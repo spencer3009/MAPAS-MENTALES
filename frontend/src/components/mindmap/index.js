@@ -5,3 +5,5 @@ export { default as ConnectionsLayer } from './ConnectionsLayer';
 export { default as Sidebar } from './Sidebar';
 export { default as Toolbar } from './Toolbar';
 export { default as ContextMenu } from './ContextMenu';
+export { default as ConfirmModal } from './ConfirmModal';
+export { default as TemplateModal } from './TemplateModal';

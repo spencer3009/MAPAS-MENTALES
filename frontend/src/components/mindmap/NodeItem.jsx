@@ -38,12 +38,15 @@ const NodeItem = memo(({
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(node.text);
   const inputRef = useRef(null);
+  const prevNodeText = useRef(node.text);
 
   const colors = NODE_COLORS[node.color] || NODE_COLORS.blue;
 
-  useEffect(() => {
+  // Actualizar editText cuando el texto del nodo cambia externamente
+  if (prevNodeText.current !== node.text && !isEditing) {
+    prevNodeText.current = node.text;
     setEditText(node.text);
-  }, [node.text]);
+  }
 
   useEffect(() => {
     if (isEditing && inputRef.current) {

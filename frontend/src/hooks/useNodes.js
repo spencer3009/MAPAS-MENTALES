@@ -1,12 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const STORAGE_KEY = 'mindmap_nodes';
+const PROJECT_NAME_KEY = 'mindmap_project_name';
 
 const DEFAULT_NODES = [
   { id: 'root', text: 'Idea Principal', x: 200, y: 280, color: 'blue', parentId: null },
   { id: '2', text: 'Concepto 1', x: 480, y: 120, color: 'pink', parentId: 'root' },
   { id: '3', text: 'Concepto 2', x: 480, y: 280, color: 'green', parentId: 'root' },
   { id: '4', text: 'Concepto 3', x: 480, y: 440, color: 'yellow', parentId: 'root' },
+];
+
+const BLANK_NODE = [
+  { id: 'root', text: 'Nuevo Mapa', x: 300, y: 300, color: 'blue', parentId: null }
 ];
 
 export const useNodes = () => {
@@ -25,6 +30,16 @@ export const useNodes = () => {
     return DEFAULT_NODES;
   });
 
+  const [projectName, setProjectName] = useState(() => {
+    try {
+      const saved = localStorage.getItem(PROJECT_NAME_KEY);
+      return saved || 'Mi Mapa Mental';
+    } catch (e) {
+      console.error('Error loading project name from localStorage:', e);
+      return 'Mi Mapa Mental';
+    }
+  });
+
   const [selectedNodeId, setSelectedNodeId] = useState(null);
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -37,6 +52,15 @@ export const useNodes = () => {
       console.error('Error saving nodes to localStorage:', e);
     }
   }, [nodes]);
+
+  // Guardar nombre del proyecto
+  useEffect(() => {
+    try {
+      localStorage.setItem(PROJECT_NAME_KEY, projectName);
+    } catch (e) {
+      console.error('Error saving project name to localStorage:', e);
+    }
+  }, [projectName]);
 
   // Guardar estado en historial para undo/redo
   const saveToHistory = useCallback((newNodes) => {
@@ -169,22 +193,136 @@ export const useNodes = () => {
     }
   }, [history, historyIndex]);
 
-  const resetToDefault = useCallback(() => {
-    saveToHistory(DEFAULT_NODES);
-    setNodes(DEFAULT_NODES);
-    setSelectedNodeId(null);
+  // Crear mapa en blanco
+  const createBlankMap = useCallback(() => {
+    try {
+      console.log('Creando mapa en blanco...');
+      const blankNodes = [{ 
+        id: crypto.randomUUID(), 
+        text: 'Idea Central', 
+        x: 300, 
+        y: 300, 
+        color: 'blue', 
+        parentId: null 
+      }];
+      
+      saveToHistory(blankNodes);
+      setNodes(blankNodes);
+      setSelectedNodeId(null);
+      setProjectName('Nuevo Mapa');
+      
+      // Limpiar historial para el nuevo mapa
+      setHistory([]);
+      setHistoryIndex(-1);
+      
+      console.log('Mapa en blanco creado exitosamente');
+      return true;
+    } catch (error) {
+      console.error('Error al crear mapa en blanco:', error);
+      return false;
+    }
   }, [saveToHistory]);
 
-  const clearAll = useCallback(() => {
-    const rootNode = [{ id: 'root', text: 'Idea Principal', x: 300, y: 300, color: 'blue', parentId: null }];
-    saveToHistory(rootNode);
-    setNodes(rootNode);
-    setSelectedNodeId(null);
+  // Cargar desde template
+  const loadFromTemplate = useCallback((templateNodes, templateName = 'Template') => {
+    try {
+      console.log('Cargando template:', templateName);
+      
+      // Generar nuevos IDs para evitar conflictos
+      const idMap = {};
+      const newNodes = templateNodes.map(node => {
+        const newId = crypto.randomUUID();
+        idMap[node.id] = newId;
+        return { ...node, id: newId };
+      });
+      
+      // Actualizar parentIds con los nuevos IDs
+      const mappedNodes = newNodes.map(node => ({
+        ...node,
+        parentId: node.parentId ? idMap[node.parentId] : null
+      }));
+      
+      saveToHistory(mappedNodes);
+      setNodes(mappedNodes);
+      setSelectedNodeId(null);
+      setProjectName(templateName);
+      
+      // Limpiar historial para el nuevo mapa
+      setHistory([]);
+      setHistoryIndex(-1);
+      
+      console.log('Template cargado exitosamente');
+      return true;
+    } catch (error) {
+      console.error('Error al cargar template:', error);
+      return false;
+    }
   }, [saveToHistory]);
+
+  // Eliminar proyecto (limpiar todo)
+  const deleteProject = useCallback(() => {
+    try {
+      console.log('Eliminando proyecto...');
+      
+      // Crear nodo inicial vacío
+      const initialNode = [{ 
+        id: crypto.randomUUID(), 
+        text: 'Idea Central', 
+        x: 300, 
+        y: 300, 
+        color: 'blue', 
+        parentId: null 
+      }];
+      
+      // Limpiar estado
+      setNodes(initialNode);
+      setSelectedNodeId(null);
+      setProjectName('Nuevo Proyecto');
+      setHistory([]);
+      setHistoryIndex(-1);
+      
+      // Limpiar localStorage
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(PROJECT_NAME_KEY);
+      
+      // Guardar el nuevo estado inicial
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(initialNode));
+      localStorage.setItem(PROJECT_NAME_KEY, 'Nuevo Proyecto');
+      
+      console.log('Proyecto eliminado exitosamente');
+      return true;
+    } catch (error) {
+      console.error('Error al eliminar proyecto:', error);
+      return false;
+    }
+  }, []);
+
+  // Restablecer a template por defecto
+  const resetToDefault = useCallback(() => {
+    try {
+      console.log('Restableciendo a template por defecto...');
+      saveToHistory(DEFAULT_NODES);
+      setNodes(DEFAULT_NODES);
+      setSelectedNodeId(null);
+      setProjectName('Mi Mapa Mental');
+      console.log('Template por defecto cargado exitosamente');
+      return true;
+    } catch (error) {
+      console.error('Error al restablecer template:', error);
+      return false;
+    }
+  }, [saveToHistory]);
+
+  // Limpiar todo (alias para compatibilidad)
+  const clearAll = useCallback(() => {
+    return createBlankMap();
+  }, [createBlankMap]);
 
   return {
     nodes,
     setNodes,
+    projectName,
+    setProjectName,
     selectedNodeId,
     setSelectedNodeId,
     addNode,
@@ -199,6 +337,9 @@ export const useNodes = () => {
     canUndo: historyIndex > 0,
     canRedo: historyIndex < history.length - 1,
     resetToDefault,
-    clearAll
+    clearAll,
+    createBlankMap,
+    loadFromTemplate,
+    deleteProject
   };
 };

@@ -100,12 +100,12 @@ const NodeItem = memo(({
   return (
     <div
       className={`
-        absolute w-40 h-16 rounded-xl
-        flex items-center justify-center p-3
-        border-2 shadow-md cursor-grab active:cursor-grabbing
+        absolute min-w-[120px] max-w-[180px] px-4 py-3 rounded-lg
+        flex items-center justify-center
+        border-2 shadow-sm cursor-grab active:cursor-grabbing
         transition-all duration-150 select-none
         ${colors.bg} ${colors.border} ${colors.hover}
-        ${isSelected ? `ring-2 ring-offset-2 ${colors.ring} shadow-lg` : ''}
+        ${isSelected ? `ring-2 ring-offset-2 ${colors.ring} shadow-md` : ''}
       `}
       style={{
         left: node.x,

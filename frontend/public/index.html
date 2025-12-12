@@ -13,47 +13,6 @@
         
         <title>Mapas Mentales</title>
         <script src="https://assets.emergent.sh/scripts/emergent-main.js"></script>
-        
-        <!-- Version check script - se ejecuta antes de cargar la app -->
-        <script>
-            (function() {
-                var BUILD_VERSION = '%REACT_APP_BUILD_VERSION%';
-                var STORED_VERSION = localStorage.getItem('app_build_version');
-                
-                console.log('[Cache Control] Build version:', BUILD_VERSION);
-                console.log('[Cache Control] Stored version:', STORED_VERSION);
-                
-                // Si la versión cambió, limpiar caché de la app
-                if (STORED_VERSION && STORED_VERSION !== BUILD_VERSION && BUILD_VERSION !== '%REACT_APP_BUILD_VERSION%') {
-                    console.log('[Cache Control] Nueva versión detectada, limpiando caché...');
-                    
-                    // Limpiar caches del Service Worker si existen
-                    if ('caches' in window) {
-                        caches.keys().then(function(names) {
-                            names.forEach(function(name) {
-                                caches.delete(name);
-                                console.log('[Cache Control] Cache eliminado:', name);
-                            });
-                        });
-                    }
-                    
-                    // Desregistrar Service Workers si existen
-                    if ('serviceWorker' in navigator) {
-                        navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                            registrations.forEach(function(registration) {
-                                registration.unregister();
-                                console.log('[Cache Control] Service Worker desregistrado');
-                            });
-                        });
-                    }
-                }
-                
-                // Guardar versión actual
-                if (BUILD_VERSION && BUILD_VERSION !== '%REACT_APP_BUILD_VERSION%') {
-                    localStorage.setItem('app_build_version', BUILD_VERSION);
-                }
-            })();
-        </script>
     </head>
     <body>
         <noscript>Necesitas habilitar JavaScript para usar esta aplicación.</noscript>

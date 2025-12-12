@@ -5,7 +5,9 @@ nixPkgs = ["nodejs_20"]
 cmds = ["cd frontend && npm install"]
 
 [phases.build]
-cmds = ["cd frontend && npm run build"]
+cmds = [
+  "cd frontend && REACT_APP_BUILD_VERSION=$(date +%Y%m%d%H%M%S) REACT_APP_BUILD_TIME=$(date -Iseconds) npm run build"
+]
 
 [start]
 cmd = "cd frontend && npx serve -s build -l ${PORT:-3000}"

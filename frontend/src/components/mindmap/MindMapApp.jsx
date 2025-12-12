@@ -13,6 +13,8 @@ const MindMapApp = () => {
   const {
     nodes,
     projectName,
+    activeProjectId,
+    projects,
     selectedNodeId,
     setSelectedNodeId,
     addNode,
@@ -27,7 +29,8 @@ const MindMapApp = () => {
     canRedo,
     createBlankMap,
     loadFromTemplate,
-    deleteProject
+    deleteProject,
+    switchProject
   } = useNodes();
 
   const {
@@ -57,6 +60,7 @@ const MindMapApp = () => {
   const [showBlankModal, setShowBlankModal] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState(null);
 
   // Handlers para toolbar
   const handleAddNode = useCallback(() => {
@@ -101,7 +105,7 @@ const MindMapApp = () => {
   }, []);
 
   // ==========================================
-  // HANDLERS PARA MODALES CON CONFIRMACIÓN
+  // HANDLERS PARA GESTIÓN DE PROYECTOS
   // ==========================================
 
   // Handler para "En Blanco" - Abrir modal
@@ -109,18 +113,18 @@ const MindMapApp = () => {
     setShowBlankModal(true);
   }, []);
 
-  // Handler para confirmar "En Blanco"
+  // Handler para confirmar "En Blanco" - CREA NUEVO PROYECTO
   const handleConfirmBlank = useCallback(() => {
     try {
-      console.log('Confirmando creación de mapa en blanco...');
+      console.log('Creando nuevo proyecto en blanco...');
       const success = createBlankMap();
       if (success) {
         resetPan();
         resetZoom();
-        console.log('Mapa en blanco creado y vista centrada');
+        console.log('Nuevo proyecto creado exitosamente');
       }
     } catch (error) {
-      console.error('Error al crear mapa en blanco:', error);
+      console.error('Error al crear proyecto en blanco:', error);
     } finally {
       setShowBlankModal(false);
     }
@@ -131,52 +135,73 @@ const MindMapApp = () => {
     setShowTemplateModal(true);
   }, []);
 
-  // Handler para seleccionar template
+  // Handler para seleccionar template - CREA NUEVO PROYECTO
   const handleSelectTemplate = useCallback((templateNodes, templateName) => {
     try {
-      console.log('Seleccionando template:', templateName);
+      console.log('Creando proyecto desde template:', templateName);
       const success = loadFromTemplate(templateNodes, templateName);
       if (success) {
         resetPan();
         resetZoom();
-        console.log('Template cargado y vista centrada');
+        console.log('Proyecto desde template creado exitosamente');
       }
     } catch (error) {
       console.error('Error al cargar template:', error);
     }
   }, [loadFromTemplate, resetPan, resetZoom]);
 
-  // Handler para "Eliminar Proyecto" - Abrir modal
-  const handleDeleteProjectClick = useCallback(() => {
+  // Handler para eliminar proyecto - Abrir modal
+  const handleDeleteProjectClick = useCallback((projectId) => {
+    setProjectToDelete(projectId || activeProjectId);
     setShowDeleteModal(true);
-  }, []);
+  }, [activeProjectId]);
 
   // Handler para confirmar eliminación
   const handleConfirmDelete = useCallback(() => {
     try {
-      console.log('Confirmando eliminación de proyecto...');
-      const success = deleteProject();
+      console.log('Eliminando proyecto:', projectToDelete);
+      const success = deleteProject(projectToDelete);
       if (success) {
         resetPan();
         resetZoom();
-        console.log('Proyecto eliminado y vista centrada');
+        console.log('Proyecto eliminado exitosamente');
       }
     } catch (error) {
       console.error('Error al eliminar proyecto:', error);
     } finally {
       setShowDeleteModal(false);
+      setProjectToDelete(null);
     }
-  }, [deleteProject, resetPan, resetZoom]);
+  }, [deleteProject, projectToDelete, resetPan, resetZoom]);
+
+  // Handler para cambiar de proyecto
+  const handleSwitchProject = useCallback((projectId) => {
+    try {
+      console.log('Cambiando a proyecto:', projectId);
+      const success = switchProject(projectId);
+      if (success) {
+        resetPan();
+        resetZoom();
+        setSelectedNodeId(null);
+      }
+    } catch (error) {
+      console.error('Error al cambiar proyecto:', error);
+    }
+  }, [switchProject, resetPan, resetZoom, setSelectedNodeId]);
+
+  // Obtener nombre del proyecto a eliminar para el modal
+  const projectToDeleteName = projects.find(p => p.id === projectToDelete)?.name || 'este proyecto';
 
   return (
     <div className="flex h-screen w-full bg-gray-50 overflow-hidden">
-      {/* Sidebar izquierdo */}
+      {/* Sidebar izquierdo con lista de proyectos */}
       <Sidebar
-        nodes={nodes}
-        projectName={projectName}
+        projects={projects}
+        activeProjectId={activeProjectId}
         onNewBlank={handleNewBlankClick}
         onNewFromTemplate={handleNewFromTemplateClick}
         onDeleteProject={handleDeleteProjectClick}
+        onSwitchProject={handleSwitchProject}
       />
 
       {/* Área principal */}
@@ -225,12 +250,12 @@ const MindMapApp = () => {
 
       {/* ==================== MODALES ==================== */}
       
-      {/* Modal: Crear mapa en blanco */}
+      {/* Modal: Crear nuevo proyecto en blanco */}
       <ConfirmModal
         isOpen={showBlankModal}
-        title="Crear Mapa en Blanco"
-        message="Se creará un nuevo mapa mental vacío con un nodo central. El mapa actual será reemplazado. ¿Deseas continuar?"
-        confirmText="Crear"
+        title="Crear Nuevo Proyecto"
+        message="Se creará un nuevo mapa mental vacío. Tu proyecto actual se conservará en la lista de proyectos."
+        confirmText="Crear Proyecto"
         cancelText="Cancelar"
         onConfirm={handleConfirmBlank}
         onCancel={() => setShowBlankModal(false)}
@@ -248,11 +273,14 @@ const MindMapApp = () => {
       <ConfirmModal
         isOpen={showDeleteModal}
         title="Eliminar Proyecto"
-        message="Se eliminará el mapa mental actual y todos sus nodos. Esta acción no se puede deshacer. ¿Estás seguro?"
+        message={`¿Estás seguro de eliminar "${projectToDeleteName}"? Esta acción no se puede deshacer.`}
         confirmText="Eliminar"
         cancelText="Cancelar"
         onConfirm={handleConfirmDelete}
-        onCancel={() => setShowDeleteModal(false)}
+        onCancel={() => {
+          setShowDeleteModal(false);
+          setProjectToDelete(null);
+        }}
         variant="danger"
       />
     </div>

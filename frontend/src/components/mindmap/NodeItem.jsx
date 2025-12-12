@@ -124,8 +124,8 @@ const NodeItem = memo(({
         <input
           ref={inputRef}
           type="text"
-          value={editText}
-          onChange={(e) => setEditText(e.target.value)}
+          value={localText}
+          onChange={(e) => setLocalText(e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           onMouseDown={(e) => e.stopPropagation()}
@@ -138,7 +138,7 @@ const NodeItem = memo(({
         />
       ) : (
         <span className="text-gray-800 font-medium text-sm text-center truncate w-full">
-          {node.text}
+          {displayText}
         </span>
       )}
     </div>

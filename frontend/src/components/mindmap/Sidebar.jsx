@@ -1,19 +1,27 @@
 import React from 'react';
-import { Plus, LayoutTemplate, FileText, Trash2, Brain } from 'lucide-react';
+import { Plus, LayoutTemplate, FileText, Trash2, Brain, Check } from 'lucide-react';
 
 const Sidebar = ({
-  nodes,
-  projectName = 'Mi Mapa Mental',
+  projects = [],
+  activeProjectId,
   onNewBlank,
   onNewFromTemplate,
-  onDeleteProject
+  onDeleteProject,
+  onSwitchProject
 }) => {
-  const nodeCount = nodes?.length || 0;
-  const today = new Date().toLocaleDateString('es-ES', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric'
-  });
+  const formatDate = (dateString) => {
+    try {
+      return new Date(dateString).toLocaleDateString('es-ES', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+    } catch {
+      return 'Sin fecha';
+    }
+  };
+
+  const activeProject = projects.find(p => p.id === activeProjectId);
 
   return (
     <div className="
@@ -21,7 +29,7 @@ const Sidebar = ({
       flex flex-col p-5 shadow-sm z-20 shrink-0 h-full
     ">
       {/* Header con Logo */}
-      <div className="flex items-center gap-3 mb-8">
+      <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md">
           <Brain className="text-white" size={22} />
         </div>
@@ -52,7 +60,7 @@ const Sidebar = ({
           w-full bg-white hover:bg-gray-50
           text-gray-700 border-2 border-gray-200
           font-medium py-3 px-4 rounded-xl
-          flex items-center justify-center gap-2 mb-8
+          flex items-center justify-center gap-2 mb-6
           transition-all duration-200
           hover:border-gray-300 active:scale-[0.98]
         "
@@ -61,65 +69,105 @@ const Sidebar = ({
         <span>En Blanco</span>
       </button>
 
-      {/* Sección de archivos */}
-      <div className="mb-3">
-        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Proyecto Actual</h2>
+      {/* Sección de proyectos */}
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+          Mis Proyectos
+        </h2>
+        <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+          {projects.length}
+        </span>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
-        {/* Card del proyecto actual */}
-        <div className="
-          border-2 border-blue-500 bg-blue-50/50
-          rounded-xl p-4 relative group
-          transition-all duration-200
-        ">
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
-              <FileText className="text-blue-600" size={18} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-gray-900 text-sm truncate">
-                {projectName}
-              </h3>
-              <p className="text-xs text-gray-500 mt-0.5">Guardado automáticamente</p>
-              <div className="flex justify-between items-center mt-3">
-                <span className="text-xs text-gray-400">{today}</span>
-                <span className="text-xs text-gray-500 font-medium">
-                  {nodeCount} nodos
-                </span>
-              </div>
-            </div>
-          </div>
+      {/* Lista de proyectos - Scrollable */}
+      <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+        {projects.map((project) => {
+          const isActive = project.id === activeProjectId;
+          const nodeCount = project.nodes?.length || 0;
           
-          {/* Botón eliminar - visible en hover */}
-          <button
-            onClick={onDeleteProject}
-            className="
-              absolute top-3 right-3 p-1.5 rounded-lg
-              bg-red-50 hover:bg-red-100
-              text-red-500 hover:text-red-600
-              opacity-0 group-hover:opacity-100
-              transition-all duration-200
-            "
-            title="Eliminar proyecto"
-          >
-            <Trash2 size={14} />
-          </button>
-        </div>
+          return (
+            <div
+              key={project.id}
+              onClick={() => !isActive && onSwitchProject(project.id)}
+              className={`
+                rounded-xl p-3 relative group cursor-pointer
+                transition-all duration-200
+                ${isActive 
+                  ? 'border-2 border-blue-500 bg-blue-50/50' 
+                  : 'border border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                }
+              `}
+            >
+              <div className="flex items-start gap-3">
+                <div className={`
+                  w-8 h-8 rounded-lg flex items-center justify-center shrink-0
+                  ${isActive ? 'bg-blue-100' : 'bg-gray-100'}
+                `}>
+                  <FileText 
+                    className={isActive ? 'text-blue-600' : 'text-gray-500'} 
+                    size={16} 
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className={`
+                      font-medium text-sm truncate
+                      ${isActive ? 'text-gray-900' : 'text-gray-700'}
+                    `}>
+                      {project.name}
+                    </h3>
+                    {isActive && (
+                      <Check size={14} className="text-blue-600 shrink-0" />
+                    )}
+                  </div>
+                  <div className="flex justify-between items-center mt-1.5">
+                    <span className="text-xs text-gray-400">
+                      {formatDate(project.updatedAt)}
+                    </span>
+                    <span className={`
+                      text-xs font-medium
+                      ${isActive ? 'text-blue-600' : 'text-gray-500'}
+                    `}>
+                      {nodeCount} nodos
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Botón eliminar - visible en hover */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteProject(project.id);
+                }}
+                className={`
+                  absolute top-2 right-2 p-1.5 rounded-lg
+                  bg-red-50 hover:bg-red-100
+                  text-red-500 hover:text-red-600
+                  opacity-0 group-hover:opacity-100
+                  transition-all duration-200
+                `}
+                title="Eliminar proyecto"
+              >
+                <Trash2 size={12} />
+              </button>
+            </div>
+          );
+        })}
+      </div>
 
-        {/* Mensaje informativo */}
-        <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
-          <p className="text-xs text-gray-500 leading-relaxed">
-            💡 <span className="font-medium">Tip:</span> Haz doble clic en un nodo para editar su texto.
-            Clic derecho para ver más opciones.
-          </p>
-        </div>
+      {/* Mensaje informativo */}
+      <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
+        <p className="text-xs text-gray-500 leading-relaxed">
+          💡 <span className="font-medium">Tip:</span> Crea múltiples mapas y cambia entre ellos.
+          Los cambios se guardan automáticamente.
+        </p>
       </div>
 
       {/* Footer */}
       <div className="pt-4 border-t border-gray-100 mt-4">
         <p className="text-xs text-gray-400 text-center">
-          Los cambios se guardan automáticamente
+          Guardado automático en navegador
         </p>
       </div>
     </div>

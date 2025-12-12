@@ -1,83 +1,167 @@
 import { useState, useEffect, useCallback } from 'react';
 
-const STORAGE_KEY = 'mindmap_nodes';
-const PROJECT_NAME_KEY = 'mindmap_project_name';
+const PROJECTS_KEY = 'mm_projects';
+const ACTIVE_PROJECT_KEY = 'mm_activeProjectId';
 
-const DEFAULT_NODES = [
-  { id: 'root', text: 'Idea Principal', x: 200, y: 280, color: 'blue', parentId: null },
-  { id: '2', text: 'Concepto 1', x: 480, y: 120, color: 'pink', parentId: 'root' },
-  { id: '3', text: 'Concepto 2', x: 480, y: 280, color: 'green', parentId: 'root' },
-  { id: '4', text: 'Concepto 3', x: 480, y: 440, color: 'yellow', parentId: 'root' },
-];
+// Template por defecto para nuevos proyectos
+const createDefaultProject = () => ({
+  id: crypto.randomUUID(),
+  name: 'Nuevo Mapa',
+  nodes: [{ 
+    id: crypto.randomUUID(), 
+    text: 'Idea Central', 
+    x: 300, 
+    y: 300, 
+    color: 'blue', 
+    parentId: null 
+  }],
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString()
+});
 
-const BLANK_NODE = [
-  { id: 'root', text: 'Nuevo Mapa', x: 300, y: 300, color: 'blue', parentId: null }
-];
+// Cargar proyectos desde localStorage
+const loadProjectsFromStorage = () => {
+  try {
+    const saved = localStorage.getItem(PROJECTS_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Error loading projects from localStorage:', e);
+  }
+  // Si no hay proyectos, crear uno por defecto
+  const defaultProject = createDefaultProject();
+  defaultProject.name = 'Mi Primer Mapa';
+  return [defaultProject];
+};
+
+// Cargar ID del proyecto activo desde localStorage
+const loadActiveProjectIdFromStorage = (projects) => {
+  try {
+    const saved = localStorage.getItem(ACTIVE_PROJECT_KEY);
+    if (saved && projects.some(p => p.id === saved)) {
+      return saved;
+    }
+  } catch (e) {
+    console.error('Error loading active project ID from localStorage:', e);
+  }
+  // Por defecto, usar el primer proyecto
+  return projects.length > 0 ? projects[0].id : null;
+};
 
 export const useNodes = () => {
-  const [nodes, setNodes] = useState(() => {
+  // Estado de proyectos
+  const [projects, setProjects] = useState(() => loadProjectsFromStorage());
+  const [activeProjectId, setActiveProjectId] = useState(() => 
+    loadActiveProjectIdFromStorage(loadProjectsFromStorage())
+  );
+  
+  // Estado para undo/redo (por proyecto)
+  const [history, setHistory] = useState({});
+  const [historyIndex, setHistoryIndex] = useState({});
+
+  // Obtener proyecto activo
+  const activeProject = projects.find(p => p.id === activeProjectId) || projects[0];
+  const nodes = activeProject?.nodes || [];
+  const projectName = activeProject?.name || 'Sin nombre';
+
+  // Estado de selección
+  const [selectedNodeId, setSelectedNodeId] = useState(null);
+
+  // ==========================================
+  // PERSISTENCIA EN LOCALSTORAGE
+  // ==========================================
+  
+  useEffect(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
+      localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
+      console.log('Proyectos guardados:', projects.length);
+    } catch (e) {
+      console.error('Error saving projects to localStorage:', e);
+    }
+  }, [projects]);
+
+  useEffect(() => {
+    try {
+      if (activeProjectId) {
+        localStorage.setItem(ACTIVE_PROJECT_KEY, activeProjectId);
+        console.log('Proyecto activo guardado:', activeProjectId);
       }
     } catch (e) {
-      console.error('Error loading nodes from localStorage:', e);
+      console.error('Error saving active project ID to localStorage:', e);
     }
-    return DEFAULT_NODES;
-  });
+  }, [activeProjectId]);
 
-  const [projectName, setProjectName] = useState(() => {
-    try {
-      const saved = localStorage.getItem(PROJECT_NAME_KEY);
-      return saved || 'Mi Mapa Mental';
-    } catch (e) {
-      console.error('Error loading project name from localStorage:', e);
-      return 'Mi Mapa Mental';
-    }
-  });
+  // ==========================================
+  // FUNCIONES DE HISTORIAL (UNDO/REDO)
+  // ==========================================
 
-  const [selectedNodeId, setSelectedNodeId] = useState(null);
-  const [history, setHistory] = useState([]);
-  const [historyIndex, setHistoryIndex] = useState(-1);
-
-  // Guardar en localStorage cuando cambian los nodos
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(nodes));
-    } catch (e) {
-      console.error('Error saving nodes to localStorage:', e);
-    }
-  }, [nodes]);
-
-  // Guardar nombre del proyecto
-  useEffect(() => {
-    try {
-      localStorage.setItem(PROJECT_NAME_KEY, projectName);
-    } catch (e) {
-      console.error('Error saving project name to localStorage:', e);
-    }
-  }, [projectName]);
-
-  // Guardar estado en historial para undo/redo
-  const saveToHistory = useCallback((newNodes) => {
+  const saveToHistory = useCallback((projectId, newNodes) => {
     setHistory(prev => {
-      const newHistory = prev.slice(0, historyIndex + 1);
+      const projectHistory = prev[projectId] || [];
+      const currentIndex = historyIndex[projectId] ?? -1;
+      const newHistory = projectHistory.slice(0, currentIndex + 1);
       newHistory.push(JSON.stringify(newNodes));
-      // Limitar historial a 50 estados
       if (newHistory.length > 50) newHistory.shift();
-      return newHistory;
+      return { ...prev, [projectId]: newHistory };
     });
-    setHistoryIndex(prev => Math.min(prev + 1, 49));
+    setHistoryIndex(prev => ({
+      ...prev,
+      [projectId]: Math.min((prev[projectId] ?? -1) + 1, 49)
+    }));
   }, [historyIndex]);
 
-  const generateId = () => crypto.randomUUID();
+  const canUndo = (history[activeProjectId]?.length || 0) > 0 && (historyIndex[activeProjectId] ?? -1) > 0;
+  const canRedo = (historyIndex[activeProjectId] ?? -1) < (history[activeProjectId]?.length || 0) - 1;
+
+  const undo = useCallback(() => {
+    const projectHistory = history[activeProjectId];
+    const currentIndex = historyIndex[activeProjectId] ?? -1;
+    
+    if (projectHistory && currentIndex > 0) {
+      const prevState = JSON.parse(projectHistory[currentIndex - 1]);
+      setHistoryIndex(prev => ({ ...prev, [activeProjectId]: currentIndex - 1 }));
+      setProjects(prev => prev.map(p => 
+        p.id === activeProjectId 
+          ? { ...p, nodes: prevState, updatedAt: new Date().toISOString() }
+          : p
+      ));
+    }
+  }, [activeProjectId, history, historyIndex]);
+
+  const redo = useCallback(() => {
+    const projectHistory = history[activeProjectId];
+    const currentIndex = historyIndex[activeProjectId] ?? -1;
+    
+    if (projectHistory && currentIndex < projectHistory.length - 1) {
+      const nextState = JSON.parse(projectHistory[currentIndex + 1]);
+      setHistoryIndex(prev => ({ ...prev, [activeProjectId]: currentIndex + 1 }));
+      setProjects(prev => prev.map(p => 
+        p.id === activeProjectId 
+          ? { ...p, nodes: nextState, updatedAt: new Date().toISOString() }
+          : p
+      ));
+    }
+  }, [activeProjectId, history, historyIndex]);
+
+  // ==========================================
+  // FUNCIONES DE NODOS
+  // ==========================================
+
+  const updateProjectNodes = useCallback((newNodes, save = true) => {
+    if (save) saveToHistory(activeProjectId, nodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [activeProjectId, nodes, saveToHistory]);
 
   const addNode = useCallback((parentId = null, position = null) => {
-    const newId = generateId();
+    const newId = crypto.randomUUID();
     let newX, newY;
 
     if (parentId) {
@@ -107,41 +191,35 @@ export const useNodes = () => {
       parentId
     };
 
-    const newNodes = [...nodes, newNode];
-    saveToHistory(newNodes);
-    setNodes(newNodes);
+    updateProjectNodes([...nodes, newNode]);
     setSelectedNodeId(newId);
     return newId;
-  }, [nodes, saveToHistory]);
-
-  const updateNode = useCallback((id, updates) => {
-    setNodes(prev => prev.map(n => 
-      n.id === id ? { ...n, ...updates } : n
-    ));
-  }, []);
+  }, [nodes, updateProjectNodes]);
 
   const updateNodePosition = useCallback((id, x, y) => {
-    setNodes(prev => prev.map(n => 
-      n.id === id ? { ...n, x, y } : n
+    const newNodes = nodes.map(n => n.id === id ? { ...n, x, y } : n);
+    // No guardar en historial para posiciones (muy frecuente)
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
     ));
-  }, []);
+  }, [nodes, activeProjectId]);
 
   const updateNodeText = useCallback((id, text) => {
-    setNodes(prev => prev.map(n => 
-      n.id === id ? { ...n, text } : n
+    const newNodes = nodes.map(n => n.id === id ? { ...n, text } : n);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
     ));
-  }, []);
+  }, [nodes, activeProjectId]);
 
   const updateNodeColor = useCallback((id, color) => {
-    const newNodes = nodes.map(n => 
-      n.id === id ? { ...n, color } : n
-    );
-    saveToHistory(newNodes);
-    setNodes(newNodes);
-  }, [nodes, saveToHistory]);
+    updateProjectNodes(nodes.map(n => n.id === id ? { ...n, color } : n));
+  }, [nodes, updateProjectNodes]);
 
   const deleteNode = useCallback((id) => {
-    // Encontrar todos los nodos hijos recursivamente
     const findDescendants = (nodeId, allNodes) => {
       const children = allNodes.filter(n => n.parentId === nodeId);
       let descendants = [nodeId];
@@ -152,18 +230,15 @@ export const useNodes = () => {
     };
 
     const nodesToDelete = new Set(findDescendants(id, nodes));
-    const newNodes = nodes.filter(n => !nodesToDelete.has(n.id));
-    
-    saveToHistory(newNodes);
-    setNodes(newNodes);
+    updateProjectNodes(nodes.filter(n => !nodesToDelete.has(n.id)));
     setSelectedNodeId(null);
-  }, [nodes, saveToHistory]);
+  }, [nodes, updateProjectNodes]);
 
   const duplicateNode = useCallback((id) => {
     const original = nodes.find(n => n.id === id);
     if (!original) return;
 
-    const newId = generateId();
+    const newId = crypto.randomUUID();
     const duplicate = {
       ...original,
       id: newId,
@@ -171,62 +246,50 @@ export const useNodes = () => {
       y: original.y + 30
     };
 
-    const newNodes = [...nodes, duplicate];
-    saveToHistory(newNodes);
-    setNodes(newNodes);
+    updateProjectNodes([...nodes, duplicate]);
     setSelectedNodeId(newId);
-  }, [nodes, saveToHistory]);
+  }, [nodes, updateProjectNodes]);
 
-  const undo = useCallback(() => {
-    if (historyIndex > 0) {
-      const prevState = JSON.parse(history[historyIndex - 1]);
-      setHistoryIndex(prev => prev - 1);
-      setNodes(prevState);
-    }
-  }, [history, historyIndex]);
+  // ==========================================
+  // GESTIÓN DE PROYECTOS
+  // ==========================================
 
-  const redo = useCallback(() => {
-    if (historyIndex < history.length - 1) {
-      const nextState = JSON.parse(history[historyIndex + 1]);
-      setHistoryIndex(prev => prev + 1);
-      setNodes(nextState);
-    }
-  }, [history, historyIndex]);
-
-  // Crear mapa en blanco
-  const createBlankMap = useCallback(() => {
+  // Crear proyecto en blanco (AGREGA, no reemplaza)
+  const createBlankMap = useCallback((name = 'Nuevo Mapa') => {
     try {
-      console.log('Creando mapa en blanco...');
-      const blankNodes = [{ 
-        id: crypto.randomUUID(), 
-        text: 'Idea Central', 
-        x: 300, 
-        y: 300, 
-        color: 'blue', 
-        parentId: null 
-      }];
+      console.log('Creando nuevo proyecto en blanco...');
       
-      saveToHistory(blankNodes);
-      setNodes(blankNodes);
+      const newProject = {
+        id: crypto.randomUUID(),
+        name: name,
+        nodes: [{ 
+          id: crypto.randomUUID(), 
+          text: 'Idea Central', 
+          x: 300, 
+          y: 300, 
+          color: 'blue', 
+          parentId: null 
+        }],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      setProjects(prev => [newProject, ...prev]);
+      setActiveProjectId(newProject.id);
       setSelectedNodeId(null);
-      setProjectName('Nuevo Mapa');
       
-      // Limpiar historial para el nuevo mapa
-      setHistory([]);
-      setHistoryIndex(-1);
-      
-      console.log('Mapa en blanco creado exitosamente');
+      console.log('Nuevo proyecto creado:', newProject.name);
       return true;
     } catch (error) {
-      console.error('Error al crear mapa en blanco:', error);
+      console.error('Error al crear proyecto en blanco:', error);
       return false;
     }
-  }, [saveToHistory]);
+  }, []);
 
-  // Cargar desde template
+  // Cargar desde template (AGREGA, no reemplaza)
   const loadFromTemplate = useCallback((templateNodes, templateName = 'Template') => {
     try {
-      console.log('Cargando template:', templateName);
+      console.log('Creando proyecto desde template:', templateName);
       
       // Generar nuevos IDs para evitar conflictos
       const idMap = {};
@@ -241,105 +304,158 @@ export const useNodes = () => {
         ...node,
         parentId: node.parentId ? idMap[node.parentId] : null
       }));
-      
-      saveToHistory(mappedNodes);
-      setNodes(mappedNodes);
+
+      const newProject = {
+        id: crypto.randomUUID(),
+        name: templateName,
+        nodes: mappedNodes,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      setProjects(prev => [newProject, ...prev]);
+      setActiveProjectId(newProject.id);
       setSelectedNodeId(null);
-      setProjectName(templateName);
       
-      // Limpiar historial para el nuevo mapa
-      setHistory([]);
-      setHistoryIndex(-1);
-      
-      console.log('Template cargado exitosamente');
+      console.log('Proyecto desde template creado:', newProject.name);
       return true;
     } catch (error) {
       console.error('Error al cargar template:', error);
       return false;
     }
-  }, [saveToHistory]);
+  }, []);
 
-  // Eliminar proyecto (limpiar todo)
-  const deleteProject = useCallback(() => {
+  // Eliminar proyecto (solo el activo)
+  const deleteProject = useCallback((projectIdToDelete = activeProjectId) => {
     try {
-      console.log('Eliminando proyecto...');
+      console.log('Eliminando proyecto:', projectIdToDelete);
       
-      // Crear nodo inicial vacío
-      const initialNode = [{ 
-        id: crypto.randomUUID(), 
-        text: 'Idea Central', 
-        x: 300, 
-        y: 300, 
-        color: 'blue', 
-        parentId: null 
-      }];
+      const remainingProjects = projects.filter(p => p.id !== projectIdToDelete);
       
-      // Limpiar estado
-      setNodes(initialNode);
+      if (remainingProjects.length === 0) {
+        // Si no quedan proyectos, crear uno nuevo
+        const newProject = createDefaultProject();
+        newProject.name = 'Nuevo Mapa';
+        setProjects([newProject]);
+        setActiveProjectId(newProject.id);
+        console.log('Último proyecto eliminado, creado uno nuevo');
+      } else {
+        setProjects(remainingProjects);
+        // Si eliminamos el proyecto activo, activar el más reciente
+        if (projectIdToDelete === activeProjectId) {
+          // Ordenar por fecha de actualización, más reciente primero
+          const sorted = [...remainingProjects].sort(
+            (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+          );
+          setActiveProjectId(sorted[0].id);
+        }
+        console.log('Proyecto eliminado, quedan:', remainingProjects.length);
+      }
+      
       setSelectedNodeId(null);
-      setProjectName('Nuevo Proyecto');
-      setHistory([]);
-      setHistoryIndex(-1);
-      
-      // Limpiar localStorage
-      localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem(PROJECT_NAME_KEY);
-      
-      // Guardar el nuevo estado inicial
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(initialNode));
-      localStorage.setItem(PROJECT_NAME_KEY, 'Nuevo Proyecto');
-      
-      console.log('Proyecto eliminado exitosamente');
       return true;
     } catch (error) {
       console.error('Error al eliminar proyecto:', error);
       return false;
     }
-  }, []);
+  }, [activeProjectId, projects]);
 
-  // Restablecer a template por defecto
-  const resetToDefault = useCallback(() => {
+  // Cambiar proyecto activo
+  const switchProject = useCallback((projectId) => {
     try {
-      console.log('Restableciendo a template por defecto...');
-      saveToHistory(DEFAULT_NODES);
-      setNodes(DEFAULT_NODES);
-      setSelectedNodeId(null);
-      setProjectName('Mi Mapa Mental');
-      console.log('Template por defecto cargado exitosamente');
-      return true;
+      if (projects.some(p => p.id === projectId)) {
+        console.log('Cambiando a proyecto:', projectId);
+        setActiveProjectId(projectId);
+        setSelectedNodeId(null);
+        return true;
+      }
+      return false;
     } catch (error) {
-      console.error('Error al restablecer template:', error);
+      console.error('Error al cambiar proyecto:', error);
       return false;
     }
-  }, [saveToHistory]);
+  }, [projects]);
 
-  // Limpiar todo (alias para compatibilidad)
+  // Renombrar proyecto
+  const renameProject = useCallback((projectId, newName) => {
+    try {
+      setProjects(prev => prev.map(p => 
+        p.id === projectId 
+          ? { ...p, name: newName, updatedAt: new Date().toISOString() }
+          : p
+      ));
+      console.log('Proyecto renombrado:', newName);
+      return true;
+    } catch (error) {
+      console.error('Error al renombrar proyecto:', error);
+      return false;
+    }
+  }, []);
+
+  // Funciones de compatibilidad
+  const setProjectName = useCallback((name) => {
+    renameProject(activeProjectId, name);
+  }, [activeProjectId, renameProject]);
+
+  const resetToDefault = useCallback(() => {
+    // Crear un proyecto con los nodos por defecto
+    const defaultNodes = [
+      { id: crypto.randomUUID(), text: 'Idea Principal', x: 200, y: 280, color: 'blue', parentId: null },
+    ];
+    const rootId = defaultNodes[0].id;
+    defaultNodes.push(
+      { id: crypto.randomUUID(), text: 'Concepto 1', x: 480, y: 120, color: 'pink', parentId: rootId },
+      { id: crypto.randomUUID(), text: 'Concepto 2', x: 480, y: 280, color: 'green', parentId: rootId },
+      { id: crypto.randomUUID(), text: 'Concepto 3', x: 480, y: 440, color: 'yellow', parentId: rootId }
+    );
+    
+    return loadFromTemplate(defaultNodes, 'Mi Mapa Mental');
+  }, [loadFromTemplate]);
+
   const clearAll = useCallback(() => {
     return createBlankMap();
   }, [createBlankMap]);
 
   return {
+    // Estado de nodos del proyecto activo
     nodes,
-    setNodes,
-    projectName,
-    setProjectName,
     selectedNodeId,
     setSelectedNodeId,
+    
+    // Información del proyecto activo
+    projectName,
+    activeProjectId,
+    activeProject,
+    
+    // Lista de todos los proyectos
+    projects,
+    
+    // Funciones de nodos
     addNode,
-    updateNode,
+    updateNode: updateProjectNodes,
     updateNodePosition,
     updateNodeText,
     updateNodeColor,
     deleteNode,
     duplicateNode,
+    
+    // Funciones de historial
     undo,
     redo,
-    canUndo: historyIndex > 0,
-    canRedo: historyIndex < history.length - 1,
-    resetToDefault,
-    clearAll,
+    canUndo,
+    canRedo,
+    
+    // Gestión de proyectos
     createBlankMap,
     loadFromTemplate,
-    deleteProject
+    deleteProject,
+    switchProject,
+    renameProject,
+    setProjectName,
+    
+    // Compatibilidad
+    resetToDefault,
+    clearAll,
+    setNodes: updateProjectNodes
   };
 };

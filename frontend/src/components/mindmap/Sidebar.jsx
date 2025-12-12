@@ -3,9 +3,10 @@ import { Plus, LayoutTemplate, FileText, Trash2, Brain } from 'lucide-react';
 
 const Sidebar = ({
   nodes,
+  projectName = 'Mi Mapa Mental',
   onNewBlank,
   onNewFromTemplate,
-  currentProjectName = 'Mi Mapa Mental'
+  onDeleteProject
 }) => {
   const nodeCount = nodes?.length || 0;
   const today = new Date().toLocaleDateString('es-ES', {
@@ -78,7 +79,7 @@ const Sidebar = ({
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-gray-900 text-sm truncate">
-                {currentProjectName}
+                {projectName}
               </h3>
               <p className="text-xs text-gray-500 mt-0.5">Guardado automáticamente</p>
               <div className="flex justify-between items-center mt-3">
@@ -89,6 +90,21 @@ const Sidebar = ({
               </div>
             </div>
           </div>
+          
+          {/* Botón eliminar - visible en hover */}
+          <button
+            onClick={onDeleteProject}
+            className="
+              absolute top-3 right-3 p-1.5 rounded-lg
+              bg-red-50 hover:bg-red-100
+              text-red-500 hover:text-red-600
+              opacity-0 group-hover:opacity-100
+              transition-all duration-200
+            "
+            title="Eliminar proyecto"
+          >
+            <Trash2 size={14} />
+          </button>
         </div>
 
         {/* Mensaje informativo */}

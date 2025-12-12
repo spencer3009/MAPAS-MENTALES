@@ -1,7 +1,9 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import Sidebar from './Sidebar';
 import Toolbar from './Toolbar';
 import Canvas from './Canvas';
+import ConfirmModal from './ConfirmModal';
+import TemplateModal from './TemplateModal';
 import { useNodes } from '../../hooks/useNodes';
 import { usePanning } from '../../hooks/usePanning';
 import { useZoom } from '../../hooks/useZoom';
@@ -10,6 +12,7 @@ import { useContextMenu } from '../../hooks/useContextMenu';
 const MindMapApp = () => {
   const {
     nodes,
+    projectName,
     selectedNodeId,
     setSelectedNodeId,
     addNode,
@@ -22,8 +25,9 @@ const MindMapApp = () => {
     redo,
     canUndo,
     canRedo,
-    resetToDefault,
-    clearAll
+    createBlankMap,
+    loadFromTemplate,
+    deleteProject
   } = useNodes();
 
   const {
@@ -49,6 +53,11 @@ const MindMapApp = () => {
     closeContextMenu
   } = useContextMenu();
 
+  // Estados para modales
+  const [showBlankModal, setShowBlankModal] = useState(false);
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
   // Handlers para toolbar
   const handleAddNode = useCallback(() => {
     if (selectedNodeId) {
@@ -70,43 +79,104 @@ const MindMapApp = () => {
   }, [resetPan, resetZoom]);
 
   const handleExportJSON = useCallback(() => {
-    const dataStr = JSON.stringify(nodes, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'mapa-mental.json';
-    link.click();
-    
-    URL.revokeObjectURL(url);
-  }, [nodes]);
+    try {
+      const dataStr = JSON.stringify(nodes, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${projectName.replace(/\s+/g, '-').toLowerCase()}.json`;
+      link.click();
+      
+      URL.revokeObjectURL(url);
+      console.log('JSON exportado exitosamente');
+    } catch (error) {
+      console.error('Error al exportar JSON:', error);
+    }
+  }, [nodes, projectName]);
 
   const handleExportPNG = useCallback(() => {
-    // Crear un canvas temporal para exportar
     alert('Funcionalidad de exportar a PNG disponible próximamente');
   }, []);
 
-  // Handlers para sidebar
-  const handleNewBlank = useCallback(() => {
-    if (window.confirm('¿Crear un nuevo mapa en blanco? Se perderán los cambios no guardados.')) {
-      clearAll();
-    }
-  }, [clearAll]);
+  // ==========================================
+  // HANDLERS PARA MODALES CON CONFIRMACIÓN
+  // ==========================================
 
-  const handleNewFromTemplate = useCallback(() => {
-    if (window.confirm('¿Cargar template? Se perderán los cambios no guardados.')) {
-      resetToDefault();
+  // Handler para "En Blanco" - Abrir modal
+  const handleNewBlankClick = useCallback(() => {
+    setShowBlankModal(true);
+  }, []);
+
+  // Handler para confirmar "En Blanco"
+  const handleConfirmBlank = useCallback(() => {
+    try {
+      console.log('Confirmando creación de mapa en blanco...');
+      const success = createBlankMap();
+      if (success) {
+        resetPan();
+        resetZoom();
+        console.log('Mapa en blanco creado y vista centrada');
+      }
+    } catch (error) {
+      console.error('Error al crear mapa en blanco:', error);
+    } finally {
+      setShowBlankModal(false);
     }
-  }, [resetToDefault]);
+  }, [createBlankMap, resetPan, resetZoom]);
+
+  // Handler para "Desde Template" - Abrir modal
+  const handleNewFromTemplateClick = useCallback(() => {
+    setShowTemplateModal(true);
+  }, []);
+
+  // Handler para seleccionar template
+  const handleSelectTemplate = useCallback((templateNodes, templateName) => {
+    try {
+      console.log('Seleccionando template:', templateName);
+      const success = loadFromTemplate(templateNodes, templateName);
+      if (success) {
+        resetPan();
+        resetZoom();
+        console.log('Template cargado y vista centrada');
+      }
+    } catch (error) {
+      console.error('Error al cargar template:', error);
+    }
+  }, [loadFromTemplate, resetPan, resetZoom]);
+
+  // Handler para "Eliminar Proyecto" - Abrir modal
+  const handleDeleteProjectClick = useCallback(() => {
+    setShowDeleteModal(true);
+  }, []);
+
+  // Handler para confirmar eliminación
+  const handleConfirmDelete = useCallback(() => {
+    try {
+      console.log('Confirmando eliminación de proyecto...');
+      const success = deleteProject();
+      if (success) {
+        resetPan();
+        resetZoom();
+        console.log('Proyecto eliminado y vista centrada');
+      }
+    } catch (error) {
+      console.error('Error al eliminar proyecto:', error);
+    } finally {
+      setShowDeleteModal(false);
+    }
+  }, [deleteProject, resetPan, resetZoom]);
 
   return (
     <div className="flex h-screen w-full bg-gray-50 overflow-hidden">
       {/* Sidebar izquierdo */}
       <Sidebar
         nodes={nodes}
-        onNewBlank={handleNewBlank}
-        onNewFromTemplate={handleNewFromTemplate}
+        projectName={projectName}
+        onNewBlank={handleNewBlankClick}
+        onNewFromTemplate={handleNewFromTemplateClick}
+        onDeleteProject={handleDeleteProjectClick}
       />
 
       {/* Área principal */}
@@ -152,6 +222,39 @@ const MindMapApp = () => {
           onWheel={handleWheel}
         />
       </div>
+
+      {/* ==================== MODALES ==================== */}
+      
+      {/* Modal: Crear mapa en blanco */}
+      <ConfirmModal
+        isOpen={showBlankModal}
+        title="Crear Mapa en Blanco"
+        message="Se creará un nuevo mapa mental vacío con un nodo central. El mapa actual será reemplazado. ¿Deseas continuar?"
+        confirmText="Crear"
+        cancelText="Cancelar"
+        onConfirm={handleConfirmBlank}
+        onCancel={() => setShowBlankModal(false)}
+        variant="default"
+      />
+
+      {/* Modal: Seleccionar template */}
+      <TemplateModal
+        isOpen={showTemplateModal}
+        onClose={() => setShowTemplateModal(false)}
+        onSelectTemplate={handleSelectTemplate}
+      />
+
+      {/* Modal: Eliminar proyecto */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        title="Eliminar Proyecto"
+        message="Se eliminará el mapa mental actual y todos sus nodos. Esta acción no se puede deshacer. ¿Estás seguro?"
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setShowDeleteModal(false)}
+        variant="danger"
+      />
     </div>
   );
 };

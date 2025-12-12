@@ -2,10 +2,10 @@
 nixPkgs = ["nodejs_20"]
 
 [phases.install]
-cmds = ["cd frontend && yarn install"]
+cmds = ["cd frontend && npm install"]
 
 [phases.build]
-cmds = ["cd frontend && yarn build"]
+cmds = ["cd frontend && npm run build"]
 
 [start]
 cmd = "cd frontend && npx serve -s build -l ${PORT:-3000}"

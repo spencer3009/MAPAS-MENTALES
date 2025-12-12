@@ -1,0 +1,4 @@
+# Ignorar el backend en Railway
+backend/
+*.py
+requirements.txt

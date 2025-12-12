@@ -74,13 +74,13 @@ const NodeItem = memo(({
 
   const handleDoubleClick = (e) => {
     e.stopPropagation();
-    setIsEditing(true);
+    handleStartEdit();
   };
 
   const handleBlur = () => {
     setIsEditing(false);
-    if (editText.trim() !== node.text) {
-      onUpdateText(node.id, editText.trim() || 'Nuevo Nodo');
+    if (localText.trim() !== node.text) {
+      onUpdateText(node.id, localText.trim() || 'Nuevo Nodo');
     }
   };
 
@@ -90,7 +90,7 @@ const NodeItem = memo(({
       handleBlur();
     }
     if (e.key === 'Escape') {
-      setEditText(node.text);
+      setLocalText(node.text);
       setIsEditing(false);
     }
   };

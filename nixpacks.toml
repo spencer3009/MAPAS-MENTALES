@@ -10,4 +10,4 @@ cmds = [
 ]
 
 [start]
-cmd = "cd frontend && npx serve -s build -l ${PORT:-3000}"
+cmd = "cd frontend && npx serve -s build -l ${PORT:-3000} -c serve.json"

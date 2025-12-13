@@ -9,3 +9,4 @@ export { default as ConfirmModal } from './ConfirmModal';
 export { default as TemplateModal } from './TemplateModal';
 export { default as NodeToolbar } from './NodeToolbar';
 export { default as NodeAddButton } from './NodeAddButton';
+export { default as CommentPopover } from './CommentPopover';

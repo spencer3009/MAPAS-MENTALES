@@ -98,14 +98,14 @@ export const COLOR_PALETTE = [
 
 /**
  * Formas disponibles para los nodos
+ * (línea, rectángulo, rectángulo redondeado, círculo/cápsula, nube)
  */
 export const NODE_SHAPES = [
-  { id: 'rectangle', name: 'Rectángulo', icon: '▭' },
-  { id: 'rounded', name: 'Redondeado', icon: '▢' },
-  { id: 'pill', name: 'Cápsula', icon: '⬭' },
-  { id: 'circle', name: 'Círculo', icon: '●' },
-  { id: 'diamond', name: 'Diamante', icon: '◇' },
-  { id: 'line', name: 'Solo texto', icon: '—' },
+  { id: 'line', name: 'Línea', icon: '—', description: 'Solo texto sin fondo' },
+  { id: 'rectangle', name: 'Rectángulo', icon: '▭', description: 'Bordes rectos' },
+  { id: 'rounded', name: 'Redondeado', icon: '▢', description: 'Bordes redondeados' },
+  { id: 'pill', name: 'Cápsula', icon: '⬭', description: 'Forma ovalada' },
+  { id: 'cloud', name: 'Nube', icon: '☁', description: 'Forma de nube' },
 ];
 
 /**

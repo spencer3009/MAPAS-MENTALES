@@ -52,13 +52,56 @@ const ColorButton = ({ color, selected, onClick, size = 'normal' }) => {
 };
 
 const ShapeButton = ({ shape, selected, onClick }) => {
-  const shapeStyles = {
-    rectangle: 'rounded-none',
-    rounded: 'rounded-lg',
-    pill: 'rounded-full',
-    circle: 'rounded-full aspect-square',
-    diamond: 'rotate-45 rounded-sm',
-    line: 'rounded-none bg-transparent border-b-2 border-current',
+  // Renderizar el icono visual de cada forma
+  const renderShapeIcon = (shapeId) => {
+    const baseClass = "w-10 h-6 flex items-center justify-center";
+    
+    switch (shapeId) {
+      case 'line':
+        return (
+          <div className={baseClass}>
+            <div className="w-8 h-0.5 bg-current opacity-60 rounded" />
+          </div>
+        );
+      case 'rectangle':
+        return (
+          <div className={baseClass}>
+            <div className="w-8 h-5 bg-current opacity-30 rounded-none border border-current" />
+          </div>
+        );
+      case 'rounded':
+        return (
+          <div className={baseClass}>
+            <div className="w-8 h-5 bg-current opacity-30 rounded-lg border border-current" />
+          </div>
+        );
+      case 'pill':
+        return (
+          <div className={baseClass}>
+            <div className="w-8 h-5 bg-current opacity-30 rounded-full border border-current" />
+          </div>
+        );
+      case 'cloud':
+        return (
+          <div className={baseClass}>
+            <svg viewBox="0 0 40 24" className="w-8 h-5 opacity-60">
+              <path 
+                d="M8 20 Q2 20 2 14 Q2 10 6 9 Q6 4 12 4 Q18 4 20 8 Q22 4 28 4 Q34 4 34 10 Q38 11 38 16 Q38 20 32 20 Z"
+                fill="currentColor"
+                fillOpacity="0.3"
+                stroke="currentColor"
+                strokeWidth="1"
+              />
+            </svg>
+          </div>
+        );
+      default:
+        return (
+          <div className={baseClass}>
+            <div className="w-8 h-5 bg-current opacity-30 rounded-lg" />
+          </div>
+        );
+    }
   };
 
   return (
@@ -72,17 +115,9 @@ const ShapeButton = ({ shape, selected, onClick }) => {
           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
         }
       `}
-      title={shape.name}
+      title={shape.description || shape.name}
     >
-      <div 
-        className={`
-          w-8 h-5 bg-current opacity-30
-          ${shapeStyles[shape.id]}
-          ${shape.id === 'circle' ? 'w-5 h-5' : ''}
-          ${shape.id === 'diamond' ? 'w-4 h-4' : ''}
-          ${shape.id === 'line' ? 'bg-transparent border-gray-400' : ''}
-        `}
-      />
+      {renderShapeIcon(shape.id)}
       <span className="text-[10px] font-medium">{shape.name}</span>
     </button>
   );

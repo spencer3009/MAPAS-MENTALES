@@ -131,6 +131,24 @@ const Canvas = ({
     setCommentPopover({ isOpen: false, nodeId: null });
   }, []);
 
+  // Handlers del panel de estilos
+  const handleToolbarStyle = useCallback(() => {
+    if (selectedNodeId) {
+      setStylePanel({ isOpen: true, nodeId: selectedNodeId });
+      setCommentPopover({ isOpen: false, nodeId: null });
+    }
+  }, [selectedNodeId]);
+
+  const handleStyleChange = useCallback((styleUpdates) => {
+    if (stylePanel.nodeId && onUpdateNodeStyle) {
+      onUpdateNodeStyle(stylePanel.nodeId, styleUpdates);
+    }
+  }, [stylePanel.nodeId, onUpdateNodeStyle]);
+
+  const handleStylePanelClose = useCallback(() => {
+    setStylePanel({ isOpen: false, nodeId: null });
+  }, []);
+
   const handleToolbarAddImage = useCallback(() => {
     alert('Funcionalidad de agregar imagen próximamente');
   }, []);

@@ -162,14 +162,17 @@ export const useNodes = () => {
 
   const addNode = useCallback((parentId = null, position = null) => {
     const newId = crypto.randomUUID();
-    let newX, newY;
 
-    // Usar setProjects directamente para evitar problemas de closure
     setProjects(prev => {
       const currentProject = prev.find(p => p.id === activeProjectId);
-      if (!currentProject) return prev;
+      if (!currentProject) {
+        console.error('No active project found');
+        return prev;
+      }
       
       const currentNodes = currentProject.nodes;
+      let newX = 400;
+      let newY = 300;
       
       if (parentId) {
         const parent = currentNodes.find(n => n.id === parentId);
@@ -177,16 +180,10 @@ export const useNodes = () => {
           const siblings = currentNodes.filter(n => n.parentId === parentId);
           newX = parent.x + 280;
           newY = parent.y + (siblings.length * 100) - 50;
-        } else {
-          newX = 400;
-          newY = 300;
         }
       } else if (position) {
         newX = position.x;
         newY = position.y;
-      } else {
-        newX = 400;
-        newY = 300;
       }
 
       const newNode = {
@@ -198,11 +195,17 @@ export const useNodes = () => {
         parentId
       };
 
-      return prev.map(p => 
+      console.log('Creating new node:', newNode);
+
+      const updatedProjects = prev.map(p => 
         p.id === activeProjectId 
           ? { ...p, nodes: [...currentNodes, newNode], updatedAt: new Date().toISOString() }
           : p
       );
+      
+      console.log('Updated projects, new node count:', updatedProjects.find(p => p.id === activeProjectId)?.nodes.length);
+      
+      return updatedProjects;
     });
 
     setSelectedNodeId(newId);

@@ -21,6 +21,7 @@ const MindMapApp = () => {
     updateNodePosition,
     updateNodeText,
     updateNodeColor,
+    updateNodeComment,
     deleteNode,
     duplicateNode,
     undo,

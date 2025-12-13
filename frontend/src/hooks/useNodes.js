@@ -164,37 +164,50 @@ export const useNodes = () => {
     const newId = crypto.randomUUID();
     let newX, newY;
 
-    if (parentId) {
-      const parent = nodes.find(n => n.id === parentId);
-      if (parent) {
-        const siblings = nodes.filter(n => n.parentId === parentId);
-        newX = parent.x + 280;
-        newY = parent.y + (siblings.length * 100) - 50;
+    // Usar setProjects directamente para evitar problemas de closure
+    setProjects(prev => {
+      const currentProject = prev.find(p => p.id === activeProjectId);
+      if (!currentProject) return prev;
+      
+      const currentNodes = currentProject.nodes;
+      
+      if (parentId) {
+        const parent = currentNodes.find(n => n.id === parentId);
+        if (parent) {
+          const siblings = currentNodes.filter(n => n.parentId === parentId);
+          newX = parent.x + 280;
+          newY = parent.y + (siblings.length * 100) - 50;
+        } else {
+          newX = 400;
+          newY = 300;
+        }
+      } else if (position) {
+        newX = position.x;
+        newY = position.y;
       } else {
         newX = 400;
         newY = 300;
       }
-    } else if (position) {
-      newX = position.x;
-      newY = position.y;
-    } else {
-      newX = 400;
-      newY = 300;
-    }
 
-    const newNode = {
-      id: newId,
-      text: 'Nuevo Nodo',
-      x: newX,
-      y: newY,
-      color: 'blue',
-      parentId
-    };
+      const newNode = {
+        id: newId,
+        text: 'Nuevo Nodo',
+        x: newX,
+        y: newY,
+        color: 'blue',
+        parentId
+      };
 
-    updateProjectNodes([...nodes, newNode]);
+      return prev.map(p => 
+        p.id === activeProjectId 
+          ? { ...p, nodes: [...currentNodes, newNode], updatedAt: new Date().toISOString() }
+          : p
+      );
+    });
+
     setSelectedNodeId(newId);
     return newId;
-  }, [nodes, updateProjectNodes]);
+  }, [activeProjectId]);
 
   const updateNodePosition = useCallback((id, x, y) => {
     const newNodes = nodes.map(n => n.id === id ? { ...n, x, y } : n);

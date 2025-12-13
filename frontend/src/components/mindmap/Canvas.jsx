@@ -20,6 +20,7 @@ const Canvas = ({
   onUpdateNodePosition,
   onUpdateNodeText,
   onUpdateNodeComment,
+  onUpdateNodeStyle,
   onOpenContextMenu,
   onCloseContextMenu,
   onAddChildNode,
@@ -33,6 +34,7 @@ const Canvas = ({
   const [newNodeId, setNewNodeId] = useState(null);
   const [showControls, setShowControls] = useState(true);
   const [commentPopover, setCommentPopover] = useState({ isOpen: false, nodeId: null });
+  const [stylePanel, setStylePanel] = useState({ isOpen: false, nodeId: null });
 
   // Obtener nodo seleccionado
   const selectedNode = nodes.find(n => n.id === selectedNodeId);

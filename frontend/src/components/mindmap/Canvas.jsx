@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useState, useEffect } from 'react';
+import React, { useRef, useCallback, useState, useEffect, useMemo } from 'react';
 import NodeItem, { NODE_WIDTH, NODE_HEIGHT } from './NodeItem';
 import ConnectionsLayer from './ConnectionsLayer';
 import ContextMenu from './ContextMenu';
@@ -28,36 +28,40 @@ const Canvas = ({
 }) => {
   const containerRef = useRef(null);
   const [dragging, setDragging] = useState(null);
-  const [newNodeId, setNewNodeId] = useState(null); // Para forzar edición en nuevo nodo
+  const [newNodeId, setNewNodeId] = useState(null);
   const [showControls, setShowControls] = useState(true);
 
   // Obtener nodo seleccionado
   const selectedNode = nodes.find(n => n.id === selectedNodeId);
 
-  // Calcular posición del botón "+" (a la derecha del nodo)
-  const getAddButtonPosition = useCallback(() => {
-    if (!selectedNode) return { x: 0, y: 0 };
+  // Calcular posiciones transformadas para los controles (fuera del contenedor escalado)
+  const controlPositions = useMemo(() => {
+    if (!selectedNode) return { addButton: null, toolbar: null };
+    
+    // Posición del botón "+" (a la derecha del nodo)
+    const addButtonX = (selectedNode.x + NODE_WIDTH + 15) * zoom + pan.x;
+    const addButtonY = (selectedNode.y + NODE_HEIGHT / 2 - 14) * zoom + pan.y;
+    
+    // Posición de la toolbar (arriba del nodo, centrada)
+    const toolbarX = (selectedNode.x + NODE_WIDTH / 2) * zoom + pan.x;
+    const toolbarY = (selectedNode.y - 50) * zoom + pan.y;
+    
     return {
-      x: selectedNode.x + NODE_WIDTH + 10,
-      y: selectedNode.y + NODE_HEIGHT / 2 - 14
+      addButton: { x: addButtonX, y: addButtonY },
+      toolbar: { x: toolbarX, y: toolbarY }
     };
-  }, [selectedNode]);
-
-  // Calcular posición de la toolbar (arriba del nodo, centrada)
-  const getToolbarPosition = useCallback(() => {
-    if (!selectedNode) return { x: 0, y: 0 };
-    return {
-      x: selectedNode.x + NODE_WIDTH / 2,
-      y: selectedNode.y - 55
-    };
-  }, [selectedNode]);
+  }, [selectedNode, zoom, pan]);
 
   // Handler para agregar nodo hijo desde el botón "+"
   const handleAddChildFromButton = useCallback(() => {
+    console.log('Add button clicked, selectedNodeId:', selectedNodeId);
     if (selectedNodeId) {
       const newId = onAddChildNode(selectedNodeId);
+      console.log('New node created with ID:', newId);
       setNewNodeId(newId);
       setShowControls(false);
+      // Mostrar controles después de un breve delay
+      setTimeout(() => setShowControls(true), 500);
     }
   }, [selectedNodeId, onAddChildNode]);
 
@@ -70,13 +74,11 @@ const Canvas = ({
   // Handlers de la toolbar
   const handleToolbarEdit = useCallback(() => {
     if (selectedNodeId) {
+      // Trigger double click para editar
       const nodeElement = document.querySelector(`[data-node-id="${selectedNodeId}"]`);
-      if (nodeElement && nodeElement.startEdit) {
-        nodeElement.startEdit();
-      } else {
-        // Simular doble click para editar
-        const event = new MouseEvent('dblclick', { bubbles: true });
-        nodeElement?.dispatchEvent(event);
+      if (nodeElement) {
+        const event = new MouseEvent('dblclick', { bubbles: true, cancelable: true });
+        nodeElement.dispatchEvent(event);
       }
     }
   }, [selectedNodeId]);
@@ -115,7 +117,7 @@ const Canvas = ({
   const handleNodeDragStart = useCallback((e, node) => {
     if (!containerRef.current) return;
     
-    setShowControls(false); // Ocultar controles durante drag
+    setShowControls(false);
     
     const rect = containerRef.current.getBoundingClientRect();
     setDragging({
@@ -129,7 +131,6 @@ const Canvas = ({
   const handleMouseMove = useCallback((e) => {
     if (!containerRef.current) return;
 
-    // Arrastrar nodo
     if (dragging) {
       const rect = containerRef.current.getBoundingClientRect();
       const newX = (e.clientX - rect.left - pan.x) / zoom - dragging.offsetX;
@@ -138,7 +139,6 @@ const Canvas = ({
       return;
     }
 
-    // Panning del lienzo
     if (isPanning) {
       onUpdatePanning(e);
     }
@@ -147,13 +147,13 @@ const Canvas = ({
   // Manejar fin de arrastre
   const handleMouseUp = useCallback(() => {
     if (dragging) {
-      setShowControls(true); // Mostrar controles después de drag
+      setTimeout(() => setShowControls(true), 100);
     }
     setDragging(null);
     onStopPanning();
   }, [dragging, onStopPanning]);
 
-  // Manejar click en el canvas (iniciar panning)
+  // Manejar click en el canvas
   const handleCanvasMouseDown = useCallback((e) => {
     if (e.button !== 0) return;
     
@@ -172,27 +172,22 @@ const Canvas = ({
     onOpenContextMenu(e.clientX - rect.left, e.clientY - rect.top, nodeId);
   }, [onOpenContextMenu]);
 
-  // Prevenir menú contextual del navegador
   const handleContextMenu = useCallback((e) => {
     e.preventDefault();
   }, []);
 
-  // Manejar scroll para zoom
   const handleWheel = useCallback((e) => {
     e.preventDefault();
     onWheel(e);
   }, [onWheel]);
 
-  // Agregar listener de wheel con passive: false
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-
     container.addEventListener('wheel', handleWheel, { passive: false });
     return () => container.removeEventListener('wheel', handleWheel);
   }, [handleWheel]);
 
-  // Mostrar controles cuando se selecciona un nodo
   useEffect(() => {
     if (selectedNodeId && !dragging) {
       setShowControls(true);
@@ -228,7 +223,7 @@ const Canvas = ({
         }}
       />
 
-      {/* Contenedor transformable */}
+      {/* Contenedor transformable para nodos y conexiones */}
       <div
         className="absolute top-0 left-0 origin-top-left will-change-transform"
         style={{
@@ -237,10 +232,8 @@ const Canvas = ({
           height: '5000px'
         }}
       >
-        {/* Capa de conexiones */}
         <ConnectionsLayer nodes={nodes} />
 
-        {/* Capa de nodos */}
         {nodes.map(node => (
           <NodeItem
             key={node.id}
@@ -254,20 +247,42 @@ const Canvas = ({
             onEditComplete={handleEditComplete}
           />
         ))}
+      </div>
 
-        {/* Botón "+" para agregar nodo hijo */}
-        <NodeAddButton
-          position={getAddButtonPosition()}
-          visible={shouldShowNodeControls}
-          zoom={zoom}
-          onAdd={handleAddChildFromButton}
-        />
+      {/* Controles flotantes - FUERA del contenedor transformable */}
+      {shouldShowNodeControls && controlPositions.addButton && (
+        <button
+          onClick={handleAddChildFromButton}
+          onMouseDown={(e) => e.stopPropagation()}
+          className="
+            absolute z-50
+            w-8 h-8 rounded-full
+            bg-blue-500 hover:bg-blue-600
+            text-white shadow-lg
+            flex items-center justify-center
+            transition-all duration-200
+            hover:scale-110 active:scale-95
+            border-2 border-white
+          "
+          style={{
+            left: controlPositions.addButton.x,
+            top: controlPositions.addButton.y,
+            transform: 'translate(-50%, -50%)'
+          }}
+          title="Agregar nodo hijo"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+      )}
 
-        {/* Toolbar contextual del nodo */}
+      {shouldShowNodeControls && controlPositions.toolbar && (
         <NodeToolbar
-          position={getToolbarPosition()}
-          visible={shouldShowNodeControls}
-          zoom={zoom}
+          position={controlPositions.toolbar}
+          visible={true}
+          zoom={1}
           currentColor={selectedNode?.color}
           onEdit={handleToolbarEdit}
           onChangeColor={handleToolbarChangeColor}
@@ -277,9 +292,9 @@ const Canvas = ({
           onDuplicate={handleToolbarDuplicate}
           onDelete={handleToolbarDelete}
         />
-      </div>
+      )}
 
-      {/* Menú contextual (click derecho) */}
+      {/* Menú contextual */}
       <ContextMenu
         position={contextMenu}
         nodeId={contextMenu?.nodeId}

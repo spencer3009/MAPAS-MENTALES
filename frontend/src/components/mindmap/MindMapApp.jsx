@@ -241,6 +241,7 @@ const MindMapApp = () => {
           onUpdateNodePosition={updateNodePosition}
           onUpdateNodeText={updateNodeText}
           onUpdateNodeComment={updateNodeComment}
+          onUpdateNodeStyle={updateNodeStyle}
           onOpenContextMenu={openContextMenu}
           onCloseContextMenu={closeContextMenu}
           onAddChildNode={addNode}

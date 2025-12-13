@@ -53,11 +53,16 @@ const loadActiveProjectIdFromStorage = (projects) => {
 };
 
 export const useNodes = () => {
+  // Cargar proyectos una sola vez para mantener consistencia
+  const [initialData] = useState(() => {
+    const loadedProjects = loadProjectsFromStorage();
+    const activeId = loadActiveProjectIdFromStorage(loadedProjects);
+    return { projects: loadedProjects, activeId };
+  });
+
   // Estado de proyectos
-  const [projects, setProjects] = useState(() => loadProjectsFromStorage());
-  const [activeProjectId, setActiveProjectId] = useState(() => 
-    loadActiveProjectIdFromStorage(loadProjectsFromStorage())
-  );
+  const [projects, setProjects] = useState(initialData.projects);
+  const [activeProjectId, setActiveProjectId] = useState(initialData.activeId);
   
   // Estado para undo/redo (por proyecto)
   const [history, setHistory] = useState({});
@@ -67,6 +72,14 @@ export const useNodes = () => {
   const activeProject = projects.find(p => p.id === activeProjectId) || projects[0];
   const nodes = activeProject?.nodes || [];
   const projectName = activeProject?.name || 'Sin nombre';
+
+  // Si activeProjectId no coincide con ningún proyecto, actualizar
+  useEffect(() => {
+    if (activeProjectId && !projects.find(p => p.id === activeProjectId) && projects.length > 0) {
+      console.log('Fixing activeProjectId mismatch');
+      setActiveProjectId(projects[0].id);
+    }
+  }, [activeProjectId, projects]);
 
   // Estado de selección
   const [selectedNodeId, setSelectedNodeId] = useState(null);

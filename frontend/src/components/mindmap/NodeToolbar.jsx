@@ -53,6 +53,7 @@ const NodeToolbar = ({
   hasComment = false,
   onEdit,
   onChangeColor,
+  onStyle,
   onAddImage,
   onAddLink,
   onDuplicate,
@@ -72,6 +73,12 @@ const NodeToolbar = ({
   const handleSelectColor = (color) => {
     onChangeColor(color);
     setShowColorPicker(false);
+  };
+
+  const handleStyleClick = (e) => {
+    e.stopPropagation();
+    setShowColorPicker(false);
+    if (onStyle) onStyle();
   };
 
   return (
@@ -98,11 +105,18 @@ const NodeToolbar = ({
         onClick={onEdit}
       />
       
-      {/* Color picker */}
+      {/* Panel de estilos avanzados */}
+      <ToolbarButton 
+        icon={Settings2} 
+        label="Personalizar estilo" 
+        onClick={handleStyleClick}
+      />
+      
+      {/* Color picker rápido (legacy) */}
       <div className="relative">
         <ToolbarButton 
           icon={Palette} 
-          label="Cambiar color" 
+          label="Color rápido" 
           onClick={handleColorClick}
           active={showColorPicker}
         />

@@ -222,6 +222,7 @@ const Canvas = ({
     onSelectNode(null);
     setShowControls(false);
     setCommentPopover({ isOpen: false, nodeId: null });
+    setStylePanel({ isOpen: false, nodeId: null });
     onStartPanning(e);
   }, [onCloseContextMenu, onSelectNode, onStartPanning]);
 

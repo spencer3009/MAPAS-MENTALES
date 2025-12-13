@@ -13,10 +13,8 @@ const getShapeStyles = (shape) => {
       return 'rounded-xl';
     case 'pill':
       return 'rounded-full';
-    case 'circle':
-      return 'rounded-full aspect-square';
-    case 'diamond':
-      return 'rotate-0'; // Manejado con clip-path
+    case 'cloud':
+      return 'rounded-xl'; // El efecto nube se hace con clip-path
     case 'line':
       return 'bg-transparent border-0 shadow-none rounded-none';
     default:

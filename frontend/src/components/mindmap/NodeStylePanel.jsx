@@ -143,7 +143,7 @@ const ShapeTab = ({ nodeStyle, onChange }) => {
       {/* Formas */}
       <div>
         <SectionTitle>Forma del nodo</SectionTitle>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-5 gap-2">
           {NODE_SHAPES.map(shape => (
             <ShapeButton
               key={shape.id}

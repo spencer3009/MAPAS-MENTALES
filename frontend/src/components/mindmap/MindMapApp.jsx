@@ -239,6 +239,7 @@ const MindMapApp = () => {
           onStopPanning={stopPanning}
           onUpdateNodePosition={updateNodePosition}
           onUpdateNodeText={updateNodeText}
+          onUpdateNodeComment={updateNodeComment}
           onOpenContextMenu={openContextMenu}
           onCloseContextMenu={closeContextMenu}
           onAddChildNode={addNode}

@@ -258,6 +258,21 @@ export const useNodes = () => {
     ));
   }, [nodes, activeProjectId]);
 
+  // Actualizar estilos del nodo (forma, colores, borde, línea)
+  const updateNodeStyle = useCallback((id, styleUpdates) => {
+    const newNodes = nodes.map(n => {
+      if (n.id === id) {
+        return { ...n, ...styleUpdates };
+      }
+      return n;
+    });
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, activeProjectId]);
+
   const deleteNode = useCallback((id) => {
     const findDescendants = (nodeId, allNodes) => {
       const children = allNodes.filter(n => n.parentId === nodeId);

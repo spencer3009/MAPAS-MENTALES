@@ -491,6 +491,7 @@ export const useNodes = () => {
     updateNodeText,
     updateNodeColor,
     updateNodeComment,
+    updateNodeStyle,
     deleteNode,
     duplicateNode,
     

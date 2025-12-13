@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, memo, useCallback } from 'react';
+import { MessageSquare } from 'lucide-react';
 
 const NODE_COLORS = {
   blue: {
@@ -6,28 +7,32 @@ const NODE_COLORS = {
     border: 'border-sky-300',
     hover: 'hover:border-sky-400',
     ring: 'ring-sky-400',
-    selected: 'border-sky-500 bg-sky-50'
+    selected: 'border-sky-500 bg-sky-50',
+    commentBg: 'bg-sky-200'
   },
   pink: {
     bg: 'bg-rose-100',
     border: 'border-rose-300',
     hover: 'hover:border-rose-400',
     ring: 'ring-rose-400',
-    selected: 'border-rose-500 bg-rose-50'
+    selected: 'border-rose-500 bg-rose-50',
+    commentBg: 'bg-rose-200'
   },
   green: {
     bg: 'bg-emerald-100',
     border: 'border-emerald-300',
     hover: 'hover:border-emerald-400',
     ring: 'ring-emerald-400',
-    selected: 'border-emerald-500 bg-emerald-50'
+    selected: 'border-emerald-500 bg-emerald-50',
+    commentBg: 'bg-emerald-200'
   },
   yellow: {
     bg: 'bg-amber-100',
     border: 'border-amber-300',
     hover: 'hover:border-amber-400',
     ring: 'ring-amber-400',
-    selected: 'border-amber-500 bg-amber-50'
+    selected: 'border-amber-500 bg-amber-50',
+    commentBg: 'bg-amber-200'
   }
 };
 
@@ -41,6 +46,7 @@ const NodeItem = memo(({
   onDragStart,
   onUpdateText,
   onContextMenu,
+  onCommentClick,
   forceEdit = false,
   onEditComplete
 }) => {
@@ -50,6 +56,7 @@ const NodeItem = memo(({
   const nodeRef = useRef(null);
 
   const colors = NODE_COLORS[node.color] || NODE_COLORS.blue;
+  const hasComment = node.comment && node.comment.trim().length > 0;
 
   // Sincronizar texto local con props
   const displayText = isEditing ? localText : node.text;
@@ -126,6 +133,13 @@ const NodeItem = memo(({
     onContextMenu(e, node.id);
   };
 
+  const handleCommentBadgeClick = (e) => {
+    e.stopPropagation();
+    if (onCommentClick) {
+      onCommentClick(node.id);
+    }
+  };
+
   // Exponer método para iniciar edición
   const startEdit = useCallback(() => {
     handleStartEdit();
@@ -162,27 +176,48 @@ const NodeItem = memo(({
       onDoubleClick={handleDoubleClick}
       onContextMenu={handleRightClick}
     >
-      {isEditing ? (
-        <input
-          ref={inputRef}
-          type="text"
-          value={localText}
-          onChange={(e) => setLocalText(e.target.value)}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          onMouseDown={(e) => e.stopPropagation()}
-          className="
-            w-full text-center bg-transparent outline-none
-            text-gray-800 font-medium text-sm
-            border-b-2 border-gray-400
-          "
-          placeholder="Nombre del nodo"
-        />
-      ) : (
-        <span className="text-gray-800 font-medium text-sm text-center break-words w-full">
-          {displayText}
-        </span>
-      )}
+      {/* Contenido del nodo */}
+      <div className="flex items-center gap-2 w-full">
+        {isEditing ? (
+          <input
+            ref={inputRef}
+            type="text"
+            value={localText}
+            onChange={(e) => setLocalText(e.target.value)}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            onMouseDown={(e) => e.stopPropagation()}
+            className="
+              flex-1 text-center bg-transparent outline-none
+              text-gray-800 font-medium text-sm
+              border-b-2 border-gray-400
+            "
+            placeholder="Nombre del nodo"
+          />
+        ) : (
+          <span className="flex-1 text-gray-800 font-medium text-sm text-center break-words">
+            {displayText}
+          </span>
+        )}
+
+        {/* Badge de comentario - Siempre visible si hay comentario */}
+        {hasComment && !isEditing && (
+          <button
+            onClick={handleCommentBadgeClick}
+            onMouseDown={(e) => e.stopPropagation()}
+            className={`
+              shrink-0 p-1.5 rounded-lg
+              ${colors.commentBg}
+              hover:opacity-80
+              transition-all duration-150
+              cursor-pointer
+            `}
+            title="Ver comentario"
+          >
+            <MessageSquare size={14} className="text-gray-600" />
+          </button>
+        )}
+      </div>
     </div>
   );
 });

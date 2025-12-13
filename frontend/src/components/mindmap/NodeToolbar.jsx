@@ -6,8 +6,8 @@ import {
   Link2, 
   Copy, 
   Trash2,
-  MoreHorizontal,
-  Smile
+  Smile,
+  MessageSquare
 } from 'lucide-react';
 
 const COLORS = [
@@ -17,12 +17,12 @@ const COLORS = [
   { key: 'yellow', bg: 'bg-amber-400', label: 'Amarillo' },
 ];
 
-const ToolbarButton = ({ icon: Icon, label, onClick, danger = false, active = false }) => (
+const ToolbarButton = ({ icon: Icon, label, onClick, danger = false, active = false, hasIndicator = false }) => (
   <button
     onClick={onClick}
     onMouseDown={(e) => e.stopPropagation()}
     className={`
-      p-2 rounded-lg transition-all duration-150
+      relative p-2 rounded-lg transition-all duration-150
       flex items-center justify-center
       ${danger 
         ? 'text-red-500 hover:bg-red-50 hover:text-red-600' 
@@ -34,6 +34,9 @@ const ToolbarButton = ({ icon: Icon, label, onClick, danger = false, active = fa
     title={label}
   >
     <Icon size={16} />
+    {hasIndicator && (
+      <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-500 rounded-full" />
+    )}
   </button>
 );
 
@@ -46,13 +49,15 @@ const NodeToolbar = ({
   visible,
   zoom = 1,
   currentColor,
+  hasComment = false,
   onEdit,
   onChangeColor,
   onAddImage,
   onAddLink,
   onDuplicate,
   onDelete,
-  onAddEmoji
+  onAddEmoji,
+  onComment
 }) => {
   const [showColorPicker, setShowColorPicker] = useState(false);
 
@@ -80,8 +85,7 @@ const NodeToolbar = ({
       style={{
         left: position.x,
         top: position.y,
-        transform: `translateX(-50%) scale(${1 / zoom})`,
-        transformOrigin: 'bottom center'
+        transform: 'translateX(-50%)'
       }}
       onMouseDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
@@ -127,14 +131,22 @@ const NodeToolbar = ({
         )}
       </div>
 
+      {/* Comentario */}
+      <ToolbarButton 
+        icon={MessageSquare} 
+        label={hasComment ? "Ver comentario" : "Agregar comentario"}
+        onClick={onComment}
+        hasIndicator={hasComment}
+      />
+
+      <Divider />
+
       {/* Emoji/Icono */}
       <ToolbarButton 
         icon={Smile} 
         label="Agregar emoji" 
         onClick={onAddEmoji}
       />
-
-      <Divider />
       
       {/* Imagen */}
       <ToolbarButton 

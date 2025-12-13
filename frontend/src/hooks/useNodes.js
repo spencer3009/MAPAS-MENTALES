@@ -248,6 +248,16 @@ export const useNodes = () => {
     updateProjectNodes(nodes.map(n => n.id === id ? { ...n, color } : n));
   }, [nodes, updateProjectNodes]);
 
+  // Actualizar comentario del nodo
+  const updateNodeComment = useCallback((id, comment) => {
+    const newNodes = nodes.map(n => n.id === id ? { ...n, comment } : n);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, activeProjectId]);
+
   const deleteNode = useCallback((id) => {
     const findDescendants = (nodeId, allNodes) => {
       const children = allNodes.filter(n => n.parentId === nodeId);

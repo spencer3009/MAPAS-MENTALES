@@ -1,9 +1,11 @@
 export { default as MindMapApp } from './MindMapApp';
 export { default as Canvas } from './Canvas';
-export { default as NodeItem } from './NodeItem';
+export { default as NodeItem, NODE_WIDTH, NODE_HEIGHT } from './NodeItem';
 export { default as ConnectionsLayer } from './ConnectionsLayer';
 export { default as Sidebar } from './Sidebar';
 export { default as Toolbar } from './Toolbar';
 export { default as ContextMenu } from './ContextMenu';
 export { default as ConfirmModal } from './ConfirmModal';
 export { default as TemplateModal } from './TemplateModal';
+export { default as NodeToolbar } from './NodeToolbar';
+export { default as NodeAddButton } from './NodeAddButton';

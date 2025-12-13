@@ -152,24 +152,59 @@ const NodeItem = memo(({
 
   // Calcular dimensiones según la forma
   const getNodeDimensions = () => {
-    if (shape === 'circle') {
-      return { width: NODE_HEIGHT + 20, height: NODE_HEIGHT + 20 };
-    }
     if (shape === 'pill') {
       return { width: NODE_WIDTH + 20, height: NODE_HEIGHT };
+    }
+    if (shape === 'cloud') {
+      return { width: NODE_WIDTH + 30, height: NODE_HEIGHT + 10 };
     }
     return { width: NODE_WIDTH, height: NODE_HEIGHT };
   };
 
   const dimensions = getNodeDimensions();
 
-  // Estilo especial para forma de diamante
-  const diamondStyle = shape === 'diamond' ? {
-    clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
-  } : {};
+  // Estilo especial para forma de nube usando SVG filter
+  const isCloudShape = shape === 'cloud';
 
   // Estilo para forma de línea (solo texto)
   const isLineShape = shape === 'line';
+
+  // Renderizar la forma de nube con SVG
+  const renderCloudShape = () => {
+    if (!isCloudShape) return null;
+    
+    return (
+      <svg 
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        viewBox="0 0 200 80"
+        preserveAspectRatio="none"
+      >
+        <defs>
+          <filter id={`cloud-shadow-${node.id}`} x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.15"/>
+          </filter>
+        </defs>
+        <path 
+          d="M25 65 
+             Q5 65 5 50 
+             Q5 35 20 32 
+             Q15 15 40 15 
+             Q60 10 75 20 
+             Q85 8 110 10 
+             Q140 8 155 25 
+             Q175 15 185 30 
+             Q200 35 195 50 
+             Q200 65 175 65 
+             Z"
+          fill={bgColor}
+          stroke={borderColor}
+          strokeWidth={borderWidth}
+          strokeDasharray={borderStyle === 'dashed' ? '8,4' : borderStyle === 'dotted' ? '2,4' : 'none'}
+          filter={`url(#cloud-shadow-${node.id})`}
+        />
+      </svg>
+    );
+  };
 
   return (
     <div

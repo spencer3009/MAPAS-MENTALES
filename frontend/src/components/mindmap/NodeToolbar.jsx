@@ -7,7 +7,8 @@ import {
   Copy, 
   Trash2,
   Smile,
-  MessageSquare
+  MessageSquare,
+  Settings2
 } from 'lucide-react';
 
 const COLORS = [

@@ -1,8 +1,8 @@
 import React, { memo } from 'react';
 import { generateBezierPath, getNodeOutputPoint, getNodeInputPoint } from '../../utils/curve';
 
-const NODE_WIDTH = 140;
-const NODE_HEIGHT = 44;
+const NODE_WIDTH = 160;
+const NODE_HEIGHT = 64;
 
 const ConnectionsLayer = memo(({ nodes }) => {
   const connections = nodes

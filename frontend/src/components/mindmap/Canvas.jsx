@@ -258,7 +258,7 @@ const Canvas = ({
   }, [selectedNodeId, dragging]);
 
   const selectedNodeForMenu = nodes.find(n => n.id === contextMenu?.nodeId);
-  const shouldShowNodeControls = selectedNodeId && showControls && !contextMenu && !dragging && !newNodeId && !commentPopover.isOpen;
+  const shouldShowNodeControls = selectedNodeId && showControls && !contextMenu && !dragging && !newNodeId && !commentPopover.isOpen && !stylePanel.isOpen;
   const commentNode = nodes.find(n => n.id === commentPopover.nodeId);
 
   return (

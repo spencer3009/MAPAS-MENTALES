@@ -3,7 +3,7 @@ import NodeItem, { NODE_WIDTH, NODE_HEIGHT } from './NodeItem';
 import ConnectionsLayer from './ConnectionsLayer';
 import ContextMenu from './ContextMenu';
 import NodeToolbar from './NodeToolbar';
-import NodeAddButton from './NodeAddButton';
+import CommentPopover from './CommentPopover';
 
 const Canvas = ({
   nodes,
@@ -18,6 +18,7 @@ const Canvas = ({
   onStopPanning,
   onUpdateNodePosition,
   onUpdateNodeText,
+  onUpdateNodeComment,
   onOpenContextMenu,
   onCloseContextMenu,
   onAddChildNode,
@@ -30,19 +31,18 @@ const Canvas = ({
   const [dragging, setDragging] = useState(null);
   const [newNodeId, setNewNodeId] = useState(null);
   const [showControls, setShowControls] = useState(true);
+  const [commentPopover, setCommentPopover] = useState({ isOpen: false, nodeId: null });
 
   // Obtener nodo seleccionado
   const selectedNode = nodes.find(n => n.id === selectedNodeId);
 
-  // Calcular posiciones transformadas para los controles (fuera del contenedor escalado)
+  // Calcular posiciones transformadas para los controles
   const controlPositions = useMemo(() => {
     if (!selectedNode) return { addButton: null, toolbar: null };
     
-    // Posición del botón "+" (a la derecha del nodo)
     const addButtonX = (selectedNode.x + NODE_WIDTH + 15) * zoom + pan.x;
     const addButtonY = (selectedNode.y + NODE_HEIGHT / 2 - 14) * zoom + pan.y;
     
-    // Posición de la toolbar (arriba del nodo, centrada)
     const toolbarX = (selectedNode.x + NODE_WIDTH / 2) * zoom + pan.x;
     const toolbarY = (selectedNode.y - 50) * zoom + pan.y;
     
@@ -52,15 +52,23 @@ const Canvas = ({
     };
   }, [selectedNode, zoom, pan]);
 
+  // Calcular posición del popover de comentario
+  const getCommentPopoverPosition = useCallback((nodeId) => {
+    const node = nodes.find(n => n.id === nodeId);
+    if (!node) return { x: 0, y: 0 };
+    
+    const x = (node.x + NODE_WIDTH / 2) * zoom + pan.x;
+    const y = (node.y + NODE_HEIGHT + 10) * zoom + pan.y;
+    
+    return { x, y };
+  }, [nodes, zoom, pan]);
+
   // Handler para agregar nodo hijo desde el botón "+"
   const handleAddChildFromButton = useCallback(() => {
-    console.log('Add button clicked, selectedNodeId:', selectedNodeId);
     if (selectedNodeId) {
       const newId = onAddChildNode(selectedNodeId);
-      console.log('New node created with ID:', newId);
       setNewNodeId(newId);
       setShowControls(false);
-      // Mostrar controles después de un breve delay
       setTimeout(() => setShowControls(true), 500);
     }
   }, [selectedNodeId, onAddChildNode]);
@@ -74,7 +82,6 @@ const Canvas = ({
   // Handlers de la toolbar
   const handleToolbarEdit = useCallback(() => {
     if (selectedNodeId) {
-      // Trigger double click para editar
       const nodeElement = document.querySelector(`[data-node-id="${selectedNodeId}"]`);
       if (nodeElement) {
         const event = new MouseEvent('dblclick', { bubbles: true, cancelable: true });
@@ -88,6 +95,27 @@ const Canvas = ({
       onChangeNodeColor(selectedNodeId, color);
     }
   }, [selectedNodeId, onChangeNodeColor]);
+
+  const handleToolbarComment = useCallback(() => {
+    if (selectedNodeId) {
+      setCommentPopover({ isOpen: true, nodeId: selectedNodeId });
+    }
+  }, [selectedNodeId]);
+
+  const handleNodeCommentClick = useCallback((nodeId) => {
+    setCommentPopover({ isOpen: true, nodeId });
+    onSelectNode(nodeId);
+  }, [onSelectNode]);
+
+  const handleCommentSave = useCallback((comment) => {
+    if (commentPopover.nodeId && onUpdateNodeComment) {
+      onUpdateNodeComment(commentPopover.nodeId, comment);
+    }
+  }, [commentPopover.nodeId, onUpdateNodeComment]);
+
+  const handleCommentClose = useCallback(() => {
+    setCommentPopover({ isOpen: false, nodeId: null });
+  }, []);
 
   const handleToolbarAddImage = useCallback(() => {
     alert('Funcionalidad de agregar imagen próximamente');
@@ -118,6 +146,7 @@ const Canvas = ({
     if (!containerRef.current) return;
     
     setShowControls(false);
+    setCommentPopover({ isOpen: false, nodeId: null });
     
     const rect = containerRef.current.getBoundingClientRect();
     setDragging({
@@ -160,6 +189,7 @@ const Canvas = ({
     onCloseContextMenu();
     onSelectNode(null);
     setShowControls(false);
+    setCommentPopover({ isOpen: false, nodeId: null });
     onStartPanning(e);
   }, [onCloseContextMenu, onSelectNode, onStartPanning]);
 
@@ -195,7 +225,8 @@ const Canvas = ({
   }, [selectedNodeId, dragging]);
 
   const selectedNodeForMenu = nodes.find(n => n.id === contextMenu?.nodeId);
-  const shouldShowNodeControls = selectedNodeId && showControls && !contextMenu && !dragging && !newNodeId;
+  const shouldShowNodeControls = selectedNodeId && showControls && !contextMenu && !dragging && !newNodeId && !commentPopover.isOpen;
+  const commentNode = nodes.find(n => n.id === commentPopover.nodeId);
 
   return (
     <div
@@ -243,6 +274,7 @@ const Canvas = ({
             onDragStart={handleNodeDragStart}
             onUpdateText={onUpdateNodeText}
             onContextMenu={handleNodeContextMenu}
+            onCommentClick={handleNodeCommentClick}
             forceEdit={newNodeId === node.id}
             onEditComplete={handleEditComplete}
           />
@@ -284,13 +316,27 @@ const Canvas = ({
           visible={true}
           zoom={1}
           currentColor={selectedNode?.color}
+          hasComment={!!selectedNode?.comment}
           onEdit={handleToolbarEdit}
           onChangeColor={handleToolbarChangeColor}
+          onComment={handleToolbarComment}
           onAddImage={handleToolbarAddImage}
           onAddLink={handleToolbarAddLink}
           onAddEmoji={handleToolbarAddEmoji}
           onDuplicate={handleToolbarDuplicate}
           onDelete={handleToolbarDelete}
+        />
+      )}
+
+      {/* Popover de comentario */}
+      {commentPopover.isOpen && commentPopover.nodeId && (
+        <CommentPopover
+          isOpen={true}
+          position={getCommentPopoverPosition(commentPopover.nodeId)}
+          comment={commentNode?.comment || ''}
+          nodeColor={commentNode?.color}
+          onSave={handleCommentSave}
+          onClose={handleCommentClose}
         />
       )}
 

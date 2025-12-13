@@ -1,43 +1,36 @@
 import React, { useState, useRef, useEffect, memo, useCallback } from 'react';
 import { MessageSquare } from 'lucide-react';
 
-const NODE_COLORS = {
-  blue: {
-    bg: 'bg-sky-100',
-    border: 'border-sky-300',
-    hover: 'hover:border-sky-400',
-    ring: 'ring-sky-400',
-    selected: 'border-sky-500 bg-sky-50',
-    commentBg: 'bg-sky-200'
-  },
-  pink: {
-    bg: 'bg-rose-100',
-    border: 'border-rose-300',
-    hover: 'hover:border-rose-400',
-    ring: 'ring-rose-400',
-    selected: 'border-rose-500 bg-rose-50',
-    commentBg: 'bg-rose-200'
-  },
-  green: {
-    bg: 'bg-emerald-100',
-    border: 'border-emerald-300',
-    hover: 'hover:border-emerald-400',
-    ring: 'ring-emerald-400',
-    selected: 'border-emerald-500 bg-emerald-50',
-    commentBg: 'bg-emerald-200'
-  },
-  yellow: {
-    bg: 'bg-amber-100',
-    border: 'border-amber-300',
-    hover: 'hover:border-amber-400',
-    ring: 'ring-amber-400',
-    selected: 'border-amber-500 bg-amber-50',
-    commentBg: 'bg-amber-200'
+const NODE_WIDTH = 160;
+const NODE_HEIGHT = 64;
+
+// Estilos de forma
+const getShapeStyles = (shape) => {
+  switch (shape) {
+    case 'rectangle':
+      return 'rounded-none';
+    case 'rounded':
+      return 'rounded-xl';
+    case 'pill':
+      return 'rounded-full';
+    case 'circle':
+      return 'rounded-full aspect-square';
+    case 'diamond':
+      return 'rotate-0'; // Manejado con clip-path
+    case 'line':
+      return 'bg-transparent border-0 shadow-none rounded-none';
+    default:
+      return 'rounded-xl';
   }
 };
 
-const NODE_WIDTH = 160;
-const NODE_HEIGHT = 64;
+// Colores de fallback basados en el color legacy
+const LEGACY_COLORS = {
+  blue: { bg: '#e0f2fe', border: '#7dd3fc', text: '#1f2937' },
+  pink: { bg: '#ffe4e6', border: '#fda4af', text: '#1f2937' },
+  green: { bg: '#d1fae5', border: '#6ee7b7', text: '#1f2937' },
+  yellow: { bg: '#fef3c7', border: '#fcd34d', text: '#1f2937' },
+};
 
 const NodeItem = memo(({
   node,
@@ -55,8 +48,16 @@ const NodeItem = memo(({
   const inputRef = useRef(null);
   const nodeRef = useRef(null);
 
-  const colors = NODE_COLORS[node.color] || NODE_COLORS.blue;
   const hasComment = node.comment && node.comment.trim().length > 0;
+
+  // Obtener estilos del nodo (con fallback a colores legacy)
+  const legacyColors = LEGACY_COLORS[node.color] || LEGACY_COLORS.blue;
+  const bgColor = node.bgColor || legacyColors.bg;
+  const borderColor = node.borderColor || legacyColors.border;
+  const textColor = node.textColor || legacyColors.text;
+  const borderWidth = node.borderWidth || 2;
+  const borderStyle = node.borderStyle || 'solid';
+  const shape = node.shape || 'rounded';
 
   // Sincronizar texto local con props
   const displayText = isEditing ? localText : node.text;
@@ -145,39 +146,65 @@ const NodeItem = memo(({
     handleStartEdit();
   }, [handleStartEdit]);
 
-  // Guardar referencia para acceso externo
   useEffect(() => {
     if (nodeRef.current) {
       nodeRef.current.startEdit = startEdit;
     }
   }, [startEdit]);
 
+  // Calcular dimensiones según la forma
+  const getNodeDimensions = () => {
+    if (shape === 'circle') {
+      return { width: NODE_HEIGHT + 20, height: NODE_HEIGHT + 20 };
+    }
+    if (shape === 'pill') {
+      return { width: NODE_WIDTH + 20, height: NODE_HEIGHT };
+    }
+    return { width: NODE_WIDTH, height: NODE_HEIGHT };
+  };
+
+  const dimensions = getNodeDimensions();
+
+  // Estilo especial para forma de diamante
+  const diamondStyle = shape === 'diamond' ? {
+    clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
+  } : {};
+
+  // Estilo para forma de línea (solo texto)
+  const isLineShape = shape === 'line';
+
   return (
     <div
       ref={nodeRef}
       data-node-id={node.id}
       className={`
-        absolute rounded-xl
+        absolute
         flex items-center justify-center p-3
-        border-2 shadow-md
         transition-all duration-150 select-none
         ${isEditing ? 'cursor-text' : 'cursor-grab active:cursor-grabbing'}
-        ${colors.bg} ${colors.border} ${colors.hover}
-        ${isSelected ? `ring-2 ring-offset-2 ${colors.ring} shadow-lg ${colors.selected}` : ''}
+        ${getShapeStyles(shape)}
+        ${isSelected && !isLineShape ? 'ring-2 ring-offset-2 ring-blue-500 shadow-lg' : ''}
+        ${isLineShape ? '' : 'shadow-md'}
       `}
       style={{
         left: node.x,
         top: node.y,
-        width: NODE_WIDTH,
-        minHeight: NODE_HEIGHT,
-        zIndex: isSelected ? 20 : 10
+        width: dimensions.width,
+        minHeight: dimensions.height,
+        backgroundColor: isLineShape ? 'transparent' : bgColor,
+        borderWidth: isLineShape ? 0 : `${borderWidth}px`,
+        borderStyle: isLineShape ? 'none' : borderStyle,
+        borderColor: isLineShape ? 'transparent' : borderColor,
+        color: textColor,
+        zIndex: isSelected ? 20 : 10,
+        ...diamondStyle
       }}
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
       onContextMenu={handleRightClick}
     >
       {/* Contenido del nodo */}
-      <div className="flex items-center gap-2 w-full">
+      <div className={`flex items-center gap-2 w-full ${shape === 'diamond' ? 'scale-75' : ''}`}>
         {isEditing ? (
           <input
             ref={inputRef}
@@ -189,35 +216,47 @@ const NodeItem = memo(({
             onMouseDown={(e) => e.stopPropagation()}
             className="
               flex-1 text-center bg-transparent outline-none
-              text-gray-800 font-medium text-sm
-              border-b-2 border-gray-400
+              font-medium text-sm
+              border-b-2 border-current opacity-50
             "
+            style={{ color: textColor }}
             placeholder="Nombre del nodo"
           />
         ) : (
-          <span className="flex-1 text-gray-800 font-medium text-sm text-center break-words">
+          <span 
+            className="flex-1 font-medium text-sm text-center break-words"
+            style={{ color: textColor }}
+          >
             {displayText}
           </span>
         )}
 
-        {/* Badge de comentario - Siempre visible si hay comentario */}
+        {/* Badge de comentario */}
         {hasComment && !isEditing && (
           <button
             onClick={handleCommentBadgeClick}
             onMouseDown={(e) => e.stopPropagation()}
-            className={`
+            className="
               shrink-0 p-1.5 rounded-lg
-              ${colors.commentBg}
-              hover:opacity-80
+              bg-white/50 backdrop-blur-sm
+              hover:bg-white/80
               transition-all duration-150
               cursor-pointer
-            `}
+            "
             title="Ver comentario"
           >
-            <MessageSquare size={14} className="text-gray-600" />
+            <MessageSquare size={14} style={{ color: textColor }} />
           </button>
         )}
       </div>
+
+      {/* Subrayado para forma de línea */}
+      {isLineShape && (
+        <div 
+          className="absolute bottom-0 left-0 right-0 h-0.5"
+          style={{ backgroundColor: borderColor }}
+        />
+      )}
     </div>
   );
 });

@@ -215,29 +215,39 @@ const NodeItem = memo(({
         flex items-center justify-center p-3
         transition-all duration-150 select-none
         ${isEditing ? 'cursor-text' : 'cursor-grab active:cursor-grabbing'}
-        ${getShapeStyles(shape)}
-        ${isSelected && !isLineShape ? 'ring-2 ring-offset-2 ring-blue-500 shadow-lg' : ''}
-        ${isLineShape ? '' : 'shadow-md'}
+        ${!isCloudShape ? getShapeStyles(shape) : ''}
+        ${isSelected && !isLineShape && !isCloudShape ? 'ring-2 ring-offset-2 ring-blue-500 shadow-lg' : ''}
+        ${isLineShape || isCloudShape ? '' : 'shadow-md'}
       `}
       style={{
         left: node.x,
         top: node.y,
         width: dimensions.width,
         minHeight: dimensions.height,
-        backgroundColor: isLineShape ? 'transparent' : bgColor,
-        borderWidth: isLineShape ? 0 : `${borderWidth}px`,
-        borderStyle: isLineShape ? 'none' : borderStyle,
-        borderColor: isLineShape ? 'transparent' : borderColor,
+        backgroundColor: isLineShape || isCloudShape ? 'transparent' : bgColor,
+        borderWidth: isLineShape || isCloudShape ? 0 : `${borderWidth}px`,
+        borderStyle: isLineShape || isCloudShape ? 'none' : borderStyle,
+        borderColor: isLineShape || isCloudShape ? 'transparent' : borderColor,
         color: textColor,
         zIndex: isSelected ? 20 : 10,
-        ...diamondStyle
       }}
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
       onContextMenu={handleRightClick}
     >
+      {/* SVG de nube */}
+      {renderCloudShape()}
+      
+      {/* Indicador de selección para nube */}
+      {isCloudShape && isSelected && (
+        <div 
+          className="absolute inset-0 rounded-xl ring-2 ring-offset-2 ring-blue-500 pointer-events-none"
+          style={{ zIndex: -1 }}
+        />
+      )}
+
       {/* Contenido del nodo */}
-      <div className={`flex items-center gap-2 w-full ${shape === 'diamond' ? 'scale-75' : ''}`}>
+      <div className={`flex items-center gap-2 w-full relative z-10 ${isCloudShape ? 'px-2' : ''}`}>
         {isEditing ? (
           <input
             ref={inputRef}

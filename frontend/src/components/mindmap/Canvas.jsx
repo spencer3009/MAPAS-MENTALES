@@ -351,6 +351,7 @@ const Canvas = ({
           hasComment={!!selectedNode?.comment}
           onEdit={handleToolbarEdit}
           onChangeColor={handleToolbarChangeColor}
+          onStyle={handleToolbarStyle}
           onComment={handleToolbarComment}
           onAddImage={handleToolbarAddImage}
           onAddLink={handleToolbarAddLink}

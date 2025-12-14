@@ -170,6 +170,336 @@ async def logout():
     # Con JWT stateless, el logout se maneja en el frontend
     return {"message": "Sesión cerrada exitosamente"}
 
+@api_router.put("/auth/profile/whatsapp")
+async def update_whatsapp_number(
+    whatsapp_number: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Actualizar número de WhatsApp del usuario"""
+    username = current_user["username"]
+    if username in HARDCODED_USERS:
+        HARDCODED_USERS[username]["whatsapp"] = whatsapp_number
+    return {"message": "Número de WhatsApp actualizado", "whatsapp": whatsapp_number}
+
+@api_router.get("/auth/profile/whatsapp")
+async def get_whatsapp_number(current_user: dict = Depends(get_current_user)):
+    """Obtener número de WhatsApp del usuario"""
+    return {"whatsapp": current_user.get("whatsapp", "")}
+
+
+# ==========================================
+# REMINDER MODELS
+# ==========================================
+
+class ReminderCreate(BaseModel):
+    type: str  # 'node' or 'project'
+    node_id: Optional[str] = None
+    node_text: Optional[str] = None
+    project_id: str
+    project_name: str
+    scheduled_date: str  # ISO format date
+    scheduled_time: str  # HH:MM format
+    message: str
+    channel: str = "whatsapp"  # 'whatsapp' or 'email'
+
+class ReminderResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str
+    type: str
+    node_id: Optional[str] = None
+    node_text: Optional[str] = None
+    project_id: str
+    project_name: str
+    scheduled_date: str
+    scheduled_time: str
+    scheduled_datetime: str
+    message: str
+    channel: str
+    status: str  # 'pending', 'sent', 'failed'
+    created_at: str
+    sent_at: Optional[str] = None
+    username: str
+
+class ReminderUpdate(BaseModel):
+    scheduled_date: Optional[str] = None
+    scheduled_time: Optional[str] = None
+    message: Optional[str] = None
+    channel: Optional[str] = None
+
+
+# ==========================================
+# WHATSAPP FUNCTIONS
+# ==========================================
+
+async def send_whatsapp_message(phone_number: str, message: str) -> dict:
+    """Enviar mensaje por WhatsApp Business API"""
+    
+    # Si no hay configuración de WhatsApp, simular envío
+    if not WHATSAPP_ACCESS_TOKEN or not WHATSAPP_PHONE_NUMBER_ID:
+        logger.info(f"[SIMULADO] WhatsApp a {phone_number}: {message}")
+        return {
+            "success": True,
+            "simulated": True,
+            "message": "Mensaje simulado (WhatsApp no configurado)"
+        }
+    
+    try:
+        url = f"{WHATSAPP_API_URL}/{WHATSAPP_PHONE_NUMBER_ID}/messages"
+        
+        headers = {
+            "Authorization": f"Bearer {WHATSAPP_ACCESS_TOKEN}",
+            "Content-Type": "application/json"
+        }
+        
+        # Formato para WhatsApp Business API de Meta
+        payload = {
+            "messaging_product": "whatsapp",
+            "to": phone_number.replace("+", ""),
+            "type": "text",
+            "text": {
+                "body": message
+            }
+        }
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, json=payload, headers=headers)
+            
+            if response.status_code == 200:
+                return {"success": True, "response": response.json()}
+            else:
+                logger.error(f"WhatsApp API error: {response.text}")
+                return {"success": False, "error": response.text}
+                
+    except Exception as e:
+        logger.error(f"Error sending WhatsApp: {str(e)}")
+        return {"success": False, "error": str(e)}
+
+
+# ==========================================
+# REMINDER SCHEDULER
+# ==========================================
+
+scheduler_running = False
+
+async def check_and_send_reminders():
+    """Verificar y enviar recordatorios pendientes"""
+    global scheduler_running
+    scheduler_running = True
+    
+    while scheduler_running:
+        try:
+            now = datetime.now(timezone.utc)
+            
+            # Buscar recordatorios pendientes que ya deberían enviarse
+            pending_reminders = await db.reminders.find({
+                "status": "pending",
+                "scheduled_datetime": {"$lte": now.isoformat()}
+            }, {"_id": 0}).to_list(100)
+            
+            for reminder in pending_reminders:
+                try:
+                    # Obtener número de WhatsApp del usuario
+                    user = HARDCODED_USERS.get(reminder["username"])
+                    if not user:
+                        continue
+                    
+                    phone_number = user.get("whatsapp", "")
+                    if not phone_number:
+                        logger.warning(f"Usuario {reminder['username']} no tiene WhatsApp configurado")
+                        continue
+                    
+                    # Construir mensaje
+                    if reminder["type"] == "node":
+                        message = f"🔔 Recordatorio de MindoraMap\n\n"
+                        message += f"📁 Proyecto: {reminder['project_name']}\n"
+                        message += f"📌 Nodo: {reminder.get('node_text', 'Sin nombre')}\n\n"
+                        message += f"📝 {reminder['message']}"
+                    else:
+                        message = f"🔔 Recordatorio de MindoraMap\n\n"
+                        message += f"📁 Proyecto: {reminder['project_name']}\n\n"
+                        message += f"📝 {reminder['message']}"
+                    
+                    # Enviar mensaje
+                    result = await send_whatsapp_message(phone_number, message)
+                    
+                    # Actualizar estado del recordatorio
+                    new_status = "sent" if result.get("success") else "failed"
+                    await db.reminders.update_one(
+                        {"id": reminder["id"]},
+                        {
+                            "$set": {
+                                "status": new_status,
+                                "sent_at": datetime.now(timezone.utc).isoformat(),
+                                "send_result": result
+                            }
+                        }
+                    )
+                    
+                    logger.info(f"Recordatorio {reminder['id']} enviado: {new_status}")
+                    
+                except Exception as e:
+                    logger.error(f"Error procesando recordatorio {reminder['id']}: {str(e)}")
+            
+        except Exception as e:
+            logger.error(f"Error en scheduler: {str(e)}")
+        
+        # Esperar 30 segundos antes de la siguiente verificación
+        await asyncio.sleep(30)
+
+async def start_scheduler():
+    """Iniciar el scheduler de recordatorios"""
+    asyncio.create_task(check_and_send_reminders())
+    logger.info("Scheduler de recordatorios iniciado")
+
+
+# ==========================================
+# REMINDER ENDPOINTS
+# ==========================================
+
+@api_router.post("/reminders", response_model=ReminderResponse)
+async def create_reminder(
+    reminder_data: ReminderCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Crear un nuevo recordatorio"""
+    
+    # Combinar fecha y hora
+    scheduled_datetime = f"{reminder_data.scheduled_date}T{reminder_data.scheduled_time}:00"
+    
+    reminder = {
+        "id": str(uuid.uuid4()),
+        "type": reminder_data.type,
+        "node_id": reminder_data.node_id,
+        "node_text": reminder_data.node_text,
+        "project_id": reminder_data.project_id,
+        "project_name": reminder_data.project_name,
+        "scheduled_date": reminder_data.scheduled_date,
+        "scheduled_time": reminder_data.scheduled_time,
+        "scheduled_datetime": scheduled_datetime,
+        "message": reminder_data.message,
+        "channel": reminder_data.channel,
+        "status": "pending",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "sent_at": None,
+        "username": current_user["username"]
+    }
+    
+    await db.reminders.insert_one(reminder)
+    
+    return reminder
+
+@api_router.get("/reminders", response_model=List[ReminderResponse])
+async def get_reminders(
+    current_user: dict = Depends(get_current_user),
+    node_id: Optional[str] = None,
+    project_id: Optional[str] = None,
+    status: Optional[str] = None
+):
+    """Obtener recordatorios del usuario"""
+    
+    query = {"username": current_user["username"]}
+    
+    if node_id:
+        query["node_id"] = node_id
+    if project_id:
+        query["project_id"] = project_id
+    if status:
+        query["status"] = status
+    
+    reminders = await db.reminders.find(query, {"_id": 0}).to_list(1000)
+    return reminders
+
+@api_router.get("/reminders/{reminder_id}", response_model=ReminderResponse)
+async def get_reminder(
+    reminder_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener un recordatorio específico"""
+    
+    reminder = await db.reminders.find_one(
+        {"id": reminder_id, "username": current_user["username"]},
+        {"_id": 0}
+    )
+    
+    if not reminder:
+        raise HTTPException(status_code=404, detail="Recordatorio no encontrado")
+    
+    return reminder
+
+@api_router.put("/reminders/{reminder_id}", response_model=ReminderResponse)
+async def update_reminder(
+    reminder_id: str,
+    update_data: ReminderUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Actualizar un recordatorio"""
+    
+    reminder = await db.reminders.find_one(
+        {"id": reminder_id, "username": current_user["username"]},
+        {"_id": 0}
+    )
+    
+    if not reminder:
+        raise HTTPException(status_code=404, detail="Recordatorio no encontrado")
+    
+    update_dict = {}
+    if update_data.scheduled_date:
+        update_dict["scheduled_date"] = update_data.scheduled_date
+    if update_data.scheduled_time:
+        update_dict["scheduled_time"] = update_data.scheduled_time
+    if update_data.message:
+        update_dict["message"] = update_data.message
+    if update_data.channel:
+        update_dict["channel"] = update_data.channel
+    
+    # Recalcular scheduled_datetime si cambió fecha u hora
+    if update_data.scheduled_date or update_data.scheduled_time:
+        new_date = update_data.scheduled_date or reminder["scheduled_date"]
+        new_time = update_data.scheduled_time or reminder["scheduled_time"]
+        update_dict["scheduled_datetime"] = f"{new_date}T{new_time}:00"
+    
+    if update_dict:
+        await db.reminders.update_one(
+            {"id": reminder_id},
+            {"$set": update_dict}
+        )
+    
+    # Obtener recordatorio actualizado
+    updated = await db.reminders.find_one({"id": reminder_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/reminders/{reminder_id}")
+async def delete_reminder(
+    reminder_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Eliminar un recordatorio"""
+    
+    result = await db.reminders.delete_one({
+        "id": reminder_id,
+        "username": current_user["username"]
+    })
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Recordatorio no encontrado")
+    
+    return {"message": "Recordatorio eliminado"}
+
+@api_router.post("/reminders/test-whatsapp")
+async def test_whatsapp(
+    message: str = "🔔 Mensaje de prueba desde MindoraMap",
+    current_user: dict = Depends(get_current_user)
+):
+    """Enviar mensaje de prueba por WhatsApp"""
+    
+    phone_number = current_user.get("whatsapp", "")
+    if not phone_number:
+        raise HTTPException(status_code=400, detail="No tienes un número de WhatsApp configurado")
+    
+    result = await send_whatsapp_message(phone_number, message)
+    return result
+
 
 # ==========================================
 # EXISTING MODELS

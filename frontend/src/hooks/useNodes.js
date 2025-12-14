@@ -226,6 +226,8 @@ export const useNodes = () => {
   const addNode = useCallback((parentId = null, position = null) => {
     const newId = crypto.randomUUID();
     
+    console.log('addNode called, activeProjectId:', activeProjectId);
+    
     // Obtener estado actual del proyecto
     const currentProject = projects.find(p => p.id === activeProjectId);
     if (!currentProject) {
@@ -234,6 +236,7 @@ export const useNodes = () => {
     }
     
     // Guardar estado actual ANTES de modificar
+    console.log('Calling pushToHistory with', activeProjectId);
     pushToHistory(activeProjectId, currentProject.nodes);
     
     setProjects(prev => {

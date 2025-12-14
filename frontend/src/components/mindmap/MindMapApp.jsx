@@ -309,6 +309,7 @@ const MindMapApp = () => {
         onDeleteProject={handleDeleteProjectClick}
         onSwitchProject={handleSwitchProject}
         onRenameProject={renameProject}
+        onProjectReminder={handleProjectReminder}
         user={user}
         onLogout={logout}
       />

@@ -31,7 +31,9 @@ const Canvas = ({
   onDuplicateNode,
   onDeleteNode,
   onChangeNodeColor,
-  onWheel
+  onWheel,
+  onToggleStyleSidebar,
+  styleSidebarOpen
 }) => {
   const containerRef = useRef(null);
   const [dragging, setDragging] = useState(null);

@@ -324,23 +324,22 @@ export const useNodes = () => {
   const [selectedNodeId, setSelectedNodeId] = useState(null);
 
   // ==========================================
-  // PERSISTENCIA EN LOCALSTORAGE
+  // PERSISTENCIA - Guardar en servidor con cada cambio
   // ==========================================
   
+  // Guardar proyecto activo cuando cambie
   useEffect(() => {
-    try {
-      localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
-      console.log('Proyectos guardados:', projects.length);
-    } catch (e) {
-      console.error('Error saving projects to localStorage:', e);
+    if (activeProject && !isLoading) {
+      // Guardar en servidor con debounce
+      debouncedSaveToServer(activeProject);
     }
-  }, [projects]);
+  }, [activeProject, isLoading, debouncedSaveToServer]);
 
+  // Guardar ID activo en localStorage (solo este dato local)
   useEffect(() => {
     try {
       if (activeProjectId) {
         localStorage.setItem(ACTIVE_PROJECT_KEY, activeProjectId);
-        console.log('Proyecto activo guardado:', activeProjectId);
       }
     } catch (e) {
       console.error('Error saving active project ID to localStorage:', e);

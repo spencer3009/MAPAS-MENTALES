@@ -356,6 +356,7 @@ const MindMapApp = () => {
             onWheel={handleWheel}
             onToggleStyleSidebar={handleToggleStyleSidebar}
             onOpenIconPanel={handleOpenIconPanel}
+            onOpenReminderPanel={handleOpenReminderPanel}
             styleSidebarOpen={showStyleSidebar}
             sidebarTab={sidebarTab}
           />

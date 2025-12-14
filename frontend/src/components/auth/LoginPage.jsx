@@ -43,7 +43,8 @@ const LoginPage = () => {
           <img 
             src={LOGO_URL} 
             alt="MindoraMap" 
-            className="h-16 w-auto object-contain"
+            style={{ width: '423px', height: '203px' }}
+            className="object-contain"
           />
         </div>
 

@@ -941,6 +941,7 @@ export const useNodes = () => {
     // Estados de sincronización
     isLoading,
     isSyncing,
+    reloadProjects,
     
     // Funciones de nodos
     addNode,

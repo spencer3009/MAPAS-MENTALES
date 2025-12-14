@@ -317,6 +317,23 @@ const NodeItem = memo(({
 
       {/* Contenido del nodo */}
       <div className={`flex items-center gap-2 w-full relative z-10 ${isCloudShape ? 'px-2' : ''}`}>
+        {/* Icono del nodo */}
+        {node.icon && !isEditing && (() => {
+          const IconComponent = LucideIcons[node.icon.name];
+          if (!IconComponent) return null;
+          // Calcular tamaño del icono basado en la altura del nodo
+          const iconSize = Math.min(Math.max(Math.floor(nodeHeight * 0.35), 16), 28);
+          return (
+            <div className="shrink-0 flex items-center justify-center">
+              <IconComponent 
+                size={iconSize} 
+                color={node.icon.color || textColor}
+                strokeWidth={2}
+              />
+            </div>
+          );
+        })()}
+        
         {isEditing ? (
           <input
             ref={inputRef}
@@ -336,7 +353,7 @@ const NodeItem = memo(({
           />
         ) : (
           <span 
-            className="flex-1 font-medium text-sm text-center break-words"
+            className={`flex-1 font-medium text-sm break-words ${node.icon ? 'text-left' : 'text-center'}`}
             style={{ color: textColor }}
           >
             {displayText}

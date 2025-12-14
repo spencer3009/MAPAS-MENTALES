@@ -32,7 +32,9 @@ const Canvas = ({
   onChangeNodeColor,
   onWheel,
   onToggleStyleSidebar,
-  styleSidebarOpen
+  onOpenIconPanel,
+  styleSidebarOpen,
+  sidebarTab
 }) => {
   const containerRef = useRef(null);
   const [dragging, setDragging] = useState(null);

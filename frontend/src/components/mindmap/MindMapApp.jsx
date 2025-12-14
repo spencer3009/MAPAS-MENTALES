@@ -243,11 +243,24 @@ const MindMapApp = () => {
         resetPan();
         resetZoom();
         setSelectedNodeId(null);
+        setShowStyleSidebar(false);
       }
     } catch (error) {
       console.error('Error al cambiar proyecto:', error);
     }
   }, [switchProject, resetPan, resetZoom, setSelectedNodeId]);
+
+  // Handlers para el sidebar de estilos
+  const handleToggleStyleSidebar = useCallback(() => {
+    setShowStyleSidebar(prev => !prev);
+  }, []);
+
+  const handleCloseStyleSidebar = useCallback(() => {
+    setShowStyleSidebar(false);
+  }, []);
+
+  // Obtener nodo seleccionado
+  const selectedNode = nodes.find(n => n.id === selectedNodeId);
 
   // Obtener nombre del proyecto a eliminar para el modal
   const projectToDeleteName = projects.find(p => p.id === projectToDelete)?.name || 'este proyecto';

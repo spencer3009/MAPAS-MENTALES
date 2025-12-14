@@ -344,14 +344,19 @@ const MindMapApp = () => {
             onChangeNodeColor={updateNodeColor}
             onWheel={handleWheel}
             onToggleStyleSidebar={handleToggleStyleSidebar}
+            onOpenIconPanel={handleOpenIconPanel}
             styleSidebarOpen={showStyleSidebar}
+            sidebarTab={sidebarTab}
           />
 
           {/* Sidebar derecho de estilos */}
           <RightStyleSidebar
             isOpen={showStyleSidebar}
             selectedNode={selectedNode}
+            activeTab={sidebarTab}
+            onTabChange={handleSidebarTabChange}
             onStyleChange={updateNodeStyle}
+            onIconChange={updateNodeIcon}
             onClose={handleCloseStyleSidebar}
           />
         </div>

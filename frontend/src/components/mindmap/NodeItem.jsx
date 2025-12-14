@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, memo, useCallback } from 'react';
 import { MessageSquare } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 
 // Constantes por defecto - exportadas para uso en otros componentes
 export const NODE_WIDTH = 160;

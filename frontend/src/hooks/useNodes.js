@@ -210,14 +210,14 @@ export const useNodes = () => {
   // FUNCIONES DE NODOS
   // ==========================================
 
-  const updateProjectNodes = useCallback((newNodes, save = true) => {
-    if (save) saveToHistory(activeProjectId, nodes);
+  const updateProjectNodes = useCallback((newNodes, saveHistory = true) => {
+    if (saveHistory) saveToHistory(activeProjectId, newNodes);
     setProjects(prev => prev.map(p => 
       p.id === activeProjectId 
         ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
         : p
     ));
-  }, [activeProjectId, nodes, saveToHistory]);
+  }, [activeProjectId, saveToHistory]);
 
   const addNode = useCallback((parentId = null, position = null) => {
     const newId = crypto.randomUUID();
@@ -230,6 +230,10 @@ export const useNodes = () => {
       }
       
       const currentNodes = currentProject.nodes;
+      
+      // Guardar estado anterior en historial
+      saveToHistory(activeProjectId, currentNodes);
+      
       let newX = 400;
       let newY = 300;
       
@@ -251,7 +255,9 @@ export const useNodes = () => {
         x: newX,
         y: newY,
         color: 'blue',
-        parentId
+        parentId,
+        width: 160,
+        height: 64
       };
 
       console.log('Creating new node:', newNode);
@@ -269,43 +275,56 @@ export const useNodes = () => {
 
     setSelectedNodeId(newId);
     return newId;
-  }, [activeProjectId]);
+  }, [activeProjectId, saveToHistory]);
+
+  // Guardar posición al FINALIZAR el drag (no durante)
+  const saveNodePositionToHistory = useCallback(() => {
+    saveToHistory(activeProjectId, nodes);
+  }, [activeProjectId, nodes, saveToHistory]);
 
   const updateNodePosition = useCallback((id, x, y) => {
-    const newNodes = nodes.map(n => n.id === id ? { ...n, x, y } : n);
-    // No guardar en historial para posiciones (muy frecuente)
+    // No guardar en historial durante el drag (muy frecuente)
     setProjects(prev => prev.map(p => 
       p.id === activeProjectId 
-        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        ? { ...p, nodes: p.nodes.map(n => n.id === id ? { ...n, x, y } : n), updatedAt: new Date().toISOString() }
         : p
     ));
-  }, [nodes, activeProjectId]);
+  }, [activeProjectId]);
 
   const updateNodeText = useCallback((id, text) => {
+    saveToHistory(activeProjectId, nodes);
     const newNodes = nodes.map(n => n.id === id ? { ...n, text } : n);
     setProjects(prev => prev.map(p => 
       p.id === activeProjectId 
         ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
         : p
     ));
-  }, [nodes, activeProjectId]);
+  }, [nodes, activeProjectId, saveToHistory]);
 
   const updateNodeColor = useCallback((id, color) => {
-    updateProjectNodes(nodes.map(n => n.id === id ? { ...n, color } : n));
-  }, [nodes, updateProjectNodes]);
+    saveToHistory(activeProjectId, nodes);
+    const newNodes = nodes.map(n => n.id === id ? { ...n, color } : n);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, activeProjectId, saveToHistory]);
 
   // Actualizar comentario del nodo
   const updateNodeComment = useCallback((id, comment) => {
+    saveToHistory(activeProjectId, nodes);
     const newNodes = nodes.map(n => n.id === id ? { ...n, comment } : n);
     setProjects(prev => prev.map(p => 
       p.id === activeProjectId 
         ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
         : p
     ));
-  }, [nodes, activeProjectId]);
+  }, [nodes, activeProjectId, saveToHistory]);
 
   // Actualizar estilos del nodo (forma, colores, borde, línea)
   const updateNodeStyle = useCallback((id, styleUpdates) => {
+    saveToHistory(activeProjectId, nodes);
     const newNodes = nodes.map(n => {
       if (n.id === id) {
         return { ...n, ...styleUpdates };
@@ -317,7 +336,19 @@ export const useNodes = () => {
         ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
         : p
     ));
-  }, [nodes, activeProjectId]);
+  }, [nodes, activeProjectId, saveToHistory]);
+
+  // Actualizar tamaño del nodo
+  const updateNodeSize = useCallback((id, width, height, saveHistory = false) => {
+    if (saveHistory) {
+      saveToHistory(activeProjectId, nodes);
+    }
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: p.nodes.map(n => n.id === id ? { ...n, width, height } : n), updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [activeProjectId, nodes, saveToHistory]);
 
   const deleteNode = useCallback((id) => {
     const findDescendants = (nodeId, allNodes) => {
@@ -329,15 +360,23 @@ export const useNodes = () => {
       return descendants;
     };
 
+    saveToHistory(activeProjectId, nodes);
     const nodesToDelete = new Set(findDescendants(id, nodes));
-    updateProjectNodes(nodes.filter(n => !nodesToDelete.has(n.id)));
+    const newNodes = nodes.filter(n => !nodesToDelete.has(n.id));
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
     setSelectedNodeId(null);
-  }, [nodes, updateProjectNodes]);
+  }, [nodes, activeProjectId, saveToHistory]);
 
   const duplicateNode = useCallback((id) => {
     const original = nodes.find(n => n.id === id);
     if (!original) return;
 
+    saveToHistory(activeProjectId, nodes);
+    
     const newId = crypto.randomUUID();
     const duplicate = {
       ...original,
@@ -346,9 +385,13 @@ export const useNodes = () => {
       y: original.y + 30
     };
 
-    updateProjectNodes([...nodes, duplicate]);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: [...p.nodes, duplicate], updatedAt: new Date().toISOString() }
+        : p
+    ));
     setSelectedNodeId(newId);
-  }, [nodes, updateProjectNodes]);
+  }, [nodes, activeProjectId, saveToHistory]);
 
   // ==========================================
   // GESTIÓN DE PROYECTOS

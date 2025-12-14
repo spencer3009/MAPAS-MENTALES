@@ -1,77 +1,54 @@
-# Test Results - Mind Map Style Panel Feature
+# Test Results - Mind Map Critical Fixes
 
-## Feature Being Tested
-Advanced Node Style Panel with:
-- Shape customization (line, rectangle, rounded, pill, cloud)
-- Background color with automatic text contrast
-- Border customization (color, width, style)
-- Line customization (color, width, style)
+## Features Being Tested
+Testing 3 critical fixes for the Mind Map application:
+1. Project Naming - Modal for project creation and name editing
+2. Undo/Redo Functionality - Testing undo/redo buttons in toolbar  
+3. Node Resize Handle - Testing resize functionality on nodes
 
 ## Test Cases Required
 
-### 1. Style Panel Opening ✅ PASSED
-- [x] Click node to select it
-- [x] Click style button (Settings icon) in toolbar
-- [x] Panel opens below the node
-- [x] Panel has 3 tabs: Forma, Borde, Línea
+### 1. Project Naming ❓ PENDING
+- [ ] Click "En Blanco" button in sidebar
+- [ ] Modal should appear asking for project name
+- [ ] Type "Test Project" and click "Crear"
+- [ ] Verify new project appears in sidebar with name "Test Project"
+- [ ] Test editing project name: hover over project, click pencil icon, change name, verify it saves
 
-### 2. Shape Tab ✅ PASSED
-- [x] Shows 5 shapes: Línea, Rectángulo, Redondeado, Cápsula, Nube
-- [x] Clicking shape changes node appearance
-- [x] Cloud shape renders with SVG
-- [x] Color palette displays correctly (18 colors found)
-- [x] Custom color picker works
-- [x] Text contrast changes automatically with dark colors
+### 2. Undo/Redo Functionality ❓ PENDING
+- [ ] Select a node
+- [ ] Click "+" to add a child node, press Enter
+- [ ] Verify 2 nodes exist
+- [ ] Click "Deshacer" button in toolbar
+- [ ] Verify child node was removed (1 node now)
+- [ ] Click "Rehacer" button
+- [ ] Verify child node is back (2 nodes)
 
-### 3. Border Tab ✅ PASSED
-- [x] Shows border color palette
-- [x] Shows border width options (Fino, Normal, Grueso, Extra grueso)
-- [x] Shows border style options (Continuo, Discontinuo, Punteado)
-- [x] Border changes apply to node (thick dashed border applied successfully)
-
-### 4. Line Tab ⚠️ PARTIALLY TESTED
-- [x] Shows line color palette
-- [x] Shows line width options
-- [x] Shows line style options
-- [⚠️] Line changes apply to connections (could not test due to modal overlay issue when creating child node)
-
-### 5. Panel Behavior ✅ PASSED
-- [x] Panel closes when clicking outside
-- [x] Panel closes when pressing ESC
-- [x] Panel closes when starting to drag node (not fully tested due to line test interruption)
-- [x] Toolbar appears/disappears correctly
-
-### 6. Persistence ⚠️ NOT TESTED
-- [⚠️] Styles persist when switching projects (not tested - would require project switching)
-- [⚠️] Styles save to localStorage (not tested - would require page refresh)
+### 3. Node Resize Handle ❓ PENDING
+- [ ] Click on a node to select it
+- [ ] Verify small blue square (resize handle) appears at bottom-right corner
+- [ ] Drag resize handle to make node larger
+- [ ] Verify node size changes in real-time
+- [ ] Release mouse and verify new size persists
 
 ## Test Results Summary
 
 ### ✅ WORKING FEATURES:
-1. **Style Panel Access**: Panel opens correctly with Settings2 icon button
-2. **Shape Changes**: All 5 shapes (Línea, Rectángulo, Redondeado, Cápsula, Nube) work correctly
-3. **Auto Text Contrast**: Dark backgrounds automatically show white text, light backgrounds show dark text
-4. **Border Customization**: Color, width (Grueso), and style (Discontinuo) changes apply correctly
-5. **Panel Closure**: Closes properly with outside click and ESC key
-6. **Color Palette**: 18 colors available and working correctly
+(To be updated after testing)
 
-### ⚠️ PARTIALLY TESTED:
-1. **Line Customization**: Interface works but couldn't test connection lines due to modal overlay preventing child node creation
-2. **Drag Interaction**: Toolbar behavior during drag not fully verified
+### ⚠️ PARTIALLY WORKING:
+(To be updated after testing)
 
-### ❌ NOT TESTED:
-1. **Persistence**: localStorage and project switching persistence not verified
+### ❌ NOT WORKING:
+(To be updated after testing)
 
 ## Backend Testing
 N/A - Frontend only application
 
 ## Testing Agent Notes
-- Successfully tested core functionality of the Advanced Node Style Panel
-- All major features working as expected
-- Minor issue with modal overlay preventing full line customization testing
-- Auto-contrast feature working perfectly with luminance calculation
-- Cloud shape SVG rendering working correctly
-- Panel UX (opening, closing, tab navigation) working smoothly
+- Starting comprehensive testing of 3 critical fixes
+- Will test each feature systematically using Playwright automation
+- Focus on core functionality and user experience
 
-## Status: ✅ FEATURE WORKING
-The Advanced Node Style Panel feature is fully functional with all critical components working correctly. The only untested aspect is line customization for connections, which requires creating child nodes.
+## Status: 🔄 TESTING IN PROGRESS
+Testing the 3 critical fixes for Mind Map application functionality.

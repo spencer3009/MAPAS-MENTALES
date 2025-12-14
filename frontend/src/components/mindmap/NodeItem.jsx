@@ -326,15 +326,27 @@ const NodeItem = memo(({
       <div className={`flex items-center gap-2 w-full relative z-10 ${isCloudShape ? 'px-2' : ''}`}>
         {/* Icono del nodo */}
         {node.icon && !isEditing && (() => {
-          const IconComponent = LucideIcons[node.icon.name];
-          if (!IconComponent) return null;
           // Calcular tamaño del icono basado en la altura del nodo
           const iconSize = Math.min(Math.max(Math.floor(nodeHeight * 0.35), 16), 28);
+          const iconColor = node.icon.color || textColor;
+          
+          // Manejar icono personalizado de WhatsApp
+          if (node.icon.name === 'WhatsApp') {
+            return (
+              <div className="shrink-0 flex items-center justify-center">
+                <WhatsAppIcon size={iconSize} color={iconColor} />
+              </div>
+            );
+          }
+          
+          const IconComponent = LucideIcons[node.icon.name];
+          if (!IconComponent) return null;
+          
           return (
             <div className="shrink-0 flex items-center justify-center">
               <IconComponent 
                 size={iconSize} 
-                color={node.icon.color || textColor}
+                color={iconColor}
                 strokeWidth={2}
               />
             </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, LayoutTemplate, FileText, Trash2, Check, Pencil, LogOut, User } from 'lucide-react';
+import { Plus, LayoutTemplate, FileText, Trash2, Check, Pencil, LogOut, User, Bell } from 'lucide-react';
 
 // URL del logo MindoraMap (horizontal)
 const LOGO_URL = 'https://customer-assets.emergentagent.com/job_mindviz-app/artifacts/k1kioask_image.png';

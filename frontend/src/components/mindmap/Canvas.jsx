@@ -159,6 +159,31 @@ const Canvas = ({
     setStylePanel({ isOpen: false, nodeId: null });
   }, []);
 
+  // Handlers del panel de iconos
+  const handleToolbarIcon = useCallback(() => {
+    if (selectedNodeId) {
+      // Toggle del panel de iconos
+      if (iconPanel.isOpen && iconPanel.nodeId === selectedNodeId) {
+        setIconPanel({ isOpen: false, nodeId: null });
+      } else {
+        setIconPanel({ isOpen: true, nodeId: selectedNodeId });
+        setCommentPopover({ isOpen: false, nodeId: null });
+        setStylePanel({ isOpen: false, nodeId: null });
+      }
+    }
+  }, [selectedNodeId, iconPanel.isOpen, iconPanel.nodeId]);
+
+  const handleIconSelect = useCallback((iconData) => {
+    if (iconPanel.nodeId && onUpdateNodeIcon) {
+      onUpdateNodeIcon(iconPanel.nodeId, iconData);
+    }
+    setIconPanel({ isOpen: false, nodeId: null });
+  }, [iconPanel.nodeId, onUpdateNodeIcon]);
+
+  const handleIconPanelClose = useCallback(() => {
+    setIconPanel({ isOpen: false, nodeId: null });
+  }, []);
+
   const handleToolbarAddImage = useCallback(() => {
     alert('Funcionalidad de agregar imagen próximamente');
   }, []);

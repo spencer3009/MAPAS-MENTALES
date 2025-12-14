@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 
 const PROJECTS_KEY = 'mm_projects';
 const ACTIVE_PROJECT_KEY = 'mm_activeProjectId';
+const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
 // Template por defecto para nuevos proyectos
 const createDefaultProject = () => ({
@@ -19,7 +20,7 @@ const createDefaultProject = () => ({
   updatedAt: new Date().toISOString()
 });
 
-// Cargar proyectos desde localStorage
+// Cargar proyectos desde localStorage (fallback)
 const loadProjectsFromStorage = () => {
   try {
     const saved = localStorage.getItem(PROJECTS_KEY);
@@ -32,10 +33,7 @@ const loadProjectsFromStorage = () => {
   } catch (e) {
     console.error('Error loading projects from localStorage:', e);
   }
-  // Si no hay proyectos, crear uno por defecto
-  const defaultProject = createDefaultProject();
-  defaultProject.name = 'Mi Primer Mapa';
-  return [defaultProject];
+  return null; // Retornar null para indicar que no hay proyectos locales
 };
 
 // Cargar ID del proyecto activo desde localStorage
@@ -48,8 +46,21 @@ const loadActiveProjectIdFromStorage = (projects) => {
   } catch (e) {
     console.error('Error loading active project ID from localStorage:', e);
   }
-  // Por defecto, usar el primer proyecto
   return projects.length > 0 ? projects[0].id : null;
+};
+
+// Obtener token del localStorage
+const getAuthToken = () => {
+  try {
+    const authData = localStorage.getItem('mm_auth');
+    if (authData) {
+      const parsed = JSON.parse(authData);
+      return parsed.token;
+    }
+  } catch (e) {
+    console.error('Error getting auth token:', e);
+  }
+  return null;
 };
 
 export const useNodes = () => {

@@ -913,6 +913,10 @@ export const useNodes = () => {
     // Lista de todos los proyectos
     projects,
     
+    // Estados de sincronización
+    isLoading,
+    isSyncing,
+    
     // Funciones de nodos
     addNode,
     updateNode: updateProjectNodes,

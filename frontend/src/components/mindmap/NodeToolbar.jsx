@@ -7,7 +7,8 @@ import {
   Copy, 
   Trash2,
   Laugh,
-  MessageSquare
+  MessageSquare,
+  Bell
 } from 'lucide-react';
 
 const ToolbarButton = ({ icon: Icon, label, onClick, danger = false, active = false, hasIndicator = false, badge = null }) => (

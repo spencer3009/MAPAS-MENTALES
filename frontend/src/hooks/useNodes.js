@@ -581,6 +581,8 @@ export const useNodes = () => {
     updateNodeColor,
     updateNodeComment,
     updateNodeStyle,
+    updateNodeSize,
+    saveNodePositionToHistory,
     deleteNode,
     duplicateNode,
     

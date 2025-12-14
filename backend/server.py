@@ -36,15 +36,22 @@ HARDCODED_USERS = {
         "username": "spencer3009",
         "hashed_password": pwd_context.hash("Socios3009"),
         "full_name": "Spencer",
-        "disabled": False
+        "disabled": False,
+        "whatsapp": "+1234567890"  # Número de WhatsApp para recordatorios
     },
     "teresa3009": {
         "username": "teresa3009",
         "hashed_password": pwd_context.hash("Socios3009"),
         "full_name": "Teresa",
-        "disabled": False
+        "disabled": False,
+        "whatsapp": "+1234567890"
     }
 }
+
+# WhatsApp Business API Configuration (Meta oficial)
+WHATSAPP_API_URL = os.environ.get('WHATSAPP_API_URL', '')
+WHATSAPP_ACCESS_TOKEN = os.environ.get('WHATSAPP_ACCESS_TOKEN', '')
+WHATSAPP_PHONE_NUMBER_ID = os.environ.get('WHATSAPP_PHONE_NUMBER_ID', '')
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']

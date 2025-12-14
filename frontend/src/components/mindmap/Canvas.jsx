@@ -200,6 +200,7 @@ const Canvas = ({
     
     setShowControls(false);
     setCommentPopover({ isOpen: false, nodeId: null });
+    setLinkPopover({ isOpen: false, nodeId: null });
     
     const rect = containerRef.current.getBoundingClientRect();
     setDragging({

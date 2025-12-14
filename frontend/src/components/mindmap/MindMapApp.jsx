@@ -269,6 +269,11 @@ const MindMapApp = () => {
     setSidebarTab('icons');
   }, []);
 
+  const handleOpenReminderPanel = useCallback(() => {
+    setShowStyleSidebar(true);
+    setSidebarTab('reminders');
+  }, []);
+
   const handleCloseStyleSidebar = useCallback(() => {
     setShowStyleSidebar(false);
   }, []);

@@ -170,30 +170,45 @@ const ShapeTab = ({ nodeStyle, onChange }) => {
         </div>
       </div>
 
-      {/* Color personalizado */}
-      <div>
+      {/* Color personalizado - Más prominente */}
+      <div className="bg-gray-50 rounded-xl p-3">
         <SectionTitle>Color personalizado</SectionTitle>
         <div className="flex items-center gap-3">
-          <input
-            type="color"
-            value={customColor}
-            onChange={handleCustomColorChange}
-            className="w-10 h-10 rounded-lg cursor-pointer border-0 p-0"
-          />
-          <input
-            type="text"
-            value={customColor}
-            onChange={(e) => {
-              if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) {
-                setCustomColor(e.target.value);
-                handleColorChange(e.target.value);
-              } else {
-                setCustomColor(e.target.value);
-              }
-            }}
-            className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg"
-            placeholder="#000000"
-          />
+          <div className="relative">
+            <input
+              type="color"
+              value={customColor}
+              onChange={handleCustomColorChange}
+              className="w-12 h-12 rounded-xl cursor-pointer border-2 border-gray-200 p-0 appearance-none"
+              style={{ backgroundColor: customColor }}
+            />
+            <div 
+              className="absolute inset-0 rounded-xl pointer-events-none ring-1 ring-inset ring-black/10"
+            />
+          </div>
+          <div className="flex-1">
+            <label className="text-xs text-gray-500 mb-1 block">Valor HEX</label>
+            <input
+              type="text"
+              value={customColor}
+              onChange={(e) => {
+                const value = e.target.value;
+                setCustomColor(value);
+                if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
+                  handleColorChange(value);
+                }
+              }}
+              onBlur={(e) => {
+                // Validar y aplicar al perder foco
+                if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) {
+                  handleColorChange(e.target.value);
+                }
+              }}
+              className="w-full px-3 py-2 text-sm font-mono border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="#e0f2fe"
+              maxLength={7}
+            />
+          </div>
         </div>
       </div>
 

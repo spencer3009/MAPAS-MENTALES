@@ -252,12 +252,26 @@ const MindMapApp = () => {
   }, [switchProject, resetPan, resetZoom, setSelectedNodeId]);
 
   // Handlers para el sidebar de estilos
-  const handleToggleStyleSidebar = useCallback(() => {
-    setShowStyleSidebar(prev => !prev);
+  const handleToggleStyleSidebar = useCallback((tab = 'styles') => {
+    if (showStyleSidebar && sidebarTab === tab) {
+      setShowStyleSidebar(false);
+    } else {
+      setShowStyleSidebar(true);
+      setSidebarTab(tab);
+    }
+  }, [showStyleSidebar, sidebarTab]);
+
+  const handleOpenIconPanel = useCallback(() => {
+    setShowStyleSidebar(true);
+    setSidebarTab('icons');
   }, []);
 
   const handleCloseStyleSidebar = useCallback(() => {
     setShowStyleSidebar(false);
+  }, []);
+
+  const handleSidebarTabChange = useCallback((tab) => {
+    setSidebarTab(tab);
   }, []);
 
   // Obtener nodo seleccionado

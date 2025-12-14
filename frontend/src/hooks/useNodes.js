@@ -127,66 +127,53 @@ export const useNodes = () => {
   // FUNCIONES DE HISTORIAL (UNDO/REDO)
   // ==========================================
 
-  const saveToHistory = useCallback((projectId, nodesToSave) => {
-    // No guardar si es una acción de undo/redo
+  const pushToHistory = useCallback((projectId, nodesToSave) => {
     if (isUndoRedoAction.current) return;
     
     const newState = JSON.stringify(nodesToSave);
+    const history = historyRef.current[projectId] || { states: [], pointer: -1 };
+    const { states, pointer } = history;
     
-    setProjectHistories(prev => {
-      const projectHistory = prev[projectId] || { states: [], pointer: -1 };
-      const { states, pointer } = projectHistory;
-      
-      // No duplicar si es igual al estado actual
-      if (states.length > 0 && pointer >= 0 && states[pointer] === newState) {
-        return prev;
-      }
-      
-      // Truncar estados futuros si estamos en medio del historial
-      const truncatedStates = states.slice(0, pointer + 1);
-      
-      // Agregar nuevo estado
-      const newStates = [...truncatedStates, newState];
-      
-      // Limitar a 50 estados
-      while (newStates.length > 50) {
-        newStates.shift();
-      }
-      
-      console.log(`History updated for ${projectId}: ${newStates.length} states, pointer: ${newStates.length - 1}`);
-      
-      return {
-        ...prev,
-        [projectId]: {
-          states: newStates,
-          pointer: newStates.length - 1
-        }
-      };
-    });
+    // Truncar estados futuros
+    const truncatedStates = states.slice(0, pointer + 1);
+    
+    // No duplicar si es igual al estado actual
+    if (truncatedStates.length > 0 && truncatedStates[truncatedStates.length - 1] === newState) {
+      return;
+    }
+    
+    // Agregar nuevo estado
+    const newStates = [...truncatedStates, newState];
+    while (newStates.length > 50) newStates.shift();
+    
+    historyRef.current[projectId] = {
+      states: newStates,
+      pointer: newStates.length - 1
+    };
+    
+    console.log(`History for ${projectId}: ${newStates.length} states, pointer: ${newStates.length - 1}`);
+    setHistoryVersion(v => v + 1);
   }, []);
 
   // Calcular canUndo y canRedo
-  const currentProjectHistory = projectHistories[activeProjectId] || { states: [], pointer: 0 };
-  const canUndo = currentProjectHistory.states.length > 1 && currentProjectHistory.pointer > 0;
-  const canRedo = currentProjectHistory.pointer < currentProjectHistory.states.length - 1;
+  const getHistoryState = useCallback((projectId) => {
+    return historyRef.current[projectId] || { states: [], pointer: 0 };
+  }, []);
+  
+  const currentHistory = getHistoryState(activeProjectId);
+  const canUndo = currentHistory.states.length > 1 && currentHistory.pointer > 0;
+  const canRedo = currentHistory.pointer < currentHistory.states.length - 1;
 
   const undo = useCallback(() => {
-    const projectHistory = projectHistories[activeProjectId];
+    const history = historyRef.current[activeProjectId];
     
-    if (projectHistory && projectHistory.pointer > 0) {
+    if (history && history.pointer > 0) {
       isUndoRedoAction.current = true;
-      const newPointer = projectHistory.pointer - 1;
-      const prevState = JSON.parse(projectHistory.states[newPointer]);
+      const newPointer = history.pointer - 1;
+      const prevState = JSON.parse(history.states[newPointer]);
       
-      console.log(`Undo: moving from ${projectHistory.pointer} to ${newPointer}`);
-      
-      setProjectHistories(prev => ({
-        ...prev,
-        [activeProjectId]: {
-          ...prev[activeProjectId],
-          pointer: newPointer
-        }
-      }));
+      history.pointer = newPointer;
+      console.log(`Undo: pointer now ${newPointer}`);
       
       setProjects(prev => prev.map(p => 
         p.id === activeProjectId 
@@ -194,27 +181,21 @@ export const useNodes = () => {
           : p
       ));
       
+      setHistoryVersion(v => v + 1);
       setTimeout(() => { isUndoRedoAction.current = false; }, 0);
     }
-  }, [activeProjectId, projectHistories]);
+  }, [activeProjectId]);
 
   const redo = useCallback(() => {
-    const projectHistory = projectHistories[activeProjectId];
+    const history = historyRef.current[activeProjectId];
     
-    if (projectHistory && projectHistory.pointer < projectHistory.states.length - 1) {
+    if (history && history.pointer < history.states.length - 1) {
       isUndoRedoAction.current = true;
-      const newPointer = projectHistory.pointer + 1;
-      const nextState = JSON.parse(projectHistory.states[newPointer]);
+      const newPointer = history.pointer + 1;
+      const nextState = JSON.parse(history.states[newPointer]);
       
-      console.log(`Redo: moving from ${projectHistory.pointer} to ${newPointer}`);
-      
-      setProjectHistories(prev => ({
-        ...prev,
-        [activeProjectId]: {
-          ...prev[activeProjectId],
-          pointer: newPointer
-        }
-      }));
+      history.pointer = newPointer;
+      console.log(`Redo: pointer now ${newPointer}`);
       
       setProjects(prev => prev.map(p => 
         p.id === activeProjectId 
@@ -222,9 +203,13 @@ export const useNodes = () => {
           : p
       ));
       
+      setHistoryVersion(v => v + 1);
       setTimeout(() => { isUndoRedoAction.current = false; }, 0);
     }
-  }, [activeProjectId, projectHistories]);
+  }, [activeProjectId]);
+  
+  // Alias para compatibilidad
+  const saveToHistory = pushToHistory;
 
   // ==========================================
   // FUNCIONES DE NODOS

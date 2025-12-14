@@ -6,6 +6,7 @@ import RightStyleSidebar from './RightStyleSidebar';
 import ConfirmModal from './ConfirmModal';
 import TemplateModal from './TemplateModal';
 import ProjectNameModal from './ProjectNameModal';
+import ProjectReminderModal from './ProjectReminderModal';
 import { useNodes } from '../../hooks/useNodes';
 import { usePanning } from '../../hooks/usePanning';
 import { useZoom } from '../../hooks/useZoom';

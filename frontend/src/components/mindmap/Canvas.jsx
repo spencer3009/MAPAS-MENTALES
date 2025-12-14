@@ -217,10 +217,14 @@ const Canvas = ({
   const handleMouseUp = useCallback(() => {
     if (dragging) {
       setTimeout(() => setShowControls(true), 100);
+      // Guardar posición en historial al finalizar el drag
+      if (onSaveNodePositionToHistory) {
+        onSaveNodePositionToHistory();
+      }
     }
     setDragging(null);
     onStopPanning();
-  }, [dragging, onStopPanning]);
+  }, [dragging, onStopPanning, onSaveNodePositionToHistory]);
 
   // Manejar click en el canvas
   const handleCanvasMouseDown = useCallback((e) => {

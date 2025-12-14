@@ -4,6 +4,7 @@ import Toolbar from './Toolbar';
 import Canvas from './Canvas';
 import ConfirmModal from './ConfirmModal';
 import TemplateModal from './TemplateModal';
+import ProjectNameModal from './ProjectNameModal';
 import { useNodes } from '../../hooks/useNodes';
 import { usePanning } from '../../hooks/usePanning';
 import { useZoom } from '../../hooks/useZoom';
@@ -23,6 +24,8 @@ const MindMapApp = () => {
     updateNodeColor,
     updateNodeComment,
     updateNodeStyle,
+    updateNodeSize,
+    saveNodePositionToHistory,
     deleteNode,
     duplicateNode,
     undo,
@@ -32,7 +35,8 @@ const MindMapApp = () => {
     createBlankMap,
     loadFromTemplate,
     deleteProject,
-    switchProject
+    switchProject,
+    renameProject
   } = useNodes();
 
   const {

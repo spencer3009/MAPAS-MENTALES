@@ -49,11 +49,11 @@ const LoginPage = () => {
           {/* Header con Logo */}
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 pt-10 pb-14">
             <div className="flex flex-col items-center">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 mb-4">
+              <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 mb-4">
                 <img 
                   src={LOGO_URL} 
                   alt="MindoraMap" 
-                  className="h-12 w-auto object-contain filter brightness-0 invert"
+                  className="h-12 w-auto object-contain"
                 />
               </div>
               <p className="text-blue-100 text-sm font-medium">

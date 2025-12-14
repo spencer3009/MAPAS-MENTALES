@@ -411,20 +411,33 @@ export const useNodes = () => {
     try {
       console.log('Creando nuevo proyecto en blanco...');
       
+      const initialNodes = [{ 
+        id: crypto.randomUUID(), 
+        text: 'Idea Central', 
+        x: 300, 
+        y: 300, 
+        color: 'blue', 
+        parentId: null,
+        width: 160,
+        height: 64
+      }];
+      
       const newProject = {
         id: crypto.randomUUID(),
         name: name,
-        nodes: [{ 
-          id: crypto.randomUUID(), 
-          text: 'Idea Central', 
-          x: 300, 
-          y: 300, 
-          color: 'blue', 
-          parentId: null 
-        }],
+        nodes: initialNodes,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
+
+      // Inicializar historial para el nuevo proyecto
+      setProjectHistories(prev => ({
+        ...prev,
+        [newProject.id]: {
+          states: [JSON.stringify(initialNodes)],
+          pointer: 0
+        }
+      }));
 
       setProjects(prev => [newProject, ...prev]);
       setActiveProjectId(newProject.id);

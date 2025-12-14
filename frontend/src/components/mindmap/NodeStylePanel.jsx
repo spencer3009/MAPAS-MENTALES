@@ -432,12 +432,19 @@ const NodeStylePanel = ({
   const [activeTab, setActiveTab] = useState('shape');
   const panelRef = useRef(null);
 
-  // Cerrar al hacer clic fuera
+  // Cerrar al hacer clic fuera (ignorando el toolbar)
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (panelRef.current && !panelRef.current.contains(e.target)) {
-        onClose();
+      // No cerrar si el clic es dentro del panel
+      if (panelRef.current && panelRef.current.contains(e.target)) {
+        return;
       }
+      // No cerrar si el clic es en el toolbar contextual
+      const toolbar = document.querySelector('.absolute.z-40.bg-white.rounded-xl.shadow-xl');
+      if (toolbar && toolbar.contains(e.target)) {
+        return;
+      }
+      onClose();
     };
 
     if (isOpen) {

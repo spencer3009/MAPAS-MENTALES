@@ -49,6 +49,8 @@ const NodeToolbar = ({
   currentColor,
   hasComment = false,
   hasIcon = false,
+  hasLinks = false,
+  linksCount = 0,
   stylePanelOpen = false,
   iconPanelOpen = false,
   onEdit,

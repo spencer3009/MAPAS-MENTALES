@@ -314,42 +314,43 @@ export const useNodes = () => {
 
   // Actualizar comentario del nodo
   const updateNodeComment = useCallback((id, comment) => {
-    saveToHistory(activeProjectId, nodes);
     const newNodes = nodes.map(n => n.id === id ? { ...n, comment } : n);
+    pushToHistory(activeProjectId, newNodes);
     setProjects(prev => prev.map(p => 
       p.id === activeProjectId 
         ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
         : p
     ));
-  }, [nodes, activeProjectId, saveToHistory]);
+  }, [nodes, activeProjectId, pushToHistory]);
 
   // Actualizar estilos del nodo (forma, colores, borde, línea)
   const updateNodeStyle = useCallback((id, styleUpdates) => {
-    saveToHistory(activeProjectId, nodes);
     const newNodes = nodes.map(n => {
       if (n.id === id) {
         return { ...n, ...styleUpdates };
       }
       return n;
     });
+    pushToHistory(activeProjectId, newNodes);
     setProjects(prev => prev.map(p => 
       p.id === activeProjectId 
         ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
         : p
     ));
-  }, [nodes, activeProjectId, saveToHistory]);
+  }, [nodes, activeProjectId, pushToHistory]);
 
   // Actualizar tamaño del nodo
   const updateNodeSize = useCallback((id, width, height, saveHistory = false) => {
+    const newNodes = nodes.map(n => n.id === id ? { ...n, width, height } : n);
     if (saveHistory) {
-      saveToHistory(activeProjectId, nodes);
+      pushToHistory(activeProjectId, newNodes);
     }
     setProjects(prev => prev.map(p => 
       p.id === activeProjectId 
-        ? { ...p, nodes: p.nodes.map(n => n.id === id ? { ...n, width, height } : n), updatedAt: new Date().toISOString() }
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
         : p
     ));
-  }, [activeProjectId, nodes, saveToHistory]);
+  }, [activeProjectId, nodes, pushToHistory]);
 
   const deleteNode = useCallback((id) => {
     const findDescendants = (nodeId, allNodes) => {
@@ -361,22 +362,20 @@ export const useNodes = () => {
       return descendants;
     };
 
-    saveToHistory(activeProjectId, nodes);
     const nodesToDelete = new Set(findDescendants(id, nodes));
     const newNodes = nodes.filter(n => !nodesToDelete.has(n.id));
+    pushToHistory(activeProjectId, newNodes);
     setProjects(prev => prev.map(p => 
       p.id === activeProjectId 
         ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
         : p
     ));
     setSelectedNodeId(null);
-  }, [nodes, activeProjectId, saveToHistory]);
+  }, [nodes, activeProjectId, pushToHistory]);
 
   const duplicateNode = useCallback((id) => {
     const original = nodes.find(n => n.id === id);
     if (!original) return;
-
-    saveToHistory(activeProjectId, nodes);
     
     const newId = crypto.randomUUID();
     const duplicate = {
@@ -385,14 +384,17 @@ export const useNodes = () => {
       x: original.x + 30,
       y: original.y + 30
     };
+    
+    const newNodes = [...nodes, duplicate];
+    pushToHistory(activeProjectId, newNodes);
 
     setProjects(prev => prev.map(p => 
       p.id === activeProjectId 
-        ? { ...p, nodes: [...p.nodes, duplicate], updatedAt: new Date().toISOString() }
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
         : p
     ));
     setSelectedNodeId(newId);
-  }, [nodes, activeProjectId, saveToHistory]);
+  }, [nodes, activeProjectId, pushToHistory]);
 
   // ==========================================
   // GESTIÓN DE PROYECTOS

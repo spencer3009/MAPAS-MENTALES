@@ -109,11 +109,15 @@ const LoginPage = () => {
         <div className="relative z-10 flex flex-col justify-center px-12 xl:px-20 py-12">
           {/* Logo y nombre */}
           <div className="mb-12">
-            <img 
-              src={LOGO_URL} 
-              alt="MindoraMap" 
-              className="h-16 xl:h-20 object-contain brightness-0 invert"
-            />
+            <div className="flex items-center gap-3">
+              <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-3">
+                <img 
+                  src={LOGO_URL} 
+                  alt="MindoraMap" 
+                  className="h-10 xl:h-12 object-contain"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Headline */}

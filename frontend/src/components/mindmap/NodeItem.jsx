@@ -100,7 +100,7 @@ const NodeItem = memo(({
       return;
     }
 
-    if (isEditing) return;
+    if (isEditing || isResizing) return;
 
     e.stopPropagation();
     onSelect(node.id);

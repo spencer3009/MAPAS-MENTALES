@@ -36,6 +36,7 @@ const Canvas = ({
   onWheel,
   onToggleStyleSidebar,
   onOpenIconPanel,
+  onOpenReminderPanel,
   styleSidebarOpen,
   sidebarTab
 }) => {

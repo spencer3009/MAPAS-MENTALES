@@ -360,6 +360,8 @@ const MindMapApp = () => {
             isOpen={showStyleSidebar}
             selectedNode={selectedNode}
             activeTab={sidebarTab}
+            projectId={activeProjectId}
+            projectName={projectName}
             onTabChange={handleSidebarTabChange}
             onStyleChange={updateNodeStyle}
             onIconChange={updateNodeIcon}

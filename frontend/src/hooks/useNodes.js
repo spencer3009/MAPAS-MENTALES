@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 const PROJECTS_KEY = 'mm_projects';
 const ACTIVE_PROJECT_KEY = 'mm_activeProjectId';

@@ -917,9 +917,13 @@ const RightStyleSidebar = ({
   isOpen,
   selectedNode,
   activeTab = 'styles',
+  projectId,
+  projectName,
   onTabChange,
   onStyleChange,
   onIconChange,
+  onReminderCreated,
+  onReminderDeleted,
   onClose
 }) => {
   const [internalTab, setInternalTab] = useState(activeTab);
@@ -960,8 +964,11 @@ const RightStyleSidebar = ({
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white shrink-0">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 bg-blue-100 rounded-lg">
-            <Sparkles size={16} className="text-blue-600" />
+          <div className={`p-1.5 rounded-lg ${internalTab === 'reminders' ? 'bg-purple-100' : 'bg-blue-100'}`}>
+            {internalTab === 'reminders' 
+              ? <Bell size={16} className="text-purple-600" />
+              : <Sparkles size={16} className="text-blue-600" />
+            }
           </div>
           <div>
             <h3 className="text-sm font-semibold text-gray-900">Personalizar</h3>
@@ -996,10 +1003,18 @@ const RightStyleSidebar = ({
                 <hr className="border-gray-100" />
                 <LineSection nodeStyle={nodeStyle} onChange={handleChange} />
               </>
-            ) : (
+            ) : internalTab === 'icons' ? (
               <IconsPanel 
                 selectedNode={selectedNode} 
                 onIconChange={onIconChange}
+              />
+            ) : (
+              <ReminderPanel
+                selectedNode={selectedNode}
+                projectId={projectId}
+                projectName={projectName}
+                onReminderCreated={onReminderCreated}
+                onReminderDeleted={onReminderDeleted}
               />
             )}
           </div>

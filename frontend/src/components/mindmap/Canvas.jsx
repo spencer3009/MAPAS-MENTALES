@@ -151,7 +151,6 @@ const Canvas = ({
       } else {
         setIconPanel({ isOpen: true, nodeId: selectedNodeId });
         setCommentPopover({ isOpen: false, nodeId: null });
-        setStylePanel({ isOpen: false, nodeId: null });
       }
     }
   }, [selectedNodeId, iconPanel.isOpen, iconPanel.nodeId]);

@@ -135,28 +135,12 @@ const Canvas = ({
     setCommentPopover({ isOpen: false, nodeId: null });
   }, []);
 
-  // Handlers del panel de estilos
+  // Handler para abrir/cerrar el sidebar de estilos
   const handleToolbarStyle = useCallback(() => {
-    if (selectedNodeId) {
-      // Toggle del panel de estilos
-      if (stylePanel.isOpen && stylePanel.nodeId === selectedNodeId) {
-        setStylePanel({ isOpen: false, nodeId: null });
-      } else {
-        setStylePanel({ isOpen: true, nodeId: selectedNodeId });
-        setCommentPopover({ isOpen: false, nodeId: null });
-      }
+    if (onToggleStyleSidebar) {
+      onToggleStyleSidebar();
     }
-  }, [selectedNodeId, stylePanel.isOpen, stylePanel.nodeId]);
-
-  const handleStyleChange = useCallback((styleUpdates) => {
-    if (stylePanel.nodeId && onUpdateNodeStyle) {
-      onUpdateNodeStyle(stylePanel.nodeId, styleUpdates);
-    }
-  }, [stylePanel.nodeId, onUpdateNodeStyle]);
-
-  const handleStylePanelClose = useCallback(() => {
-    setStylePanel({ isOpen: false, nodeId: null });
-  }, []);
+  }, [onToggleStyleSidebar]);
 
   // Handlers del panel de iconos
   const handleToolbarIcon = useCallback(() => {

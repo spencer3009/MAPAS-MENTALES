@@ -37,7 +37,7 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 flex items-center justify-center p-4">
       {/* Card principal */}
-      <div className="w-full max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden">
+      <div className="bg-white rounded-3xl shadow-2xl overflow-hidden" style={{ width: '530px', maxWidth: '95%' }}>
         {/* Logo Section */}
         <div className="pt-10 pb-6 px-8 flex justify-center">
           <img 

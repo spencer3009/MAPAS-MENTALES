@@ -164,7 +164,6 @@ const Canvas = ({
     
     setShowControls(false);
     setCommentPopover({ isOpen: false, nodeId: null });
-    setIconPanel({ isOpen: false, nodeId: null });
     
     const rect = containerRef.current.getBoundingClientRect();
     setDragging({

@@ -28,6 +28,7 @@ const MindMapApp = () => {
     updateNodeComment,
     updateNodeStyle,
     updateNodeSize,
+    updateNodeIcon,
     saveNodePositionToHistory,
     deleteNode,
     duplicateNode,

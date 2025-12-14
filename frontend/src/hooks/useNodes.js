@@ -64,10 +64,8 @@ export const useNodes = () => {
   const [projects, setProjects] = useState(initialData.projects);
   const [activeProjectId, setActiveProjectId] = useState(initialData.activeId);
   
-  // Estado para undo/redo - historial simple por proyecto
-  // Cada entrada del historial es un string JSON de los nodos
-  // historyPointer indica qué posición del historial está actualmente mostrada
-  const [projectHistories, setProjectHistories] = useState(() => {
+  // Estado para undo/redo usando useRef para historial inmutable
+  const historyRef = useRef(() => {
     const histories = {};
     initialData.projects.forEach(p => {
       histories[p.id] = {
@@ -77,7 +75,13 @@ export const useNodes = () => {
     });
     return histories;
   });
+  const [historyVersion, setHistoryVersion] = useState(0); // Trigger re-renders
   const isUndoRedoAction = useRef(false);
+  
+  // Inicializar historyRef si está como función
+  if (typeof historyRef.current === 'function') {
+    historyRef.current = historyRef.current();
+  }
 
   // Obtener proyecto activo
   const activeProject = projects.find(p => p.id === activeProjectId) || projects[0];

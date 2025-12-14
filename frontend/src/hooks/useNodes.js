@@ -212,6 +212,35 @@ export const useNodes = () => {
     }, 1000); // 1 segundo de debounce
   }, [saveProjectToServer]);
 
+  // Función para recargar proyectos (útil después del login)
+  const reloadProjects = useCallback(async () => {
+    const token = getAuthToken();
+    if (!token) return;
+    
+    console.log('Recargando proyectos del servidor...');
+    setIsLoading(true);
+    
+    const serverProjects = await loadFromServer();
+    
+    if (serverProjects && serverProjects.length > 0) {
+      setProjects(serverProjects);
+      
+      const histories = {};
+      serverProjects.forEach(p => {
+        histories[p.id] = {
+          states: [JSON.stringify(p.nodes)],
+          pointer: 0
+        };
+      });
+      historyRef.current = histories;
+      
+      const activeId = loadActiveProjectIdFromStorage(serverProjects);
+      setActiveProjectId(activeId);
+    }
+    
+    setIsLoading(false);
+  }, [loadFromServer]);
+
   // Cargar proyectos al iniciar
   useEffect(() => {
     const initializeProjects = async () => {

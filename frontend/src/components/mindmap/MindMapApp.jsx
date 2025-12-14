@@ -82,6 +82,9 @@ const MindMapApp = () => {
     projectId: null
   });
 
+  // Estado para el sidebar de estilos
+  const [showStyleSidebar, setShowStyleSidebar] = useState(false);
+
   // Handlers para toolbar
   const handleAddNode = useCallback(() => {
     if (selectedNodeId) {

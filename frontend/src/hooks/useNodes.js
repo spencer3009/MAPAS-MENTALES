@@ -64,34 +64,248 @@ const getAuthToken = () => {
 };
 
 export const useNodes = () => {
-  // Cargar proyectos una sola vez para mantener consistencia
-  const [initialData] = useState(() => {
-    const loadedProjects = loadProjectsFromStorage();
-    const activeId = loadActiveProjectIdFromStorage(loadedProjects);
-    return { projects: loadedProjects, activeId };
-  });
-
-  // Estado de proyectos
-  const [projects, setProjects] = useState(initialData.projects);
-  const [activeProjectId, setActiveProjectId] = useState(initialData.activeId);
+  // Estado inicial vacío hasta que cargue del servidor
+  const [projects, setProjects] = useState([]);
+  const [activeProjectId, setActiveProjectId] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
   
   // Estado para undo/redo usando useRef para historial mutable
-  const historyRef = useRef(null);
+  const historyRef = useRef({});
   const [historyVersion, setHistoryVersion] = useState(0);
   const isUndoRedoAction = useRef(false);
   
-  // Inicializar historyRef en el primer render
-  if (historyRef.current === null) {
-    const histories = {};
-    initialData.projects.forEach(p => {
-      histories[p.id] = {
-        states: [JSON.stringify(p.nodes)],
-        pointer: 0
-      };
-    });
-    historyRef.current = histories;
-    console.log('History initialized:', Object.keys(histories));
-  }
+  // Ref para debounce de guardado
+  const saveTimeoutRef = useRef(null);
+  const pendingSaveRef = useRef(null);
+
+  // ==========================================
+  // SINCRONIZACIÓN CON SERVIDOR
+  // ==========================================
+
+  // Cargar proyectos del servidor
+  const loadFromServer = useCallback(async () => {
+    const token = getAuthToken();
+    if (!token) {
+      console.log('No auth token, using local storage');
+      return null;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/api/projects`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        const serverProjects = await response.json();
+        console.log('Proyectos cargados del servidor:', serverProjects.length);
+        return serverProjects;
+      }
+    } catch (error) {
+      console.error('Error cargando proyectos del servidor:', error);
+    }
+    return null;
+  }, []);
+
+  // Guardar proyecto en servidor
+  const saveProjectToServer = useCallback(async (project) => {
+    const token = getAuthToken();
+    if (!token) return false;
+
+    try {
+      // Verificar si existe
+      const checkResponse = await fetch(`${API_URL}/api/projects/${project.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      const method = checkResponse.ok ? 'PUT' : 'POST';
+      const url = checkResponse.ok 
+        ? `${API_URL}/api/projects/${project.id}`
+        : `${API_URL}/api/projects`;
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          id: project.id,
+          name: project.name,
+          nodes: project.nodes
+        })
+      });
+
+      if (response.ok) {
+        console.log(`Proyecto ${method === 'PUT' ? 'actualizado' : 'creado'} en servidor:`, project.name);
+        return true;
+      }
+    } catch (error) {
+      console.error('Error guardando proyecto en servidor:', error);
+    }
+    return false;
+  }, []);
+
+  // Eliminar proyecto del servidor
+  const deleteProjectFromServer = useCallback(async (projectId) => {
+    const token = getAuthToken();
+    if (!token) return false;
+
+    try {
+      const response = await fetch(`${API_URL}/api/projects/${projectId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        console.log('Proyecto eliminado del servidor:', projectId);
+        return true;
+      }
+    } catch (error) {
+      console.error('Error eliminando proyecto del servidor:', error);
+    }
+    return false;
+  }, []);
+
+  // Sincronizar proyectos locales al servidor
+  const syncLocalToServer = useCallback(async (localProjects) => {
+    const token = getAuthToken();
+    if (!token || !localProjects || localProjects.length === 0) return;
+
+    setIsSyncing(true);
+    try {
+      const response = await fetch(`${API_URL}/api/projects/sync`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(localProjects.map(p => ({
+          id: p.id,
+          name: p.name,
+          nodes: p.nodes
+        })))
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Proyectos sincronizados:', result.synced);
+        // Limpiar localStorage después de sincronizar
+        localStorage.removeItem(PROJECTS_KEY);
+      }
+    } catch (error) {
+      console.error('Error sincronizando proyectos:', error);
+    } finally {
+      setIsSyncing(false);
+    }
+  }, []);
+
+  // Guardar con debounce para evitar muchas peticiones
+  const debouncedSaveToServer = useCallback((project) => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    
+    pendingSaveRef.current = project;
+    
+    saveTimeoutRef.current = setTimeout(async () => {
+      if (pendingSaveRef.current) {
+        await saveProjectToServer(pendingSaveRef.current);
+        pendingSaveRef.current = null;
+      }
+    }, 1000); // 1 segundo de debounce
+  }, [saveProjectToServer]);
+
+  // Cargar proyectos al iniciar
+  useEffect(() => {
+    const initializeProjects = async () => {
+      setIsLoading(true);
+      
+      // Intentar cargar del servidor primero
+      const serverProjects = await loadFromServer();
+      
+      if (serverProjects && serverProjects.length > 0) {
+        // Usar proyectos del servidor
+        setProjects(serverProjects);
+        
+        // Inicializar historial
+        const histories = {};
+        serverProjects.forEach(p => {
+          histories[p.id] = {
+            states: [JSON.stringify(p.nodes)],
+            pointer: 0
+          };
+        });
+        historyRef.current = histories;
+        
+        // Establecer proyecto activo
+        const activeId = loadActiveProjectIdFromStorage(serverProjects);
+        setActiveProjectId(activeId);
+        
+        // Si hay proyectos locales, sincronizarlos
+        const localProjects = loadProjectsFromStorage();
+        if (localProjects && localProjects.length > 0) {
+          // Sincronizar proyectos locales que no estén en servidor
+          const serverIds = new Set(serverProjects.map(p => p.id));
+          const newLocalProjects = localProjects.filter(p => !serverIds.has(p.id));
+          if (newLocalProjects.length > 0) {
+            await syncLocalToServer(newLocalProjects);
+            // Recargar del servidor para tener los proyectos sincronizados
+            const updatedProjects = await loadFromServer();
+            if (updatedProjects) {
+              setProjects(updatedProjects);
+            }
+          }
+        }
+      } else {
+        // Usar localStorage como fallback
+        const localProjects = loadProjectsFromStorage();
+        
+        if (localProjects && localProjects.length > 0) {
+          setProjects(localProjects);
+          
+          // Inicializar historial
+          const histories = {};
+          localProjects.forEach(p => {
+            histories[p.id] = {
+              states: [JSON.stringify(p.nodes)],
+              pointer: 0
+            };
+          });
+          historyRef.current = histories;
+          
+          setActiveProjectId(loadActiveProjectIdFromStorage(localProjects));
+          
+          // Intentar sincronizar al servidor
+          await syncLocalToServer(localProjects);
+          
+          // Recargar del servidor
+          const syncedProjects = await loadFromServer();
+          if (syncedProjects && syncedProjects.length > 0) {
+            setProjects(syncedProjects);
+          }
+        } else {
+          // Crear proyecto por defecto
+          const defaultProject = createDefaultProject();
+          defaultProject.name = 'Mi Primer Mapa';
+          setProjects([defaultProject]);
+          setActiveProjectId(defaultProject.id);
+          
+          historyRef.current[defaultProject.id] = {
+            states: [JSON.stringify(defaultProject.nodes)],
+            pointer: 0
+          };
+          
+          // Guardar en servidor
+          await saveProjectToServer(defaultProject);
+        }
+      }
+      
+      setIsLoading(false);
+    };
+
+    initializeProjects();
+  }, [loadFromServer, syncLocalToServer, saveProjectToServer]);
 
   // Obtener proyecto activo
   const activeProject = projects.find(p => p.id === activeProjectId) || projects[0];

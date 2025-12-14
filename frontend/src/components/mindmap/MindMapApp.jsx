@@ -300,6 +300,7 @@ const MindMapApp = () => {
           onUpdateNodeComment={updateNodeComment}
           onUpdateNodeStyle={updateNodeStyle}
           onUpdateNodeSize={updateNodeSize}
+          onUpdateNodeIcon={updateNodeIcon}
           onSaveNodePositionToHistory={saveNodePositionToHistory}
           onOpenContextMenu={openContextMenu}
           onCloseContextMenu={closeContextMenu}

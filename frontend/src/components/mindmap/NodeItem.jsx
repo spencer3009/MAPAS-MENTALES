@@ -413,6 +413,20 @@ const NodeItem = memo(({
             </span>
           </div>
         )}
+
+        {/* Badge de recordatorio */}
+        {node.hasReminder && !isEditing && (
+          <div
+            className="
+              shrink-0 p-1 rounded-lg
+              bg-purple-500/20 backdrop-blur-sm
+              cursor-default
+            "
+            title="Tiene recordatorio programado"
+          >
+            <Bell size={12} style={{ color: textColor }} />
+          </div>
+        )}
       </div>
 
       {/* Subrayado para forma de línea */}

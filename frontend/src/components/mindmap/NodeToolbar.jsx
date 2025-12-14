@@ -6,7 +6,7 @@ import {
   Link2, 
   Copy, 
   Trash2,
-  Sticker,
+  Laugh,
   MessageSquare
 } from 'lucide-react';
 

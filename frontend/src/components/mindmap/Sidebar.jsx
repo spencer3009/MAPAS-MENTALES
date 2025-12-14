@@ -193,18 +193,35 @@ const Sidebar = ({
               {/* Botones de acción - visibles en hover */}
               <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
                 {!isEditing && (
-                  <button
-                    onClick={(e) => handleStartEdit(project, e)}
-                    className="
-                      p-1.5 rounded-lg
-                      bg-gray-50 hover:bg-gray-100
-                      text-gray-500 hover:text-gray-600
-                      transition-all duration-200
-                    "
-                    title="Renombrar proyecto"
-                  >
-                    <Pencil size={12} />
-                  </button>
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onProjectReminder) onProjectReminder(project);
+                      }}
+                      className="
+                        p-1.5 rounded-lg
+                        bg-purple-50 hover:bg-purple-100
+                        text-purple-500 hover:text-purple-600
+                        transition-all duration-200
+                      "
+                      title="Recordatorio de proyecto"
+                    >
+                      <Bell size={12} />
+                    </button>
+                    <button
+                      onClick={(e) => handleStartEdit(project, e)}
+                      className="
+                        p-1.5 rounded-lg
+                        bg-gray-50 hover:bg-gray-100
+                        text-gray-500 hover:text-gray-600
+                        transition-all duration-200
+                      "
+                      title="Renombrar proyecto"
+                    >
+                      <Pencil size={12} />
+                    </button>
+                  </>
                 )}
                 <button
                   onClick={(e) => {

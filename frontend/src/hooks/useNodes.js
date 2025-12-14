@@ -796,9 +796,12 @@ export const useNodes = () => {
   }, [saveProjectToServer]);
 
   // Eliminar proyecto (solo el activo)
-  const deleteProject = useCallback((projectIdToDelete = activeProjectId) => {
+  const deleteProject = useCallback(async (projectIdToDelete = activeProjectId) => {
     try {
       console.log('Eliminando proyecto:', projectIdToDelete);
+      
+      // Eliminar del servidor primero
+      await deleteProjectFromServer(projectIdToDelete);
       
       const remainingProjects = projects.filter(p => p.id !== projectIdToDelete);
       
@@ -808,12 +811,15 @@ export const useNodes = () => {
         newProject.name = 'Nuevo Mapa';
         setProjects([newProject]);
         setActiveProjectId(newProject.id);
+        
+        // Guardar el nuevo proyecto en servidor
+        await saveProjectToServer(newProject);
+        
         console.log('Último proyecto eliminado, creado uno nuevo');
       } else {
         setProjects(remainingProjects);
         // Si eliminamos el proyecto activo, activar el más reciente
         if (projectIdToDelete === activeProjectId) {
-          // Ordenar por fecha de actualización, más reciente primero
           const sorted = [...remainingProjects].sort(
             (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
           );
@@ -828,7 +834,7 @@ export const useNodes = () => {
       console.error('Error al eliminar proyecto:', error);
       return false;
     }
-  }, [activeProjectId, projects]);
+  }, [activeProjectId, projects, deleteProjectFromServer, saveProjectToServer]);
 
   // Cambiar proyecto activo
   const switchProject = useCallback((projectId) => {

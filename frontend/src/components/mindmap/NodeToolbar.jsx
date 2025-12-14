@@ -6,7 +6,7 @@ import {
   Link2, 
   Copy, 
   Trash2,
-  Smile,
+  Sticker,
   MessageSquare
 } from 'lucide-react';
 
@@ -43,14 +43,16 @@ const NodeToolbar = ({
   zoom = 1,
   currentColor,
   hasComment = false,
+  hasIcon = false,
   stylePanelOpen = false,
+  iconPanelOpen = false,
   onEdit,
   onStyle,
   onAddImage,
   onAddLink,
   onDuplicate,
   onDelete,
-  onAddEmoji,
+  onAddIcon,
   onComment
 }) => {
   if (!visible) return null;
@@ -60,8 +62,14 @@ const NodeToolbar = ({
     if (onStyle) onStyle();
   };
 
+  const handleIconClick = (e) => {
+    e.stopPropagation();
+    if (onAddIcon) onAddIcon();
+  };
+
   return (
     <div
+      data-toolbar="node-toolbar"
       className="
         absolute z-40
         bg-white rounded-xl shadow-xl
@@ -102,11 +110,13 @@ const NodeToolbar = ({
 
       <Divider />
 
-      {/* Emoji/Icono */}
+      {/* Icono - NUEVO */}
       <ToolbarButton 
-        icon={Smile} 
-        label="Agregar emoji" 
-        onClick={onAddEmoji}
+        icon={Sticker} 
+        label="Agregar icono" 
+        onClick={handleIconClick}
+        active={iconPanelOpen}
+        hasIndicator={hasIcon}
       />
       
       {/* Imagen */}

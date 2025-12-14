@@ -383,13 +383,15 @@ const Canvas = ({
           currentColor={selectedNode?.color}
           hasComment={!!selectedNode?.comment}
           hasIcon={!!selectedNode?.icon}
+          hasLinks={selectedNode?.links?.length > 0}
+          linksCount={selectedNode?.links?.length || 0}
           stylePanelOpen={styleSidebarOpen && sidebarTab === 'styles'}
           iconPanelOpen={styleSidebarOpen && sidebarTab === 'icons'}
           onEdit={handleToolbarEdit}
           onStyle={handleToolbarStyle}
           onComment={handleToolbarComment}
           onAddImage={handleToolbarAddImage}
-          onAddLink={handleToolbarAddLink}
+          onAddLink={handleToolbarLink}
           onAddIcon={handleToolbarIcon}
           onDuplicate={handleToolbarDuplicate}
           onDelete={handleToolbarDelete}

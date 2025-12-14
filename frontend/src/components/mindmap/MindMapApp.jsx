@@ -254,6 +254,7 @@ const MindMapApp = () => {
         onNewFromTemplate={handleNewFromTemplateClick}
         onDeleteProject={handleDeleteProjectClick}
         onSwitchProject={handleSwitchProject}
+        onRenameProject={renameProject}
       />
 
       {/* Área principal */}

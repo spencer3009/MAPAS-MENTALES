@@ -400,30 +400,6 @@ const Canvas = ({
         />
       )}
 
-      {/* Panel de estilos del nodo - posicionado debajo del toolbar */}
-      {stylePanel.isOpen && stylePanel.nodeId && controlPositions.toolbar && (
-        <NodeStylePanel
-          isOpen={true}
-          position={{ 
-            x: controlPositions.toolbar.x, 
-            y: controlPositions.toolbar.y + 50 // 50px debajo del toolbar
-          }}
-          nodeStyle={{
-            shape: nodes.find(n => n.id === stylePanel.nodeId)?.shape || 'rounded',
-            bgColor: nodes.find(n => n.id === stylePanel.nodeId)?.bgColor || '#e0f2fe',
-            textColor: nodes.find(n => n.id === stylePanel.nodeId)?.textColor || '#1f2937',
-            borderColor: nodes.find(n => n.id === stylePanel.nodeId)?.borderColor || '#7dd3fc',
-            borderWidth: nodes.find(n => n.id === stylePanel.nodeId)?.borderWidth || 2,
-            borderStyle: nodes.find(n => n.id === stylePanel.nodeId)?.borderStyle || 'solid',
-            lineColor: nodes.find(n => n.id === stylePanel.nodeId)?.lineColor || '#94a3b8',
-            lineWidth: nodes.find(n => n.id === stylePanel.nodeId)?.lineWidth || 2,
-            lineStyle: nodes.find(n => n.id === stylePanel.nodeId)?.lineStyle || 'solid',
-          }}
-          onStyleChange={handleStyleChange}
-          onClose={handleStylePanelClose}
-        />
-      )}
-
       {/* Panel de iconos - posicionado debajo del toolbar */}
       {iconPanel.isOpen && iconPanel.nodeId && controlPositions.toolbar && (
         <IconPickerPanel

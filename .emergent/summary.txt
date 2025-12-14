@@ -1,92 +1,88 @@
 <analysis>**original_problem_statement:**
-The user initially requested a frontend-only mind-mapping application. Over the course of the session, the requirements expanded significantly.
+The user initially requested a frontend-only mind-mapping application. Over time, the requirements expanded to include a full-stack application with JWT authentication, a professional UI/UX, advanced node styling, icon selection, node linking, and a reminder system with WhatsApp notifications.
 
 **PRODUCT REQUIREMENTS:**
-1.  **Core Functionality (Phase 1 - Complete):** Create, edit, drag & drop nodes, connect with Bezier curves, pan, and zoom.
-2.  **Deployment Readiness (Phase 2 - Complete):** Configure for frontend-only deployment.
-3.  **Multi-Project Management (Phase 3 - Complete):** Support multiple mind maps per user via .
-4.  **Advanced UX/UI (Phase 4 - Complete):**
+1.  **Core Functionality (Complete):** Create, edit, drag & drop nodes, connect with Bezier curves, pan, and zoom.
+2.  **Deployment Readiness (Complete):** Configured for frontend-only deployment initially.
+3.  **Multi-Project Management (Complete):** Support multiple mind maps per user via .
+4.  **Advanced UX/UI (Complete):**
     *   Contextual controls (floating toolbar, add button).
     *   Node comments.
-    *   Advanced styling panel (shape, border, line, auto-contrast text).
-5.  **Critical Core Features (Phase 5 - Complete):**
-    *   **Project Naming:** Allow users to name new projects and edit existing names.
-    *   **Undo/Redo:** Implement a robust history system for all major actions (create, delete, move, style, resize nodes).
-    *   **Node Resizing:** Allow users to dynamically resize the width and height of nodes via a visual handle.
-6.  **Branding & Visuals (Phase 6 - Complete):**
-    *   Incorporate a user-provided logo into the application sidebar and login page.
-    *   Adjust logo size and surrounding margins based on specific user feedback for a professional look.
-7.  **Authentication System (Phase 7 - Complete):**
-    *   Implement a basic JWT-based authentication system with a FastAPI backend.
-    *   Create a dedicated, professionally designed login page.
-    *   Hardcode initial users for controlled access.
-    *   Protect the main application, ensuring only authenticated users can access it.
-    *   Display the logged-in user's information and provide a logout option.
-8.  **Advanced Icon Selector (Phase 8 - Next Task):**
-    *   Implement a comprehensive icon library within a picker panel.
-    *   Organize icons into categories (General, Business, Tech, etc.).
-    *   Include special, highlighted icons for check (✔) and cross (✖).
-    *   Allow icons to be color-customizable.
-    *   Include a search functionality within the picker.
+    *   Refactored floating panels into a unified, stable right-side panel for Styles, Icons, and Reminders, inspired by professional tools like Figma/Miro.
+5.  **Critical Core Features (Complete):**
+    *   Project Naming.
+    *   Undo/Redo.
+    *   Node Resizing.
+6.  **Branding & Visuals (Complete):** Custom logo, professional login page redesign.
+7.  **Authentication System (Complete):** JWT-based auth with FastAPI backend and hardcoded users.
+8.  **Advanced Icon Selector (Complete):** A comprehensive icon library integrated into the right sidebar, with categories, search, color customization, and special icons (including WhatsApp).
+9.  **Node Linking (Complete):** A system to add, manage, and display multiple URL links per node, with a popover UI and visual indicators on the node.
+10. **Reminder System (In Progress):** A system to set reminders for nodes and projects, with notifications sent via WhatsApp. The UI and backend storage are complete, but the notification scheduler is pending.
 
 **User's preferred language**: Spanish
 
 **what currently exists?**
-A full-stack mind-mapping application with a React frontend and a FastAPI backend. The frontend features a robust mind-mapping canvas with advanced node styling, resizing, undo/redo, and project management. Data for mind maps is persisted in . The application is protected by a JWT-based authentication system, with a professionally designed login page and two hardcoded users for access. The branding has been updated with a custom logo on both the login screen and the main application sidebar.
+A full-stack mind-mapping application with a React frontend and FastAPI backend. The app features JWT authentication and a professional, redesigned login page. The core mind map functionality is robust, with data persisted in . The UX has been significantly enhanced by replacing floating pop-ups with a unified, tabbed right sidebar for managing node styles, icons, and reminders. The application also supports adding multiple links to each node. The backend has been extended with API endpoints and MongoDB models to store reminders, and  has been installed.
 
 **Last working item**:
-*   **Last item agent was working:** The agent was beginning the implementation of the advanced icon selector feature. It had just created the new component file  and was analyzing  to plan the integration.
-*   **Status:** NOT STARTED
+*   **Last item agent was working:** The agent was attempting to verify the creation of a reminder by fetching the list of all reminders from the backend via a  command. This was the final step after implementing the frontend UI and backend endpoints for the reminder feature.
+*   **Status:** BLOCKED
 *   **Agent Testing Done:** N
-*   **Which testing method agent to use?** screenshot tool
+*   **Which testing method agent to use?** manual testing by curl
 *   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-*   **Issue 1: Implement the Advanced Icon Selector (P0)**
-    *   **Description:** The user has requested a comprehensive icon picker for nodes, with categories, search, color customization, and special handling for check/cross icons. The task has not been started yet.
-    *   **Status:** NOT STARTED
+*   **Issue 1: API endpoint verification failing (P0)**
 
 **Issues Detail:**
-*   **Issue 1: Implement the Advanced Icon Selector**
-    *   **Attempted fixes:** None. The agent only created the initial file.
+*   **Issue 1: API endpoint verification failing**
+    *   **Attempted fixes:** The agent made several  attempts that failed.
+        1.  A call to  failed with  because no JWT token was provided.
+        2.  An attempt to get a token failed to parse the response correctly (). This was likely due to using the wrong  (should be  for the token endpoint).
+        3.  A call to  (with a trailing slash) failed with a .
     *   **Next debug checklist:**
-        1.  **Find an Icon Library:** Decide on an icon library to use (e.g., , ). The agent should probably install it.
-        2.  **Structure :** Build the UI with categories, a search bar, and a grid of icons based on the user's requirements.
-        3.  **Implement State Management:** Add state in  to manage the visibility and position of the icon picker panel.
-        4.  **Update :** Add a new button (e.g., an emoji or icon symbol) to the toolbar to open the .
-        5.  **Update :** Create a function (e.g., ) to add/update an icon on a specific node and save it to .
-        6.  **Update :** Modify the component to render the selected icon inside the node, alongside the text. Ensure it coexists with other styles.
-        7.  **Implement Color Customization:** Ensure the selected icon can have its color changed, possibly using the existing style panel's color palette.
-    *   **Why fix this issue and what will be achieved with the fix?** This will complete a key feature request, allowing users to add rich visual cues to their mind maps, significantly enhancing the application's expressiveness and professional quality.
+        1.  Confirm the FastAPI route in  is  (without the trailing slash).
+        2.  Construct a valid sequential  command: first, obtain the JWT token using the correct credentials and . Second, parse the  from the JSON response. Third, use that token in the  header to make a  request to the  endpoint.
+        3.  Example of a correct command chain:
+            Token received: 
+{"detail":"Not Found"}
+    *   **Why fix this issue and what will be achieved with the fix?** This will confirm that the backend API for creating and retrieving reminders from MongoDB is working correctly, which is a prerequisite for implementing the notification scheduler.
+    *   **Status:** IN PROGRESS
     *   **Is recurring issue?** N
-    *   **Should Test frontend/backend/both after fix?** Frontend
+    *   **Should Test frontend/backend/both after fix?** Backend
     *   **Blocked on other issue:** None
 
 **In progress Task List**:
-*   None.
+*   **Task 1: Complete Reminder System (P0)**
+    *   **Where to resume:** The frontend UI and backend CRUD endpoints for reminders are complete. The immediate next step is to resolve the API verification blocker (Issue 1). After that, implement the backend scheduler.
+    *   **What will be achieved with this?** A full end-to-end reminder system, fulfilling a major user requirement.
+    *   **Status:** IN PROGRESS
+    *   **Should Test frontend/backend/both after fix?** Both
+    *   **Blocked on something:** Issue 1: API endpoint verification failing.
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks:**
-    *   **Implement Advanced Icon Selector (P0):** (See details above). This is the immediate next task.
+    *   **Implement Backend Scheduler (P0):** Once the API is verified, create a background scheduler (e.g., using ) in the FastAPI backend. This scheduler will periodically check the  collection in MongoDB and trigger a (simulated) WhatsApp notification for due reminders.
+    *   **Implement Project-Level Reminders (P1):** Add UI in the left sidebar and backend logic to allow setting reminders for an entire project, not just individual nodes.
 *   **Future Tasks:**
-    *   **Enhance Authentication:** The user mentioned that the current hardcoded user system is temporary. Future work will involve implementing a public registration module and persisting users in a database.
+    *   **Full WhatsApp Integration:** Move from a simulated WhatsApp notification to a real integration using the official Meta API, as originally requested.
+    *   **Enhance Authentication:** Migrate from hardcoded users to a full public registration system with users stored in the database.
+    *   **Migrate Mind Map Data:** Move all project, node, and style data from browser  to the backend MongoDB database, associating it with user accounts.
+    *   **Email Notification Channel:** Implement email as an alternative channel for reminders.
 
 **Completed work in this session**
-- **Advanced Node Styling Panel:** Implemented a full-featured panel to customize node shape (including cloud), background color, border (color, width, style), and connecting line appearance. Includes automatic text color contrast for readability.
-- **Critical Core Features:**
-    - **Project Naming:** Implemented a modal to name new projects and the ability to rename existing ones via double-click in the sidebar.
-    - **Undo/Redo:** A robust history system was implemented using  to handle undo/redo for all major user actions (node creation, deletion, movement, styling, resizing).
-    - **Node Resizing:** Added a visual handle to nodes allowing users to change width and height, with the new dimensions persisting.
-- **Full-Stack Authentication:**
-    - Migrated the project from frontend-only to a full-stack application with a FastAPI backend.
-    - Implemented JWT-based authentication with  endpoint and two hardcoded users.
-    - Created a secure  on the frontend to manage user sessions.
-    - Designed and implemented a professional login page based on user-provided image references and specific dimension requirements.
-    - Protected the main application, redirecting unauthenticated users to the login page.
-    - Displayed the logged-in user's name in the sidebar with a logout button.
-- **Branding and UI Polish:**
-    - Integrated a custom user-provided logo into the sidebar and login page.
-    - Iteratively adjusted the logo's size, position, and surrounding margins to meet user's aesthetic requirements for a professional SaaS look and feel.
+- **Right Sidebar UI/UX Overhaul:**
+    - Refactored the floating style panel into a permanent, tabbed right sidebar for Styles, Icons, and Reminders, creating a stable and professional editing experience.
+- **Advanced Icon Selector:**
+    - Implemented a full icon picker within the right sidebar, featuring categories, search, color customization, and the requested WhatsApp icon.
+- **Node Link Functionality:**
+    - Implemented a complete system to add, manage, and display multiple links per node via a popover, with visual indicators on the node and toolbar.
+- **Reminder System (Phase 1):**
+    - Built the complete frontend UI for creating and viewing reminders within the right sidebar.
+    - Implemented the FastAPI backend endpoints () and MongoDB collection to create, read, and delete reminders.
+- **Professional Login Page Redesign:**
+    - Completely overhauled the login page with a modern, responsive, two-column SaaS-style design.
+- **UX Fixes:** Corrected the icon picker button and fixed the deployment direction of floating panels before they were deprecated.
 
 **Earlier issues found/mentioned but not fixed**
 *   None.
@@ -99,76 +95,81 @@ A full-stack mind-mapping application with a React frontend and a FastAPI backen
 
 **Key Technical Concepts**
 *   **Frontend:** React (with Hooks), TailwindCSS
-*   **Backend:** FastAPI (Python)
-*   **Authentication:** JWT (JSON Web Tokens) with  and  on the backend.
-*   **State Management:** React Hooks,  for authentication state.
+*   **Backend:** FastAPI (Python), MongoDB,  for HTTP clients.
+*   **Authentication:** JWT (JSON Web Tokens).
+*   **State Management:** React Hooks, .
 *   **Persistence:**
-    *   Browser  for mind map projects (, ).
-    *   Hardcoded user list in  for authentication.
-*   **Undo/Redo:** Custom implementation using  to manage a history of states for each project, avoiding stale closure issues with React state.
+    *   Browser  for mind map projects.
+    *   MongoDB for storing reminders.
+    *   Hardcoded user list in .
+*   **Scheduling (Planned):**  or a similar library for running background tasks.
 
 **key DB schema**
-*   **Frontend ():**
-    *   : 
-    *   : 
-    *   :  (JWT for authentication)
-*   **Backend ( hardcoded):**
-    *   : A dictionary mapping usernames to user data objects containing , , and .
+*   ** (MongoDB collection - NEW):**
+    *   
+*   ** (Backend hardcoded):**
+    *   A dictionary mapping usernames to user data.
 
 **changes in tech stack**
-*   The application has transitioned from a **frontend-only** project to a **full-stack application** with the introduction of a FastAPI backend to handle authentication.
+*   **:** Added to the backend for making outbound HTTP requests (planned for WhatsApp integration).
 
 **All files of reference**
-*   : (Created) The new FastAPI server that handles JWT authentication.
-*   : (Updated) Rewritten to handle routing between the  and  based on authentication status.
-*   : (Created) Manages authentication state, login/logout functions, and the JWT token.
-*   : (Created) The new, fully-styled login page.
-*   : (Heavily Updated) The core logic for undo/redo, node resizing, style updates, and project naming was added here.
-*   : (Heavily Updated) Modified to support dynamic resizing, custom styles, and rendering the resize handle.
-*   : (Heavily Updated) Integrated the style panel, resize logic, and passes down new props for undo/redo and node updates.
-*   : (Heavily Updated) Added project renaming, the new logo, and the display for the logged-in user with a logout button.
-*   : (Created) The modal for naming a new project.
-*   : (Created) The placeholder file for the next feature.
+*   : Heavily updated with reminder API endpoints, Pydantic models, and MongoDB logic.
+*   : Updated to include .
+*   : Overwritten with a new professional design.
+*   : New file, acts as the central hub for all node editing (styles, icons, reminders).
+*   : New file containing the UI for managing reminders.
+*   : New file for the link management UI.
+*   : Updated with functions for adding/deleting links and reminders.
+*   , , , : All significantly modified to integrate the right sidebar, link functionality, and reminder feature.
 
 **Areas that need refactoring**
-*   The user database in  is hardcoded. This should be migrated to a proper database (like MongoDB, as used in other projects) when public registration is implemented.
-*   Mind map data is still stored in . For a true multi-user SaaS, this data should be moved to the backend and associated with user accounts.
+*   The WhatsApp integration is currently a placeholder. It needs to be connected to a real sending mechanism.
+*   User data is hardcoded in  and should be moved to a database.
+*   Mind map project data is in  and should be migrated to the backend for a true multi-user experience.
 
 **key api endpoints**
-*   : The new authentication endpoint. It accepts a username and password in a form data payload and returns a JWT .
+*   : Authenticates a user and returns a JWT.
+*   : Creates a new reminder.
+*   : Retrieves all reminders for the authenticated user.
+*   : Deletes a specific reminder.
 
 **Critical Info for New Agent**
-*   **Full-Stack Architecture:** Remember this is no longer a frontend-only app. The backend in  handles authentication. Use backend: stopped
-backend: started if you modify backend dependencies or .
-*   **Authentication Flow:** All access to the main app is gated by . The JWT token is stored in . API calls requiring authentication will need to include the  header in the future (though none exist yet besides login).
-*   **Undo/Redo Logic:** The undo/redo implementation in  is complex and relies on a  to correctly manage state history for each project. Be careful when modifying functions that change project data, and ensure they correctly call  with the *new* state.
-*   **Data Storage:** Project data is in . This is not yet user-specific on the backend, so all users share the same  data on a given browser. This is a known limitation to be addressed later.
+*   **Immediate Blocker:** The agent cannot proceed with the reminder feature until the API verification  command is fixed. The main problem is likely incorrect authentication. Refer to the debug checklist in the Issues Detail section.
+*   **Reminder Architecture:** The reminder system is partially built. UI and backend storage are done. The next critical step is implementing the background scheduler in  to process the reminders stored in MongoDB.
+*   **UI Architecture:** The application has standardized on a fixed right sidebar for all node-related settings (Styles, Icons, Reminders). Do not introduce new floating panels; extend the existing sidebar.
+*   **API Authentication:** Remember that all new backend endpoints are protected. Any  or frontend API call (other than login) must include the  header.
 
 **documents created in this job**
 *   None.
 
 **Last 10 User Messages and any pending user messages**
-1.  **Request:** The final login page design should match a new image. (COMPLETED)
-2.  **Request:** Make the logo on the login page bigger (423x203). (COMPLETED)
-3.  **Request:** The logo should be 323px wide with a proportional height. (COMPLETED)
-4.  **Request:** Reduce the width of the white login container to 530px. (COMPLETED)
-5.  **User Message:** el logo debe ser 323px de ancho y alto proporcional. (COMPLETED)
-6.  **User Message:** si pero el ancho del contenedor blanco también redúcelo, porque está bien ancho. Creo que podría ser de 530px (COMPLETED)
-7.  **Request:** Detailed requirements for an advanced icon selector panel, including categories, special icons (check/cross), color customization, and search. (PENDING - This is the next task)
-8.  **User Message:** Aclaración importante sobre el selector avanzado de iconos... (PENDING)
-9.  **User Message:** *Agent begins working on the icon selector.*
-10. **User Message:** *Agent creates the IconPickerPanel.jsx file.* (PENDING)
+1.  **Request:** Implement a full node linking system. (COMPLETED)
+2.  **Confirmation:** User is satisfied with the link functionality. (COMPLETED)
+3.  **Request:** Implement a node and project reminder system with WhatsApp notifications. (IN PROGRESS)
+4.  **Agent Question:** Asked for clarification on WhatsApp API, user phone number source, and backend architecture. (ANSWERED)
+5.  **User Response:** Confirmed use of official WhatsApp API, user profile as the number source, and the proposed backend/scheduler architecture. (PENDING - implementation in progress)
+6.  **Agent Action:** Started implementing the reminder system UI and backend. (IN PROGRESS)
+7.  **Agent Action:** Created the  component. (IN PROGRESS)
+8.  **Agent Action:** Integrated the reminder panel into the right sidebar. (IN PROGRESS)
+9.  **Agent Action:** Added reminder logic to the backend and frontend. (IN PROGRESS)
+10. **Agent Action:** Ran into an authentication error while trying to test the  endpoint via . (BLOCKED)
 
 **Project Health Check:**
-*   **Broken:** None
-*   **Mocked:** The user database is hardcoded in .
+*   **Broken:**
+    *   Backend API verification for the  endpoint is failing due to authentication issues in the  command.
+*   **Mocked:**
+    *   The user database is hardcoded in .
+    *   The WhatsApp notification sending mechanism is not yet implemented; it will be simulated initially.
 
 **3rd Party Integrations**
-*   **python-jose[cryptography]:** For JWT creation and validation on the backend.
-*   **passlib[bcrypt]:** For hashing and verifying passwords on the backend.
+*   **python-jose[cryptography]:** For JWT on the backend.
+*   **passlib[bcrypt]:** For password hashing on the backend.
+*   **httpx:** Installed on the backend for future HTTP calls.
+*   **WhatsApp Business API (Meta):** Planned for integration to send reminder notifications.
 
 **Testing status**
-*   **Testing agent used after significant changes:** NO (The agent used the screenshot tool for extensive manual E2E testing of all features).
+*   **Testing agent used after significant changes:** YES (for the icon selector feature).
 *   **Troubleshoot agent used after agent stuck in loop:** NO
 *   **Test files created:** None.
 *   **Known regressions:** None.
@@ -182,4 +183,5 @@ backend: started if you modify backend dependencies or .
     *   Password: 
 
 **What agent forgot to execute**
-*   Nothing was forgotten. The agent was in the process of starting the new Advanced Icon Selector feature when the session ended.</analysis>
+*   The agent did not successfully verify the reminder creation via the API due to a faulty  command.
+*   The agent has not yet implemented the background scheduler, which is a core part of the user-confirmed MVP for the reminder feature.</analysis>

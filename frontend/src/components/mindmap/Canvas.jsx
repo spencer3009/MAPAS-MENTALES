@@ -315,7 +315,9 @@ const Canvas = ({
             isSelected={selectedNodeId === node.id}
             onSelect={onSelectNode}
             onDragStart={handleNodeDragStart}
+            onDragEnd={onSaveNodePositionToHistory}
             onUpdateText={onUpdateNodeText}
+            onUpdateSize={onUpdateNodeSize}
             onContextMenu={handleNodeContextMenu}
             onCommentClick={handleNodeCommentClick}
             forceEdit={newNodeId === node.id}

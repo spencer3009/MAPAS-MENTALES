@@ -58,13 +58,14 @@ const Sidebar = ({
       w-72 bg-white border-r border-gray-200
       flex flex-col p-5 shadow-sm z-20 shrink-0 h-full
     ">
-      {/* Header con Logo MindoraMap */}
-      <div className="flex items-center gap-3 mb-6">
+      {/* Header con Logo MindoraMap - Branding Principal */}
+      <div className="flex flex-col items-center justify-center py-6 mb-6 border-b border-gray-100">
         <img 
           src={LOGO_URL} 
           alt="MindoraMap" 
-          className="h-10 w-auto object-contain"
+          className="h-14 w-auto object-contain mb-2"
         />
+        <p className="text-xs text-gray-400 font-medium tracking-wide">Organiza tus ideas</p>
       </div>
 
       {/* Botones de acción */}

@@ -9,6 +9,7 @@ import { useNodes } from '../../hooks/useNodes';
 import { usePanning } from '../../hooks/usePanning';
 import { useZoom } from '../../hooks/useZoom';
 import { useContextMenu } from '../../hooks/useContextMenu';
+import { useAuth } from '../../contexts/AuthContext';
 
 const MindMapApp = () => {
   const {

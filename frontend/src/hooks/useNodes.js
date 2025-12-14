@@ -230,18 +230,21 @@ export const useNodes = () => {
 
   const addNode = useCallback((parentId = null, position = null) => {
     const newId = crypto.randomUUID();
+    
+    // Primero guardamos el estado actual en historial
+    const currentProject = projects.find(p => p.id === activeProjectId);
+    if (currentProject) {
+      saveToHistory(activeProjectId, currentProject.nodes);
+    }
 
     setProjects(prev => {
-      const currentProject = prev.find(p => p.id === activeProjectId);
-      if (!currentProject) {
+      const project = prev.find(p => p.id === activeProjectId);
+      if (!project) {
         console.error('No active project found');
         return prev;
       }
       
-      const currentNodes = currentProject.nodes;
-      
-      // Guardar estado anterior en historial
-      saveToHistory(activeProjectId, currentNodes);
+      const currentNodes = project.nodes;
       
       let newX = 400;
       let newY = 300;
@@ -278,6 +281,13 @@ export const useNodes = () => {
       );
       
       console.log('Updated projects, new node count:', updatedProjects.find(p => p.id === activeProjectId)?.nodes.length);
+      
+      return updatedProjects;
+    });
+
+    setSelectedNodeId(newId);
+    return newId;
+  }, [activeProjectId, projects, saveToHistory]);
       
       return updatedProjects;
     });

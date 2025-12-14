@@ -127,17 +127,10 @@ export const useNodes = () => {
   // ==========================================
 
   const pushToHistory = useCallback((projectId, nodesToSave) => {
-    console.log('pushToHistory called:', projectId, 'isUndoRedo:', isUndoRedoAction.current);
-    
-    if (isUndoRedoAction.current) {
-      console.log('Skipping - isUndoRedoAction is true');
-      return;
-    }
+    if (isUndoRedoAction.current) return;
     
     const newState = JSON.stringify(nodesToSave);
     const history = historyRef.current[projectId] || { states: [], pointer: -1 };
-    console.log('Current history for project:', history);
-    
     const { states, pointer } = history;
     
     // Truncar estados futuros

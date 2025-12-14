@@ -163,7 +163,9 @@ const NodeItem = memo(({
       startX: e.clientX,
       startY: e.clientY,
       startWidth: nodeWidth,
-      startHeight: nodeHeight
+      startHeight: nodeHeight,
+      currentWidth: nodeWidth,
+      currentHeight: nodeHeight
     };
 
     const handleResizeMove = (moveEvent) => {
@@ -175,21 +177,27 @@ const NodeItem = memo(({
       const newWidth = Math.max(MIN_WIDTH, resizeStartRef.current.startWidth + deltaX);
       const newHeight = Math.max(MIN_HEIGHT, resizeStartRef.current.startHeight + deltaY);
       
+      // Guardar las dimensiones actuales en el ref
+      resizeStartRef.current.currentWidth = Math.round(newWidth);
+      resizeStartRef.current.currentHeight = Math.round(newHeight);
+      
       if (onUpdateSize) {
         onUpdateSize(node.id, Math.round(newWidth), Math.round(newHeight), false);
       }
     };
 
     const handleResizeEnd = () => {
+      if (resizeStartRef.current && onUpdateSize) {
+        // Usar las dimensiones finales del ref
+        const finalWidth = resizeStartRef.current.currentWidth;
+        const finalHeight = resizeStartRef.current.currentHeight;
+        onUpdateSize(node.id, finalWidth, finalHeight, true);
+      }
+      
       setIsResizing(false);
       resizeStartRef.current = null;
       document.removeEventListener('mousemove', handleResizeMove);
       document.removeEventListener('mouseup', handleResizeEnd);
-      
-      // Guardar en historial al finalizar
-      if (onUpdateSize) {
-        onUpdateSize(node.id, nodeWidth, nodeHeight, true);
-      }
     };
 
     document.addEventListener('mousemove', handleResizeMove);

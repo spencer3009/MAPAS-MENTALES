@@ -104,20 +104,16 @@ const Canvas = ({
     }
   }, [selectedNodeId]);
 
-  const handleToolbarChangeColor = useCallback((color) => {
-    if (selectedNodeId) {
-      onChangeNodeColor(selectedNodeId, color);
-    }
-  }, [selectedNodeId, onChangeNodeColor]);
-
   const handleToolbarComment = useCallback(() => {
     if (selectedNodeId) {
       setCommentPopover({ isOpen: true, nodeId: selectedNodeId });
+      setStylePanel({ isOpen: false, nodeId: null });
     }
   }, [selectedNodeId]);
 
   const handleNodeCommentClick = useCallback((nodeId) => {
     setCommentPopover({ isOpen: true, nodeId });
+    setStylePanel({ isOpen: false, nodeId: null });
     onSelectNode(nodeId);
   }, [onSelectNode]);
 
@@ -134,10 +130,15 @@ const Canvas = ({
   // Handlers del panel de estilos
   const handleToolbarStyle = useCallback(() => {
     if (selectedNodeId) {
-      setStylePanel({ isOpen: true, nodeId: selectedNodeId });
-      setCommentPopover({ isOpen: false, nodeId: null });
+      // Toggle del panel de estilos
+      if (stylePanel.isOpen && stylePanel.nodeId === selectedNodeId) {
+        setStylePanel({ isOpen: false, nodeId: null });
+      } else {
+        setStylePanel({ isOpen: true, nodeId: selectedNodeId });
+        setCommentPopover({ isOpen: false, nodeId: null });
+      }
     }
-  }, [selectedNodeId]);
+  }, [selectedNodeId, stylePanel.isOpen, stylePanel.nodeId]);
 
   const handleStyleChange = useCallback((styleUpdates) => {
     if (stylePanel.nodeId && onUpdateNodeStyle) {

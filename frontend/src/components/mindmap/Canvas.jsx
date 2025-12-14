@@ -192,10 +192,6 @@ const Canvas = ({
     alert('Funcionalidad de agregar enlace próximamente');
   }, []);
 
-  const handleToolbarAddEmoji = useCallback(() => {
-    alert('Funcionalidad de agregar emoji próximamente');
-  }, []);
-
   const handleToolbarDuplicate = useCallback(() => {
     if (selectedNodeId) {
       onDuplicateNode(selectedNodeId);

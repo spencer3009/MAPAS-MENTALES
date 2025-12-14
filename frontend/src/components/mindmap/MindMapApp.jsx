@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import Sidebar from './Sidebar';
 import Toolbar from './Toolbar';
 import Canvas from './Canvas';
+import RightStyleSidebar from './RightStyleSidebar';
 import ConfirmModal from './ConfirmModal';
 import TemplateModal from './TemplateModal';
 import ProjectNameModal from './ProjectNameModal';

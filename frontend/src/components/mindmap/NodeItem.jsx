@@ -1,8 +1,11 @@
 import React, { useState, useRef, useEffect, memo, useCallback } from 'react';
 import { MessageSquare } from 'lucide-react';
 
-const NODE_WIDTH = 160;
-const NODE_HEIGHT = 64;
+// Constantes por defecto - exportadas para uso en otros componentes
+export const NODE_WIDTH = 160;
+export const NODE_HEIGHT = 64;
+const MIN_WIDTH = 80;
+const MIN_HEIGHT = 40;
 
 // Estilos de forma
 const getShapeStyles = (shape) => {
@@ -35,7 +38,9 @@ const NodeItem = memo(({
   isSelected,
   onSelect,
   onDragStart,
+  onDragEnd,
   onUpdateText,
+  onUpdateSize,
   onContextMenu,
   onCommentClick,
   forceEdit = false,
@@ -43,8 +48,10 @@ const NodeItem = memo(({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [localText, setLocalText] = useState(node.text);
+  const [isResizing, setIsResizing] = useState(false);
   const inputRef = useRef(null);
   const nodeRef = useRef(null);
+  const resizeStartRef = useRef(null);
 
   const hasComment = node.comment && node.comment.trim().length > 0;
 
@@ -56,6 +63,10 @@ const NodeItem = memo(({
   const borderWidth = node.borderWidth || 2;
   const borderStyle = node.borderStyle || 'solid';
   const shape = node.shape || 'rounded';
+
+  // Tamaño del nodo (con valores por defecto)
+  const nodeWidth = node.width || NODE_WIDTH;
+  const nodeHeight = node.height || NODE_HEIGHT;
 
   // Sincronizar texto local con props
   const displayText = isEditing ? localText : node.text;

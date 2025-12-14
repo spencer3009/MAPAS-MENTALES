@@ -52,11 +52,7 @@ const loadActiveProjectIdFromStorage = (projects) => {
 // Obtener token del localStorage
 const getAuthToken = () => {
   try {
-    const authData = localStorage.getItem('mm_auth');
-    if (authData) {
-      const parsed = JSON.parse(authData);
-      return parsed.token;
-    }
+    return localStorage.getItem('mm_auth_token');
   } catch (e) {
     console.error('Error getting auth token:', e);
   }

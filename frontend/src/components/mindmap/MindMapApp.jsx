@@ -123,12 +123,49 @@ const MindMapApp = () => {
   // HANDLERS PARA GESTIÓN DE PROYECTOS
   // ==========================================
 
-  // Handler para "En Blanco" - Abrir modal
+  // Handler para "En Blanco" - Abrir modal de nombre
   const handleNewBlankClick = useCallback(() => {
-    setShowBlankModal(true);
+    setProjectNameModalConfig({
+      title: 'Nuevo Proyecto',
+      subtitle: 'Ingresa un nombre para tu mapa mental',
+      confirmText: 'Crear',
+      initialName: 'Nuevo Mapa',
+      isRename: false,
+      projectId: null
+    });
+    setShowProjectNameModal(true);
   }, []);
 
-  // Handler para confirmar "En Blanco" - CREA NUEVO PROYECTO
+  // Handler para confirmar nombre de proyecto
+  const handleConfirmProjectName = useCallback((name) => {
+    if (projectNameModalConfig.isRename && projectNameModalConfig.projectId) {
+      // Renombrar proyecto existente
+      renameProject(projectNameModalConfig.projectId, name);
+    } else {
+      // Crear nuevo proyecto
+      const success = createBlankMap(name);
+      if (success) {
+        resetPan();
+        resetZoom();
+      }
+    }
+    setShowProjectNameModal(false);
+  }, [projectNameModalConfig, createBlankMap, renameProject, resetPan, resetZoom]);
+
+  // Handler para renombrar proyecto (doble clic en el nombre)
+  const handleRenameProject = useCallback((projectId, currentName) => {
+    setProjectNameModalConfig({
+      title: 'Renombrar Proyecto',
+      subtitle: 'Cambia el nombre de tu mapa mental',
+      confirmText: 'Guardar',
+      initialName: currentName,
+      isRename: true,
+      projectId: projectId
+    });
+    setShowProjectNameModal(true);
+  }, []);
+
+  // Handler para confirmar "En Blanco" - DEPRECATED, usar handleConfirmProjectName
   const handleConfirmBlank = useCallback(() => {
     try {
       console.log('Creando nuevo proyecto en blanco...');

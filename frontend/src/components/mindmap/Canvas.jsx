@@ -395,12 +395,14 @@ const Canvas = ({
           linksCount={selectedNode?.links?.length || 0}
           stylePanelOpen={styleSidebarOpen && sidebarTab === 'styles'}
           iconPanelOpen={styleSidebarOpen && sidebarTab === 'icons'}
+          reminderPanelOpen={styleSidebarOpen && sidebarTab === 'reminders'}
           onEdit={handleToolbarEdit}
           onStyle={handleToolbarStyle}
           onComment={handleToolbarComment}
           onAddImage={handleToolbarAddImage}
           onAddLink={handleToolbarLink}
           onAddIcon={handleToolbarIcon}
+          onAddReminder={handleToolbarReminder}
           onDuplicate={handleToolbarDuplicate}
           onDelete={handleToolbarDelete}
         />

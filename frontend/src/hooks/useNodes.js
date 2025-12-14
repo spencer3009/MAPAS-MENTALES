@@ -373,6 +373,61 @@ export const useNodes = () => {
     ));
   }, [nodes, activeProjectId, pushToHistory]);
 
+  // Agregar enlace al nodo
+  const addNodeLink = useCallback((id, url) => {
+    const newNodes = nodes.map(n => {
+      if (n.id === id) {
+        const currentLinks = n.links || [];
+        return { ...n, links: [...currentLinks, url] };
+      }
+      return n;
+    });
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, activeProjectId, pushToHistory]);
+
+  // Eliminar enlace del nodo
+  const removeNodeLink = useCallback((id, linkIndex) => {
+    const newNodes = nodes.map(n => {
+      if (n.id === id) {
+        const currentLinks = n.links || [];
+        const updatedLinks = currentLinks.filter((_, idx) => idx !== linkIndex);
+        return { ...n, links: updatedLinks };
+      }
+      return n;
+    });
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, activeProjectId, pushToHistory]);
+
+  // Actualizar enlace del nodo
+  const updateNodeLink = useCallback((id, linkIndex, newUrl) => {
+    const newNodes = nodes.map(n => {
+      if (n.id === id) {
+        const currentLinks = n.links || [];
+        const updatedLinks = currentLinks.map((link, idx) => 
+          idx === linkIndex ? newUrl : link
+        );
+        return { ...n, links: updatedLinks };
+      }
+      return n;
+    });
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, activeProjectId, pushToHistory]);
+
   const deleteNode = useCallback((id) => {
     const findDescendants = (nodeId, allNodes) => {
       const children = allNodes.filter(n => n.parentId === nodeId);

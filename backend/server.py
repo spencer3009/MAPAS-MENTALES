@@ -237,7 +237,12 @@ async def send_whatsapp_message(phone_number: str, message: str) -> dict:
     
     # Si no hay configuración de WhatsApp, simular envío
     if not WHATSAPP_ACCESS_TOKEN or not WHATSAPP_PHONE_NUMBER_ID:
-        logger.info(f"[SIMULADO] WhatsApp a {phone_number}: {message}")
+        logger.info("=" * 60)
+        logger.info("📱 [SIMULACIÓN WHATSAPP] Notificación de recordatorio")
+        logger.info(f"📞 Destinatario: {phone_number}")
+        logger.info(f"📝 Mensaje: {message}")
+        logger.info("✅ Estado: ENVIADO (simulado)")
+        logger.info("=" * 60)
         return {
             "success": True,
             "simulated": True,
@@ -344,8 +349,8 @@ async def check_and_send_reminders():
         except Exception as e:
             logger.error(f"Error en scheduler: {str(e)}")
         
-        # Esperar 30 segundos antes de la siguiente verificación
-        await asyncio.sleep(30)
+        # Esperar 5 minutos (300 segundos) antes de la siguiente verificación
+        await asyncio.sleep(300)
 
 async def start_scheduler():
     """Iniciar el scheduler de recordatorios"""

@@ -43,8 +43,8 @@ const NodeToolbar = ({
   zoom = 1,
   currentColor,
   hasComment = false,
+  stylePanelOpen = false,
   onEdit,
-  onChangeColor,
   onStyle,
   onAddImage,
   onAddLink,
@@ -53,23 +53,10 @@ const NodeToolbar = ({
   onAddEmoji,
   onComment
 }) => {
-  const [showColorPicker, setShowColorPicker] = useState(false);
-
   if (!visible) return null;
-
-  const handleColorClick = (e) => {
-    e.stopPropagation();
-    setShowColorPicker(!showColorPicker);
-  };
-
-  const handleSelectColor = (color) => {
-    onChangeColor(color);
-    setShowColorPicker(false);
-  };
 
   const handleStyleClick = (e) => {
     e.stopPropagation();
-    setShowColorPicker(false);
     if (onStyle) onStyle();
   };
 
@@ -97,46 +84,13 @@ const NodeToolbar = ({
         onClick={onEdit}
       />
       
-      {/* Panel de estilos avanzados */}
+      {/* Panel de estilos - ícono de paleta */}
       <ToolbarButton 
-        icon={Settings2} 
+        icon={Palette} 
         label="Personalizar estilo" 
         onClick={handleStyleClick}
+        active={stylePanelOpen}
       />
-      
-      {/* Color picker rápido (legacy) */}
-      <div className="relative">
-        <ToolbarButton 
-          icon={Palette} 
-          label="Color rápido" 
-          onClick={handleColorClick}
-          active={showColorPicker}
-        />
-        
-        {showColorPicker && (
-          <div 
-            className="
-              absolute top-full left-1/2 -translate-x-1/2 mt-2
-              bg-white rounded-lg shadow-xl border border-gray-200
-              p-2 flex gap-1.5
-              animate-in fade-in zoom-in-95 duration-150
-            "
-          >
-            {COLORS.map(({ key, bg, label }) => (
-              <button
-                key={key}
-                onClick={() => handleSelectColor(key)}
-                className={`
-                  w-6 h-6 rounded-full ${bg}
-                  transition-transform hover:scale-110
-                  ${currentColor === key ? 'ring-2 ring-offset-2 ring-gray-400' : ''}
-                `}
-                title={label}
-              />
-            ))}
-          </div>
-        )}
-      </div>
 
       {/* Comentario */}
       <ToolbarButton 

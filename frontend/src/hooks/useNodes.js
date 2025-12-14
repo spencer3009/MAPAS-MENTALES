@@ -427,17 +427,15 @@ export const useNodes = () => {
       };
 
       // Inicializar historial para el nuevo proyecto
-      setProjectHistories(prev => ({
-        ...prev,
-        [newProject.id]: {
-          states: [JSON.stringify(initialNodes)],
-          pointer: 0
-        }
-      }));
+      historyRef.current[newProject.id] = {
+        states: [JSON.stringify(initialNodes)],
+        pointer: 0
+      };
 
       setProjects(prev => [newProject, ...prev]);
       setActiveProjectId(newProject.id);
       setSelectedNodeId(null);
+      setHistoryVersion(v => v + 1);
       
       console.log('Nuevo proyecto creado:', newProject.name);
       return true;

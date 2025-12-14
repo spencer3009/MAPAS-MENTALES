@@ -112,7 +112,7 @@ const NodeToolbar = ({
 
       {/* Icono - NUEVO */}
       <ToolbarButton 
-        icon={Sticker} 
+        icon={Laugh} 
         label="Agregar icono" 
         onClick={handleIconClick}
         active={iconPanelOpen}

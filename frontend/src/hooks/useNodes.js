@@ -129,74 +129,91 @@ export const useNodes = () => {
     
     const newState = JSON.stringify(nodesToSave);
     
-    setHistory(prev => {
-      const projectHistory = prev[projectId] || [];
+    setProjectHistories(prev => {
+      const projectHistory = prev[projectId] || { states: [], pointer: -1 };
+      
+      // Truncar estados futuros si estamos en medio del historial
+      const truncatedStates = projectHistory.states.slice(0, projectHistory.pointer + 1);
       
       // No duplicar si es igual al último estado
-      if (projectHistory.length > 0 && projectHistory[projectHistory.length - 1] === newState) {
+      if (truncatedStates.length > 0 && truncatedStates[truncatedStates.length - 1] === newState) {
         return prev;
       }
       
-      // Agregar el nuevo estado
-      const newHistory = [...projectHistory, newState];
+      // Agregar nuevo estado
+      const newStates = [...truncatedStates, newState];
       
       // Limitar a 50 estados
-      if (newHistory.length > 50) {
-        newHistory.shift();
+      while (newStates.length > 50) {
+        newStates.shift();
       }
       
-      return { ...prev, [projectId]: newHistory };
+      return {
+        ...prev,
+        [projectId]: {
+          states: newStates,
+          pointer: newStates.length - 1
+        }
+      };
     });
-    
-    setHistoryIndex(prev => {
-      const currentHistory = history[projectId] || [];
-      // El nuevo índice es el último elemento del historial actualizado
-      return { ...prev, [projectId]: currentHistory.length };
-    });
-  }, [history]);
+  }, []);
 
-  const canUndo = (history[activeProjectId]?.length || 0) > 1 && (historyIndex[activeProjectId] ?? 0) > 0;
-  const canRedo = (historyIndex[activeProjectId] ?? 0) < (history[activeProjectId]?.length || 0) - 1;
+  // Calcular canUndo y canRedo
+  const currentProjectHistory = projectHistories[activeProjectId] || { states: [], pointer: 0 };
+  const canUndo = currentProjectHistory.pointer > 0;
+  const canRedo = currentProjectHistory.pointer < currentProjectHistory.states.length - 1;
 
   const undo = useCallback(() => {
-    const projectHistory = history[activeProjectId];
-    const currentIndex = historyIndex[activeProjectId] ?? 0;
+    const projectHistory = projectHistories[activeProjectId];
     
-    if (projectHistory && currentIndex > 0) {
+    if (projectHistory && projectHistory.pointer > 0) {
       isUndoRedoAction.current = true;
-      const prevState = JSON.parse(projectHistory[currentIndex - 1]);
+      const newPointer = projectHistory.pointer - 1;
+      const prevState = JSON.parse(projectHistory.states[newPointer]);
       
-      setHistoryIndex(prev => ({ ...prev, [activeProjectId]: currentIndex - 1 }));
+      setProjectHistories(prev => ({
+        ...prev,
+        [activeProjectId]: {
+          ...prev[activeProjectId],
+          pointer: newPointer
+        }
+      }));
+      
       setProjects(prev => prev.map(p => 
         p.id === activeProjectId 
           ? { ...p, nodes: prevState, updatedAt: new Date().toISOString() }
           : p
       ));
       
-      // Reset flag después del update
       setTimeout(() => { isUndoRedoAction.current = false; }, 0);
     }
-  }, [activeProjectId, history, historyIndex]);
+  }, [activeProjectId, projectHistories]);
 
   const redo = useCallback(() => {
-    const projectHistory = history[activeProjectId];
-    const currentIndex = historyIndex[activeProjectId] ?? 0;
+    const projectHistory = projectHistories[activeProjectId];
     
-    if (projectHistory && currentIndex < projectHistory.length - 1) {
+    if (projectHistory && projectHistory.pointer < projectHistory.states.length - 1) {
       isUndoRedoAction.current = true;
-      const nextState = JSON.parse(projectHistory[currentIndex + 1]);
+      const newPointer = projectHistory.pointer + 1;
+      const nextState = JSON.parse(projectHistory.states[newPointer]);
       
-      setHistoryIndex(prev => ({ ...prev, [activeProjectId]: currentIndex + 1 }));
+      setProjectHistories(prev => ({
+        ...prev,
+        [activeProjectId]: {
+          ...prev[activeProjectId],
+          pointer: newPointer
+        }
+      }));
+      
       setProjects(prev => prev.map(p => 
         p.id === activeProjectId 
           ? { ...p, nodes: nextState, updatedAt: new Date().toISOString() }
           : p
       ));
       
-      // Reset flag después del update
       setTimeout(() => { isUndoRedoAction.current = false; }, 0);
     }
-  }, [activeProjectId, history, historyIndex]);
+  }, [activeProjectId, projectHistories]);
 
   // ==========================================
   // FUNCIONES DE NODOS

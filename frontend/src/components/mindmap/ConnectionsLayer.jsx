@@ -1,8 +1,8 @@
 import React, { memo } from 'react';
 import { generateBezierPath, getNodeOutputPoint, getNodeInputPoint } from '../../utils/curve';
 
-const NODE_WIDTH = 160;
-const NODE_HEIGHT = 64;
+const DEFAULT_NODE_WIDTH = 160;
+const DEFAULT_NODE_HEIGHT = 64;
 
 // Función auxiliar para obtener el dasharray según el estilo
 const getStrokeDasharray = (style) => {
@@ -23,8 +23,13 @@ const ConnectionsLayer = memo(({ nodes }) => {
       const parent = nodes.find(n => n.id === node.parentId);
       if (!parent) return null;
 
-      const start = getNodeOutputPoint(parent, NODE_WIDTH, NODE_HEIGHT);
-      const end = getNodeInputPoint(node, NODE_HEIGHT);
+      // Usar tamaño dinámico de cada nodo
+      const parentWidth = parent.width || DEFAULT_NODE_WIDTH;
+      const parentHeight = parent.height || DEFAULT_NODE_HEIGHT;
+      const nodeHeight = node.height || DEFAULT_NODE_HEIGHT;
+
+      const start = getNodeOutputPoint(parent, parentWidth, parentHeight);
+      const end = getNodeInputPoint(node, nodeHeight);
       const path = generateBezierPath(start.x, start.y, end.x, end.y);
 
       // Usar estilos de línea del nodo hijo (la línea va hacia el hijo)

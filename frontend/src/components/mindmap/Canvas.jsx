@@ -23,6 +23,7 @@ const Canvas = ({
   onUpdateNodeComment,
   onUpdateNodeStyle,
   onUpdateNodeSize,
+  onUpdateNodeIcon,
   onSaveNodePositionToHistory,
   onOpenContextMenu,
   onCloseContextMenu,

@@ -478,6 +478,15 @@ export const useNodes = () => {
         updatedAt: new Date().toISOString()
       };
 
+      // Inicializar historial para el nuevo proyecto
+      setProjectHistories(prev => ({
+        ...prev,
+        [newProject.id]: {
+          states: [JSON.stringify(mappedNodes)],
+          pointer: 0
+        }
+      }));
+
       setProjects(prev => [newProject, ...prev]);
       setActiveProjectId(newProject.id);
       setSelectedNodeId(null);

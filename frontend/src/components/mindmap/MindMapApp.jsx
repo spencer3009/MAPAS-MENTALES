@@ -300,33 +300,46 @@ const MindMapApp = () => {
           zoom={zoom}
         />
 
-        {/* Canvas principal */}
-        <Canvas
-          nodes={nodes}
-          selectedNodeId={selectedNodeId}
-          pan={pan}
-          zoom={zoom}
-          isPanning={isPanning}
-          contextMenu={contextMenu}
-          onSelectNode={setSelectedNodeId}
-          onStartPanning={startPanning}
-          onUpdatePanning={updatePanning}
-          onStopPanning={stopPanning}
-          onUpdateNodePosition={updateNodePosition}
-          onUpdateNodeText={updateNodeText}
-          onUpdateNodeComment={updateNodeComment}
-          onUpdateNodeStyle={updateNodeStyle}
-          onUpdateNodeSize={updateNodeSize}
-          onUpdateNodeIcon={updateNodeIcon}
-          onSaveNodePositionToHistory={saveNodePositionToHistory}
-          onOpenContextMenu={openContextMenu}
-          onCloseContextMenu={closeContextMenu}
-          onAddChildNode={addNode}
-          onDuplicateNode={duplicateNode}
-          onDeleteNode={deleteNode}
-          onChangeNodeColor={updateNodeColor}
-          onWheel={handleWheel}
-        />
+        {/* Canvas y Sidebar derecho */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Canvas principal */}
+          <Canvas
+            nodes={nodes}
+            selectedNodeId={selectedNodeId}
+            pan={pan}
+            zoom={zoom}
+            isPanning={isPanning}
+            contextMenu={contextMenu}
+            onSelectNode={setSelectedNodeId}
+            onStartPanning={startPanning}
+            onUpdatePanning={updatePanning}
+            onStopPanning={stopPanning}
+            onUpdateNodePosition={updateNodePosition}
+            onUpdateNodeText={updateNodeText}
+            onUpdateNodeComment={updateNodeComment}
+            onUpdateNodeStyle={updateNodeStyle}
+            onUpdateNodeSize={updateNodeSize}
+            onUpdateNodeIcon={updateNodeIcon}
+            onSaveNodePositionToHistory={saveNodePositionToHistory}
+            onOpenContextMenu={openContextMenu}
+            onCloseContextMenu={closeContextMenu}
+            onAddChildNode={addNode}
+            onDuplicateNode={duplicateNode}
+            onDeleteNode={deleteNode}
+            onChangeNodeColor={updateNodeColor}
+            onWheel={handleWheel}
+            onToggleStyleSidebar={handleToggleStyleSidebar}
+            styleSidebarOpen={showStyleSidebar}
+          />
+
+          {/* Sidebar derecho de estilos */}
+          <RightStyleSidebar
+            isOpen={showStyleSidebar}
+            selectedNode={selectedNode}
+            onStyleChange={updateNodeStyle}
+            onClose={handleCloseStyleSidebar}
+          />
+        </div>
       </div>
 
       {/* ==================== MODALES ==================== */}

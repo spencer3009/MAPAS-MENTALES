@@ -127,33 +127,16 @@ const Canvas = ({
   // Handler para abrir/cerrar el sidebar de estilos
   const handleToolbarStyle = useCallback(() => {
     if (onToggleStyleSidebar) {
-      onToggleStyleSidebar();
+      onToggleStyleSidebar('styles');
     }
   }, [onToggleStyleSidebar]);
 
-  // Handlers del panel de iconos
+  // Handler para abrir el sidebar en la pestaña de iconos
   const handleToolbarIcon = useCallback(() => {
-    if (selectedNodeId) {
-      // Toggle del panel de iconos
-      if (iconPanel.isOpen && iconPanel.nodeId === selectedNodeId) {
-        setIconPanel({ isOpen: false, nodeId: null });
-      } else {
-        setIconPanel({ isOpen: true, nodeId: selectedNodeId });
-        setCommentPopover({ isOpen: false, nodeId: null });
-      }
+    if (onOpenIconPanel) {
+      onOpenIconPanel();
     }
-  }, [selectedNodeId, iconPanel.isOpen, iconPanel.nodeId]);
-
-  const handleIconSelect = useCallback((iconData) => {
-    if (iconPanel.nodeId && onUpdateNodeIcon) {
-      onUpdateNodeIcon(iconPanel.nodeId, iconData);
-    }
-    setIconPanel({ isOpen: false, nodeId: null });
-  }, [iconPanel.nodeId, onUpdateNodeIcon]);
-
-  const handleIconPanelClose = useCallback(() => {
-    setIconPanel({ isOpen: false, nodeId: null });
-  }, []);
+  }, [onOpenIconPanel]);
 
   const handleToolbarAddImage = useCallback(() => {
     alert('Funcionalidad de agregar imagen próximamente');

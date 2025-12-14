@@ -111,11 +111,12 @@ const Sidebar = ({
         {projects.map((project) => {
           const isActive = project.id === activeProjectId;
           const nodeCount = project.nodes?.length || 0;
+          const isEditing = editingProjectId === project.id;
           
           return (
             <div
               key={project.id}
-              onClick={() => !isActive && onSwitchProject(project.id)}
+              onClick={() => !isActive && !isEditing && onSwitchProject(project.id)}
               className={`
                 rounded-xl p-3 relative group cursor-pointer
                 transition-all duration-200
@@ -137,14 +138,38 @@ const Sidebar = ({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className={`
-                      font-medium text-sm truncate
-                      ${isActive ? 'text-gray-900' : 'text-gray-700'}
-                    `}>
-                      {project.name}
-                    </h3>
-                    {isActive && (
-                      <Check size={14} className="text-blue-600 shrink-0" />
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={editingName}
+                        onChange={(e) => setEditingName(e.target.value)}
+                        onBlur={handleSaveEdit}
+                        onKeyDown={handleKeyDown}
+                        onClick={(e) => e.stopPropagation()}
+                        autoFocus
+                        className="
+                          flex-1 font-medium text-sm text-gray-900
+                          px-2 py-0.5 rounded border border-blue-500
+                          outline-none focus:ring-2 focus:ring-blue-200
+                        "
+                        maxLength={50}
+                      />
+                    ) : (
+                      <>
+                        <h3 
+                          className={`
+                            font-medium text-sm truncate
+                            ${isActive ? 'text-gray-900' : 'text-gray-700'}
+                          `}
+                          onDoubleClick={(e) => handleStartEdit(project, e)}
+                          title="Doble clic para editar"
+                        >
+                          {project.name}
+                        </h3>
+                        {isActive && (
+                          <Check size={14} className="text-blue-600 shrink-0" />
+                        )}
+                      </>
                     )}
                   </div>
                   <div className="flex justify-between items-center mt-1.5">
@@ -161,23 +186,38 @@ const Sidebar = ({
                 </div>
               </div>
               
-              {/* Botón eliminar - visible en hover */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDeleteProject(project.id);
-                }}
-                className={`
-                  absolute top-2 right-2 p-1.5 rounded-lg
-                  bg-red-50 hover:bg-red-100
-                  text-red-500 hover:text-red-600
-                  opacity-0 group-hover:opacity-100
-                  transition-all duration-200
-                `}
-                title="Eliminar proyecto"
-              >
-                <Trash2 size={12} />
-              </button>
+              {/* Botones de acción - visibles en hover */}
+              <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                {!isEditing && (
+                  <button
+                    onClick={(e) => handleStartEdit(project, e)}
+                    className="
+                      p-1.5 rounded-lg
+                      bg-gray-50 hover:bg-gray-100
+                      text-gray-500 hover:text-gray-600
+                      transition-all duration-200
+                    "
+                    title="Renombrar proyecto"
+                  >
+                    <Pencil size={12} />
+                  </button>
+                )}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteProject(project.id);
+                  }}
+                  className="
+                    p-1.5 rounded-lg
+                    bg-red-50 hover:bg-red-100
+                    text-red-500 hover:text-red-600
+                    transition-all duration-200
+                  "
+                  title="Eliminar proyecto"
+                >
+                  <Trash2 size={12} />
+                </button>
+              </div>
             </div>
           );
         })}

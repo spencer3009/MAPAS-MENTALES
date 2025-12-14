@@ -75,17 +75,6 @@ const Canvas = ({
     return { x, y };
   }, [nodes, zoom, pan]);
 
-  // Calcular posición del panel de estilos
-  const getStylePanelPosition = useCallback((nodeId) => {
-    const node = nodes.find(n => n.id === nodeId);
-    if (!node) return { x: 0, y: 0 };
-    
-    const x = (node.x + NODE_WIDTH / 2) * zoom + pan.x;
-    const y = (node.y + NODE_HEIGHT + 15) * zoom + pan.y;
-    
-    return { x, y };
-  }, [nodes, zoom, pan]);
-
   // Handler para agregar nodo hijo desde el botón "+"
   const handleAddChildFromButton = useCallback(() => {
     if (selectedNodeId) {

@@ -747,7 +747,7 @@ export const useNodes = () => {
   }, [saveProjectToServer]);
 
   // Cargar desde template (AGREGA, no reemplaza)
-  const loadFromTemplate = useCallback((templateNodes, templateName = 'Template') => {
+  const loadFromTemplate = useCallback(async (templateNodes, templateName = 'Template') => {
     try {
       console.log('Creando proyecto desde template:', templateName);
       
@@ -784,13 +784,16 @@ export const useNodes = () => {
       setSelectedNodeId(null);
       setHistoryVersion(v => v + 1);
       
+      // Guardar en servidor inmediatamente
+      await saveProjectToServer(newProject);
+      
       console.log('Proyecto desde template creado:', newProject.name);
       return true;
     } catch (error) {
       console.error('Error al cargar template:', error);
       return false;
     }
-  }, []);
+  }, [saveProjectToServer]);
 
   // Eliminar proyecto (solo el activo)
   const deleteProject = useCallback((projectIdToDelete = activeProjectId) => {

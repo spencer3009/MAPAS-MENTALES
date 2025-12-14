@@ -131,14 +131,15 @@ export const useNodes = () => {
     
     setProjectHistories(prev => {
       const projectHistory = prev[projectId] || { states: [], pointer: -1 };
+      const { states, pointer } = projectHistory;
       
-      // Truncar estados futuros si estamos en medio del historial
-      const truncatedStates = projectHistory.states.slice(0, projectHistory.pointer + 1);
-      
-      // No duplicar si es igual al último estado
-      if (truncatedStates.length > 0 && truncatedStates[truncatedStates.length - 1] === newState) {
+      // No duplicar si es igual al estado actual
+      if (states.length > 0 && pointer >= 0 && states[pointer] === newState) {
         return prev;
       }
+      
+      // Truncar estados futuros si estamos en medio del historial
+      const truncatedStates = states.slice(0, pointer + 1);
       
       // Agregar nuevo estado
       const newStates = [...truncatedStates, newState];
@@ -147,6 +148,8 @@ export const useNodes = () => {
       while (newStates.length > 50) {
         newStates.shift();
       }
+      
+      console.log(`History updated for ${projectId}: ${newStates.length} states, pointer: ${newStates.length - 1}`);
       
       return {
         ...prev,
@@ -160,7 +163,7 @@ export const useNodes = () => {
 
   // Calcular canUndo y canRedo
   const currentProjectHistory = projectHistories[activeProjectId] || { states: [], pointer: 0 };
-  const canUndo = currentProjectHistory.pointer > 0;
+  const canUndo = currentProjectHistory.states.length > 1 && currentProjectHistory.pointer > 0;
   const canRedo = currentProjectHistory.pointer < currentProjectHistory.states.length - 1;
 
   const undo = useCallback(() => {
@@ -170,6 +173,8 @@ export const useNodes = () => {
       isUndoRedoAction.current = true;
       const newPointer = projectHistory.pointer - 1;
       const prevState = JSON.parse(projectHistory.states[newPointer]);
+      
+      console.log(`Undo: moving from ${projectHistory.pointer} to ${newPointer}`);
       
       setProjectHistories(prev => ({
         ...prev,
@@ -196,6 +201,8 @@ export const useNodes = () => {
       isUndoRedoAction.current = true;
       const newPointer = projectHistory.pointer + 1;
       const nextState = JSON.parse(projectHistory.states[newPointer]);
+      
+      console.log(`Redo: moving from ${projectHistory.pointer} to ${newPointer}`);
       
       setProjectHistories(prev => ({
         ...prev,

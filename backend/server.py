@@ -599,7 +599,7 @@ async def create_project(
     await db.projects.insert_one(project)
     
     # Return without _id
-    del project["_id"] if "_id" in project else None
+    project.pop("_id", None)
     return project
 
 @api_router.put("/projects/{project_id}", response_model=ProjectResponse)

@@ -853,20 +853,27 @@ export const useNodes = () => {
   }, [projects]);
 
   // Renombrar proyecto
-  const renameProject = useCallback((projectId, newName) => {
+  const renameProject = useCallback(async (projectId, newName) => {
     try {
       setProjects(prev => prev.map(p => 
         p.id === projectId 
           ? { ...p, name: newName, updatedAt: new Date().toISOString() }
           : p
       ));
+      
+      // Guardar en servidor
+      const project = projects.find(p => p.id === projectId);
+      if (project) {
+        await saveProjectToServer({ ...project, name: newName });
+      }
+      
       console.log('Proyecto renombrado:', newName);
       return true;
     } catch (error) {
       console.error('Error al renombrar proyecto:', error);
       return false;
     }
-  }, []);
+  }, [projects, saveProjectToServer]);
 
   // Funciones de compatibilidad
   const setProjectName = useCallback((name) => {

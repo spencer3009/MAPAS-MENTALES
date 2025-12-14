@@ -331,14 +331,13 @@ const IconPickerPanel = ({
 
   if (!isOpen) return null;
 
-  // Calcular posición del panel para evitar que se salga de pantalla
+  // Calcular posición del panel - SIEMPRE hacia abajo con scroll interno
   const getPanelStyle = () => {
     const panelWidth = 520;
-    const panelHeight = 550;
     let left = position.x;
-    let top = position.y + 10;
+    let top = position.y + 10; // Siempre debajo del toolbar
     
-    // Ajustar si se sale por la derecha
+    // Solo ajustar horizontalmente si se sale de pantalla
     if (typeof window !== 'undefined') {
       if (left + panelWidth / 2 > window.innerWidth - 20) {
         left = window.innerWidth - panelWidth / 2 - 20;
@@ -346,10 +345,17 @@ const IconPickerPanel = ({
       if (left - panelWidth / 2 < 20) {
         left = panelWidth / 2 + 20;
       }
-      // Ajustar si se sale por abajo
-      if (top + panelHeight > window.innerHeight - 20) {
-        top = position.y - panelHeight - 60;
-      }
+      // Calcular altura máxima disponible hacia abajo
+      const availableHeight = window.innerHeight - top - 20;
+      const maxPanelHeight = Math.max(350, Math.min(550, availableHeight));
+      
+      return {
+        left,
+        top,
+        transform: 'translateX(-50%)',
+        width: `${panelWidth}px`,
+        maxHeight: `${maxPanelHeight}px`
+      };
     }
     
     return {
@@ -357,7 +363,7 @@ const IconPickerPanel = ({
       top,
       transform: 'translateX(-50%)',
       width: `${panelWidth}px`,
-      maxHeight: `${panelHeight}px`
+      maxHeight: '550px'
     };
   };
 

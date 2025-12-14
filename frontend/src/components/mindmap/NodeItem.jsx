@@ -150,6 +150,52 @@ const NodeItem = memo(({
     }
   };
 
+  // ==========================================
+  // RESIZE HANDLE
+  // ==========================================
+  
+  const handleResizeStart = useCallback((e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    setIsResizing(true);
+    resizeStartRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      startWidth: nodeWidth,
+      startHeight: nodeHeight
+    };
+
+    const handleResizeMove = (moveEvent) => {
+      if (!resizeStartRef.current) return;
+      
+      const deltaX = moveEvent.clientX - resizeStartRef.current.startX;
+      const deltaY = moveEvent.clientY - resizeStartRef.current.startY;
+      
+      const newWidth = Math.max(MIN_WIDTH, resizeStartRef.current.startWidth + deltaX);
+      const newHeight = Math.max(MIN_HEIGHT, resizeStartRef.current.startHeight + deltaY);
+      
+      if (onUpdateSize) {
+        onUpdateSize(node.id, Math.round(newWidth), Math.round(newHeight), false);
+      }
+    };
+
+    const handleResizeEnd = () => {
+      setIsResizing(false);
+      resizeStartRef.current = null;
+      document.removeEventListener('mousemove', handleResizeMove);
+      document.removeEventListener('mouseup', handleResizeEnd);
+      
+      // Guardar en historial al finalizar
+      if (onUpdateSize) {
+        onUpdateSize(node.id, nodeWidth, nodeHeight, true);
+      }
+    };
+
+    document.addEventListener('mousemove', handleResizeMove);
+    document.addEventListener('mouseup', handleResizeEnd);
+  }, [node.id, nodeWidth, nodeHeight, onUpdateSize]);
+
   // Exponer método para iniciar edición
   const startEdit = useCallback(() => {
     handleStartEdit();
@@ -163,13 +209,16 @@ const NodeItem = memo(({
 
   // Calcular dimensiones según la forma
   const getNodeDimensions = () => {
+    const baseWidth = nodeWidth;
+    const baseHeight = nodeHeight;
+    
     if (shape === 'pill') {
-      return { width: NODE_WIDTH + 20, height: NODE_HEIGHT };
+      return { width: baseWidth + 20, height: baseHeight };
     }
     if (shape === 'cloud') {
-      return { width: NODE_WIDTH + 30, height: NODE_HEIGHT + 10 };
+      return { width: baseWidth + 30, height: baseHeight + 10 };
     }
-    return { width: NODE_WIDTH, height: NODE_HEIGHT };
+    return { width: baseWidth, height: baseHeight };
   };
 
   const dimensions = getNodeDimensions();

@@ -410,6 +410,19 @@ const Canvas = ({
         />
       )}
 
+      {/* Popover de enlaces */}
+      {linkPopover.isOpen && linkPopover.nodeId && (
+        <LinkPopover
+          isOpen={true}
+          position={getCommentPopoverPosition(linkPopover.nodeId)}
+          links={linkNode?.links || []}
+          onAddLink={handleAddLink}
+          onRemoveLink={handleRemoveLink}
+          onUpdateLink={handleUpdateLink}
+          onClose={handleLinkPopoverClose}
+        />
+      )}
+
       {/* Menú contextual */}
       <ContextMenu
         position={contextMenu}

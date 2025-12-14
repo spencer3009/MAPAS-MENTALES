@@ -507,8 +507,194 @@ async def test_whatsapp(
 
 
 # ==========================================
-# EXISTING MODELS
+# PROJECT MODELS
 # ==========================================
+
+class NodeData(BaseModel):
+    id: str
+    text: str
+    x: float
+    y: float
+    parentId: Optional[str] = None
+    color: Optional[str] = "blue"
+    bgColor: Optional[str] = None
+    textColor: Optional[str] = None
+    borderColor: Optional[str] = None
+    borderWidth: Optional[int] = None
+    borderStyle: Optional[str] = None
+    lineColor: Optional[str] = None
+    lineWidth: Optional[int] = None
+    lineStyle: Optional[str] = None
+    shape: Optional[str] = None
+    width: Optional[float] = None
+    height: Optional[float] = None
+    comment: Optional[str] = None
+    icon: Optional[dict] = None
+    links: Optional[List[dict]] = None
+
+class ProjectCreate(BaseModel):
+    id: Optional[str] = None
+    name: str
+    nodes: List[NodeData]
+
+class ProjectUpdate(BaseModel):
+    name: Optional[str] = None
+    nodes: Optional[List[NodeData]] = None
+
+class ProjectResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str
+    name: str
+    nodes: List[dict]
+    username: str
+    createdAt: str
+    updatedAt: str
+
+
+# ==========================================
+# PROJECT ENDPOINTS
+# ==========================================
+
+@api_router.get("/projects", response_model=List[ProjectResponse])
+async def get_projects(current_user: dict = Depends(get_current_user)):
+    """Obtener todos los proyectos del usuario"""
+    projects = await db.projects.find(
+        {"username": current_user["username"]},
+        {"_id": 0}
+    ).to_list(100)
+    return projects
+
+@api_router.get("/projects/{project_id}", response_model=ProjectResponse)
+async def get_project(
+    project_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener un proyecto específico"""
+    project = await db.projects.find_one(
+        {"id": project_id, "username": current_user["username"]},
+        {"_id": 0}
+    )
+    if not project:
+        raise HTTPException(status_code=404, detail="Proyecto no encontrado")
+    return project
+
+@api_router.post("/projects", response_model=ProjectResponse)
+async def create_project(
+    project_data: ProjectCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Crear un nuevo proyecto"""
+    now = datetime.now(timezone.utc).isoformat()
+    
+    project = {
+        "id": project_data.id or str(uuid.uuid4()),
+        "name": project_data.name,
+        "nodes": [node.model_dump() for node in project_data.nodes],
+        "username": current_user["username"],
+        "createdAt": now,
+        "updatedAt": now
+    }
+    
+    await db.projects.insert_one(project)
+    
+    # Return without _id
+    del project["_id"] if "_id" in project else None
+    return project
+
+@api_router.put("/projects/{project_id}", response_model=ProjectResponse)
+async def update_project(
+    project_id: str,
+    update_data: ProjectUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Actualizar un proyecto existente"""
+    project = await db.projects.find_one(
+        {"id": project_id, "username": current_user["username"]},
+        {"_id": 0}
+    )
+    
+    if not project:
+        raise HTTPException(status_code=404, detail="Proyecto no encontrado")
+    
+    update_dict = {"updatedAt": datetime.now(timezone.utc).isoformat()}
+    
+    if update_data.name is not None:
+        update_dict["name"] = update_data.name
+    
+    if update_data.nodes is not None:
+        update_dict["nodes"] = [node.model_dump() for node in update_data.nodes]
+    
+    await db.projects.update_one(
+        {"id": project_id},
+        {"$set": update_dict}
+    )
+    
+    # Return updated project
+    updated = await db.projects.find_one({"id": project_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/projects/{project_id}")
+async def delete_project(
+    project_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Eliminar un proyecto"""
+    result = await db.projects.delete_one({
+        "id": project_id,
+        "username": current_user["username"]
+    })
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Proyecto no encontrado")
+    
+    # También eliminar recordatorios asociados al proyecto
+    await db.reminders.delete_many({
+        "project_id": project_id,
+        "username": current_user["username"]
+    })
+    
+    return {"message": "Proyecto eliminado"}
+
+@api_router.post("/projects/sync")
+async def sync_projects(
+    projects: List[ProjectCreate],
+    current_user: dict = Depends(get_current_user)
+):
+    """Sincronizar proyectos desde localStorage al servidor"""
+    username = current_user["username"]
+    synced = []
+    
+    for project_data in projects:
+        now = datetime.now(timezone.utc).isoformat()
+        
+        # Check if project exists
+        existing = await db.projects.find_one(
+            {"id": project_data.id, "username": username}
+        )
+        
+        project_dict = {
+            "id": project_data.id or str(uuid.uuid4()),
+            "name": project_data.name,
+            "nodes": [node.model_dump() for node in project_data.nodes],
+            "username": username,
+            "updatedAt": now
+        }
+        
+        if existing:
+            # Update existing
+            await db.projects.update_one(
+                {"id": project_data.id},
+                {"$set": project_dict}
+            )
+        else:
+            # Create new
+            project_dict["createdAt"] = now
+            await db.projects.insert_one(project_dict)
+        
+        synced.append(project_dict["id"])
+    
+    return {"synced": len(synced), "project_ids": synced}
 
 
 # ==========================================

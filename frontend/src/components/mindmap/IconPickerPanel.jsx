@@ -376,6 +376,7 @@ const IconPickerPanel = ({
         border border-gray-200
         overflow-hidden
         animate-in fade-in zoom-in-95 duration-200
+        flex flex-col
       "
       style={getPanelStyle()}
       onMouseDown={(e) => e.stopPropagation()}

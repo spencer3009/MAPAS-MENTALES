@@ -434,6 +434,16 @@ const MindMapApp = () => {
         }}
         variant="danger"
       />
+
+      {/* Modal: Recordatorio de proyecto */}
+      <ProjectReminderModal
+        isOpen={showProjectReminderModal}
+        project={projectForReminder}
+        onClose={() => {
+          setShowProjectReminderModal(false);
+          setProjectForReminder(null);
+        }}
+      />
     </div>
   );
 };

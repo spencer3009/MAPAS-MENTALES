@@ -278,6 +278,12 @@ const MindMapApp = () => {
     setSidebarTab('reminders');
   }, []);
 
+  // Handler para abrir recordatorio de proyecto
+  const handleProjectReminder = useCallback((project) => {
+    setProjectForReminder(project);
+    setShowProjectReminderModal(true);
+  }, []);
+
   const handleCloseStyleSidebar = useCallback(() => {
     setShowStyleSidebar(false);
   }, []);

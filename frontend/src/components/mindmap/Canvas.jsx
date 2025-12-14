@@ -179,6 +179,13 @@ const Canvas = ({
     }
   }, [onOpenIconPanel]);
 
+  // Handler para abrir el sidebar en la pestaña de recordatorios
+  const handleToolbarReminder = useCallback(() => {
+    if (onOpenReminderPanel) {
+      onOpenReminderPanel();
+    }
+  }, [onOpenReminderPanel]);
+
   const handleToolbarAddImage = useCallback(() => {
     alert('Funcionalidad de agregar imagen próximamente');
   }, []);

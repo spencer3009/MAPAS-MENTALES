@@ -444,6 +444,20 @@ const Canvas = ({
         />
       )}
 
+      {/* Panel de iconos - posicionado debajo del toolbar */}
+      {iconPanel.isOpen && iconPanel.nodeId && controlPositions.toolbar && (
+        <IconPickerPanel
+          isOpen={true}
+          position={{ 
+            x: controlPositions.toolbar.x, 
+            y: controlPositions.toolbar.y + 50
+          }}
+          currentIcon={iconNode?.icon || null}
+          onSelectIcon={handleIconSelect}
+          onClose={handleIconPanelClose}
+        />
+      )}
+
       {/* Menú contextual */}
       <ContextMenu
         position={contextMenu}

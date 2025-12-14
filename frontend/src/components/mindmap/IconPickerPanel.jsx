@@ -472,8 +472,8 @@ const IconPickerPanel = ({
         </div>
       )}
 
-      {/* Grid de iconos */}
-      <div className="p-3 overflow-y-auto" style={{ maxHeight: '320px' }}>
+      {/* Grid de iconos - área con scroll flexible */}
+      <div className="p-3 overflow-y-auto flex-1 min-h-0">
         {searchTerm && (
           <p className="text-xs text-gray-500 mb-2 px-1">
             {filteredIcons.length} resultado{filteredIcons.length !== 1 ? 's' : ''} para &ldquo;{searchTerm}&rdquo;

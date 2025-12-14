@@ -701,7 +701,7 @@ export const useNodes = () => {
   // ==========================================
 
   // Crear proyecto en blanco (AGREGA, no reemplaza)
-  const createBlankMap = useCallback((name = 'Nuevo Mapa') => {
+  const createBlankMap = useCallback(async (name = 'Nuevo Mapa') => {
     try {
       console.log('Creando nuevo proyecto en blanco...');
       
@@ -735,13 +735,16 @@ export const useNodes = () => {
       setSelectedNodeId(null);
       setHistoryVersion(v => v + 1);
       
+      // Guardar en servidor inmediatamente
+      await saveProjectToServer(newProject);
+      
       console.log('Nuevo proyecto creado:', newProject.name);
       return true;
     } catch (error) {
       console.error('Error al crear proyecto en blanco:', error);
       return false;
     }
-  }, []);
+  }, [saveProjectToServer]);
 
   // Cargar desde template (AGREGA, no reemplaza)
   const loadFromTemplate = useCallback((templateNodes, templateName = 'Template') => {

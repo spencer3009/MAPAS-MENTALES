@@ -238,12 +238,6 @@ export const useNodes = () => {
   const addNode = useCallback((parentId = null, position = null) => {
     const newId = crypto.randomUUID();
     
-    // Primero guardamos el estado actual en historial
-    const currentProject = projects.find(p => p.id === activeProjectId);
-    if (currentProject) {
-      saveToHistory(activeProjectId, currentProject.nodes);
-    }
-
     setProjects(prev => {
       const project = prev.find(p => p.id === activeProjectId);
       if (!project) {
@@ -252,6 +246,31 @@ export const useNodes = () => {
       }
       
       const currentNodes = project.nodes;
+      
+      // Guardar estado anterior en historial ANTES de modificar
+      const currentState = JSON.stringify(currentNodes);
+      setProjectHistories(prevHist => {
+        const projectHistory = prevHist[activeProjectId] || { states: [], pointer: -1 };
+        const { states, pointer } = projectHistory;
+        
+        // Truncar estados futuros
+        const truncatedStates = states.slice(0, pointer + 1);
+        
+        // No duplicar
+        if (truncatedStates.length > 0 && truncatedStates[truncatedStates.length - 1] === currentState) {
+          return prevHist;
+        }
+        
+        const newStates = [...truncatedStates, currentState];
+        while (newStates.length > 50) newStates.shift();
+        
+        console.log(`History before addNode: ${newStates.length} states`);
+        
+        return {
+          ...prevHist,
+          [activeProjectId]: { states: newStates, pointer: newStates.length - 1 }
+        };
+      });
       
       let newX = 400;
       let newY = 300;
@@ -281,20 +300,16 @@ export const useNodes = () => {
 
       console.log('Creating new node:', newNode);
 
-      const updatedProjects = prev.map(p => 
+      return prev.map(p => 
         p.id === activeProjectId 
           ? { ...p, nodes: [...currentNodes, newNode], updatedAt: new Date().toISOString() }
           : p
       );
-      
-      console.log('Updated projects, new node count:', updatedProjects.find(p => p.id === activeProjectId)?.nodes.length);
-      
-      return updatedProjects;
     });
 
     setSelectedNodeId(newId);
     return newId;
-  }, [activeProjectId, projects, saveToHistory]);
+  }, [activeProjectId]);
 
   // Guardar posición al FINALIZAR el drag (no durante)
   const saveNodePositionToHistory = useCallback(() => {

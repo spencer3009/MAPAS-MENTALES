@@ -54,6 +54,7 @@ const NodeToolbar = ({
   linksCount = 0,
   stylePanelOpen = false,
   iconPanelOpen = false,
+  reminderPanelOpen = false,
   onEdit,
   onStyle,
   onAddImage,
@@ -61,6 +62,7 @@ const NodeToolbar = ({
   onDuplicate,
   onDelete,
   onAddIcon,
+  onAddReminder,
   onComment
 }) => {
   if (!visible) return null;

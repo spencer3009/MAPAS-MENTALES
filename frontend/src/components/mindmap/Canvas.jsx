@@ -394,13 +394,15 @@ const Canvas = ({
           zoom={1}
           currentColor={selectedNode?.color}
           hasComment={!!selectedNode?.comment}
+          hasIcon={!!selectedNode?.icon}
           stylePanelOpen={stylePanel.isOpen}
+          iconPanelOpen={iconPanel.isOpen}
           onEdit={handleToolbarEdit}
           onStyle={handleToolbarStyle}
           onComment={handleToolbarComment}
           onAddImage={handleToolbarAddImage}
           onAddLink={handleToolbarAddLink}
-          onAddEmoji={handleToolbarAddEmoji}
+          onAddIcon={handleToolbarIcon}
           onDuplicate={handleToolbarDuplicate}
           onDelete={handleToolbarDelete}
         />

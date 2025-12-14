@@ -167,7 +167,10 @@ async def logout():
 # ==========================================
 
 
-# Define Models
+# ==========================================
+# EXISTING MODELS
+# ==========================================
+
 class StatusCheck(BaseModel):
     model_config = ConfigDict(extra="ignore")  # Ignore MongoDB's _id field
     
@@ -178,7 +181,11 @@ class StatusCheck(BaseModel):
 class StatusCheckCreate(BaseModel):
     client_name: str
 
-# Add your routes to the router instead of directly to app
+
+# ==========================================
+# EXISTING ENDPOINTS
+# ==========================================
+
 @api_router.get("/")
 async def root():
     return {"message": "Hello World"}

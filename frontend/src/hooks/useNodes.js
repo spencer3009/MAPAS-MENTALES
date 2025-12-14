@@ -127,50 +127,82 @@ export const useNodes = () => {
   // ==========================================
 
   const saveToHistory = useCallback((projectId, newNodes) => {
+    // No guardar si es una acción de undo/redo
+    if (isUndoRedoAction.current) return;
+    
     setHistory(prev => {
       const projectHistory = prev[projectId] || [];
-      const currentIndex = historyIndex[projectId] ?? -1;
+      const currentIndex = historyIndex[projectId] ?? 0;
+      
+      // Truncar el historial después del índice actual (eliminar futuros estados si existían)
       const newHistory = projectHistory.slice(0, currentIndex + 1);
-      newHistory.push(JSON.stringify(newNodes));
-      if (newHistory.length > 50) newHistory.shift();
+      
+      // Agregar el nuevo estado
+      const newState = JSON.stringify(newNodes);
+      
+      // No duplicar si es igual al último estado
+      if (newHistory.length > 0 && newHistory[newHistory.length - 1] === newState) {
+        return prev;
+      }
+      
+      newHistory.push(newState);
+      
+      // Limitar a 50 estados
+      if (newHistory.length > 50) {
+        newHistory.shift();
+      }
+      
       return { ...prev, [projectId]: newHistory };
     });
-    setHistoryIndex(prev => ({
-      ...prev,
-      [projectId]: Math.min((prev[projectId] ?? -1) + 1, 49)
-    }));
-  }, [historyIndex]);
+    
+    setHistoryIndex(prev => {
+      const projectHistory = history[projectId] || [];
+      const currentIndex = prev[projectId] ?? 0;
+      const newIndex = Math.min(currentIndex + 1, 49);
+      return { ...prev, [projectId]: newIndex };
+    });
+  }, [history, historyIndex]);
 
-  const canUndo = (history[activeProjectId]?.length || 0) > 0 && (historyIndex[activeProjectId] ?? -1) > 0;
-  const canRedo = (historyIndex[activeProjectId] ?? -1) < (history[activeProjectId]?.length || 0) - 1;
+  const canUndo = (history[activeProjectId]?.length || 0) > 1 && (historyIndex[activeProjectId] ?? 0) > 0;
+  const canRedo = (historyIndex[activeProjectId] ?? 0) < (history[activeProjectId]?.length || 0) - 1;
 
   const undo = useCallback(() => {
     const projectHistory = history[activeProjectId];
-    const currentIndex = historyIndex[activeProjectId] ?? -1;
+    const currentIndex = historyIndex[activeProjectId] ?? 0;
     
     if (projectHistory && currentIndex > 0) {
+      isUndoRedoAction.current = true;
       const prevState = JSON.parse(projectHistory[currentIndex - 1]);
+      
       setHistoryIndex(prev => ({ ...prev, [activeProjectId]: currentIndex - 1 }));
       setProjects(prev => prev.map(p => 
         p.id === activeProjectId 
           ? { ...p, nodes: prevState, updatedAt: new Date().toISOString() }
           : p
       ));
+      
+      // Reset flag después del update
+      setTimeout(() => { isUndoRedoAction.current = false; }, 0);
     }
   }, [activeProjectId, history, historyIndex]);
 
   const redo = useCallback(() => {
     const projectHistory = history[activeProjectId];
-    const currentIndex = historyIndex[activeProjectId] ?? -1;
+    const currentIndex = historyIndex[activeProjectId] ?? 0;
     
     if (projectHistory && currentIndex < projectHistory.length - 1) {
+      isUndoRedoAction.current = true;
       const nextState = JSON.parse(projectHistory[currentIndex + 1]);
+      
       setHistoryIndex(prev => ({ ...prev, [activeProjectId]: currentIndex + 1 }));
       setProjects(prev => prev.map(p => 
         p.id === activeProjectId 
           ? { ...p, nodes: nextState, updatedAt: new Date().toISOString() }
           : p
       ));
+      
+      // Reset flag después del update
+      setTimeout(() => { isUndoRedoAction.current = false; }, 0);
     }
   }, [activeProjectId, history, historyIndex]);
 

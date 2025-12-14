@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { Plus, LayoutTemplate, FileText, Trash2, Brain, Check, Pencil } from 'lucide-react';
+import { Plus, LayoutTemplate, FileText, Trash2, Check, Pencil } from 'lucide-react';
+
+// URL del logo MindoraMap
+const LOGO_URL = 'https://customer-assets.emergentagent.com/job_mindviz-app/artifacts/4jbk8b5l_image.png';
 
 const Sidebar = ({
   projects = [],

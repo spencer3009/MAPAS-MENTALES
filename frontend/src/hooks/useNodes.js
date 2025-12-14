@@ -126,26 +126,22 @@ export const useNodes = () => {
   // FUNCIONES DE HISTORIAL (UNDO/REDO)
   // ==========================================
 
-  const saveToHistory = useCallback((projectId, newNodes) => {
+  const saveToHistory = useCallback((projectId, nodesToSave) => {
     // No guardar si es una acción de undo/redo
     if (isUndoRedoAction.current) return;
     
+    const newState = JSON.stringify(nodesToSave);
+    
     setHistory(prev => {
       const projectHistory = prev[projectId] || [];
-      const currentIndex = historyIndex[projectId] ?? 0;
-      
-      // Truncar el historial después del índice actual (eliminar futuros estados si existían)
-      const newHistory = projectHistory.slice(0, currentIndex + 1);
-      
-      // Agregar el nuevo estado
-      const newState = JSON.stringify(newNodes);
       
       // No duplicar si es igual al último estado
-      if (newHistory.length > 0 && newHistory[newHistory.length - 1] === newState) {
+      if (projectHistory.length > 0 && projectHistory[projectHistory.length - 1] === newState) {
         return prev;
       }
       
-      newHistory.push(newState);
+      // Agregar el nuevo estado
+      const newHistory = [...projectHistory, newState];
       
       // Limitar a 50 estados
       if (newHistory.length > 50) {
@@ -156,12 +152,11 @@ export const useNodes = () => {
     });
     
     setHistoryIndex(prev => {
-      const projectHistory = history[projectId] || [];
-      const currentIndex = prev[projectId] ?? 0;
-      const newIndex = Math.min(currentIndex + 1, 49);
-      return { ...prev, [projectId]: newIndex };
+      const currentHistory = history[projectId] || [];
+      // El nuevo índice es el último elemento del historial actualizado
+      return { ...prev, [projectId]: currentHistory.length };
     });
-  }, [history, historyIndex]);
+  }, [history]);
 
   const canUndo = (history[activeProjectId]?.length || 0) > 1 && (historyIndex[activeProjectId] ?? 0) > 0;
   const canRedo = (historyIndex[activeProjectId] ?? 0) < (history[activeProjectId]?.length || 0) - 1;

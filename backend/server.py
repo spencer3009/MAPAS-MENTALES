@@ -571,6 +571,14 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+@app.on_event("startup")
+async def startup_event():
+    """Iniciar scheduler al arrancar la aplicación"""
+    await start_scheduler()
+    logger.info("Aplicación iniciada con scheduler de recordatorios")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
+    global scheduler_running
+    scheduler_running = False
     client.close()

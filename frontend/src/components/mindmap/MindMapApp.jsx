@@ -67,6 +67,15 @@ const MindMapApp = () => {
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState(null);
+  const [showProjectNameModal, setShowProjectNameModal] = useState(false);
+  const [projectNameModalConfig, setProjectNameModalConfig] = useState({
+    title: 'Nuevo Proyecto',
+    subtitle: 'Ingresa un nombre para tu mapa mental',
+    confirmText: 'Crear',
+    initialName: '',
+    isRename: false,
+    projectId: null
+  });
 
   // Handlers para toolbar
   const handleAddNode = useCallback(() => {

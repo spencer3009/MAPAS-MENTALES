@@ -288,13 +288,6 @@ export const useNodes = () => {
     setSelectedNodeId(newId);
     return newId;
   }, [activeProjectId, projects, saveToHistory]);
-      
-      return updatedProjects;
-    });
-
-    setSelectedNodeId(newId);
-    return newId;
-  }, [activeProjectId, saveToHistory]);
 
   // Guardar posición al FINALIZAR el drag (no durante)
   const saveNodePositionToHistory = useCallback(() => {

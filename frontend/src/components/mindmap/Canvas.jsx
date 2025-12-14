@@ -110,13 +110,49 @@ const Canvas = ({
   const handleToolbarComment = useCallback(() => {
     if (selectedNodeId) {
       setCommentPopover({ isOpen: true, nodeId: selectedNodeId });
+      setLinkPopover({ isOpen: false, nodeId: null });
     }
   }, [selectedNodeId]);
 
   const handleNodeCommentClick = useCallback((nodeId) => {
     setCommentPopover({ isOpen: true, nodeId });
+    setLinkPopover({ isOpen: false, nodeId: null });
     onSelectNode(nodeId);
   }, [onSelectNode]);
+
+  // Handlers del popover de enlaces
+  const handleToolbarLink = useCallback(() => {
+    if (selectedNodeId) {
+      if (linkPopover.isOpen && linkPopover.nodeId === selectedNodeId) {
+        setLinkPopover({ isOpen: false, nodeId: null });
+      } else {
+        setLinkPopover({ isOpen: true, nodeId: selectedNodeId });
+        setCommentPopover({ isOpen: false, nodeId: null });
+      }
+    }
+  }, [selectedNodeId, linkPopover.isOpen, linkPopover.nodeId]);
+
+  const handleLinkPopoverClose = useCallback(() => {
+    setLinkPopover({ isOpen: false, nodeId: null });
+  }, []);
+
+  const handleAddLink = useCallback((url) => {
+    if (linkPopover.nodeId && onAddNodeLink) {
+      onAddNodeLink(linkPopover.nodeId, url);
+    }
+  }, [linkPopover.nodeId, onAddNodeLink]);
+
+  const handleRemoveLink = useCallback((linkIndex) => {
+    if (linkPopover.nodeId && onRemoveNodeLink) {
+      onRemoveNodeLink(linkPopover.nodeId, linkIndex);
+    }
+  }, [linkPopover.nodeId, onRemoveNodeLink]);
+
+  const handleUpdateLink = useCallback((linkIndex, newUrl) => {
+    if (linkPopover.nodeId && onUpdateNodeLink) {
+      onUpdateNodeLink(linkPopover.nodeId, linkIndex, newUrl);
+    }
+  }, [linkPopover.nodeId, onUpdateNodeLink]);
 
   const handleCommentSave = useCallback((comment) => {
     if (commentPopover.nodeId && onUpdateNodeComment) {

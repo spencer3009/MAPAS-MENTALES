@@ -396,6 +396,23 @@ const NodeItem = memo(({
             <MessageSquare size={14} style={{ color: textColor }} />
           </button>
         )}
+
+        {/* Badge de enlaces */}
+        {node.links && node.links.length > 0 && !isEditing && (
+          <div
+            className="
+              shrink-0 flex items-center gap-1 px-1.5 py-1 rounded-lg
+              bg-blue-500/20 backdrop-blur-sm
+              cursor-default
+            "
+            title={`${node.links.length} enlace${node.links.length > 1 ? 's' : ''}`}
+          >
+            <Link2 size={12} style={{ color: textColor }} />
+            <span className="text-[10px] font-semibold" style={{ color: textColor }}>
+              {node.links.length}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Subrayado para forma de línea */}

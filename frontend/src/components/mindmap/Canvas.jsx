@@ -117,13 +117,11 @@ const Canvas = ({
   const handleToolbarComment = useCallback(() => {
     if (selectedNodeId) {
       setCommentPopover({ isOpen: true, nodeId: selectedNodeId });
-      setStylePanel({ isOpen: false, nodeId: null });
     }
   }, [selectedNodeId]);
 
   const handleNodeCommentClick = useCallback((nodeId) => {
     setCommentPopover({ isOpen: true, nodeId });
-    setStylePanel({ isOpen: false, nodeId: null });
     onSelectNode(nodeId);
   }, [onSelectNode]);
 

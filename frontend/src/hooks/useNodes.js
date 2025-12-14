@@ -227,39 +227,21 @@ export const useNodes = () => {
   const addNode = useCallback((parentId = null, position = null) => {
     const newId = crypto.randomUUID();
     
+    // Obtener estado actual del proyecto
+    const currentProject = projects.find(p => p.id === activeProjectId);
+    if (!currentProject) {
+      console.error('No active project found');
+      return null;
+    }
+    
+    // Guardar estado actual ANTES de modificar
+    pushToHistory(activeProjectId, currentProject.nodes);
+    
     setProjects(prev => {
       const project = prev.find(p => p.id === activeProjectId);
-      if (!project) {
-        console.error('No active project found');
-        return prev;
-      }
+      if (!project) return prev;
       
       const currentNodes = project.nodes;
-      
-      // Guardar estado anterior en historial ANTES de modificar
-      const currentState = JSON.stringify(currentNodes);
-      setProjectHistories(prevHist => {
-        const projectHistory = prevHist[activeProjectId] || { states: [], pointer: -1 };
-        const { states, pointer } = projectHistory;
-        
-        // Truncar estados futuros
-        const truncatedStates = states.slice(0, pointer + 1);
-        
-        // No duplicar
-        if (truncatedStates.length > 0 && truncatedStates[truncatedStates.length - 1] === currentState) {
-          return prevHist;
-        }
-        
-        const newStates = [...truncatedStates, currentState];
-        while (newStates.length > 50) newStates.shift();
-        
-        console.log(`History before addNode: ${newStates.length} states`);
-        
-        return {
-          ...prevHist,
-          [activeProjectId]: { states: newStates, pointer: newStates.length - 1 }
-        };
-      });
       
       let newX = 400;
       let newY = 300;
@@ -298,7 +280,7 @@ export const useNodes = () => {
 
     setSelectedNodeId(newId);
     return newId;
-  }, [activeProjectId]);
+  }, [activeProjectId, projects, pushToHistory]);
 
   // Guardar posición al FINALIZAR el drag (no durante)
   const saveNodePositionToHistory = useCallback(() => {

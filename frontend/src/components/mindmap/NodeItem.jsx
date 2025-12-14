@@ -360,11 +360,45 @@ const NodeItem = memo(({
           style={{ backgroundColor: borderColor }}
         />
       )}
+
+      {/* Resize Handle - solo visible cuando está seleccionado */}
+      {isSelected && !isEditing && !isLineShape && (
+        <div
+          onMouseDown={handleResizeStart}
+          className="
+            absolute bottom-0 right-0
+            w-4 h-4
+            cursor-se-resize
+            bg-blue-500 hover:bg-blue-600
+            rounded-tl-md rounded-br-md
+            opacity-80 hover:opacity-100
+            transition-all duration-150
+            flex items-center justify-center
+            shadow-md
+          "
+          style={{ zIndex: 30 }}
+          title="Arrastrar para redimensionar"
+        >
+          <svg 
+            width="8" 
+            height="8" 
+            viewBox="0 0 8 8" 
+            fill="none"
+            className="text-white"
+          >
+            <path 
+              d="M7 1L1 7M7 4L4 7M7 7L7 7" 
+              stroke="currentColor" 
+              strokeWidth="1.5" 
+              strokeLinecap="round"
+            />
+          </svg>
+        </div>
+      )}
     </div>
   );
 });
 
 NodeItem.displayName = 'NodeItem';
 
-export { NODE_WIDTH, NODE_HEIGHT };
 export default NodeItem;

@@ -296,10 +296,11 @@ const Canvas = ({
   }, [selectedNodeId, dragging]);
 
   const selectedNodeForMenu = nodes.find(n => n.id === contextMenu?.nodeId);
-  // El toolbar debe mostrarse incluso cuando el panel de estilos está abierto
+  // El toolbar debe mostrarse incluso cuando el panel de estilos o iconos está abierto
   const shouldShowToolbar = selectedNodeId && showControls && !contextMenu && !dragging && !newNodeId && !commentPopover.isOpen;
-  const shouldShowAddButton = shouldShowToolbar && !stylePanel.isOpen;
+  const shouldShowAddButton = shouldShowToolbar && !stylePanel.isOpen && !iconPanel.isOpen;
   const commentNode = nodes.find(n => n.id === commentPopover.nodeId);
+  const iconNode = nodes.find(n => n.id === iconPanel.nodeId);
 
   return (
     <div

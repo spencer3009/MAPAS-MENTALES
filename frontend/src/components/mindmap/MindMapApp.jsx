@@ -292,6 +292,8 @@ const MindMapApp = () => {
           onUpdateNodeText={updateNodeText}
           onUpdateNodeComment={updateNodeComment}
           onUpdateNodeStyle={updateNodeStyle}
+          onUpdateNodeSize={updateNodeSize}
+          onSaveNodePositionToHistory={saveNodePositionToHistory}
           onOpenContextMenu={openContextMenu}
           onCloseContextMenu={closeContextMenu}
           onAddChildNode={addNode}
@@ -304,7 +306,18 @@ const MindMapApp = () => {
 
       {/* ==================== MODALES ==================== */}
       
-      {/* Modal: Crear nuevo proyecto en blanco */}
+      {/* Modal: Nombrar proyecto */}
+      <ProjectNameModal
+        isOpen={showProjectNameModal}
+        title={projectNameModalConfig.title}
+        subtitle={projectNameModalConfig.subtitle}
+        confirmText={projectNameModalConfig.confirmText}
+        initialName={projectNameModalConfig.initialName}
+        onConfirm={handleConfirmProjectName}
+        onCancel={() => setShowProjectNameModal(false)}
+      />
+
+      {/* Modal: Crear nuevo proyecto en blanco - DEPRECATED */}
       <ConfirmModal
         isOpen={showBlankModal}
         title="Crear Nuevo Proyecto"

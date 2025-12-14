@@ -241,6 +241,31 @@ export const useNodes = () => {
     setIsLoading(false);
   }, [loadFromServer]);
 
+  // Escuchar cambios en el token (para recargar después del login)
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'mm_auth_token' && e.newValue) {
+        console.log('Token changed, reloading projects...');
+        setTimeout(reloadProjects, 100);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [reloadProjects]);
+
+  // También verificar periódicamente si hay token y recargar
+  const hasInitialized = useRef(false);
+  useEffect(() => {
+    if (!hasInitialized.current) {
+      const token = getAuthToken();
+      if (token && projects.length === 0) {
+        reloadProjects();
+      }
+      hasInitialized.current = true;
+    }
+  }, [projects.length, reloadProjects]);
+
   // Cargar proyectos al iniciar
   useEffect(() => {
     const initializeProjects = async () => {

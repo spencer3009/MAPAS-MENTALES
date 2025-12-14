@@ -352,6 +352,27 @@ export const useNodes = () => {
     ));
   }, [activeProjectId, nodes, pushToHistory]);
 
+  // Actualizar icono del nodo
+  const updateNodeIcon = useCallback((id, icon) => {
+    const newNodes = nodes.map(n => {
+      if (n.id === id) {
+        // icon puede ser null para eliminar, o {name, color} para establecer
+        if (icon === null) {
+          const { icon: _, ...rest } = n;
+          return rest;
+        }
+        return { ...n, icon };
+      }
+      return n;
+    });
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, activeProjectId, pushToHistory]);
+
   const deleteNode = useCallback((id) => {
     const findDescendants = (nodeId, allNodes) => {
       const children = allNodes.filter(n => n.parentId === nodeId);

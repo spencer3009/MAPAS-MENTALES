@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   X, Palette, Square, Circle, Minus, Sparkles, Search,
-  Smile, Trash2
+  Smile, Trash2, Bell
 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { 
@@ -13,6 +13,7 @@ import {
   LINE_WIDTHS,
   getContrastTextColor 
 } from '../../utils/colors';
+import ReminderPanel from './ReminderPanel';
 
 // ==========================================
 // ICONOS PERSONALIZADOS (WhatsApp, etc.)

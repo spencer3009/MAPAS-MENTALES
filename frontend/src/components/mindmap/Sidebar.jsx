@@ -1,5 +1,5 @@
-import React from 'react';
-import { Plus, LayoutTemplate, FileText, Trash2, Brain, Check } from 'lucide-react';
+import React, { useState } from 'react';
+import { Plus, LayoutTemplate, FileText, Trash2, Brain, Check, Pencil } from 'lucide-react';
 
 const Sidebar = ({
   projects = [],
@@ -7,8 +7,12 @@ const Sidebar = ({
   onNewBlank,
   onNewFromTemplate,
   onDeleteProject,
-  onSwitchProject
+  onSwitchProject,
+  onRenameProject
 }) => {
+  const [editingProjectId, setEditingProjectId] = useState(null);
+  const [editingName, setEditingName] = useState('');
+
   const formatDate = (dateString) => {
     try {
       return new Date(dateString).toLocaleDateString('es-ES', {
@@ -18,6 +22,29 @@ const Sidebar = ({
       });
     } catch {
       return 'Sin fecha';
+    }
+  };
+
+  const handleStartEdit = (project, e) => {
+    e.stopPropagation();
+    setEditingProjectId(project.id);
+    setEditingName(project.name);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingName.trim() && onRenameProject) {
+      onRenameProject(editingProjectId, editingName.trim());
+    }
+    setEditingProjectId(null);
+    setEditingName('');
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSaveEdit();
+    } else if (e.key === 'Escape') {
+      setEditingProjectId(null);
+      setEditingName('');
     }
   };
 

@@ -45,10 +45,14 @@ const Canvas = ({
   const controlPositions = useMemo(() => {
     if (!selectedNode) return { addButton: null, toolbar: null };
     
-    const addButtonX = (selectedNode.x + NODE_WIDTH + 15) * zoom + pan.x;
-    const addButtonY = (selectedNode.y + NODE_HEIGHT / 2 - 14) * zoom + pan.y;
+    // Usar tamaño del nodo si está disponible, sino usar valores por defecto
+    const nodeW = selectedNode.width || NODE_WIDTH;
+    const nodeH = selectedNode.height || NODE_HEIGHT;
     
-    const toolbarX = (selectedNode.x + NODE_WIDTH / 2) * zoom + pan.x;
+    const addButtonX = (selectedNode.x + nodeW + 15) * zoom + pan.x;
+    const addButtonY = (selectedNode.y + nodeH / 2 - 14) * zoom + pan.y;
+    
+    const toolbarX = (selectedNode.x + nodeW / 2) * zoom + pan.x;
     const toolbarY = (selectedNode.y - 50) * zoom + pan.y;
     
     return {

@@ -318,7 +318,7 @@ const Canvas = ({
       </div>
 
       {/* Controles flotantes - FUERA del contenedor transformable */}
-      {shouldShowNodeControls && controlPositions.addButton && (
+      {shouldShowAddButton && controlPositions.addButton && (
         <button
           onClick={handleAddChildFromButton}
           onMouseDown={(e) => e.stopPropagation()}
@@ -346,15 +346,16 @@ const Canvas = ({
         </button>
       )}
 
-      {shouldShowNodeControls && controlPositions.toolbar && (
+      {/* Toolbar contextual - siempre visible cuando hay nodo seleccionado */}
+      {shouldShowToolbar && controlPositions.toolbar && (
         <NodeToolbar
           position={controlPositions.toolbar}
           visible={true}
           zoom={1}
           currentColor={selectedNode?.color}
           hasComment={!!selectedNode?.comment}
+          stylePanelOpen={stylePanel.isOpen}
           onEdit={handleToolbarEdit}
-          onChangeColor={handleToolbarChangeColor}
           onStyle={handleToolbarStyle}
           onComment={handleToolbarComment}
           onAddImage={handleToolbarAddImage}
@@ -377,11 +378,14 @@ const Canvas = ({
         />
       )}
 
-      {/* Panel de estilos del nodo */}
-      {stylePanel.isOpen && stylePanel.nodeId && (
+      {/* Panel de estilos del nodo - posicionado debajo del toolbar */}
+      {stylePanel.isOpen && stylePanel.nodeId && controlPositions.toolbar && (
         <NodeStylePanel
           isOpen={true}
-          position={getStylePanelPosition(stylePanel.nodeId)}
+          position={{ 
+            x: controlPositions.toolbar.x, 
+            y: controlPositions.toolbar.y + 50 // 50px debajo del toolbar
+          }}
           nodeStyle={{
             shape: nodes.find(n => n.id === stylePanel.nodeId)?.shape || 'rounded',
             bgColor: nodes.find(n => n.id === stylePanel.nodeId)?.bgColor || '#e0f2fe',

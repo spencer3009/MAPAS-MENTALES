@@ -4,7 +4,6 @@ import ConnectionsLayer from './ConnectionsLayer';
 import ContextMenu from './ContextMenu';
 import NodeToolbar from './NodeToolbar';
 import CommentPopover from './CommentPopover';
-import IconPickerPanel from './IconPickerPanel';
 
 const Canvas = ({
   nodes,

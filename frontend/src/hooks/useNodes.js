@@ -233,22 +233,12 @@ export const useNodes = () => {
   const addNode = useCallback((parentId = null, position = null) => {
     const newId = crypto.randomUUID();
     
-    console.log('addNode called, activeProjectId:', activeProjectId);
-    
-    // Obtener estado actual del proyecto
-    const currentProject = projects.find(p => p.id === activeProjectId);
-    if (!currentProject) {
-      console.error('No active project found');
-      return null;
-    }
-    
-    // Guardar estado actual ANTES de modificar
-    console.log('Calling pushToHistory with', activeProjectId);
-    pushToHistory(activeProjectId, currentProject.nodes);
-    
     setProjects(prev => {
       const project = prev.find(p => p.id === activeProjectId);
-      if (!project) return prev;
+      if (!project) {
+        console.error('No active project found');
+        return prev;
+      }
       
       const currentNodes = project.nodes;
       
@@ -279,17 +269,21 @@ export const useNodes = () => {
       };
 
       console.log('Creating new node:', newNode);
+      
+      // Guardar el NUEVO estado en el historial (después del cambio)
+      const newNodes = [...currentNodes, newNode];
+      pushToHistory(activeProjectId, newNodes);
 
       return prev.map(p => 
         p.id === activeProjectId 
-          ? { ...p, nodes: [...currentNodes, newNode], updatedAt: new Date().toISOString() }
+          ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
           : p
       );
     });
 
     setSelectedNodeId(newId);
     return newId;
-  }, [activeProjectId, projects, pushToHistory]);
+  }, [activeProjectId, pushToHistory]);
 
   // Guardar posición al FINALIZAR el drag (no durante)
   const saveNodePositionToHistory = useCallback(() => {

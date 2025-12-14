@@ -469,7 +469,7 @@ const IconPickerPanel = ({
       <div className="p-3 overflow-y-auto" style={{ maxHeight: '320px' }}>
         {searchTerm && (
           <p className="text-xs text-gray-500 mb-2 px-1">
-            {filteredIcons.length} resultado{filteredIcons.length !== 1 ? 's' : ''} para "{searchTerm}"
+            {filteredIcons.length} resultado{filteredIcons.length !== 1 ? 's' : ''} para &ldquo;{searchTerm}&rdquo;
           </p>
         )}
         

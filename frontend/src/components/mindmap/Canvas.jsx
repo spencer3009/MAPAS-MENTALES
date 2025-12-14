@@ -182,10 +182,6 @@ const Canvas = ({
     alert('Funcionalidad de agregar imagen próximamente');
   }, []);
 
-  const handleToolbarAddLink = useCallback(() => {
-    alert('Funcionalidad de agregar enlace próximamente');
-  }, []);
-
   const handleToolbarDuplicate = useCallback(() => {
     if (selectedNodeId) {
       onDuplicateNode(selectedNodeId);

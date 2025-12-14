@@ -415,7 +415,7 @@ const TabSelector = ({ activeTab, onTabChange }) => (
     <button
       onClick={() => onTabChange('styles')}
       className={`
-        flex-1 py-3 px-4 text-sm font-medium flex items-center justify-center gap-2
+        flex-1 py-3 px-2 text-xs font-medium flex items-center justify-center gap-1.5
         transition-all duration-200 border-b-2
         ${activeTab === 'styles'
           ? 'text-blue-600 border-blue-600 bg-white'
@@ -423,13 +423,13 @@ const TabSelector = ({ activeTab, onTabChange }) => (
         }
       `}
     >
-      <Palette size={16} />
+      <Palette size={14} />
       Estilos
     </button>
     <button
       onClick={() => onTabChange('icons')}
       className={`
-        flex-1 py-3 px-4 text-sm font-medium flex items-center justify-center gap-2
+        flex-1 py-3 px-2 text-xs font-medium flex items-center justify-center gap-1.5
         transition-all duration-200 border-b-2
         ${activeTab === 'icons'
           ? 'text-blue-600 border-blue-600 bg-white'
@@ -437,8 +437,22 @@ const TabSelector = ({ activeTab, onTabChange }) => (
         }
       `}
     >
-      <Smile size={16} />
+      <Smile size={14} />
       Iconos
+    </button>
+    <button
+      onClick={() => onTabChange('reminders')}
+      className={`
+        flex-1 py-3 px-2 text-xs font-medium flex items-center justify-center gap-1.5
+        transition-all duration-200 border-b-2
+        ${activeTab === 'reminders'
+          ? 'text-purple-600 border-purple-600 bg-white'
+          : 'text-gray-500 border-transparent hover:text-gray-700 hover:bg-gray-100'
+        }
+      `}
+    >
+      <Bell size={14} />
+      Recordar
     </button>
   </div>
 );

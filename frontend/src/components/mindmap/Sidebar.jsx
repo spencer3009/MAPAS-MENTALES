@@ -12,6 +12,7 @@ const Sidebar = ({
   onDeleteProject,
   onSwitchProject,
   onRenameProject,
+  onProjectReminder,
   user,
   onLogout
 }) => {

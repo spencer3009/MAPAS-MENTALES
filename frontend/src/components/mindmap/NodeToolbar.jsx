@@ -136,8 +136,9 @@ const NodeToolbar = ({
       {/* Enlace */}
       <ToolbarButton 
         icon={Link2} 
-        label="Agregar enlace" 
+        label={hasLinks ? `Ver enlaces (${linksCount})` : "Agregar enlace"}
         onClick={onAddLink}
+        badge={linksCount > 0 ? linksCount : null}
       />
       
       <Divider />

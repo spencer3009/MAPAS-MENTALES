@@ -12,6 +12,8 @@ import { useContextMenu } from '../../hooks/useContextMenu';
 import { useAuth } from '../../contexts/AuthContext';
 
 const MindMapApp = () => {
+  const { user, logout } = useAuth();
+  
   const {
     nodes,
     projectName,

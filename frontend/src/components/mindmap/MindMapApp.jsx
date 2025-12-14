@@ -258,6 +258,8 @@ const MindMapApp = () => {
         onDeleteProject={handleDeleteProjectClick}
         onSwitchProject={handleSwitchProject}
         onRenameProject={renameProject}
+        user={user}
+        onLogout={logout}
       />
 
       {/* Área principal */}

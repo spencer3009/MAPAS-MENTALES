@@ -248,9 +248,8 @@ const Canvas = ({
   const selectedNodeForMenu = nodes.find(n => n.id === contextMenu?.nodeId);
   // El toolbar debe mostrarse cuando hay nodo seleccionado
   const shouldShowToolbar = selectedNodeId && showControls && !contextMenu && !dragging && !newNodeId && !commentPopover.isOpen;
-  const shouldShowAddButton = shouldShowToolbar && !iconPanel.isOpen;
+  const shouldShowAddButton = shouldShowToolbar;
   const commentNode = nodes.find(n => n.id === commentPopover.nodeId);
-  const iconNode = nodes.find(n => n.id === iconPanel.nodeId);
 
   return (
     <div

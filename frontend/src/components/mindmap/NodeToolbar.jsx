@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   Type, 
   Palette, 
@@ -7,16 +7,8 @@ import {
   Copy, 
   Trash2,
   Smile,
-  MessageSquare,
-  Settings2
+  MessageSquare
 } from 'lucide-react';
-
-const COLORS = [
-  { key: 'blue', bg: 'bg-sky-400', label: 'Azul' },
-  { key: 'pink', bg: 'bg-rose-400', label: 'Rosa' },
-  { key: 'green', bg: 'bg-emerald-400', label: 'Verde' },
-  { key: 'yellow', bg: 'bg-amber-400', label: 'Amarillo' },
-];
 
 const ToolbarButton = ({ icon: Icon, label, onClick, danger = false, active = false, hasIndicator = false }) => (
   <button

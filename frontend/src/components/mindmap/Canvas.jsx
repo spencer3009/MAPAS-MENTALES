@@ -344,8 +344,8 @@ const Canvas = ({
           currentColor={selectedNode?.color}
           hasComment={!!selectedNode?.comment}
           hasIcon={!!selectedNode?.icon}
-          stylePanelOpen={styleSidebarOpen}
-          iconPanelOpen={iconPanel.isOpen}
+          stylePanelOpen={styleSidebarOpen && sidebarTab === 'styles'}
+          iconPanelOpen={styleSidebarOpen && sidebarTab === 'icons'}
           onEdit={handleToolbarEdit}
           onStyle={handleToolbarStyle}
           onComment={handleToolbarComment}

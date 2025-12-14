@@ -143,6 +143,14 @@ const NodeToolbar = ({
         onClick={onAddLink}
         badge={linksCount > 0 ? linksCount : null}
       />
+
+      {/* Recordatorio */}
+      <ToolbarButton 
+        icon={Bell} 
+        label="Agregar recordatorio" 
+        onClick={onAddReminder}
+        active={reminderPanelOpen}
+      />
       
       <Divider />
       

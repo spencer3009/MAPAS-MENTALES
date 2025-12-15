@@ -49,7 +49,7 @@ HARDCODED_USERS = {
 }
 
 # WhatsApp Business API Configuration (Meta oficial)
-WHATSAPP_API_URL = os.environ.get('WHATSAPP_API_URL', '')
+WHATSAPP_API_URL = "https://graph.facebook.com/v21.0"
 WHATSAPP_ACCESS_TOKEN = os.environ.get('WHATSAPP_ACCESS_TOKEN', '')
 WHATSAPP_PHONE_NUMBER_ID = os.environ.get('WHATSAPP_PHONE_NUMBER_ID', '')
 

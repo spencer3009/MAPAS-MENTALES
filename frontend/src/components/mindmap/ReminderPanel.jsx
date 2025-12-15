@@ -127,7 +127,7 @@ const ReminderPanel = ({
 
       if (response.ok) {
         setReminders(prev => prev.filter(r => r.id !== reminderId));
-        if (onReminderDeleted) onReminderDeleted(reminderId);
+        if (onReminderChange) onReminderChange();
       }
     } catch (err) {
       console.error('Error deleting reminder:', err);

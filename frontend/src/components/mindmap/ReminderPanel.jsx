@@ -104,7 +104,7 @@ const ReminderPanel = ({
         setReminders(prev => [...prev, newReminder]);
         setFormData({ date: '', time: '', message: '', channel: 'whatsapp' });
         setShowForm(false);
-        if (onReminderCreated) onReminderCreated(newReminder);
+        if (onReminderChange) onReminderChange();
       } else {
         const data = await response.json();
         setError(data.detail || 'Error al crear recordatorio');

@@ -175,15 +175,34 @@ async def update_whatsapp_number(
     whatsapp_number: str,
     current_user: dict = Depends(get_current_user)
 ):
-    """Actualizar número de WhatsApp del usuario"""
+    """Actualizar número de WhatsApp del usuario en MongoDB"""
     username = current_user["username"]
+    
+    # Guardar/actualizar en MongoDB
+    await db.user_profiles.update_one(
+        {"username": username},
+        {"$set": {"whatsapp": whatsapp_number, "updated_at": datetime.now(timezone.utc).isoformat()}},
+        upsert=True
+    )
+    
+    # También actualizar en memoria para la sesión actual
     if username in HARDCODED_USERS:
         HARDCODED_USERS[username]["whatsapp"] = whatsapp_number
+    
+    logger.info(f"WhatsApp actualizado para {username}: {whatsapp_number}")
     return {"message": "Número de WhatsApp actualizado", "whatsapp": whatsapp_number}
 
 @api_router.get("/auth/profile/whatsapp")
 async def get_whatsapp_number(current_user: dict = Depends(get_current_user)):
-    """Obtener número de WhatsApp del usuario"""
+    """Obtener número de WhatsApp del usuario desde MongoDB"""
+    username = current_user["username"]
+    
+    # Buscar en MongoDB primero
+    profile = await db.user_profiles.find_one({"username": username}, {"_id": 0})
+    if profile and profile.get("whatsapp"):
+        return {"whatsapp": profile["whatsapp"]}
+    
+    # Fallback a datos hardcodeados
     return {"whatsapp": current_user.get("whatsapp", "")}
 
 

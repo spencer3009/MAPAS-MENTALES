@@ -18,8 +18,7 @@ const ReminderPanel = ({
   selectedNode, 
   projectId, 
   projectName,
-  onReminderCreated,
-  onReminderDeleted 
+  onReminderChange
 }) => {
   const { token } = useAuth();
   const [reminders, setReminders] = useState([]);

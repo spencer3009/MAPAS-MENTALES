@@ -922,8 +922,7 @@ const RightStyleSidebar = ({
   onTabChange,
   onStyleChange,
   onIconChange,
-  onReminderCreated,
-  onReminderDeleted,
+  onReminderChange,
   onClose
 }) => {
   const [internalTab, setInternalTab] = useState(activeTab);

@@ -96,6 +96,44 @@ const MindMapApp = () => {
   const [showProjectReminderModal, setShowProjectReminderModal] = useState(false);
   const [projectForReminder, setProjectForReminder] = useState(null);
 
+  // Estado para recordatorios (para mostrar indicador en nodos)
+  const [nodeReminders, setNodeReminders] = useState(new Set());
+
+  // Cargar recordatorios para marcar nodos con recordatorios activos
+  const loadReminders = useCallback(async () => {
+    if (!token) return;
+    
+    try {
+      const response = await fetch(`${API_URL}/api/reminders`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        const reminders = await response.json();
+        // Filtrar solo recordatorios pendientes de nodos
+        const nodeIdsWithReminders = new Set(
+          reminders
+            .filter(r => r.status === 'pending' && r.node_id)
+            .map(r => r.node_id)
+        );
+        setNodeReminders(nodeIdsWithReminders);
+      }
+    } catch (error) {
+      console.error('Error loading reminders:', error);
+    }
+  }, [token]);
+
+  // Cargar recordatorios al montar y cuando cambie el proyecto
+  useEffect(() => {
+    loadReminders();
+  }, [loadReminders, activeProjectId]);
+
+  // Enriquecer nodos con información de recordatorio
+  const nodesWithReminders = nodes.map(node => ({
+    ...node,
+    hasReminder: nodeReminders.has(node.id)
+  }));
+
   // Handlers para toolbar
   const handleAddNode = useCallback(() => {
     if (selectedNodeId) {

@@ -424,6 +424,7 @@ const MindMapApp = () => {
             onStyleChange={updateNodeStyle}
             onIconChange={updateNodeIcon}
             onClose={handleCloseStyleSidebar}
+            onReminderChange={loadReminders}
           />
         </div>
       </div>

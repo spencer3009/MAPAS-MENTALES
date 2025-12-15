@@ -1012,8 +1012,7 @@ const RightStyleSidebar = ({
                 selectedNode={selectedNode}
                 projectId={projectId}
                 projectName={projectName}
-                onReminderCreated={onReminderCreated}
-                onReminderDeleted={onReminderDeleted}
+                onReminderChange={onReminderChange}
               />
             )}
           </div>

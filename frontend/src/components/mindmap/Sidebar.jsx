@@ -291,8 +291,9 @@ const Sidebar = ({
                 "
                 title="Cerrar sesión"
               >
-              <LogOut size={18} />
-            </button>
+                <LogOut size={18} />
+              </button>
+            </div>
           </div>
         </div>
       )}

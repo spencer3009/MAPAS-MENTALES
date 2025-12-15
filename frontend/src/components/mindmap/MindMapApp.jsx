@@ -379,7 +379,7 @@ const MindMapApp = () => {
         <div className="flex-1 flex overflow-hidden">
           {/* Canvas principal */}
           <Canvas
-            nodes={nodes}
+            nodes={nodesWithReminders}
             selectedNodeId={selectedNodeId}
             pan={pan}
             zoom={zoom}

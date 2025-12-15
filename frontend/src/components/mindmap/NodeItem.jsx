@@ -414,17 +414,18 @@ const NodeItem = memo(({
           </div>
         )}
 
-        {/* Badge de recordatorio */}
+        {/* Badge de recordatorio (reloj) */}
         {node.hasReminder && !isEditing && (
           <div
             className="
-              shrink-0 p-1 rounded-lg
-              bg-purple-500/20 backdrop-blur-sm
+              shrink-0 p-1.5 rounded-lg
+              bg-amber-500/20 backdrop-blur-sm
               cursor-default
+              animate-pulse
             "
-            title="Tiene recordatorio programado"
+            title="Recordatorio programado ⏰"
           >
-            <Bell size={12} style={{ color: textColor }} />
+            <Clock size={14} className="text-amber-600" />
           </div>
         )}
       </div>

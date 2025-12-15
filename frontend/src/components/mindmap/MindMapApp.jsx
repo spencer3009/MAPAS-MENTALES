@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import Toolbar from './Toolbar';
 import Canvas from './Canvas';
@@ -13,8 +13,10 @@ import { useZoom } from '../../hooks/useZoom';
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useAuth } from '../../contexts/AuthContext';
 
+const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+
 const MindMapApp = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, token } = useAuth();
   
   const {
     nodes,

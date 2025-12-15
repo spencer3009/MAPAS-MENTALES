@@ -333,8 +333,8 @@ const MindMapApp = () => {
     setSidebarTab(tab);
   }, []);
 
-  // Obtener nodo seleccionado
-  const selectedNode = nodes.find(n => n.id === selectedNodeId);
+  // Obtener nodo seleccionado (con info de recordatorio)
+  const selectedNode = nodesWithReminders.find(n => n.id === selectedNodeId);
 
   // Obtener nombre del proyecto a eliminar para el modal
   const projectToDeleteName = projects.find(p => p.id === projectToDelete)?.name || 'este proyecto';

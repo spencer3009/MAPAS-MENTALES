@@ -355,6 +355,7 @@ const MindMapApp = () => {
         onSwitchProject={handleSwitchProject}
         onRenameProject={renameProject}
         onProjectReminder={handleProjectReminder}
+        onOpenProfile={() => setShowProfileModal(true)}
         user={user}
         onLogout={logout}
       />

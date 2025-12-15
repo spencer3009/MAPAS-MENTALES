@@ -490,6 +490,13 @@ const MindMapApp = () => {
           setProjectForReminder(null);
         }}
       />
+
+      {/* Modal: Perfil de usuario */}
+      <ProfileModal
+        isOpen={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+        user={user}
+      />
     </div>
   );
 };

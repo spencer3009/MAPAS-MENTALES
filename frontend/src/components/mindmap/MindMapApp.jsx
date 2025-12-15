@@ -97,6 +97,9 @@ const MindMapApp = () => {
   const [showProjectReminderModal, setShowProjectReminderModal] = useState(false);
   const [projectForReminder, setProjectForReminder] = useState(null);
 
+  // Estado para modal de perfil
+  const [showProfileModal, setShowProfileModal] = useState(false);
+
   // Estado para recordatorios (para mostrar indicador en nodos)
   const [nodeReminders, setNodeReminders] = useState(new Set());
 

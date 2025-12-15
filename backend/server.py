@@ -323,14 +323,19 @@ async def check_and_send_reminders():
             
             for reminder in pending_reminders:
                 try:
-                    # Obtener número de WhatsApp del usuario
-                    user = HARDCODED_USERS.get(reminder["username"])
-                    if not user:
-                        continue
+                    username = reminder["username"]
                     
-                    phone_number = user.get("whatsapp", "")
+                    # Primero buscar número en MongoDB (user_profiles)
+                    profile = await db.user_profiles.find_one({"username": username}, {"_id": 0})
+                    phone_number = profile.get("whatsapp") if profile else None
+                    
+                    # Fallback a usuarios hardcodeados
                     if not phone_number:
-                        logger.warning(f"Usuario {reminder['username']} no tiene WhatsApp configurado")
+                        user = HARDCODED_USERS.get(username)
+                        phone_number = user.get("whatsapp", "") if user else ""
+                    
+                    if not phone_number:
+                        logger.warning(f"Usuario {username} no tiene WhatsApp configurado")
                         continue
                     
                     # Construir mensaje

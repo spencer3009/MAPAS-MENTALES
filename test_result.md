@@ -11,7 +11,7 @@ Testing Project Persistence implementation:
 ## Test Credentials
 - Username: spencer3009
 - Password: Socios3009
-- Application URL: https://brainwave-75.preview.emergentagent.com
+- Application URL: https://nodethink.preview.emergentagent.com
 
 ## Test Plan
 Current focus:

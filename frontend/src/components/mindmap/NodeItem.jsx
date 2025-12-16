@@ -460,18 +460,22 @@ const NodeItem = memo(({
           </div>
         )}
 
-        {/* Badge de recordatorio (reloj) */}
+        {/* Badge de recordatorio (reloj) - color dinámico según fondo */}
         {node.hasReminder && !isEditing && (
           <div
-            className="
+            className={`
               shrink-0 p-1.5 rounded-lg
-              bg-amber-500/20 backdrop-blur-sm
-              cursor-default
-              animate-pulse
-            "
+              backdrop-blur-sm cursor-default
+              ${isLightColor(bgColor) 
+                ? 'bg-gray-900/10' 
+                : 'bg-white/20'}
+            `}
             title="Recordatorio programado ⏰"
           >
-            <Clock size={14} className="text-amber-600" />
+            <Clock 
+              size={14} 
+              className={isLightColor(bgColor) ? 'text-gray-800' : 'text-white'} 
+            />
           </div>
         )}
       </div>

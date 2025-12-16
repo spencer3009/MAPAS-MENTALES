@@ -232,6 +232,8 @@ async def get_profile(current_user: dict = Depends(get_current_user)):
         "apellidos": nombre_parts[1] if len(nombre_parts) > 1 else "",
         "email": hardcoded.get("email", ""),
         "whatsapp": hardcoded.get("whatsapp", ""),
+        "pais": "",
+        "timezone": "America/Lima",
         "created_at": None,
         "updated_at": None
     }
@@ -260,6 +262,10 @@ async def update_profile(
         if whatsapp and not whatsapp.startswith("+"):
             whatsapp = "+" + whatsapp
         update_data["whatsapp"] = whatsapp
+    if profile_data.pais is not None:
+        update_data["pais"] = profile_data.pais.strip()
+    if profile_data.timezone is not None:
+        update_data["timezone"] = profile_data.timezone.strip()
     
     # Verificar si el perfil existe
     existing = await db.user_profiles.find_one({"username": username})

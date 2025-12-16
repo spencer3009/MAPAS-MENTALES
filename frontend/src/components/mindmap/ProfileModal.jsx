@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, User, Phone, Save, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { 
+  X, User, Phone, Mail, Save, Loader2, CheckCircle, AlertCircle,
+  Lock, Eye, EyeOff, UserCircle
+} from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 // Icono de WhatsApp
@@ -13,67 +16,164 @@ const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
 const ProfileModal = ({ isOpen, onClose, user }) => {
   const { token } = useAuth();
-  const [whatsappNumber, setWhatsappNumber] = useState('');
+  const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'password'
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [success, setSuccess] = useState(null);
   const [error, setError] = useState(null);
+  
+  // Profile form state
+  const [profile, setProfile] = useState({
+    nombre: '',
+    apellidos: '',
+    email: '',
+    whatsapp: ''
+  });
 
-  // Cargar número actual al abrir
+  // Password form state
+  const [passwords, setPasswords] = useState({
+    current: '',
+    new: '',
+    confirm: ''
+  });
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false
+  });
+
+  // Load profile on open
   useEffect(() => {
     if (isOpen && token) {
-      loadWhatsappNumber();
+      loadProfile();
     }
   }, [isOpen, token]);
 
-  const loadWhatsappNumber = async () => {
+  // Reset on close
+  useEffect(() => {
+    if (!isOpen) {
+      setActiveTab('profile');
+      setError(null);
+      setSuccess(null);
+      setPasswords({ current: '', new: '', confirm: '' });
+    }
+  }, [isOpen]);
+
+  const loadProfile = async () => {
     setLoading(true);
+    setError(null);
     try {
-      const response = await fetch(`${API_URL}/api/auth/profile/whatsapp`, {
+      const response = await fetch(`${API_URL}/api/profile`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
         const data = await response.json();
-        setWhatsappNumber(data.whatsapp || '');
+        setProfile({
+          nombre: data.nombre || '',
+          apellidos: data.apellidos || '',
+          email: data.email || '',
+          whatsapp: data.whatsapp || ''
+        });
       }
     } catch (err) {
-      console.error('Error loading WhatsApp number:', err);
+      console.error('Error loading profile:', err);
+      setError('Error al cargar el perfil');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSave = async () => {
-    if (!whatsappNumber.trim()) {
-      setError('Por favor ingresa un número de WhatsApp');
-      return;
-    }
-
-    // Validar formato básico
-    const cleanNumber = whatsappNumber.replace(/\s/g, '');
-    if (!/^\+?\d{10,15}$/.test(cleanNumber)) {
-      setError('Formato inválido. Usa formato internacional: +521234567890');
-      return;
-    }
-
+  const handleSaveProfile = async () => {
     setSaving(true);
     setError(null);
+    setSuccess(null);
+
+    // Validate WhatsApp format
+    if (profile.whatsapp) {
+      const cleanNumber = profile.whatsapp.replace(/\s/g, '');
+      if (!/^\+?\d{10,15}$/.test(cleanNumber)) {
+        setError('Formato de WhatsApp inválido. Usa formato internacional: +521234567890');
+        setSaving(false);
+        return;
+      }
+    }
+
+    // Validate email format
+    if (profile.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profile.email)) {
+      setError('Formato de email inválido');
+      setSaving(false);
+      return;
+    }
 
     try {
-      const response = await fetch(`${API_URL}/api/auth/profile/whatsapp?whatsapp_number=${encodeURIComponent(cleanNumber)}`, {
+      const response = await fetch(`${API_URL}/api/profile`, {
         method: 'PUT',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(profile)
       });
 
       if (response.ok) {
-        setSuccess(true);
-        setTimeout(() => {
-          setSuccess(false);
-          onClose();
-        }, 1500);
+        setSuccess('Perfil actualizado correctamente');
+        setTimeout(() => setSuccess(null), 3000);
       } else {
         const data = await response.json();
-        setError(data.detail || 'Error al guardar');
+        setError(data.detail || 'Error al guardar el perfil');
+      }
+    } catch (err) {
+      setError('Error de conexión');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    setSaving(true);
+    setError(null);
+    setSuccess(null);
+
+    // Validations
+    if (!passwords.current || !passwords.new || !passwords.confirm) {
+      setError('Todos los campos son obligatorios');
+      setSaving(false);
+      return;
+    }
+
+    if (passwords.new !== passwords.confirm) {
+      setError('Las contraseñas nuevas no coinciden');
+      setSaving(false);
+      return;
+    }
+
+    if (passwords.new.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres');
+      setSaving(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/api/profile/password`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          current_password: passwords.current,
+          new_password: passwords.new,
+          confirm_password: passwords.confirm
+        })
+      });
+
+      if (response.ok) {
+        setSuccess('Contraseña actualizada correctamente');
+        setPasswords({ current: '', new: '', confirm: '' });
+        setTimeout(() => setSuccess(null), 3000);
+      } else {
+        const data = await response.json();
+        setError(data.detail || 'Error al cambiar la contraseña');
       }
     } catch (err) {
       setError('Error de conexión');
@@ -86,17 +186,17 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden animate-in fade-in zoom-in duration-200 max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-white/20 rounded-xl">
-                <User size={20} className="text-white" />
+                <UserCircle size={24} className="text-white" />
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-white">Mi Perfil</h2>
-                <p className="text-sm text-white/80">{user?.full_name || user?.username}</p>
+                <p className="text-sm text-white/80">@{user?.username}</p>
               </div>
             </div>
             <button
@@ -108,106 +208,244 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
           </div>
         </div>
 
+        {/* Tabs */}
+        <div className="flex border-b border-gray-200 px-4 shrink-0">
+          <button
+            onClick={() => { setActiveTab('profile'); setError(null); setSuccess(null); }}
+            className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === 'profile'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <User size={16} className="inline mr-2" />
+            Datos Personales
+          </button>
+          <button
+            onClick={() => { setActiveTab('password'); setError(null); setSuccess(null); }}
+            className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === 'password'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <Lock size={16} className="inline mr-2" />
+            Contraseña
+          </button>
+        </div>
+
         {/* Content */}
-        <div className="p-6 space-y-6">
-          {/* Success Message */}
+        <div className="p-6 space-y-4 overflow-y-auto flex-1">
+          {/* Messages */}
           {success && (
-            <div className="p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3">
-              <CheckCircle className="text-green-600" size={20} />
-              <p className="text-green-700 font-medium">¡Número guardado correctamente!</p>
+            <div className="p-3 bg-green-50 border border-green-200 rounded-xl flex items-center gap-2">
+              <CheckCircle size={18} className="text-green-600" />
+              <p className="text-sm text-green-700">{success}</p>
             </div>
           )}
-
-          {/* Error Message */}
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2">
-              <AlertCircle size={16} className="text-red-500" />
+              <AlertCircle size={18} className="text-red-500" />
               <p className="text-sm text-red-600">{error}</p>
             </div>
           )}
 
-          {!success && (
-            <>
-              {/* WhatsApp Number Section */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <WhatsAppIcon size={20} color="#25D366" />
-                  <label className="text-sm font-semibold text-gray-700">
-                    Número de WhatsApp
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 size={24} className="animate-spin text-blue-500" />
+            </div>
+          ) : activeTab === 'profile' ? (
+            /* Profile Form */
+            <div className="space-y-4">
+              {/* Nombre y Apellidos */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                    Nombre
                   </label>
-                </div>
-                
-                <p className="text-xs text-gray-500">
-                  Este número recibirá las notificaciones de recordatorios. 
-                  Usa el formato internacional con código de país.
-                </p>
-
-                <div className="relative">
-                  <Phone size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
-                    type="tel"
-                    value={whatsappNumber}
-                    onChange={(e) => setWhatsappNumber(e.target.value)}
-                    placeholder="+521234567890"
-                    disabled={loading}
-                    className="
-                      w-full pl-10 pr-4 py-3 text-sm
-                      border border-gray-200 rounded-xl
-                      focus:border-green-400 focus:ring-2 focus:ring-green-100
-                      outline-none transition-all
-                      disabled:bg-gray-50 disabled:text-gray-400
-                    "
+                    type="text"
+                    value={profile.nombre}
+                    onChange={(e) => setProfile(p => ({ ...p, nombre: e.target.value }))}
+                    placeholder="Tu nombre"
+                    className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
                   />
                 </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                    Apellidos
+                  </label>
+                  <input
+                    type="text"
+                    value={profile.apellidos}
+                    onChange={(e) => setProfile(p => ({ ...p, apellidos: e.target.value }))}
+                    placeholder="Tus apellidos"
+                    className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                  />
+                </div>
+              </div>
 
-                <p className="text-[10px] text-gray-400">
-                  Ejemplo: +52 para México, +34 para España, +1 para USA
+              {/* Email */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                  <Mail size={12} className="inline mr-1" />
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={profile.email}
+                  onChange={(e) => setProfile(p => ({ ...p, email: e.target.value }))}
+                  placeholder="correo@ejemplo.com"
+                  className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                />
+              </div>
+
+              {/* WhatsApp */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                  <WhatsAppIcon size={12} color="#25D366" className="inline mr-1" />
+                  <span className="ml-1">WhatsApp</span>
+                </label>
+                <div className="relative">
+                  <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="tel"
+                    value={profile.whatsapp}
+                    onChange={(e) => setProfile(p => ({ ...p, whatsapp: e.target.value }))}
+                    placeholder="+521234567890"
+                    className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:border-green-400 focus:ring-2 focus:ring-green-100 outline-none transition-all"
+                  />
+                </div>
+                <p className="text-[10px] text-gray-400 mt-1">
+                  Formato internacional con código de país. Ej: +52 México, +34 España
                 </p>
               </div>
 
-              {/* Info Box */}
-              <div className="p-4 bg-amber-50 border border-amber-100 rounded-xl">
+              {/* WhatsApp Info */}
+              <div className="p-3 bg-green-50 border border-green-100 rounded-xl">
+                <div className="flex items-start gap-2">
+                  <WhatsAppIcon size={18} color="#25D366" className="shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs font-medium text-green-800">
+                      Notificaciones por WhatsApp
+                    </p>
+                    <p className="text-[10px] text-green-600 mt-0.5">
+                      Los recordatorios de tus proyectos y nodos se enviarán a este número.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Save Button */}
+              <button
+                onClick={handleSaveProfile}
+                disabled={saving}
+                className="w-full py-3 px-4 rounded-xl text-sm font-medium bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-200"
+              >
+                {saving ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : (
+                  <Save size={18} />
+                )}
+                Guardar Cambios
+              </button>
+            </div>
+          ) : (
+            /* Password Form */
+            <div className="space-y-4">
+              {/* Current Password */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                  Contraseña Actual
+                </label>
+                <div className="relative">
+                  <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type={showPasswords.current ? 'text' : 'password'}
+                    value={passwords.current}
+                    onChange={(e) => setPasswords(p => ({ ...p, current: e.target.value }))}
+                    placeholder="••••••••"
+                    className="w-full pl-10 pr-10 py-2.5 text-sm border border-gray-200 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPasswords(s => ({ ...s, current: !s.current }))}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPasswords.current ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* New Password */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                  Nueva Contraseña
+                </label>
+                <div className="relative">
+                  <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type={showPasswords.new ? 'text' : 'password'}
+                    value={passwords.new}
+                    onChange={(e) => setPasswords(p => ({ ...p, new: e.target.value }))}
+                    placeholder="Mínimo 6 caracteres"
+                    className="w-full pl-10 pr-10 py-2.5 text-sm border border-gray-200 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPasswords(s => ({ ...s, new: !s.new }))}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPasswords.new ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Confirm Password */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                  Confirmar Nueva Contraseña
+                </label>
+                <div className="relative">
+                  <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type={showPasswords.confirm ? 'text' : 'password'}
+                    value={passwords.confirm}
+                    onChange={(e) => setPasswords(p => ({ ...p, confirm: e.target.value }))}
+                    placeholder="Repite la contraseña"
+                    className="w-full pl-10 pr-10 py-2.5 text-sm border border-gray-200 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPasswords(s => ({ ...s, confirm: !s.confirm }))}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPasswords.confirm ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Password Requirements */}
+              <div className="p-3 bg-amber-50 border border-amber-100 rounded-xl">
                 <p className="text-xs text-amber-700">
-                  <strong>⚠️ Importante:</strong> Asegúrate de que este número esté agregado 
-                  como destinatario permitido en tu cuenta de Meta Developers para recibir 
-                  mensajes de prueba.
+                  <strong>Requisitos:</strong> La contraseña debe tener al menos 6 caracteres.
                 </p>
               </div>
 
-              {/* Buttons */}
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="
-                    flex-1 py-3 px-4 rounded-xl text-sm font-medium
-                    bg-gray-100 text-gray-700 hover:bg-gray-200
-                    transition-colors
-                  "
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={saving || loading}
-                  className="
-                    flex-1 py-3 px-4 rounded-xl text-sm font-medium
-                    bg-gradient-to-r from-green-500 to-emerald-500 text-white
-                    hover:from-green-600 hover:to-emerald-600
-                    disabled:opacity-50 disabled:cursor-not-allowed
-                    transition-all flex items-center justify-center gap-2
-                    shadow-lg shadow-green-200
-                  "
-                >
-                  {saving ? (
-                    <Loader2 size={18} className="animate-spin" />
-                  ) : (
-                    <Save size={18} />
-                  )}
-                  Guardar
-                </button>
-              </div>
-            </>
+              {/* Change Password Button */}
+              <button
+                onClick={handleChangePassword}
+                disabled={saving}
+                className="w-full py-3 px-4 rounded-xl text-sm font-medium bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-200"
+              >
+                {saving ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : (
+                  <Lock size={18} />
+                )}
+                Cambiar Contraseña
+              </button>
+            </div>
           )}
         </div>
       </div>

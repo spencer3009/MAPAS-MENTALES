@@ -530,8 +530,8 @@ async def check_and_send_reminders():
         except Exception as e:
             logger.error(f"Error en scheduler: {str(e)}")
         
-        # Esperar 5 minutos (300 segundos) antes de la siguiente verificación
-        await asyncio.sleep(300)
+        # Esperar 30 segundos para prueba (cambiar a 300 en producción)
+        await asyncio.sleep(30)
 
 async def start_scheduler():
     """Iniciar el scheduler de recordatorios"""

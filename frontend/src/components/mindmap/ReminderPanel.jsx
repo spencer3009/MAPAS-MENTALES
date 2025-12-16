@@ -238,6 +238,16 @@ const ReminderPanel = ({
             Nuevo recordatorio
           </h4>
 
+          {/* Indicador de fecha/hora local */}
+          <div className="p-2 bg-blue-50 border border-blue-100 rounded-lg">
+            <p className="text-[10px] text-blue-600 font-medium">
+              📅 Hoy: {getTodayFormatted()}
+            </p>
+            <p className="text-[10px] text-blue-500">
+              Zona horaria: {userTimezone}
+            </p>
+          </div>
+
           {error && (
             <div className="p-2 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 flex items-center gap-2">
               <AlertCircle size={14} />

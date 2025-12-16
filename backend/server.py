@@ -1,5 +1,6 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, BackgroundTasks
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, BackgroundTasks, Form, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.responses import Response
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -48,10 +49,10 @@ HARDCODED_USERS = {
     }
 }
 
-# WhatsApp Business API Configuration (Meta oficial)
-WHATSAPP_API_URL = "https://graph.facebook.com/v21.0"
-WHATSAPP_ACCESS_TOKEN = os.environ.get('WHATSAPP_ACCESS_TOKEN', '')
-WHATSAPP_PHONE_NUMBER_ID = os.environ.get('WHATSAPP_PHONE_NUMBER_ID', '')
+# Twilio WhatsApp Sandbox Configuration
+TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID', '')
+TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN', '')
+TWILIO_WHATSAPP_NUMBER = os.environ.get('TWILIO_WHATSAPP_NUMBER', '')  # Format: whatsapp:+14155238886
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
@@ -405,55 +406,65 @@ class ReminderUpdate(BaseModel):
 
 
 # ==========================================
-# WHATSAPP FUNCTIONS
+# TWILIO WHATSAPP FUNCTIONS
 # ==========================================
 
+def generate_twiml_response(message: str) -> str:
+    """Generar respuesta TwiML XML para Twilio"""
+    return f'''<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Message>{message}</Message>
+</Response>'''
+
+
 async def send_whatsapp_message(phone_number: str, message: str) -> dict:
-    """Enviar mensaje por WhatsApp Business API"""
+    """Enviar mensaje por Twilio WhatsApp API"""
     
-    # Si no hay configuración de WhatsApp, simular envío
-    if not WHATSAPP_ACCESS_TOKEN or not WHATSAPP_PHONE_NUMBER_ID:
+    # Si no hay configuración de Twilio, simular envío
+    if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN or not TWILIO_WHATSAPP_NUMBER:
         logger.info("=" * 60)
-        logger.info("📱 [SIMULACIÓN WHATSAPP] Notificación de recordatorio")
+        logger.info("📱 [SIMULACIÓN WHATSAPP - TWILIO] Notificación de recordatorio")
         logger.info(f"📞 Destinatario: {phone_number}")
         logger.info(f"📝 Mensaje: {message}")
-        logger.info("✅ Estado: ENVIADO (simulado)")
+        logger.info("✅ Estado: ENVIADO (simulado - Twilio no configurado)")
         logger.info("=" * 60)
         return {
             "success": True,
             "simulated": True,
-            "message": "Mensaje simulado (WhatsApp no configurado)"
+            "message": "Mensaje simulado (Twilio WhatsApp no configurado)"
         }
     
     try:
-        url = f"{WHATSAPP_API_URL}/{WHATSAPP_PHONE_NUMBER_ID}/messages"
+        # Twilio API URL
+        url = f"https://api.twilio.com/2010-04-01/Accounts/{TWILIO_ACCOUNT_SID}/Messages.json"
         
-        headers = {
-            "Authorization": f"Bearer {WHATSAPP_ACCESS_TOKEN}",
-            "Content-Type": "application/json"
-        }
+        # Formatear número para Twilio (whatsapp:+1234567890)
+        to_number = phone_number if phone_number.startswith("whatsapp:") else f"whatsapp:{phone_number}"
         
-        # Formato para WhatsApp Business API de Meta
+        # Payload para Twilio
         payload = {
-            "messaging_product": "whatsapp",
-            "to": phone_number.replace("+", ""),
-            "type": "text",
-            "text": {
-                "body": message
-            }
+            "From": TWILIO_WHATSAPP_NUMBER,
+            "To": to_number,
+            "Body": message
         }
         
-        async with httpx.AsyncClient() as client:
-            response = await client.post(url, json=payload, headers=headers)
+        async with httpx.AsyncClient() as http_client:
+            response = await http_client.post(
+                url,
+                data=payload,
+                auth=(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+            )
             
-            if response.status_code == 200:
-                return {"success": True, "response": response.json()}
+            if response.status_code in [200, 201]:
+                result = response.json()
+                logger.info(f"✅ WhatsApp enviado via Twilio. SID: {result.get('sid')}")
+                return {"success": True, "response": result, "sid": result.get("sid")}
             else:
-                logger.error(f"WhatsApp API error: {response.text}")
-                return {"success": False, "error": response.text}
+                logger.error(f"Twilio API error: {response.status_code} - {response.text}")
+                return {"success": False, "error": response.text, "status_code": response.status_code}
                 
     except Exception as e:
-        logger.error(f"Error sending WhatsApp: {str(e)}")
+        logger.error(f"Error sending WhatsApp via Twilio: {str(e)}")
         return {"success": False, "error": str(e)}
 
 

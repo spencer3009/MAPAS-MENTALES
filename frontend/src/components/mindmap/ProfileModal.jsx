@@ -331,6 +331,8 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
                   </label>
                   <input
                     type="text"
+                    name="profile_nombre"
+                    autoComplete="given-name"
                     value={profile.nombre}
                     onChange={(e) => setProfile(p => ({ ...p, nombre: e.target.value }))}
                     placeholder="Tu nombre"
@@ -343,6 +345,8 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
                   </label>
                   <input
                     type="text"
+                    name="profile_apellidos"
+                    autoComplete="family-name"
                     value={profile.apellidos}
                     onChange={(e) => setProfile(p => ({ ...p, apellidos: e.target.value }))}
                     placeholder="Tus apellidos"
@@ -359,6 +363,8 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
                 </label>
                 <input
                   type="email"
+                  name="profile_email"
+                  autoComplete="email"
                   value={profile.email}
                   onChange={(e) => setProfile(p => ({ ...p, email: e.target.value }))}
                   placeholder="correo@ejemplo.com"

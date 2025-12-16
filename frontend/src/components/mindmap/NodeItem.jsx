@@ -9,6 +9,52 @@ const WhatsAppIcon = ({ size = 20, color = 'currentColor' }) => (
   </svg>
 );
 
+// Función para calcular luminancia y determinar si el color es claro u oscuro
+const isLightColor = (color) => {
+  if (!color) return true;
+  
+  // Convertir color a RGB
+  let r, g, b;
+  
+  if (color.startsWith('#')) {
+    // Hex color
+    const hex = color.replace('#', '');
+    if (hex.length === 3) {
+      r = parseInt(hex[0] + hex[0], 16);
+      g = parseInt(hex[1] + hex[1], 16);
+      b = parseInt(hex[2] + hex[2], 16);
+    } else {
+      r = parseInt(hex.substr(0, 2), 16);
+      g = parseInt(hex.substr(2, 2), 16);
+      b = parseInt(hex.substr(4, 2), 16);
+    }
+  } else if (color.startsWith('rgb')) {
+    // RGB or RGBA color
+    const match = color.match(/\d+/g);
+    if (match) {
+      r = parseInt(match[0]);
+      g = parseInt(match[1]);
+      b = parseInt(match[2]);
+    } else {
+      return true;
+    }
+  } else {
+    // Named colors - assume light for common light colors
+    const lightColors = ['white', 'yellow', 'lightyellow', 'lightblue', 'lightgreen', 'pink', 'lavender', 'beige', 'ivory', 'azure', 'honeydew', 'mintcream', 'snow', 'seashell', 'linen', 'oldlace', 'floralwhite', 'ghostwhite', 'aliceblue'];
+    const darkColors = ['black', 'navy', 'darkblue', 'darkgreen', 'maroon', 'purple', 'indigo', 'darkred', 'darkslategray'];
+    
+    if (lightColors.includes(color.toLowerCase())) return true;
+    if (darkColors.includes(color.toLowerCase())) return false;
+    return true; // Default to light
+  }
+  
+  // Calculate relative luminance using sRGB
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  
+  // Return true if light (luminance > 0.5)
+  return luminance > 0.5;
+};
+
 // Constantes por defecto - exportadas para uso en otros componentes
 export const NODE_WIDTH = 160;
 export const NODE_HEIGHT = 64;

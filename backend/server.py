@@ -193,40 +193,162 @@ async def logout():
     # Con JWT stateless, el logout se maneja en el frontend
     return {"message": "Sesión cerrada exitosamente"}
 
-@api_router.put("/auth/profile/whatsapp")
-async def update_whatsapp_number(
-    whatsapp_number: str,
-    current_user: dict = Depends(get_current_user)
-):
-    """Actualizar número de WhatsApp del usuario en MongoDB"""
+
+# ==========================================
+# USER PROFILE ENDPOINTS
+# ==========================================
+
+@api_router.get("/profile")
+async def get_profile(current_user: dict = Depends(get_current_user)):
+    """Obtener perfil completo del usuario"""
     username = current_user["username"]
     
-    # Guardar/actualizar en MongoDB
-    await db.user_profiles.update_one(
+    # Buscar perfil en MongoDB
+    profile = await db.user_profiles.find_one({"username": username}, {"_id": 0})
+    
+    if profile:
+        return {
+            "username": username,
+            "nombre": profile.get("nombre", ""),
+            "apellidos": profile.get("apellidos", ""),
+            "email": profile.get("email", ""),
+            "whatsapp": profile.get("whatsapp", ""),
+            "created_at": profile.get("created_at"),
+            "updated_at": profile.get("updated_at")
+        }
+    
+    # Si no existe perfil, devolver datos básicos de HARDCODED_USERS
+    hardcoded = HARDCODED_USERS.get(username, {})
+    full_name = hardcoded.get("full_name", "")
+    nombre_parts = full_name.split(" ", 1) if full_name else ["", ""]
+    
+    return {
+        "username": username,
+        "nombre": nombre_parts[0] if len(nombre_parts) > 0 else "",
+        "apellidos": nombre_parts[1] if len(nombre_parts) > 1 else "",
+        "email": hardcoded.get("email", ""),
+        "whatsapp": hardcoded.get("whatsapp", ""),
+        "created_at": None,
+        "updated_at": None
+    }
+
+@api_router.put("/profile")
+async def update_profile(
+    profile_data: UserProfileUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Actualizar perfil del usuario"""
+    username = current_user["username"]
+    now = datetime.now(timezone.utc).isoformat()
+    
+    # Preparar datos para actualizar
+    update_data = {"updated_at": now}
+    
+    if profile_data.nombre is not None:
+        update_data["nombre"] = profile_data.nombre.strip()
+    if profile_data.apellidos is not None:
+        update_data["apellidos"] = profile_data.apellidos.strip()
+    if profile_data.email is not None:
+        update_data["email"] = profile_data.email.strip().lower()
+    if profile_data.whatsapp is not None:
+        # Limpiar y validar formato de WhatsApp
+        whatsapp = profile_data.whatsapp.strip().replace(" ", "")
+        if whatsapp and not whatsapp.startswith("+"):
+            whatsapp = "+" + whatsapp
+        update_data["whatsapp"] = whatsapp
+    
+    # Verificar si el perfil existe
+    existing = await db.user_profiles.find_one({"username": username})
+    
+    if existing:
+        await db.user_profiles.update_one(
+            {"username": username},
+            {"$set": update_data}
+        )
+    else:
+        # Crear nuevo perfil
+        update_data["username"] = username
+        update_data["created_at"] = now
+        await db.user_profiles.insert_one(update_data)
+    
+    logger.info(f"Perfil actualizado para {username}")
+    
+    # Devolver perfil actualizado
+    updated_profile = await db.user_profiles.find_one({"username": username}, {"_id": 0})
+    return {
+        "message": "Perfil actualizado correctamente",
+        "profile": updated_profile
+    }
+
+@api_router.put("/profile/password")
+async def change_password(
+    password_data: PasswordChange,
+    current_user: dict = Depends(get_current_user)
+):
+    """Cambiar contraseña del usuario"""
+    username = current_user["username"]
+    
+    # Validar que las contraseñas nuevas coincidan
+    if password_data.new_password != password_data.confirm_password:
+        raise HTTPException(
+            status_code=400,
+            detail="Las contraseñas nuevas no coinciden"
+        )
+    
+    # Validar longitud mínima
+    if len(password_data.new_password) < 6:
+        raise HTTPException(
+            status_code=400,
+            detail="La contraseña debe tener al menos 6 caracteres"
+        )
+    
+    # Verificar contraseña actual
+    user = HARDCODED_USERS.get(username)
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    if not verify_password(password_data.current_password, user["hashed_password"]):
+        raise HTTPException(
+            status_code=400,
+            detail="La contraseña actual es incorrecta"
+        )
+    
+    # Hashear nueva contraseña
+    new_hashed = pwd_context.hash(password_data.new_password)
+    
+    # Guardar en MongoDB (para persistencia futura)
+    await db.user_passwords.update_one(
         {"username": username},
-        {"$set": {"whatsapp": whatsapp_number, "updated_at": datetime.now(timezone.utc).isoformat()}},
+        {
+            "$set": {
+                "hashed_password": new_hashed,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }
+        },
         upsert=True
     )
     
-    # También actualizar en memoria para la sesión actual
-    if username in HARDCODED_USERS:
-        HARDCODED_USERS[username]["whatsapp"] = whatsapp_number
+    # Actualizar en memoria (para sesión actual)
+    HARDCODED_USERS[username]["hashed_password"] = new_hashed
     
-    logger.info(f"WhatsApp actualizado para {username}: {whatsapp_number}")
-    return {"message": "Número de WhatsApp actualizado", "whatsapp": whatsapp_number}
+    logger.info(f"Contraseña cambiada para {username}")
+    return {"message": "Contraseña actualizada correctamente"}
+
+# Endpoints legacy para compatibilidad
+@api_router.put("/auth/profile/whatsapp")
+async def update_whatsapp_number_legacy(
+    whatsapp_number: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Legacy: Actualizar solo número de WhatsApp"""
+    profile_update = UserProfileUpdate(whatsapp=whatsapp_number)
+    return await update_profile(profile_update, current_user)
 
 @api_router.get("/auth/profile/whatsapp")
-async def get_whatsapp_number(current_user: dict = Depends(get_current_user)):
-    """Obtener número de WhatsApp del usuario desde MongoDB"""
-    username = current_user["username"]
-    
-    # Buscar en MongoDB primero
-    profile = await db.user_profiles.find_one({"username": username}, {"_id": 0})
-    if profile and profile.get("whatsapp"):
-        return {"whatsapp": profile["whatsapp"]}
-    
-    # Fallback a datos hardcodeados
-    return {"whatsapp": current_user.get("whatsapp", "")}
+async def get_whatsapp_number_legacy(current_user: dict = Depends(get_current_user)):
+    """Legacy: Obtener solo número de WhatsApp"""
+    profile = await get_profile(current_user)
+    return {"whatsapp": profile.get("whatsapp", "")}
 
 
 # ==========================================

@@ -156,10 +156,21 @@ const ReminderPanel = ({
     }
   };
 
-  // Obtener fecha mínima (hoy)
+  // Obtener fecha mínima (hoy en zona horaria del usuario)
   const getMinDate = () => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
+    // Crear fecha en la zona horaria del usuario
+    const now = new Date();
+    const options = { timeZone: userTimezone, year: 'numeric', month: '2-digit', day: '2-digit' };
+    const formatter = new Intl.DateTimeFormat('en-CA', options); // en-CA gives YYYY-MM-DD
+    return formatter.format(now);
+  };
+
+  // Obtener fecha actual formateada para el usuario
+  const getTodayFormatted = () => {
+    const now = new Date();
+    const options = { timeZone: userTimezone, weekday: 'long', day: 'numeric', month: 'long' };
+    const formatter = new Intl.DateTimeFormat('es-ES', options);
+    return formatter.format(now);
   };
 
   // Formatear fecha para mostrar
@@ -168,7 +179,8 @@ const ReminderPanel = ({
     return date.toLocaleDateString('es-ES', { 
       day: 'numeric', 
       month: 'short',
-      year: 'numeric'
+      year: 'numeric',
+      timeZone: userTimezone
     });
   };
 

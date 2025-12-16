@@ -462,6 +462,8 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
                   <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     type={showPasswords.current ? 'text' : 'password'}
+                    name="current_password"
+                    autoComplete="current-password"
                     value={passwords.current}
                     onChange={(e) => setPasswords(p => ({ ...p, current: e.target.value }))}
                     placeholder="••••••••"
@@ -486,6 +488,8 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
                   <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     type={showPasswords.new ? 'text' : 'password'}
+                    name="new_password"
+                    autoComplete="new-password"
                     value={passwords.new}
                     onChange={(e) => setPasswords(p => ({ ...p, new: e.target.value }))}
                     placeholder="Mínimo 6 caracteres"
@@ -510,6 +514,8 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
                   <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     type={showPasswords.confirm ? 'text' : 'password'}
+                    name="confirm_password"
+                    autoComplete="new-password"
                     value={passwords.confirm}
                     onChange={(e) => setPasswords(p => ({ ...p, confirm: e.target.value }))}
                     placeholder="Repite la contraseña"

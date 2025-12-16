@@ -217,6 +217,8 @@ async def get_profile(current_user: dict = Depends(get_current_user)):
             "apellidos": profile.get("apellidos", ""),
             "email": profile.get("email", ""),
             "whatsapp": profile.get("whatsapp", ""),
+            "pais": profile.get("pais", ""),
+            "timezone": profile.get("timezone", "America/Lima"),
             "created_at": profile.get("created_at"),
             "updated_at": profile.get("updated_at")
         }

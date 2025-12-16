@@ -1,22 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  X, User, Phone, Mail, Save, Loader2, CheckCircle, AlertCircle,
-  Lock, Eye, EyeOff, UserCircle
+  X, User, Mail, Save, Loader2, CheckCircle, AlertCircle,
+  Lock, Eye, EyeOff, UserCircle, Bell
 } from 'lucide-react';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+import { parsePhoneNumber, isValidPhoneNumber } from 'libphonenumber-js';
 import { useAuth } from '../../contexts/AuthContext';
-
-// Icono de WhatsApp
-const WhatsAppIcon = ({ size = 20, color = 'currentColor' }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-  </svg>
-);
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
 const ProfileModal = ({ isOpen, onClose, user }) => {
   const { token } = useAuth();
-  const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'password'
+  const [activeTab, setActiveTab] = useState('profile');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(null);
@@ -29,6 +25,10 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
     email: '',
     whatsapp: ''
   });
+
+  // Phone input state (separate for better control)
+  const [phoneValue, setPhoneValue] = useState('');
+  const [phoneCountry, setPhoneCountry] = useState('pe'); // Default Peru
 
   // Password form state
   const [passwords, setPasswords] = useState({
@@ -74,6 +74,22 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
           email: data.email || '',
           whatsapp: data.whatsapp || ''
         });
+        
+        // Set phone input value (remove + for the component)
+        if (data.whatsapp) {
+          const cleanPhone = data.whatsapp.replace('+', '');
+          setPhoneValue(cleanPhone);
+          
+          // Try to detect country from number
+          try {
+            const parsed = parsePhoneNumber(data.whatsapp);
+            if (parsed && parsed.country) {
+              setPhoneCountry(parsed.country.toLowerCase());
+            }
+          } catch (e) {
+            // Default to Peru if can't parse
+          }
+        }
       }
     } catch (err) {
       console.error('Error loading profile:', err);
@@ -83,19 +99,53 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
     }
   };
 
+  const handlePhoneChange = (value, country) => {
+    setPhoneValue(value);
+    if (country) {
+      setPhoneCountry(country.countryCode);
+    }
+    
+    // Format to E.164 for storage
+    if (value) {
+      const formattedPhone = '+' + value;
+      setProfile(p => ({ ...p, whatsapp: formattedPhone }));
+    } else {
+      setProfile(p => ({ ...p, whatsapp: '' }));
+    }
+  };
+
+  const validateWhatsApp = () => {
+    if (!profile.whatsapp) {
+      return { valid: false, error: 'El número de WhatsApp es obligatorio para recibir recordatorios' };
+    }
+    
+    try {
+      if (!isValidPhoneNumber(profile.whatsapp)) {
+        return { valid: false, error: 'Número de teléfono inválido. Verifica el formato.' };
+      }
+      
+      const parsed = parsePhoneNumber(profile.whatsapp);
+      if (!parsed || !parsed.isValid()) {
+        return { valid: false, error: 'Número de teléfono inválido para el país seleccionado.' };
+      }
+      
+      return { valid: true, formatted: parsed.format('E.164') };
+    } catch (e) {
+      return { valid: false, error: 'Formato de número inválido.' };
+    }
+  };
+
   const handleSaveProfile = async () => {
     setSaving(true);
     setError(null);
     setSuccess(null);
 
-    // Validate WhatsApp format
-    if (profile.whatsapp) {
-      const cleanNumber = profile.whatsapp.replace(/\s/g, '');
-      if (!/^\+?\d{10,15}$/.test(cleanNumber)) {
-        setError('Formato de WhatsApp inválido. Usa formato internacional: +521234567890');
-        setSaving(false);
-        return;
-      }
+    // Validate WhatsApp
+    const whatsappValidation = validateWhatsApp();
+    if (!whatsappValidation.valid) {
+      setError(whatsappValidation.error);
+      setSaving(false);
+      return;
     }
 
     // Validate email format
@@ -106,13 +156,18 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
     }
 
     try {
+      const dataToSave = {
+        ...profile,
+        whatsapp: whatsappValidation.formatted // Always save E.164 format
+      };
+
       const response = await fetch(`${API_URL}/api/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(profile)
+        body: JSON.stringify(dataToSave)
       });
 
       if (response.ok) {
@@ -134,7 +189,6 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
     setError(null);
     setSuccess(null);
 
-    // Validations
     if (!passwords.current || !passwords.new || !passwords.confirm) {
       setError('Todos los campos son obligatorios');
       setSaving(false);
@@ -180,6 +234,18 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
     } finally {
       setSaving(false);
     }
+  };
+
+  // Get formatted preview
+  const getWhatsAppPreview = () => {
+    if (!profile.whatsapp) return null;
+    try {
+      const parsed = parsePhoneNumber(profile.whatsapp);
+      if (parsed) {
+        return parsed.formatInternational();
+      }
+    } catch (e) {}
+    return profile.whatsapp;
   };
 
   if (!isOpen) return null;
@@ -300,38 +366,66 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
                 />
               </div>
 
-              {/* WhatsApp */}
+              {/* WhatsApp - Professional Phone Input */}
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-                  <WhatsAppIcon size={12} color="#25D366" className="inline mr-1" />
-                  <span className="ml-1">WhatsApp</span>
+                  📱 WhatsApp <span className="text-red-500">*</span>
                 </label>
-                <div className="relative">
-                  <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="tel"
-                    value={profile.whatsapp}
-                    onChange={(e) => setProfile(p => ({ ...p, whatsapp: e.target.value }))}
-                    placeholder="+521234567890"
-                    className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:border-green-400 focus:ring-2 focus:ring-green-100 outline-none transition-all"
+                <div className="phone-input-container">
+                  <PhoneInput
+                    country={phoneCountry}
+                    value={phoneValue}
+                    onChange={handlePhoneChange}
+                    inputClass="!w-full !h-11 !text-sm !rounded-xl !border-gray-200 focus:!border-green-400 focus:!ring-2 focus:!ring-green-100"
+                    buttonClass="!rounded-l-xl !border-gray-200 !bg-gray-50 hover:!bg-gray-100"
+                    dropdownClass="!rounded-xl !shadow-xl !border-gray-200"
+                    searchClass="!rounded-lg !border-gray-200"
+                    containerClass="!w-full"
+                    enableSearch={true}
+                    searchPlaceholder="Buscar país..."
+                    preferredCountries={['pe', 'mx', 'co', 'ar', 'cl', 'es', 'us']}
+                    localization={{
+                      pe: 'Perú',
+                      mx: 'México', 
+                      co: 'Colombia',
+                      ar: 'Argentina',
+                      cl: 'Chile',
+                      es: 'España',
+                      us: 'Estados Unidos'
+                    }}
                   />
                 </div>
-                <p className="text-[10px] text-gray-400 mt-1">
-                  Formato internacional con código de país. Ej: +52 México, +34 España
-                </p>
+                
+                {/* Preview */}
+                {profile.whatsapp && (
+                  <div className="mt-2 flex items-center gap-2 text-xs">
+                    <span className="text-gray-400">Número guardado:</span>
+                    <span className="font-mono text-green-600 bg-green-50 px-2 py-0.5 rounded">
+                      {getWhatsAppPreview()}
+                    </span>
+                  </div>
+                )}
               </div>
 
-              {/* WhatsApp Info */}
-              <div className="p-3 bg-green-50 border border-green-100 rounded-xl">
-                <div className="flex items-start gap-2">
-                  <WhatsAppIcon size={18} color="#25D366" className="shrink-0 mt-0.5" />
+              {/* WhatsApp Info Box */}
+              <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-green-100 rounded-lg shrink-0">
+                    <Bell size={18} className="text-green-600" />
+                  </div>
                   <div>
-                    <p className="text-xs font-medium text-green-800">
-                      Notificaciones por WhatsApp
+                    <p className="text-sm font-medium text-green-800">
+                      Notificaciones de Recordatorios
                     </p>
-                    <p className="text-[10px] text-green-600 mt-0.5">
-                      Los recordatorios de tus proyectos y nodos se enviarán a este número.
+                    <p className="text-xs text-green-600 mt-1">
+                      Los recordatorios de tus proyectos y nodos se enviarán automáticamente 
+                      a este número de WhatsApp cuando llegue la fecha programada.
                     </p>
+                    {!profile.whatsapp && (
+                      <p className="text-xs text-amber-600 mt-2 font-medium">
+                        ⚠️ Sin número configurado no recibirás recordatorios.
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -449,6 +543,60 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
           )}
         </div>
       </div>
+
+      {/* Custom styles for phone input */}
+      <style jsx global>{`
+        .react-tel-input .form-control {
+          width: 100% !important;
+          height: 44px !important;
+          font-size: 14px !important;
+          border-radius: 12px !important;
+          border: 1px solid #e5e7eb !important;
+          padding-left: 52px !important;
+        }
+        .react-tel-input .form-control:focus {
+          border-color: #22c55e !important;
+          box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1) !important;
+        }
+        .react-tel-input .flag-dropdown {
+          border-radius: 12px 0 0 12px !important;
+          border: 1px solid #e5e7eb !important;
+          border-right: none !important;
+          background: #f9fafb !important;
+        }
+        .react-tel-input .flag-dropdown:hover {
+          background: #f3f4f6 !important;
+        }
+        .react-tel-input .flag-dropdown.open {
+          background: #f3f4f6 !important;
+          border-radius: 12px 0 0 0 !important;
+        }
+        .react-tel-input .selected-flag {
+          padding: 0 8px 0 12px !important;
+          border-radius: 12px 0 0 12px !important;
+        }
+        .react-tel-input .country-list {
+          border-radius: 12px !important;
+          box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important;
+          margin-top: 4px !important;
+          max-height: 250px !important;
+        }
+        .react-tel-input .country-list .country {
+          padding: 10px 12px !important;
+        }
+        .react-tel-input .country-list .country:hover {
+          background: #f0fdf4 !important;
+        }
+        .react-tel-input .country-list .country.highlight {
+          background: #dcfce7 !important;
+        }
+        .react-tel-input .search-box {
+          border-radius: 8px !important;
+          margin: 8px !important;
+          padding: 8px 12px !important;
+          width: calc(100% - 16px) !important;
+        }
+      `}</style>
     </div>
   );
 };

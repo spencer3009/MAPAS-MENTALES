@@ -26,6 +26,7 @@ const ReminderPanel = ({
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [userTimezone, setUserTimezone] = useState('America/Lima');
   
   // Form state
   const [formData, setFormData] = useState({
@@ -34,6 +35,27 @@ const ReminderPanel = ({
     message: '',
     channel: 'whatsapp'
   });
+
+  // Cargar zona horaria del perfil
+  useEffect(() => {
+    const loadTimezone = async () => {
+      if (!token) return;
+      try {
+        const response = await fetch(`${API_URL}/api/profile`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const profile = await response.json();
+          if (profile.timezone) {
+            setUserTimezone(profile.timezone);
+          }
+        }
+      } catch (err) {
+        console.error('Error loading timezone:', err);
+      }
+    };
+    loadTimezone();
+  }, [token]);
 
   // Cargar recordatorios
   useEffect(() => {

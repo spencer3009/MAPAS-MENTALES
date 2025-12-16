@@ -89,6 +89,8 @@ class UserProfile(BaseModel):
     apellidos: str = ""
     email: str = ""
     whatsapp: str = ""
+    pais: str = ""
+    timezone: str = ""
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
 
@@ -98,6 +100,8 @@ class UserProfileUpdate(BaseModel):
     apellidos: Optional[str] = None
     email: Optional[str] = None
     whatsapp: Optional[str] = None
+    pais: Optional[str] = None
+    timezone: Optional[str] = None
 
 class PasswordChange(BaseModel):
     """Modelo para cambio de contraseña"""

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   X, User, Mail, Save, Loader2, CheckCircle, AlertCircle,
-  Lock, Eye, EyeOff, UserCircle, Bell
+  Lock, Eye, EyeOff, UserCircle, Bell, Globe
 } from 'lucide-react';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
@@ -9,6 +9,32 @@ import { parsePhoneNumber, isValidPhoneNumber } from 'libphonenumber-js';
 import { useAuth } from '../../contexts/AuthContext';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+
+// Lista de países con códigos y zonas horarias
+const COUNTRIES = [
+  { code: 'PE', name: 'Perú', flag: '🇵🇪', timezone: 'America/Lima', phoneCode: '51' },
+  { code: 'MX', name: 'México', flag: '🇲🇽', timezone: 'America/Mexico_City', phoneCode: '52' },
+  { code: 'CO', name: 'Colombia', flag: '🇨🇴', timezone: 'America/Bogota', phoneCode: '57' },
+  { code: 'AR', name: 'Argentina', flag: '🇦🇷', timezone: 'America/Argentina/Buenos_Aires', phoneCode: '54' },
+  { code: 'CL', name: 'Chile', flag: '🇨🇱', timezone: 'America/Santiago', phoneCode: '56' },
+  { code: 'EC', name: 'Ecuador', flag: '🇪🇨', timezone: 'America/Guayaquil', phoneCode: '593' },
+  { code: 'VE', name: 'Venezuela', flag: '🇻🇪', timezone: 'America/Caracas', phoneCode: '58' },
+  { code: 'BO', name: 'Bolivia', flag: '🇧🇴', timezone: 'America/La_Paz', phoneCode: '591' },
+  { code: 'PY', name: 'Paraguay', flag: '🇵🇾', timezone: 'America/Asuncion', phoneCode: '595' },
+  { code: 'UY', name: 'Uruguay', flag: '🇺🇾', timezone: 'America/Montevideo', phoneCode: '598' },
+  { code: 'BR', name: 'Brasil', flag: '🇧🇷', timezone: 'America/Sao_Paulo', phoneCode: '55' },
+  { code: 'ES', name: 'España', flag: '🇪🇸', timezone: 'Europe/Madrid', phoneCode: '34' },
+  { code: 'US', name: 'Estados Unidos', flag: '🇺🇸', timezone: 'America/New_York', phoneCode: '1' },
+  { code: 'CR', name: 'Costa Rica', flag: '🇨🇷', timezone: 'America/Costa_Rica', phoneCode: '506' },
+  { code: 'PA', name: 'Panamá', flag: '🇵🇦', timezone: 'America/Panama', phoneCode: '507' },
+  { code: 'GT', name: 'Guatemala', flag: '🇬🇹', timezone: 'America/Guatemala', phoneCode: '502' },
+  { code: 'HN', name: 'Honduras', flag: '🇭🇳', timezone: 'America/Tegucigalpa', phoneCode: '504' },
+  { code: 'SV', name: 'El Salvador', flag: '🇸🇻', timezone: 'America/El_Salvador', phoneCode: '503' },
+  { code: 'NI', name: 'Nicaragua', flag: '🇳🇮', timezone: 'America/Managua', phoneCode: '505' },
+  { code: 'DO', name: 'República Dominicana', flag: '🇩🇴', timezone: 'America/Santo_Domingo', phoneCode: '1' },
+  { code: 'PR', name: 'Puerto Rico', flag: '🇵🇷', timezone: 'America/Puerto_Rico', phoneCode: '1' },
+  { code: 'CU', name: 'Cuba', flag: '🇨🇺', timezone: 'America/Havana', phoneCode: '53' },
+];
 
 const ProfileModal = ({ isOpen, onClose, user }) => {
   const { token } = useAuth();
@@ -23,12 +49,14 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
     nombre: '',
     apellidos: '',
     email: '',
-    whatsapp: ''
+    whatsapp: '',
+    pais: 'PE',
+    timezone: 'America/Lima'
   });
 
-  // Phone input state (separate for better control)
+  // Phone input state
   const [phoneValue, setPhoneValue] = useState('');
-  const [phoneCountry, setPhoneCountry] = useState('pe'); // Default Peru
+  const [phoneCountry, setPhoneCountry] = useState('pe');
 
   // Password form state
   const [passwords, setPasswords] = useState({
@@ -72,23 +100,22 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
           nombre: data.nombre || '',
           apellidos: data.apellidos || '',
           email: data.email || '',
-          whatsapp: data.whatsapp || ''
+          whatsapp: data.whatsapp || '',
+          pais: data.pais || 'PE',
+          timezone: data.timezone || 'America/Lima'
         });
         
-        // Set phone input value (remove + for the component)
+        // Set phone input value
         if (data.whatsapp) {
           const cleanPhone = data.whatsapp.replace('+', '');
           setPhoneValue(cleanPhone);
           
-          // Try to detect country from number
           try {
             const parsed = parsePhoneNumber(data.whatsapp);
             if (parsed && parsed.country) {
               setPhoneCountry(parsed.country.toLowerCase());
             }
-          } catch (e) {
-            // Default to Peru if can't parse
-          }
+          } catch (e) {}
         }
       }
     } catch (err) {
@@ -105,12 +132,23 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
       setPhoneCountry(country.countryCode);
     }
     
-    // Format to E.164 for storage
     if (value) {
       const formattedPhone = '+' + value;
       setProfile(p => ({ ...p, whatsapp: formattedPhone }));
     } else {
       setProfile(p => ({ ...p, whatsapp: '' }));
+    }
+  };
+
+  const handleCountryChange = (countryCode) => {
+    const country = COUNTRIES.find(c => c.code === countryCode);
+    if (country) {
+      setProfile(p => ({
+        ...p,
+        pais: countryCode,
+        timezone: country.timezone
+      }));
+      setPhoneCountry(countryCode.toLowerCase());
     }
   };
 
@@ -158,7 +196,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
     try {
       const dataToSave = {
         ...profile,
-        whatsapp: whatsappValidation.formatted // Always save E.164 format
+        whatsapp: whatsappValidation.formatted
       };
 
       const response = await fetch(`${API_URL}/api/profile`, {
@@ -236,7 +274,6 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
     }
   };
 
-  // Get formatted preview
   const getWhatsAppPreview = () => {
     if (!profile.whatsapp) return null;
     try {
@@ -247,6 +284,8 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
     } catch (e) {}
     return profile.whatsapp;
   };
+
+  const selectedCountry = COUNTRIES.find(c => c.code === profile.pais) || COUNTRIES[0];
 
   if (!isOpen) return null;
 
@@ -372,7 +411,29 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
                 />
               </div>
 
-              {/* WhatsApp - Professional Phone Input */}
+              {/* País - NUEVO */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                  <Globe size={12} className="inline mr-1" />
+                  País
+                </label>
+                <select
+                  value={profile.pais}
+                  onChange={(e) => handleCountryChange(e.target.value)}
+                  className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all bg-white"
+                >
+                  {COUNTRIES.map(country => (
+                    <option key={country.code} value={country.code}>
+                      {country.flag} {country.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[10px] text-gray-400 mt-1">
+                  Zona horaria: {selectedCountry.timezone}
+                </p>
+              </div>
+
+              {/* WhatsApp */}
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
                   📱 WhatsApp <span className="text-red-500">*</span>
@@ -390,19 +451,9 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
                     enableSearch={true}
                     searchPlaceholder="Buscar país..."
                     preferredCountries={['pe', 'mx', 'co', 'ar', 'cl', 'es', 'us']}
-                    localization={{
-                      pe: 'Perú',
-                      mx: 'México', 
-                      co: 'Colombia',
-                      ar: 'Argentina',
-                      cl: 'Chile',
-                      es: 'España',
-                      us: 'Estados Unidos'
-                    }}
                   />
                 </div>
                 
-                {/* Preview */}
                 {profile.whatsapp && (
                   <div className="mt-2 flex items-center gap-2 text-xs">
                     <span className="text-gray-400">Número guardado:</span>
@@ -413,7 +464,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
                 )}
               </div>
 
-              {/* WhatsApp Info Box */}
+              {/* Info Box */}
               <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl">
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-green-100 rounded-lg shrink-0">
@@ -424,14 +475,8 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
                       Notificaciones de Recordatorios
                     </p>
                     <p className="text-xs text-green-600 mt-1">
-                      Los recordatorios de tus proyectos y nodos se enviarán automáticamente 
-                      a este número de WhatsApp cuando llegue la fecha programada.
+                      Los recordatorios se enviarán a tu WhatsApp según la zona horaria de {selectedCountry.flag} {selectedCountry.name}.
                     </p>
-                    {!profile.whatsapp && (
-                      <p className="text-xs text-amber-600 mt-2 font-medium">
-                        ⚠️ Sin número configurado no recibirás recordatorios.
-                      </p>
-                    )}
                   </div>
                 </div>
               </div>
@@ -453,7 +498,6 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
           ) : (
             /* Password Form */
             <div className="space-y-4">
-              {/* Current Password */}
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
                   Contraseña Actual
@@ -479,7 +523,6 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
                 </div>
               </div>
 
-              {/* New Password */}
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
                   Nueva Contraseña
@@ -505,7 +548,6 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
                 </div>
               </div>
 
-              {/* Confirm Password */}
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
                   Confirmar Nueva Contraseña
@@ -531,14 +573,12 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
                 </div>
               </div>
 
-              {/* Password Requirements */}
               <div className="p-3 bg-amber-50 border border-amber-100 rounded-xl">
                 <p className="text-xs text-amber-700">
                   <strong>Requisitos:</strong> La contraseña debe tener al menos 6 caracteres.
                 </p>
               </div>
 
-              {/* Change Password Button */}
               <button
                 onClick={handleChangePassword}
                 disabled={saving}

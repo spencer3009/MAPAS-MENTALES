@@ -699,6 +699,55 @@ async def test_whatsapp(
 
 
 # ==========================================
+# TWILIO WHATSAPP WEBHOOK
+# ==========================================
+
+@app.post("/webhook/whatsapp")
+async def twilio_whatsapp_webhook(
+    Body: str = Form(""),
+    From: str = Form(""),
+    To: str = Form(""),
+    MessageSid: str = Form("")
+):
+    """
+    Webhook para recibir mensajes entrantes de Twilio WhatsApp
+    Recibe payload application/x-www-form-urlencoded
+    Responde con TwiML XML
+    """
+    logger.info("=" * 60)
+    logger.info("📱 [TWILIO WEBHOOK] Mensaje WhatsApp recibido")
+    logger.info(f"📞 De: {From}")
+    logger.info(f"📞 Para: {To}")
+    logger.info(f"📝 Mensaje: {Body}")
+    logger.info(f"🆔 MessageSid: {MessageSid}")
+    logger.info("=" * 60)
+    
+    # Normalizar el mensaje (lowercase, sin espacios extra)
+    user_message = Body.strip().lower()
+    
+    # Lógica de respuesta básica para pruebas
+    if user_message == "hola":
+        response_message = "Hola 👋 el sistema está funcionando correctamente."
+    elif user_message == "test":
+        response_message = "✅ Test exitoso. El webhook de Twilio está activo."
+    elif user_message == "help" or user_message == "ayuda":
+        response_message = "🤖 Comandos disponibles:\n- hola: Verificar sistema\n- test: Probar conexión\n- ayuda: Ver comandos"
+    else:
+        response_message = f"Recibí tu mensaje: '{Body}'\n\nEscribe 'hola' para verificar el sistema o 'ayuda' para ver comandos."
+    
+    # Generar respuesta TwiML XML
+    twiml = generate_twiml_response(response_message)
+    
+    logger.info(f"📤 Respuesta TwiML: {response_message}")
+    
+    # Retornar respuesta XML con Content-Type correcto
+    return Response(
+        content=twiml,
+        media_type="application/xml"
+    )
+
+
+# ==========================================
 # PROJECT MODELS
 # ==========================================
 

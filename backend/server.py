@@ -702,7 +702,7 @@ async def test_whatsapp(
 # TWILIO WHATSAPP WEBHOOK
 # ==========================================
 
-@app.post("/webhook/whatsapp")
+@api_router.post("/webhook/whatsapp")
 async def twilio_whatsapp_webhook(
     Body: str = Form(""),
     From: str = Form(""),
@@ -713,6 +713,8 @@ async def twilio_whatsapp_webhook(
     Webhook para recibir mensajes entrantes de Twilio WhatsApp
     Recibe payload application/x-www-form-urlencoded
     Responde con TwiML XML
+    
+    URL del webhook: /api/webhook/whatsapp
     """
     logger.info("=" * 60)
     logger.info("📱 [TWILIO WEBHOOK] Mensaje WhatsApp recibido")

@@ -82,6 +82,29 @@ class UserResponse(BaseModel):
     username: str
     full_name: str
 
+class UserProfile(BaseModel):
+    """Modelo completo del perfil de usuario"""
+    username: str
+    nombre: str = ""
+    apellidos: str = ""
+    email: str = ""
+    whatsapp: str = ""
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+
+class UserProfileUpdate(BaseModel):
+    """Modelo para actualizar el perfil"""
+    nombre: Optional[str] = None
+    apellidos: Optional[str] = None
+    email: Optional[str] = None
+    whatsapp: Optional[str] = None
+
+class PasswordChange(BaseModel):
+    """Modelo para cambio de contraseña"""
+    current_password: str
+    new_password: str
+    confirm_password: str
+
 
 # ==========================================
 # AUTH FUNCTIONS

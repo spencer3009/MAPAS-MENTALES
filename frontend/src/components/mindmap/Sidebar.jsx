@@ -19,12 +19,9 @@ const Sidebar = ({
   onSwitchProject,
   onRenameProject,
   onProjectReminder,
-  onOpenProfile,
   onPinProject,
   onReorderProjects,
-  onOpenAllProjects,
-  user,
-  onLogout
+  onOpenAllProjects
 }) => {
   const [editingProjectId, setEditingProjectId] = useState(null);
   const [editingName, setEditingName] = useState('');

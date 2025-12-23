@@ -361,12 +361,9 @@ const MindMapApp = () => {
         onSwitchProject={handleSwitchProject}
         onRenameProject={renameProject}
         onProjectReminder={handleProjectReminder}
-        onOpenProfile={() => setShowProfileModal(true)}
         onPinProject={pinProject}
         onReorderProjects={reorderProjects}
         onOpenAllProjects={() => setShowAllProjectsModal(true)}
-        user={user}
-        onLogout={logout}
       />
 
       {/* Área principal */}
@@ -389,6 +386,9 @@ const MindMapApp = () => {
           zoom={zoom}
           token={token}
           onRefreshNotifications={loadReminders}
+          user={user}
+          onOpenProfile={() => setShowProfileModal(true)}
+          onLogout={logout}
         />
 
         {/* Canvas y Sidebar derecho */}

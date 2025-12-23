@@ -719,6 +719,164 @@ async def test_whatsapp(
 
 
 # ==========================================
+# NOTIFICATION ENDPOINTS (SEEN/UNSEEN)
+# ==========================================
+
+class NotificationStats(BaseModel):
+    """Estadísticas de notificaciones"""
+    unseen_count: int
+    total_completed: int
+
+class MarkSeenRequest(BaseModel):
+    """Request para marcar notificaciones como vistas"""
+    reminder_ids: List[str]
+
+@api_router.get("/notifications/stats", response_model=NotificationStats)
+async def get_notification_stats(
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener estadísticas de notificaciones (contador de no vistos)"""
+    
+    username = current_user["username"]
+    
+    # Contar recordatorios cumplidos (sent) no vistos
+    unseen_count = await db.reminders.count_documents({
+        "username": username,
+        "status": "sent",
+        "$or": [
+            {"seen": False},
+            {"seen": {"$exists": False}}
+        ]
+    })
+    
+    # Contar total de recordatorios cumplidos
+    total_completed = await db.reminders.count_documents({
+        "username": username,
+        "status": "sent"
+    })
+    
+    return {
+        "unseen_count": unseen_count,
+        "total_completed": total_completed
+    }
+
+@api_router.post("/notifications/mark-seen")
+async def mark_notifications_seen(
+    request: MarkSeenRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Marcar notificaciones específicas como vistas"""
+    
+    username = current_user["username"]
+    now = datetime.now(timezone.utc).isoformat()
+    
+    # Actualizar solo los recordatorios del usuario
+    result = await db.reminders.update_many(
+        {
+            "username": username,
+            "id": {"$in": request.reminder_ids},
+            "status": "sent"
+        },
+        {
+            "$set": {
+                "seen": True,
+                "seen_at": now
+            }
+        }
+    )
+    
+    logger.info(f"Marcados {result.modified_count} recordatorios como vistos para {username}")
+    
+    return {
+        "marked_count": result.modified_count,
+        "reminder_ids": request.reminder_ids
+    }
+
+@api_router.post("/notifications/mark-all-seen")
+async def mark_all_notifications_seen(
+    current_user: dict = Depends(get_current_user)
+):
+    """Marcar todas las notificaciones cumplidas como vistas"""
+    
+    username = current_user["username"]
+    now = datetime.now(timezone.utc).isoformat()
+    
+    # Actualizar todos los recordatorios cumplidos no vistos
+    result = await db.reminders.update_many(
+        {
+            "username": username,
+            "status": "sent",
+            "$or": [
+                {"seen": False},
+                {"seen": {"$exists": False}}
+            ]
+        },
+        {
+            "$set": {
+                "seen": True,
+                "seen_at": now
+            }
+        }
+    )
+    
+    logger.info(f"Marcados {result.modified_count} recordatorios como vistos para {username}")
+    
+    return {
+        "marked_count": result.modified_count
+    }
+
+@api_router.get("/notifications/completed")
+async def get_completed_notifications(
+    current_user: dict = Depends(get_current_user),
+    skip: int = 0,
+    limit: int = 20,
+    unseen_only: bool = False
+):
+    """
+    Obtener notificaciones completadas con paginación para scroll infinito.
+    Devuelve recordatorios con status 'sent' ordenados por sent_at descendente.
+    """
+    
+    username = current_user["username"]
+    
+    query = {
+        "username": username,
+        "status": "sent"
+    }
+    
+    if unseen_only:
+        query["$or"] = [
+            {"seen": False},
+            {"seen": {"$exists": False}}
+        ]
+    
+    # Obtener recordatorios con paginación
+    reminders = await db.reminders.find(
+        query,
+        {"_id": 0}
+    ).sort("sent_at", -1).skip(skip).limit(limit).to_list(limit)
+    
+    # Asegurar campos seen
+    for reminder in reminders:
+        if "seen" not in reminder:
+            reminder["seen"] = False
+        if "seen_at" not in reminder:
+            reminder["seen_at"] = None
+    
+    # Verificar si hay más resultados
+    total = await db.reminders.count_documents(query)
+    has_more = (skip + len(reminders)) < total
+    
+    return {
+        "reminders": reminders,
+        "total": total,
+        "skip": skip,
+        "limit": limit,
+        "has_more": has_more
+    }
+
+
+# ==========================================
 # TWILIO WHATSAPP WEBHOOK
 # ==========================================
 

@@ -1110,6 +1110,93 @@ async def delete_project(
     
     return {"message": "Proyecto eliminado"}
 
+
+# ==========================================
+# PROJECT MANAGEMENT ENDPOINTS
+# ==========================================
+
+class PinProjectRequest(BaseModel):
+    isPinned: bool
+
+class ReorderProjectsRequest(BaseModel):
+    projectOrders: List[dict]  # [{id: "...", customOrder: 0}, ...]
+
+@api_router.put("/projects/{project_id}/pin")
+async def pin_project(
+    project_id: str,
+    request: PinProjectRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Anclar o desanclar un proyecto"""
+    username = current_user["username"]
+    
+    # Verificar que el proyecto existe
+    project = await db.projects.find_one(
+        {"id": project_id, "username": username}
+    )
+    if not project:
+        raise HTTPException(status_code=404, detail="Proyecto no encontrado")
+    
+    # Si se quiere anclar, verificar que no hay más de 2 anclados
+    if request.isPinned:
+        pinned_count = await db.projects.count_documents({
+            "username": username,
+            "isPinned": True
+        })
+        # Si ya hay 2 anclados y este proyecto no está anclado, rechazar
+        if pinned_count >= 2 and not project.get("isPinned", False):
+            raise HTTPException(
+                status_code=400, 
+                detail="No puedes anclar más de 2 proyectos"
+            )
+    
+    # Actualizar estado de anclado
+    await db.projects.update_one(
+        {"id": project_id},
+        {"$set": {"isPinned": request.isPinned}}
+    )
+    
+    logger.info(f"Proyecto {project_id} {'anclado' if request.isPinned else 'desanclado'} por {username}")
+    
+    return {"id": project_id, "isPinned": request.isPinned}
+
+@api_router.put("/projects/{project_id}/activate")
+async def activate_project(
+    project_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Marcar un proyecto como activo (actualizar lastActiveAt)"""
+    username = current_user["username"]
+    now = datetime.now(timezone.utc).isoformat()
+    
+    result = await db.projects.update_one(
+        {"id": project_id, "username": username},
+        {"$set": {"lastActiveAt": now}}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Proyecto no encontrado")
+    
+    return {"id": project_id, "lastActiveAt": now}
+
+@api_router.put("/projects/reorder")
+async def reorder_projects(
+    request: ReorderProjectsRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Reordenar proyectos (orden personalizado)"""
+    username = current_user["username"]
+    
+    for order_item in request.projectOrders:
+        await db.projects.update_one(
+            {"id": order_item["id"], "username": username},
+            {"$set": {"customOrder": order_item["customOrder"]}}
+        )
+    
+    logger.info(f"Proyectos reordenados para {username}")
+    
+    return {"reordered": len(request.projectOrders)}
+
 @api_router.post("/projects/sync")
 async def sync_projects(
     projects: List[ProjectCreate],

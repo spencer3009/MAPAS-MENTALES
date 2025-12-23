@@ -138,8 +138,8 @@ const Toolbar = ({
         </div>
       </div>
 
-      {/* Grupo derecho: Exportación */}
-      <div className="flex items-center gap-1">
+      {/* Grupo derecho: Exportación y Notificaciones */}
+      <div className="flex items-center gap-2">
         <ToolbarButton
           icon={<FileJson size={18} />}
           text="JSON"
@@ -150,6 +150,14 @@ const Toolbar = ({
           icon={<Image size={18} />}
           text="PNG"
           onClick={onExportPNG}
+        />
+
+        <Divider />
+
+        {/* Campanita de notificaciones */}
+        <NotificationBell
+          completedReminders={completedReminders}
+          onRefresh={onRefreshNotifications}
         />
       </div>
     </div>

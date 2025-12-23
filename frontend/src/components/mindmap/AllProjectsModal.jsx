@@ -34,13 +34,23 @@ const AllProjectsModal = ({
     setHasChanges(false);
   }, [projects]);
 
+  // Guardar el orden - definido primero para poder usarlo en otros hooks
+  const saveOrder = useCallback(async () => {
+    if (!hasChanges || !onReorderProjects) return;
+
+    const projectOrders = localProjects.map((p, index) => ({
+      id: p.id,
+      customOrder: index
+    }));
+
+    await onReorderProjects(projectOrders);
+    setHasChanges(false);
+  }, [hasChanges, localProjects, onReorderProjects]);
+
   // Cerrar al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (modalRef.current && !modalRef.current.contains(e.target)) {
-        if (hasChanges) {
-          handleSaveOrder();
-        }
         onClose();
       }
     };
@@ -49,15 +59,12 @@ const AllProjectsModal = ({
       document.addEventListener('mousedown', handleClickOutside);
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen, onClose, hasChanges]);
+  }, [isOpen, onClose]);
 
   // Cerrar con Escape
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === 'Escape') {
-        if (hasChanges) {
-          handleSaveOrder();
-        }
         onClose();
       }
     };
@@ -66,7 +73,14 @@ const AllProjectsModal = ({
       document.addEventListener('keydown', handleEscape);
     }
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [isOpen, onClose, hasChanges]);
+  }, [isOpen, onClose]);
+
+  // Auto-guardar cuando el modal se cierra con cambios pendientes
+  useEffect(() => {
+    if (!isOpen && hasChanges) {
+      saveOrder();
+    }
+  }, [isOpen, hasChanges, saveOrder]);
 
   // Filtrar proyectos por búsqueda
   const filteredProjects = useMemo(() => {

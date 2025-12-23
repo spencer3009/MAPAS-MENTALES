@@ -156,7 +156,7 @@ const Toolbar = ({
 
         {/* Campanita de notificaciones */}
         <NotificationBell
-          completedReminders={completedReminders}
+          token={token}
           onRefresh={onRefreshNotifications}
         />
       </div>

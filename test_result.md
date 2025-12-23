@@ -97,18 +97,28 @@
   - Project switching functionality works
   - Canvas updates to show different project content
 
+### ✅ ADDITIONAL SUCCESSFUL FEATURES TESTED:
+
+#### 7. Drag & Drop Functionality in "Ver todos" Modal
+- **Status**: ✅ WORKING
+- **Findings**:
+  - "Ordenar" button successfully activates reorder mode
+  - Blue banner appears: "Arrastra y suelta los proyectos para reordenarlos"
+  - Green "Guardar orden" button appears and functions correctly
+  - Position numbers (1, 2, 3...) display correctly for each project
+  - Grip handles (⋮⋮) visible for drag operations
+  - Action buttons (pin, edit, delete) properly hidden in reorder mode
+  - Button correctly changes to "Listo" in reorder mode
+  - Drag & drop operations work smoothly between projects
+  - "Cambios sin guardar" indicator appears when changes are made
+  - Save functionality works - changes persist after clicking "Guardar orden"
+  - "Cambios sin guardar" indicator disappears after saving
+  - Exit reorder mode works with "Listo" button
+  - Normal view returns after exiting reorder mode
+
 ### ⚠️ MINOR OBSERVATIONS:
 
-#### 1. Reorder Mode
-- **Status**: ⚠️ PARTIALLY TESTED
-- **Findings**:
-  - Reorder button found and clickable
-  - Mode activation works
-  - "Arrastra para reordenar" message not clearly visible in test
-  - Drag handles present for non-pinned projects
-  - Exit functionality works
-
-#### 2. Active Project Indicator
+#### 1. Active Project Indicator
 - **Status**: ⚠️ VISUAL INDICATOR UNCLEAR
 - **Findings**:
   - Project switching works functionally

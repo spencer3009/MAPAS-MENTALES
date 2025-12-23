@@ -886,22 +886,6 @@ export const useNodes = () => {
     }
   }, [activeProjectId, projects, deleteProjectFromServer, saveProjectToServer]);
 
-  // Cambiar proyecto activo
-  const switchProject = useCallback((projectId) => {
-    try {
-      if (projects.some(p => p.id === projectId)) {
-        console.log('Cambiando a proyecto:', projectId);
-        setActiveProjectId(projectId);
-        setSelectedNodeId(null);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Error al cambiar proyecto:', error);
-      return false;
-    }
-  }, [projects]);
-
   // Renombrar proyecto
   const renameProject = useCallback(async (projectId, newName) => {
     try {

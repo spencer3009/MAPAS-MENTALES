@@ -387,7 +387,7 @@ const MindMapApp = () => {
           canRedo={canRedo}
           hasSelection={!!selectedNodeId}
           zoom={zoom}
-          completedReminders={completedReminders}
+          token={token}
           onRefreshNotifications={loadReminders}
         />
 

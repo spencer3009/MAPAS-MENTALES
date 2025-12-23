@@ -11,6 +11,7 @@ import {
   ZoomOut,
   RotateCcw
 } from 'lucide-react';
+import NotificationBell from './NotificationBell';
 
 const ToolbarButton = ({ icon, text, onClick, disabled, variant = 'default' }) => {
   const baseStyles = `

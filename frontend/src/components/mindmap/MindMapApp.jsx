@@ -8,6 +8,7 @@ import TemplateModal from './TemplateModal';
 import ProjectNameModal from './ProjectNameModal';
 import ProjectReminderModal from './ProjectReminderModal';
 import ProfileModal from './ProfileModal';
+import AllProjectsModal from './AllProjectsModal';
 import { useNodes } from '../../hooks/useNodes';
 import { usePanning } from '../../hooks/usePanning';
 import { useZoom } from '../../hooks/useZoom';
@@ -48,7 +49,9 @@ const MindMapApp = () => {
     loadFromTemplate,
     deleteProject,
     switchProject,
-    renameProject
+    renameProject,
+    pinProject,
+    reorderProjects
   } = useNodes();
 
   const {

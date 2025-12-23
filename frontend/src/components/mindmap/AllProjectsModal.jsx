@@ -280,8 +280,12 @@ const AllProjectsModal = ({
       saveOrder();
     }
     setIsReorderMode(!isReorderMode);
-    setSearchQuery(''); // Limpiar búsqueda al cambiar modo
-  }, [isReorderMode, hasChanges, saveOrder]);
+    setSearchQuery('');
+    if (!isReorderMode) {
+      // Entrando en modo reordenar - comenzar con la lista ordenada actual
+      setReorderedList([...sortedProjects]);
+    }
+  }, [isReorderMode, hasChanges, saveOrder, sortedProjects]);
 
   const pinnedCount = projects.filter(p => p.isPinned).length;
 

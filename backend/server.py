@@ -986,11 +986,21 @@ class ProjectResponse(BaseModel):
 
 @api_router.get("/projects", response_model=List[ProjectResponse])
 async def get_projects(current_user: dict = Depends(get_current_user)):
-    """Obtener todos los proyectos del usuario"""
+    """Obtener todos los proyectos del usuario con ordenamiento inteligente"""
     projects = await db.projects.find(
         {"username": current_user["username"]},
         {"_id": 0}
     ).to_list(100)
+    
+    # Asegurar que todos los proyectos tienen los campos nuevos
+    for project in projects:
+        if "isPinned" not in project:
+            project["isPinned"] = False
+        if "lastActiveAt" not in project:
+            project["lastActiveAt"] = project.get("updatedAt")
+        if "customOrder" not in project:
+            project["customOrder"] = None
+    
     return projects
 
 @api_router.get("/projects/{project_id}", response_model=ProjectResponse)

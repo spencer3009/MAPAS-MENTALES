@@ -925,83 +925,112 @@ export const useNodes = () => {
     }
   }, [projects, saveProjectToServer]);
 
-  // Funciones de compatibilidad
-  const setProjectName = useCallback((name) => {
-    renameProject(activeProjectId, name);
-  }, [activeProjectId, renameProject]);
+  // Anclar/Desanclar proyecto
+  const pinProject = useCallback(async (projectId, shouldPin) => {
+    const token = getAuthToken();
+    if (!token) return false;
 
-  const resetToDefault = useCallback(() => {
-    // Crear un proyecto con los nodos por defecto
-    const defaultNodes = [
-      { id: crypto.randomUUID(), text: 'Idea Principal', x: 200, y: 280, color: 'blue', parentId: null },
-    ];
-    const rootId = defaultNodes[0].id;
-    defaultNodes.push(
-      { id: crypto.randomUUID(), text: 'Concepto 1', x: 480, y: 120, color: 'pink', parentId: rootId },
-      { id: crypto.randomUUID(), text: 'Concepto 2', x: 480, y: 280, color: 'green', parentId: rootId },
-      { id: crypto.randomUUID(), text: 'Concepto 3', x: 480, y: 440, color: 'yellow', parentId: rootId }
-    );
-    
-    return loadFromTemplate(defaultNodes, 'Mi Mapa Mental');
-  }, [loadFromTemplate]);
+    try {
+      const response = await fetch(`${API_URL}/api/projects/${projectId}/pin`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ isPinned: shouldPin })
+      });
 
-  const clearAll = useCallback(() => {
-    return createBlankMap();
-  }, [createBlankMap]);
+      if (response.ok) {
+        setProjects(prev => prev.map(p => 
+          p.id === projectId 
+            ? { ...p, isPinned: shouldPin }
+            : p
+        ));
+        console.log(`Proyecto ${projectId} ${shouldPin ? 'anclado' : 'desanclado'}`);
+        return true;
+      } else {
+        const error = await response.json();
+        console.error('Error al anclar proyecto:', error.detail);
+        return false;
+      }
+    } catch (error) {
+      console.error('Error al anclar proyecto:', error);
+      return false;
+    }
+  }, []);
 
-  return {
-    // Estado de nodos del proyecto activo
-    nodes,
-    selectedNodeId,
-    setSelectedNodeId,
-    
-    // Información del proyecto activo
-    projectName,
-    activeProjectId,
-    activeProject,
-    
-    // Lista de todos los proyectos
-    projects,
-    
-    // Estados de sincronización
-    isLoading,
-    isSyncing,
-    reloadProjects,
-    
-    // Funciones de nodos
-    addNode,
-    updateNode: updateProjectNodes,
-    updateNodePosition,
-    updateNodeText,
-    updateNodeColor,
-    updateNodeComment,
-    updateNodeStyle,
-    updateNodeSize,
-    updateNodeIcon,
-    addNodeLink,
-    removeNodeLink,
-    updateNodeLink,
-    saveNodePositionToHistory,
-    deleteNode,
-    duplicateNode,
-    
-    // Funciones de historial
-    undo,
-    redo,
-    canUndo,
-    canRedo,
-    
-    // Gestión de proyectos
-    createBlankMap,
-    loadFromTemplate,
-    deleteProject,
-    switchProject,
-    renameProject,
-    setProjectName,
-    
-    // Compatibilidad
-    resetToDefault,
-    clearAll,
-    setNodes: updateProjectNodes
-  };
-};
+  // Activar proyecto (actualizar lastActiveAt)
+  const activateProject = useCallback(async (projectId) => {
+    const token = getAuthToken();
+    if (!token) return;
+
+    try {
+      const response = await fetch(`${API_URL}/api/projects/${projectId}/activate`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setProjects(prev => prev.map(p => 
+          p.id === projectId 
+            ? { ...p, lastActiveAt: data.lastActiveAt }
+            : p
+        ));
+      }
+    } catch (error) {
+      console.error('Error al activar proyecto:', error);
+    }
+  }, []);
+
+  // Reordenar proyectos
+  const reorderProjects = useCallback(async (projectOrders) => {
+    const token = getAuthToken();
+    if (!token) return false;
+
+    try {
+      const response = await fetch(`${API_URL}/api/projects/reorder`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ projectOrders })
+      });
+
+      if (response.ok) {
+        // Actualizar estado local con el nuevo orden
+        setProjects(prev => {
+          const orderMap = new Map(projectOrders.map(o => [o.id, o.customOrder]));
+          return prev.map(p => ({
+            ...p,
+            customOrder: orderMap.has(p.id) ? orderMap.get(p.id) : p.customOrder
+          }));
+        });
+        console.log('Proyectos reordenados');
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error al reordenar proyectos:', error);
+      return false;
+    }
+  }, []);
+
+  // Cambiar proyecto activo (actualizado para activar)
+  const switchProject = useCallback((projectId) => {
+    try {
+      if (projects.some(p => p.id === projectId)) {
+        console.log('Cambiando a proyecto:', projectId);
+        setActiveProjectId(projectId);
+        setSelectedNodeId(null);
+        // Activar el proyecto en el servidor
+        activateProject(projectId);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error al cambiar proyecto:', error);
+      return false;
+    }
+  }, [projects, activateProject]);

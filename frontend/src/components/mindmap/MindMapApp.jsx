@@ -141,6 +141,15 @@ const MindMapApp = () => {
     loadReminders();
   }, [loadReminders, activeProjectId]);
 
+  // Auto-refresh de recordatorios cada 30 segundos para notificaciones en tiempo real
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadReminders();
+    }, 30000); // 30 segundos
+    
+    return () => clearInterval(interval);
+  }, [loadReminders]);
+
   // Enriquecer nodos con información de recordatorio
   const nodesWithReminders = nodes.map(node => ({
     ...node,

@@ -581,6 +581,8 @@ async def create_reminder(
         "status": "pending",
         "created_at": datetime.now(timezone.utc).isoformat(),
         "sent_at": None,
+        "seen": False,
+        "seen_at": None,
         "username": current_user["username"]
     }
     

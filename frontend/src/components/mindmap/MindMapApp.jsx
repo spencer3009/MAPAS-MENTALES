@@ -508,6 +508,18 @@ const MindMapApp = () => {
         onClose={() => setShowProfileModal(false)}
         user={user}
       />
+
+      {/* Modal: Todos los proyectos */}
+      <AllProjectsModal
+        isOpen={showAllProjectsModal}
+        onClose={() => setShowAllProjectsModal(false)}
+        projects={projects}
+        activeProjectId={activeProjectId}
+        onSwitchProject={handleSwitchProject}
+        onDeleteProject={handleDeleteProjectClick}
+        onRenameProject={renameProject}
+        onPinProject={pinProject}
+      />
     </div>
   );
 };

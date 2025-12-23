@@ -361,7 +361,7 @@ const AllProjectsModal = ({
               </div>
               {hasChanges && (
                 <button
-                  onClick={handleSaveOrder}
+                  onClick={saveOrder}
                   className="
                     flex items-center gap-1.5 px-3 py-1.5
                     bg-green-500 text-white text-sm font-medium

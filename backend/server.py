@@ -1031,7 +1031,10 @@ async def create_project(
         "nodes": [node.model_dump() for node in project_data.nodes],
         "username": current_user["username"],
         "createdAt": now,
-        "updatedAt": now
+        "updatedAt": now,
+        "lastActiveAt": now,
+        "isPinned": project_data.isPinned or False,
+        "customOrder": project_data.customOrder
     }
     
     await db.projects.insert_one(project)

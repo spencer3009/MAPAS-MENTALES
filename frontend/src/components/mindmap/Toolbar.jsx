@@ -12,6 +12,7 @@ import {
   RotateCcw
 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
+import UserDropdown from './UserDropdown';
 
 const ToolbarButton = ({ icon, text, onClick, disabled, variant = 'default' }) => {
   const baseStyles = `

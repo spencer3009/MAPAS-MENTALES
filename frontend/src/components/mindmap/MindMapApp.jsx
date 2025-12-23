@@ -387,6 +387,8 @@ const MindMapApp = () => {
           canRedo={canRedo}
           hasSelection={!!selectedNodeId}
           zoom={zoom}
+          completedReminders={completedReminders}
+          onRefreshNotifications={loadReminders}
         />
 
         {/* Canvas y Sidebar derecho */}

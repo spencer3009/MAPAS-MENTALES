@@ -19,33 +19,42 @@ const AllProjectsModal = ({
   const [editingProjectId, setEditingProjectId] = useState(null);
   const [editingName, setEditingName] = useState('');
   const [isReorderMode, setIsReorderMode] = useState(false);
-  const [localProjects, setLocalProjects] = useState([]);
   const [draggedProject, setDraggedProject] = useState(null);
   const [dragOverProjectId, setDragOverProjectId] = useState(null);
-  const [dropPosition, setDropPosition] = useState(null); // 'above' or 'below'
-  const [hasChanges, setHasChanges] = useState(false);
+  const [dropPosition, setDropPosition] = useState(null);
+  const [reorderedList, setReorderedList] = useState(null); // null = use projects, array = reordered
   
   const modalRef = useRef(null);
   const dragCounter = useRef(0);
 
-  // Sincronizar proyectos locales cuando cambian los props
+  // Resetear estado cuando se abre/cierra el modal
+  const prevIsOpen = useRef(isOpen);
   useEffect(() => {
-    setLocalProjects(projects);
-    setHasChanges(false);
-  }, [projects]);
+    if (isOpen && !prevIsOpen.current) {
+      // Modal se acaba de abrir - resetear estado
+      setReorderedList(null);
+      setIsReorderMode(false);
+      setSearchQuery('');
+    }
+    prevIsOpen.current = isOpen;
+  }, [isOpen]);
 
-  // Guardar el orden - definido primero para poder usarlo en otros hooks
+  // Lista de proyectos a mostrar (original o reordenada)
+  const displayProjects = reorderedList || projects;
+  const hasChanges = reorderedList !== null;
+
+  // Guardar el orden
   const saveOrder = useCallback(async () => {
-    if (!hasChanges || !onReorderProjects) return;
+    if (!reorderedList || !onReorderProjects) return;
 
-    const projectOrders = localProjects.map((p, index) => ({
+    const projectOrders = reorderedList.map((p, index) => ({
       id: p.id,
       customOrder: index
     }));
 
     await onReorderProjects(projectOrders);
-    setHasChanges(false);
-  }, [hasChanges, localProjects, onReorderProjects]);
+    setReorderedList(null);
+  }, [reorderedList, onReorderProjects]);
 
   // Cerrar al hacer clic fuera
   useEffect(() => {
@@ -74,13 +83,6 @@ const AllProjectsModal = ({
     }
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
-
-  // Auto-guardar cuando el modal se cierra con cambios pendientes
-  useEffect(() => {
-    if (!isOpen && hasChanges) {
-      saveOrder();
-    }
-  }, [isOpen, hasChanges, saveOrder]);
 
   // Filtrar proyectos por búsqueda
   const filteredProjects = useMemo(() => {

@@ -1066,6 +1066,12 @@ async def update_project(
     if update_data.nodes is not None:
         update_dict["nodes"] = [node.model_dump() for node in update_data.nodes]
     
+    if update_data.isPinned is not None:
+        update_dict["isPinned"] = update_data.isPinned
+    
+    if update_data.customOrder is not None:
+        update_dict["customOrder"] = update_data.customOrder
+    
     await db.projects.update_one(
         {"id": project_id},
         {"$set": update_dict}
@@ -1073,6 +1079,13 @@ async def update_project(
     
     # Return updated project
     updated = await db.projects.find_one({"id": project_id}, {"_id": 0})
+    # Asegurar campos por defecto
+    if "isPinned" not in updated:
+        updated["isPinned"] = False
+    if "lastActiveAt" not in updated:
+        updated["lastActiveAt"] = updated.get("updatedAt")
+    if "customOrder" not in updated:
+        updated["customOrder"] = None
     return updated
 
 @api_router.delete("/projects/{project_id}")

@@ -57,7 +57,9 @@ const Toolbar = ({
   canUndo,
   canRedo,
   hasSelection,
-  zoom
+  zoom,
+  completedReminders = [],
+  onRefreshNotifications
 }) => {
   return (
     <div className="

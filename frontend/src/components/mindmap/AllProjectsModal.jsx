@@ -330,7 +330,7 @@ const AllProjectsModal = ({
             </button>
             <button
               onClick={() => {
-                if (hasChanges) handleSaveOrder();
+                if (hasChanges) saveOrder();
                 onClose();
               }}
               className="

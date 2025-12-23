@@ -26,24 +26,17 @@ const AllProjectsModal = ({
   
   const modalRef = useRef(null);
   const dragCounter = useRef(0);
-  const wasOpen = useRef(false);
 
-  // Resetear estado cuando se abre el modal (usando key pattern)
-  if (isOpen && !wasOpen.current) {
-    // Modal se acaba de abrir
-    wasOpen.current = true;
-  }
-  if (!isOpen && wasOpen.current) {
-    // Modal se acaba de cerrar - guardar cambios si hay
-    if (reorderedList && onReorderProjects) {
-      const projectOrders = reorderedList.map((p, index) => ({
-        id: p.id,
-        customOrder: index
-      }));
-      onReorderProjects(projectOrders);
+  // Resetear estado cuando se abre el modal
+  useEffect(() => {
+    if (isOpen) {
+      // Modal se acaba de abrir - resetear estado
+      setReorderedList(null);
+      setIsReorderMode(false);
+      setSearchQuery('');
     }
-    wasOpen.current = false;
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   // Lista de proyectos a mostrar (original o reordenada)
   const displayProjects = reorderedList || projects;

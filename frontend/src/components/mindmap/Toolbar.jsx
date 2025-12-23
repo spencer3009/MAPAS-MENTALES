@@ -142,7 +142,7 @@ const Toolbar = ({
         </div>
       </div>
 
-      {/* Grupo derecho: Exportación y Notificaciones */}
+      {/* Grupo derecho: Exportación, Notificaciones y Usuario */}
       <div className="flex items-center gap-2">
         <ToolbarButton
           icon={<FileJson size={18} />}
@@ -162,6 +162,13 @@ const Toolbar = ({
         <NotificationBell
           token={token}
           onRefresh={onRefreshNotifications}
+        />
+
+        {/* Avatar y dropdown de usuario */}
+        <UserDropdown
+          user={user}
+          onOpenProfile={onOpenProfile}
+          onLogout={onLogout}
         />
       </div>
     </div>

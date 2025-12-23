@@ -60,7 +60,10 @@ const Toolbar = ({
   hasSelection,
   zoom,
   token,
-  onRefreshNotifications
+  onRefreshNotifications,
+  user,
+  onOpenProfile,
+  onLogout
 }) => {
   return (
     <div className="

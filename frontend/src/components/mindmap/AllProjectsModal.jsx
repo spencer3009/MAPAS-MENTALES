@@ -236,9 +236,12 @@ const AllProjectsModal = ({
       return;
     }
 
+    // Usar la lista actual (reordenada o original)
+    const currentList = reorderedList || [...projects];
+    
     // Encontrar índices
-    const draggedIndex = localProjects.findIndex(p => p.id === draggedProject.id);
-    const targetIndex = localProjects.findIndex(p => p.id === targetProject.id);
+    const draggedIndex = currentList.findIndex(p => p.id === draggedProject.id);
+    const targetIndex = currentList.findIndex(p => p.id === targetProject.id);
 
     if (draggedIndex === -1 || targetIndex === -1) {
       handleDragEnd();
@@ -246,7 +249,7 @@ const AllProjectsModal = ({
     }
 
     // Crear nuevo array con el orden actualizado
-    const newProjects = [...localProjects];
+    const newProjects = [...currentList];
     const [removed] = newProjects.splice(draggedIndex, 1);
     
     // Calcular índice de inserción basado en la posición del drop
@@ -267,10 +270,9 @@ const AllProjectsModal = ({
       customOrder: index
     }));
 
-    setLocalProjects(updatedProjects);
-    setHasChanges(true);
+    setReorderedList(updatedProjects);
     handleDragEnd();
-  }, [isReorderMode, draggedProject, localProjects, dropPosition, handleDragEnd]);
+  }, [isReorderMode, draggedProject, reorderedList, projects, dropPosition, handleDragEnd]);
 
   // Toggle modo reordenar
   const toggleReorderMode = useCallback(() => {

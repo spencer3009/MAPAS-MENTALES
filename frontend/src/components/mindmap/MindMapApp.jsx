@@ -519,6 +519,7 @@ const MindMapApp = () => {
         onDeleteProject={handleDeleteProjectClick}
         onRenameProject={renameProject}
         onPinProject={pinProject}
+        onReorderProjects={reorderProjects}
       />
     </div>
   );

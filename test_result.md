@@ -112,3 +112,18 @@ The Notification Bell feature is **FULLY FUNCTIONAL** and meets all specified re
 
 **RECOMMENDATION:** Feature is ready for production use. No issues found during comprehensive testing.
 
+## Updated Test Results - Notification Bell with Seen/Unseen Logic
+
+### New Features:
+1. Badge only shows count of UNSEEN completed reminders
+2. Badge disappears when all reminders are seen
+3. Opening the bell marks visible reminders as seen
+4. Infinite scroll with pagination (20 items per page)
+5. Real-time counter updates every 30 seconds
+
+### New Backend Endpoints:
+- GET /api/notifications/stats - Returns unseen_count and total_completed
+- GET /api/notifications/completed?skip=0&limit=20 - Paginated completed reminders
+- POST /api/notifications/mark-seen - Mark specific reminders as seen
+- POST /api/notifications/mark-all-seen - Mark all reminders as seen
+

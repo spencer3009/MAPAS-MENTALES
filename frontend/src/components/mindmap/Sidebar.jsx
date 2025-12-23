@@ -1,8 +1,15 @@
-import React, { useState } from 'react';
-import { Plus, LayoutTemplate, FileText, Trash2, Check, Pencil, LogOut, User, Bell, Settings } from 'lucide-react';
+import React, { useState, useMemo, useCallback } from 'react';
+import { 
+  Plus, LayoutTemplate, FileText, Trash2, Check, Pencil, 
+  LogOut, User, Bell, Settings, Pin, PinOff, ChevronRight,
+  GripVertical, ArrowUpDown, ExternalLink
+} from 'lucide-react';
 
 // URL del logo MindoraMap (horizontal)
 const LOGO_URL = 'https://customer-assets.emergentagent.com/job_mindviz-app/artifacts/k1kioask_image.png';
+
+const MAX_VISIBLE_PROJECTS = 5;
+const MAX_PINNED = 2;
 
 const Sidebar = ({
   projects = [],
@@ -14,11 +21,55 @@ const Sidebar = ({
   onRenameProject,
   onProjectReminder,
   onOpenProfile,
+  onPinProject,
+  onReorderProjects,
+  onOpenAllProjects,
   user,
   onLogout
 }) => {
   const [editingProjectId, setEditingProjectId] = useState(null);
   const [editingName, setEditingName] = useState('');
+  const [isReorderMode, setIsReorderMode] = useState(false);
+  const [draggedProject, setDraggedProject] = useState(null);
+
+  // Ordenar proyectos: Anclados > Activo > Recientes
+  const sortedProjects = useMemo(() => {
+    return [...projects].sort((a, b) => {
+      // 1. Anclados primero
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      
+      // 2. Si ambos anclados, por customOrder o fecha
+      if (a.isPinned && b.isPinned) {
+        if (a.customOrder !== null && b.customOrder !== null) {
+          return a.customOrder - b.customOrder;
+        }
+        return new Date(b.lastActiveAt || b.updatedAt) - new Date(a.lastActiveAt || a.updatedAt);
+      }
+      
+      // 3. Proyecto activo después de anclados
+      if (a.id === activeProjectId) return -1;
+      if (b.id === activeProjectId) return 1;
+      
+      // 4. Por customOrder si existe
+      if (a.customOrder !== null && b.customOrder !== null) {
+        return a.customOrder - b.customOrder;
+      }
+      
+      // 5. Por última actividad (más reciente primero)
+      const dateA = new Date(a.lastActiveAt || a.updatedAt);
+      const dateB = new Date(b.lastActiveAt || b.updatedAt);
+      return dateB - dateA;
+    });
+  }, [projects, activeProjectId]);
+
+  // Proyectos visibles (limitados)
+  const visibleProjects = useMemo(() => {
+    return sortedProjects.slice(0, MAX_VISIBLE_PROJECTS);
+  }, [sortedProjects]);
+
+  const hasMoreProjects = projects.length > MAX_VISIBLE_PROJECTS;
+  const pinnedCount = projects.filter(p => p.isPinned).length;
 
   const formatDate = (dateString) => {
     try {
@@ -55,7 +106,64 @@ const Sidebar = ({
     }
   };
 
-  const activeProject = projects.find(p => p.id === activeProjectId);
+  const handlePinProject = useCallback((projectId, shouldPin, e) => {
+    e.stopPropagation();
+    if (onPinProject) {
+      onPinProject(projectId, shouldPin);
+    }
+  }, [onPinProject]);
+
+  // Drag and Drop handlers
+  const handleDragStart = (e, project) => {
+    if (project.isPinned) return; // No permitir arrastrar proyectos anclados
+    setDraggedProject(project);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e, project) => {
+    e.preventDefault();
+    if (project.isPinned || !draggedProject) return;
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e, targetProject) => {
+    e.preventDefault();
+    if (!draggedProject || targetProject.isPinned || draggedProject.id === targetProject.id) {
+      setDraggedProject(null);
+      return;
+    }
+
+    // Calcular nuevo orden
+    const nonPinnedProjects = sortedProjects.filter(p => !p.isPinned);
+    const sourceIndex = nonPinnedProjects.findIndex(p => p.id === draggedProject.id);
+    const targetIndex = nonPinnedProjects.findIndex(p => p.id === targetProject.id);
+
+    if (sourceIndex === -1 || targetIndex === -1) {
+      setDraggedProject(null);
+      return;
+    }
+
+    // Crear nuevo array con el orden actualizado
+    const newOrder = [...nonPinnedProjects];
+    newOrder.splice(sourceIndex, 1);
+    newOrder.splice(targetIndex, 0, draggedProject);
+
+    // Preparar datos para el backend
+    const projectOrders = newOrder.map((p, index) => ({
+      id: p.id,
+      customOrder: index
+    }));
+
+    if (onReorderProjects) {
+      onReorderProjects(projectOrders);
+    }
+
+    setDraggedProject(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedProject(null);
+  };
 
   return (
     <div className="
@@ -92,7 +200,7 @@ const Sidebar = ({
           w-full bg-white hover:bg-gray-50
           text-gray-700 border-2 border-gray-200
           font-medium py-3 px-4 rounded-xl
-          flex items-center justify-center gap-2 mb-6
+          flex items-center justify-center gap-2 mb-4
           transition-all duration-200
           hover:border-gray-300 active:scale-[0.98]
         "
@@ -103,44 +211,105 @@ const Sidebar = ({
 
       {/* Sección de proyectos */}
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-          Mis Proyectos
-        </h2>
-        <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-          {projects.length}
-        </span>
+        <div className="flex items-center gap-2">
+          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            Mis Proyectos
+          </h2>
+          <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+            {projects.length}
+          </span>
+        </div>
+        
+        {/* Botón de reordenar */}
+        {projects.length > 1 && (
+          <button
+            onClick={() => setIsReorderMode(!isReorderMode)}
+            className={`
+              p-1.5 rounded-lg text-xs
+              transition-all duration-200
+              ${isReorderMode 
+                ? 'bg-blue-100 text-blue-600' 
+                : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+              }
+            `}
+            title={isReorderMode ? 'Salir del modo ordenar' : 'Ordenar proyectos'}
+          >
+            <ArrowUpDown size={14} />
+          </button>
+        )}
       </div>
+
+      {/* Indicador de modo reordenar */}
+      {isReorderMode && (
+        <div className="mb-2 px-2 py-1.5 bg-blue-50 rounded-lg border border-blue-100">
+          <p className="text-xs text-blue-600 flex items-center gap-1">
+            <GripVertical size={12} />
+            Arrastra para reordenar (proyectos no anclados)
+          </p>
+        </div>
+      )}
 
       {/* Lista de proyectos - Scrollable */}
       <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-        {projects.map((project) => {
+        {visibleProjects.map((project) => {
           const isActive = project.id === activeProjectId;
           const nodeCount = project.nodes?.length || 0;
           const isEditing = editingProjectId === project.id;
+          const isPinned = project.isPinned;
+          const canPin = pinnedCount < MAX_PINNED || isPinned;
+          const isDragging = draggedProject?.id === project.id;
           
           return (
             <div
               key={project.id}
               onClick={() => !isActive && !isEditing && onSwitchProject(project.id)}
+              draggable={isReorderMode && !isPinned}
+              onDragStart={(e) => handleDragStart(e, project)}
+              onDragOver={(e) => handleDragOver(e, project)}
+              onDrop={(e) => handleDrop(e, project)}
+              onDragEnd={handleDragEnd}
               className={`
-                rounded-xl p-3 relative group cursor-pointer
+                rounded-xl p-3 relative group
                 transition-all duration-200
-                ${isActive 
-                  ? 'border-2 border-blue-500 bg-blue-50/50' 
-                  : 'border border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                ${isPinned 
+                  ? 'border-2 border-amber-300 bg-amber-50/30' 
+                  : isActive 
+                    ? 'border-2 border-blue-500 bg-blue-50/50' 
+                    : 'border border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                 }
+                ${isDragging ? 'opacity-50 scale-95' : ''}
+                ${isReorderMode && !isPinned ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'}
               `}
             >
               <div className="flex items-start gap-3">
+                {/* Drag handle o Icon */}
                 <div className={`
                   w-8 h-8 rounded-lg flex items-center justify-center shrink-0
-                  ${isActive ? 'bg-blue-100' : 'bg-gray-100'}
+                  ${isPinned 
+                    ? 'bg-amber-100' 
+                    : isActive 
+                      ? 'bg-blue-100' 
+                      : 'bg-gray-100'
+                  }
                 `}>
-                  <FileText 
-                    className={isActive ? 'text-blue-600' : 'text-gray-500'} 
-                    size={16} 
-                  />
+                  {isReorderMode && !isPinned ? (
+                    <GripVertical 
+                      className="text-gray-400" 
+                      size={16} 
+                    />
+                  ) : isPinned ? (
+                    <Pin 
+                      className="text-amber-500" 
+                      size={14} 
+                    />
+                  ) : (
+                    <FileText 
+                      className={isActive ? 'text-blue-600' : 'text-gray-500'} 
+                      size={16} 
+                    />
+                  )}
                 </div>
+                
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     {isEditing ? (
@@ -179,7 +348,7 @@ const Sidebar = ({
                   </div>
                   <div className="flex justify-between items-center mt-1.5">
                     <span className="text-xs text-gray-400">
-                      {formatDate(project.updatedAt)}
+                      {formatDate(project.lastActiveAt || project.updatedAt)}
                     </span>
                     <span className={`
                       text-xs font-medium
@@ -192,64 +361,107 @@ const Sidebar = ({
               </div>
               
               {/* Botones de acción - visibles en hover */}
-              <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
-                {!isEditing && (
-                  <>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (onProjectReminder) onProjectReminder(project);
-                      }}
-                      className="
-                        p-1.5 rounded-lg
-                        bg-purple-50 hover:bg-purple-100
-                        text-purple-500 hover:text-purple-600
-                        transition-all duration-200
-                      "
-                      title="Recordatorio de proyecto"
-                    >
-                      <Bell size={12} />
-                    </button>
-                    <button
-                      onClick={(e) => handleStartEdit(project, e)}
-                      className="
-                        p-1.5 rounded-lg
-                        bg-gray-50 hover:bg-gray-100
-                        text-gray-500 hover:text-gray-600
-                        transition-all duration-200
-                      "
-                      title="Renombrar proyecto"
-                    >
-                      <Pencil size={12} />
-                    </button>
-                  </>
-                )}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDeleteProject(project.id);
-                  }}
-                  className="
-                    p-1.5 rounded-lg
-                    bg-red-50 hover:bg-red-100
-                    text-red-500 hover:text-red-600
-                    transition-all duration-200
-                  "
-                  title="Eliminar proyecto"
-                >
-                  <Trash2 size={12} />
-                </button>
-              </div>
+              {!isReorderMode && (
+                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                  {!isEditing && (
+                    <>
+                      {/* Pin/Unpin button */}
+                      <button
+                        onClick={(e) => handlePinProject(project.id, !isPinned, e)}
+                        disabled={!canPin && !isPinned}
+                        className={`
+                          p-1.5 rounded-lg transition-all duration-200
+                          ${isPinned 
+                            ? 'bg-amber-100 hover:bg-amber-200 text-amber-600' 
+                            : canPin
+                              ? 'bg-gray-50 hover:bg-amber-100 text-gray-500 hover:text-amber-600'
+                              : 'bg-gray-50 text-gray-300 cursor-not-allowed'
+                          }
+                        `}
+                        title={isPinned ? 'Desanclar' : canPin ? 'Anclar arriba' : 'Máximo 2 anclados'}
+                      >
+                        {isPinned ? <PinOff size={12} /> : <Pin size={12} />}
+                      </button>
+                      
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onProjectReminder) onProjectReminder(project);
+                        }}
+                        className="
+                          p-1.5 rounded-lg
+                          bg-purple-50 hover:bg-purple-100
+                          text-purple-500 hover:text-purple-600
+                          transition-all duration-200
+                        "
+                        title="Recordatorio de proyecto"
+                      >
+                        <Bell size={12} />
+                      </button>
+                      <button
+                        onClick={(e) => handleStartEdit(project, e)}
+                        className="
+                          p-1.5 rounded-lg
+                          bg-gray-50 hover:bg-gray-100
+                          text-gray-500 hover:text-gray-600
+                          transition-all duration-200
+                        "
+                        title="Renombrar proyecto"
+                      >
+                        <Pencil size={12} />
+                      </button>
+                    </>
+                  )}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeleteProject(project.id);
+                    }}
+                    className="
+                      p-1.5 rounded-lg
+                      bg-red-50 hover:bg-red-100
+                      text-red-500 hover:text-red-600
+                      transition-all duration-200
+                    "
+                    title="Eliminar proyecto"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              )}
             </div>
           );
         })}
+        
+        {/* Ver todos - si hay más proyectos */}
+        {hasMoreProjects && (
+          <button
+            onClick={onOpenAllProjects}
+            className="
+              w-full py-2.5 px-3
+              text-sm font-medium text-blue-600
+              bg-blue-50 hover:bg-blue-100
+              border border-blue-200 hover:border-blue-300
+              rounded-xl
+              flex items-center justify-center gap-2
+              transition-all duration-200
+            "
+          >
+            <ExternalLink size={14} />
+            Ver todos ({projects.length} proyectos)
+          </button>
+        )}
       </div>
 
       {/* Mensaje informativo */}
       <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
         <p className="text-xs text-gray-500 leading-relaxed">
-          💡 <span className="font-medium">Tip:</span> Crea múltiples mapas y cambia entre ellos.
-          Los cambios se guardan automáticamente.
+          💡 <span className="font-medium">Tip:</span> Ancla tus proyectos favoritos con 📌 para acceso rápido.
+          {pinnedCount > 0 && (
+            <span className="block mt-1 text-amber-600">
+              {pinnedCount}/{MAX_PINNED} anclados
+            </span>
+          )}
         </p>
       </div>
 

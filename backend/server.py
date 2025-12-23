@@ -595,9 +595,12 @@ async def get_reminders(
     current_user: dict = Depends(get_current_user),
     node_id: Optional[str] = None,
     project_id: Optional[str] = None,
-    status: Optional[str] = None
+    status: Optional[str] = None,
+    seen: Optional[bool] = None,
+    skip: int = 0,
+    limit: int = 100
 ):
-    """Obtener recordatorios del usuario"""
+    """Obtener recordatorios del usuario con paginación"""
     
     query = {"username": current_user["username"]}
     
@@ -607,8 +610,21 @@ async def get_reminders(
         query["project_id"] = project_id
     if status:
         query["status"] = status
+    if seen is not None:
+        query["seen"] = seen
     
-    reminders = await db.reminders.find(query, {"_id": 0}).to_list(1000)
+    reminders = await db.reminders.find(
+        query, 
+        {"_id": 0}
+    ).sort("sent_at", -1).skip(skip).limit(limit).to_list(limit)
+    
+    # Asegurar que todos los recordatorios tengan el campo seen
+    for reminder in reminders:
+        if "seen" not in reminder:
+            reminder["seen"] = False
+        if "seen_at" not in reminder:
+            reminder["seen_at"] = None
+    
     return reminders
 
 @api_router.get("/reminders/{reminder_id}", response_model=ReminderResponse)

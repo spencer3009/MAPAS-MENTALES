@@ -460,51 +460,6 @@ const Sidebar = ({
           )}
         </p>
       </div>
-
-      {/* Usuario y Logout */}
-      {user && (
-        <div className="mt-auto pt-4 border-t border-gray-100">
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
-                <User size={16} className="text-blue-600" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {user.full_name || user.username}
-                </p>
-                <p className="text-xs text-gray-500 truncate">@{user.username}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={onOpenProfile}
-                className="
-                  p-2 rounded-lg
-                  text-gray-500 hover:text-blue-600
-                  hover:bg-blue-50
-                  transition-all duration-200
-                "
-                title="Configuración de perfil"
-              >
-                <Settings size={16} />
-              </button>
-              <button
-                onClick={onLogout}
-                className="
-                  p-2 rounded-lg
-                  text-gray-500 hover:text-red-600
-                  hover:bg-red-50
-                  transition-all duration-200
-                "
-                title="Cerrar sesión"
-              >
-                <LogOut size={18} />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

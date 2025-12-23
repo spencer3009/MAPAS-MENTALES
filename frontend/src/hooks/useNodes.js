@@ -1034,3 +1034,87 @@ export const useNodes = () => {
       return false;
     }
   }, [projects, activateProject]);
+
+
+  // Funciones de compatibilidad
+  const setProjectName = useCallback((name) => {
+    renameProject(activeProjectId, name);
+  }, [activeProjectId, renameProject]);
+
+  const resetToDefault = useCallback(() => {
+    // Crear un proyecto con los nodos por defecto
+    const defaultNodes = [
+      { id: crypto.randomUUID(), text: 'Idea Principal', x: 200, y: 280, color: 'blue', parentId: null },
+    ];
+    const rootId = defaultNodes[0].id;
+    defaultNodes.push(
+      { id: crypto.randomUUID(), text: 'Concepto 1', x: 480, y: 120, color: 'pink', parentId: rootId },
+      { id: crypto.randomUUID(), text: 'Concepto 2', x: 480, y: 280, color: 'green', parentId: rootId },
+      { id: crypto.randomUUID(), text: 'Concepto 3', x: 480, y: 440, color: 'yellow', parentId: rootId }
+    );
+    
+    return loadFromTemplate(defaultNodes, 'Mi Mapa Mental');
+  }, [loadFromTemplate]);
+
+  const clearAll = useCallback(() => {
+    return createBlankMap();
+  }, [createBlankMap]);
+
+  return {
+    // Estado de nodos del proyecto activo
+    nodes,
+    selectedNodeId,
+    setSelectedNodeId,
+    
+    // Información del proyecto activo
+    projectName,
+    activeProjectId,
+    activeProject,
+    
+    // Lista de todos los proyectos
+    projects,
+    
+    // Estados de sincronización
+    isLoading,
+    isSyncing,
+    reloadProjects,
+    
+    // Funciones de nodos
+    addNode,
+    updateNode: updateProjectNodes,
+    updateNodePosition,
+    updateNodeText,
+    updateNodeColor,
+    updateNodeComment,
+    updateNodeStyle,
+    updateNodeSize,
+    updateNodeIcon,
+    addNodeLink,
+    removeNodeLink,
+    updateNodeLink,
+    saveNodePositionToHistory,
+    deleteNode,
+    duplicateNode,
+    
+    // Funciones de historial
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+    
+    // Gestión de proyectos
+    createBlankMap,
+    loadFromTemplate,
+    deleteProject,
+    switchProject,
+    renameProject,
+    setProjectName,
+    pinProject,
+    reorderProjects,
+    
+    // Compatibilidad
+    resetToDefault,
+    clearAll,
+    setNodes: updateProjectNodes
+  };
+};

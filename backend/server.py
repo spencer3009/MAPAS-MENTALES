@@ -957,10 +957,14 @@ class ProjectCreate(BaseModel):
     id: Optional[str] = None
     name: str
     nodes: List[NodeData]
+    isPinned: Optional[bool] = False
+    customOrder: Optional[int] = None
 
 class ProjectUpdate(BaseModel):
     name: Optional[str] = None
     nodes: Optional[List[NodeData]] = None
+    isPinned: Optional[bool] = None
+    customOrder: Optional[int] = None
 
 class ProjectResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -971,6 +975,9 @@ class ProjectResponse(BaseModel):
     username: str
     createdAt: str
     updatedAt: str
+    lastActiveAt: Optional[str] = None
+    isPinned: bool = False
+    customOrder: Optional[int] = None
 
 
 # ==========================================

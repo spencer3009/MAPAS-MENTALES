@@ -362,6 +362,9 @@ const MindMapApp = () => {
         onRenameProject={renameProject}
         onProjectReminder={handleProjectReminder}
         onOpenProfile={() => setShowProfileModal(true)}
+        onPinProject={pinProject}
+        onReorderProjects={reorderProjects}
+        onOpenAllProjects={() => setShowAllProjectsModal(true)}
         user={user}
         onLogout={logout}
       />

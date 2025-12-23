@@ -1,8 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { 
   Plus, LayoutTemplate, FileText, Trash2, Check, Pencil, 
-  LogOut, User, Bell, Settings, Pin, PinOff, ChevronRight,
-  GripVertical, ArrowUpDown, ExternalLink
+  Bell, Pin, PinOff, GripVertical, ArrowUpDown, ExternalLink
 } from 'lucide-react';
 
 // URL del logo MindoraMap (horizontal)

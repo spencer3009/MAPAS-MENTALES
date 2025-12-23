@@ -35,7 +35,6 @@ const AllProjectsModal = ({
       setIsReorderMode(false);
       setSearchQuery('');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   // Lista de proyectos a mostrar (original o reordenada)

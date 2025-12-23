@@ -93,14 +93,16 @@ const NotificationBell = ({ completedReminders = [], onRefresh }) => {
           ref={dropdownRef}
           className="
             absolute right-0 top-full mt-2
-            w-80 sm:w-96
+            w-[calc(100vw-2rem)] sm:w-96
+            max-w-[400px]
             bg-white rounded-xl shadow-xl
             border border-gray-200
             overflow-hidden
-            z-50
+            z-[100]
             animate-in fade-in slide-in-from-top-2
             duration-200
           "
+          style={{ maxHeight: 'calc(100vh - 100px)' }}
         >
           {/* Header del dropdown */}
           <div className="

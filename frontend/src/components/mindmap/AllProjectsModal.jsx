@@ -86,13 +86,12 @@ const AllProjectsModal = ({
 
   // Filtrar proyectos por búsqueda
   const filteredProjects = useMemo(() => {
-    const projectsToFilter = isReorderMode ? localProjects : projects;
-    if (!searchQuery.trim()) return projectsToFilter;
+    if (!searchQuery.trim()) return displayProjects;
     const query = searchQuery.toLowerCase();
-    return projectsToFilter.filter(p => 
+    return displayProjects.filter(p => 
       p.name.toLowerCase().includes(query)
     );
-  }, [projects, localProjects, searchQuery, isReorderMode]);
+  }, [displayProjects, searchQuery]);
 
   // Ordenar proyectos: Anclados > Activo > Recientes (solo cuando no hay búsqueda ni reorder)
   const sortedProjects = useMemo(() => {

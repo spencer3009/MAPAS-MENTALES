@@ -58,7 +58,7 @@ const Toolbar = ({
   canRedo,
   hasSelection,
   zoom,
-  completedReminders = [],
+  token,
   onRefreshNotifications
 }) => {
   return (

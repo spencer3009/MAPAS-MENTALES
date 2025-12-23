@@ -102,6 +102,9 @@ const MindMapApp = () => {
 
   // Estado para recordatorios (para mostrar indicador en nodos)
   const [nodeReminders, setNodeReminders] = useState(new Set());
+  
+  // Estado para recordatorios cumplidos (para la campanita de notificaciones)
+  const [completedReminders, setCompletedReminders] = useState([]);
 
   // Cargar recordatorios para marcar nodos con recordatorios activos
   const loadReminders = useCallback(async () => {
@@ -121,6 +124,12 @@ const MindMapApp = () => {
             .map(r => r.node_id)
         );
         setNodeReminders(nodeIdsWithReminders);
+        
+        // Filtrar recordatorios cumplidos (sent) para la campanita
+        const completed = reminders
+          .filter(r => r.status === 'sent')
+          .sort((a, b) => new Date(b.sent_at || b.scheduled_datetime) - new Date(a.sent_at || a.scheduled_datetime));
+        setCompletedReminders(completed);
       }
     } catch (error) {
       console.error('Error loading reminders:', error);

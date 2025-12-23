@@ -271,27 +271,14 @@ const AllProjectsModal = ({
     handleDragEnd();
   }, [isReorderMode, draggedProject, localProjects, dropPosition, handleDragEnd]);
 
-  // Guardar el orden
-  const handleSaveOrder = useCallback(async () => {
-    if (!hasChanges || !onReorderProjects) return;
-
-    const projectOrders = localProjects.map((p, index) => ({
-      id: p.id,
-      customOrder: index
-    }));
-
-    await onReorderProjects(projectOrders);
-    setHasChanges(false);
-  }, [hasChanges, localProjects, onReorderProjects]);
-
   // Toggle modo reordenar
   const toggleReorderMode = useCallback(() => {
     if (isReorderMode && hasChanges) {
-      handleSaveOrder();
+      saveOrder();
     }
     setIsReorderMode(!isReorderMode);
     setSearchQuery(''); // Limpiar búsqueda al cambiar modo
-  }, [isReorderMode, hasChanges, handleSaveOrder]);
+  }, [isReorderMode, hasChanges, saveOrder]);
 
   const pinnedCount = projects.filter(p => p.isPinned).length;
 

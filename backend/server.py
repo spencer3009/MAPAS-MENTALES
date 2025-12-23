@@ -510,12 +510,12 @@ async def check_and_send_reminders():
                     
                     # Construir mensaje
                     if reminder["type"] == "node":
-                        message = f"🔔 Recordatorio de MindoraMap\n\n"
+                        message = "🔔 Recordatorio de MindoraMap\n\n"
                         message += f"📁 Proyecto: {reminder['project_name']}\n"
                         message += f"📌 Nodo: {reminder.get('node_text', 'Sin nombre')}\n\n"
                         message += f"📝 {reminder['message']}"
                     else:
-                        message = f"🔔 Recordatorio de MindoraMap\n\n"
+                        message = "🔔 Recordatorio de MindoraMap\n\n"
                         message += f"📁 Proyecto: {reminder['project_name']}\n\n"
                         message += f"📝 {reminder['message']}"
                     

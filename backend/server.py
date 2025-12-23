@@ -396,6 +396,8 @@ class ReminderResponse(BaseModel):
     status: str  # 'pending', 'sent', 'failed'
     created_at: str
     sent_at: Optional[str] = None
+    seen: bool = False  # Si el usuario ha visto la notificación
+    seen_at: Optional[str] = None
     username: str
 
 class ReminderUpdate(BaseModel):

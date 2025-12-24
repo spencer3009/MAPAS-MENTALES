@@ -122,12 +122,9 @@ const ContextMenu = ({
             </button>
 
             {/* Submenu para grosor de línea */}
-            <div 
-              className="relative"
-              onMouseEnter={() => setShowLineWidthMenu(true)}
-              onMouseLeave={() => setShowLineWidthMenu(false)}
-            >
+            <div className="relative">
               <button
+                onClick={() => setShowLineWidthMenu(!showLineWidthMenu)}
                 className="
                   w-full text-left px-4 py-2.5 text-sm text-gray-700
                   hover:bg-gray-50 flex items-center gap-3
@@ -138,26 +135,19 @@ const ContextMenu = ({
                   <Minus size={16} className="text-sky-500" />
                   <span>Grosor de línea</span>
                 </div>
-                <ChevronRight size={14} className="text-gray-400" />
+                <ChevronRight size={14} className={`text-gray-400 transition-transform ${showLineWidthMenu ? 'rotate-90' : ''}`} />
               </button>
               
-              {/* Submenu de grosor */}
+              {/* Submenu de grosor - se muestra debajo cuando está expandido */}
               {showLineWidthMenu && (
-                <div 
-                  className="
-                    absolute left-full top-0 ml-1
-                    bg-white rounded-lg shadow-xl border border-gray-200
-                    py-1 w-40
-                    animate-in fade-in slide-in-from-left-1 duration-150
-                  "
-                >
+                <div className="bg-gray-50 border-t border-gray-100">
                   {LINE_WIDTH_OPTIONS.map((option) => (
                     <button
                       key={option.value}
                       onClick={() => handleChangeLineWidth(option.value)}
                       className={`
-                        w-full text-left px-3 py-2 text-sm
-                        hover:bg-gray-50 flex items-center gap-2
+                        w-full text-left px-6 py-2 text-sm
+                        hover:bg-gray-100 flex items-center gap-2
                         transition-colors
                         ${(currentLineWidth || 3) === option.value 
                           ? 'text-sky-600 bg-sky-50 font-medium' 

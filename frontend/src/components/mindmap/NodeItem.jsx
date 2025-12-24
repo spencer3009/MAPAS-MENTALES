@@ -433,16 +433,13 @@ const NodeItem = memo(({
             {/* Indicadores alineados a la derecha del texto - iconos minimalistas */}
             {!isEditing && (hasReminder || hasComment || hasLinks) && (
               <div className="shrink-0 flex items-center gap-1.5">
-                {/* Recordatorio - icono con punto azul */}
+                {/* Recordatorio - icono sin punto */}
                 {node.hasReminder && (
-                  <div className="relative">
-                    <Bell 
-                      size={18} 
-                      className="text-gray-400"
-                      title="Tiene recordatorio"
-                    />
-                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-500 rounded-full" />
-                  </div>
+                  <Bell 
+                    size={18} 
+                    className="text-gray-400"
+                    title="Tiene recordatorio"
+                  />
                 )}
                 
                 {/* Comentario - icono de burbuja de chat */}

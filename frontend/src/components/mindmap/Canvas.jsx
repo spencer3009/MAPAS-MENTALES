@@ -5,6 +5,7 @@ import ContextMenu from './ContextMenu';
 import NodeToolbar from './NodeToolbar';
 import CommentPopover from './CommentPopover';
 import LinkPopover from './LinkPopover';
+import NodeTypeSelector from './NodeTypeSelector';
 
 const Canvas = ({
   nodes,

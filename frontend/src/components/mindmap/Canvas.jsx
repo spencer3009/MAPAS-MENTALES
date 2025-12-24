@@ -163,19 +163,14 @@ const Canvas = ({
     const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
     const modifierKey = isMac ? e?.metaKey : e?.ctrlKey;
     
-    console.log('[handleNodeSelect] nodeId:', nodeId, 'event:', e, 'ctrlKey:', e?.ctrlKey, 'metaKey:', e?.metaKey, 'modifierKey:', modifierKey);
-    
     if (modifierKey && onAddToSelection) {
       // CTRL/CMD + clic = agregar/quitar de selección múltiple
-      console.log('[handleNodeSelect] Adding to selection');
       onAddToSelection(nodeId);
     } else if (e?.shiftKey && onAddToSelection) {
       // SHIFT + clic = agregar a selección
-      console.log('[handleNodeSelect] SHIFT adding to selection');
       onAddToSelection(nodeId);
     } else {
       // Clic normal = seleccionar solo este nodo
-      console.log('[handleNodeSelect] Single selection');
       onSelectNode(nodeId);
     }
   }, [onSelectNode, onAddToSelection]);

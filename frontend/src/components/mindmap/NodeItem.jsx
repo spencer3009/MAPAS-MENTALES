@@ -207,8 +207,14 @@ const NodeItem = memo(({
 
   const handleRightClick = (e) => {
     e.preventDefault();
-    onSelect(node.id);
+    onSelect(node.id, e);
     onContextMenu(e, node.id);
+  };
+
+  // Manejar clic en el nodo (con soporte para CTRL/CMD + clic)
+  const handleNodeClick = (e) => {
+    e.stopPropagation();
+    onSelect(node.id, e);
   };
 
   const handleCommentBadgeClick = (e) => {

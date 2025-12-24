@@ -384,6 +384,14 @@ export const useNodes = () => {
   const addToSelection = useCallback((nodeId) => {
     setSelectedNodeIds(prev => {
       const newSet = new Set(prev);
+      
+      // Si hay un nodo seleccionado individualmente, agregarlo al Set primero
+      // Esto permite que CTRL+click funcione desde una selección individual
+      if (selectedNodeId && !newSet.has(selectedNodeId)) {
+        newSet.add(selectedNodeId);
+      }
+      
+      // Alternar el nodo clickeado
       if (newSet.has(nodeId)) {
         newSet.delete(nodeId);
       } else {
@@ -393,7 +401,7 @@ export const useNodes = () => {
     });
     // Limpiar selección individual
     setSelectedNodeId(null);
-  }, []);
+  }, [selectedNodeId]);
 
   // Seleccionar un solo nodo (limpiar selección múltiple)
   const selectSingleNode = useCallback((nodeId) => {

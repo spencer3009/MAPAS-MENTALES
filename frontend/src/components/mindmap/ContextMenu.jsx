@@ -10,10 +10,9 @@ const COLOR_OPTIONS = [
 
 // Opciones de grosor de línea para nodos dashed_text
 const LINE_WIDTH_OPTIONS = [
-  { value: 1, label: 'Muy fina (1px)' },
-  { value: 2, label: 'Normal (2px)' },
-  { value: 3, label: 'Gruesa (3px)' },
-  { value: 4, label: 'Muy gruesa (4px)' },
+  { value: 1, label: 'Normal (1px)' },
+  { value: 2, label: 'Gruesa (2px)' },
+  { value: 3, label: 'Muy gruesa (3px)' },
 ];
 
 const ContextMenu = ({

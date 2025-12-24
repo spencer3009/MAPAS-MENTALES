@@ -367,13 +367,13 @@ const NodeItem = memo(({
       onDoubleClick={handleDoubleClick}
       onContextMenu={handleRightClick}
     >
-      {/* Render especial para nodo "dashed" (solo texto con línea) */}
+      {/* Render especial para nodo "dashed_text" (solo texto con línea celeste punteada) */}
       {isDashedNode ? (
         <div className="w-full flex flex-col items-center">
           {/* Indicador de selección sutil para dashed node */}
           {isSelected && (
             <div 
-              className="absolute -inset-1 rounded-lg bg-blue-100/50 border-2 border-blue-400/30 pointer-events-none"
+              className="absolute -inset-1 rounded-lg bg-sky-100/40 border-2 border-sky-300/50 pointer-events-none"
               style={{ zIndex: -1 }}
             />
           )}
@@ -391,25 +391,28 @@ const NodeItem = memo(({
               className="
                 w-full text-center bg-transparent outline-none
                 font-medium text-sm text-gray-700
-                pb-1
+                pb-2
               "
               placeholder="Escribe aquí..."
               autoFocus
             />
           ) : (
             <span 
-              className="w-full text-center font-medium text-sm text-gray-700 pb-1 break-words"
+              className="w-full text-center font-medium text-sm text-gray-700 pb-2 break-words"
             >
               {displayText || 'Nodo nuevo'}
             </span>
           )}
           
-          {/* Línea punteada debajo del texto */}
+          {/* Línea punteada celeste debajo del texto - 4px de grosor (2px más que el default de 2px) */}
           <div 
-            className="w-full h-0 border-b-2 border-dashed border-gray-300 mt-1"
+            className="w-full"
             style={{ 
-              borderColor: isSelected ? '#93c5fd' : '#d1d5db',
-              opacity: isSelected ? 1 : 0.7
+              height: 0,
+              borderBottomWidth: '4px',
+              borderBottomStyle: 'dashed',
+              borderBottomColor: isSelected ? '#0ea5e9' : ACCENT_COLOR, // sky-500 cuando seleccionado, sky-400 normal
+              marginTop: '2px'
             }}
           />
           

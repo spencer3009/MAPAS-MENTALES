@@ -382,21 +382,28 @@ export const useNodes = () => {
 
   // Agregar nodo a la selección múltiple (CTRL/CMD + clic)
   const addToSelection = useCallback((nodeId) => {
+    console.log('[addToSelection] Called with nodeId:', nodeId, 'current selectedNodeId:', selectedNodeId);
+    
     setSelectedNodeIds(prev => {
       const newSet = new Set(prev);
+      console.log('[addToSelection] Previous set size:', prev.size);
       
       // Si hay un nodo seleccionado individualmente, agregarlo al Set primero
       // Esto permite que CTRL+click funcione desde una selección individual
       if (selectedNodeId && !newSet.has(selectedNodeId)) {
+        console.log('[addToSelection] Adding current selectedNodeId to set:', selectedNodeId);
         newSet.add(selectedNodeId);
       }
       
       // Alternar el nodo clickeado
       if (newSet.has(nodeId)) {
+        console.log('[addToSelection] Removing nodeId from set');
         newSet.delete(nodeId);
       } else {
+        console.log('[addToSelection] Adding nodeId to set');
         newSet.add(nodeId);
       }
+      console.log('[addToSelection] New set size:', newSet.size);
       return newSet;
     });
     // Limpiar selección individual

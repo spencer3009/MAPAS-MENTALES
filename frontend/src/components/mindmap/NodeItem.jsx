@@ -122,9 +122,13 @@ const NodeItem = memo(({
   const nodeWidth = node.width || NODE_WIDTH;
   const nodeHeight = node.height || NODE_HEIGHT;
 
-  // Tipo de nodo: 'default' | 'dashed'
+  // Tipo de nodo: 'default' | 'dashed_text'
+  // Compatibilidad: 'dashed' se trata igual que 'dashed_text'
   const nodeType = node.nodeType || 'default';
-  const isDashedNode = nodeType === 'dashed';
+  const isDashedNode = nodeType === 'dashed' || nodeType === 'dashed_text';
+  
+  // Color de acento del sistema para la línea (celeste)
+  const ACCENT_COLOR = '#38bdf8'; // sky-400 - celeste brillante
 
   // Sincronizar texto local con props
   const displayText = isEditing ? localText : node.text;

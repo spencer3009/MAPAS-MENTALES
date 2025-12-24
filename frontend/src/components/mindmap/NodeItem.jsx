@@ -393,10 +393,13 @@ const NodeItem = memo(({
             <div 
               className={`absolute -inset-1 rounded-lg pointer-events-none ${
                 isMultiSelected 
-                  ? 'bg-blue-100/50 border-2 border-blue-400/60' 
+                  ? 'bg-blue-100/60 border-2 border-blue-500/70' 
                   : 'bg-sky-100/40 border-2 border-sky-300/50'
               }`}
-              style={{ zIndex: -1 }}
+              style={{ 
+                zIndex: -1,
+                boxShadow: isMultiSelected ? '0 0 0 2px rgba(59, 130, 246, 0.4)' : 'none'
+              }}
             />
           )}
           

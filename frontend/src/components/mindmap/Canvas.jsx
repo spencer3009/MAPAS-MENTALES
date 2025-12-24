@@ -158,6 +158,23 @@ const Canvas = ({
     onSelectNode(nodeId);
   }, [onSelectNode]);
 
+  // Manejar selección de nodo con soporte para CTRL/CMD + clic
+  const handleNodeSelect = useCallback((nodeId, e) => {
+    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+    const modifierKey = isMac ? e?.metaKey : e?.ctrlKey;
+    
+    if (modifierKey && onAddToSelection) {
+      // CTRL/CMD + clic = agregar/quitar de selección múltiple
+      onAddToSelection(nodeId);
+    } else if (e?.shiftKey && onAddToSelection) {
+      // SHIFT + clic = agregar a selección
+      onAddToSelection(nodeId);
+    } else {
+      // Clic normal = seleccionar solo este nodo
+      onSelectNode(nodeId);
+    }
+  }, [onSelectNode, onAddToSelection]);
+
   // Handlers del popover de enlaces
   const handleToolbarLink = useCallback(() => {
     if (selectedNodeId) {

@@ -615,6 +615,57 @@ export const useNodes = () => {
     ));
   }, [nodes, activeProjectId, pushToHistory]);
 
+  // Cambiar tipo de nodo (default <-> dashed_text)
+  const updateNodeType = useCallback((id, newNodeType) => {
+    const newNodes = nodes.map(n => {
+      if (n.id === id) {
+        if (newNodeType === 'default') {
+          // Convertir a nodo con fondo - restaurar dimensiones estándar
+          return { 
+            ...n, 
+            nodeType: 'default',
+            width: 160,
+            height: 64,
+            // Mantener el texto pero asegurarse de que tenga texto
+            text: n.text || 'Nuevo Nodo'
+          };
+        } else {
+          // Convertir a nodo dashed_text
+          return { 
+            ...n, 
+            nodeType: 'dashed_text',
+            width: 260,
+            height: 40,
+            dashedLineWidth: n.dashedLineWidth || 3
+          };
+        }
+      }
+      return n;
+    });
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, activeProjectId, pushToHistory]);
+
+  // Cambiar grosor de línea para nodos dashed_text
+  const updateDashedLineWidth = useCallback((id, lineWidth) => {
+    const newNodes = nodes.map(n => {
+      if (n.id === id) {
+        return { ...n, dashedLineWidth: lineWidth };
+      }
+      return n;
+    });
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, activeProjectId, pushToHistory]);
+
   // Actualizar tamaño del nodo
   const updateNodeSize = useCallback((id, width, height, saveHistory = false) => {
     const newNodes = nodes.map(n => n.id === id ? { ...n, width, height } : n);

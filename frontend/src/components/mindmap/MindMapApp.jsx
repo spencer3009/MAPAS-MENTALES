@@ -423,6 +423,8 @@ const MindMapApp = () => {
             onDuplicateNode={duplicateNode}
             onDeleteNode={deleteNode}
             onChangeNodeColor={updateNodeColor}
+            onChangeNodeType={updateNodeType}
+            onChangeLineWidth={updateDashedLineWidth}
             onWheel={handleWheel}
             onToggleStyleSidebar={handleToggleStyleSidebar}
             onOpenIconPanel={handleOpenIconPanel}

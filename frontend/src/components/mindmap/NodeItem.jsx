@@ -163,7 +163,7 @@ const NodeItem = memo(({
   const handleMouseDown = (e) => {
     if (e.button === 2) {
       e.preventDefault();
-      onSelect(node.id);
+      onSelect(node.id, e);
       onContextMenu(e, node.id);
       return;
     }
@@ -171,7 +171,7 @@ const NodeItem = memo(({
     if (isEditing || isResizing) return;
 
     e.stopPropagation();
-    onSelect(node.id);
+    onSelect(node.id, e);
     onDragStart(e, node);
   };
 

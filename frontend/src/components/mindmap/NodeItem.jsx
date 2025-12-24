@@ -381,10 +381,13 @@ const NodeItem = memo(({
         color: isDashedNode ? '#374151' : textColor,
         zIndex: isInSelection ? 20 : 10,
         padding: isDashedNode ? '8px 4px' : undefined,
-        // Agregar box-shadow extra para selección múltiple
+        // Agregar box-shadow extra para selección múltiple (más visible)
         boxShadow: isMultiSelected 
-          ? '0 0 0 3px rgba(59, 130, 246, 0.5), 0 10px 15px -3px rgba(0, 0, 0, 0.1)' 
+          ? '0 0 0 4px rgba(37, 99, 235, 0.6), 0 10px 25px -5px rgba(0, 0, 0, 0.2)' 
           : undefined,
+        // Cambiar borde cuando está multi-seleccionado para mayor énfasis
+        outline: isMultiSelected ? '2px solid #2563eb' : 'none',
+        outlineOffset: isMultiSelected ? '3px' : 0,
       }}
       onMouseDown={handleMouseDown}
       onClick={handleNodeClick}

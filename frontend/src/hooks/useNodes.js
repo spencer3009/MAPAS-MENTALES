@@ -526,13 +526,13 @@ export const useNodes = () => {
 
       const newNode = {
         id: newId,
-        text: 'Nuevo Nodo',
+        text: options?.nodeType === 'dashed' ? '' : 'Nuevo Nodo', // Texto vacío para dashed (mostrará placeholder)
         x: newX,
         y: newY,
         color: 'blue',
         parentId,
-        width: 160,
-        height: 64,
+        width: options?.nodeType === 'dashed' ? 260 : 160,
+        height: options?.nodeType === 'dashed' ? 40 : 64,
         nodeType: options?.nodeType || 'default' // 'default' | 'dashed'
       };
 

@@ -359,8 +359,8 @@ const NodeItem = memo(({
         ${isEditing ? 'cursor-text' : 'cursor-grab active:cursor-grabbing'}
         ${isDashedNode ? 'flex flex-col items-center justify-center' : 'flex items-center justify-center p-3'}
         ${!isCloudShape && !isDashedNode ? getShapeStyles(shape) : ''}
-        ${isInSelection && !isLineShape && !isCloudShape && !isDashedNode ? 'ring-2 ring-offset-2 ring-blue-500' : ''}
-        ${isMultiSelected && !isLineShape && !isCloudShape && !isDashedNode ? 'ring-blue-500 ring-offset-blue-100' : ''}
+        ${isMultiSelected && !isLineShape && !isCloudShape && !isDashedNode ? 'ring-2 ring-offset-2 ring-blue-500' : ''}
+        ${isSelected && !isMultiSelected && !isLineShape && !isCloudShape && !isDashedNode ? 'ring-2 ring-offset-2 ring-blue-500' : ''}
         ${isLineShape || isCloudShape || isDashedNode ? '' : 'shadow-md'}
         ${isInSelection && !isDashedNode ? 'shadow-lg' : ''}
       `}

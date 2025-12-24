@@ -460,41 +460,6 @@ export const useNodes = () => {
 
   // NOTA: Las acciones en grupo (deleteSelectedNodes, alignNodes, etc.) 
   // se definen después de pushToHistory para evitar errores de inicialización
-      if (selectedNodeIds.has(n.id)) {
-        return { ...n, y: maxBottom - (n.height || 64) };
-      }
-      return n;
-    });
-
-    pushToHistory(activeProjectId, newNodes);
-    setProjects(prev => prev.map(p => 
-      p.id === activeProjectId 
-        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
-        : p
-    ));
-  }, [nodes, selectedNodeIds, activeProjectId, pushToHistory, getSelectedNodes]);
-
-  // Mover nodos seleccionados en grupo
-  const moveSelectedNodes = useCallback((deltaX, deltaY) => {
-    const idsToMove = selectedNodeIds.size > 0 
-      ? Array.from(selectedNodeIds) 
-      : (selectedNodeId ? [selectedNodeId] : []);
-    
-    if (idsToMove.length === 0) return;
-
-    const newNodes = nodes.map(n => {
-      if (idsToMove.includes(n.id)) {
-        return { ...n, x: n.x + deltaX, y: n.y + deltaY };
-      }
-      return n;
-    });
-
-    setProjects(prev => prev.map(p => 
-      p.id === activeProjectId 
-        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
-        : p
-    ));
-  }, [nodes, selectedNodeId, selectedNodeIds, activeProjectId]);
 
   // ==========================================
   // PERSISTENCIA - Guardar en servidor con cada cambio

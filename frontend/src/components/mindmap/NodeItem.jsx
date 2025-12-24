@@ -489,7 +489,7 @@ const NodeItem = memo(({
               height: 0,
               borderBottomWidth: '3px',
               borderBottomStyle: 'dashed',
-              borderBottomColor: isSelected ? '#0ea5e9' : ACCENT_COLOR,
+              borderBottomColor: isInSelection ? '#0ea5e9' : ACCENT_COLOR,
               transform: 'scaleY(0.5)',
               opacity: 1
             }}
@@ -501,9 +501,11 @@ const NodeItem = memo(({
           {renderCloudShape()}
           
           {/* Indicador de selección para nube */}
-          {isCloudShape && isSelected && (
+          {isCloudShape && isInSelection && (
             <div 
-              className="absolute inset-0 rounded-xl ring-2 ring-offset-2 ring-blue-500 pointer-events-none"
+              className={`absolute inset-0 rounded-xl ring-2 ring-offset-2 pointer-events-none ${
+                isMultiSelected ? 'ring-blue-400' : 'ring-blue-500'
+              }`}
               style={{ zIndex: -1 }}
             />
           )}

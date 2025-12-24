@@ -165,6 +165,51 @@ const MindMapApp = () => {
     hasReminder: nodeReminders.has(node.id)
   }));
 
+  // ==========================================
+  // ATAJOS DE TECLADO PARA SELECCIÓN MÚLTIPLE
+  // ==========================================
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ignorar si estamos en un input o textarea
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        return;
+      }
+
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const modifierKey = isMac ? e.metaKey : e.ctrlKey;
+
+      // CTRL/CMD + A - Seleccionar todos
+      if (modifierKey && e.key.toLowerCase() === 'a') {
+        e.preventDefault();
+        selectAllNodes();
+      }
+
+      // ESC - Limpiar selección
+      if (e.key === 'Escape') {
+        clearSelection();
+        closeContextMenu();
+      }
+
+      // DELETE o BACKSPACE - Eliminar seleccionados
+      if ((e.key === 'Delete' || e.key === 'Backspace') && (selectedNodeId || selectedNodeIds.size > 0)) {
+        // Solo si no estamos editando
+        if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+          e.preventDefault();
+          deleteSelectedNodes();
+        }
+      }
+
+      // CTRL/CMD + D - Duplicar seleccionados
+      if (modifierKey && e.key.toLowerCase() === 'd') {
+        e.preventDefault();
+        duplicateSelectedNodes();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectAllNodes, clearSelection, closeContextMenu, selectedNodeId, selectedNodeIds, deleteSelectedNodes, duplicateSelectedNodes]);
+
   // Handlers para toolbar
   const handleAddNode = useCallback(() => {
     if (selectedNodeId) {

@@ -511,100 +511,102 @@ const NodeItem = memo(({
 
             {/* Badge de comentario */}
             {hasComment && !isEditing && (
-          <button
-            onClick={handleCommentBadgeClick}
-            onMouseDown={(e) => e.stopPropagation()}
-            className="
-              shrink-0 p-1.5 rounded-lg
-              bg-white/50 backdrop-blur-sm
-              hover:bg-white/80
-              transition-all duration-150
-              cursor-pointer
-            "
-            title="Ver comentario"
-          >
-            <MessageSquare size={14} style={{ color: textColor }} />
-          </button>
-        )}
+              <button
+                onClick={handleCommentBadgeClick}
+                onMouseDown={(e) => e.stopPropagation()}
+                className="
+                  shrink-0 p-1.5 rounded-lg
+                  bg-white/50 backdrop-blur-sm
+                  hover:bg-white/80
+                  transition-all duration-150
+                  cursor-pointer
+                "
+                title="Ver comentario"
+              >
+                <MessageSquare size={14} style={{ color: textColor }} />
+              </button>
+            )}
 
-        {/* Badge de enlaces */}
-        {node.links && node.links.length > 0 && !isEditing && (
-          <div
-            className="
-              shrink-0 flex items-center gap-1 px-1.5 py-1 rounded-lg
-              bg-blue-500/20 backdrop-blur-sm
-              cursor-default
-            "
-            title={`${node.links.length} enlace${node.links.length > 1 ? 's' : ''}`}
-          >
-            <Link2 size={12} style={{ color: textColor }} />
-            <span className="text-[10px] font-semibold" style={{ color: textColor }}>
-              {node.links.length}
-            </span>
+            {/* Badge de enlaces */}
+            {node.links && node.links.length > 0 && !isEditing && (
+              <div
+                className="
+                  shrink-0 flex items-center gap-1 px-1.5 py-1 rounded-lg
+                  bg-blue-500/20 backdrop-blur-sm
+                  cursor-default
+                "
+                title={`${node.links.length} enlace${node.links.length > 1 ? 's' : ''}`}
+              >
+                <Link2 size={12} style={{ color: textColor }} />
+                <span className="text-[10px] font-semibold" style={{ color: textColor }}>
+                  {node.links.length}
+                </span>
+              </div>
+            )}
+
+            {/* Badge de recordatorio (reloj) - color dinámico según fondo */}
+            {node.hasReminder && !isEditing && (
+              <div
+                className={`
+                  shrink-0 p-1.5 rounded-lg
+                  backdrop-blur-sm cursor-default
+                  ${isLightColor(bgColor) 
+                    ? 'bg-gray-900/10' 
+                    : 'bg-white/20'}
+                `}
+                title="Recordatorio programado ⏰"
+              >
+                <Clock 
+                  size={14} 
+                  className={isLightColor(bgColor) ? 'text-gray-800' : 'text-white'} 
+                />
+              </div>
+            )}
           </div>
-        )}
 
-        {/* Badge de recordatorio (reloj) - color dinámico según fondo */}
-        {node.hasReminder && !isEditing && (
-          <div
-            className={`
-              shrink-0 p-1.5 rounded-lg
-              backdrop-blur-sm cursor-default
-              ${isLightColor(bgColor) 
-                ? 'bg-gray-900/10' 
-                : 'bg-white/20'}
-            `}
-            title="Recordatorio programado ⏰"
-          >
-            <Clock 
-              size={14} 
-              className={isLightColor(bgColor) ? 'text-gray-800' : 'text-white'} 
+          {/* Subrayado para forma de línea */}
+          {isLineShape && (
+            <div 
+              className="absolute bottom-0 left-0 right-0 h-0.5"
+              style={{ backgroundColor: borderColor }}
             />
-          </div>
-        )}
-      </div>
+          )}
 
-      {/* Subrayado para forma de línea */}
-      {isLineShape && (
-        <div 
-          className="absolute bottom-0 left-0 right-0 h-0.5"
-          style={{ backgroundColor: borderColor }}
-        />
-      )}
-
-      {/* Resize Handle - solo visible cuando está seleccionado */}
-      {isSelected && !isEditing && !isLineShape && (
-        <div
-          onMouseDown={handleResizeStart}
-          className="
-            absolute bottom-0 right-0
-            w-4 h-4
-            cursor-se-resize
-            bg-blue-500 hover:bg-blue-600
-            rounded-tl-md rounded-br-md
-            opacity-80 hover:opacity-100
-            transition-all duration-150
-            flex items-center justify-center
-            shadow-md
-          "
-          style={{ zIndex: 30 }}
-          title="Arrastrar para redimensionar"
-        >
-          <svg 
-            width="8" 
-            height="8" 
-            viewBox="0 0 8 8" 
-            fill="none"
-            className="text-white"
-          >
-            <path 
-              d="M7 1L1 7M7 4L4 7M7 7L7 7" 
-              stroke="currentColor" 
-              strokeWidth="1.5" 
-              strokeLinecap="round"
-            />
-          </svg>
-        </div>
+          {/* Resize Handle - solo visible cuando está seleccionado y no es dashed */}
+          {isSelected && !isEditing && !isLineShape && (
+            <div
+              onMouseDown={handleResizeStart}
+              className="
+                absolute bottom-0 right-0
+                w-4 h-4
+                cursor-se-resize
+                bg-blue-500 hover:bg-blue-600
+                rounded-tl-md rounded-br-md
+                opacity-80 hover:opacity-100
+                transition-all duration-150
+                flex items-center justify-center
+                shadow-md
+              "
+              style={{ zIndex: 30 }}
+              title="Arrastrar para redimensionar"
+            >
+              <svg 
+                width="8" 
+                height="8" 
+                viewBox="0 0 8 8" 
+                fill="none"
+                className="text-white"
+              >
+                <path 
+                  d="M7 1L1 7M7 4L4 7M7 7L7 7" 
+                  stroke="currentColor" 
+                  strokeWidth="1.5" 
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

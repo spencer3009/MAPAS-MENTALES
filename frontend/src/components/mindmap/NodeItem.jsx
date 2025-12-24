@@ -379,11 +379,11 @@ const NodeItem = memo(({
             />
           )}
           
-          {/* Contenido principal: icono + texto */}
-          <div className="w-full flex items-center justify-center gap-2 pb-2">
+          {/* Contenido principal: icono + texto + indicadores */}
+          <div className="w-full flex items-center gap-1.5 pb-1">
             {/* Icono del nodo (igual que en nodos normales) */}
             {node.icon && !isEditing && (() => {
-              const iconSize = 18; // Tamaño fijo para dashed nodes
+              const iconSize = 16; // Tamaño más pequeño para dashed nodes
               const iconColor = node.icon.color || '#374151'; // gray-700
               
               // Manejar icono personalizado de WhatsApp
@@ -419,74 +419,64 @@ const NodeItem = memo(({
                 onBlur={handleBlur}
                 onKeyDown={handleKeyDown}
                 onMouseDown={(e) => e.stopPropagation()}
-                className={`
-                  ${node.icon ? 'flex-1 text-left' : 'w-full text-center'}
-                  bg-transparent outline-none
-                  font-medium text-sm text-gray-700
-                `}
+                className="flex-1 text-left bg-transparent outline-none font-medium text-sm text-gray-700"
                 placeholder="Escribe aquí..."
                 autoFocus
               />
             ) : (
-              <span 
-                className={`${node.icon ? 'flex-1 text-left' : 'w-full text-center'} font-medium text-sm text-gray-700 break-words`}
-              >
+              <span className="flex-1 text-left font-medium text-sm text-gray-700 break-words">
                 {displayText || 'Nodo nuevo'}
               </span>
             )}
+            
+            {/* Indicadores alineados a la derecha del texto */}
+            {!isEditing && (hasReminder || hasComment || hasLinks) && (
+              <div className="shrink-0 flex items-center gap-0.5">
+                {/* Recordatorio - icono pequeño */}
+                {node.hasReminder && (
+                  <span 
+                    className="text-[10px] opacity-80"
+                    title="Tiene recordatorio"
+                  >
+                    ⏰
+                  </span>
+                )}
+                
+                {/* Comentario - icono pequeño */}
+                {hasComment && (
+                  <button
+                    onClick={handleCommentBadgeClick}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    className="text-[10px] opacity-80 hover:opacity-100 transition-opacity"
+                    title="Ver comentario"
+                  >
+                    💬
+                  </button>
+                )}
+                
+                {/* Enlaces - icono pequeño */}
+                {hasLinks && (
+                  <span 
+                    className="text-[10px] opacity-80"
+                    title={`${node.links.length} enlace(s)`}
+                  >
+                    🔗
+                  </span>
+                )}
+              </div>
+            )}
           </div>
           
-          {/* Línea punteada celeste debajo del texto - grosor configurable (default 2px) */}
+          {/* Línea punteada celeste debajo del texto - muy delgada (default 1px) */}
           <div 
             className="w-full"
             style={{ 
               height: 0,
-              borderBottomWidth: `${node.dashedLineWidth || 2}px`,
+              borderBottomWidth: `${node.dashedLineWidth || 1}px`,
               borderBottomStyle: 'dashed',
               borderBottomColor: isSelected ? '#0ea5e9' : ACCENT_COLOR, // sky-500 cuando seleccionado, sky-400 normal
-              marginTop: '2px'
             }}
           />
-          
-          {/* Badge de comentario para dashed node */}
-          {hasComment && !isEditing && (
-            <button
-              onClick={handleCommentBadgeClick}
-              onMouseDown={(e) => e.stopPropagation()}
-              className="
-                absolute -top-2 -right-2
-                w-5 h-5 rounded-full
-                bg-yellow-400 text-yellow-900
-                flex items-center justify-center
-                text-xs shadow-sm
-                hover:bg-yellow-500 hover:scale-110
-                transition-all duration-200
-              "
-              title="Ver comentario"
-            >
-              💬
-            </button>
-          )}
-          
-          {/* Indicador de recordatorio para dashed node */}
-          {node.hasReminder && !isEditing && (
-            <span 
-              className="absolute -top-2 -left-2 text-sm"
-              title="Tiene recordatorio"
-            >
-              ⏰
-            </span>
-          )}
-          
-          {/* Indicador de enlaces para dashed node */}
-          {hasLinks && !isEditing && (
-            <span 
-              className="absolute -bottom-4 right-0 text-xs bg-white rounded-full shadow-sm px-1 border border-gray-100"
-              title={`${node.links.length} enlace(s)`}
-            >
-              🔗
-            </span>
-          )}
         </div>
       ) : (
         <>

@@ -47,6 +47,7 @@ const Canvas = ({
   const [showControls, setShowControls] = useState(true);
   const [commentPopover, setCommentPopover] = useState({ isOpen: false, nodeId: null });
   const [linkPopover, setLinkPopover] = useState({ isOpen: false, nodeId: null });
+  const [nodeTypeSelector, setNodeTypeSelector] = useState({ isOpen: false, position: null, parentId: null });
 
   // Obtener nodo seleccionado
   const selectedNode = nodes.find(n => n.id === selectedNodeId);

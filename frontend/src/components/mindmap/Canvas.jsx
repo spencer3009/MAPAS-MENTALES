@@ -427,6 +427,7 @@ const Canvas = ({
           hasComment={!!selectedNode?.comment}
           hasIcon={!!selectedNode?.icon}
           hasLinks={selectedNode?.links?.length > 0}
+          hasReminder={!!selectedNode?.hasReminder}
           linksCount={selectedNode?.links?.length || 0}
           stylePanelOpen={styleSidebarOpen && sidebarTab === 'styles'}
           iconPanelOpen={styleSidebarOpen && sidebarTab === 'icons'}

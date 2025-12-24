@@ -630,8 +630,8 @@ const NodeItem = memo(({
             />
           )}
 
-          {/* Resize Handle - solo visible cuando está seleccionado y no es dashed */}
-          {isSelected && !isEditing && !isLineShape && (
+          {/* Resize Handle - solo visible cuando está seleccionado individualmente y no es dashed */}
+          {isSelected && !isMultiSelected && !isEditing && !isLineShape && (
             <div
               onMouseDown={handleResizeStart}
               className="

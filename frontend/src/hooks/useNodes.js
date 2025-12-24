@@ -372,6 +372,287 @@ export const useNodes = () => {
 
   // Estado de selección
   const [selectedNodeId, setSelectedNodeId] = useState(null);
+  
+  // Estado de selección múltiple
+  const [selectedNodeIds, setSelectedNodeIds] = useState(new Set());
+
+  // ==========================================
+  // FUNCIONES DE SELECCIÓN MÚLTIPLE
+  // ==========================================
+
+  // Agregar nodo a la selección múltiple (CTRL/CMD + clic)
+  const addToSelection = useCallback((nodeId) => {
+    setSelectedNodeIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(nodeId)) {
+        newSet.delete(nodeId);
+      } else {
+        newSet.add(nodeId);
+      }
+      return newSet;
+    });
+    // Limpiar selección individual
+    setSelectedNodeId(null);
+  }, []);
+
+  // Seleccionar un solo nodo (limpiar selección múltiple)
+  const selectSingleNode = useCallback((nodeId) => {
+    setSelectedNodeId(nodeId);
+    setSelectedNodeIds(new Set());
+  }, []);
+
+  // Seleccionar todos los nodos
+  const selectAllNodes = useCallback(() => {
+    const allIds = new Set(nodes.map(n => n.id));
+    setSelectedNodeIds(allIds);
+    setSelectedNodeId(null);
+  }, [nodes]);
+
+  // Limpiar toda la selección
+  const clearSelection = useCallback(() => {
+    setSelectedNodeId(null);
+    setSelectedNodeIds(new Set());
+  }, []);
+
+  // Seleccionar nodos dentro de un área
+  const selectNodesInArea = useCallback((startPoint, endPoint, additive = false) => {
+    const minX = Math.min(startPoint.x, endPoint.x);
+    const maxX = Math.max(startPoint.x, endPoint.x);
+    const minY = Math.min(startPoint.y, endPoint.y);
+    const maxY = Math.max(startPoint.y, endPoint.y);
+
+    const nodesInArea = nodes.filter(node => {
+      const nodeRight = node.x + (node.width || 160);
+      const nodeBottom = node.y + (node.height || 64);
+      
+      // Verificar si el nodo está dentro del área
+      return node.x < maxX && nodeRight > minX && node.y < maxY && nodeBottom > minY;
+    });
+
+    if (additive) {
+      setSelectedNodeIds(prev => {
+        const newSet = new Set(prev);
+        nodesInArea.forEach(n => newSet.add(n.id));
+        return newSet;
+      });
+    } else {
+      setSelectedNodeIds(new Set(nodesInArea.map(n => n.id)));
+    }
+    setSelectedNodeId(null);
+  }, [nodes]);
+
+  // Verificar si un nodo está seleccionado (individual o múltiple)
+  const isNodeSelected = useCallback((nodeId) => {
+    return selectedNodeId === nodeId || selectedNodeIds.has(nodeId);
+  }, [selectedNodeId, selectedNodeIds]);
+
+  // Obtener todos los nodos seleccionados
+  const getSelectedNodes = useCallback(() => {
+    if (selectedNodeIds.size > 0) {
+      return nodes.filter(n => selectedNodeIds.has(n.id));
+    }
+    if (selectedNodeId) {
+      const node = nodes.find(n => n.id === selectedNodeId);
+      return node ? [node] : [];
+    }
+    return [];
+  }, [nodes, selectedNodeId, selectedNodeIds]);
+
+  // ==========================================
+  // ACCIONES EN GRUPO
+  // ==========================================
+
+  // Eliminar nodos seleccionados
+  const deleteSelectedNodes = useCallback(() => {
+    const idsToDelete = selectedNodeIds.size > 0 
+      ? Array.from(selectedNodeIds) 
+      : (selectedNodeId ? [selectedNodeId] : []);
+    
+    if (idsToDelete.length === 0) return;
+
+    const newNodes = nodes.filter(n => !idsToDelete.includes(n.id));
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+    clearSelection();
+  }, [nodes, selectedNodeId, selectedNodeIds, activeProjectId, pushToHistory, clearSelection]);
+
+  // Duplicar nodos seleccionados
+  const duplicateSelectedNodes = useCallback(() => {
+    const selectedNodes = getSelectedNodes();
+    if (selectedNodes.length === 0) return;
+
+    const offset = 50;
+    const newNodes = selectedNodes.map(node => ({
+      ...node,
+      id: crypto.randomUUID(),
+      x: node.x + offset,
+      y: node.y + offset,
+    }));
+
+    const updatedNodes = [...nodes, ...newNodes];
+    pushToHistory(activeProjectId, updatedNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: updatedNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+
+    // Seleccionar los nuevos nodos
+    setSelectedNodeIds(new Set(newNodes.map(n => n.id)));
+    setSelectedNodeId(null);
+  }, [nodes, activeProjectId, pushToHistory, getSelectedNodes]);
+
+  // Alinear nodos a la izquierda
+  const alignNodesLeft = useCallback(() => {
+    const selectedNodes = getSelectedNodes();
+    if (selectedNodes.length < 2) return;
+
+    const minX = Math.min(...selectedNodes.map(n => n.x));
+    const newNodes = nodes.map(n => {
+      if (selectedNodeIds.has(n.id)) {
+        return { ...n, x: minX };
+      }
+      return n;
+    });
+
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, selectedNodeIds, activeProjectId, pushToHistory, getSelectedNodes]);
+
+  // Alinear nodos al centro horizontal
+  const alignNodesCenter = useCallback(() => {
+    const selectedNodes = getSelectedNodes();
+    if (selectedNodes.length < 2) return;
+
+    const centerX = selectedNodes.reduce((sum, n) => sum + n.x + (n.width || 160) / 2, 0) / selectedNodes.length;
+    const newNodes = nodes.map(n => {
+      if (selectedNodeIds.has(n.id)) {
+        return { ...n, x: centerX - (n.width || 160) / 2 };
+      }
+      return n;
+    });
+
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, selectedNodeIds, activeProjectId, pushToHistory, getSelectedNodes]);
+
+  // Alinear nodos a la derecha
+  const alignNodesRight = useCallback(() => {
+    const selectedNodes = getSelectedNodes();
+    if (selectedNodes.length < 2) return;
+
+    const maxRight = Math.max(...selectedNodes.map(n => n.x + (n.width || 160)));
+    const newNodes = nodes.map(n => {
+      if (selectedNodeIds.has(n.id)) {
+        return { ...n, x: maxRight - (n.width || 160) };
+      }
+      return n;
+    });
+
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, selectedNodeIds, activeProjectId, pushToHistory, getSelectedNodes]);
+
+  // Alinear nodos arriba
+  const alignNodesTop = useCallback(() => {
+    const selectedNodes = getSelectedNodes();
+    if (selectedNodes.length < 2) return;
+
+    const minY = Math.min(...selectedNodes.map(n => n.y));
+    const newNodes = nodes.map(n => {
+      if (selectedNodeIds.has(n.id)) {
+        return { ...n, y: minY };
+      }
+      return n;
+    });
+
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, selectedNodeIds, activeProjectId, pushToHistory, getSelectedNodes]);
+
+  // Alinear nodos al centro vertical
+  const alignNodesMiddle = useCallback(() => {
+    const selectedNodes = getSelectedNodes();
+    if (selectedNodes.length < 2) return;
+
+    const centerY = selectedNodes.reduce((sum, n) => sum + n.y + (n.height || 64) / 2, 0) / selectedNodes.length;
+    const newNodes = nodes.map(n => {
+      if (selectedNodeIds.has(n.id)) {
+        return { ...n, y: centerY - (n.height || 64) / 2 };
+      }
+      return n;
+    });
+
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, selectedNodeIds, activeProjectId, pushToHistory, getSelectedNodes]);
+
+  // Alinear nodos abajo
+  const alignNodesBottom = useCallback(() => {
+    const selectedNodes = getSelectedNodes();
+    if (selectedNodes.length < 2) return;
+
+    const maxBottom = Math.max(...selectedNodes.map(n => n.y + (n.height || 64)));
+    const newNodes = nodes.map(n => {
+      if (selectedNodeIds.has(n.id)) {
+        return { ...n, y: maxBottom - (n.height || 64) };
+      }
+      return n;
+    });
+
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, selectedNodeIds, activeProjectId, pushToHistory, getSelectedNodes]);
+
+  // Mover nodos seleccionados en grupo
+  const moveSelectedNodes = useCallback((deltaX, deltaY) => {
+    const idsToMove = selectedNodeIds.size > 0 
+      ? Array.from(selectedNodeIds) 
+      : (selectedNodeId ? [selectedNodeId] : []);
+    
+    if (idsToMove.length === 0) return;
+
+    const newNodes = nodes.map(n => {
+      if (idsToMove.includes(n.id)) {
+        return { ...n, x: n.x + deltaX, y: n.y + deltaY };
+      }
+      return n;
+    });
+
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, selectedNodeId, selectedNodeIds, activeProjectId]);
 
   // ==========================================
   // PERSISTENCIA - Guardar en servidor con cada cambio

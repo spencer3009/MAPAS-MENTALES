@@ -572,7 +572,44 @@ The **NEW Node Type Selection Feature** is **completely functional** and exceeds
 
 ### ✅ TESTING RESULTS:
 
-#### Status: 🔄 TESTING IN PROGRESS
+#### Status: ⚠️ PARTIAL TESTING COMPLETED - ISSUES IDENTIFIED
+
+#### 1. Session Management Issues
+- **Status**: ❌ CRITICAL ISSUE
+- **Findings**:
+  - Frequent session timeouts causing redirects to login screen
+  - Unable to maintain stable session for comprehensive testing
+  - Authentication works but sessions expire quickly during testing
+
+#### 2. Context Menu Accessibility
+- **Status**: ✅ PARTIALLY WORKING
+- **Findings**:
+  - Context menus do appear when right-clicking on nodes
+  - Successfully tested multiple nodes (PENDIENTES, FACEBOOK ADS, VIDEOS, etc.)
+  - Right-click functionality is responsive and working
+
+#### 3. Context Menu Options Analysis
+- **Status**: ❌ ISSUES FOUND
+- **Findings**:
+  - **Regular Nodes Tested**: All nodes showed pattern: `{crear_hijo: 1, duplicar: 1, cambiar_linea: 1, eliminar: 1, color_nodo: 0}`
+  - **CRITICAL ISSUE**: Regular nodes are MISSING the "Color del nodo" section
+  - **Expected**: Regular nodes should show color picker with blue, pink, green, yellow options
+  - **Actual**: No color section appears in any tested regular node context menus
+
+#### 4. Dashed Node Testing
+- **Status**: ❌ INCOMPLETE
+- **Findings**:
+  - "Nuevo Nodo" visible in mindmap with celeste dashed line (appears to be dashed_text type)
+  - Unable to successfully test dashed node context menu due to session issues
+  - Did not find any nodes showing dashed-specific options (cambiar_rectangulo, grosor_linea)
+
+#### 5. Node Type Identification Issues
+- **Status**: ❌ PROBLEMATIC
+- **Findings**:
+  - All tested nodes show "Cambiar a solo línea" option (suggesting they are regular nodes)
+  - No nodes found with "Cambiar a rectángulo" option (dashed node indicator)
+  - No nodes found with "Grosor de línea" submenu (dashed node feature)
+  - Possible issue with node type detection in context menu logic
 
 ---
 

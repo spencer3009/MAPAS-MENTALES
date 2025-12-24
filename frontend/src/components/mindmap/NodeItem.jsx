@@ -114,6 +114,11 @@ const NodeItem = memo(({
 
   // Determinar si el nodo está en cualquier tipo de selección
   const isInSelection = isSelected || isMultiSelected;
+  
+  // Debug: log cuando el nodo debería tener estilo de selección
+  if (isMultiSelected) {
+    console.log('[NodeItem] Node is multi-selected:', node.id, node.text?.substring(0, 20));
+  }
 
   // Obtener estilos del nodo (con fallback a colores legacy)
   const legacyColors = LEGACY_COLORS[node.color] || LEGACY_COLORS.blue;

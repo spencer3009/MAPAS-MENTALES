@@ -90,6 +90,7 @@ const LEGACY_COLORS = {
 const NodeItem = memo(({
   node,
   isSelected,
+  isMultiSelected = false,
   onSelect,
   onDragStart,
   onDragEnd,
@@ -110,6 +111,9 @@ const NodeItem = memo(({
   const hasComment = node.comment && node.comment.trim().length > 0;
   const hasLinks = node.links && node.links.length > 0;
   const hasReminder = node.hasReminder;
+
+  // Determinar si el nodo está en cualquier tipo de selección
+  const isInSelection = isSelected || isMultiSelected;
 
   // Obtener estilos del nodo (con fallback a colores legacy)
   const legacyColors = LEGACY_COLORS[node.color] || LEGACY_COLORS.blue;

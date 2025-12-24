@@ -148,9 +148,10 @@ const NodeToolbar = ({
       {/* Recordatorio */}
       <ToolbarButton 
         icon={Bell} 
-        label="Agregar recordatorio" 
+        label={hasReminder ? "Ver recordatorio" : "Agregar recordatorio"}
         onClick={onAddReminder}
         active={reminderPanelOpen}
+        hasIndicator={hasReminder}
       />
       
       <Divider />

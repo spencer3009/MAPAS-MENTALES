@@ -464,11 +464,16 @@ const MindMapApp = () => {
           <Canvas
             nodes={nodesWithReminders}
             selectedNodeId={selectedNodeId}
+            selectedNodeIds={selectedNodeIds}
             pan={pan}
             zoom={zoom}
             isPanning={isPanning}
             contextMenu={contextMenu}
-            onSelectNode={setSelectedNodeId}
+            onSelectNode={selectSingleNode}
+            onAddToSelection={addToSelection}
+            onSelectNodesInArea={selectNodesInArea}
+            onClearSelection={clearSelection}
+            isNodeSelected={isNodeSelected}
             onStartPanning={startPanning}
             onUpdatePanning={updatePanning}
             onStopPanning={stopPanning}
@@ -490,12 +495,27 @@ const MindMapApp = () => {
             onChangeNodeColor={updateNodeColor}
             onChangeNodeType={updateNodeType}
             onChangeLineWidth={updateDashedLineWidth}
+            onMoveSelectedNodes={moveSelectedNodes}
             onWheel={handleWheel}
             onToggleStyleSidebar={handleToggleStyleSidebar}
             onOpenIconPanel={handleOpenIconPanel}
             onOpenReminderPanel={handleOpenReminderPanel}
             styleSidebarOpen={showStyleSidebar}
             sidebarTab={sidebarTab}
+          />
+
+          {/* Toolbar de selección múltiple */}
+          <MultiSelectToolbar
+            selectedCount={selectedNodeIds.size}
+            onAlignLeft={alignNodesLeft}
+            onAlignCenter={alignNodesCenter}
+            onAlignRight={alignNodesRight}
+            onAlignTop={alignNodesTop}
+            onAlignMiddle={alignNodesMiddle}
+            onAlignBottom={alignNodesBottom}
+            onDeleteSelected={deleteSelectedNodes}
+            onDuplicateSelected={duplicateSelectedNodes}
+            onClearSelection={clearSelection}
           />
 
           {/* Sidebar derecho de estilos */}

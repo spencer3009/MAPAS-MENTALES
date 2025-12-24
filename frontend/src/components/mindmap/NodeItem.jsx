@@ -466,14 +466,16 @@ const NodeItem = memo(({
             )}
           </div>
           
-          {/* Línea punteada celeste debajo del texto - muy delgada (default 1px) */}
+          {/* Línea punteada celeste debajo del texto - ultra delgada */}
           <div 
             className="w-full"
             style={{ 
               height: 0,
-              borderBottomWidth: `${node.dashedLineWidth || 1}px`,
+              borderBottomWidth: '1px',
               borderBottomStyle: 'dashed',
-              borderBottomColor: isSelected ? '#0ea5e9' : ACCENT_COLOR, // sky-500 cuando seleccionado, sky-400 normal
+              borderBottomColor: isSelected ? '#0ea5e9' : ACCENT_COLOR,
+              transform: 'scaleY(0.5)',
+              opacity: 0.7
             }}
           />
         </div>

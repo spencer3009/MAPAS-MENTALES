@@ -378,31 +378,62 @@ const NodeItem = memo(({
             />
           )}
           
-          {/* Texto editable */}
-          {isEditing ? (
-            <input
-              ref={inputRef}
-              type="text"
-              value={localText}
-              onChange={(e) => setLocalText(e.target.value)}
-              onBlur={handleBlur}
-              onKeyDown={handleKeyDown}
-              onMouseDown={(e) => e.stopPropagation()}
-              className="
-                w-full text-center bg-transparent outline-none
-                font-medium text-sm text-gray-700
-                pb-2
-              "
-              placeholder="Escribe aquí..."
-              autoFocus
-            />
-          ) : (
-            <span 
-              className="w-full text-center font-medium text-sm text-gray-700 pb-2 break-words"
-            >
-              {displayText || 'Nodo nuevo'}
-            </span>
-          )}
+          {/* Contenido principal: icono + texto */}
+          <div className="w-full flex items-center justify-center gap-2 pb-2">
+            {/* Icono del nodo (igual que en nodos normales) */}
+            {node.icon && !isEditing && (() => {
+              const iconSize = 18; // Tamaño fijo para dashed nodes
+              const iconColor = node.icon.color || '#374151'; // gray-700
+              
+              // Manejar icono personalizado de WhatsApp
+              if (node.icon.name === 'WhatsApp') {
+                return (
+                  <div className="shrink-0 flex items-center justify-center">
+                    <WhatsAppIcon size={iconSize} color={iconColor} />
+                  </div>
+                );
+              }
+              
+              const IconComponent = LucideIcons[node.icon.name];
+              if (!IconComponent) return null;
+              
+              return (
+                <div className="shrink-0 flex items-center justify-center">
+                  <IconComponent 
+                    size={iconSize} 
+                    color={iconColor}
+                    strokeWidth={2}
+                  />
+                </div>
+              );
+            })()}
+            
+            {/* Texto editable */}
+            {isEditing ? (
+              <input
+                ref={inputRef}
+                type="text"
+                value={localText}
+                onChange={(e) => setLocalText(e.target.value)}
+                onBlur={handleBlur}
+                onKeyDown={handleKeyDown}
+                onMouseDown={(e) => e.stopPropagation()}
+                className={`
+                  ${node.icon ? 'flex-1 text-left' : 'w-full text-center'}
+                  bg-transparent outline-none
+                  font-medium text-sm text-gray-700
+                `}
+                placeholder="Escribe aquí..."
+                autoFocus
+              />
+            ) : (
+              <span 
+                className={`${node.icon ? 'flex-1 text-left' : 'w-full text-center'} font-medium text-sm text-gray-700 break-words`}
+              >
+                {displayText || 'Nodo nuevo'}
+              </span>
+            )}
+          </div>
           
           {/* Línea punteada celeste debajo del texto - grosor configurable (default 2px) */}
           <div 
@@ -443,6 +474,16 @@ const NodeItem = memo(({
               title="Tiene recordatorio"
             >
               ⏰
+            </span>
+          )}
+          
+          {/* Indicador de enlaces para dashed node */}
+          {hasLinks && !isEditing && (
+            <span 
+              className="absolute -bottom-2 -right-2 text-sm bg-white rounded-full shadow-sm px-1"
+              title={`${node.links.length} enlace(s)`}
+            >
+              🔗
             </span>
           )}
         </div>

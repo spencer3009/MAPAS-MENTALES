@@ -259,21 +259,68 @@ const Canvas = ({
   const handleMouseMove = useCallback((e) => {
     if (!containerRef.current) return;
 
+    // Selección por área
+    if (isSelectingArea && selectionBox) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const currentX = e.clientX - rect.left;
+      const currentY = e.clientY - rect.top;
+      setSelectionBox(prev => ({ ...prev, endX: currentX, endY: currentY }));
+      return;
+    }
+
     if (dragging) {
       const rect = containerRef.current.getBoundingClientRect();
       const newX = (e.clientX - rect.left - pan.x) / zoom - dragging.offsetX;
       const newY = (e.clientY - rect.top - pan.y) / zoom - dragging.offsetY;
-      onUpdateNodePosition(dragging.nodeId, newX, newY);
+      
+      // Si hay múltiples nodos seleccionados, mover todos
+      if (selectedNodeIds.size > 1 && selectedNodeIds.has(dragging.nodeId)) {
+        // Calcular el delta
+        const node = nodes.find(n => n.id === dragging.nodeId);
+        if (node) {
+          const deltaX = newX - node.x;
+          const deltaY = newY - node.y;
+          if (onMoveSelectedNodes) {
+            onMoveSelectedNodes(deltaX, deltaY);
+          }
+        }
+      } else {
+        onUpdateNodePosition(dragging.nodeId, newX, newY);
+      }
       return;
     }
 
     if (isPanning) {
       onUpdatePanning(e);
     }
-  }, [dragging, isPanning, pan, zoom, onUpdateNodePosition, onUpdatePanning]);
+  }, [dragging, isPanning, isSelectingArea, selectionBox, pan, zoom, nodes, selectedNodeIds, onUpdateNodePosition, onUpdatePanning, onMoveSelectedNodes]);
 
   // Manejar fin de arrastre
-  const handleMouseUp = useCallback(() => {
+  const handleMouseUp = useCallback((e) => {
+    // Finalizar selección por área
+    if (isSelectingArea && selectionBox) {
+      const rect = containerRef.current.getBoundingClientRect();
+      
+      // Convertir coordenadas de pantalla a coordenadas del canvas
+      const startX = (selectionBox.startX - pan.x) / zoom;
+      const startY = (selectionBox.startY - pan.y) / zoom;
+      const endX = (selectionBox.endX - pan.x) / zoom;
+      const endY = (selectionBox.endY - pan.y) / zoom;
+      
+      // Verificar si el área es suficientemente grande
+      const width = Math.abs(endX - startX);
+      const height = Math.abs(endY - startY);
+      
+      if (width > 10 || height > 10) {
+        const additive = e.shiftKey;
+        onSelectNodesInArea({ x: startX, y: startY }, { x: endX, y: endY }, additive);
+      }
+      
+      setSelectionBox(null);
+      setIsSelectingArea(false);
+      return;
+    }
+
     if (dragging) {
       setTimeout(() => setShowControls(true), 100);
       // Guardar posición en historial al finalizar el drag
@@ -283,19 +330,33 @@ const Canvas = ({
     }
     setDragging(null);
     onStopPanning();
-  }, [dragging, onStopPanning, onSaveNodePositionToHistory]);
+  }, [dragging, isSelectingArea, selectionBox, pan, zoom, onStopPanning, onSaveNodePositionToHistory, onSelectNodesInArea]);
 
-  // Manejar click en el canvas
+  // Manejar click en el canvas (para panning o selección por área)
   const handleCanvasMouseDown = useCallback((e) => {
     if (e.button !== 0) return;
     
     onCloseContextMenu();
-    onSelectNode(null);
+    
+    // SHIFT + clic en canvas = iniciar selección por área (aditiva)
+    // Clic normal en canvas = iniciar selección por área o panning
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // Iniciar selección por área
+    setSelectionBox({ startX: x, startY: y, endX: x, endY: y });
+    setIsSelectingArea(true);
+    
+    // Limpiar selección si no hay modificador
+    if (!e.shiftKey && !e.ctrlKey && !e.metaKey) {
+      if (onClearSelection) onClearSelection();
+    }
+    
     setShowControls(false);
     setCommentPopover({ isOpen: false, nodeId: null });
     setLinkPopover({ isOpen: false, nodeId: null });
-    onStartPanning(e);
-  }, [onCloseContextMenu, onSelectNode, onStartPanning]);
+  }, [onCloseContextMenu, onClearSelection]);
 
   // Manejar click derecho en nodo
   const handleNodeContextMenu = useCallback((e, nodeId) => {

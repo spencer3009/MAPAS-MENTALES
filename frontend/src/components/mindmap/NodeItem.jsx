@@ -359,7 +359,7 @@ const NodeItem = memo(({
         ${isDashedNode ? 'flex flex-col items-center justify-center' : 'flex items-center justify-center p-3'}
         ${!isCloudShape && !isDashedNode ? getShapeStyles(shape) : ''}
         ${isInSelection && !isLineShape && !isCloudShape && !isDashedNode ? 'ring-2 ring-offset-2 ring-blue-500' : ''}
-        ${isMultiSelected && !isLineShape && !isCloudShape && !isDashedNode ? 'ring-blue-400' : ''}
+        ${isMultiSelected && !isLineShape && !isCloudShape && !isDashedNode ? 'ring-blue-500 ring-offset-blue-100' : ''}
         ${isLineShape || isCloudShape || isDashedNode ? '' : 'shadow-md'}
         ${isInSelection && !isDashedNode ? 'shadow-lg' : ''}
       `}
@@ -375,6 +375,10 @@ const NodeItem = memo(({
         color: isDashedNode ? '#374151' : textColor,
         zIndex: isInSelection ? 20 : 10,
         padding: isDashedNode ? '8px 4px' : undefined,
+        // Agregar box-shadow extra para selección múltiple
+        boxShadow: isMultiSelected 
+          ? '0 0 0 3px rgba(59, 130, 246, 0.5), 0 10px 15px -3px rgba(0, 0, 0, 0.1)' 
+          : undefined,
       }}
       onMouseDown={handleMouseDown}
       onClick={handleNodeClick}

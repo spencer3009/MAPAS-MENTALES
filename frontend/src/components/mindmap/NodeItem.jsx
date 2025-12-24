@@ -432,33 +432,33 @@ const NodeItem = memo(({
             
             {/* Indicadores alineados a la derecha del texto */}
             {!isEditing && (hasReminder || hasComment || hasLinks) && (
-              <div className="shrink-0 flex items-center gap-0.5">
-                {/* Recordatorio - icono pequeño */}
+              <div className="shrink-0 flex items-center gap-1">
+                {/* Recordatorio - icono visible */}
                 {node.hasReminder && (
                   <span 
-                    className="text-[10px] opacity-80"
+                    className="text-sm"
                     title="Tiene recordatorio"
                   >
                     ⏰
                   </span>
                 )}
                 
-                {/* Comentario - icono pequeño */}
+                {/* Comentario - icono visible */}
                 {hasComment && (
                   <button
                     onClick={handleCommentBadgeClick}
                     onMouseDown={(e) => e.stopPropagation()}
-                    className="text-[10px] opacity-80 hover:opacity-100 transition-opacity"
+                    className="text-sm hover:scale-110 transition-transform"
                     title="Ver comentario"
                   >
                     💬
                   </button>
                 )}
                 
-                {/* Enlaces - icono pequeño */}
+                {/* Enlaces - icono visible */}
                 {hasLinks && (
                   <span 
-                    className="text-[10px] opacity-80"
+                    className="text-sm"
                     title={`${node.links.length} enlace(s)`}
                   >
                     🔗

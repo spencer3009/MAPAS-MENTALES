@@ -952,6 +952,8 @@ class NodeData(BaseModel):
     comment: Optional[str] = None
     icon: Optional[dict] = None
     links: Optional[List[dict]] = None
+    nodeType: Optional[str] = "default"  # 'default' | 'dashed' - Tipo de nodo para persistencia
+    hasReminder: Optional[bool] = False  # Indicador de recordatorio
 
 class ProjectCreate(BaseModel):
     id: Optional[str] = None

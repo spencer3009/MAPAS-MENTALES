@@ -53,7 +53,26 @@ const MindMapApp = () => {
     switchProject,
     renameProject,
     pinProject,
-    reorderProjects
+    reorderProjects,
+    // Selección múltiple
+    selectedNodeIds,
+    addToSelection,
+    selectSingleNode,
+    selectAllNodes,
+    clearSelection,
+    selectNodesInArea,
+    isNodeSelected,
+    getSelectedNodes,
+    // Acciones en grupo
+    deleteSelectedNodes,
+    duplicateSelectedNodes,
+    alignNodesLeft,
+    alignNodesCenter,
+    alignNodesRight,
+    alignNodesTop,
+    alignNodesMiddle,
+    alignNodesBottom,
+    moveSelectedNodes
   } = useNodes();
 
   const {

@@ -953,6 +953,7 @@ class NodeData(BaseModel):
     icon: Optional[dict] = None
     links: Optional[List[dict]] = None
     nodeType: Optional[str] = "default"  # 'default' | 'dashed_text' - Tipo de nodo para persistencia (también acepta 'dashed' legacy)
+    dashedLineWidth: Optional[int] = 3  # Grosor de la línea para nodos dashed_text (2-5px)
     hasReminder: Optional[bool] = False  # Indicador de recordatorio
 
 class ProjectCreate(BaseModel):

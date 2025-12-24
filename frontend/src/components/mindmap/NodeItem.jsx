@@ -475,7 +475,7 @@ const NodeItem = memo(({
               borderBottomStyle: 'dashed',
               borderBottomColor: isSelected ? '#0ea5e9' : ACCENT_COLOR,
               transform: 'scaleY(0.5)',
-              opacity: 0.7
+              opacity: 1
             }}
           />
         </div>

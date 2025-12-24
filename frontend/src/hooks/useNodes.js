@@ -497,7 +497,7 @@ export const useNodes = () => {
     ));
   }, [activeProjectId, saveToHistory]);
 
-  const addNode = useCallback((parentId = null, position = null) => {
+  const addNode = useCallback((parentId = null, position = null, options = {}) => {
     const newId = crypto.randomUUID();
     
     setProjects(prev => {

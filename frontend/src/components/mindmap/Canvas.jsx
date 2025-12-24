@@ -454,8 +454,9 @@ const Canvas = ({
           <NodeItem
             key={node.id}
             node={node}
-            isSelected={selectedNodeId === node.id}
-            onSelect={onSelectNode}
+            isSelected={isNodeSelected ? isNodeSelected(node.id) : selectedNodeId === node.id}
+            isMultiSelected={selectedNodeIds.has(node.id)}
+            onSelect={handleNodeSelect}
             onDragStart={handleNodeDragStart}
             onDragEnd={onSaveNodePositionToHistory}
             onUpdateText={onUpdateNodeText}

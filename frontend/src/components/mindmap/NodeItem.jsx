@@ -212,9 +212,10 @@ const NodeItem = memo(({
   };
 
   // Manejar clic en el nodo (con soporte para CTRL/CMD + clic)
+  // NOTA: La selección ahora se maneja en handleMouseDown para evitar doble ejecución
   const handleNodeClick = (e) => {
     e.stopPropagation();
-    onSelect(node.id, e);
+    // No llamar onSelect aquí - ya se maneja en handleMouseDown
   };
 
   const handleCommentBadgeClick = (e) => {

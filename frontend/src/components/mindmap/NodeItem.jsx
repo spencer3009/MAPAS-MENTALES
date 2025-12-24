@@ -430,39 +430,37 @@ const NodeItem = memo(({
               </span>
             )}
             
-            {/* Indicadores alineados a la derecha del texto */}
+            {/* Indicadores alineados a la derecha del texto - iconos minimalistas */}
             {!isEditing && (hasReminder || hasComment || hasLinks) && (
-              <div className="shrink-0 flex items-center gap-1.5">
-                {/* Recordatorio - icono grande y visible */}
+              <div className="shrink-0 flex items-center gap-1">
+                {/* Recordatorio - icono minimalista */}
                 {node.hasReminder && (
-                  <span 
-                    className="text-base"
+                  <Bell 
+                    size={14} 
+                    className="text-gray-400"
                     title="Tiene recordatorio"
-                  >
-                    ⏰
-                  </span>
+                  />
                 )}
                 
-                {/* Comentario - icono de nota más claro */}
+                {/* Comentario - icono minimalista */}
                 {hasComment && (
                   <button
                     onClick={handleCommentBadgeClick}
                     onMouseDown={(e) => e.stopPropagation()}
-                    className="text-base hover:scale-110 transition-transform"
+                    className="hover:text-gray-600 transition-colors"
                     title="Ver comentario"
                   >
-                    📝
+                    <FileText size={14} className="text-gray-400" />
                   </button>
                 )}
                 
-                {/* Enlaces - icono grande y visible */}
+                {/* Enlaces - icono minimalista */}
                 {hasLinks && (
-                  <span 
-                    className="text-base"
+                  <Link2 
+                    size={14} 
+                    className="text-gray-400"
                     title={`${node.links.length} enlace(s)`}
-                  >
-                    🔗
-                  </span>
+                  />
                 )}
               </div>
             )}

@@ -6,15 +6,21 @@ import NodeToolbar from './NodeToolbar';
 import CommentPopover from './CommentPopover';
 import LinkPopover from './LinkPopover';
 import NodeTypeSelector from './NodeTypeSelector';
+import SelectionBox from './SelectionBox';
 
 const Canvas = ({
   nodes,
   selectedNodeId,
+  selectedNodeIds = new Set(),
   pan,
   zoom,
   isPanning,
   contextMenu,
   onSelectNode,
+  onAddToSelection,
+  onSelectNodesInArea,
+  onClearSelection,
+  isNodeSelected,
   onStartPanning,
   onUpdatePanning,
   onStopPanning,
@@ -36,6 +42,7 @@ const Canvas = ({
   onChangeNodeColor,
   onChangeNodeType,
   onChangeLineWidth,
+  onMoveSelectedNodes,
   onWheel,
   onToggleStyleSidebar,
   onOpenIconPanel,

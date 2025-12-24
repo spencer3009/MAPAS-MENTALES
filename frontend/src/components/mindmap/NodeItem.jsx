@@ -109,6 +109,7 @@ const NodeItem = memo(({
 
   const hasComment = node.comment && node.comment.trim().length > 0;
   const hasLinks = node.links && node.links.length > 0;
+  const hasReminder = node.hasReminder;
 
   // Obtener estilos del nodo (con fallback a colores legacy)
   const legacyColors = LEGACY_COLORS[node.color] || LEGACY_COLORS.blue;

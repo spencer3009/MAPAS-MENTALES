@@ -471,7 +471,7 @@ const NodeItem = memo(({
             className="w-full"
             style={{ 
               height: 0,
-              borderBottomWidth: '1px',
+              borderBottomWidth: '2px',
               borderBottomStyle: 'dashed',
               borderBottomColor: isSelected ? '#0ea5e9' : ACCENT_COLOR,
               transform: 'scaleY(0.5)',

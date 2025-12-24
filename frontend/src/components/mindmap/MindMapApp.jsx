@@ -35,6 +35,8 @@ const MindMapApp = () => {
     updateNodeStyle,
     updateNodeSize,
     updateNodeIcon,
+    updateNodeType,
+    updateDashedLineWidth,
     addNodeLink,
     removeNodeLink,
     updateNodeLink,

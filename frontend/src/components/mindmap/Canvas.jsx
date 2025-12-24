@@ -406,6 +406,15 @@ const Canvas = ({
         </button>
       )}
 
+      {/* Selector de tipo de nodo */}
+      <NodeTypeSelector
+        isOpen={nodeTypeSelector.isOpen}
+        position={nodeTypeSelector.position}
+        onSelect={handleNodeTypeSelect}
+        onClose={handleCloseNodeTypeSelector}
+        parentNode={selectedNode}
+      />
+
       {/* Toolbar contextual - siempre visible cuando hay nodo seleccionado */}
       {shouldShowToolbar && controlPositions.toolbar && (
         <NodeToolbar

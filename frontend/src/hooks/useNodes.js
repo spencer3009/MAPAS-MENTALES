@@ -526,14 +526,15 @@ export const useNodes = () => {
 
       const newNode = {
         id: newId,
-        text: options?.nodeType === 'dashed' ? '' : 'Nuevo Nodo', // Texto vacío para dashed (mostrará placeholder)
+        text: (options?.nodeType === 'dashed' || options?.nodeType === 'dashed_text') ? '' : 'Nuevo Nodo', // Texto vacío para dashed (mostrará placeholder)
         x: newX,
         y: newY,
         color: 'blue',
         parentId,
-        width: options?.nodeType === 'dashed' ? 260 : 160,
-        height: options?.nodeType === 'dashed' ? 40 : 64,
-        nodeType: options?.nodeType || 'default' // 'default' | 'dashed'
+        width: (options?.nodeType === 'dashed' || options?.nodeType === 'dashed_text') ? 260 : 160,
+        height: (options?.nodeType === 'dashed' || options?.nodeType === 'dashed_text') ? 40 : 64,
+        // Normalizar 'dashed' a 'dashed_text' para nuevos nodos
+        nodeType: options?.nodeType === 'dashed' ? 'dashed_text' : (options?.nodeType || 'default') // 'default' | 'dashed_text'
       };
 
       console.log('Creating new node:', newNode);

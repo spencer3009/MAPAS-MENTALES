@@ -442,7 +442,7 @@ const NodeItem = memo(({
                   />
                 )}
                 
-                {/* Comentario - icono minimalista */}
+                {/* Comentario - icono de burbuja de chat */}
                 {hasComment && (
                   <button
                     onClick={handleCommentBadgeClick}
@@ -450,7 +450,7 @@ const NodeItem = memo(({
                     className="hover:text-gray-600 transition-colors"
                     title="Ver comentario"
                   >
-                    <FileText size={18} className="text-gray-400" />
+                    <MessageSquare size={18} className="text-gray-400" />
                   </button>
                 )}
                 

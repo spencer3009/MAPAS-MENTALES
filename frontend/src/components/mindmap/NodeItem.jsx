@@ -358,9 +358,10 @@ const NodeItem = memo(({
         ${isEditing ? 'cursor-text' : 'cursor-grab active:cursor-grabbing'}
         ${isDashedNode ? 'flex flex-col items-center justify-center' : 'flex items-center justify-center p-3'}
         ${!isCloudShape && !isDashedNode ? getShapeStyles(shape) : ''}
-        ${isSelected && !isLineShape && !isCloudShape && !isDashedNode ? 'ring-2 ring-offset-2 ring-blue-500' : ''}
+        ${isInSelection && !isLineShape && !isCloudShape && !isDashedNode ? 'ring-2 ring-offset-2 ring-blue-500' : ''}
+        ${isMultiSelected && !isLineShape && !isCloudShape && !isDashedNode ? 'ring-blue-400' : ''}
         ${isLineShape || isCloudShape || isDashedNode ? '' : 'shadow-md'}
-        ${isSelected && !isDashedNode ? 'shadow-lg' : ''}
+        ${isInSelection && !isDashedNode ? 'shadow-lg' : ''}
       `}
       style={{
         left: node.x,
@@ -372,10 +373,11 @@ const NodeItem = memo(({
         borderStyle: isDashedNode ? 'none' : (isLineShape || isCloudShape ? 'none' : borderStyle),
         borderColor: isDashedNode ? 'transparent' : (isLineShape || isCloudShape ? 'transparent' : borderColor),
         color: isDashedNode ? '#374151' : textColor,
-        zIndex: isSelected ? 20 : 10,
+        zIndex: isInSelection ? 20 : 10,
         padding: isDashedNode ? '8px 4px' : undefined,
       }}
       onMouseDown={handleMouseDown}
+      onClick={handleNodeClick}
       onDoubleClick={handleDoubleClick}
       onContextMenu={handleRightClick}
     >
@@ -383,9 +385,13 @@ const NodeItem = memo(({
       {isDashedNode ? (
         <div className="w-full flex flex-col items-center">
           {/* Indicador de selección sutil para dashed node */}
-          {isSelected && (
+          {isInSelection && (
             <div 
-              className="absolute -inset-1 rounded-lg bg-sky-100/40 border-2 border-sky-300/50 pointer-events-none"
+              className={`absolute -inset-1 rounded-lg pointer-events-none ${
+                isMultiSelected 
+                  ? 'bg-blue-100/50 border-2 border-blue-400/60' 
+                  : 'bg-sky-100/40 border-2 border-sky-300/50'
+              }`}
               style={{ zIndex: -1 }}
             />
           )}

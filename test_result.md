@@ -568,7 +568,7 @@ The **NEW Node Type Selection Feature** is **completely functional** and exceeds
 ### Test Credentials:
 - Username: spencer3009
 - Password: Socios3009
-- URL: https://mapcraft-46.preview.emergentagent.com
+- URL: https://mindmap-dash-1.preview.emergentagent.com
 
 ### ✅ TESTING RESULTS:
 

@@ -15,7 +15,10 @@ const STORAGE_KEY = 'mindoramap_last_node_type';
 
 const getLastNodeType = () => {
   try {
-    return localStorage.getItem(STORAGE_KEY) || NODE_TYPES.DEFAULT;
+    const saved = localStorage.getItem(STORAGE_KEY);
+    // Migrar 'dashed' a 'dashed_text' si existe
+    if (saved === 'dashed') return NODE_TYPES.DASHED_TEXT;
+    return saved || NODE_TYPES.DEFAULT;
   } catch {
     return NODE_TYPES.DEFAULT;
   }

@@ -532,7 +532,8 @@ export const useNodes = () => {
         color: 'blue',
         parentId,
         width: 160,
-        height: 64
+        height: 64,
+        nodeType: options?.nodeType || 'default' // 'default' | 'dashed'
       };
 
       console.log('Creating new node:', newNode);

@@ -161,7 +161,7 @@ const NodeTypeSelector = ({
           )}
         </button>
 
-        {/* Opción 2: Nodo con líneas punteadas */}
+        {/* Opción 2: Nodo con línea punteada (solo texto) */}
         <button
           onClick={() => handleSelect(NODE_TYPES.DASHED)}
           className={`
@@ -174,18 +174,17 @@ const NodeTypeSelector = ({
             }
           `}
         >
-          {/* Preview del nodo */}
+          {/* Preview del nodo - solo texto con línea punteada */}
           <div className="
-            w-20 h-12 rounded-lg
-            bg-transparent
-            border-2 border-dashed border-gray-400
-            flex items-center justify-center
+            w-20 h-12
+            flex flex-col items-center justify-center
           ">
-            <span className="text-[10px] text-gray-600 font-medium">Texto</span>
+            <span className="text-[10px] text-gray-600 font-medium mb-1">Texto</span>
+            <div className="w-16 border-b-2 border-dashed border-gray-400" />
           </div>
           
           <span className="text-xs font-medium text-gray-700">
-            Solo líneas
+            Solo línea
           </span>
 
           {/* Indicador de último usado */}

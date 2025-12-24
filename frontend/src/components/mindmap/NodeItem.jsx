@@ -122,6 +122,10 @@ const NodeItem = memo(({
   const nodeWidth = node.width || NODE_WIDTH;
   const nodeHeight = node.height || NODE_HEIGHT;
 
+  // Tipo de nodo: 'default' | 'dashed'
+  const nodeType = node.nodeType || 'default';
+  const isDashedNode = nodeType === 'dashed';
+
   // Sincronizar texto local con props
   const displayText = isEditing ? localText : node.text;
 

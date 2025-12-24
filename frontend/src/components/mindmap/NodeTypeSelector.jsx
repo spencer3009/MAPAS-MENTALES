@@ -167,26 +167,35 @@ const NodeTypeSelector = ({
           )}
         </button>
 
-        {/* Opción 2: Nodo con línea punteada (solo texto) */}
+        {/* Opción 2: Nodo con línea punteada celeste (solo texto) */}
         <button
-          onClick={() => handleSelect(NODE_TYPES.DASHED)}
+          onClick={() => handleSelect(NODE_TYPES.DASHED_TEXT)}
           className={`
             relative flex flex-col items-center gap-2 p-3
             rounded-xl border-2 transition-all duration-200
             hover:scale-105
-            ${lastUsedType === NODE_TYPES.DASHED 
-              ? 'border-blue-500 bg-blue-50' 
-              : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50/50'
+            ${lastUsedType === NODE_TYPES.DASHED_TEXT || lastUsedType === 'dashed'
+              ? 'border-sky-500 bg-sky-50' 
+              : 'border-gray-200 hover:border-sky-300 hover:bg-sky-50/50'
             }
           `}
         >
-          {/* Preview del nodo - solo texto con línea punteada */}
+          {/* Preview del nodo - solo texto con línea punteada celeste */}
           <div className="
             w-20 h-12
             flex flex-col items-center justify-center
           ">
             <span className="text-[10px] text-gray-600 font-medium mb-1">Texto</span>
-            <div className="w-16 border-b-2 border-dashed border-gray-400" />
+            {/* Línea celeste punteada - 4px de grosor */}
+            <div 
+              className="w-16"
+              style={{
+                height: 0,
+                borderBottomWidth: '4px',
+                borderBottomStyle: 'dashed',
+                borderBottomColor: '#38bdf8' // sky-400 - celeste
+              }}
+            />
           </div>
           
           <span className="text-xs font-medium text-gray-700">
@@ -194,11 +203,11 @@ const NodeTypeSelector = ({
           </span>
 
           {/* Indicador de último usado */}
-          {lastUsedType === NODE_TYPES.DASHED && (
+          {(lastUsedType === NODE_TYPES.DASHED_TEXT || lastUsedType === 'dashed') && (
             <span className="
               absolute -top-1 -right-1
               w-4 h-4 rounded-full
-              bg-blue-500
+              bg-sky-500
               flex items-center justify-center
             ">
               <span className="text-white text-[8px]">✓</span>

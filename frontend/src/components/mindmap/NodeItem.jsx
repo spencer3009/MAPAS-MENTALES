@@ -338,111 +338,179 @@ const NodeItem = memo(({
       data-node-id={node.id}
       className={`
         absolute
-        flex items-center justify-center p-3
         transition-all duration-200 select-none
         ${isEditing ? 'cursor-text' : 'cursor-grab active:cursor-grabbing'}
+        ${isDashedNode ? 'flex flex-col items-center justify-center' : 'flex items-center justify-center p-3'}
         ${!isCloudShape && !isDashedNode ? getShapeStyles(shape) : ''}
-        ${isDashedNode ? 'rounded-xl' : ''}
-        ${isSelected && !isLineShape && !isCloudShape ? 'ring-2 ring-offset-2 ring-blue-500' : ''}
+        ${isSelected && !isLineShape && !isCloudShape && !isDashedNode ? 'ring-2 ring-offset-2 ring-blue-500' : ''}
         ${isLineShape || isCloudShape || isDashedNode ? '' : 'shadow-md'}
-        ${isDashedNode ? 'bg-white/50 backdrop-blur-sm' : ''}
         ${isSelected && !isDashedNode ? 'shadow-lg' : ''}
-        ${isDashedNode && isSelected ? 'shadow-md' : ''}
       `}
       style={{
         left: node.x,
         top: node.y,
-        width: dimensions.width,
-        minHeight: dimensions.height,
-        backgroundColor: isDashedNode 
-          ? 'transparent' 
-          : (isLineShape || isCloudShape ? 'transparent' : bgColor),
-        borderWidth: isDashedNode 
-          ? '2px' 
-          : (isLineShape || isCloudShape ? 0 : `${borderWidth}px`),
-        borderStyle: isDashedNode 
-          ? 'dashed' 
-          : (isLineShape || isCloudShape ? 'none' : borderStyle),
-        borderColor: isDashedNode 
-          ? '#9ca3af' 
-          : (isLineShape || isCloudShape ? 'transparent' : borderColor),
+        width: isDashedNode ? 260 : dimensions.width,
+        minHeight: isDashedNode ? 'auto' : dimensions.height,
+        backgroundColor: isDashedNode || isLineShape || isCloudShape ? 'transparent' : bgColor,
+        borderWidth: isDashedNode ? 0 : (isLineShape || isCloudShape ? 0 : `${borderWidth}px`),
+        borderStyle: isDashedNode ? 'none' : (isLineShape || isCloudShape ? 'none' : borderStyle),
+        borderColor: isDashedNode ? 'transparent' : (isLineShape || isCloudShape ? 'transparent' : borderColor),
         color: isDashedNode ? '#374151' : textColor,
         zIndex: isSelected ? 20 : 10,
+        padding: isDashedNode ? '8px 4px' : undefined,
       }}
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
       onContextMenu={handleRightClick}
     >
-      {/* SVG de nube */}
-      {renderCloudShape()}
-      
-      {/* Indicador de selección para nube */}
-      {isCloudShape && isSelected && (
-        <div 
-          className="absolute inset-0 rounded-xl ring-2 ring-offset-2 ring-blue-500 pointer-events-none"
-          style={{ zIndex: -1 }}
-        />
-      )}
-
-      {/* Contenido del nodo */}
-      <div className={`flex items-center gap-2 w-full relative z-10 ${isCloudShape ? 'px-2' : ''}`}>
-        {/* Icono del nodo */}
-        {node.icon && !isEditing && (() => {
-          // Calcular tamaño del icono basado en la altura del nodo
-          const iconSize = Math.min(Math.max(Math.floor(nodeHeight * 0.35), 16), 28);
-          const iconColor = node.icon.color || textColor;
+      {/* Render especial para nodo "dashed" (solo texto con línea) */}
+      {isDashedNode ? (
+        <div className="w-full flex flex-col items-center">
+          {/* Indicador de selección sutil para dashed node */}
+          {isSelected && (
+            <div 
+              className="absolute -inset-1 rounded-lg bg-blue-100/50 border-2 border-blue-400/30 pointer-events-none"
+              style={{ zIndex: -1 }}
+            />
+          )}
           
-          // Manejar icono personalizado de WhatsApp
-          if (node.icon.name === 'WhatsApp') {
-            return (
-              <div className="shrink-0 flex items-center justify-center">
-                <WhatsAppIcon size={iconSize} color={iconColor} />
-              </div>
-            );
-          }
+          {/* Texto editable */}
+          {isEditing ? (
+            <input
+              ref={inputRef}
+              type="text"
+              value={localText}
+              onChange={(e) => setLocalText(e.target.value)}
+              onBlur={handleBlur}
+              onKeyDown={handleKeyDown}
+              onMouseDown={(e) => e.stopPropagation()}
+              className="
+                w-full text-center bg-transparent outline-none
+                font-medium text-sm text-gray-700
+                pb-1
+              "
+              placeholder="Escribe aquí..."
+              autoFocus
+            />
+          ) : (
+            <span 
+              className="w-full text-center font-medium text-sm text-gray-700 pb-1 break-words"
+            >
+              {displayText || 'Nodo nuevo'}
+            </span>
+          )}
           
-          const IconComponent = LucideIcons[node.icon.name];
-          if (!IconComponent) return null;
-          
-          return (
-            <div className="shrink-0 flex items-center justify-center">
-              <IconComponent 
-                size={iconSize} 
-                color={iconColor}
-                strokeWidth={2}
-              />
-            </div>
-          );
-        })()}
-        
-        {isEditing ? (
-          <input
-            ref={inputRef}
-            type="text"
-            value={localText}
-            onChange={(e) => setLocalText(e.target.value)}
-            onBlur={handleBlur}
-            onKeyDown={handleKeyDown}
-            onMouseDown={(e) => e.stopPropagation()}
-            className="
-              flex-1 text-center bg-transparent outline-none
-              font-medium text-sm
-              border-b-2 border-current opacity-50
-            "
-            style={{ color: textColor }}
-            placeholder="Nombre del nodo"
+          {/* Línea punteada debajo del texto */}
+          <div 
+            className="w-full h-0 border-b-2 border-dashed border-gray-300 mt-1"
+            style={{ 
+              borderColor: isSelected ? '#93c5fd' : '#d1d5db',
+              opacity: isSelected ? 1 : 0.7
+            }}
           />
-        ) : (
-          <span 
-            className={`flex-1 font-medium text-sm break-words ${node.icon ? 'text-left' : 'text-center'}`}
-            style={{ color: textColor }}
-          >
-            {displayText}
-          </span>
-        )}
+          
+          {/* Badge de comentario para dashed node */}
+          {hasComment && !isEditing && (
+            <button
+              onClick={handleCommentBadgeClick}
+              onMouseDown={(e) => e.stopPropagation()}
+              className="
+                absolute -top-2 -right-2
+                w-5 h-5 rounded-full
+                bg-yellow-400 text-yellow-900
+                flex items-center justify-center
+                text-xs shadow-sm
+                hover:bg-yellow-500 hover:scale-110
+                transition-all duration-200
+              "
+              title="Ver comentario"
+            >
+              💬
+            </button>
+          )}
+          
+          {/* Indicador de recordatorio para dashed node */}
+          {hasReminder && !isEditing && (
+            <span 
+              className="absolute -top-2 -left-2 text-sm"
+              title="Tiene recordatorio"
+            >
+              ⏰
+            </span>
+          )}
+        </div>
+      ) : (
+        <>
+          {/* SVG de nube */}
+          {renderCloudShape()}
+          
+          {/* Indicador de selección para nube */}
+          {isCloudShape && isSelected && (
+            <div 
+              className="absolute inset-0 rounded-xl ring-2 ring-offset-2 ring-blue-500 pointer-events-none"
+              style={{ zIndex: -1 }}
+            />
+          )}
 
-        {/* Badge de comentario */}
-        {hasComment && !isEditing && (
+          {/* Contenido del nodo normal */}
+          <div className={`flex items-center gap-2 w-full relative z-10 ${isCloudShape ? 'px-2' : ''}`}>
+            {/* Icono del nodo */}
+            {node.icon && !isEditing && (() => {
+              // Calcular tamaño del icono basado en la altura del nodo
+              const iconSize = Math.min(Math.max(Math.floor(nodeHeight * 0.35), 16), 28);
+              const iconColor = node.icon.color || textColor;
+              
+              // Manejar icono personalizado de WhatsApp
+              if (node.icon.name === 'WhatsApp') {
+                return (
+                  <div className="shrink-0 flex items-center justify-center">
+                    <WhatsAppIcon size={iconSize} color={iconColor} />
+                  </div>
+                );
+              }
+              
+              const IconComponent = LucideIcons[node.icon.name];
+              if (!IconComponent) return null;
+              
+              return (
+                <div className="shrink-0 flex items-center justify-center">
+                  <IconComponent 
+                    size={iconSize} 
+                    color={iconColor}
+                    strokeWidth={2}
+                  />
+                </div>
+              );
+            })()}
+            
+            {isEditing ? (
+              <input
+                ref={inputRef}
+                type="text"
+                value={localText}
+                onChange={(e) => setLocalText(e.target.value)}
+                onBlur={handleBlur}
+                onKeyDown={handleKeyDown}
+                onMouseDown={(e) => e.stopPropagation()}
+                className="
+                  flex-1 text-center bg-transparent outline-none
+                  font-medium text-sm
+                  border-b-2 border-current opacity-50
+                "
+                style={{ color: textColor }}
+                placeholder="Nombre del nodo"
+              />
+            ) : (
+              <span 
+                className={`flex-1 font-medium text-sm break-words ${node.icon ? 'text-left' : 'text-center'}`}
+                style={{ color: textColor }}
+              >
+                {displayText}
+              </span>
+            )}
+
+            {/* Badge de comentario */}
+            {hasComment && !isEditing && (
           <button
             onClick={handleCommentBadgeClick}
             onMouseDown={(e) => e.stopPropagation()}

@@ -51,6 +51,7 @@ const NodeToolbar = ({
   hasComment = false,
   hasIcon = false,
   hasLinks = false,
+  hasReminder = false,
   linksCount = 0,
   stylePanelOpen = false,
   iconPanelOpen = false,

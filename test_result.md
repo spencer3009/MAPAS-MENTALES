@@ -268,7 +268,23 @@ The **NEW User Profile Header Implementation** is **fully functional** and succe
 
 ---
 
-## UPDATED "SOLO LÍNEA" NODE TYPE TESTING (December 24, 2025)
+## UPDATED "SOLO LÍNEA" (dashed_text) NODE TYPE TESTING (December 24, 2025) - v2
+
+### 🔍 NEW IMPLEMENTATION REQUIREMENTS:
+
+#### Visual Style Specifications:
+- **Line Color**: Celeste (Sky-400 #38bdf8) - system accent color
+- **Line Width**: 4px (2px thicker than default 2px)
+- **Line Style**: Horizontal, dashed, positioned just below text
+- **No Background**: No rectangle, no fill, no side borders
+- **Editable Area**: ~260px width
+- **Text**: Directly editable on canvas
+
+#### Persistence Requirements:
+- Style renders correctly when creating node
+- Style persists after save and reload
+- Style persists in JSON export/import
+- Render based exclusively on `node_type: "dashed_text"`, not temporary styles
 
 ### 🔍 TESTING RESULTS:
 

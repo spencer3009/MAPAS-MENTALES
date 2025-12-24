@@ -1126,6 +1126,8 @@ export const useNodes = () => {
     updateNodeStyle,
     updateNodeSize,
     updateNodeIcon,
+    updateNodeType,
+    updateDashedLineWidth,
     addNodeLink,
     removeNodeLink,
     updateNodeLink,

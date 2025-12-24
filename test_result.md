@@ -268,6 +268,80 @@ The **NEW User Profile Header Implementation** is **fully functional** and succe
 
 ---
 
+## UPDATED "SOLO LÍNEA" NODE TYPE TESTING (December 24, 2025)
+
+### 🔍 TESTING RESULTS:
+
+#### 1. Authentication & Interface Access
+- **Status**: ✅ WORKING
+- **Findings**:
+  - User authentication successful with credentials (spencer3009/Socios3009)
+  - MindMap interface loads correctly showing existing project
+  - Canvas displays complex mindmap with multiple nodes (PENDIENTES, FACEBOOK ADS, etc.)
+  - All UI elements present: sidebar, toolbar, canvas, user profile header
+
+#### 2. Node Selection & Add Button
+- **Status**: ❌ CRITICAL ISSUE IDENTIFIED
+- **Findings**:
+  - ❌ **MAJOR ISSUE**: Cannot locate or click the "+" add button after selecting nodes
+  - Node selection appears to work (can click on existing nodes)
+  - Add button selectors not responding or not visible after node selection
+  - Multiple selector attempts failed: `button:has-text("+")`, `[title="Agregar nodo hijo"]`, `.bg-blue-500:has(svg)`
+  - **ROOT CAUSE**: Add button may not be appearing or has different implementation than expected
+
+#### 3. Node Type Selector Popup
+- **Status**: ❌ CANNOT TEST
+- **Findings**:
+  - Cannot reach Node Type Selector due to add button issue
+  - Unable to verify "Tipo de nodo" popup appearance
+  - Cannot test "Con fondo" vs "Solo línea" options
+  - **BLOCKED BY**: Add button functionality issue
+
+#### 4. "Solo línea" Node Creation
+- **Status**: ❌ CANNOT TEST
+- **Findings**:
+  - Cannot create new "Solo línea" nodes due to upstream issues
+  - Unable to verify dashed line visual implementation
+  - Cannot test node characteristics (width ~260px, placeholder text)
+  - **BLOCKED BY**: Node creation workflow broken
+
+### ⚠️ CRITICAL ISSUES IDENTIFIED:
+
+#### 1. Add Button Not Functional
+- **Issue**: The "+" button to add child nodes is not appearing or not clickable after node selection
+- **Impact**: Prevents testing of entire node creation workflow
+- **Selectors Tried**: 
+  - `button:has-text("+")`
+  - `[title="Agregar nodo hijo"]`
+  - `button[title*="Agregar"]`
+  - `.bg-blue-500:has(svg)`
+  - `button:has(svg)`
+  - Multiple variations
+- **Status**: All selectors failed to find clickable add button
+
+#### 2. Node Creation Workflow Broken
+- **Issue**: Cannot proceed with node creation testing
+- **Impact**: Unable to verify "Solo línea" implementation
+- **Dependencies**: Requires functional add button
+
+### 🔧 TECHNICAL ANALYSIS:
+
+#### Possible Root Causes:
+1. **Add Button Implementation Changed**: Button may use different selectors or structure
+2. **Timing Issues**: Button may appear with delay or require different interaction
+3. **State Management**: Node selection may not properly trigger add button visibility
+4. **CSS/Styling Changes**: Button may be present but not visible due to styling
+5. **JavaScript Errors**: Client-side errors preventing button functionality
+
+#### Recommended Investigation:
+1. **Inspect Add Button Implementation**: Check current HTML structure and selectors
+2. **Verify Node Selection Logic**: Ensure node selection properly triggers UI updates
+3. **Check Console Errors**: Look for JavaScript errors preventing functionality
+4. **Test Manual Interaction**: Verify if add button works with manual user interaction
+5. **Review Recent Changes**: Check if recent code changes affected node creation workflow
+
+---
+
 ## NEW NODE TYPE SELECTION FEATURE TESTING (December 23, 2025)
 
 ### ✅ TESTING RESULTS COMPLETED:

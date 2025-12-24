@@ -339,22 +339,34 @@ const NodeItem = memo(({
       className={`
         absolute
         flex items-center justify-center p-3
-        transition-all duration-150 select-none
+        transition-all duration-200 select-none
         ${isEditing ? 'cursor-text' : 'cursor-grab active:cursor-grabbing'}
-        ${!isCloudShape ? getShapeStyles(shape) : ''}
-        ${isSelected && !isLineShape && !isCloudShape ? 'ring-2 ring-offset-2 ring-blue-500 shadow-lg' : ''}
-        ${isLineShape || isCloudShape ? '' : 'shadow-md'}
+        ${!isCloudShape && !isDashedNode ? getShapeStyles(shape) : ''}
+        ${isDashedNode ? 'rounded-xl' : ''}
+        ${isSelected && !isLineShape && !isCloudShape ? 'ring-2 ring-offset-2 ring-blue-500' : ''}
+        ${isLineShape || isCloudShape || isDashedNode ? '' : 'shadow-md'}
+        ${isDashedNode ? 'bg-white/50 backdrop-blur-sm' : ''}
+        ${isSelected && !isDashedNode ? 'shadow-lg' : ''}
+        ${isDashedNode && isSelected ? 'shadow-md' : ''}
       `}
       style={{
         left: node.x,
         top: node.y,
         width: dimensions.width,
         minHeight: dimensions.height,
-        backgroundColor: isLineShape || isCloudShape ? 'transparent' : bgColor,
-        borderWidth: isLineShape || isCloudShape ? 0 : `${borderWidth}px`,
-        borderStyle: isLineShape || isCloudShape ? 'none' : borderStyle,
-        borderColor: isLineShape || isCloudShape ? 'transparent' : borderColor,
-        color: textColor,
+        backgroundColor: isDashedNode 
+          ? 'transparent' 
+          : (isLineShape || isCloudShape ? 'transparent' : bgColor),
+        borderWidth: isDashedNode 
+          ? '2px' 
+          : (isLineShape || isCloudShape ? 0 : `${borderWidth}px`),
+        borderStyle: isDashedNode 
+          ? 'dashed' 
+          : (isLineShape || isCloudShape ? 'none' : borderStyle),
+        borderColor: isDashedNode 
+          ? '#9ca3af' 
+          : (isLineShape || isCloudShape ? 'transparent' : borderColor),
+        color: isDashedNode ? '#374151' : textColor,
         zIndex: isSelected ? 20 : 10,
       }}
       onMouseDown={handleMouseDown}

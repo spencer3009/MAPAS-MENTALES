@@ -541,24 +541,55 @@ The **NEW Node Type Selection Feature** is **completely functional** and exceeds
 
 ---
 
+## CONTEXT MENU NODE TYPE CONVERSION & LINE WIDTH TESTING (December 24, 2025)
+
+### 🔍 NEW TESTING REQUIREMENTS:
+
+#### Context Menu Features to Test:
+1. **Dashed Node Context Menu** - should show:
+   - "Crear nodo hijo", "Duplicar nodo", "Cambiar a rectángulo", "Grosor de línea", "Eliminar nodo"
+   - NO "Color del nodo" section (since dashed nodes don't have backgrounds)
+
+2. **Regular Node Context Menu** - should show:
+   - "Crear nodo hijo", "Duplicar nodo", "Cambiar a solo línea", "Eliminar nodo"
+   - "Color del nodo" section with color options
+
+3. **Node Type Conversion**:
+   - Convert dashed to rectangle (adds solid background)
+   - Convert rectangle to dashed (removes background, adds celeste dashed line)
+
+4. **Line Width Submenu** (dashed nodes only):
+   - "Fina (2px)", "Normal (3px)", "Gruesa (4px)", "Muy gruesa (5px)"
+   - Shows preview of line thickness
+   - Default should be "Normal (3px)"
+
+5. **Persistence**: All changes should persist after page reload
+
+### Test Credentials:
+- Username: spencer3009
+- Password: Socios3009
+- URL: https://mapcraft-46.preview.emergentagent.com
+
+### ✅ TESTING RESULTS:
+
+#### Status: 🔄 TESTING IN PROGRESS
+
+---
+
 ## AGENT COMMUNICATION
 
 ### Testing Agent → Main Agent (December 24, 2025)
 
-**✅ DASHED_TEXT NODE FEATURE TESTING COMPLETE - FULL SUCCESS!**
+**🔄 CONTEXT MENU TESTING INITIATED**
 
-The updated "Solo línea" (dashed_text) node type feature is working perfectly. 
+Starting comprehensive testing of context menu options for node type conversion and line width functionality in MindoraMap.
 
-**Key Findings:**
-1. **CELESTE Color**: ✅ Correctly implemented `rgb(56, 189, 248)` (Sky-400 #38bdf8) - NOT gray as before
-2. **Line Thickness**: ✅ Exactly 4px (2px thicker than default 2px)
-3. **Dashed Style**: ✅ Properly applied dashed border pattern
-4. **No Background**: ✅ Transparent background, no borders as required
-5. **Perfect Persistence**: ✅ All styling properties maintained across page reloads
-6. **Existing Node**: ✅ Dashed_text node visible and functional on canvas
+**Test Plan:**
+1. Login and access existing mindmap with both node types
+2. Test context menu on dashed nodes (verify options and NO color section)
+3. Test context menu on regular nodes (verify options and color section)
+4. Test node type conversions (both directions)
+5. Test line width submenu and changes
+6. Test persistence after page reload
 
-**Status**: The implementation exceeds all requirements and is **production-ready**.
-
-**Minor Note**: Session management caused frequent logouts during testing, preventing full node creation workflow testing, but existing node analysis confirms complete functionality.
-
-**Recommendation**: Feature is ready for user acceptance testing and production deployment.
+**Status**: Testing in progress...

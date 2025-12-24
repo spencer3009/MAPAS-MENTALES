@@ -355,25 +355,29 @@ const Canvas = ({
     
     onCloseContextMenu();
     
-    // SHIFT + clic en canvas = iniciar selección por área (aditiva)
-    // Clic normal en canvas = iniciar selección por área o panning
     const rect = containerRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
-    // Iniciar selección por área
-    setSelectionBox({ startX: x, startY: y, endX: x, endY: y });
-    setIsSelectingArea(true);
+    // SHIFT + clic = iniciar selección por área
+    if (e.shiftKey) {
+      setSelectionBox({ startX: x, startY: y, endX: x, endY: y });
+      setIsSelectingArea(true);
+      setShowControls(false);
+      return;
+    }
     
+    // Clic normal en canvas = panning (mover el lienzo)
     // Limpiar selección si no hay modificador
-    if (!e.shiftKey && !e.ctrlKey && !e.metaKey) {
+    if (!e.ctrlKey && !e.metaKey) {
       if (onClearSelection) onClearSelection();
     }
     
     setShowControls(false);
     setCommentPopover({ isOpen: false, nodeId: null });
     setLinkPopover({ isOpen: false, nodeId: null });
-  }, [onCloseContextMenu, onClearSelection]);
+    onStartPanning(e);
+  }, [onCloseContextMenu, onClearSelection, onStartPanning]);
 
   // Manejar click derecho en nodo
   const handleNodeContextMenu = useCallback((e, nodeId) => {

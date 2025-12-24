@@ -85,13 +85,35 @@ const Canvas = ({
 
   // Handler para agregar nodo hijo desde el botón "+"
   const handleAddChildFromButton = useCallback(() => {
-    if (selectedNodeId) {
-      const newId = onAddChildNode(selectedNodeId);
-      setNewNodeId(newId);
+    if (selectedNodeId && controlPositions.addButton) {
+      // Mostrar selector de tipo de nodo
+      setNodeTypeSelector({
+        isOpen: true,
+        position: {
+          x: controlPositions.addButton.x,
+          y: controlPositions.addButton.y + 30
+        },
+        parentId: selectedNodeId
+      });
       setShowControls(false);
+    }
+  }, [selectedNodeId, controlPositions.addButton]);
+
+  // Handler para cuando se selecciona un tipo de nodo
+  const handleNodeTypeSelect = useCallback((nodeType) => {
+    if (nodeTypeSelector.parentId) {
+      const newId = onAddChildNode(nodeTypeSelector.parentId, null, { nodeType });
+      setNewNodeId(newId);
+      setNodeTypeSelector({ isOpen: false, position: null, parentId: null });
       setTimeout(() => setShowControls(true), 500);
     }
-  }, [selectedNodeId, onAddChildNode]);
+  }, [nodeTypeSelector.parentId, onAddChildNode]);
+
+  // Handler para cerrar el selector de tipo de nodo
+  const handleCloseNodeTypeSelector = useCallback(() => {
+    setNodeTypeSelector({ isOpen: false, position: null, parentId: null });
+    setShowControls(true);
+  }, []);
 
   // Handler cuando se completa la edición del nuevo nodo
   const handleEditComplete = useCallback(() => {

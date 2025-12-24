@@ -575,6 +575,15 @@ const Canvas = ({
         onClose={onCloseContextMenu}
       />
 
+      {/* Caja de selección por área */}
+      {isSelectingArea && selectionBox && (
+        <SelectionBox
+          startPoint={{ x: selectionBox.startX, y: selectionBox.startY }}
+          endPoint={{ x: selectionBox.endX, y: selectionBox.endY }}
+          zoom={zoom}
+        />
+      )}
+
       {/* Indicador de zoom */}
       <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-sm border border-gray-200">
         <span className="text-xs font-medium text-gray-600">

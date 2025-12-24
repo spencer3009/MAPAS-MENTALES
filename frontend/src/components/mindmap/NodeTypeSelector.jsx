@@ -186,12 +186,12 @@ const NodeTypeSelector = ({
             flex flex-col items-center justify-center
           ">
             <span className="text-[10px] text-gray-600 font-medium mb-1">Texto</span>
-            {/* Línea celeste punteada - 3px de grosor */}
+            {/* Línea celeste punteada - 2px de grosor */}
             <div 
               className="w-16"
               style={{
                 height: 0,
-                borderBottomWidth: '3px',
+                borderBottomWidth: '2px',
                 borderBottomStyle: 'dashed',
                 borderBottomColor: '#38bdf8' // sky-400 - celeste
               }}

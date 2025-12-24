@@ -265,3 +265,87 @@ The **NEW User Profile Header Implementation** is **fully functional** and succe
 **Minor items**: Notification bell selector needed minor adjustment in automated testing, but visual functionality is intact.
 
 **Recommendation**: The user profile migration to header is **complete and ready for production**. The implementation successfully delivers a modern, professional user interface with improved user experience and clear separation of concerns between project management (sidebar) and user controls (header).
+
+---
+
+## NEW NODE TYPE SELECTION FEATURE TESTING (December 23, 2025)
+
+### 🎯 TESTING REQUIREMENTS:
+
+#### 1. Node Type Selector Popup
+- **Status**: 🔄 PENDING TESTING
+- **Requirements**:
+  - Click any node to select it (e.g., "Idea Central")
+  - Click the "+" button that appears
+  - Verify "Tipo de nodo" selector popup appears
+
+#### 2. Node Type Selector UI Elements
+- **Status**: 🔄 PENDING TESTING
+- **Requirements**:
+  - Header "Tipo de nodo" with X close button
+  - Two options with visual previews:
+    - "Con fondo" - blue rectangular node preview
+    - "Solo líneas" - dashed border node preview
+  - Checkmark on the last used option
+  - Footer: "💡 Se recuerda tu última selección"
+
+#### 3. Create "Con fondo" Node
+- **Status**: 🔄 PENDING TESTING
+- **Requirements**:
+  - Select "Con fondo" option
+  - Verify new node created with:
+    - Solid background color (blue gradient)
+    - Rounded corners
+    - Shadow effect
+    - Text "Nuevo Nodo" editable
+
+#### 4. Create "Solo líneas" Node
+- **Status**: 🔄 PENDING TESTING
+- **Requirements**:
+  - Click parent node, then "+"
+  - Select "Solo líneas" option
+  - Verify new node created with:
+    - Dashed gray border
+    - Transparent/no background
+    - Text visible inside
+    - Rounded corners
+
+#### 5. Selection Memory
+- **Status**: 🔄 PENDING TESTING
+- **Requirements**:
+  - Create another child node using "+"
+  - Verify selector remembers last choice (checkmark)
+  - Verify nodes persist when switching projects
+
+#### 6. Close Selector
+- **Status**: 🔄 PENDING TESTING
+- **Requirements**:
+  - Open selector and click X or click outside
+  - Verify it closes without creating a node
+  - Test Escape key to close
+
+### 📋 TEST PLAN:
+
+```yaml
+current_focus:
+  - "Node Type Selector Popup"
+  - "Node Type Selector UI Elements"
+  - "Create Con fondo Node"
+  - "Create Solo líneas Node"
+  - "Selection Memory"
+  - "Close Selector"
+
+test_priority: "high_first"
+test_all: true
+```
+
+### 🔑 TEST CREDENTIALS:
+- **URL**: http://localhost:3000
+- **Username**: spencer3009
+- **Password**: Socios3009
+
+### 📝 EXPECTED BEHAVIOR:
+- Quick flow: Click "+" → choose type → node created immediately
+- Visual difference between node types is clear
+- Last selection remembered across sessions
+- Both node types can be edited, moved, connected like normal nodes

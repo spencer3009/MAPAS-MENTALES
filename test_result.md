@@ -653,3 +653,50 @@ The **NEW Node Type Selection Feature** is **completely functional** and exceeds
 3. **MEDIUM PRIORITY**: Resolve session management issues for stable testing
 
 **Status**: Context menu functionality is **partially working** but has critical missing features that prevent full node customization.
+
+---
+
+## DASHED NODE FULL FEATURES TESTING (December 24, 2025) - v3
+
+### 🎯 REQUIREMENTS VERIFIED:
+
+#### 1. Line Width Adjustment
+- ✅ Reduced from 3px to **2px** (1px less)
+- ✅ Line width options updated: 1px (Muy fina), 2px (Normal), 3px (Gruesa), 4px (Muy gruesa)
+- ✅ Default line width is now 2px
+
+#### 2. Icons on Dashed Nodes
+- ✅ Icon button appears in toolbar when dashed node is selected
+- ✅ Icon panel opens correctly with search, colors, and categories
+- ✅ Icons are VISIBLE on dashed nodes (displayed to the left of text)
+- ✅ Icon persists after page reload
+
+#### 3. Links on Dashed Nodes
+- ✅ Link button appears in toolbar
+- ✅ Link panel opens correctly for adding links
+- ✅ Links can be added to dashed nodes
+- ✅ Link indicator (🔗) appears on node
+- ✅ Links persist after page reload
+
+#### 4. Comments & Reminders (already working)
+- ✅ Comment badge (💬) visible when comment exists
+- ✅ Reminder indicator (⏰) visible when reminder set
+- ✅ Both features accessible from toolbar
+
+#### 5. All Features Match Rectangle Nodes
+- ✅ Edit text - works
+- ✅ Style panel - works
+- ✅ Add icon - works (NEW)
+- ✅ Add image - works
+- ✅ Add link - works (NEW indicator)
+- ✅ Add comment - works
+- ✅ Add reminder - works
+- ✅ Duplicate - works
+- ✅ Delete - works
+
+### Testing Credentials:
+- Username: spencer3009
+- Password: Socios3009
+
+### ✅ ALL FEATURES VERIFIED AND WORKING
+

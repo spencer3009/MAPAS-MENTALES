@@ -34,6 +34,8 @@ const Canvas = ({
   onDuplicateNode,
   onDeleteNode,
   onChangeNodeColor,
+  onChangeNodeType,
+  onChangeLineWidth,
   onWheel,
   onToggleStyleSidebar,
   onOpenIconPanel,

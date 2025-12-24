@@ -430,7 +430,7 @@ const NodeItem = memo(({
           )}
           
           {/* Indicador de recordatorio para dashed node */}
-          {hasReminder && !isEditing && (
+          {node.hasReminder && !isEditing && (
             <span 
               className="absolute -top-2 -left-2 text-sm"
               title="Tiene recordatorio"

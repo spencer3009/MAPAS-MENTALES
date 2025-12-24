@@ -148,7 +148,7 @@ const ContextMenu = ({
                         w-full text-left px-6 py-2 text-sm
                         hover:bg-gray-100 flex items-center gap-2
                         transition-colors
-                        ${(currentLineWidth || 2) === option.value 
+                        ${(currentLineWidth || 1) === option.value 
                           ? 'text-sky-600 bg-sky-50 font-medium' 
                           : 'text-gray-700'
                         }

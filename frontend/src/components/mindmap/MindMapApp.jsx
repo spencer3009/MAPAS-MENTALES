@@ -9,6 +9,7 @@ import ProjectNameModal from './ProjectNameModal';
 import ProjectReminderModal from './ProjectReminderModal';
 import ProfileModal from './ProfileModal';
 import AllProjectsModal from './AllProjectsModal';
+import MultiSelectToolbar from './MultiSelectToolbar';
 import { useNodes } from '../../hooks/useNodes';
 import { usePanning } from '../../hooks/usePanning';
 import { useZoom } from '../../hooks/useZoom';

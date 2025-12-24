@@ -481,7 +481,7 @@ const NodeItem = memo(({
           {/* Indicador de enlaces para dashed node */}
           {hasLinks && !isEditing && (
             <span 
-              className="absolute -bottom-2 -right-2 text-sm bg-white rounded-full shadow-sm px-1"
+              className="absolute -bottom-4 right-0 text-xs bg-white rounded-full shadow-sm px-1 border border-gray-100"
               title={`${node.links.length} enlace(s)`}
             >
               🔗

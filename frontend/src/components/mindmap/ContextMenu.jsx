@@ -165,7 +165,7 @@ const ContextMenu = ({
                         }}
                       />
                       <span>{option.label}</span>
-                      {(currentLineWidth || 2) === option.value && (
+                      {(currentLineWidth || 1) === option.value && (
                         <span className="ml-auto text-sky-500">✓</span>
                       )}
                     </button>

@@ -129,7 +129,11 @@ const MultiSelectToolbar = ({
 
       {/* Limpiar selección */}
       <button
-        onClick={onClearSelection}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClearSelection();
+        }}
+        onMouseDown={(e) => e.stopPropagation()}
         className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
         title="Limpiar selección (ESC)"
       >

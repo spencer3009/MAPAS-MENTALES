@@ -3,9 +3,12 @@ import { Square, MinusSquare, X } from 'lucide-react';
 
 // Tipos de nodo disponibles
 export const NODE_TYPES = {
-  DEFAULT: 'default',  // Nodo rectangular con fondo
-  DASHED: 'dashed'     // Nodo con líneas punteadas sin fondo
+  DEFAULT: 'default',      // Nodo rectangular con fondo
+  DASHED_TEXT: 'dashed_text'  // Nodo con línea punteada celeste sin fondo
 };
+
+// Alias para compatibilidad con código existente
+export const DASHED = NODE_TYPES.DASHED_TEXT;
 
 // Guardar/recuperar última selección del usuario
 const STORAGE_KEY = 'mindoramap_last_node_type';

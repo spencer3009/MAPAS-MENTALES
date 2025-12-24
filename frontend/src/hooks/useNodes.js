@@ -516,6 +516,202 @@ export const useNodes = () => {
     setHistoryVersion(v => v + 1);
   }, []);
 
+  // ==========================================
+  // ACCIONES EN GRUPO (después de pushToHistory)
+  // ==========================================
+
+  // Eliminar nodos seleccionados
+  const deleteSelectedNodes = useCallback(() => {
+    const idsToDelete = selectedNodeIds.size > 0 
+      ? Array.from(selectedNodeIds) 
+      : (selectedNodeId ? [selectedNodeId] : []);
+    
+    if (idsToDelete.length === 0) return;
+
+    const newNodes = nodes.filter(n => !idsToDelete.includes(n.id));
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+    clearSelection();
+  }, [nodes, selectedNodeId, selectedNodeIds, activeProjectId, pushToHistory, clearSelection]);
+
+  // Duplicar nodos seleccionados
+  const duplicateSelectedNodes = useCallback(() => {
+    const nodesToDuplicate = getSelectedNodes();
+    if (nodesToDuplicate.length === 0) return;
+
+    const offset = 50;
+    const newDuplicatedNodes = nodesToDuplicate.map(node => ({
+      ...node,
+      id: crypto.randomUUID(),
+      x: node.x + offset,
+      y: node.y + offset,
+    }));
+
+    const updatedNodes = [...nodes, ...newDuplicatedNodes];
+    pushToHistory(activeProjectId, updatedNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: updatedNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+
+    // Seleccionar los nuevos nodos
+    setSelectedNodeIds(new Set(newDuplicatedNodes.map(n => n.id)));
+    setSelectedNodeId(null);
+  }, [nodes, activeProjectId, pushToHistory, getSelectedNodes]);
+
+  // Alinear nodos a la izquierda
+  const alignNodesLeft = useCallback(() => {
+    const selectedNodes = getSelectedNodes();
+    if (selectedNodes.length < 2) return;
+
+    const minX = Math.min(...selectedNodes.map(n => n.x));
+    const newNodes = nodes.map(n => {
+      if (selectedNodeIds.has(n.id)) {
+        return { ...n, x: minX };
+      }
+      return n;
+    });
+
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, selectedNodeIds, activeProjectId, pushToHistory, getSelectedNodes]);
+
+  // Alinear nodos al centro horizontal
+  const alignNodesCenter = useCallback(() => {
+    const selectedNodes = getSelectedNodes();
+    if (selectedNodes.length < 2) return;
+
+    const centerX = selectedNodes.reduce((sum, n) => sum + n.x + (n.width || 160) / 2, 0) / selectedNodes.length;
+    const newNodes = nodes.map(n => {
+      if (selectedNodeIds.has(n.id)) {
+        return { ...n, x: centerX - (n.width || 160) / 2 };
+      }
+      return n;
+    });
+
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, selectedNodeIds, activeProjectId, pushToHistory, getSelectedNodes]);
+
+  // Alinear nodos a la derecha
+  const alignNodesRight = useCallback(() => {
+    const selectedNodes = getSelectedNodes();
+    if (selectedNodes.length < 2) return;
+
+    const maxRight = Math.max(...selectedNodes.map(n => n.x + (n.width || 160)));
+    const newNodes = nodes.map(n => {
+      if (selectedNodeIds.has(n.id)) {
+        return { ...n, x: maxRight - (n.width || 160) };
+      }
+      return n;
+    });
+
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, selectedNodeIds, activeProjectId, pushToHistory, getSelectedNodes]);
+
+  // Alinear nodos arriba
+  const alignNodesTop = useCallback(() => {
+    const selectedNodes = getSelectedNodes();
+    if (selectedNodes.length < 2) return;
+
+    const minY = Math.min(...selectedNodes.map(n => n.y));
+    const newNodes = nodes.map(n => {
+      if (selectedNodeIds.has(n.id)) {
+        return { ...n, y: minY };
+      }
+      return n;
+    });
+
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, selectedNodeIds, activeProjectId, pushToHistory, getSelectedNodes]);
+
+  // Alinear nodos al centro vertical
+  const alignNodesMiddle = useCallback(() => {
+    const selectedNodes = getSelectedNodes();
+    if (selectedNodes.length < 2) return;
+
+    const centerY = selectedNodes.reduce((sum, n) => sum + n.y + (n.height || 64) / 2, 0) / selectedNodes.length;
+    const newNodes = nodes.map(n => {
+      if (selectedNodeIds.has(n.id)) {
+        return { ...n, y: centerY - (n.height || 64) / 2 };
+      }
+      return n;
+    });
+
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, selectedNodeIds, activeProjectId, pushToHistory, getSelectedNodes]);
+
+  // Alinear nodos abajo
+  const alignNodesBottom = useCallback(() => {
+    const selectedNodes = getSelectedNodes();
+    if (selectedNodes.length < 2) return;
+
+    const maxBottom = Math.max(...selectedNodes.map(n => n.y + (n.height || 64)));
+    const newNodes = nodes.map(n => {
+      if (selectedNodeIds.has(n.id)) {
+        return { ...n, y: maxBottom - (n.height || 64) };
+      }
+      return n;
+    });
+
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, selectedNodeIds, activeProjectId, pushToHistory, getSelectedNodes]);
+
+  // Mover nodos seleccionados en grupo
+  const moveSelectedNodes = useCallback((deltaX, deltaY) => {
+    const idsToMove = selectedNodeIds.size > 0 
+      ? Array.from(selectedNodeIds) 
+      : (selectedNodeId ? [selectedNodeId] : []);
+    
+    if (idsToMove.length === 0) return;
+
+    const newNodes = nodes.map(n => {
+      if (idsToMove.includes(n.id)) {
+        return { ...n, x: n.x + deltaX, y: n.y + deltaY };
+      }
+      return n;
+    });
+
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, selectedNodeId, selectedNodeIds, activeProjectId]);
+
   // Calcular canUndo y canRedo
   const getHistoryState = useCallback((projectId) => {
     return historyRef.current[projectId] || { states: [], pointer: 0 };

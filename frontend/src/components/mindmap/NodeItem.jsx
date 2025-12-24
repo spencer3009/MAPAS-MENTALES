@@ -404,12 +404,12 @@ const NodeItem = memo(({
             </span>
           )}
           
-          {/* Línea punteada celeste debajo del texto - grosor configurable (default 3px) */}
+          {/* Línea punteada celeste debajo del texto - grosor configurable (default 2px) */}
           <div 
             className="w-full"
             style={{ 
               height: 0,
-              borderBottomWidth: `${node.dashedLineWidth || 3}px`,
+              borderBottomWidth: `${node.dashedLineWidth || 2}px`,
               borderBottomStyle: 'dashed',
               borderBottomColor: isSelected ? '#0ea5e9' : ACCENT_COLOR, // sky-500 cuando seleccionado, sky-400 normal
               marginTop: '2px'

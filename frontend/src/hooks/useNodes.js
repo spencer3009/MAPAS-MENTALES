@@ -1432,6 +1432,28 @@ export const useNodes = () => {
     pinProject,
     reorderProjects,
     
+    // Selección múltiple
+    selectedNodeIds,
+    setSelectedNodeIds,
+    addToSelection,
+    selectSingleNode,
+    selectAllNodes,
+    clearSelection,
+    selectNodesInArea,
+    isNodeSelected,
+    getSelectedNodes,
+    
+    // Acciones en grupo
+    deleteSelectedNodes,
+    duplicateSelectedNodes,
+    alignNodesLeft,
+    alignNodesCenter,
+    alignNodesRight,
+    alignNodesTop,
+    alignNodesMiddle,
+    alignNodesBottom,
+    moveSelectedNodes,
+    
     // Compatibilidad
     resetToDefault,
     clearAll,

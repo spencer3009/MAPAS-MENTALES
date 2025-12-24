@@ -57,9 +57,13 @@ const Canvas = ({
   const [commentPopover, setCommentPopover] = useState({ isOpen: false, nodeId: null });
   const [linkPopover, setLinkPopover] = useState({ isOpen: false, nodeId: null });
   const [nodeTypeSelector, setNodeTypeSelector] = useState({ isOpen: false, position: null, parentId: null });
+  
+  // Estado para selección por área (drag selection)
+  const [selectionBox, setSelectionBox] = useState(null);
+  const [isSelectingArea, setIsSelectingArea] = useState(false);
 
-  // Obtener nodo seleccionado
-  const selectedNode = nodes.find(n => n.id === selectedNodeId);
+  // Obtener nodo seleccionado (para toolbar individual)
+  const selectedNode = selectedNodeIds.size === 0 ? nodes.find(n => n.id === selectedNodeId) : null;
 
   // Calcular posiciones transformadas para los controles
   const controlPositions = useMemo(() => {

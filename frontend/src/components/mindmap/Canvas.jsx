@@ -473,10 +473,14 @@ const Canvas = ({
         position={contextMenu}
         nodeId={contextMenu?.nodeId}
         currentColor={selectedNodeForMenu?.color}
+        currentNodeType={selectedNodeForMenu?.nodeType}
+        currentLineWidth={selectedNodeForMenu?.dashedLineWidth}
         onAddChild={onAddChildNode}
         onDuplicate={onDuplicateNode}
         onDelete={onDeleteNode}
         onChangeColor={onChangeNodeColor}
+        onChangeNodeType={onChangeNodeType}
+        onChangeLineWidth={onChangeLineWidth}
         onClose={onCloseContextMenu}
       />
 

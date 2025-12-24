@@ -432,11 +432,11 @@ const NodeItem = memo(({
             
             {/* Indicadores alineados a la derecha del texto - iconos minimalistas */}
             {!isEditing && (hasReminder || hasComment || hasLinks) && (
-              <div className="shrink-0 flex items-center gap-1">
+              <div className="shrink-0 flex items-center gap-1.5">
                 {/* Recordatorio - icono minimalista */}
                 {node.hasReminder && (
                   <Bell 
-                    size={14} 
+                    size={18} 
                     className="text-gray-400"
                     title="Tiene recordatorio"
                   />
@@ -450,14 +450,14 @@ const NodeItem = memo(({
                     className="hover:text-gray-600 transition-colors"
                     title="Ver comentario"
                   >
-                    <FileText size={14} className="text-gray-400" />
+                    <FileText size={18} className="text-gray-400" />
                   </button>
                 )}
                 
                 {/* Enlaces - icono minimalista */}
                 {hasLinks && (
                   <Link2 
-                    size={14} 
+                    size={18} 
                     className="text-gray-400"
                     title={`${node.links.length} enlace(s)`}
                   />

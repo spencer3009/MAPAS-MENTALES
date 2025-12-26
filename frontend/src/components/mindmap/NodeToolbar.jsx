@@ -10,7 +10,8 @@ import {
   Bell,
   AlignLeft,
   AlignCenter,
-  AlignRight
+  AlignRight,
+  CheckCircle2
 } from 'lucide-react';
 
 const ToolbarButton = ({ icon: Icon, label, onClick, danger = false, active = false, hasIndicator = false, badge = null }) => (

@@ -124,8 +124,11 @@ const ConnectionsLayer = memo(({
 
       const parentCenterX = parent.x + (parent.width || DEFAULT_NODE_WIDTH) / 2;
       const parentBottom = parent.y + (parent.height || DEFAULT_NODE_HEIGHT);
+      const parentRight = parent.x + (parent.width || DEFAULT_NODE_WIDTH);
 
-      // Filtrar según el tipo de layout
+      // =====================================================
+      // CASO 1: Botón en línea HORIZONTAL (entre hijos verticales)
+      // =====================================================
       let verticalChildren;
       if (layoutType === 'mindtree') {
         // En MindTree, todos los hijos son "verticales"
@@ -133,43 +136,78 @@ const ConnectionsLayer = memo(({
       } else {
         // En MindHybrid, hijos con childDirection: 'vertical' O inferido por posición
         verticalChildren = children.filter(c => {
-          // Si tiene childDirection definido, usar eso
           if (c.childDirection === 'vertical') return true;
           if (c.childDirection === 'horizontal') return false;
           
-          // Si no tiene childDirection, inferir por posición
-          // Un hijo es "vertical" si está más abajo que a la derecha del padre
+          // Inferir por posición: hijo "vertical" está más abajo que a la derecha
           const relX = c.x - parent.x;
           const relY = c.y - parent.y;
-          return relY > 50 && Math.abs(relX) < 200; // Más abajo y no muy a la derecha
+          return relY > 50 && Math.abs(relX) < 200;
         });
       }
 
-      // Necesitamos al menos 2 hijos para formar una línea horizontal
-      if (verticalChildren.length < 2) return;
+      // Si hay 2+ hijos verticales, crear botón en la línea horizontal
+      if (verticalChildren.length >= 2) {
+        const sortedByX = [...verticalChildren].sort((a, b) => a.x - b.x);
+        const leftChild = sortedByX[0];
+        const rightChild = sortedByX[sortedByX.length - 1];
 
-      // Ordenar por X para encontrar los extremos
-      const sortedByX = [...verticalChildren].sort((a, b) => a.x - b.x);
-      const leftChild = sortedByX[0];
-      const rightChild = sortedByX[sortedByX.length - 1];
+        const childTop = leftChild.y;
+        const lineY = (parentBottom + childTop) / 2;
 
-      // Calcular la posición de la línea horizontal
-      // Está a medio camino entre el borde inferior del padre y el borde superior de los hijos
-      const childTop = leftChild.y;
-      const lineY = (parentBottom + childTop) / 2;
+        const leftX = leftChild.x + (leftChild.width || DEFAULT_NODE_WIDTH) / 2;
+        const rightX = rightChild.x + (rightChild.width || DEFAULT_NODE_WIDTH) / 2;
+        const centerX = (leftX + rightX) / 2;
 
-      // Centro X de la línea
-      const leftX = leftChild.x + (leftChild.width || DEFAULT_NODE_WIDTH) / 2;
-      const rightX = rightChild.x + (rightChild.width || DEFAULT_NODE_WIDTH) / 2;
-      const centerX = (leftX + rightX) / 2;
+        buttons.push({
+          id: `hline-btn-${parentId}`,
+          parentId,
+          x: centerX,
+          y: lineY,
+          childIds: verticalChildren.map(c => c.id),
+          lineType: 'horizontal' // Para hijos verticales bajo el padre
+        });
+      }
 
-      buttons.push({
-        id: `line-btn-${parentId}`,
-        parentId,
-        x: centerX,
-        y: lineY,
-        childIds: verticalChildren.map(c => c.id)
-      });
+      // =====================================================
+      // CASO 2: Botón en línea VERTICAL (entre hermanos horizontales)
+      // Solo para MindHybrid
+      // =====================================================
+      if (layoutType === 'mindhybrid') {
+        const horizontalChildren = children.filter(c => {
+          if (c.childDirection === 'horizontal') return true;
+          if (c.childDirection === 'vertical') return false;
+          
+          // Inferir por posición: hijo "horizontal" está más a la derecha
+          const relX = c.x - parent.x;
+          const relY = c.y - parent.y;
+          return relX > 100 && Math.abs(relY) < 100;
+        });
+
+        // Si hay 2+ hermanos horizontales, crear botón en la línea vertical que los conecta
+        if (horizontalChildren.length >= 2) {
+          const sortedByY = [...horizontalChildren].sort((a, b) => a.y - b.y);
+          const topChild = sortedByY[0];
+          const bottomChild = sortedByY[sortedByY.length - 1];
+
+          // La línea vertical está a la izquierda de los hermanos (donde entra el conector)
+          const lineX = topChild.x; // Lado izquierdo de los nodos
+          
+          // Centro Y de la línea vertical
+          const topY = topChild.y + (topChild.height || DEFAULT_NODE_HEIGHT) / 2;
+          const bottomY = bottomChild.y + (bottomChild.height || DEFAULT_NODE_HEIGHT) / 2;
+          const centerY = (topY + bottomY) / 2;
+
+          buttons.push({
+            id: `vline-btn-${parentId}`,
+            parentId,
+            x: lineX - 15, // Un poco a la izquierda de la línea
+            y: centerY,
+            childIds: horizontalChildren.map(c => c.id),
+            lineType: 'vertical' // Para hermanos horizontales apilados
+          });
+        }
+      }
     });
 
     return buttons;

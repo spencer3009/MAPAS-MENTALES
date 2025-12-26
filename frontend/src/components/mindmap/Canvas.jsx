@@ -516,7 +516,7 @@ const Canvas = ({
           height: '5000px'
         }}
       >
-        <ConnectionsLayer nodes={nodes} />
+        <ConnectionsLayer nodes={nodes} layoutType={layoutType} />
 
         {nodes.map(node => (
           <NodeItem

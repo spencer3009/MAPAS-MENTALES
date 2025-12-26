@@ -20,34 +20,41 @@ export const generateBezierPath = (startX, startY, endX, endY) => {
 
 /**
  * Genera un path SVG de conexión tipo organigrama (MindTree)
- * Línea vertical hacia abajo, luego horizontal hacia el hijo
- * Patrón: Padre → abajo → derecha → Hijo
- * @param {number} startX - Coordenada X del punto de inicio (centro inferior del padre)
- * @param {number} startY - Coordenada Y del punto de inicio
- * @param {number} endX - Coordenada X del punto final (lado izquierdo del hijo)
- * @param {number} endY - Coordenada Y del punto final
+ * Línea vertical hacia abajo desde el padre, luego horizontal hacia el hijo
+ * Patrón:
+ *     Padre
+ *       |
+ *   ____|____
+ *   |   |   |
+ * Hijo1 Hijo2 Hijo3
+ * 
+ * @param {number} startX - Centro inferior del padre
+ * @param {number} startY - Borde inferior del padre
+ * @param {number} endX - Centro superior del hijo
+ * @param {number} endY - Borde superior del hijo
  * @returns {string} Path SVG
  */
 export const generateOrgChartPath = (startX, startY, endX, endY) => {
-  // Punto intermedio: bajar a la mitad del camino vertical, luego ir horizontal
+  // Punto intermedio vertical (a mitad de camino entre padre e hijo)
   const midY = startY + (endY - startY) / 2;
   
-  // Path: M(inicio) → L(abajo) → L(horizontal) → L(final)
-  // Usar curvas suaves en las esquinas
-  const cornerRadius = 8;
+  // Path: Padre → abajo → horizontal → abajo → Hijo
+  // Con esquinas redondeadas
+  const radius = 6;
   
-  // Si el hijo está directamente debajo (mismo X), línea recta
-  if (Math.abs(startX - endX) < 10) {
+  // Si está directamente debajo, línea recta
+  if (Math.abs(startX - endX) < 5) {
     return `M ${startX} ${startY} L ${endX} ${endY}`;
   }
   
-  // Path con esquinas redondeadas
+  const direction = endX > startX ? 1 : -1;
+  
   return `
     M ${startX} ${startY}
-    L ${startX} ${midY - cornerRadius}
-    Q ${startX} ${midY} ${startX + (endX > startX ? cornerRadius : -cornerRadius)} ${midY}
-    L ${endX - (endX > startX ? cornerRadius : -cornerRadius)} ${midY}
-    Q ${endX} ${midY} ${endX} ${midY + cornerRadius}
+    L ${startX} ${midY - radius}
+    Q ${startX} ${midY} ${startX + (radius * direction)} ${midY}
+    L ${endX - (radius * direction)} ${midY}
+    Q ${endX} ${midY} ${endX} ${midY + radius}
     L ${endX} ${endY}
   `.replace(/\s+/g, ' ').trim();
 };
@@ -97,15 +104,15 @@ export const getNodeOutputPointOrgChart = (node, nodeWidth = 160, nodeHeight = 6
 };
 
 /**
- * Calcula el punto de conexión de entrada para organigrama (lado izquierdo)
+ * Calcula el punto de conexión de entrada para organigrama (centro superior)
  * Para MindTree (layout vertical)
  * @param {Object} node - El nodo
- * @param {number} nodeHeight - Alto del nodo
+ * @param {number} nodeWidth - Ancho del nodo
  * @returns {{ x: number, y: number }}
  */
-export const getNodeInputPointOrgChart = (node, nodeHeight = 64) => {
+export const getNodeInputPointOrgChart = (node, nodeWidth = 160) => {
   return {
-    x: node.x,                 // Lado izquierdo
-    y: node.y + nodeHeight / 2 // Centro vertical
+    x: node.x + nodeWidth / 2, // Centro horizontal
+    y: node.y                  // Borde superior
   };
 };

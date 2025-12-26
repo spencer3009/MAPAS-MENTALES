@@ -1507,10 +1507,22 @@ export const useNodes = () => {
           const siblings = currentNodes.filter(n => n.parentId === parentId);
           
           if (layoutType === 'mindtree') {
-            // MindTree: hijos debajo del padre, distribuidos horizontalmente
-            const parentWidth = parent.width || 160;
-            newX = parent.x + (siblings.length * 180);
-            newY = parent.y + (parent.height || 64) + 120;
+            // MindTree (Organigrama): hijos en COLUMNA VERTICAL debajo del padre
+            // Cada hijo se coloca debajo del anterior, indentado a la derecha
+            const parentHeight = parent.height || 64;
+            const childSpacing = 80; // Espacio vertical entre hijos
+            const indentation = 40; // Indentación horizontal
+            
+            newX = parent.x + indentation;
+            // Calcular Y sumando las alturas de todos los hermanos existentes
+            if (siblings.length === 0) {
+              newY = parent.y + parentHeight + 60; // Primer hijo
+            } else {
+              // Encontrar el último hermano por posición Y
+              const lastSibling = siblings.reduce((max, s) => s.y > max.y ? s : max, siblings[0]);
+              const lastSiblingHeight = lastSibling.height || 64;
+              newY = lastSibling.y + lastSiblingHeight + childSpacing;
+            }
           } else {
             // MindFlow: hijos a la derecha del padre, distribuidos verticalmente
             newX = parent.x + 280;

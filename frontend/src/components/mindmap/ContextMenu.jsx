@@ -22,40 +22,38 @@ const ContextMenu = ({
 }) => {
   const [showLineWidthMenu, setShowLineWidthMenu] = useState(false);
   const menuRef = useRef(null);
-  const [adjustedPosition, setAdjustedPosition] = useState({ x: 0, y: 0 });
+  const [menuPosition, setMenuPosition] = useState(null);
   
   if (!position) return null;
 
   const isDashedNode = currentNodeType === 'dashed' || currentNodeType === 'dashed_text';
 
-  // Ajustar posición del menú para que no salga de la pantalla
-  useEffect(() => {
-    if (menuRef.current && position) {
-      const menu = menuRef.current;
-      const menuRect = menu.getBoundingClientRect();
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      
-      let newX = position.x;
-      let newY = position.y;
-      
-      // Ajustar si se sale por la derecha
-      if (position.x + menuRect.width > viewportWidth - 20) {
-        newX = position.x - menuRect.width;
-      }
-      
-      // Ajustar si se sale por abajo
-      if (position.y + menuRect.height > viewportHeight - 20) {
-        newY = position.y - menuRect.height;
-      }
-      
-      // Asegurar que no sea menor que 0
-      newX = Math.max(10, newX);
-      newY = Math.max(10, newY);
-      
-      setAdjustedPosition({ x: newX, y: newY });
+  // Calcular la altura estimada del menú según el tipo de nodo
+  const estimatedMenuHeight = isDashedNode ? 280 : 200; // px aproximados
+  const menuWidth = 224; // w-56 = 14rem = 224px
+
+  // Calcular posición ajustada
+  const getAdjustedPosition = () => {
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    let x = position.x;
+    let y = position.y;
+    
+    // Ajustar si se sale por la derecha
+    if (x + menuWidth > viewportWidth - 20) {
+      x = Math.max(10, x - menuWidth);
     }
-  }, [position]);
+    
+    // Ajustar si se sale por abajo
+    if (y + estimatedMenuHeight > viewportHeight - 20) {
+      y = Math.max(10, y - estimatedMenuHeight);
+    }
+    
+    return { x, y };
+  };
+
+  const adjustedPos = getAdjustedPosition();
 
   const handleAction = (action) => {
     action();

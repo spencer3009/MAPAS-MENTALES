@@ -274,12 +274,14 @@ const MindMapApp = () => {
     // Aplicar alineación según el tipo de layout del proyecto
     if (currentLayoutType === 'mindtree') {
       applyFullMindTreeAlignment();
+    } else if (currentLayoutType === 'mindhybrid') {
+      applyFullMindHybridAlignment();
     } else {
       applyFullAutoAlignment();
     }
 
     console.log('[AutoAlign] Alineación completada');
-  }, [autoAlignEnabled, currentLayoutType, applyFullAutoAlignment, applyFullMindTreeAlignment]);
+  }, [autoAlignEnabled, currentLayoutType, applyFullAutoAlignment, applyFullMindTreeAlignment, applyFullMindHybridAlignment]);
 
   // Toggle de alineación automática
   const handleToggleAutoAlign = useCallback((enabled) => {
@@ -291,12 +293,14 @@ const MindMapApp = () => {
       setTimeout(() => {
         if (currentLayoutType === 'mindtree') {
           applyFullMindTreeAlignment();
+        } else if (currentLayoutType === 'mindhybrid') {
+          applyFullMindHybridAlignment();
         } else {
           applyFullAutoAlignment();
         }
       }, 100);
     }
-  }, [currentLayoutType, applyFullAutoAlignment, applyFullMindTreeAlignment]);
+  }, [currentLayoutType, applyFullAutoAlignment, applyFullMindTreeAlignment, applyFullMindHybridAlignment]);
 
 
   const handleExportJSON = useCallback(() => {

@@ -719,16 +719,25 @@ export const useNodes = () => {
     // Calcular la altura total del área de distribución
     const topY = topNode.y;
     const bottomY = bottomNode.y + (bottomNode.height || 64);
-    const totalHeight = bottomY - topY;
     
     // Calcular la suma de las alturas de todos los nodos
     const totalNodesHeight = sortedNodes.reduce((sum, n) => sum + (n.height || 64), 0);
     
+    // Calcular el espaciado mínimo deseado (al menos 20px entre nodos)
+    const minSpacing = 20;
+    const minTotalHeight = totalNodesHeight + (minSpacing * (sortedNodes.length - 1));
+    
+    // Si el área actual es más pequeña que el mínimo necesario, expandirla
+    let actualTotalHeight = bottomY - topY;
+    if (actualTotalHeight < minTotalHeight) {
+      actualTotalHeight = minTotalHeight;
+    }
+    
     // Calcular el espacio disponible para distribuir
-    const availableSpace = totalHeight - totalNodesHeight;
+    const availableSpace = actualTotalHeight - totalNodesHeight;
     
     // Calcular el espaciado uniforme entre nodos
-    const spacing = availableSpace / (sortedNodes.length - 1);
+    const spacing = Math.max(minSpacing, availableSpace / (sortedNodes.length - 1));
     
     console.log('[distributeNodesVertically] Espacio disponible:', availableSpace, 'Espaciado:', spacing);
 
@@ -737,13 +746,7 @@ export const useNodes = () => {
     let currentY = topY;
     
     sortedNodes.forEach((node, index) => {
-      if (index === 0) {
-        // El primer nodo mantiene su posición
-        newPositions.set(node.id, topY);
-      } else {
-        // Los siguientes nodos se posicionan con espaciado uniforme
-        newPositions.set(node.id, currentY);
-      }
+      newPositions.set(node.id, currentY);
       currentY += (node.height || 64) + spacing;
     });
 

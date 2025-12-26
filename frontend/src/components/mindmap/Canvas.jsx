@@ -39,6 +39,7 @@ const Canvas = ({
   onAddChildNode,
   onAddNodeHorizontal,
   onAddNodeVertical,
+  onAddNodeFromLine,
   onDuplicateNode,
   onDeleteNode,
   onChangeNodeColor,

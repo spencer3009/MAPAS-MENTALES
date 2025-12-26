@@ -154,6 +154,15 @@ const Canvas = ({
 
   // Wrapper para eliminar nodo con auto-alineación
   const handleDeleteWithAutoAlign = useCallback((nodeId) => {
+    if (!nodeId) {
+      console.error('[Canvas] handleDeleteWithAutoAlign: nodeId es undefined');
+      return;
+    }
+    if (!onDeleteNode) {
+      console.error('[Canvas] handleDeleteWithAutoAlign: onDeleteNode es undefined');
+      return;
+    }
+    console.log('[Canvas] Eliminando nodo:', nodeId);
     onDeleteNode(nodeId);
     // Aplicar alineación jerárquica automática si está habilitada
     if (autoAlignEnabled && onAutoAlign) {

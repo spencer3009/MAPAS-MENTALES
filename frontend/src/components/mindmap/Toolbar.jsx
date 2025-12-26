@@ -89,7 +89,10 @@ const Toolbar = ({
   onRefreshNotifications,
   user,
   onOpenProfile,
-  onLogout
+  onLogout,
+  // Alineación automática
+  autoAlignEnabled,
+  onToggleAutoAlign
 }) => {
   return (
     <div className="

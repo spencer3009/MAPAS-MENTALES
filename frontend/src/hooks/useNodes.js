@@ -742,10 +742,15 @@ export const useNodes = () => {
   // Evita superposición entre subárboles
   // ==========================================
 
-  // Constantes de layout
+  // Constantes de layout para MindFlow (horizontal)
   const BLOCK_MARGIN = 30; // Margen vertical entre bloques
   const CHILD_SPACING = 20; // Espacio entre nodos hijos
   const HORIZONTAL_OFFSET = 280; // Distancia horizontal padre-hijos
+
+  // Constantes de layout para MindTree (vertical)
+  const MINDTREE_VERTICAL_OFFSET = 120; // Distancia vertical padre-hijos
+  const MINDTREE_HORIZONTAL_SPACING = 40; // Espacio horizontal entre hermanos
+  const MINDTREE_BLOCK_MARGIN = 50; // Margen entre bloques en MindTree
 
   // Calcular la altura total de un bloque (nodo + todos sus descendientes)
   const calculateBlockHeight = useCallback((nodeId, allNodes) => {

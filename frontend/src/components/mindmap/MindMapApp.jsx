@@ -138,8 +138,8 @@ const MindMapApp = () => {
   // Estado para modal de todos los proyectos
   const [showAllProjectsModal, setShowAllProjectsModal] = useState(false);
 
-  // Estado para alineación automática (OFF por defecto)
-  const [autoAlignEnabled, setAutoAlignEnabled] = useState(false);
+  // Estado para alineación automática (ON por defecto)
+  const [autoAlignEnabled, setAutoAlignEnabled] = useState(true);
 
   // Estado para recordatorios (para mostrar indicador en nodos)
   const [nodeReminders, setNodeReminders] = useState(new Set());

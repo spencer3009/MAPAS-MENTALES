@@ -45,13 +45,23 @@ const ConnectionsLayer = memo(({
 
       if (layoutType === 'mindhybrid') {
         // MindHybrid: el tipo de conector depende de la dirección del nodo hijo
-        if (node.childDirection === 'vertical') {
+        // Si childDirection no está definido, inferir de la posición relativa al padre
+        let effectiveDirection = node.childDirection;
+        if (!effectiveDirection) {
+          // Inferir dirección por posición
+          const relX = node.x - parent.x;
+          const relY = node.y - parent.y;
+          // Si el nodo está más abajo que a la derecha, es vertical
+          effectiveDirection = (relY > 50 && Math.abs(relX) < parentWidth + 50) ? 'vertical' : 'horizontal';
+        }
+        
+        if (effectiveDirection === 'vertical') {
           // Hijo vertical: conector tipo org chart (vertical)
           start = getNodeOutputPointOrgChart(parent, parentWidth, parentHeight);
           end = getNodeInputPointOrgChart(node, nodeWidth);
           path = generateOrgChartPath(start.x, start.y, end.x, end.y);
         } else {
-          // Hijo horizontal (o sin dirección): conector curvo (horizontal)
+          // Hijo horizontal: conector curvo (horizontal)
           start = getNodeOutputPoint(parent, parentWidth, parentHeight);
           end = getNodeInputPoint(node, nodeHeight);
           path = generateBezierPath(start.x, start.y, end.x, end.y);

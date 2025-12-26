@@ -274,9 +274,24 @@ const Canvas = ({
     }
   }, [onOpenReminderPanel]);
 
-  const handleToolbarAddImage = useCallback(() => {
-    alert('Funcionalidad de agregar imagen próximamente');
-  }, []);
+  // Handlers de alineación de texto del nodo seleccionado
+  const handleToolbarAlignTextLeft = useCallback(() => {
+    if (selectedNodeId && onAlignTextLeft) {
+      onAlignTextLeft(selectedNodeId);
+    }
+  }, [selectedNodeId, onAlignTextLeft]);
+
+  const handleToolbarAlignTextCenter = useCallback(() => {
+    if (selectedNodeId && onAlignTextCenter) {
+      onAlignTextCenter(selectedNodeId);
+    }
+  }, [selectedNodeId, onAlignTextCenter]);
+
+  const handleToolbarAlignTextRight = useCallback(() => {
+    if (selectedNodeId && onAlignTextRight) {
+      onAlignTextRight(selectedNodeId);
+    }
+  }, [selectedNodeId, onAlignTextRight]);
 
   const handleToolbarDuplicate = useCallback(() => {
     if (selectedNodeId) {

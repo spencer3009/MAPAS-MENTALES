@@ -1628,7 +1628,6 @@ export const useNodes = () => {
     if (!parentId) return null;
     
     const newId = crypto.randomUUID();
-    const autoAlignAfter = options?.autoAlign || false;
     
     setProjects(prev => {
       const project = prev.find(p => p.id === activeProjectId);

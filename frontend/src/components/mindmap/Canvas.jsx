@@ -56,6 +56,8 @@ const Canvas = ({
   onAlignTextLeft,
   onAlignTextCenter,
   onAlignTextRight,
+  // Toggle completado
+  onToggleNodeCompleted,
   // Tipo de layout del proyecto
   layoutType = 'mindflow'
 }) => {

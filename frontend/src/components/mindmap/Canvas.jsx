@@ -165,8 +165,9 @@ const Canvas = ({
     console.log('[Canvas] Eliminando nodo:', nodeId);
     onDeleteNode(nodeId);
     // Aplicar alineación jerárquica automática si está habilitada
+    // Usar un delay mayor para dar tiempo a que el estado se actualice
     if (autoAlignEnabled && onAutoAlign) {
-      setTimeout(() => onAutoAlign(), 100);
+      setTimeout(() => onAutoAlign(), 300);
     }
   }, [onDeleteNode, autoAlignEnabled, onAutoAlign]);
 

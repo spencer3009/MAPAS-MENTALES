@@ -205,27 +205,6 @@ const ContextMenu = ({
           <span>Eliminar nodo</span>
         </button>
       </div>
-
-      {/* Sección de colores - solo para nodos con fondo */}
-      {!isDashedNode && (
-        <div className="border-t border-gray-100 px-4 py-3">
-          <p className="text-xs text-gray-500 mb-2 font-medium">Color del nodo:</p>
-          <div className="flex gap-2">
-            {COLOR_OPTIONS.map(({ key, bg, hover }) => (
-              <button
-                key={key}
-                onClick={() => handleAction(() => onChangeColor(nodeId, key))}
-                className={`
-                  w-7 h-7 rounded-full transition-all
-                  ${bg} ${hover}
-                  ${currentColor === key ? 'ring-2 ring-gray-500 ring-offset-2 scale-110' : ''}
-                `}
-                title={key}
-              />
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

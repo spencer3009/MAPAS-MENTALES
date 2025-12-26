@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { 
   generateBezierPath, 
   generateOrgChartPath,
@@ -23,7 +23,12 @@ const getStrokeDasharray = (style) => {
   }
 };
 
-const ConnectionsLayer = memo(({ nodes, layoutType = 'mindflow' }) => {
+const ConnectionsLayer = memo(({ 
+  nodes, 
+  layoutType = 'mindflow',
+  onAddNodeFromLine,
+  showLineButtons = false
+}) => {
   const connections = nodes
     .filter(node => node.parentId)
     .map(node => {

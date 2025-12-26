@@ -200,7 +200,7 @@ const ConnectionsLayer = memo(({
           key={btn.id}
           onClick={(e) => {
             e.stopPropagation();
-            onAddNodeFromLine(btn.parentId, btn.siblingIds);
+            onAddNodeFromLine(btn.parentId, btn.childIds);
           }}
           onMouseDown={(e) => e.stopPropagation()}
           className="

@@ -475,7 +475,7 @@ const NodeItem = memo(({
                 autoFocus
               />
             ) : (
-              <span className={`flex-1 ${textAlignClass} font-medium text-sm text-gray-700 break-words`}>
+              <span className={`flex-1 ${textAlignClass} font-medium text-sm text-gray-700 break-words ${node.isCompleted ? 'line-through opacity-60' : ''}`}>
                 {displayText || 'Nodo nuevo'}
               </span>
             )}

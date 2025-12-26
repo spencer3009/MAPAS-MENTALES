@@ -26,6 +26,7 @@ const MindMapApp = () => {
     nodes,
     projectName,
     activeProjectId,
+    activeProject,
     projects,
     selectedNodeId,
     setSelectedNodeId,
@@ -87,8 +88,10 @@ const MindMapApp = () => {
     distributeNodesVertically,
     distributeNodesHorizontally,
     moveSelectedNodes,
-    // Alineación jerárquica automática
-    applyFullAutoAlignment
+    // Alineación jerárquica automática (MindFlow)
+    applyFullAutoAlignment,
+    // Alineación MindTree (vertical)
+    applyFullMindTreeAlignment
   } = useNodes();
 
   const {

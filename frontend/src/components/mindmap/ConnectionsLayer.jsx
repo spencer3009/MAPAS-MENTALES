@@ -61,10 +61,16 @@ const ConnectionsLayer = memo(({
           end = getNodeInputPointOrgChart(node, nodeWidth);
           path = generateOrgChartPath(start.x, start.y, end.x, end.y);
         } else {
-          // Hijo horizontal: conector curvo (horizontal)
-          start = getNodeOutputPoint(parent, parentWidth, parentHeight);
-          end = getNodeInputPoint(node, nodeHeight);
-          path = generateBezierPath(start.x, start.y, end.x, end.y);
+          // Hijo horizontal: LÍNEA RECTA (no curva bezier)
+          // Sale del centro derecho del padre, entra al centro izquierdo del hijo
+          const startX = parent.x + parentWidth;
+          const startY = parent.y + parentHeight / 2;
+          const endX = node.x;
+          const endY = node.y + nodeHeight / 2;
+          start = { x: startX, y: startY };
+          end = { x: endX, y: endY };
+          // Línea recta horizontal
+          path = `M ${startX} ${startY} L ${endX} ${endY}`;
         }
       } else if (layoutType === 'mindtree') {
         // MindTree (Organigrama): conectores verticales tipo org chart

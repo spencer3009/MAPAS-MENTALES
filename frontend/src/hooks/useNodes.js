@@ -94,8 +94,13 @@ export const useNodes = () => {
       
       if (response.ok) {
         const serverProjects = await response.json();
-        console.log('Proyectos cargados del servidor:', serverProjects.length);
-        return serverProjects;
+        // Asignar layoutType 'mindflow' a proyectos existentes que no lo tengan
+        const projectsWithLayout = serverProjects.map(p => ({
+          ...p,
+          layoutType: p.layoutType || 'mindflow'
+        }));
+        console.log('Proyectos cargados del servidor:', projectsWithLayout.length);
+        return projectsWithLayout;
       }
     } catch (error) {
       console.error('Error cargando proyectos del servidor:', error);

@@ -1126,22 +1126,151 @@ async def delete_project(
     project_id: str,
     current_user: dict = Depends(get_current_user)
 ):
-    """Eliminar un proyecto"""
-    result = await db.projects.delete_one({
+    """Soft delete - Mover proyecto a la papelera"""
+    username = current_user["username"]
+    
+    # Verificar que el proyecto existe y no está ya eliminado
+    project = await db.projects.find_one({
         "id": project_id,
-        "username": current_user["username"]
+        "username": username,
+        "$or": [
+            {"isDeleted": {"$exists": False}},
+            {"isDeleted": False}
+        ]
     })
     
-    if result.deleted_count == 0:
+    if not project:
         raise HTTPException(status_code=404, detail="Proyecto no encontrado")
     
-    # También eliminar recordatorios asociados al proyecto
-    await db.reminders.delete_many({
-        "project_id": project_id,
-        "username": current_user["username"]
+    # Soft delete: marcar como eliminado
+    now = datetime.now(timezone.utc).isoformat()
+    await db.projects.update_one(
+        {"id": project_id},
+        {
+            "$set": {
+                "isDeleted": True,
+                "deletedAt": now,
+                "isPinned": False  # Desanclar al enviar a papelera
+            }
+        }
+    )
+    
+    logger.info(f"Proyecto {project_id} enviado a papelera por {username}")
+    
+    return {"message": "Proyecto enviado a la papelera", "deletedAt": now}
+
+
+# ==========================================
+# TRASH (PAPELERA) ENDPOINTS
+# ==========================================
+
+class TrashProjectResponse(BaseModel):
+    """Respuesta para proyectos en papelera"""
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str
+    name: str
+    username: str
+    deletedAt: str
+    nodeCount: int = 0
+    layoutType: str = "mindflow"
+
+
+@api_router.get("/projects/trash", response_model=List[TrashProjectResponse])
+async def get_trash_projects(current_user: dict = Depends(get_current_user)):
+    """Obtener proyectos en la papelera"""
+    username = current_user["username"]
+    
+    projects = await db.projects.find(
+        {
+            "username": username,
+            "isDeleted": True
+        },
+        {"_id": 0}
+    ).sort("deletedAt", -1).to_list(100)
+    
+    # Formatear respuesta
+    trash_projects = []
+    for project in projects:
+        trash_projects.append({
+            "id": project["id"],
+            "name": project["name"],
+            "username": project["username"],
+            "deletedAt": project.get("deletedAt", ""),
+            "nodeCount": len(project.get("nodes", [])),
+            "layoutType": project.get("layoutType", "mindflow")
+        })
+    
+    return trash_projects
+
+
+@api_router.post("/projects/{project_id}/restore")
+async def restore_project(
+    project_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Restaurar un proyecto desde la papelera"""
+    username = current_user["username"]
+    
+    # Verificar que el proyecto existe y está en la papelera
+    project = await db.projects.find_one({
+        "id": project_id,
+        "username": username,
+        "isDeleted": True
     })
     
-    return {"message": "Proyecto eliminado"}
+    if not project:
+        raise HTTPException(status_code=404, detail="Proyecto no encontrado en la papelera")
+    
+    # Restaurar proyecto
+    now = datetime.now(timezone.utc).isoformat()
+    await db.projects.update_one(
+        {"id": project_id},
+        {
+            "$set": {
+                "isDeleted": False,
+                "deletedAt": None,
+                "updatedAt": now,
+                "lastActiveAt": now
+            }
+        }
+    )
+    
+    logger.info(f"Proyecto {project_id} restaurado por {username}")
+    
+    return {"message": "Proyecto restaurado exitosamente", "id": project_id}
+
+
+@api_router.delete("/projects/{project_id}/permanent")
+async def permanent_delete_project(
+    project_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Eliminar permanentemente un proyecto de la papelera"""
+    username = current_user["username"]
+    
+    # Verificar que el proyecto existe y está en la papelera
+    project = await db.projects.find_one({
+        "id": project_id,
+        "username": username,
+        "isDeleted": True
+    })
+    
+    if not project:
+        raise HTTPException(status_code=404, detail="Proyecto no encontrado en la papelera")
+    
+    # Eliminar permanentemente
+    await db.projects.delete_one({"id": project_id})
+    
+    # También eliminar recordatorios asociados
+    await db.reminders.delete_many({
+        "project_id": project_id,
+        "username": username
+    })
+    
+    logger.info(f"Proyecto {project_id} eliminado permanentemente por {username}")
+    
+    return {"message": "Proyecto eliminado permanentemente"}
 
 
 # ==========================================

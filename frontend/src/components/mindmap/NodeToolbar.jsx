@@ -141,12 +141,29 @@ const NodeToolbar = ({
         hasIndicator={hasIcon}
       />
       
-      {/* Imagen */}
+      <Divider />
+
+      {/* Alineación de texto */}
       <ToolbarButton 
-        icon={Image} 
-        label="Agregar imagen" 
-        onClick={onAddImage}
+        icon={AlignLeft} 
+        label="Alinear texto a la izquierda" 
+        onClick={onAlignTextLeft}
+        active={currentTextAlign === 'left'}
       />
+      <ToolbarButton 
+        icon={AlignCenter} 
+        label="Alinear texto al centro" 
+        onClick={onAlignTextCenter}
+        active={currentTextAlign === 'center'}
+      />
+      <ToolbarButton 
+        icon={AlignRight} 
+        label="Alinear texto a la derecha" 
+        onClick={onAlignTextRight}
+        active={currentTextAlign === 'right'}
+      />
+      
+      <Divider />
       
       {/* Enlace */}
       <ToolbarButton 

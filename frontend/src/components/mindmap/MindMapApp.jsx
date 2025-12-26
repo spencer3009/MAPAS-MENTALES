@@ -94,7 +94,9 @@ const MindMapApp = () => {
     // Alineación jerárquica automática (MindFlow)
     applyFullAutoAlignment,
     // Alineación MindTree (vertical)
-    applyFullMindTreeAlignment
+    applyFullMindTreeAlignment,
+    // Alineación MindHybrid (mixta)
+    applyFullMindHybridAlignment
   } = useNodes();
 
   const {

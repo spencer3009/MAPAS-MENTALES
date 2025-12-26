@@ -379,13 +379,13 @@ const NodeItem = memo(({
         <div 
           className="absolute flex items-center justify-center pointer-events-none z-30"
           style={{
-            left: node.x + (dimensions.width / 2) - 16,
-            top: node.y - 36,
+            left: node.x + (dimensions.width / 2) - 14,
+            top: node.y - 18,
           }}
         >
-          <div className="w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center border-2 border-green-500">
+          <div className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center border-2 border-green-500">
             <svg 
-              className="w-5 h-5 text-green-500" 
+              className="w-4 h-4 text-green-600" 
               fill="none" 
               stroke="currentColor" 
               viewBox="0 0 24 24"

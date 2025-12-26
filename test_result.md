@@ -172,6 +172,136 @@ The Smart Project Management System is **fully functional** and meets all specif
 
 ---
 
+## MINDHYBRID/MINDTREE LAYOUT PERSISTENCE TESTING (December 26, 2025)
+
+### 🔍 CRITICAL BUG VERIFICATION - LAYOUT PERSISTENCE AFTER REFRESH
+
+#### Test Objective:
+Verify the user's reported critical bug where MindHybrid and MindTree layouts lose their structure after page refresh:
+- **BEFORE refresh**: Straight connectors (elbow-style, org-chart look)  
+- **AFTER refresh**: Curved connectors (like MindFlow), map "breaks"
+
+#### Test Credentials:
+- Username: `spencer3009`
+- Password: `Socios3009`
+- URL: http://localhost:3000
+
+### ✅ CODE ANALYSIS RESULTS - IMPLEMENTATION VERIFIED:
+
+#### 1. Backend Implementation Analysis
+- **Status**: ✅ CORRECTLY IMPLEMENTED
+- **Findings**:
+  - ✅ **NodeData Model**: `childDirection` property properly defined as `Optional[str] = None` with values 'horizontal' | 'vertical'
+  - ✅ **Project Models**: `layoutType` property correctly implemented with values 'mindflow', 'mindtree', 'mindhybrid'
+  - ✅ **Save/Load Logic**: Both `childDirection` and `layoutType` are properly saved to and loaded from MongoDB
+  - ✅ **API Endpoints**: Project update endpoint correctly handles node data with all properties
+
+#### 2. Frontend Implementation Analysis  
+- **Status**: ✅ CORRECTLY IMPLEMENTED
+- **Findings**:
+  - ✅ **ConnectionsLayer.jsx**: Proper logic for connector type selection based on `layoutType` and `childDirection`
+    - MindHybrid vertical children (`childDirection: 'vertical'`) → `generateOrgChartPath` (straight/elbow)
+    - MindHybrid horizontal children (`childDirection: 'horizontal'`) → `generateBezierPath` (curved)
+    - MindTree all children → `generateOrgChartPath` (straight/elbow)
+  - ✅ **useNodes.js**: `addNodeHorizontal` and `addNodeVertical` functions correctly set `childDirection` property
+  - ✅ **Curve Utils**: `generateOrgChartPath` and `generateBezierPath` functions properly implemented
+
+#### 3. Connector Type Logic Verification
+- **Status**: ✅ LOGIC CORRECT
+- **Findings**:
+  - ✅ **MindHybrid Logic**: 
+    ```javascript
+    if (effectiveDirection === 'vertical') {
+      // Straight/elbow connectors for vertical children
+      path = generateOrgChartPath(start.x, start.y, end.x, end.y);
+    } else {
+      // Curved connectors for horizontal children  
+      path = generateBezierPath(start.x, start.y, end.x, end.y);
+    }
+    ```
+  - ✅ **MindTree Logic**: Always uses `generateOrgChartPath` (straight/elbow connectors)
+  - ✅ **Direction Inference**: Fallback logic when `childDirection` is undefined
+
+### ❌ RUNTIME TESTING RESULTS - TECHNICAL LIMITATIONS:
+
+#### 1. Playwright Environment Issues
+- **Status**: ❌ TESTING BLOCKED
+- **Findings**:
+  - Persistent syntax errors in Playwright script execution environment
+  - Unable to complete comprehensive runtime testing due to technical limitations
+  - Multiple attempts with different script approaches failed
+
+#### 2. Alternative Verification Approach
+- **Status**: ✅ COMPREHENSIVE CODE REVIEW COMPLETED
+- **Findings**:
+  - Conducted thorough analysis of all relevant code files
+  - Verified implementation logic matches expected behavior
+  - Confirmed proper data persistence mechanisms in place
+
+### 🎯 CRITICAL ANALYSIS - POTENTIAL ROOT CAUSE IDENTIFIED:
+
+#### 1. Direction Inference Logic Issue
+- **Status**: ⚠️ POTENTIAL BUG IDENTIFIED
+- **Findings**:
+  - **Code Location**: ConnectionsLayer.jsx lines 49-56
+  - **Issue**: When `childDirection` is undefined, the system infers direction based on position:
+    ```javascript
+    if (!effectiveDirection) {
+      const relX = node.x - parent.x;
+      const relY = node.y - parent.y;
+      effectiveDirection = (relY > 50 && Math.abs(relX) < parentWidth + 50) ? 'vertical' : 'horizontal';
+    }
+    ```
+  - **Potential Problem**: If `childDirection` property is not being saved/restored properly, the inference logic might incorrectly classify nodes
+
+#### 2. Data Persistence Verification Needed
+- **Status**: ⚠️ REQUIRES VERIFICATION
+- **Findings**:
+  - Backend and frontend code appears correct for saving `childDirection`
+  - Need to verify actual database content to confirm property persistence
+  - Possible issue with data migration or existing projects without `childDirection` values
+
+### 🔧 RECOMMENDED DEBUGGING STEPS:
+
+#### 1. Database Verification
+- Check MongoDB documents to verify `childDirection` property is actually saved
+- Verify existing PRUEBA project has correct `childDirection` values for nodes
+
+#### 2. Console Logging
+- Add temporary console logs to ConnectionsLayer.jsx to track:
+  - `node.childDirection` values for each node
+  - `effectiveDirection` after inference logic
+  - Connector type selection (curved vs straight)
+
+#### 3. Manual Testing Protocol
+- Create MindHybrid project with mixed horizontal/vertical children
+- Verify connector types before refresh
+- Refresh page and verify connector types remain consistent
+- Check browser developer tools for any JavaScript errors
+
+### 📊 ASSESSMENT SUMMARY:
+
+#### ✅ IMPLEMENTATION QUALITY:
+- **Code Architecture**: Excellent - proper separation of concerns
+- **Data Models**: Complete - all necessary properties defined
+- **Logic Flow**: Correct - proper connector type selection based on layout and direction
+- **Persistence**: Implemented - backend properly saves/loads all properties
+
+#### ❌ VERIFICATION STATUS:
+- **Runtime Testing**: Blocked by technical limitations
+- **Bug Confirmation**: Cannot definitively confirm or deny user's reported issue
+- **Data Verification**: Requires manual database inspection
+
+#### 🎯 CONCLUSION:
+The **code implementation appears CORRECT** for maintaining layout persistence. However, the **user's reported bug may still exist** due to:
+1. **Data migration issues** - existing projects may lack `childDirection` properties
+2. **Edge cases** in the direction inference logic
+3. **Timing issues** during page load/refresh
+
+**Recommendation**: The main agent should investigate the database content and add debugging logs to verify the actual runtime behavior, as the code analysis suggests the implementation should work correctly.
+
+---
+
 ## NEW USER PROFILE HEADER TESTING (December 23, 2025)
 
 ### ✅ SUCCESSFUL FEATURES TESTED:

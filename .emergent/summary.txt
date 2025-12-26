@@ -1,60 +1,52 @@
 <analysis>**original_problem_statement:**
-The user initially requested to fix the multi-selection functionality, specifically enabling  to select multiple individual nodes and ensuring there was clear visual feedback for the selected nodes.
-
-This request then expanded into a series of significant UI/UX enhancements and new features:
-1.  **UI Cleanup:** Remove the duplicate Change Color option from the right-click context menu to streamline it.
-2.  **Contextual Toolbar:** Make the floating node toolbar smarter by hiding the color palette icon for  nodes, as they don't have a background color.
-3.  **Bug Fix:** Correct the positioning of the right-click context menu, which was appearing at the top of the screen instead of next to the node.
-4.  **Toolbar Feature:** Overhaul the  to correctly differentiate between text alignment and node alignment, adding new, distinct icons for each action.
-5.  **Feature Consolidation:** Combine the Align Middle and Distribute Vertically actions into a single, more intuitive button on the .
-6.  **Major Feature - Auto-Align:** Implement a new Alineación automática (Auto-Align) mode, toggled by a switch in the header. When active, this mode should automatically manage the layout of nodes.
-7.  **Auto-Align V2 - Hierarchical Layout:** Evolve the auto-align feature to handle parent-child relationships, automatically arranging children vertically under their parent and centering the parent relative to its children.
-8.  **Auto-Align V3 - Block Layout:** The final and most complex request was to fix the auto-align feature so that it treats each parent and its descendants as a distinct block. These blocks should be stacked vertically without overlapping, and the layout should adjust in real-time as nodes are added or removed.
+The user initially requested to fix multi-selection and then introduced a series of major features. The latest requests from this session include:
+1.  **Enable Auto-Align by Default:** The Alineación automática switch should be on when the application loads.
+2.  **Toolbar Overhaul:** Replace the Image button on the floating node toolbar with three text-alignment buttons (left, center, right).
+3.  **Layout Templates (MindFlow & MindTree):** Implement a template system shown at project creation. MindFlow is the existing free-form layout. MindTree is a new vertical org-chart layout where children are distributed horizontally beneath the parent, connected by elbow-style connectors. This requirement went through several iterations and corrections from the user.
+4.  **Template Selector Icons:** Update the icons in the template selector to be more illustrative of the layouts.
+5.  **Mark as Completed Feature:** Add a new button to the node toolbar to toggle a completed state. When completed, the node's text should be struck-through, the entire node should have a 41% opacity, and a green checkmark icon should appear above it.
+6.  **MindHybrid Layout:** Introduce a third layout, MindHybrid, which allows each node to have two + buttons: one on the right to create horizontal children (like MindFlow) and one below to create vertical children (like MindTree), enabling mixed-structure maps.
 
 **PRODUCT REQUIREMENTS:**
-1.  **Multi-Select (Complete):** Users must be able to select multiple, specific nodes using . Selected nodes must have a clear visual indicator (a prominent blue ring).
-2.  **Context Menu Cleanup (Complete):** The Change Color option must be removed from the right-click context menu. This action is now exclusively in the floating node toolbar.
-3.  **Context-Aware Toolbar (Complete):** The floating  must not show the color palette icon when a  node is selected.
-4.  **Context Menu Positioning (Complete):** The right-click menu must appear next to the node it was opened on, not at the top of the screen.
-5.  **Alignment Toolbar Overhaul (Complete):** The  must have separate, clearly iconified buttons for aligning text within nodes versus aligning the nodes themselves on the canvas.
-6.  **Consolidated Distribution (Complete):** The action to align nodes to the vertical middle should also evenly distribute the vertical spacing between them. The separate distribute button was removed.
-7.  **Auto-Align Feature (In Progress):** An Alineación automática switch in the header should enable a smart layout mode.
-8.  **Hierarchical Auto-Align (In Progress):** When auto-align is on, child nodes of a parent should be automatically arranged, and the parent centered.
-9.  **Collision-Free Block Layout (In Progress):** The auto-align mode must prevent the children of one parent from overlapping with the children of another parent by treating each sub-tree as a self-contained layout block.
+1.  **Project Creation Flow:** When a user creates a new blank project, they must be presented with a mandatory template selector showing three options: MindFlow, MindTree, and MindHybrid.
+2.  **Layout Persistence:** The chosen layout type (, , ) must be saved with the project and be permanent. All existing projects should default to .
+3.  **MindFlow Layout:** Must function exactly as the original layout did, with free-form node placement and curved connectors.
+4.  **MindTree Layout:** Must render as a top-down org-chart. Children of a node must be distributed horizontally underneath it with uniform spacing. Connectors must be elbow-style (vertical drop, then horizontal branching).
+5.  **MindHybrid Layout:** When this layout is active, selecting a node should display two creation buttons: a  on the right and a  below it. The right button creates a horizontal child, and the bottom button creates a vertical child. Auto-alignment must handle both blocks of children (horizontal and vertical) without overlap.
+6.  **Mark as Completed:** A new checkmark icon button on the node toolbar will toggle the  state. If , the node must display with 41% opacity, have its text struck-through, and show a green check icon positioned just above the node's border.
+7.  **Text Alignment Toolbar:** The floating node toolbar must feature dedicated buttons for left, center, and right text alignment, replacing the old image button.
 
 **User's preferred language**: Spanish. The next agent MUST respond in Spanish.
 
 **what currently exists?**
-The application is a full-stack mind-mapping tool with a JWT authentication system that uses a hardcoded user list. The multi-selection system is now robust and visually clear. The UI has been significantly refined: the context menu is simplified, and toolbars (both floating and multi-select) are context-aware and have logically grouped, distinct icons for actions like text vs. node alignment.
-
-A major new feature, Alineación automática (Auto-Align), has been added with a toggle switch in the header. The initial implementation had race-condition bugs related to adding/deleting nodes, which were fixed. The feature was then extended to handle hierarchical layouts. The most recent work involved rewriting the core auto-align algorithm to implement a layout by blocks model to prevent sub-trees from overlapping.
+The application is a mind-mapping tool with JWT authentication against a hardcoded user list. Several major features were completed in this session:
+- **Default Auto-Align:** The auto-align feature is now enabled by default.
+- **Text Alignment Toolbar:** The node's floating toolbar has been updated to include text-alignment buttons, replacing the old image icon.
+- **Mark as Completed:** This feature is fully implemented. Nodes can be marked as complete, which applies a text strikethrough, 41% opacity, and a green check icon, all of which persists.
+- **Layout Template System:** A template selector modal now appears on project creation with three options (MindFlow, MindTree, MindHybrid). The MindFlow and MindTree layouts are implemented and functional. MindHybrid is partially implemented.
 
 **Last working item**:
-*   **Last item agent was working:** The agent was in the middle of a major refactor of the Auto-Align feature. The goal was to implement a layout by blocks algorithm to prevent the child nodes of different parent nodes from overlapping. The agent had just rewritten the hierarchical alignment logic in  to support this new block model but had not yet tested the changes.
+*   **Last item agent was working:** The agent was debugging the new MindHybrid layout. After implementing the logic, it was discovered that only the horizontal (right) add-node button was appearing, while the vertical (bottom) button was missing. The agent traced this to an incorrect X-coordinate calculation for the bottom button in the   hook within  and was about to correct the positioning logic.
 *   **Status:** IN PROGRESS
 *   **Agent Testing Done:** N
-*   **Which testing method agent to use?** Frontend testing agent. This is a complex visual layout feature. The test should involve creating multiple parent nodes, each with several children, activating Auto-Align, and then adding/deleting children from different parents to verify that the layout blocks adjust dynamically without any visual overlap.
+*   **Which testing method agent to use?** Frontend testing agent. The test should create a new MindHybrid project, verify both the right and bottom + buttons appear, and then test creating, deleting, and mixing horizontal and vertical child nodes to ensure the layout adjusts correctly without overlaps.
 *   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-*   **Issue 1: 'X' button in MultiSelectToolbar is not working (P2)**
-    *   **Description:** The 'X' button intended to clear the multi-selection does not work. The user can use the  key as a functional workaround.
-    *   **Attempted fixes:** The agent added  and , but the issue persisted. It was deprioritized in favor of new features.
+*   **Issue 1: MindHybrid bottom add button is not visible (P0)**
+    *   **Description:** In a MindHybrid project, only the right-side + button for adding horizontal nodes is visible. The bottom + button for vertical nodes is missing due to a miscalculation in its position.
+    *   **Status:** IN PROGRESS
+*   **Issue 2: 'X' button in MultiSelectToolbar is not working (P2)**
+    *   **Description:** The 'X' button intended to clear the multi-selection does not function. The  key serves as a workaround.
     *   **Status:** NOT STARTED
-    *   **Is recurring issue?** Y
-    *   **Should Test frontend/backend/both after fix?** Frontend
-
-*   **Issue 2: Mobile Layout Overlap (P2)**
-    *   **Description:** On smaller screens, the sidebar overlaps the main canvas when the user dropdown menu is open. This is a known issue from a previous session.
+*   **Issue 3: Mobile Layout Overlap (P2)**
+    *   **Description:** On small screens, the sidebar overlaps the main canvas when the user dropdown menu is open.
     *   **Status:** NOT STARTED
-    *   **Is recurring issue?** Y
-    *   **Should Test frontend/backend/both after fix?** Frontend (Screenshot tool)
 
 **In progress Task List**:
-*   **Task 1: Complete and Test the Block Layout Auto-Align Feature (P0)**
-    *   **Description:** The core logic for the advanced auto-alignment that prevents sub-tree overlaps has been written but is untested.
-    *   **Where to resume:** Test the new  function in . Create a complex mind map with multiple parents and children, enable Alineación automática, and verify that the layout adjusts correctly without overlaps when nodes are added, deleted, or moved.
-    *   **What will be achieved with this?** A smart, collision-free automatic layout system that makes organizing complex maps effortless.
+*   **Task 1: Complete and Test the MindHybrid Layout Feature (P0)**
+    *   **Where to resume:** In , inside the   hook, correct the X-coordinate calculation for . The current logic incorrectly subtracts an offset (), which should be removed to properly center the button.
+    *   **What will be achieved with this?** A fully functional MindHybrid layout where users can create both horizontal and vertical child nodes from the same parent, enabling complex, mixed-structure diagrams.
     *   **Status:** IN PROGRESS
     *   **Blocked on something:** None.
 
@@ -68,13 +60,12 @@ A major new feature, Alineación automática (Auto-Align), has been added with a
     *   **Mobile Layout Fix (P2):** Address the sidebar overlap issue on smaller screens.
 
 **Completed work in this session**
-- **Multi-Selection Fixed:** Correctly implemented  for selecting individual nodes and added a prominent blue ring for clear visual feedback.
-- **UI Streamlining:** Removed the redundant Change Color option from the context menu and fixed the menu's positioning.
-- **Context-Aware Toolbars:** The floating  now hides the color palette for  nodes.
-- **Alignment Toolbar Overhaul:** The  was completely redesigned with distinct icons to separate Text Alignment actions from Node Alignment actions, fixing a major UX issue.
-- **Distribute Vertically Feature:** Implemented and then consolidated the vertical distribution logic into the Align Middle button, simplifying the toolbar.
-- **Auto-Align Feature Implemented:** Added a header toggle switch to enable/disable automatic layout management.
-- **Auto-Align Bug Fixes:** Resolved critical race-condition bugs where adding or deleting nodes while auto-align was active would fail. The fix involved integrating the alignment logic directly into the  and  functions.
+- **Default Auto-Align:** The Alineación automática feature is now enabled by default upon loading.
+- **Text Alignment Toolbar:** The node toolbar was successfully updated to remove the image icon and add three functional text-alignment buttons.
+- **Layout Template System:** A modal for selecting a layout (MindFlow, MindTree, MindHybrid) was implemented and appears on new project creation.
+- **MindTree Layout:** A full org-chart layout was implemented, where children are distributed horizontally under the parent with elbow connectors. This was an iterative process with multiple corrections based on user feedback.
+- **Template Selector Icons:** New custom SVG icons were created and implemented for the layout selector, matching user specifications.
+- **Mark as Completed Feature:** A new button was added to the node toolbar to toggle a  state, which correctly applies text strikethrough, 41% opacity, and a green check icon to the node.
 
 **Earlier issues found/mentioned but not fixed**
 *   **Issue 1: 'X' button in MultiSelectToolbar:** The button to clear the multi-node selection does not work.  key is the workaround.
@@ -87,67 +78,70 @@ A major new feature, Alineación automática (Auto-Align), has been added with a
 
 
 **Key Technical Concepts**
-*   **React State & Hooks:** Extensive use of , , , and  to manage complex UI state, including selection, dragging, and the new auto-align mode.
-*   **DOM Measurement:** Using  and  to get the real rendered dimensions () of nodes, which is critical for accurate layout calculations.
-*   **Event Handling:** Careful management of , , and  to implement custom interactions and avoid duplicate event firing.
-*   **Race Condition Mitigation:** Fixed bugs in asynchronous state updates by moving follow-up logic (like auto-alignment) directly into the state-updating functions (, ) instead of relying on fragile external callbacks or .
-*   **Hierarchical & Recursive Algorithms:** Implemented a recursive function () to traverse the node tree and calculate block-based layouts to prevent visual overlaps.
+*   **Layout-Specific Logic:** The application logic is now heavily dependent on a  property stored with each project. This property dictates which alignment algorithms, connector styles, and UI elements (like add buttons) are used.
+*   **Conditional Rendering:** React components like  and  now use the  prop to conditionally render different UI elements and behaviors (e.g., showing one or two + buttons, choosing a connector path function).
+*   **State Management ():** The central  hook has been expanded to manage multiple layout algorithms (, ), node states (), and layout-specific creation functions (, ).
+*   **Custom SVG Components:** Custom inline SVG components were created for the template selector icons to match the user's design requirements.
 
 **key DB schema**
-*   **:**
-    *   : (string, new) Stores text alignment ('left', 'center', 'right').
-    *   , : (number) Updated by  on render to store actual dimensions for layout calculations.
+*   ** collection:**
+    *   : (string) Added to store the chosen layout ('mindflow', 'mindtree', or 'mindhybrid').
+*   ** array:**
+    *   : (boolean) Added to track the completed status of a node.
+    *   : (string) Added for MindHybrid to distinguish between 'horizontal' and 'vertical' children.
 
 **changes in tech stack**
 *   None.
 
 **All files of reference**
-*   : The most critical file. Contains the new, complex block layout algorithm for auto-alignment, as well as logic for text alignment and fixes for race conditions.
-*   : The main application component, now responsible for managing the state of the Auto-Align feature.
-*   : The main header toolbar, which now contains the new Alineación automática switch.
-*   : Was significantly overhauled to fix UX issues with alignment icons and functionality.
-*   : Modified to pass down handlers that trigger auto-alignment after node operations like adding, deleting, or dragging.
+*   : The core logic hub. Contains all algorithms for MindTree and MindHybrid layouts, and the state management for new features like .
+*   : Critical for the current task. Contains the logic for positioning and rendering the layout-specific add buttons (). The bug is located here.
+*   : The main orchestrator, managing the template selection flow and passing the correct layout-specific functions down the component tree.
+*   : The new modal component for choosing a project layout.
+*   : Handles the visual representation of the  state.
+*   : Contains the different SVG path generation functions for each layout's connectors.
+*   : Renders the connectors, now conditionally choosing the path style based on .
 
-**Areas that need refactoring**
-*   The  hook has become a god object for state management, handling everything from selection and CRUD to complex layout algorithms. It should be broken down into smaller, more focused hooks (e.g., , , ) to improve maintainability.
+**Areas that need refactoring**:
+*   The  hook continues to grow and is responsible for all state and business logic, including three distinct layout algorithms. It is a prime candidate for being broken down into smaller, more focused hooks (e.g., , , ).
 
 **key api endpoints**
-*   No new endpoints. The existing  endpoint is used to persist all changes.
+*   The existing  endpoint is used to persist all new node properties (, ) and project properties ().
 
 **Critical Info for New Agent**
-*   **Auto-Align is the Core Task:** The current primary task is to finalize the block layout auto-alignment feature. The logic has been rewritten but requires thorough testing.
-*   **Race Condition Pattern:** The agent fixed several bugs caused by race conditions. The successful pattern was to integrate follow-up logic (like re-aligning) *inside* the primary action's state update function (e.g., inside ), rather than calling it from an external  or callback. This is a crucial pattern to remember for future modifications.
-*   **UI/UX is Key:** The user is very particular about UI/UX details, such as icon design, tooltip text, and logical consistency. Pay close attention to these requirements.
+*   **The Bug is in :** The immediate task is to fix the position of the bottom + button for the MindHybrid layout. The error is in the   hook, specifically the calculation for .
+*   **Layouts are Distinct:** Be very careful to respect the  of the active project. All alignment logic, node creation, and rendering of UI elements like connectors and add buttons are conditional on this property.
+*   **Iterative Development:** The user provided significant corrections during the development of the MindTree layout. Be prepared for similar feedback and be ready to refactor based on new visual requirements.
 
 **documents and test_reports created in this job**
-*    was updated after testing the multi-select feature.
+*    was updated multiple times by the testing agent, reporting successes and failures for the various features implemented.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** When Automatic alignment is enabled, you cannot create child nodes. They disappear immediately.
-2.  **User:** Fix the Distribute vertically function on the MultiSelectToolbar so that the nodes have perfectly uniform vertical spacing between them.
-3.  **User:** The Auto-align mode has an issue where child nodes of different parents overlap. It should work like a smart layout by blocks, preventing any overlap.
-4.  **User:** When Automatic alignment is enabled, it is not possible to delete a node.
-5.  **User:** Extend the Automatic alignment mode to handle parent-child relationships. Child nodes should be distributed automatically, and the parent node should be repositioned to be centered with respect to its group of children.
-6.  **User:** New function: Automatic alignment. Add a switch in the header that allows enabling/disabling automatic node alignment. When ON, selected nodes should align automatically.
-7.  **User:** You were wrong, the icon that should do the work of aligning and distributing the nodes vertically (equalizes space between nodes) is the one in the image.
-8.  **User:** This icon should also do the job of aligning and distributing vertically, evening out the space between selected nodes.
-9.  **User:** Fix the behavior of the alignment buttons on the MultiSelectToolbar. Differentiate correctly between aligning nodes on the canvas and aligning the text within the nodes.
-10. **User:** I want to improve the behavior of the Automatic alignment mode in my mind map application. Currently, when there are several parent nodes that have children, and automatic alignment is activated, the child nodes of different parents overlap.
+1.  **User:** When the task is completed, it should look like this. Check that it has an opacity of 41, a check icon has been added, and the strikethrough has been maintained. (with image)
+2.  **User:** Lower the icon and put it closer to the text as it is in the image. (with image)
+3.  **User:** General objective: Implement a new layout type called MindHybrid... (detailed spec)
+4.  **User (plan confirmation):** Yes, children can be mixed. Hide the current + button in MindHybrid. The layout should be organized logically, not by creation order.
+5.  **Agent:** I will start implementing MindHybrid.
+6.  **Agent:** Step 2: Add functions in useNodes.js...
+7.  **Agent:** Step 3: Modify Canvas.jsx...
+8.  **Agent:** Step 4: Update MindMapApp.jsx...
+9.  **Agent:** Step 5: Update ConnectionsLayer...
+10. **User:** CONTINUE
 
 **Project Health Check:**
-*   **Broken:** The Auto-Align feature is in an untested, in-progress state. Its core logic was just rewritten.
-*   **Mocked:** User authentication remains a hardcoded dictionary in .
+*   **Broken:** The MindHybrid feature is incomplete and non-functional due to the missing add vertical button.
+*   **Mocked:** User authentication is still a hardcoded dictionary in .
 
 **3rd Party Integrations**
-*   **Lucide React:** Used for minimalist UI icons.
+*   **Lucide React:** Used for UI icons.
 *   **Twilio WhatsApp API:** For receiving incoming messages.
 *   **react-beautiful-dnd:** For project reordering.
 
 **Testing status**
-*   **Testing agent used after significant changes:** YES (once, for multi-select)
+*   **Testing agent used after significant changes:** YES
 *   **Troubleshoot agent used after agent stuck in loop:** NO
 *   **Test files created:** None
-*   **Known regressions:** None currently, but the in-progress Auto-Align feature could have regressions.
+*   **Known regressions:** The in-progress MindHybrid feature is not functional.
 
 **Credentials to test flow:**
 *   **User 1:**
@@ -155,5 +149,4 @@ A major new feature, Alineación automática (Auto-Align), has been added with a
     *   Password: 
 
 **What agent forgot to execute**
-*   The agent acknowledged but did not fix the non-functional 'X' button on the , as it was a lower priority than the features requested by the user.
-*   The mobile layout issue remains unaddressed.</analysis>
+*   The agent has not yet addressed the two pre-existing, lower-priority issues from the original handoff summary: the non-functional 'X' button on the  and the mobile layout overlap issue.</analysis>

@@ -568,7 +568,7 @@ The **NEW Node Type Selection Feature** is **completely functional** and exceeds
 ### Test Credentials:
 - Username: spencer3009
 - Password: Socios3009
-- URL: https://mindflow-86.preview.emergentagent.com
+- URL: https://node-alignment.preview.emergentagent.com
 
 ### ✅ TESTING RESULTS:
 
@@ -810,7 +810,7 @@ The **NEW Node Type Selection Feature** is **completely functional** and exceeds
 ### Testing Credentials:
 - Username: spencer3009
 - Password: Socios3009
-- URL: https://mindflow-86.preview.emergentagent.com
+- URL: https://node-alignment.preview.emergentagent.com
 
 ### ✅ TESTING RESULTS - COMPREHENSIVE SUCCESS:
 
@@ -962,7 +962,7 @@ Verify the new "Mark as Completed" (Strikethrough) feature in the Node Toolbar:
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- URL: https://mindflow-86.preview.emergentagent.com
+- URL: https://node-alignment.preview.emergentagent.com
 
 ### ✅ CODE IMPLEMENTATION ANALYSIS - EXCELLENT:
 
@@ -1649,7 +1649,7 @@ Verify the new layout template system works correctly:
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- URL: https://mindflow-86.preview.emergentagent.com
+- URL: https://node-alignment.preview.emergentagent.com
 
 ### ✅ TESTING RESULTS - COMPREHENSIVE SUCCESS:
 

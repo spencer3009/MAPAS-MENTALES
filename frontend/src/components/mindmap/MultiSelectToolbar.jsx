@@ -292,20 +292,6 @@ const MultiSelectToolbar = ({
       {/* Separador */}
       <div className="w-px h-6 bg-gray-200 mx-1" />
 
-      {/* Distribución */}
-      <div className="flex items-center gap-0.5 px-1">
-        <button
-          onClick={onDistributeVertically}
-          className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-          title="Distribuir verticalmente — iguala el espacio entre los nodos seleccionados"
-        >
-          <DistributeVerticalIcon size={18} className="text-gray-600" />
-        </button>
-      </div>
-
-      {/* Separador */}
-      <div className="w-px h-6 bg-gray-200 mx-1" />
-
       {/* Acciones */}
       <div className="flex items-center gap-0.5 px-1">
         <button

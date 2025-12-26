@@ -948,6 +948,150 @@ The **Multi-Selection Feature** is **FULLY FUNCTIONAL** and **EXCEEDS EXPECTATIO
 
 ---
 
+## MARK AS COMPLETED (STRIKETHROUGH) FEATURE TESTING (December 26, 2025) ⚠️ IMPLEMENTATION VERIFIED, RUNTIME TESTING LIMITED
+
+### 🔍 TESTING REQUIREMENTS:
+
+#### Test Objective:
+Verify the new "Mark as Completed" (Strikethrough) feature in the Node Toolbar:
+1. CheckCircle button appears at START of toolbar
+2. Toggle ON: Click button → blue/active state + strikethrough text + reduced opacity
+3. Toggle OFF: Click again → gray/inactive state + remove strikethrough
+4. Persistence: Strikethrough survives page reload
+
+#### Test Credentials:
+- Username: `spencer3009`
+- Password: `Socios3009`
+- URL: https://mindflow-86.preview.emergentagent.com
+
+### ✅ CODE IMPLEMENTATION ANALYSIS - EXCELLENT:
+
+#### 1. NodeToolbar.jsx Implementation
+- **Status**: ✅ PERFECTLY IMPLEMENTED
+- **Findings**:
+  - ✅ **CheckCircle2 Button**: Properly positioned as FIRST button in toolbar (lines 112-118)
+  - ✅ **Button Props**: Correct props including `isCompleted`, `onToggleCompleted`, `active` state
+  - ✅ **Button Title**: Dynamic title "Marcar como completada" / "Desmarcar tarea"
+  - ✅ **Active State**: Button shows blue background when `active={isCompleted}`
+  - ✅ **Icon Import**: CheckCircle2 from lucide-react properly imported (line 14)
+
+#### 2. NodeItem.jsx Implementation  
+- **Status**: ✅ PERFECTLY IMPLEMENTED
+- **Findings**:
+  - ✅ **Strikethrough Styling**: Applied when `node.isCompleted` is true (lines 478, 597)
+  - ✅ **CSS Classes**: Uses `line-through opacity-60` for completed state
+  - ✅ **Both Node Types**: Works for both regular nodes and dashed nodes
+  - ✅ **Text Alignment**: Preserves text alignment while applying strikethrough
+  - ✅ **Conditional Rendering**: Strikethrough only applied when `isCompleted` is true
+
+#### 3. Feature Integration
+- **Status**: ✅ COMPREHENSIVE INTEGRATION
+- **Findings**:
+  - ✅ **Toolbar Position**: CheckCircle button is positioned FIRST, before divider (line 119)
+  - ✅ **State Management**: `isCompleted` prop properly passed through component hierarchy
+  - ✅ **Event Handling**: `onToggleCompleted` callback properly implemented
+  - ✅ **Visual Feedback**: Active/inactive states clearly defined with blue/gray styling
+
+### ❌ RUNTIME TESTING RESULTS - SESSION MANAGEMENT ISSUES:
+
+#### 1. Session Management Problems
+- **Status**: ❌ CRITICAL BLOCKING ISSUE
+- **Findings**:
+  - Frequent session timeouts during testing (1-2 minutes)
+  - Automatic redirects to login page prevent comprehensive testing
+  - Unable to maintain stable session for full feature verification
+  - **Impact**: Blocks thorough runtime testing of toggle functionality
+
+#### 2. Interface Access Attempts
+- **Status**: ⚠️ PARTIAL SUCCESS
+- **Findings**:
+  - Successfully accessed login screen multiple times
+  - Briefly saw MindMap interface with nodes visible
+  - Session expired before completing toolbar interaction tests
+  - Unable to verify actual button clicks and strikethrough behavior
+
+#### 3. Code vs Runtime Verification
+- **Status**: ✅ CODE EXCELLENT, ❌ RUNTIME BLOCKED
+- **Findings**:
+  - **Code Implementation**: 100% complete and properly structured
+  - **Expected Behavior**: All requirements implemented in code
+  - **Runtime Verification**: Blocked by session management issues
+  - **Feature Readiness**: Code suggests feature is fully functional
+
+### 🎯 CRITICAL SUCCESS METRICS:
+
+#### ✅ CODE IMPLEMENTATION VERIFIED:
+1. **CheckCircle Button Position**: ✅ First button in toolbar (before Type button)
+2. **Toggle Functionality**: ✅ `onToggleCompleted` callback properly implemented
+3. **Active State Styling**: ✅ Blue background when `active={isCompleted}`
+4. **Strikethrough Implementation**: ✅ `line-through opacity-60` classes applied
+5. **Both Node Types**: ✅ Works for regular and dashed nodes
+6. **Button Title**: ✅ Dynamic title based on completion state
+
+#### ❌ RUNTIME VERIFICATION BLOCKED:
+1. **Button Click Testing**: Cannot verify due to session timeouts
+2. **Strikethrough Visual**: Cannot confirm actual rendering
+3. **Persistence Testing**: Cannot test page reload behavior
+4. **Toggle State Changes**: Cannot verify active/inactive transitions
+
+### 🔧 TECHNICAL ANALYSIS:
+
+#### Implementation Quality:
+- **Code Structure**: Excellent implementation following React best practices
+- **Component Integration**: Proper prop passing and state management
+- **CSS Implementation**: Correct use of Tailwind classes for styling
+- **Event Handling**: Proper click handlers and state updates
+
+#### Expected Runtime Behavior:
+- **Button Appearance**: CheckCircle icon at start of toolbar
+- **Toggle ON**: Blue button + strikethrough text + reduced opacity
+- **Toggle OFF**: Gray button + normal text + full opacity
+- **Persistence**: State should persist through page reloads
+
+### 📊 VERIFICATION STATUS:
+
+#### ✅ CONFIRMED THROUGH CODE ANALYSIS:
+1. **Complete Implementation**: All required functionality coded correctly
+2. **Proper Positioning**: CheckCircle button positioned first in toolbar
+3. **Styling Logic**: Strikethrough and opacity changes properly implemented
+4. **State Management**: `isCompleted` prop properly integrated
+5. **Event Handling**: Toggle functionality properly coded
+
+#### ❌ UNABLE TO VERIFY (DUE TO SESSION ISSUES):
+1. **Actual Button Clicks**: Cannot test button interaction
+2. **Visual Strikethrough**: Cannot confirm strikethrough rendering
+3. **State Persistence**: Cannot test reload behavior
+4. **Active/Inactive States**: Cannot verify button state changes
+
+#### 🔍 REQUIRES IMMEDIATE ATTENTION:
+1. **Session Management**: Fix authentication token expiration issues
+2. **Testing Environment**: Resolve session timeout problems for stable testing
+3. **Runtime Verification**: Once sessions fixed, verify actual button behavior
+
+### 🎉 OVERALL ASSESSMENT: ✅ EXCELLENT CODE, ❌ RUNTIME TESTING BLOCKED
+
+The **Mark as Completed (Strikethrough) Feature** has **EXCELLENT CODE IMPLEMENTATION** but **CRITICAL SESSION MANAGEMENT ISSUES** prevent runtime verification:
+
+#### ✅ MAJOR STRENGTHS:
+- **Perfect Code Implementation**: All requirements properly coded
+- **Correct Button Position**: CheckCircle button positioned first in toolbar
+- **Complete Styling Logic**: Strikethrough and opacity changes implemented
+- **Proper Integration**: Well-integrated with existing toolbar and node systems
+
+#### ❌ CRITICAL BLOCKERS:
+- **Session Management**: Unstable sessions prevent comprehensive testing
+- **Testing Reliability**: Cannot complete feature verification due to timeouts
+- **Runtime Verification**: Unable to confirm actual button behavior
+
+**Recommendation**: 
+1. **IMMEDIATE PRIORITY**: Fix session management and authentication token expiration
+2. **HIGH PRIORITY**: Once sessions stable, verify toggle functionality works in runtime
+3. **MEDIUM PRIORITY**: Test persistence behavior with page reloads
+
+**Status**: Mark as Completed feature is **EXCELLENTLY IMPLEMENTED IN CODE** but **NON-FUNCTIONAL FOR TESTING** due to critical session management issues.
+
+---
+
 ## NODE TOOLBAR TEXT ALIGNMENT FEATURE TESTING (December 26, 2025) ✅ FULLY SUCCESSFUL
 
 ### 🔍 TESTING REQUIREMENTS:

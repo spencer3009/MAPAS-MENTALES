@@ -162,14 +162,10 @@ const Canvas = ({
       console.error('[Canvas] handleDeleteWithAutoAlign: onDeleteNode es undefined');
       return;
     }
-    console.log('[Canvas] Eliminando nodo:', nodeId);
-    onDeleteNode(nodeId);
-    // Aplicar alineación jerárquica automática si está habilitada
-    // Usar un delay mayor para dar tiempo a que el estado se actualice
-    if (autoAlignEnabled && onAutoAlign) {
-      setTimeout(() => onAutoAlign(), 300);
-    }
-  }, [onDeleteNode, autoAlignEnabled, onAutoAlign]);
+    console.log('[Canvas] Eliminando nodo:', nodeId, 'autoAlign:', autoAlignEnabled);
+    // Pasar el flag de autoAlign para que la eliminación incluya la alineación
+    onDeleteNode(nodeId, autoAlignEnabled);
+  }, [onDeleteNode, autoAlignEnabled]);
 
   // Handlers de la toolbar
   const handleToolbarEdit = useCallback(() => {

@@ -50,15 +50,6 @@ const ConnectionsLayer = memo(({
           start = getNodeOutputPointOrgChart(parent, parentWidth, parentHeight);
           end = getNodeInputPointOrgChart(node, nodeWidth);
           path = generateOrgChartPath(start.x, start.y, end.x, end.y);
-        } else if (node.childDirection === 'vertical-from-line') {
-          // Hijo que cuelga de la línea horizontal entre hermanos
-          // El conector va desde el punto medio de la línea hacia abajo
-          // Por ahora, conectamos desde el lado derecho del padre hacia abajo
-          const midX = node.x + nodeWidth / 2;
-          start = { x: midX, y: parent.y + parentHeight / 2 };
-          end = getNodeInputPointOrgChart(node, nodeWidth);
-          // Línea vertical simple
-          path = `M ${start.x} ${start.y} L ${end.x} ${end.y}`;
         } else {
           // Hijo horizontal (o sin dirección): conector curvo (horizontal)
           start = getNodeOutputPoint(parent, parentWidth, parentHeight);

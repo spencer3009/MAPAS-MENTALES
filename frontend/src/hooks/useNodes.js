@@ -128,6 +128,7 @@ export const useNodes = () => {
         body: JSON.stringify({
           id: project.id,
           name: project.name,
+          layoutType: project.layoutType || 'mindflow', // Por defecto mindflow
           nodes: project.nodes
         })
       });

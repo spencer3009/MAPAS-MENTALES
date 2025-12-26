@@ -176,10 +176,8 @@ const MultiSelectToolbar = ({
   onAlignNodesCenter,
   onAlignNodesRight,
   onAlignNodesTop,
-  onAlignNodesMiddle,
+  onAlignNodesMiddle,  // Este también distribuye verticalmente
   onAlignNodesBottom,
-  // Distribución
-  onDistributeVertically,
   // Acciones
   onDeleteSelected,
   onDuplicateSelected,

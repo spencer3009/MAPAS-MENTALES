@@ -157,7 +157,7 @@ const LayoutTemplateSelector = ({ isOpen, onSelect, onClose }) => {
                     flex items-center justify-center mb-4
                     group-hover:scale-105 transition-transform duration-200
                   `}>
-                    <Icon size={32} strokeWidth={1.5} />
+                    <Icon className="w-10 h-10" />
                   </div>
 
                   {/* Title */}

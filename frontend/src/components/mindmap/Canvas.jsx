@@ -192,6 +192,13 @@ const Canvas = ({
     }
   }, [selectedNodeId]);
 
+  // Handler para toggle completado (texto tachado)
+  const handleToolbarToggleCompleted = useCallback(() => {
+    if (selectedNodeId && onToggleNodeCompleted) {
+      onToggleNodeCompleted(selectedNodeId);
+    }
+  }, [selectedNodeId, onToggleNodeCompleted]);
+
   const handleToolbarComment = useCallback(() => {
     if (selectedNodeId) {
       setCommentPopover({ isOpen: true, nodeId: selectedNodeId });

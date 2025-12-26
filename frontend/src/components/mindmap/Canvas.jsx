@@ -593,6 +593,7 @@ const Canvas = ({
           nodeType={selectedNode?.nodeType || 'default'}
           currentColor={selectedNode?.color}
           currentTextAlign={selectedNode?.textAlign || 'center'}
+          isCompleted={!!selectedNode?.isCompleted}
           hasComment={!!selectedNode?.comment}
           hasIcon={!!selectedNode?.icon}
           hasLinks={selectedNode?.links?.length > 0}
@@ -603,6 +604,7 @@ const Canvas = ({
           reminderPanelOpen={styleSidebarOpen && sidebarTab === 'reminders'}
           onEdit={handleToolbarEdit}
           onStyle={handleToolbarStyle}
+          onToggleCompleted={handleToolbarToggleCompleted}
           onComment={handleToolbarComment}
           onAlignTextLeft={handleToolbarAlignTextLeft}
           onAlignTextCenter={handleToolbarAlignTextCenter}

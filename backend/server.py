@@ -955,6 +955,10 @@ class NodeData(BaseModel):
     nodeType: Optional[str] = "default"  # 'default' | 'dashed_text' - Tipo de nodo para persistencia (también acepta 'dashed' legacy)
     dashedLineWidth: Optional[int] = 3  # Grosor de la línea para nodos dashed_text (2-5px)
     hasReminder: Optional[bool] = False  # Indicador de recordatorio
+    # Campos para MindHybrid/MindTree layouts
+    childDirection: Optional[str] = None  # 'horizontal' | 'vertical' - Dirección del nodo hijo
+    isCompleted: Optional[bool] = False  # Estado de completado (tachado + opacidad)
+    textAlign: Optional[str] = None  # 'left' | 'center' | 'right' - Alineación del texto
 
 class ProjectCreate(BaseModel):
     id: Optional[str] = None

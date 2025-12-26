@@ -699,6 +699,7 @@ export const useNodes = () => {
   }, [nodes, selectedNodeIds, activeProjectId, pushToHistory, getSelectedNodes]);
 
   // Distribuir nodos verticalmente (espaciado uniforme)
+  // El espacio entre el bottom de un nodo y el top del siguiente será siempre el mismo
   const distributeNodesVertically = useCallback(() => {
     const selectedNodes = getSelectedNodes();
     
@@ -709,48 +710,41 @@ export const useNodes = () => {
 
     console.log('[distributeNodesVertically] Distribuyendo', selectedNodes.length, 'nodos verticalmente');
 
-    // Ordenar nodos por posición Y (de arriba hacia abajo)
+    // 1. Ordenar nodos por posición Y (de arriba hacia abajo)
     const sortedNodes = [...selectedNodes].sort((a, b) => a.y - b.y);
     
-    // Obtener el nodo más alto (primer punto) y el más bajo (último punto)
-    const topNode = sortedNodes[0];
-    const bottomNode = sortedNodes[sortedNodes.length - 1];
+    // 2. Obtener las referencias del primer y último nodo
+    const firstNode = sortedNodes[0];
+    const lastNode = sortedNodes[sortedNodes.length - 1];
     
-    // Calcular la altura total del área de distribución
-    const topY = topNode.y;
-    const bottomY = bottomNode.y + (bottomNode.height || 64);
+    // 3. Calcular topY (top del primer nodo) y bottomY (bottom del último nodo)
+    const topY = firstNode.y;
+    const bottomY = lastNode.y + (lastNode.height || 64);
     
-    // Calcular la suma de las alturas de todos los nodos
-    const totalNodesHeight = sortedNodes.reduce((sum, n) => sum + (n.height || 64), 0);
+    // 4. Calcular la suma de las alturas de todos los nodos
+    const totalHeights = sortedNodes.reduce((sum, n) => sum + (n.height || 64), 0);
     
-    // Calcular el espaciado mínimo deseado (al menos 20px entre nodos)
-    const minSpacing = 20;
-    const minTotalHeight = totalNodesHeight + (minSpacing * (sortedNodes.length - 1));
+    // 5. Calcular el espacio uniforme entre nodos
+    // espacio = (bottomY - topY - totalHeights) / (N - 1)
+    const N = sortedNodes.length;
+    const espacio = (bottomY - topY - totalHeights) / (N - 1);
     
-    // Si el área actual es más pequeña que el mínimo necesario, expandirla
-    let actualTotalHeight = bottomY - topY;
-    if (actualTotalHeight < minTotalHeight) {
-      actualTotalHeight = minTotalHeight;
-    }
-    
-    // Calcular el espacio disponible para distribuir
-    const availableSpace = actualTotalHeight - totalNodesHeight;
-    
-    // Calcular el espaciado uniforme entre nodos
-    const spacing = Math.max(minSpacing, availableSpace / (sortedNodes.length - 1));
-    
-    console.log('[distributeNodesVertically] Espacio disponible:', availableSpace, 'Espaciado:', spacing);
+    console.log('[distributeNodesVertically] topY:', topY, 'bottomY:', bottomY);
+    console.log('[distributeNodesVertically] totalHeights:', totalHeights, 'N:', N);
+    console.log('[distributeNodesVertically] Espacio uniforme calculado:', espacio);
 
-    // Crear mapa de nuevas posiciones Y
+    // 6. Reposicionar cada nodo
+    // El primer nodo se queda donde está (currentY = topY)
+    // Para cada nodo: asignar node.y = currentY, luego currentY += node.height + espacio
     const newPositions = new Map();
     let currentY = topY;
     
-    sortedNodes.forEach((node, index) => {
+    sortedNodes.forEach((node) => {
       newPositions.set(node.id, currentY);
-      currentY += (node.height || 64) + spacing;
+      currentY += (node.height || 64) + espacio;
     });
 
-    // Aplicar las nuevas posiciones (solo Y, X no cambia)
+    // 7. Aplicar las nuevas posiciones (solo Y, X no cambia)
     const newNodes = nodes.map(n => {
       if (newPositions.has(n.id)) {
         return { ...n, y: newPositions.get(n.id) };

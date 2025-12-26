@@ -526,6 +526,8 @@ const MindMapApp = () => {
           user={user}
           onOpenProfile={() => setShowProfileModal(true)}
           onLogout={logout}
+          autoAlignEnabled={autoAlignEnabled}
+          onToggleAutoAlign={handleToggleAutoAlign}
         />
 
         {/* Canvas y Sidebar derecho */}

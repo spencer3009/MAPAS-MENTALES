@@ -1859,6 +1859,10 @@ export const useNodes = () => {
     distributeNodesHorizontally,
     moveSelectedNodes,
     
+    // Alineación jerárquica automática
+    autoAlignHierarchy,
+    applyFullAutoAlignment,
+    
     // Compatibilidad
     resetToDefault,
     clearAll,

@@ -122,14 +122,27 @@ const ConnectionsLayer = memo(({
       const parent = nodes.find(n => n.id === parentId);
       if (!parent) return;
 
+      const parentCenterX = parent.x + (parent.width || DEFAULT_NODE_WIDTH) / 2;
+      const parentBottom = parent.y + (parent.height || DEFAULT_NODE_HEIGHT);
+
       // Filtrar según el tipo de layout
       let verticalChildren;
       if (layoutType === 'mindtree') {
         // En MindTree, todos los hijos son "verticales"
         verticalChildren = children;
       } else {
-        // En MindHybrid, solo hijos con childDirection: 'vertical'
-        verticalChildren = children.filter(c => c.childDirection === 'vertical');
+        // En MindHybrid, hijos con childDirection: 'vertical' O inferido por posición
+        verticalChildren = children.filter(c => {
+          // Si tiene childDirection definido, usar eso
+          if (c.childDirection === 'vertical') return true;
+          if (c.childDirection === 'horizontal') return false;
+          
+          // Si no tiene childDirection, inferir por posición
+          // Un hijo es "vertical" si está más abajo que a la derecha del padre
+          const relX = c.x - parent.x;
+          const relY = c.y - parent.y;
+          return relY > 50 && Math.abs(relX) < 200; // Más abajo y no muy a la derecha
+        });
       }
 
       // Necesitamos al menos 2 hijos para formar una línea horizontal
@@ -142,7 +155,6 @@ const ConnectionsLayer = memo(({
 
       // Calcular la posición de la línea horizontal
       // Está a medio camino entre el borde inferior del padre y el borde superior de los hijos
-      const parentBottom = parent.y + (parent.height || DEFAULT_NODE_HEIGHT);
       const childTop = leftChild.y;
       const lineY = (parentBottom + childTop) / 2;
 

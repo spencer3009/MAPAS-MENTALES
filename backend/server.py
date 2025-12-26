@@ -959,6 +959,9 @@ class NodeData(BaseModel):
     childDirection: Optional[str] = None  # 'horizontal' | 'vertical' - Dirección del nodo hijo
     isCompleted: Optional[bool] = False  # Estado de completado (tachado + opacidad)
     textAlign: Optional[str] = None  # 'left' | 'center' | 'right' - Alineación del texto
+    # Campos para nodos creados desde conectores horizontales en MindHybrid
+    connectorParentId: Optional[str] = None  # ID del padre del conector horizontal
+    connectorTargetId: Optional[str] = None  # ID del hijo horizontal del conector
 
 class ProjectCreate(BaseModel):
     id: Optional[str] = None

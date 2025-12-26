@@ -576,6 +576,8 @@ const MindMapApp = () => {
             onOpenContextMenu={openContextMenu}
             onCloseContextMenu={closeContextMenu}
             onAddChildNode={addNode}
+            onAddNodeHorizontal={addNodeHorizontal}
+            onAddNodeVertical={addNodeVertical}
             onDuplicateNode={duplicateNode}
             onDeleteNode={deleteNode}
             onChangeNodeColor={updateNodeColor}

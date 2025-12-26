@@ -526,8 +526,6 @@ const MindMapApp = () => {
             onAlignNodesTop={alignNodesTop}
             onAlignNodesMiddle={alignNodesMiddle}
             onAlignNodesBottom={alignNodesBottom}
-            // Distribución
-            onDistributeVertically={distributeNodesVertically}
             // Acciones
             onDeleteSelected={deleteSelectedNodes}
             onDuplicateSelected={duplicateSelectedNodes}

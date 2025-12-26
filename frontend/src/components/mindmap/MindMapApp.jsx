@@ -81,7 +81,9 @@ const MindMapApp = () => {
     // Distribución
     distributeNodesVertically,
     distributeNodesHorizontally,
-    moveSelectedNodes
+    moveSelectedNodes,
+    // Alineación jerárquica automática
+    applyFullAutoAlignment
   } = useNodes();
 
   const {

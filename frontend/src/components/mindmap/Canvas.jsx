@@ -149,6 +149,20 @@ const Canvas = ({
     }
   }, [selectedNodeId, controlPositions.addButton]);
 
+  // Handler para agregar nodo HORIZONTAL (MindHybrid) - botón derecho
+  const handleAddChildHorizontal = useCallback(() => {
+    if (selectedNodeId && onAddNodeHorizontal) {
+      onAddNodeHorizontal(selectedNodeId, { autoAlign: autoAlignEnabled });
+    }
+  }, [selectedNodeId, onAddNodeHorizontal, autoAlignEnabled]);
+
+  // Handler para agregar nodo VERTICAL (MindHybrid) - botón inferior
+  const handleAddChildVertical = useCallback(() => {
+    if (selectedNodeId && onAddNodeVertical) {
+      onAddNodeVertical(selectedNodeId, { autoAlign: autoAlignEnabled });
+    }
+  }, [selectedNodeId, onAddNodeVertical, autoAlignEnabled]);
+
   // Handler para cuando se selecciona un tipo de nodo
   const handleNodeTypeSelect = useCallback((nodeType) => {
     if (nodeTypeSelector.parentId) {

@@ -21,10 +21,41 @@ const ContextMenu = ({
   onClose
 }) => {
   const [showLineWidthMenu, setShowLineWidthMenu] = useState(false);
+  const menuRef = useRef(null);
+  const [adjustedPosition, setAdjustedPosition] = useState({ x: 0, y: 0 });
   
   if (!position) return null;
 
   const isDashedNode = currentNodeType === 'dashed' || currentNodeType === 'dashed_text';
+
+  // Ajustar posición del menú para que no salga de la pantalla
+  useEffect(() => {
+    if (menuRef.current && position) {
+      const menu = menuRef.current;
+      const menuRect = menu.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      
+      let newX = position.x;
+      let newY = position.y;
+      
+      // Ajustar si se sale por la derecha
+      if (position.x + menuRect.width > viewportWidth - 20) {
+        newX = position.x - menuRect.width;
+      }
+      
+      // Ajustar si se sale por abajo
+      if (position.y + menuRect.height > viewportHeight - 20) {
+        newY = position.y - menuRect.height;
+      }
+      
+      // Asegurar que no sea menor que 0
+      newX = Math.max(10, newX);
+      newY = Math.max(10, newY);
+      
+      setAdjustedPosition({ x: newX, y: newY });
+    }
+  }, [position]);
 
   const handleAction = (action) => {
     action();

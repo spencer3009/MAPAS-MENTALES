@@ -9,10 +9,36 @@ import {
   Image,
   ZoomIn,
   ZoomOut,
-  RotateCcw
+  RotateCcw,
+  AlignLeft
 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import UserDropdown from './UserDropdown';
+
+// Componente Switch para toggle
+const ToggleSwitch = ({ enabled, onChange, label }) => (
+  <div className="flex items-center gap-2">
+    <button
+      onClick={() => onChange(!enabled)}
+      className={`
+        relative w-11 h-6 rounded-full transition-colors duration-200
+        ${enabled ? 'bg-blue-500' : 'bg-gray-300'}
+      `}
+      title={label}
+    >
+      <span
+        className={`
+          absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow
+          transition-transform duration-200
+          ${enabled ? 'translate-x-5' : 'translate-x-0'}
+        `}
+      />
+    </button>
+    <span className="text-xs text-gray-600 font-medium hidden lg:inline">
+      {label}
+    </span>
+  </div>
+);
 
 const ToolbarButton = ({ icon, text, onClick, disabled, variant = 'default' }) => {
   const baseStyles = `

@@ -1123,6 +1123,24 @@ export const useNodes = () => {
     ));
   }, [activeProjectId, nodes, pushToHistory]);
 
+  // Actualizar solo dimensiones específicas del nodo (sin guardar en historial)
+  const updateNodeDimensions = useCallback((id, dimensions) => {
+    setProjects(prev => prev.map(p => {
+      if (p.id !== activeProjectId) return p;
+      
+      const newNodes = p.nodes.map(n => {
+        if (n.id !== id) return n;
+        return { 
+          ...n, 
+          ...(dimensions.width !== undefined && { width: dimensions.width }),
+          ...(dimensions.height !== undefined && { height: dimensions.height })
+        };
+      });
+      
+      return { ...p, nodes: newNodes };
+    }));
+  }, [activeProjectId]);
+
   // Actualizar icono del nodo
   const updateNodeIcon = useCallback((id, icon) => {
     const newNodes = nodes.map(n => {

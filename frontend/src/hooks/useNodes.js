@@ -984,8 +984,8 @@ export const useNodes = () => {
   const MINDTREE_PARENT_CHILD_GAP = 60; // Espacio entre padre y primer hijo
   const MINDTREE_LEVEL_INDENT = 40; // Indentación horizontal por nivel
 
-  // Calcular la altura total de un bloque (nodo + todos sus descendientes)
-  const calculateBlockHeight = useCallback((nodeId, allNodes) => {
+  // Calcular la altura total de un bloque organigrama (nodo + todos sus descendientes)
+  const calculateOrgChartBlockHeight = useCallback((nodeId, allNodes) => {
     const node = allNodes.find(n => n.id === nodeId);
     if (!node) return 0;
 
@@ -999,7 +999,7 @@ export const useNodes = () => {
     // Altura total = altura del padre + gap + suma de alturas de hijos con espaciado
     let childrenTotalHeight = 0;
     children.forEach((child, index) => {
-      childrenTotalHeight += calculateBlockHeight(child.id, allNodes);
+      childrenTotalHeight += calculateOrgChartBlockHeight(child.id, allNodes);
       if (index < children.length - 1) {
         childrenTotalHeight += MINDTREE_CHILD_VERTICAL_SPACING;
       }

@@ -1738,9 +1738,9 @@ export const useNodes = () => {
     return newId;
   }, [activeProjectId, pushToHistory]);
 
-  // Agregar nodo desde una línea horizontal compartida (entre hermanos horizontales)
-  // Este nodo "cuelga" del punto medio de la línea y se distribuye horizontalmente debajo
-  const addNodeFromLine = useCallback((parentId, siblingIds, options = {}) => {
+  // Agregar nodo desde una línea horizontal compartida (entre hermanos verticales)
+  // Este nodo se agrega como un nuevo hijo vertical del padre
+  const addNodeFromLine = useCallback((parentId, childIds, options = {}) => {
     if (!parentId) return null;
     
     const newId = crypto.randomUUID();
@@ -1753,76 +1753,52 @@ export const useNodes = () => {
       const parent = currentNodes.find(n => n.id === parentId);
       if (!parent) return prev;
       
-      // Obtener los hermanos horizontales para calcular el punto medio
-      const horizontalSiblings = currentNodes.filter(n => 
-        siblingIds.includes(n.id) && n.childDirection === 'horizontal'
+      // Obtener los hijos verticales existentes (los que forman la línea horizontal)
+      const existingVerticalChildren = currentNodes.filter(n => 
+        childIds.includes(n.id) || 
+        (n.parentId === parentId && (n.childDirection === 'vertical' || (!n.childDirection && project.layoutType === 'mindtree')))
       );
       
-      if (horizontalSiblings.length < 2) {
-        console.log('[MindHybrid] Se necesitan al menos 2 hermanos horizontales');
+      if (existingVerticalChildren.length < 2) {
+        console.log('[AddNodeFromLine] Se necesitan al menos 2 hijos verticales');
         return prev;
       }
       
-      // Encontrar nodos existentes que cuelgan de esta línea
-      const existingLineChildren = currentNodes.filter(n => 
-        n.parentId === parentId && n.childDirection === 'vertical-from-line'
-      );
+      // Ordenar por X para encontrar la posición
+      const sortedByX = [...existingVerticalChildren].sort((a, b) => a.x - b.x);
+      const leftChild = sortedByX[0];
+      const rightChild = sortedByX[sortedByX.length - 1];
       
       // Calcular posición del nuevo nodo
-      // X: en el centro de los hermanos horizontales, distribuido con otros hijos de línea
-      const sortedSiblings = [...horizontalSiblings].sort((a, b) => a.y - b.y);
-      const firstSibling = sortedSiblings[0];
-      const lastSibling = sortedSiblings[sortedSiblings.length - 1];
+      // X: en el centro de los hijos existentes
+      const leftX = leftChild.x + (leftChild.width || 160) / 2;
+      const rightX = rightChild.x + (rightChild.width || 160) / 2;
+      const centerX = (leftX + rightX) / 2;
       
-      // Centro de la línea horizontal (punto de entrada de los hermanos)
-      const lineX = firstSibling.x - 30; // Un poco a la izquierda de los nodos
-      const firstY = firstSibling.y + (firstSibling.height || 64) / 2;
-      const lastY = lastSibling.y + (lastSibling.height || 64) / 2;
-      const midY = (firstY + lastY) / 2;
+      // Y: al mismo nivel que los hijos existentes
+      const newY = leftChild.y;
       
-      // Posición del nuevo nodo (debajo del centro de la línea)
-      const verticalGap = 100;
-      const horizontalSpacing = 180;
-      
-      // Distribuir hijos de línea horizontalmente
-      const totalLineChildren = existingLineChildren.length + 1;
-      const totalWidth = (totalLineChildren - 1) * horizontalSpacing;
-      const startX = lineX - totalWidth / 2;
-      const newIndex = existingLineChildren.length;
-      
-      const newX = startX + (newIndex * horizontalSpacing);
-      const newY = midY + verticalGap;
+      // Determinar la dirección del hijo según el layout
+      const childDirection = project.layoutType === 'mindtree' ? undefined : 'vertical';
       
       const newNode = {
         id: newId,
         text: 'Nuevo Nodo',
-        x: newX,
+        x: centerX - 80, // Centrar el nodo (width/2)
         y: newY,
-        color: 'purple', // Color distintivo para nodos de línea
+        color: 'default',
         parentId,
         width: 160,
         height: 64,
         nodeType: options?.nodeType || 'default',
-        childDirection: 'vertical-from-line', // Nuevo tipo de dirección
-        lineParentSiblings: siblingIds // Guardar referencia a los hermanos de la línea
+        childDirection: childDirection
       };
       
-      console.log('[MindHybrid] Creando nodo desde línea:', newNode);
+      console.log('[AddNodeFromLine] Creando nodo desde línea:', newNode);
       
       let newNodes = [...currentNodes, newNode];
       
-      // Redistribuir todos los nodos hijos de línea
-      const allLineChildren = [...existingLineChildren, newNode];
-      const totalWidthNew = (allLineChildren.length - 1) * horizontalSpacing;
-      const startXNew = lineX - totalWidthNew / 2;
-      
-      allLineChildren.forEach((child, idx) => {
-        const childNewX = startXNew + (idx * horizontalSpacing);
-        newNodes = newNodes.map(n => 
-          n.id === child.id ? { ...n, x: childNewX } : n
-        );
-      });
-      
+      // Aplicar auto-alineación para redistribuir todos los hijos
       pushToHistory(activeProjectId, newNodes);
       
       return prev.map(p => 

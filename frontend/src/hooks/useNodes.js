@@ -710,6 +710,30 @@ export const useNodes = () => {
 
     console.log('[distributeNodesVertically] Distribuyendo', selectedNodes.length, 'nodos verticalmente');
 
+    // Función auxiliar para estimar la altura real de un nodo
+    // Toma en cuenta el texto y tipo de nodo
+    const getNodeHeight = (node) => {
+      // Si el nodo tiene altura almacenada, usarla
+      if (node.height && node.height > 0) {
+        return node.height;
+      }
+      
+      // Estimar altura basada en el contenido
+      const baseHeight = 64; // Altura mínima
+      const text = node.text || '';
+      const nodeWidth = node.width || 160;
+      
+      // Estimar cuántas líneas de texto hay (aproximadamente 10-12 caracteres por línea)
+      const charsPerLine = Math.floor(nodeWidth / 8); // ~8px por carácter
+      const estimatedLines = Math.ceil(text.length / charsPerLine);
+      const lineHeight = 24; // altura aproximada por línea
+      
+      // Altura = base + líneas adicionales
+      const estimatedHeight = Math.max(baseHeight, 40 + (estimatedLines * lineHeight));
+      
+      return estimatedHeight;
+    };
+
     // 1. Ordenar nodos por posición Y (de arriba hacia abajo)
     const sortedNodes = [...selectedNodes].sort((a, b) => a.y - b.y);
     
@@ -719,10 +743,11 @@ export const useNodes = () => {
     
     // 3. Calcular topY (top del primer nodo) y bottomY (bottom del último nodo)
     const topY = firstNode.y;
-    const bottomY = lastNode.y + (lastNode.height || 64);
+    const lastNodeHeight = getNodeHeight(lastNode);
+    const bottomY = lastNode.y + lastNodeHeight;
     
     // 4. Calcular la suma de las alturas de todos los nodos
-    const totalHeights = sortedNodes.reduce((sum, n) => sum + (n.height || 64), 0);
+    const totalHeights = sortedNodes.reduce((sum, n) => sum + getNodeHeight(n), 0);
     
     // 5. Calcular el espacio uniforme entre nodos
     // espacio = (bottomY - topY - totalHeights) / (N - 1)
@@ -741,7 +766,7 @@ export const useNodes = () => {
     
     sortedNodes.forEach((node) => {
       newPositions.set(node.id, currentY);
-      currentY += (node.height || 64) + espacio;
+      currentY += getNodeHeight(node) + espacio;
     });
 
     // 7. Aplicar las nuevas posiciones (solo Y, X no cambia)

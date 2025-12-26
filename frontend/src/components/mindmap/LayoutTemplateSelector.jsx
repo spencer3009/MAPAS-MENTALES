@@ -1,5 +1,63 @@
 import React, { useState } from 'react';
-import { X, ArrowRight, GitBranch, Network } from 'lucide-react';
+import { X, ArrowRight } from 'lucide-react';
+
+// Ícono personalizado para MindFlow (horizontal)
+const MindFlowIcon = ({ className }) => (
+  <svg 
+    viewBox="0 0 48 48" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    {/* Nodo izquierdo (padre) */}
+    <rect x="4" y="16" width="12" height="12" rx="2" />
+    {/* Nodo superior derecho (hijo 1) */}
+    <rect x="32" y="6" width="12" height="12" rx="2" />
+    {/* Nodo inferior derecho (hijo 2) */}
+    <rect x="32" y="26" width="12" height="12" rx="2" />
+    {/* Conector horizontal desde padre */}
+    <path d="M16 22 H24" />
+    {/* Línea vertical de ramificación */}
+    <path d="M24 12 V32" />
+    {/* Conector a hijo superior */}
+    <path d="M24 12 H32" />
+    {/* Conector a hijo inferior */}
+    <path d="M24 32 H32" />
+  </svg>
+);
+
+// Ícono personalizado para MindTree (organigrama vertical)
+const MindTreeIcon = ({ className }) => (
+  <svg 
+    viewBox="0 0 48 48" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    {/* Nodo superior (padre/CEO) */}
+    <rect x="16" y="4" width="16" height="10" rx="2" />
+    {/* Nodo inferior izquierdo */}
+    <rect x="4" y="32" width="12" height="10" rx="2" />
+    {/* Nodo inferior centro */}
+    <rect x="18" y="32" width="12" height="10" rx="2" />
+    {/* Nodo inferior derecho */}
+    <rect x="32" y="32" width="12" height="10" rx="2" />
+    {/* Línea vertical hacia abajo desde padre */}
+    <path d="M24 14 V22" />
+    {/* Línea horizontal de distribución */}
+    <path d="M10 22 H38" />
+    {/* Conectores verticales hacia hijos */}
+    <path d="M10 22 V32" />
+    <path d="M24 22 V32" />
+    <path d="M38 22 V32" />
+  </svg>
+);
 
 const LayoutTemplateSelector = ({ isOpen, onSelect, onClose }) => {
   const [selectedLayout, setSelectedLayout] = useState(null);
@@ -17,7 +75,7 @@ const LayoutTemplateSelector = ({ isOpen, onSelect, onClose }) => {
       id: 'mindflow',
       name: 'MindFlow',
       description: 'Flujo horizontal libre y expansivo. El mapa crece hacia los lados.',
-      icon: Network,
+      icon: MindFlowIcon,
       color: 'blue',
       bgGradient: 'from-blue-500 to-blue-600',
       borderColor: 'border-blue-500',
@@ -30,7 +88,7 @@ const LayoutTemplateSelector = ({ isOpen, onSelect, onClose }) => {
       id: 'mindtree',
       name: 'MindTree',
       description: 'Flujo vertical tipo organigrama. Los nodos se organizan de arriba hacia abajo.',
-      icon: GitBranch,
+      icon: MindTreeIcon,
       color: 'emerald',
       bgGradient: 'from-emerald-500 to-emerald-600',
       borderColor: 'border-emerald-500',

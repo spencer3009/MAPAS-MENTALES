@@ -1392,6 +1392,34 @@ The **MindTree Vertical Layout Feature** has **EXCELLENT CODE IMPLEMENTATION** b
 
 ---
 
+## MINDHYBRID LAYOUT FIX - BOTH BUTTONS NOW WORKING (December 26, 2025) ✅ FIXED
+
+### 🔧 ROOT CAUSE IDENTIFIED AND FIXED:
+
+**The Problem:**
+- The `layoutType` field was NOT being saved to the backend database
+- Backend models (`ProjectCreate`, `ProjectUpdate`, `ProjectResponse`) did not include `layoutType`
+- When projects were loaded, `layoutType` was always undefined, defaulting to 'mindflow'
+- This caused the MindHybrid buttons to not render because `layoutType !== 'mindhybrid'` was always true
+
+**The Fix:**
+1. Added `layoutType` field to all backend models:
+   - `ProjectCreate`: `layoutType: Optional[str] = "mindflow"`
+   - `ProjectUpdate`: `layoutType: Optional[str] = None`
+   - `ProjectResponse`: `layoutType: str = "mindflow"`
+2. Updated backend endpoints to save and return `layoutType`
+3. Added default `layoutType = "mindflow"` for existing projects without the field
+
+**Result:**
+- ✅ Blue "+" button (horizontal children) - WORKING
+- ✅ Green "+" button (vertical children) - WORKING
+- ✅ Both buttons appear when a node is selected in MindHybrid projects
+- ✅ Horizontal nodes created to the RIGHT of parent
+- ✅ Vertical nodes created BELOW parent
+- ✅ Layout persists after page reload
+
+---
+
 ## NEW MINDHYBRID LAYOUT FUNCTIONALITY TESTING (December 26, 2025) ⚠️ EXCELLENT UI IMPLEMENTATION, CRITICAL NODE CREATION ISSUE
 
 ### 🔍 TESTING REQUIREMENTS:

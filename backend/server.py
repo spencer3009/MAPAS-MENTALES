@@ -1023,6 +1023,9 @@ async def get_project(
     )
     if not project:
         raise HTTPException(status_code=404, detail="Proyecto no encontrado")
+    # Asegurar campos por defecto
+    if "layoutType" not in project:
+        project["layoutType"] = "mindflow"
     return project
 
 @api_router.post("/projects", response_model=ProjectResponse)

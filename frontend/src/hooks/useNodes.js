@@ -1432,7 +1432,7 @@ export const useNodes = () => {
     ));
   }, [nodes, activeProjectId, pushToHistory]);
 
-  const deleteNode = useCallback((id) => {
+  const deleteNode = useCallback((id, autoAlignAfter = false) => {
     const findDescendants = (nodeId, allNodes) => {
       const children = allNodes.filter(n => n.parentId === nodeId);
       let descendants = [nodeId];
@@ -1443,7 +1443,21 @@ export const useNodes = () => {
     };
 
     const nodesToDelete = new Set(findDescendants(id, nodes));
-    const newNodes = nodes.filter(n => !nodesToDelete.has(n.id));
+    let newNodes = nodes.filter(n => !nodesToDelete.has(n.id));
+    
+    // Si autoAlign está activo, aplicar alineación jerárquica a los nuevos nodos
+    if (autoAlignAfter) {
+      console.log('[deleteNode] Aplicando alineación jerárquica después de eliminar');
+      // Encontrar todos los nodos raíz
+      const rootNodes = newNodes.filter(n => !n.parentId);
+      rootNodes.forEach(root => {
+        const children = newNodes.filter(n => n.parentId === root.id);
+        if (children.length > 0) {
+          newNodes = autoAlignHierarchy(root.id, newNodes);
+        }
+      });
+    }
+    
     pushToHistory(activeProjectId, newNodes);
     setProjects(prev => prev.map(p => 
       p.id === activeProjectId 
@@ -1451,7 +1465,7 @@ export const useNodes = () => {
         : p
     ));
     setSelectedNodeId(null);
-  }, [nodes, activeProjectId, pushToHistory]);
+  }, [nodes, activeProjectId, pushToHistory, autoAlignHierarchy]);
 
   const duplicateNode = useCallback((id) => {
     const original = nodes.find(n => n.id === id);

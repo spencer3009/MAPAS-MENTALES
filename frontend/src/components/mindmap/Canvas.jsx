@@ -82,8 +82,17 @@ const Canvas = ({
     const nodeW = selectedNode.width || NODE_WIDTH;
     const nodeH = selectedNode.height || NODE_HEIGHT;
     
-    const addButtonX = (selectedNode.x + nodeW + 15) * zoom + pan.x;
-    const addButtonY = (selectedNode.y + nodeH / 2 - 14) * zoom + pan.y;
+    let addButtonX, addButtonY;
+    
+    if (layoutType === 'mindtree') {
+      // MindTree (Organigrama): botón "+" DEBAJO del nodo
+      addButtonX = (selectedNode.x + nodeW / 2) * zoom + pan.x;
+      addButtonY = (selectedNode.y + nodeH + 20) * zoom + pan.y;
+    } else {
+      // MindFlow: botón "+" al LADO derecho del nodo
+      addButtonX = (selectedNode.x + nodeW + 15) * zoom + pan.x;
+      addButtonY = (selectedNode.y + nodeH / 2 - 14) * zoom + pan.y;
+    }
     
     const toolbarX = (selectedNode.x + nodeW / 2) * zoom + pan.x;
     const toolbarY = (selectedNode.y - 50) * zoom + pan.y;
@@ -92,7 +101,7 @@ const Canvas = ({
       addButton: { x: addButtonX, y: addButtonY },
       toolbar: { x: toolbarX, y: toolbarY }
     };
-  }, [selectedNode, zoom, pan]);
+  }, [selectedNode, zoom, pan, layoutType]);
 
   // Calcular posición del popover de comentario
   const getCommentPopoverPosition = useCallback((nodeId) => {

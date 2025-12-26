@@ -281,7 +281,13 @@ const ConnectionsLayer = memo(({
           key={btn.id}
           onClick={(e) => {
             e.stopPropagation();
-            onAddNodeFromLine(btn.parentId, btn.childIds);
+            // Si es un botón de conector horizontal individual, pasar targetChildId
+            // Si es un botón de línea entre hermanos, pasar childIds
+            if (btn.lineType === 'horizontal-connector') {
+              onAddNodeFromLine(btn.parentId, btn.targetChildId);
+            } else {
+              onAddNodeFromLine(btn.parentId, btn.childIds);
+            }
           }}
           onMouseDown={(e) => e.stopPropagation()}
           className="

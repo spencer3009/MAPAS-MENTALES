@@ -1914,9 +1914,10 @@ export const useNodes = () => {
   }, [saveProjectToServer]);
 
   // Cargar desde template (AGREGA, no reemplaza)
-  const loadFromTemplate = useCallback(async (templateNodes, templateName = 'Template') => {
+  // Los templates usan MindFlow por defecto
+  const loadFromTemplate = useCallback(async (templateNodes, templateName = 'Template', layoutType = 'mindflow') => {
     try {
-      console.log('Creando proyecto desde template:', templateName);
+      console.log('Creando proyecto desde template:', templateName, 'con layout:', layoutType);
       
       // Generar nuevos IDs para evitar conflictos
       const idMap = {};
@@ -1935,6 +1936,7 @@ export const useNodes = () => {
       const newProject = {
         id: crypto.randomUUID(),
         name: templateName,
+        layoutType: layoutType, // 'mindflow' por defecto para templates
         nodes: mappedNodes,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()

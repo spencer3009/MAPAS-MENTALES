@@ -1,143 +1,153 @@
 <analysis>**original_problem_statement:**
-The user initially requested to refine the visual style of the  node type, specifying its color, thickness, and that it should be a simple underline without a background. This evolved into a series of iterative visual adjustments and functional enhancements.
+The user initially requested to fix the multi-selection functionality, specifically enabling  to select multiple individual nodes and ensuring there was clear visual feedback for the selected nodes.
 
-The user then requested a full feature set for these  nodes, including support for icons, links, comments, and reminders, identical to the standard rectangular nodes. This also involved implementing a right-click context menu to switch between node types and adjust the underline's thickness. A key requirement was to align all indicator icons (for comments, links, reminders) neatly to the right of the node's text.
-
-Finally, the user requested a major new feature: a multi-node selection system, including selection via  and area drag, along with a contextual toolbar for group actions like alignment and deletion. During its implementation, a critical regression was introduced where canvas panning stopped working, which the user immediately asked to be fixed.
+This request then expanded into a series of significant UI/UX enhancements and new features:
+1.  **UI Cleanup:** Remove the duplicate Change Color option from the right-click context menu to streamline it.
+2.  **Contextual Toolbar:** Make the floating node toolbar smarter by hiding the color palette icon for  nodes, as they don't have a background color.
+3.  **Bug Fix:** Correct the positioning of the right-click context menu, which was appearing at the top of the screen instead of next to the node.
+4.  **Toolbar Feature:** Overhaul the  to correctly differentiate between text alignment and node alignment, adding new, distinct icons for each action.
+5.  **Feature Consolidation:** Combine the Align Middle and Distribute Vertically actions into a single, more intuitive button on the .
+6.  **Major Feature - Auto-Align:** Implement a new Alineación automática (Auto-Align) mode, toggled by a switch in the header. When active, this mode should automatically manage the layout of nodes.
+7.  **Auto-Align V2 - Hierarchical Layout:** Evolve the auto-align feature to handle parent-child relationships, automatically arranging children vertically under their parent and centering the parent relative to its children.
+8.  **Auto-Align V3 - Block Layout:** The final and most complex request was to fix the auto-align feature so that it treats each parent and its descendants as a distinct block. These blocks should be stacked vertically without overlapping, and the layout should adjust in real-time as nodes are added or removed.
 
 **PRODUCT REQUIREMENTS:**
-1.  **Dashed Node Styling (Complete):** Iteratively refine the visual style of the  node's underline, settling on a  thickness, celeste color, and 100% opacity.
-2.  **Indicator Icon Redesign (Complete):** Replace default emoji indicators with minimalist, monochrome Lucide icons ( for comments,  for links,  for reminders), make them larger, and align them in a clean row to the right of the node text.
-3.  **Functional Parity for Dashed Nodes (Complete):** Ensure  nodes fully support adding/displaying icons, links, comments, and reminders, and that this data persists correctly.
-4.  **Node Type Switching (Complete):** Implement a right-click context menu to allow users to toggle any node between the  (rectangle) and  (underline) types.
-5.  **Line Thickness Control (Complete):** Add a submenu to the context menu for  nodes that allows the user to select the line's thickness, with the choice persisting.
-6.  **Toolbar Reminder Indicator (Complete):** Add a blue dot to the reminder bell icon *in the floating toolbar* (not the node itself) when the selected node has an active reminder.
-7.  **Multi-Node Selection (In Progress):** Implement a system to select multiple nodes via  (select all), , and area selection. A contextual toolbar for group actions should appear.
-8.  **Panning Regression Fix (Complete):** After multi-select was added, the user reported that canvas panning (click + drag) was broken. This was fixed by restoring panning to  and moving area selection to .
+1.  **Multi-Select (Complete):** Users must be able to select multiple, specific nodes using . Selected nodes must have a clear visual indicator (a prominent blue ring).
+2.  **Context Menu Cleanup (Complete):** The Change Color option must be removed from the right-click context menu. This action is now exclusively in the floating node toolbar.
+3.  **Context-Aware Toolbar (Complete):** The floating  must not show the color palette icon when a  node is selected.
+4.  **Context Menu Positioning (Complete):** The right-click menu must appear next to the node it was opened on, not at the top of the screen.
+5.  **Alignment Toolbar Overhaul (Complete):** The  must have separate, clearly iconified buttons for aligning text within nodes versus aligning the nodes themselves on the canvas.
+6.  **Consolidated Distribution (Complete):** The action to align nodes to the vertical middle should also evenly distribute the vertical spacing between them. The separate distribute button was removed.
+7.  **Auto-Align Feature (In Progress):** An Alineación automática switch in the header should enable a smart layout mode.
+8.  **Hierarchical Auto-Align (In Progress):** When auto-align is on, child nodes of a parent should be automatically arranged, and the parent centered.
+9.  **Collision-Free Block Layout (In Progress):** The auto-align mode must prevent the children of one parent from overlapping with the children of another parent by treating each sub-tree as a self-contained layout block.
 
 **User's preferred language**: Spanish. The next agent MUST respond in Spanish.
 
 **what currently exists?**
-The application is a full-stack mind-mapping tool with JWT auth and data persisted in MongoDB. A highly customized  node type exists alongside the  rectangular nodes. These  nodes now have full functional parity, supporting icons, comments, links, and reminders with custom minimalist indicator icons. A right-click context menu allows for dynamic type switching and style adjustments.
+The application is a full-stack mind-mapping tool with a JWT authentication system that uses a hardcoded user list. The multi-selection system is now robust and visually clear. The UI has been significantly refined: the context menu is simplified, and toolbars (both floating and multi-select) are context-aware and have logically grouped, distinct icons for actions like text vs. node alignment.
 
-A multi-selection system has been implemented. The logic for selecting nodes via keyboard shortcuts () and area selection () is functional, and a  appears with the correct node count and action buttons. The critical panning regression has been fixed.
+A major new feature, Alineación automática (Auto-Align), has been added with a toggle switch in the header. The initial implementation had race-condition bugs related to adding/deleting nodes, which were fixed. The feature was then extended to handle hierarchical layouts. The most recent work involved rewriting the core auto-align algorithm to implement a layout by blocks model to prevent sub-trees from overlapping.
 
 **Last working item**:
-*   **Last item agent was working:** The agent successfully fixed a critical regression reported by the user where canvas panning (click + drag) stopped working after the multi-select feature was introduced. The fix restored panning to its original behavior and moved area selection to require holding the  key ( + click + drag).
-*   **Status:** USER VERIFICATION PENDING
-*   **Agent Testing Done:** Y
-*   **Which testing method agent to use?** Frontend testing agent to comprehensively test the canvas interactions: panning, SHIFT + area selection, and CTRL + click selection, ensuring no regressions.
+*   **Last item agent was working:** The agent was in the middle of a major refactor of the Auto-Align feature. The goal was to implement a layout by blocks algorithm to prevent the child nodes of different parent nodes from overlapping. The agent had just rewritten the hierarchical alignment logic in  to support this new block model but had not yet tested the changes.
+*   **Status:** IN PROGRESS
+*   **Agent Testing Done:** N
+*   **Which testing method agent to use?** Frontend testing agent. This is a complex visual layout feature. The test should involve creating multiple parent nodes, each with several children, activating Auto-Align, and then adding/deleting children from different parents to verify that the layout blocks adjust dynamically without any visual overlap.
 *   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-*   **Issue 1: Visual Feedback for Multi-Selected Nodes is Missing (P1)**
-    *   **Description:** Although the multi-selection logic works and the  appears correctly, the selected nodes themselves do not display the intended visual feedback (e.g., a blue ring or highlight). This makes it difficult for the user to see which nodes are currently part of the selection.
-    *   **Attempted fixes:** The agent added CSS classes () to  for the  state, but the style was not applied visually, suggesting a potential component re-rendering issue.
-    *   **Next debug checklist:**
-        1.  In , log the  prop to confirm it's being received correctly when the selection changes.
-        2.  In , double-check the logic within the  function passed to .
-        3.  Investigate if the  component needs to be explicitly re-rendered when the  Set changes.
-    *   **Why fix this issue and what will be achieved with the fix?** This is a crucial UX fix. It will provide essential visual confirmation to the user about which nodes are currently selected, making group operations intuitive and error-free.
-    *   **Status:** IN PROGRESS
-    *   **Is recurring issue?** N
+*   **Issue 1: 'X' button in MultiSelectToolbar is not working (P2)**
+    *   **Description:** The 'X' button intended to clear the multi-selection does not work. The user can use the  key as a functional workaround.
+    *   **Attempted fixes:** The agent added  and , but the issue persisted. It was deprioritized in favor of new features.
+    *   **Status:** NOT STARTED
+    *   **Is recurring issue?** Y
     *   **Should Test frontend/backend/both after fix?** Frontend
 
+*   **Issue 2: Mobile Layout Overlap (P2)**
+    *   **Description:** On smaller screens, the sidebar overlaps the main canvas when the user dropdown menu is open. This is a known issue from a previous session.
+    *   **Status:** NOT STARTED
+    *   **Is recurring issue?** Y
+    *   **Should Test frontend/backend/both after fix?** Frontend (Screenshot tool)
+
 **In progress Task List**:
-*   **Task 1: Finalize Multi-Node Selection Feature (P0)**
-    *   **Description:** The foundation of the multi-select feature is built, but it requires user verification and has a pending visual bug.
-    *   **Where to resume:** First, ask the user to verify the panning () vs. area selection () fix. Once confirmed, proceed to fix the visual feedback for selected nodes (Issue 1).
-    *   **What will be achieved with this?** A complete, intuitive, and visually clear multi-node selection system.
+*   **Task 1: Complete and Test the Block Layout Auto-Align Feature (P0)**
+    *   **Description:** The core logic for the advanced auto-alignment that prevents sub-tree overlaps has been written but is untested.
+    *   **Where to resume:** Test the new  function in . Create a complex mind map with multiple parents and children, enable Alineación automática, and verify that the layout adjusts correctly without overlaps when nodes are added, deleted, or moved.
+    *   **What will be achieved with this?** A smart, collision-free automatic layout system that makes organizing complex maps effortless.
     *   **Status:** IN PROGRESS
-    *   **Blocked on:** User verification of the last fix.
+    *   **Blocked on something:** None.
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks:**
-    *   **User Verification (P0):** Ask the user to verify that canvas panning () and area selection () now work correctly together.
-    *   **Test Multi-Select Group Actions (P1):** The buttons for , , and  on the  have been created, but their underlying functions (, , ) have not been tested.
+    *   Fix the non-functional 'X' button on the . (P1)
 *   **Future Tasks:**
-    *   **Enhance Authentication (P1):** Migrate from the hardcoded user list to a full database-driven public registration system.
+    *   **Enhance Authentication (P1):** Migrate from the hardcoded user list in  to a full database-driven public registration system.
     *   **Email Notification Channel (P2):** Add email as an option for reminder notifications.
-    *   **Twilio Outgoing Messages (P2):** Implement the ability to send outgoing WhatsApp messages via Twilio.
+    *   **Twilio Outgoing Messages (P2):** Implement the ability to send outgoing WhatsApp messages.
     *   **Mobile Layout Fix (P2):** Address the sidebar overlap issue on smaller screens.
 
 **Completed work in this session**
-- **Dashed Node Visual Overhaul:** Fine-tuned the  node's underline to user's exact specifications and redesigned all indicator icons (comment, link, reminder) to be larger, minimalist (Lucide), and neatly aligned to the right.
-- **Dashed Node Functional Parity:** Ensured  nodes support icons, links, comments, and reminders, and fixed a persistence bug for links by correcting the backend data model.
-- **Context Menu Implementation:** Created a right-click menu to switch node types and a submenu to adjust line thickness.
-- **Toolbar Indicator Added:** Implemented a blue dot on the floating toolbar's reminder icon for nodes with active reminders.
-- **Multi-Node Selection Implemented:** Built the core system for selection via , , and , including the .
-- **Critical Regression Fixed:** Restored canvas panning functionality, which was broken during the multi-select implementation.
+- **Multi-Selection Fixed:** Correctly implemented  for selecting individual nodes and added a prominent blue ring for clear visual feedback.
+- **UI Streamlining:** Removed the redundant Change Color option from the context menu and fixed the menu's positioning.
+- **Context-Aware Toolbars:** The floating  now hides the color palette for  nodes.
+- **Alignment Toolbar Overhaul:** The  was completely redesigned with distinct icons to separate Text Alignment actions from Node Alignment actions, fixing a major UX issue.
+- **Distribute Vertically Feature:** Implemented and then consolidated the vertical distribution logic into the Align Middle button, simplifying the toolbar.
+- **Auto-Align Feature Implemented:** Added a header toggle switch to enable/disable automatic layout management.
+- **Auto-Align Bug Fixes:** Resolved critical race-condition bugs where adding or deleting nodes while auto-align was active would fail. The fix involved integrating the alignment logic directly into the  and  functions.
 
 **Earlier issues found/mentioned but not fixed**
-*   The mobile layout issue where the sidebar overlaps the main content when the user dropdown is open remains unfixed.
+*   **Issue 1: 'X' button in MultiSelectToolbar:** The button to clear the multi-node selection does not work.  key is the workaround.
+*   **Issue 2: Mobile layout issue:** Sidebar overlaps the main content on small screens when the user dropdown is open.
 
 **Known issue recurrence from previous fork**
 *   None.
 
 **Code Architecture**
-linksdashedLineWidthselectedNodeIds
+
 
 **Key Technical Concepts**
-*   **Frontend:** React (Hooks, Context), TailwindCSS, Lucide React.
-*   **Backend:** FastAPI, MongoDB (), Pydantic.
-*   **State Management:** Complex state management using  and  for multi-selection (), panning, and selection box state.
-*   **Event Handling:** Advanced handling of  (, , ) and  () for implementing standard UX patterns.
+*   **React State & Hooks:** Extensive use of , , , and  to manage complex UI state, including selection, dragging, and the new auto-align mode.
+*   **DOM Measurement:** Using  and  to get the real rendered dimensions () of nodes, which is critical for accurate layout calculations.
+*   **Event Handling:** Careful management of , , and  to implement custom interactions and avoid duplicate event firing.
+*   **Race Condition Mitigation:** Fixed bugs in asynchronous state updates by moving follow-up logic (like auto-alignment) directly into the state-updating functions (, ) instead of relying on fragile external callbacks or .
+*   **Hierarchical & Recursive Algorithms:** Implemented a recursive function () to traverse the node tree and calculate block-based layouts to prevent visual overlaps.
 
 **key DB schema**
 *   **:**
-    *   : (string) Can be .
-    *   : (float, new) Stores custom line thickness.
-    *   : (List[str]) Type corrected from  to fix persistence.
-    *   , , : Now fully supported on all node types.
+    *   : (string, new) Stores text alignment ('left', 'center', 'right').
+    *   , : (number) Updated by  on render to store actual dimensions for layout calculations.
 
 **changes in tech stack**
-*   **Lucide React:** Added and used for all node indicator icons to achieve a minimalist, monochrome style.
+*   None.
 
 **All files of reference**
-*   : The brain of the node management, now containing the logic for multi-selection state () and all group action functions (delete, align, duplicate).
-*   : The main interaction surface, heavily modified to orchestrate panning, area selection (with SHIFT), and individual node clicks.
-*   : Contains all the final, highly-tuned styling for the  node and its various indicator icons. Also includes the currently non-functional styling for multi-selection.
-*   : The new UI component that appears when more than one node is selected.
-*   : The  model was updated to fix link persistence () and add support for saving .
+*   : The most critical file. Contains the new, complex block layout algorithm for auto-alignment, as well as logic for text alignment and fixes for race conditions.
+*   : The main application component, now responsible for managing the state of the Auto-Align feature.
+*   : The main header toolbar, which now contains the new Alineación automática switch.
+*   : Was significantly overhauled to fix UX issues with alignment icons and functionality.
+*   : Modified to pass down handlers that trigger auto-alignment after node operations like adding, deleting, or dragging.
 
 **Areas that need refactoring**
-*   The  component has grown significantly complex. It handles rendering logic for multiple node types, editing states, selection states, and various indicators. It could be broken down into smaller, more manageable sub-components.
-*   User authentication remains hardcoded in .
+*   The  hook has become a god object for state management, handling everything from selection and CRUD to complex layout algorithms. It should be broken down into smaller, more focused hooks (e.g., , , ) to improve maintainability.
 
 **key api endpoints**
-*   No new endpoints were created. Existing  endpoint was leveraged to save all node state changes, including multi-node operations.
+*   No new endpoints. The existing  endpoint is used to persist all changes.
 
 **Critical Info for New Agent**
-*   **Canvas Interaction Model:** The canvas interaction has been explicitly defined by the user: **Click+Drag = Pan**, and **SHIFT+Click+Drag = Area Select**. This is a critical distinction to maintain.
-*   **Multi-Select Visual Bug:** The immediate technical task is to fix the visual feedback for multi-selected nodes. The logic is working, but the nodes don't highlight correctly.
-*   **State Management:** Node selection is now dual-state:  (string) for single-node actions (like the floating toolbar) and  (Set) for multi-node actions. The  appears only when .
+*   **Auto-Align is the Core Task:** The current primary task is to finalize the block layout auto-alignment feature. The logic has been rewritten but requires thorough testing.
+*   **Race Condition Pattern:** The agent fixed several bugs caused by race conditions. The successful pattern was to integrate follow-up logic (like re-aligning) *inside* the primary action's state update function (e.g., inside ), rather than calling it from an external  or callback. This is a crucial pattern to remember for future modifications.
+*   **UI/UX is Key:** The user is very particular about UI/UX details, such as icon design, tooltip text, and logical consistency. Pay close attention to these requirements.
 
 **documents and test_reports created in this job**
-*    was updated.
+*    was updated after testing the multi-select feature.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** The hand/pan tool on the canvas is broken.
-2.  **Agent:** I'll fix it. The new model will be: Click+Drag to Pan, SHIFT+Click+Drag for area select.
-3.  **Agent:** (Shows screenshots) Panning is fixed.
-4.  **Agent:** (Shows screenshots) SHIFT+Drag for area selection now works.
-5.  **Agent:** Is this behavior correct now?
-6.  **User:** Yes, that's what I needed.
-7.  ... (Previous messages relate to implementing multi-select features).
+1.  **User:** When Automatic alignment is enabled, you cannot create child nodes. They disappear immediately.
+2.  **User:** Fix the Distribute vertically function on the MultiSelectToolbar so that the nodes have perfectly uniform vertical spacing between them.
+3.  **User:** The Auto-align mode has an issue where child nodes of different parents overlap. It should work like a smart layout by blocks, preventing any overlap.
+4.  **User:** When Automatic alignment is enabled, it is not possible to delete a node.
+5.  **User:** Extend the Automatic alignment mode to handle parent-child relationships. Child nodes should be distributed automatically, and the parent node should be repositioned to be centered with respect to its group of children.
+6.  **User:** New function: Automatic alignment. Add a switch in the header that allows enabling/disabling automatic node alignment. When ON, selected nodes should align automatically.
+7.  **User:** You were wrong, the icon that should do the work of aligning and distributing the nodes vertically (equalizes space between nodes) is the one in the image.
+8.  **User:** This icon should also do the job of aligning and distributing vertically, evening out the space between selected nodes.
+9.  **User:** Fix the behavior of the alignment buttons on the MultiSelectToolbar. Differentiate correctly between aligning nodes on the canvas and aligning the text within the nodes.
+10. **User:** I want to improve the behavior of the Automatic alignment mode in my mind map application. Currently, when there are several parent nodes that have children, and automatic alignment is activated, the child nodes of different parents overlap.
 
 **Project Health Check:**
-*   **Broken:** None.
-*   **Mocked:** User authentication is still a hardcoded dictionary in .
+*   **Broken:** The Auto-Align feature is in an untested, in-progress state. Its core logic was just rewritten.
+*   **Mocked:** User authentication remains a hardcoded dictionary in .
 
 **3rd Party Integrations**
-*   **Lucide React:** (New) For minimalist UI icons.
+*   **Lucide React:** Used for minimalist UI icons.
 *   **Twilio WhatsApp API:** For receiving incoming messages.
 *   **react-beautiful-dnd:** For project reordering.
 
 **Testing status**
-*   **Testing agent used after significant changes:** YES
+*   **Testing agent used after significant changes:** YES (once, for multi-select)
 *   **Troubleshoot agent used after agent stuck in loop:** NO
 *   **Test files created:** None
-*   **Known regressions:** A major panning regression was introduced and then fixed within this session.
+*   **Known regressions:** None currently, but the in-progress Auto-Align feature could have regressions.
 
 **Credentials to test flow:**
 *   **User 1:**
@@ -145,4 +155,5 @@ linksdashedLineWidthselectedNodeIds
     *   Password: 
 
 **What agent forgot to execute**
-*   The agent implemented the logic for multi-selection but did not successfully implement the required visual feedback (highlighting) for the selected nodes, which is a key part of the UX. This is captured as a pending issue.</analysis>
+*   The agent acknowledged but did not fix the non-functional 'X' button on the , as it was a lower priority than the features requested by the user.
+*   The mobile layout issue remains unaddressed.</analysis>

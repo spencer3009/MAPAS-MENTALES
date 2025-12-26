@@ -568,7 +568,7 @@ The **NEW Node Type Selection Feature** is **completely functional** and exceeds
 ### Test Credentials:
 - Username: spencer3009
 - Password: Socios3009
-- URL: https://mindmap-dash-1.preview.emergentagent.com
+- URL: https://mindflow-86.preview.emergentagent.com
 
 ### ✅ TESTING RESULTS:
 
@@ -717,7 +717,7 @@ The **NEW Node Type Selection Feature** is **completely functional** and exceeds
 ### Testing Credentials:
 - Username: spencer3009
 - Password: Socios3009
-- URL: https://mindmap-dash-1.preview.emergentagent.com
+- URL: https://mindflow-86.preview.emergentagent.com
 
 ### ✅ TESTING RESULTS - COMPREHENSIVE SUCCESS:
 

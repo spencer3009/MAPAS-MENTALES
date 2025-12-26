@@ -320,27 +320,39 @@ const MindMapApp = () => {
   // HANDLERS PARA GESTIÓN DE PROYECTOS
   // ==========================================
 
-  // Handler para "En Blanco" - Abrir modal de nombre
+  // Handler para "En Blanco" - Ahora abre primero el selector de layout
   const handleNewBlankClick = useCallback(() => {
+    setShowLayoutSelector(true);
+  }, []);
+
+  // Handler para cuando se selecciona un layout
+  const handleLayoutSelect = useCallback((layoutType) => {
+    setShowLayoutSelector(false);
+    // Guardar el layout seleccionado y abrir modal de nombre
+    setPendingProjectName(null); // Reset
     setProjectNameModalConfig({
       title: 'Nuevo Proyecto',
-      subtitle: 'Ingresa un nombre para tu mapa mental',
+      subtitle: layoutType === 'mindtree' 
+        ? 'Proyecto con layout vertical (MindTree)' 
+        : 'Proyecto con layout horizontal (MindFlow)',
       confirmText: 'Crear',
       initialName: 'Nuevo Mapa',
       isRename: false,
-      projectId: null
+      projectId: null,
+      layoutType: layoutType // Guardamos el layout seleccionado
     });
     setShowProjectNameModal(true);
   }, []);
 
   // Handler para confirmar nombre de proyecto
-  const handleConfirmProjectName = useCallback((name) => {
+  const handleConfirmProjectName = useCallback(async (name) => {
     if (projectNameModalConfig.isRename && projectNameModalConfig.projectId) {
       // Renombrar proyecto existente
       renameProject(projectNameModalConfig.projectId, name);
     } else {
-      // Crear nuevo proyecto
-      const success = createBlankMap(name);
+      // Crear nuevo proyecto con el layout seleccionado
+      const layoutType = projectNameModalConfig.layoutType || 'mindflow';
+      const success = await createBlankMap(name, layoutType);
       if (success) {
         resetPan();
         resetZoom();

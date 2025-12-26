@@ -1248,6 +1248,37 @@ The **MindTree Vertical Layout Feature** has **EXCELLENT CODE IMPLEMENTATION** b
 
 ---
 
+## 🧪 NEXT TEST: MindTree Organigrama Layout (CORRECTED)
+
+### Test Objective
+Verify MindTree layout now creates proper ORGANIGRAMA structure:
+- Children in VERTICAL COLUMN (one below another)
+- NOT horizontal distribution
+- Connectors: vertical lines with horizontal branches
+- "+" button appears BELOW the node (not to the side)
+
+### Test Credentials
+- Username: `spencer3009`
+- Password: `Socios3009`
+
+### Expected MindTree Behavior
+```
+  Padre
+   [+]    <-- Button below node
+    |
+    ├── Hijo 1
+    ├── Hijo 2
+    └── Hijo 3
+```
+
+### Test Cases
+1. Create MindTree project
+2. Select node → verify "+" button is BELOW the node
+3. Add children → verify they stack VERTICALLY (column)
+4. Verify connectors are org-chart style (vertical lines with branches)
+
+---
+
 ## LAYOUT TEMPLATE SYSTEM (MindFlow / MindTree) TESTING (December 26, 2025) ✅ MOSTLY SUCCESSFUL
 
 ### 🔍 TESTING REQUIREMENTS:

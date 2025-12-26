@@ -1019,3 +1019,26 @@ The **Node Toolbar Text Alignment Feature** is **FULLY FUNCTIONAL** and **EXCEED
 
 **Recommendation**: The Node Toolbar Text Alignment feature is **PRODUCTION-READY** and successfully delivers all requested functionality. The implementation demonstrates excellent technical quality, user experience design, and complete replacement of the image button with comprehensive text alignment capabilities.
 
+---
+
+## 🧪 NEXT TEST: Layout Template System (MindFlow / MindTree)
+
+### Test Objective
+Verify the new layout template system works correctly:
+1. Layout selector appears when creating a blank project
+2. MindFlow layout preserves existing horizontal behavior
+3. MindTree layout creates vertical organization (top-to-bottom)
+4. Existing projects get 'mindflow' layoutType by default
+
+### Test Credentials
+- Username: `spencer3009`
+- Password: `Socios3009`
+
+### Test Cases
+1. **Layout Selector UI**: Click "En Blanco" → verify two cards appear (MindFlow, MindTree)
+2. **MindTree Selection**: Select MindTree → verify "Continuar" button activates
+3. **Project Creation**: Complete flow → verify project created with MindTree layout
+4. **Add Child Nodes**: Add children in MindTree project → verify vertical distribution
+5. **MindFlow Existing**: Existing projects should use horizontal layout (unchanged behavior)
+6. **Auto-Align MindTree**: With auto-align ON, children should appear BELOW parent
+

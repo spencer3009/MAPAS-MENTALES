@@ -1740,7 +1740,7 @@ export const useNodes = () => {
 
   // Agregar nodo desde una línea horizontal compartida (entre hermanos verticales)
   // Este nodo se agrega como un nuevo hijo vertical del padre
-  const addNodeFromLine = useCallback((parentId, childIds, options = {}) => {
+  const addNodeFromLine = useCallback((parentId, childIdsOrTargetChildId, options = {}) => {
     if (!parentId) return null;
     
     const newId = crypto.randomUUID();
@@ -1752,6 +1752,82 @@ export const useNodes = () => {
       const currentNodes = project.nodes;
       const parent = currentNodes.find(n => n.id === parentId);
       if (!parent) return prev;
+      
+      // Si es un string (targetChildId), es un botón de conector horizontal individual
+      // Si es un array (childIds), es un botón de línea horizontal/vertical entre hermanos
+      const isHorizontalConnectorButton = typeof childIdsOrTargetChildId === 'string';
+      
+      if (isHorizontalConnectorButton) {
+        // CASO: Botón "+" en el conector horizontal entre padre e hijo
+        // Crear un nodo vertical que cuelgue del punto medio del conector
+        const targetChild = currentNodes.find(n => n.id === childIdsOrTargetChildId);
+        if (!targetChild) return prev;
+        
+        // Calcular el punto medio del conector horizontal
+        const parentRight = parent.x + (parent.width || 160);
+        const parentCenterY = parent.y + (parent.height || 64) / 2;
+        const childLeft = targetChild.x;
+        const childCenterY = targetChild.y + (targetChild.height || 64) / 2;
+        
+        const connectorCenterX = (parentRight + childLeft) / 2;
+        const connectorCenterY = (parentCenterY + childCenterY) / 2;
+        
+        // Encontrar hijos existentes que cuelgan de este conector
+        const existingConnectorChildren = currentNodes.filter(n => 
+          n.connectorParentId === parentId && n.connectorTargetId === childIdsOrTargetChildId
+        );
+        
+        // Posicionar el nuevo nodo debajo del punto medio del conector
+        const verticalGap = 100;
+        const horizontalSpacing = 180;
+        const totalChildren = existingConnectorChildren.length + 1;
+        const totalWidth = (totalChildren - 1) * horizontalSpacing;
+        const startX = connectorCenterX - totalWidth / 2;
+        const newIndex = existingConnectorChildren.length;
+        
+        const newNode = {
+          id: newId,
+          text: 'Nuevo Nodo',
+          x: startX + (newIndex * horizontalSpacing) - 80,
+          y: connectorCenterY + verticalGap,
+          color: 'default',
+          parentId: parentId,
+          width: 160,
+          height: 64,
+          nodeType: options?.nodeType || 'default',
+          childDirection: 'vertical',
+          // Marcadores especiales para identificar este tipo de nodo
+          connectorParentId: parentId,
+          connectorTargetId: childIdsOrTargetChildId
+        };
+        
+        console.log('[AddNodeFromLine] Creando nodo desde conector horizontal:', newNode);
+        
+        let newNodes = [...currentNodes, newNode];
+        
+        // Redistribuir todos los hijos del conector
+        const allConnectorChildren = [...existingConnectorChildren, newNode];
+        const newTotalWidth = (allConnectorChildren.length - 1) * horizontalSpacing;
+        const newStartX = connectorCenterX - newTotalWidth / 2;
+        
+        allConnectorChildren.forEach((child, idx) => {
+          const childNewX = newStartX + (idx * horizontalSpacing) - 80;
+          newNodes = newNodes.map(n => 
+            n.id === child.id ? { ...n, x: childNewX } : n
+          );
+        });
+        
+        pushToHistory(activeProjectId, newNodes);
+        
+        return prev.map(p => 
+          p.id === activeProjectId 
+            ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+            : p
+        );
+      }
+      
+      // CASO: Botón en línea horizontal/vertical entre hermanos
+      const childIds = childIdsOrTargetChildId;
       
       // Obtener los hijos verticales existentes (los que forman la línea horizontal)
       const existingVerticalChildren = currentNodes.filter(n => 

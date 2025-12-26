@@ -1,5 +1,12 @@
 import React, { memo } from 'react';
-import { generateBezierPath, getNodeOutputPoint, getNodeInputPoint } from '../../utils/curve';
+import { 
+  generateBezierPath, 
+  generateOrgChartPath,
+  getNodeOutputPoint, 
+  getNodeInputPoint,
+  getNodeOutputPointOrgChart,
+  getNodeInputPointOrgChart
+} from '../../utils/curve';
 
 const DEFAULT_NODE_WIDTH = 160;
 const DEFAULT_NODE_HEIGHT = 64;
@@ -16,7 +23,7 @@ const getStrokeDasharray = (style) => {
   }
 };
 
-const ConnectionsLayer = memo(({ nodes }) => {
+const ConnectionsLayer = memo(({ nodes, layoutType = 'mindflow' }) => {
   const connections = nodes
     .filter(node => node.parentId)
     .map(node => {
@@ -26,11 +33,22 @@ const ConnectionsLayer = memo(({ nodes }) => {
       // Usar tamaño dinámico de cada nodo
       const parentWidth = parent.width || DEFAULT_NODE_WIDTH;
       const parentHeight = parent.height || DEFAULT_NODE_HEIGHT;
+      const nodeWidth = node.width || DEFAULT_NODE_WIDTH;
       const nodeHeight = node.height || DEFAULT_NODE_HEIGHT;
 
-      const start = getNodeOutputPoint(parent, parentWidth, parentHeight);
-      const end = getNodeInputPoint(node, nodeHeight);
-      const path = generateBezierPath(start.x, start.y, end.x, end.y);
+      let start, end, path;
+
+      if (layoutType === 'mindtree') {
+        // MindTree (Organigrama): conectores verticales tipo org chart
+        start = getNodeOutputPointOrgChart(parent, parentWidth, parentHeight);
+        end = getNodeInputPointOrgChart(node, nodeHeight);
+        path = generateOrgChartPath(start.x, start.y, end.x, end.y);
+      } else {
+        // MindFlow: conectores horizontales con curvas bezier
+        start = getNodeOutputPoint(parent, parentWidth, parentHeight);
+        end = getNodeInputPoint(node, nodeHeight);
+        path = generateBezierPath(start.x, start.y, end.x, end.y);
+      }
 
       // Usar estilos de línea del nodo hijo (la línea va hacia el hijo)
       const lineColor = node.lineColor || '#94a3b8';

@@ -347,10 +347,14 @@ const Canvas = ({
       if (onSaveNodePositionToHistory) {
         onSaveNodePositionToHistory();
       }
+      // Aplicar alineación automática si está habilitada
+      if (autoAlignEnabled && onAutoAlign) {
+        setTimeout(() => onAutoAlign(), 50);
+      }
     }
     setDragging(null);
     onStopPanning();
-  }, [dragging, isSelectingArea, selectionBox, pan, zoom, onStopPanning, onSaveNodePositionToHistory, onSelectNodesInArea]);
+  }, [dragging, isSelectingArea, selectionBox, pan, zoom, onStopPanning, onSaveNodePositionToHistory, onSelectNodesInArea, autoAlignEnabled, onAutoAlign]);
 
   // Manejar click en el canvas (para panning o selección por área)
   const handleCanvasMouseDown = useCallback((e) => {

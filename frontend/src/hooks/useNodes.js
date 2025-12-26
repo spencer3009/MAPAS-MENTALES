@@ -2534,6 +2534,10 @@ export const useNodes = () => {
     autoAlignMindTree,
     applyFullMindTreeAlignment,
     
+    // Alineación MindHybrid (mixta)
+    autoAlignMindHybrid,
+    applyFullMindHybridAlignment,
+    
     // Compatibilidad
     resetToDefault,
     clearAll,

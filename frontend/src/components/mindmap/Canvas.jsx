@@ -557,7 +557,12 @@ const Canvas = ({
           height: '5000px'
         }}
       >
-        <ConnectionsLayer nodes={nodes} layoutType={layoutType} />
+        <ConnectionsLayer 
+          nodes={nodes} 
+          layoutType={layoutType}
+          onAddNodeFromLine={onAddNodeFromLine}
+          showLineButtons={layoutType === 'mindhybrid' && showControls}
+        />
 
         {nodes.map(node => (
           <NodeItem

@@ -4,9 +4,6 @@ import {
   AlignLeft, 
   AlignCenter, 
   AlignRight,
-  AlignStartVertical,
-  AlignCenterVertical,
-  AlignEndVertical,
   X,
   Copy
 } from 'lucide-react';
@@ -33,18 +30,157 @@ const DistributeVerticalIcon = ({ size = 18, className = "" }) => (
   </svg>
 );
 
+// Icono: Alinear nodos a la izquierda (línea vertical izquierda + rectángulos pegados)
+const AlignNodesLeftIcon = ({ size = 18, className = "" }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+    className={className}
+  >
+    {/* Línea vertical de referencia */}
+    <line x1="4" y1="4" x2="4" y2="20" />
+    {/* Rectángulo superior pegado a la izquierda */}
+    <rect x="6" y="5" width="14" height="4" rx="1" />
+    {/* Rectángulo inferior pegado a la izquierda */}
+    <rect x="6" y="15" width="10" height="4" rx="1" />
+  </svg>
+);
+
+// Icono: Alinear nodos al centro horizontal (línea vertical central + rectángulos centrados)
+const AlignNodesCenterIcon = ({ size = 18, className = "" }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+    className={className}
+  >
+    {/* Línea vertical central */}
+    <line x1="12" y1="4" x2="12" y2="20" />
+    {/* Rectángulo superior centrado */}
+    <rect x="5" y="5" width="14" height="4" rx="1" />
+    {/* Rectángulo inferior centrado */}
+    <rect x="7" y="15" width="10" height="4" rx="1" />
+  </svg>
+);
+
+// Icono: Alinear nodos a la derecha (línea vertical derecha + rectángulos pegados)
+const AlignNodesRightIcon = ({ size = 18, className = "" }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+    className={className}
+  >
+    {/* Línea vertical de referencia */}
+    <line x1="20" y1="4" x2="20" y2="20" />
+    {/* Rectángulo superior pegado a la derecha */}
+    <rect x="4" y="5" width="14" height="4" rx="1" />
+    {/* Rectángulo inferior pegado a la derecha */}
+    <rect x="8" y="15" width="10" height="4" rx="1" />
+  </svg>
+);
+
+// Icono: Alinear nodos arriba (línea horizontal superior + rectángulos pegados)
+const AlignNodesTopIcon = ({ size = 18, className = "" }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+    className={className}
+  >
+    {/* Línea horizontal de referencia */}
+    <line x1="4" y1="4" x2="20" y2="4" />
+    {/* Rectángulo izquierdo pegado arriba */}
+    <rect x="5" y="6" width="4" height="12" rx="1" />
+    {/* Rectángulo derecho pegado arriba */}
+    <rect x="15" y="6" width="4" height="8" rx="1" />
+  </svg>
+);
+
+// Icono: Alinear nodos al centro vertical (línea horizontal central + rectángulos centrados)
+const AlignNodesMiddleIcon = ({ size = 18, className = "" }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+    className={className}
+  >
+    {/* Línea horizontal central */}
+    <line x1="4" y1="12" x2="20" y2="12" />
+    {/* Rectángulo izquierdo centrado */}
+    <rect x="5" y="6" width="4" height="12" rx="1" />
+    {/* Rectángulo derecho centrado */}
+    <rect x="15" y="8" width="4" height="8" rx="1" />
+  </svg>
+);
+
+// Icono: Alinear nodos abajo (línea horizontal inferior + rectángulos pegados)
+const AlignNodesBottomIcon = ({ size = 18, className = "" }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+    className={className}
+  >
+    {/* Línea horizontal de referencia */}
+    <line x1="4" y1="20" x2="20" y2="20" />
+    {/* Rectángulo izquierdo pegado abajo */}
+    <rect x="5" y="6" width="4" height="12" rx="1" />
+    {/* Rectángulo derecho pegado abajo */}
+    <rect x="15" y="10" width="4" height="8" rx="1" />
+  </svg>
+);
+
 /**
  * Toolbar que aparece cuando hay múltiples nodos seleccionados
  */
 const MultiSelectToolbar = ({
   selectedCount,
-  onAlignLeft,
-  onAlignCenter,
-  onAlignRight,
-  onAlignTop,
-  onAlignMiddle,
-  onAlignBottom,
+  // Alineación de TEXTO dentro del nodo
+  onAlignTextLeft,
+  onAlignTextCenter,
+  onAlignTextRight,
+  // Alineación de NODOS en el canvas
+  onAlignNodesLeft,
+  onAlignNodesCenter,
+  onAlignNodesRight,
+  onAlignNodesTop,
+  onAlignNodesMiddle,
+  onAlignNodesBottom,
+  // Distribución
   onDistributeVertically,
+  // Acciones
   onDeleteSelected,
   onDuplicateSelected,
   onClearSelection,
@@ -72,26 +208,26 @@ const MultiSelectToolbar = ({
       {/* Separador */}
       <div className="w-px h-6 bg-gray-200 mx-1" />
 
-      {/* Alineación horizontal */}
+      {/* Alineación de TEXTO dentro del nodo */}
       <div className="flex items-center gap-0.5 px-1">
         <button
-          onClick={onAlignLeft}
+          onClick={onAlignTextLeft}
           className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-          title="Alinear a la izquierda"
+          title="Alinear texto a la izquierda"
         >
           <AlignLeft size={18} className="text-gray-600" />
         </button>
         <button
-          onClick={onAlignCenter}
+          onClick={onAlignTextCenter}
           className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-          title="Alinear al centro horizontal"
+          title="Alinear texto al centro"
         >
           <AlignCenter size={18} className="text-gray-600" />
         </button>
         <button
-          onClick={onAlignRight}
+          onClick={onAlignTextRight}
           className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-          title="Alinear a la derecha"
+          title="Alinear texto a la derecha"
         >
           <AlignRight size={18} className="text-gray-600" />
         </button>
@@ -100,28 +236,56 @@ const MultiSelectToolbar = ({
       {/* Separador */}
       <div className="w-px h-6 bg-gray-200 mx-1" />
 
-      {/* Alineación vertical */}
+      {/* Alineación de NODOS en el canvas (horizontal) */}
       <div className="flex items-center gap-0.5 px-1">
         <button
-          onClick={onAlignTop}
+          onClick={onAlignNodesLeft}
           className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-          title="Alinear arriba"
+          title="Alinear nodos a la izquierda"
         >
-          <AlignStartVertical size={18} className="text-gray-600" />
+          <AlignNodesLeftIcon size={18} className="text-gray-600" />
         </button>
         <button
-          onClick={onAlignMiddle}
+          onClick={onAlignNodesCenter}
           className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-          title="Alinear al centro vertical"
+          title="Alinear nodos al centro horizontal"
         >
-          <AlignCenterVertical size={18} className="text-gray-600" />
+          <AlignNodesCenterIcon size={18} className="text-gray-600" />
         </button>
         <button
-          onClick={onAlignBottom}
+          onClick={onAlignNodesRight}
           className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-          title="Alinear abajo"
+          title="Alinear nodos a la derecha"
         >
-          <AlignEndVertical size={18} className="text-gray-600" />
+          <AlignNodesRightIcon size={18} className="text-gray-600" />
+        </button>
+      </div>
+
+      {/* Separador */}
+      <div className="w-px h-6 bg-gray-200 mx-1" />
+
+      {/* Alineación de NODOS en el canvas (vertical) */}
+      <div className="flex items-center gap-0.5 px-1">
+        <button
+          onClick={onAlignNodesTop}
+          className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+          title="Alinear nodos arriba"
+        >
+          <AlignNodesTopIcon size={18} className="text-gray-600" />
+        </button>
+        <button
+          onClick={onAlignNodesMiddle}
+          className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+          title="Alinear nodos al centro vertical"
+        >
+          <AlignNodesMiddleIcon size={18} className="text-gray-600" />
+        </button>
+        <button
+          onClick={onAlignNodesBottom}
+          className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+          title="Alinear nodos abajo"
+        >
+          <AlignNodesBottomIcon size={18} className="text-gray-600" />
         </button>
       </div>
 

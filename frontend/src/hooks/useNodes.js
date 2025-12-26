@@ -1523,16 +1523,26 @@ export const useNodes = () => {
       }
       
       const currentNodes = project.nodes;
+      const layoutType = project.layoutType || 'mindflow';
       
       let newX = 400;
-      let newY = 300;
+      let newY = layoutType === 'mindtree' ? 100 : 300;
       
       if (parentId) {
         const parent = currentNodes.find(n => n.id === parentId);
         if (parent) {
           const siblings = currentNodes.filter(n => n.parentId === parentId);
-          newX = parent.x + 280;
-          newY = parent.y + (siblings.length * 100) - 50;
+          
+          if (layoutType === 'mindtree') {
+            // MindTree: hijos debajo del padre, distribuidos horizontalmente
+            const parentWidth = parent.width || 160;
+            newX = parent.x + (siblings.length * 180);
+            newY = parent.y + (parent.height || 64) + 120;
+          } else {
+            // MindFlow: hijos a la derecha del padre, distribuidos verticalmente
+            newX = parent.x + 280;
+            newY = parent.y + (siblings.length * 100) - 50;
+          }
         }
       } else if (position) {
         newX = position.x;
@@ -1552,14 +1562,14 @@ export const useNodes = () => {
         nodeType: options?.nodeType === 'dashed' ? 'dashed_text' : (options?.nodeType || 'default') // 'default' | 'dashed_text'
       };
 
-      console.log('Creating new node:', newNode);
+      console.log('Creating new node:', newNode, 'Layout:', layoutType);
       
       // Agregar el nuevo nodo
       let newNodes = [...currentNodes, newNode];
       
-      // Si autoAlign está activo, aplicar alineación jerárquica
+      // Si autoAlign está activo, aplicar alineación según el tipo de layout
       if (autoAlignAfter && parentId) {
-        console.log('[addNode] Aplicando alineación jerárquica después de crear nodo');
+        console.log('[addNode] Aplicando alineación después de crear nodo. Layout:', layoutType);
         // Encontrar el nodo raíz de esta jerarquía
         let currentParentId = parentId;
         let rootId = parentId;
@@ -1572,8 +1582,12 @@ export const useNodes = () => {
             break;
           }
         }
-        // Aplicar alineación desde la raíz
-        newNodes = autoAlignHierarchy(rootId, newNodes);
+        // Aplicar alineación según el tipo de layout
+        if (layoutType === 'mindtree') {
+          newNodes = autoAlignMindTree(rootId, newNodes);
+        } else {
+          newNodes = autoAlignHierarchy(rootId, newNodes);
+        }
       }
       
       // Guardar el NUEVO estado en el historial (después del cambio)
@@ -1588,7 +1602,7 @@ export const useNodes = () => {
 
     setSelectedNodeId(newId);
     return newId;
-  }, [activeProjectId, pushToHistory, autoAlignHierarchy]);
+  }, [activeProjectId, pushToHistory, autoAlignHierarchy, autoAlignMindTree]);
 
   // Guardar posición al FINALIZAR el drag (no durante)
   const saveNodePositionToHistory = useCallback(() => {

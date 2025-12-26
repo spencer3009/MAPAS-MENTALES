@@ -2258,9 +2258,13 @@ export const useNodes = () => {
     distributeNodesHorizontally,
     moveSelectedNodes,
     
-    // Alineación jerárquica automática
+    // Alineación jerárquica automática (MindFlow - horizontal)
     autoAlignHierarchy,
     applyFullAutoAlignment,
+    
+    // Alineación MindTree (vertical)
+    autoAlignMindTree,
+    applyFullMindTreeAlignment,
     
     // Compatibilidad
     resetToDefault,

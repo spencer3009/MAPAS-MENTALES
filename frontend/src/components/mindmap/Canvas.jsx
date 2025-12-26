@@ -55,7 +55,9 @@ const Canvas = ({
   // Alineación de texto
   onAlignTextLeft,
   onAlignTextCenter,
-  onAlignTextRight
+  onAlignTextRight,
+  // Tipo de layout del proyecto
+  layoutType = 'mindflow'
 }) => {
   const containerRef = useRef(null);
   const [dragging, setDragging] = useState(null);

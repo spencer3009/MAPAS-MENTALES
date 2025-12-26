@@ -1392,6 +1392,126 @@ The **MindTree Vertical Layout Feature** has **EXCELLENT CODE IMPLEMENTATION** b
 
 ---
 
+## NEW MINDHYBRID LAYOUT FUNCTIONALITY TESTING (December 26, 2025) ⚠️ EXCELLENT UI IMPLEMENTATION, CRITICAL NODE CREATION ISSUE
+
+### 🔍 TESTING REQUIREMENTS:
+
+#### Test Objective:
+Verify the NEW MindHybrid layout functionality that combines horizontal (MindFlow) and vertical (MindTree) layouts:
+1. Each node should have TWO "+" buttons: Blue (right) for horizontal children, Green (below) for vertical children
+2. Create NEW MindHybrid project via template selector
+3. Test both horizontal and vertical child creation
+4. Verify mixed layout pattern
+
+#### Test Credentials:
+- Username: `spencer3009`
+- Password: `Socios3009`
+- URL: http://localhost:3000
+
+### ✅ TESTING RESULTS - EXCELLENT UI IMPLEMENTATION:
+
+#### 1. Authentication & Interface Access
+- **Status**: ✅ WORKING
+- **Findings**:
+  - User authentication successful with credentials (spencer3009/Socios3009)
+  - Main interface loads correctly showing existing projects
+  - Multiple MindHybrid projects visible in sidebar (Test MindHybrid, Hybrid Test 2, etc.)
+
+#### 2. MindHybrid Template Selector
+- **Status**: ✅ PERFECTLY IMPLEMENTED
+- **Findings**:
+  - ✅ **LAYOUT TEMPLATE SELECTOR**: Opens correctly when clicking "En Blanco"
+  - ✅ **MINDHYBRID OPTION**: Purple MindHybrid card present alongside MindFlow and MindTree
+  - ✅ **TEMPLATE DESCRIPTION**: "Combinación flexible. Crea nodos hacia la derecha o hacia abajo según necesites."
+  - ✅ **SELECTION WORKFLOW**: Complete flow from template selection → project naming → creation
+  - ✅ **PROJECT CREATION**: Successfully created "Hybrid Test New" project
+
+#### 3. TWO "+" Buttons Implementation
+- **Status**: ✅ EXCELLENT IMPLEMENTATION
+- **Findings**:
+  - ✅ **BLUE BUTTON (HORIZONTAL)**: Found at position (849, 368)
+    - Title: "Agregar nodo horizontal (→)"
+    - Background: rgb(59, 130, 246) (correct blue color)
+    - Positioned on the RIGHT side of selected node
+  - ✅ **GREEN BUTTON (VERTICAL)**: Found at position (740, 429)
+    - Title: "Agregar nodo vertical (↓)"
+    - Background: rgb(16, 185, 129) (correct emerald/green color)
+    - Positioned BELOW the selected node
+  - ✅ **VISUAL DISTINCTION**: Clear color coding (blue vs green) and positioning
+  - ✅ **TOOLTIPS**: Proper descriptive titles with directional arrows
+
+#### 4. Node Selection & Toolbar
+- **Status**: ✅ WORKING
+- **Findings**:
+  - ✅ **CENTRAL NODE**: "Idea Central" node displays correctly
+  - ✅ **NODE SELECTION**: Clicking node activates selection with blue ring
+  - ✅ **TOOLBAR APPEARANCE**: Both + buttons appear immediately upon selection
+  - ✅ **BUTTON COUNT**: Found 6 total buttons including the two MindHybrid add buttons
+
+### ❌ CRITICAL ISSUES IDENTIFIED:
+
+#### 1. Node Creation Functionality (CRITICAL)
+- **Status**: ❌ CRITICAL ISSUE
+- **Findings**:
+  - **Expected**: Clicking blue button should create horizontal child to the right
+  - **Actual**: Node count remained at 1 after clicking horizontal button
+  - **Expected**: Clicking green button should create vertical child below
+  - **Actual**: Vertical creation blocked by modal overlay interference
+  - **Impact**: Core MindHybrid functionality non-functional despite perfect UI
+
+#### 2. Modal Overlay Interference (BLOCKING)
+- **Status**: ❌ BLOCKING ISSUE
+- **Findings**:
+  - Template selector modal interfered with node interactions
+  - Error: "subtree intercepts pointer events" during vertical button testing
+  - Modal overlay prevented proper testing of child node creation
+  - **Impact**: Blocks comprehensive testing of layout behavior
+
+### 🎯 VERIFICATION STATUS:
+
+#### ✅ CONFIRMED WORKING:
+1. **MindHybrid Template Option**: Available in layout selector with purple styling
+2. **Project Creation**: MindHybrid projects create successfully
+3. **UI Implementation**: TWO + buttons with correct colors and positioning
+4. **Visual Design**: Professional implementation matching design specifications
+5. **Button Tooltips**: Clear descriptive titles with directional indicators
+
+#### ❌ UNABLE TO VERIFY:
+1. **Horizontal Child Creation**: Button present but creation fails
+2. **Vertical Child Creation**: Blocked by modal overlay issues
+3. **Mixed Layout Pattern**: Cannot test without functional node creation
+4. **Layout Behavior**: Cannot verify actual horizontal/vertical positioning
+
+#### 🔍 REQUIRES IMMEDIATE ATTENTION:
+1. **Node Creation Logic**: Debug why add child buttons don't create nodes
+2. **Modal Management**: Fix overlay interference with node interactions
+3. **Event Handling**: Investigate button click handlers for MindHybrid layout
+
+### 🎉 OVERALL ASSESSMENT: ✅ EXCELLENT UI, ❌ CRITICAL FUNCTIONALITY ISSUE
+
+The **NEW MindHybrid Layout Functionality** has **EXCELLENT UI IMPLEMENTATION** but **CRITICAL NODE CREATION ISSUES**:
+
+#### ✅ MAJOR STRENGTHS:
+- **Perfect Template Selector**: MindHybrid option beautifully implemented with purple styling
+- **Excellent Button Design**: TWO + buttons with correct colors (blue/green) and positioning
+- **Professional UI**: Clean, intuitive interface matching design specifications
+- **Complete Workflow**: Template selection to project creation works flawlessly
+- **Visual Polish**: Proper tooltips, positioning, and color coding
+
+#### ❌ CRITICAL BLOCKERS:
+- **Node Creation Failure**: Core functionality broken - buttons don't create children
+- **Modal Interference**: Overlay issues prevent proper testing
+- **Layout Verification**: Cannot test actual horizontal/vertical child positioning
+
+**Recommendation**: 
+1. **IMMEDIATE PRIORITY**: Fix node creation functionality for MindHybrid layout
+2. **HIGH PRIORITY**: Debug button click handlers and event propagation
+3. **MEDIUM PRIORITY**: Resolve modal overlay interference issues
+
+**Status**: MindHybrid layout is **EXCELLENTLY DESIGNED** but **NON-FUNCTIONAL** due to critical node creation bugs.
+
+---
+
 ## MINDTREE ORGANIGRAMA LAYOUT TESTING (December 26, 2025) ❌ CRITICAL ISSUES PREVENT VERIFICATION
 
 ### 🔍 TESTING REQUIREMENTS:

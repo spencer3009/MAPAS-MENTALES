@@ -515,13 +515,20 @@ const MindMapApp = () => {
           {/* Toolbar de selección múltiple */}
           <MultiSelectToolbar
             selectedCount={selectedNodeIds.size}
-            onAlignLeft={alignNodesLeft}
-            onAlignCenter={alignNodesCenter}
-            onAlignRight={alignNodesRight}
-            onAlignTop={alignNodesTop}
-            onAlignMiddle={alignNodesMiddle}
-            onAlignBottom={alignNodesBottom}
+            // Alineación de TEXTO dentro del nodo
+            onAlignTextLeft={alignTextLeft}
+            onAlignTextCenter={alignTextCenter}
+            onAlignTextRight={alignTextRight}
+            // Alineación de NODOS en el canvas
+            onAlignNodesLeft={alignNodesLeft}
+            onAlignNodesCenter={alignNodesCenter}
+            onAlignNodesRight={alignNodesRight}
+            onAlignNodesTop={alignNodesTop}
+            onAlignNodesMiddle={alignNodesMiddle}
+            onAlignNodesBottom={alignNodesBottom}
+            // Distribución
             onDistributeVertically={distributeNodesVertically}
+            // Acciones
             onDeleteSelected={deleteSelectedNodes}
             onDuplicateSelected={duplicateSelectedNodes}
             onClearSelection={clearSelection}

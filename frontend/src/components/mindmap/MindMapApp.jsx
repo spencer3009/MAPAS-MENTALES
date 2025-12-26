@@ -260,30 +260,38 @@ const MindMapApp = () => {
   }, [resetPan, resetZoom]);
 
   // Función de alineación automática
-  // Alinea los nodos seleccionados a la izquierda y distribuye uniformemente
-  // Función de alineación automática
-  // Usa la alineación jerárquica para toda la estructura padre-hijo
+  // Usa el layout correcto según el tipo de proyecto (MindFlow o MindTree)
   const applyAutoAlignment = useCallback(() => {
     if (!autoAlignEnabled) return;
 
-    console.log('[AutoAlign] Aplicando alineación jerárquica automática');
+    console.log('[AutoAlign] Aplicando alineación para layout:', currentLayoutType);
     
-    // Aplicar alineación jerárquica completa
-    applyFullAutoAlignment();
+    // Aplicar alineación según el tipo de layout del proyecto
+    if (currentLayoutType === 'mindtree') {
+      applyFullMindTreeAlignment();
+    } else {
+      applyFullAutoAlignment();
+    }
 
     console.log('[AutoAlign] Alineación completada');
-  }, [autoAlignEnabled, applyFullAutoAlignment]);
+  }, [autoAlignEnabled, currentLayoutType, applyFullAutoAlignment, applyFullMindTreeAlignment]);
 
   // Toggle de alineación automática
   const handleToggleAutoAlign = useCallback((enabled) => {
     setAutoAlignEnabled(enabled);
     console.log('[AutoAlign] Alineación automática:', enabled ? 'ACTIVADA' : 'DESACTIVADA');
     
-    // Si se activa, aplicar alineación inmediatamente
+    // Si se activa, aplicar alineación inmediatamente según el layout
     if (enabled) {
-      setTimeout(() => applyFullAutoAlignment(), 100);
+      setTimeout(() => {
+        if (currentLayoutType === 'mindtree') {
+          applyFullMindTreeAlignment();
+        } else {
+          applyFullAutoAlignment();
+        }
+      }, 100);
     }
-  }, [applyFullAutoAlignment]);
+  }, [currentLayoutType, applyFullAutoAlignment, applyFullMindTreeAlignment]);
 
 
   const handleExportJSON = useCallback(() => {

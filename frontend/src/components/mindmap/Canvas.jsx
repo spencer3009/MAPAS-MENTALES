@@ -517,6 +517,7 @@ const Canvas = ({
           position={controlPositions.toolbar}
           visible={true}
           zoom={1}
+          nodeType={selectedNode?.nodeType || 'default'}
           currentColor={selectedNode?.color}
           hasComment={!!selectedNode?.comment}
           hasIcon={!!selectedNode?.icon}

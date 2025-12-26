@@ -242,6 +242,65 @@ const MindMapApp = () => {
     resetZoom();
   }, [resetPan, resetZoom]);
 
+  // Función de alineación automática
+  // Alinea los nodos seleccionados a la izquierda y distribuye uniformemente
+  const applyAutoAlignment = useCallback(() => {
+    if (!autoAlignEnabled) return;
+    if (selectedNodeIds.size < 2) return;
+
+    console.log('[AutoAlign] Aplicando alineación automática a', selectedNodeIds.size, 'nodos');
+
+    // Obtener los nodos seleccionados
+    const selectedNodes = nodes.filter(n => selectedNodeIds.has(n.id));
+    if (selectedNodes.length < 2) return;
+
+    // Función para obtener la altura del nodo
+    const getNodeHeight = (node) => {
+      if (node.height && node.height > 0) return node.height;
+      const baseHeight = 64;
+      const text = node.text || '';
+      const nodeWidth = node.width || 160;
+      const charsPerLine = Math.floor(nodeWidth / 9);
+      const estimatedLines = Math.max(1, Math.ceil(text.length / charsPerLine));
+      return Math.max(baseHeight, 30 + (estimatedLines * 22));
+    };
+
+    // 1. Alinear a la izquierda: encontrar la X mínima
+    const minX = Math.min(...selectedNodes.map(n => n.x));
+
+    // 2. Ordenar nodos por posición Y actual
+    const sortedNodes = [...selectedNodes].sort((a, b) => a.y - b.y);
+
+    // 3. Calcular distribución vertical uniforme
+    const topY = sortedNodes[0].y;
+    const lastNode = sortedNodes[sortedNodes.length - 1];
+    const bottomY = lastNode.y + getNodeHeight(lastNode);
+    const totalHeights = sortedNodes.reduce((sum, n) => sum + getNodeHeight(n), 0);
+    const totalArea = bottomY - topY;
+    const espacio = Math.max(20, (totalArea - totalHeights) / (sortedNodes.length - 1));
+
+    // 4. Calcular nuevas posiciones
+    const newPositions = new Map();
+    let currentY = topY;
+    sortedNodes.forEach((node) => {
+      newPositions.set(node.id, { x: minX, y: currentY });
+      currentY += getNodeHeight(node) + espacio;
+    });
+
+    // 5. Aplicar las nuevas posiciones
+    newPositions.forEach((pos, nodeId) => {
+      updateNodePosition(nodeId, pos.x, pos.y, false);
+    });
+
+    console.log('[AutoAlign] Alineación completada');
+  }, [autoAlignEnabled, selectedNodeIds, nodes, updateNodePosition]);
+
+  // Toggle de alineación automática
+  const handleToggleAutoAlign = useCallback((enabled) => {
+    setAutoAlignEnabled(enabled);
+    console.log('[AutoAlign] Alineación automática:', enabled ? 'ACTIVADA' : 'DESACTIVADA');
+  }, []);
+
   const handleExportJSON = useCallback(() => {
     try {
       const dataStr = JSON.stringify(nodes, null, 2);

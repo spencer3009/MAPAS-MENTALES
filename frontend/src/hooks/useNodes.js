@@ -710,28 +710,21 @@ export const useNodes = () => {
 
     console.log('[distributeNodesVertically] Distribuyendo', selectedNodes.length, 'nodos verticalmente');
 
-    // Función auxiliar para estimar la altura real de un nodo
-    // Toma en cuenta el texto y tipo de nodo
+    // Función para obtener la altura del nodo
+    // Usa la altura almacenada o estima basándose en el contenido
     const getNodeHeight = (node) => {
-      // Si el nodo tiene altura almacenada, usarla
+      // Si el nodo tiene altura almacenada (actualizada por el render), usarla
       if (node.height && node.height > 0) {
         return node.height;
       }
       
-      // Estimar altura basada en el contenido
-      const baseHeight = 64; // Altura mínima
+      // Fallback: estimar altura basada en el contenido del texto
+      const baseHeight = 64;
       const text = node.text || '';
       const nodeWidth = node.width || 160;
-      
-      // Estimar cuántas líneas de texto hay (aproximadamente 10-12 caracteres por línea)
-      const charsPerLine = Math.floor(nodeWidth / 8); // ~8px por carácter
-      const estimatedLines = Math.ceil(text.length / charsPerLine);
-      const lineHeight = 24; // altura aproximada por línea
-      
-      // Altura = base + líneas adicionales
-      const estimatedHeight = Math.max(baseHeight, 40 + (estimatedLines * lineHeight));
-      
-      return estimatedHeight;
+      const charsPerLine = Math.floor(nodeWidth / 9);
+      const estimatedLines = Math.max(1, Math.ceil(text.length / charsPerLine));
+      return Math.max(baseHeight, 30 + (estimatedLines * 22));
     };
 
     // 1. Ordenar nodos por posición Y (de arriba hacia abajo)
@@ -741,7 +734,7 @@ export const useNodes = () => {
     const firstNode = sortedNodes[0];
     const lastNode = sortedNodes[sortedNodes.length - 1];
     
-    // 3. Calcular topY (top del primer nodo) y bottomY (bottom del último nodo)
+    // 3. Calcular topY y bottomY
     const topY = firstNode.y;
     const lastNodeHeight = getNodeHeight(lastNode);
     const bottomY = lastNode.y + lastNodeHeight;
@@ -750,7 +743,6 @@ export const useNodes = () => {
     const totalHeights = sortedNodes.reduce((sum, n) => sum + getNodeHeight(n), 0);
     
     // 5. Calcular el espacio uniforme entre nodos
-    // espacio = (bottomY - topY - totalHeights) / (N - 1)
     const N = sortedNodes.length;
     const espacio = (bottomY - topY - totalHeights) / (N - 1);
     
@@ -759,8 +751,6 @@ export const useNodes = () => {
     console.log('[distributeNodesVertically] Espacio uniforme calculado:', espacio);
 
     // 6. Reposicionar cada nodo
-    // El primer nodo se queda donde está (currentY = topY)
-    // Para cada nodo: asignar node.y = currentY, luego currentY += node.height + espacio
     const newPositions = new Map();
     let currentY = topY;
     

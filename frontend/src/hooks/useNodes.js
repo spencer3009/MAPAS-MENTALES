@@ -969,158 +969,131 @@ export const useNodes = () => {
   }, [nodes, activeProjectId, autoAlignHierarchy]);
 
   // ==========================================
-  // ALGORITMO DE ALINEACIÓN MINDTREE (VERTICAL)
-  // Flujo de arriba hacia abajo tipo organigrama
+  // ALGORITMO DE ALINEACIÓN MINDTREE (ORGANIGRAMA VERTICAL)
+  // Layout tipo organigrama: padre arriba, hijos en columna vertical debajo
+  // Patrón:
+  //    Padre
+  //      |
+  //      ├── Hijo 1
+  //      ├── Hijo 2
+  //      └── Hijo 3
   // ==========================================
 
-  // Obtener el ancho de un nodo
-  const getNodeWidth = useCallback((node) => {
-    if (node.width && node.width > 0) return node.width;
-    return 160; // Ancho por defecto
-  }, []);
+  // Constantes específicas para MindTree organigrama
+  const MINDTREE_CHILD_VERTICAL_SPACING = 80; // Espacio vertical entre hijos (en columna)
+  const MINDTREE_PARENT_CHILD_GAP = 60; // Espacio entre padre y primer hijo
+  const MINDTREE_LEVEL_INDENT = 40; // Indentación horizontal por nivel
 
-  // Calcular el ancho total de un bloque (nodo + todos sus descendientes en horizontal)
-  const calculateBlockWidth = useCallback((nodeId, allNodes) => {
+  // Calcular la altura total de un bloque (nodo + todos sus descendientes)
+  const calculateBlockHeight = useCallback((nodeId, allNodes) => {
     const node = allNodes.find(n => n.id === nodeId);
     if (!node) return 0;
 
     const children = allNodes.filter(n => n.parentId === nodeId);
+    const nodeH = getNodeHeight(node);
     
     if (children.length === 0) {
-      // Nodo hoja: solo su propio ancho
-      return getNodeWidth(node);
+      return nodeH;
     }
 
-    // Calcular ancho de cada hijo (recursivamente)
-    let totalWidth = 0;
+    // Altura total = altura del padre + gap + suma de alturas de hijos con espaciado
+    let childrenTotalHeight = 0;
     children.forEach((child, index) => {
-      const childBlockWidth = calculateBlockWidth(child.id, allNodes);
-      totalWidth += childBlockWidth;
+      childrenTotalHeight += calculateBlockHeight(child.id, allNodes);
       if (index < children.length - 1) {
-        totalWidth += MINDTREE_HORIZONTAL_SPACING; // Espacio entre bloques hermanos
+        childrenTotalHeight += MINDTREE_CHILD_VERTICAL_SPACING;
       }
     });
 
-    // El ancho del bloque es el máximo entre el nodo padre y el total de hijos
-    return Math.max(getNodeWidth(node), totalWidth);
-  }, [getNodeWidth, MINDTREE_HORIZONTAL_SPACING]);
+    return nodeH + MINDTREE_PARENT_CHILD_GAP + childrenTotalHeight;
+  }, [getNodeHeight, MINDTREE_CHILD_VERTICAL_SPACING, MINDTREE_PARENT_CHILD_GAP]);
 
-  // Alinear un subárbol verticalmente (MindTree)
-  const alignSubtreeVertical = useCallback((nodeId, startX, startY, allNodes) => {
+  // Alinear un subárbol en formato organigrama vertical
+  // Los hijos se colocan en columna vertical debajo del padre
+  const alignSubtreeOrgChart = useCallback((nodeId, startX, startY, allNodes, level = 0) => {
     const node = allNodes.find(n => n.id === nodeId);
-    if (!node) return { nodes: allNodes, blockWidth: 0 };
+    if (!node) return { nodes: allNodes, blockHeight: 0 };
 
     const children = allNodes.filter(n => n.parentId === nodeId);
     let updatedNodes = [...allNodes];
+    const nodeH = getNodeHeight(node);
+
+    // Posicionar el nodo actual
+    updatedNodes = updatedNodes.map(n => 
+      n.id === nodeId ? { ...n, x: startX, y: startY } : n
+    );
 
     if (children.length === 0) {
-      // Nodo hoja: posicionarlo y retornar
-      updatedNodes = updatedNodes.map(n => 
-        n.id === nodeId ? { ...n, x: startX, y: startY } : n
-      );
-      return { nodes: updatedNodes, blockWidth: getNodeWidth(node) };
+      return { nodes: updatedNodes, blockHeight: nodeH };
     }
 
-    // Ordenar hijos por posición X actual
-    const sortedChildren = [...children].sort((a, b) => a.x - b.x);
+    // Ordenar hijos por posición Y actual (para mantener orden)
+    const sortedChildren = [...children].sort((a, b) => a.y - b.y);
 
-    // Calcular anchos de cada bloque hijo
-    const childrenBlockWidths = sortedChildren.map(child => 
-      calculateBlockWidth(child.id, updatedNodes)
-    );
+    // Posición X de los hijos (indentados respecto al padre)
+    const childX = startX + MINDTREE_LEVEL_INDENT;
+    
+    // Posición Y inicial de los hijos (debajo del padre)
+    let currentY = startY + nodeH + MINDTREE_PARENT_CHILD_GAP;
 
-    // Calcular ancho total de todos los hijos
-    const totalChildrenWidth = childrenBlockWidths.reduce((sum, w, i) => {
-      return sum + w + (i < childrenBlockWidths.length - 1 ? MINDTREE_HORIZONTAL_SPACING : 0);
-    }, 0);
-
-    // Posición Y de los hijos (debajo del padre)
-    const childrenY = startY + getNodeHeight(node) + MINDTREE_VERTICAL_OFFSET;
-
-    // Calcular X inicial para centrar los hijos respecto al padre
-    const nodeWidth = getNodeWidth(node);
-    const childrenStartX = startX + (nodeWidth / 2) - (totalChildrenWidth / 2);
-
-    // Posicionar cada hijo y su subárbol
-    let currentX = childrenStartX;
-    for (let i = 0; i < sortedChildren.length; i++) {
-      const child = sortedChildren[i];
-      const childBlockWidth = childrenBlockWidths[i];
-
-      // El hijo se centra dentro de su bloque
-      const childNodeWidth = getNodeWidth(child);
-      const childX = currentX + (childBlockWidth / 2) - (childNodeWidth / 2);
-
-      // Alinear el subárbol del hijo
-      const result = alignSubtreeVertical(child.id, childX, childrenY, updatedNodes);
+    // Posicionar cada hijo en columna vertical
+    for (const child of sortedChildren) {
+      const result = alignSubtreeOrgChart(child.id, childX, currentY, updatedNodes, level + 1);
       updatedNodes = result.nodes;
-
-      // Avanzar X para el siguiente bloque
-      currentX += childBlockWidth + MINDTREE_HORIZONTAL_SPACING;
+      
+      // Avanzar Y para el siguiente hijo
+      currentY += result.blockHeight + MINDTREE_CHILD_VERTICAL_SPACING;
     }
 
-    // Posicionar el nodo padre centrado sobre sus hijos
-    const parentX = childrenStartX + (totalChildrenWidth / 2) - (nodeWidth / 2);
-    updatedNodes = updatedNodes.map(n => 
-      n.id === nodeId ? { ...n, x: parentX, y: startY } : n
-    );
+    // Calcular altura total del bloque
+    const totalBlockHeight = currentY - startY - MINDTREE_CHILD_VERTICAL_SPACING;
 
-    return { nodes: updatedNodes, blockWidth: Math.max(nodeWidth, totalChildrenWidth) };
-  }, [getNodeHeight, getNodeWidth, calculateBlockWidth, MINDTREE_VERTICAL_OFFSET, MINDTREE_HORIZONTAL_SPACING]);
+    return { nodes: updatedNodes, blockHeight: totalBlockHeight };
+  }, [getNodeHeight, MINDTREE_LEVEL_INDENT, MINDTREE_PARENT_CHILD_GAP, MINDTREE_CHILD_VERTICAL_SPACING]);
 
-  // Función principal: alinear toda la jerarquía en modo MindTree
+  // Función principal: alinear toda la jerarquía en modo MindTree (Organigrama)
   const autoAlignMindTree = useCallback((rootId, currentNodes) => {
     if (!rootId) return currentNodes;
 
     const root = currentNodes.find(n => n.id === rootId);
     if (!root) return currentNodes;
 
-    const children = currentNodes.filter(n => n.parentId === rootId);
-    if (children.length === 0) return currentNodes;
+    console.log('[MindTree Organigrama] Alineando subárbol de:', root.text?.substring(0, 20));
 
-    console.log('[AutoAlignMindTree] Alineando subárbol de:', root.text?.substring(0, 20));
-
-    // Mantener la posición Y del root, pero calcular nueva X centrada
-    const result = alignSubtreeVertical(rootId, root.x, root.y, currentNodes);
+    // Mantener la posición del root y alinear todo debajo
+    const result = alignSubtreeOrgChart(rootId, root.x, root.y, currentNodes, 0);
     
     return result.nodes;
-  }, [alignSubtreeVertical]);
+  }, [alignSubtreeOrgChart]);
 
   // Aplicar alineación automática MindTree a toda la estructura
   const applyFullMindTreeAlignment = useCallback(() => {
-    console.log('[MindTree] Aplicando alineación vertical completa');
+    console.log('[MindTree] Aplicando alineación de organigrama vertical');
 
     // Encontrar todos los nodos raíz (sin padre)
     const rootNodes = nodes.filter(n => !n.parentId);
     
+    if (rootNodes.length === 0) {
+      console.log('[MindTree] No hay nodos raíz');
+      return;
+    }
+
     let updatedNodes = [...nodes];
     let currentRootY = 100; // Posición Y inicial para el primer root
 
     // Para cada nodo raíz, alinear su jerarquía
-    rootNodes.forEach((root, index) => {
-      // Calcular la altura total del árbol de este root
-      const getTreeHeight = (nodeId) => {
-        const node = updatedNodes.find(n => n.id === nodeId);
-        if (!node) return 0;
-        const children = updatedNodes.filter(n => n.parentId === nodeId);
-        if (children.length === 0) return getNodeHeight(node);
-        const maxChildHeight = Math.max(...children.map(c => getTreeHeight(c.id)));
-        return getNodeHeight(node) + MINDTREE_VERTICAL_OFFSET + maxChildHeight;
-      };
-
+    rootNodes.forEach((root) => {
       // Posicionar este root
       updatedNodes = updatedNodes.map(n => 
-        n.id === root.id ? { ...n, y: currentRootY } : n
+        n.id === root.id ? { ...n, x: 100, y: currentRootY } : n
       );
 
-      const children = updatedNodes.filter(n => n.parentId === root.id);
-      if (children.length > 0) {
-        updatedNodes = autoAlignMindTree(root.id, updatedNodes);
-      }
+      // Alinear el subárbol del root
+      const result = alignSubtreeOrgChart(root.id, 100, currentRootY, updatedNodes, 0);
+      updatedNodes = result.nodes;
 
       // Avanzar Y para el siguiente root (si hay múltiples)
-      const treeHeight = getTreeHeight(root.id);
-      currentRootY += treeHeight + MINDTREE_BLOCK_MARGIN;
+      currentRootY += result.blockHeight + MINDTREE_BLOCK_MARGIN;
     });
 
     // Actualizar el estado
@@ -1130,8 +1103,8 @@ export const useNodes = () => {
         : p
     ));
 
-    console.log('[MindTree] Alineación vertical completada');
-  }, [nodes, activeProjectId, autoAlignMindTree, getNodeHeight, MINDTREE_VERTICAL_OFFSET, MINDTREE_BLOCK_MARGIN]);
+    console.log('[MindTree] Alineación de organigrama completada');
+  }, [nodes, activeProjectId, alignSubtreeOrgChart, MINDTREE_BLOCK_MARGIN]);
 
   // Alinear nodos abajo
   const alignNodesBottom = useCallback(() => {

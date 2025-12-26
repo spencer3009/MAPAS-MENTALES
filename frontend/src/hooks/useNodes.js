@@ -1669,11 +1669,6 @@ export const useNodes = () => {
       
       let newNodes = [...currentNodes, newNode];
       
-      // Si autoAlign está activo, reorganizar
-      if (autoAlignAfter) {
-        newNodes = autoAlignMindHybrid(parentId, newNodes);
-      }
-      
       pushToHistory(activeProjectId, newNodes);
       
       return prev.map(p => 

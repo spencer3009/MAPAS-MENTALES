@@ -51,7 +51,11 @@ const Canvas = ({
   sidebarTab,
   // Alineación automática
   autoAlignEnabled,
-  onAutoAlign
+  onAutoAlign,
+  // Alineación de texto
+  onAlignTextLeft,
+  onAlignTextCenter,
+  onAlignTextRight
 }) => {
   const containerRef = useRef(null);
   const [dragging, setDragging] = useState(null);

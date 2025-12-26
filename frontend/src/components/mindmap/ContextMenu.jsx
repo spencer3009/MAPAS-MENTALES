@@ -22,7 +22,6 @@ const ContextMenu = ({
 }) => {
   const [showLineWidthMenu, setShowLineWidthMenu] = useState(false);
   const menuRef = useRef(null);
-  const [menuPosition, setMenuPosition] = useState(null);
   
   if (!position) return null;
 

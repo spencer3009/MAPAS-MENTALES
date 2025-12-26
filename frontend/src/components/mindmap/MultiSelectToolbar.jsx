@@ -96,7 +96,7 @@ const AlignNodesTopIcon = ({ size = 18, className = "" }) => (
   </svg>
 );
 
-// Icono: Alinear nodos al centro vertical (línea horizontal central + rectángulos centrados)
+// Icono: Alinear y distribuir nodos verticalmente (rectángulos con línea vertical central)
 const AlignNodesMiddleIcon = ({ size = 18, className = "" }) => (
   <svg 
     width={size} 
@@ -109,12 +109,12 @@ const AlignNodesMiddleIcon = ({ size = 18, className = "" }) => (
     strokeLinejoin="round"
     className={className}
   >
-    {/* Línea horizontal central */}
-    <line x1="4" y1="12" x2="20" y2="12" />
-    {/* Rectángulo izquierdo centrado */}
-    <rect x="5" y="6" width="4" height="12" rx="1" />
-    {/* Rectángulo derecho centrado */}
-    <rect x="15" y="8" width="4" height="8" rx="1" />
+    {/* Rectángulo superior */}
+    <rect x="4" y="4" width="16" height="5" rx="1" />
+    {/* Línea vertical central conectando */}
+    <line x1="12" y1="9" x2="12" y2="15" />
+    {/* Rectángulo inferior */}
+    <rect x="4" y="15" width="16" height="5" rx="1" />
   </svg>
 );
 

@@ -146,8 +146,15 @@ const MindMapApp = () => {
   // Estado para modal de todos los proyectos
   const [showAllProjectsModal, setShowAllProjectsModal] = useState(false);
 
+  // Estado para selector de plantilla de layout
+  const [showLayoutSelector, setShowLayoutSelector] = useState(false);
+  const [pendingProjectName, setPendingProjectName] = useState(null);
+
   // Estado para alineación automática (ON por defecto)
   const [autoAlignEnabled, setAutoAlignEnabled] = useState(true);
+
+  // Obtener el layoutType del proyecto activo
+  const currentLayoutType = activeProject?.layoutType || 'mindflow';
 
   // Estado para recordatorios (para mostrar indicador en nodos)
   const [nodeReminders, setNodeReminders] = useState(new Set());

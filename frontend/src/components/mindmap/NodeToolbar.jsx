@@ -47,6 +47,7 @@ const NodeToolbar = ({
   position,
   visible,
   zoom = 1,
+  nodeType = 'default',
   currentColor,
   hasComment = false,
   hasIcon = false,
@@ -67,6 +68,9 @@ const NodeToolbar = ({
   onComment
 }) => {
   if (!visible) return null;
+
+  // Determinar si es un nodo de tipo "solo línea" (sin fondo)
+  const isDashedNode = nodeType === 'dashed' || nodeType === 'dashed_text';
 
   const handleStyleClick = (e) => {
     e.stopPropagation();

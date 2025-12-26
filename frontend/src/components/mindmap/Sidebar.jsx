@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { 
   Plus, LayoutTemplate, FileText, Trash2, Check, Pencil, 
-  Bell, Pin, PinOff, GripVertical, ArrowUpDown, ExternalLink
+  Bell, Pin, PinOff, GripVertical, ArrowUpDown, ExternalLink, Archive
 } from 'lucide-react';
 
 // URL del logo MindoraMap (horizontal)
@@ -21,7 +21,9 @@ const Sidebar = ({
   onProjectReminder,
   onPinProject,
   onReorderProjects,
-  onOpenAllProjects
+  onOpenAllProjects,
+  onOpenTrash,
+  trashCount = 0
 }) => {
   const [editingProjectId, setEditingProjectId] = useState(null);
   const [editingName, setEditingName] = useState('');

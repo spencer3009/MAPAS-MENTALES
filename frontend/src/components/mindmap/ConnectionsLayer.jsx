@@ -38,7 +38,20 @@ const ConnectionsLayer = memo(({ nodes, layoutType = 'mindflow' }) => {
 
       let start, end, path;
 
-      if (layoutType === 'mindtree') {
+      if (layoutType === 'mindhybrid') {
+        // MindHybrid: el tipo de conector depende de la dirección del nodo hijo
+        if (node.childDirection === 'vertical') {
+          // Hijo vertical: conector tipo org chart (vertical)
+          start = getNodeOutputPointOrgChart(parent, parentWidth, parentHeight);
+          end = getNodeInputPointOrgChart(node, nodeWidth);
+          path = generateOrgChartPath(start.x, start.y, end.x, end.y);
+        } else {
+          // Hijo horizontal (o sin dirección): conector curvo (horizontal)
+          start = getNodeOutputPoint(parent, parentWidth, parentHeight);
+          end = getNodeInputPoint(node, nodeHeight);
+          path = generateBezierPath(start.x, start.y, end.x, end.y);
+        }
+      } else if (layoutType === 'mindtree') {
         // MindTree (Organigrama): conectores verticales tipo org chart
         // Padre: centro inferior, Hijo: centro superior
         start = getNodeOutputPointOrgChart(parent, parentWidth, parentHeight);

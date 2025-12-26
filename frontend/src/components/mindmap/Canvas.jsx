@@ -578,7 +578,8 @@ const Canvas = ({
       </div>
 
       {/* Controles flotantes - FUERA del contenedor transformable */}
-      {shouldShowAddButton && controlPositions.addButton && (
+      {/* Botón único "+" para MindFlow y MindTree */}
+      {shouldShowAddButton && controlPositions.addButton && layoutType !== 'mindhybrid' && (
         <button
           onClick={handleAddChildFromButton}
           onMouseDown={(e) => e.stopPropagation()}
@@ -604,6 +605,69 @@ const Canvas = ({
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
         </button>
+      )}
+
+      {/* Botones MindHybrid: Derecha (horizontal) e Inferior (vertical) */}
+      {shouldShowAddButton && layoutType === 'mindhybrid' && (
+        <>
+          {/* Botón DERECHO → crear hijo horizontal */}
+          {controlPositions.addButtonRight && (
+            <button
+              onClick={handleAddChildHorizontal}
+              onMouseDown={(e) => e.stopPropagation()}
+              className="
+                absolute z-50
+                w-7 h-7 rounded-full
+                bg-blue-500 hover:bg-blue-600
+                text-white shadow-lg
+                flex items-center justify-center
+                transition-all duration-200
+                hover:scale-110 active:scale-95
+                border-2 border-white
+              "
+              style={{
+                left: controlPositions.addButtonRight.x,
+                top: controlPositions.addButtonRight.y,
+                transform: 'translate(-50%, -50%)'
+              }}
+              title="Agregar nodo horizontal (→)"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+          )}
+          
+          {/* Botón INFERIOR ↓ crear hijo vertical */}
+          {controlPositions.addButtonBottom && (
+            <button
+              onClick={handleAddChildVertical}
+              onMouseDown={(e) => e.stopPropagation()}
+              className="
+                absolute z-50
+                w-7 h-7 rounded-full
+                bg-emerald-500 hover:bg-emerald-600
+                text-white shadow-lg
+                flex items-center justify-center
+                transition-all duration-200
+                hover:scale-110 active:scale-95
+                border-2 border-white
+              "
+              style={{
+                left: controlPositions.addButtonBottom.x,
+                top: controlPositions.addButtonBottom.y,
+                transform: 'translate(-50%, -50%)'
+              }}
+              title="Agregar nodo vertical (↓)"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+          )}
+        </>
       )}
 
       {/* Selector de tipo de nodo */}

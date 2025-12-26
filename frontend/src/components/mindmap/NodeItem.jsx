@@ -727,6 +727,7 @@ const NodeItem = memo(({
         </>
       )}
     </div>
+    </>
   );
 });
 

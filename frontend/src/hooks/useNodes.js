@@ -721,6 +721,116 @@ export const useNodes = () => {
     console.log('[alignNodesMiddle] Distribución completada');
   }, [nodes, selectedNodeIds, activeProjectId, pushToHistory, getSelectedNodes]);
 
+  // ==========================================
+  // ALINEACIÓN JERÁRQUICA AUTOMÁTICA
+  // (Para relación padre-hijo)
+  // ==========================================
+
+  // Función auxiliar para obtener la altura de un nodo
+  const getNodeHeight = useCallback((node) => {
+    if (node.height && node.height > 0) return node.height;
+    const baseHeight = 64;
+    const text = node.text || '';
+    const nodeWidth = node.width || 160;
+    const charsPerLine = Math.floor(nodeWidth / 9);
+    const estimatedLines = Math.max(1, Math.ceil(text.length / charsPerLine));
+    return Math.max(baseHeight, 30 + (estimatedLines * 22));
+  }, []);
+
+  // Alinear hijos de un padre y reposicionar el padre al centro
+  const autoAlignHierarchy = useCallback((parentId, currentNodes) => {
+    if (!parentId) return currentNodes;
+
+    const parent = currentNodes.find(n => n.id === parentId);
+    if (!parent) return currentNodes;
+
+    // Obtener todos los hijos del padre
+    const children = currentNodes.filter(n => n.parentId === parentId);
+    if (children.length === 0) return currentNodes;
+
+    console.log('[AutoAlignHierarchy] Alineando', children.length, 'hijos del padre:', parent.text?.substring(0, 20));
+
+    // 1. Ordenar hijos por posición Y actual
+    const sortedChildren = [...children].sort((a, b) => a.y - b.y);
+
+    // 2. Calcular el eje X de los hijos (a la derecha del padre)
+    const childrenX = parent.x + 280;
+
+    // 3. Calcular distribución vertical uniforme
+    const spacing = 20; // Espacio fijo entre hijos
+    const totalChildrenHeight = sortedChildren.reduce((sum, child) => 
+      sum + getNodeHeight(child) + spacing, -spacing);
+
+    // 4. Calcular posición inicial Y para centrar los hijos respecto al padre
+    const parentCenterY = parent.y + getNodeHeight(parent) / 2;
+    let startY = parentCenterY - totalChildrenHeight / 2;
+
+    // 5. Crear mapa de nuevas posiciones para los hijos
+    const newPositions = new Map();
+    let currentY = startY;
+    sortedChildren.forEach((child) => {
+      newPositions.set(child.id, { x: childrenX, y: currentY });
+      currentY += getNodeHeight(child) + spacing;
+    });
+
+    // 6. Calcular el centro vertical del bloque de hijos
+    const firstChildY = startY;
+    const lastChildY = currentY - spacing;
+    const childrenCenterY = (firstChildY + lastChildY) / 2;
+
+    // 7. Reposicionar el padre para que quede centrado verticalmente respecto a los hijos
+    const newParentY = childrenCenterY - getNodeHeight(parent) / 2;
+
+    // 8. Aplicar las nuevas posiciones
+    let updatedNodes = currentNodes.map(n => {
+      if (n.id === parentId) {
+        return { ...n, y: newParentY };
+      }
+      if (newPositions.has(n.id)) {
+        const pos = newPositions.get(n.id);
+        return { ...n, x: pos.x, y: pos.y };
+      }
+      return n;
+    });
+
+    // 9. Recursivamente alinear los hijos que también son padres
+    sortedChildren.forEach(child => {
+      const grandchildren = updatedNodes.filter(n => n.parentId === child.id);
+      if (grandchildren.length > 0) {
+        updatedNodes = autoAlignHierarchy(child.id, updatedNodes);
+      }
+    });
+
+    return updatedNodes;
+  }, [getNodeHeight]);
+
+  // Aplicar alineación automática a toda la jerarquía desde la raíz
+  const applyFullAutoAlignment = useCallback(() => {
+    console.log('[AutoAlign] Aplicando alineación jerárquica completa');
+
+    // Encontrar todos los nodos raíz (sin padre)
+    const rootNodes = nodes.filter(n => !n.parentId);
+    
+    let updatedNodes = [...nodes];
+
+    // Para cada nodo raíz, alinear su jerarquía
+    rootNodes.forEach(root => {
+      const children = updatedNodes.filter(n => n.parentId === root.id);
+      if (children.length > 0) {
+        updatedNodes = autoAlignHierarchy(root.id, updatedNodes);
+      }
+    });
+
+    // Actualizar el estado
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: updatedNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+
+    console.log('[AutoAlign] Alineación jerárquica completada');
+  }, [nodes, activeProjectId, autoAlignHierarchy]);
+
   // Alinear nodos abajo
   const alignNodesBottom = useCallback(() => {
     const selectedNodes = getSelectedNodes();

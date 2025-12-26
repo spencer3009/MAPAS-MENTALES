@@ -37,6 +37,8 @@ const Canvas = ({
   onOpenContextMenu,
   onCloseContextMenu,
   onAddChildNode,
+  onAddNodeHorizontal,
+  onAddNodeVertical,
   onDuplicateNode,
   onDeleteNode,
   onChangeNodeColor,

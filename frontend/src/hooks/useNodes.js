@@ -1738,6 +1738,104 @@ export const useNodes = () => {
     return newId;
   }, [activeProjectId, pushToHistory]);
 
+  // Agregar nodo desde una línea horizontal compartida (entre hermanos horizontales)
+  // Este nodo "cuelga" del punto medio de la línea y se distribuye horizontalmente debajo
+  const addNodeFromLine = useCallback((parentId, siblingIds, options = {}) => {
+    if (!parentId) return null;
+    
+    const newId = crypto.randomUUID();
+    
+    setProjects(prev => {
+      const project = prev.find(p => p.id === activeProjectId);
+      if (!project) return prev;
+      
+      const currentNodes = project.nodes;
+      const parent = currentNodes.find(n => n.id === parentId);
+      if (!parent) return prev;
+      
+      // Obtener los hermanos horizontales para calcular el punto medio
+      const horizontalSiblings = currentNodes.filter(n => 
+        siblingIds.includes(n.id) && n.childDirection === 'horizontal'
+      );
+      
+      if (horizontalSiblings.length < 2) {
+        console.log('[MindHybrid] Se necesitan al menos 2 hermanos horizontales');
+        return prev;
+      }
+      
+      // Encontrar nodos existentes que cuelgan de esta línea
+      const existingLineChildren = currentNodes.filter(n => 
+        n.parentId === parentId && n.childDirection === 'vertical-from-line'
+      );
+      
+      // Calcular posición del nuevo nodo
+      // X: en el centro de los hermanos horizontales, distribuido con otros hijos de línea
+      const sortedSiblings = [...horizontalSiblings].sort((a, b) => a.y - b.y);
+      const firstSibling = sortedSiblings[0];
+      const lastSibling = sortedSiblings[sortedSiblings.length - 1];
+      
+      // Centro de la línea horizontal (punto de entrada de los hermanos)
+      const lineX = firstSibling.x - 30; // Un poco a la izquierda de los nodos
+      const firstY = firstSibling.y + (firstSibling.height || 64) / 2;
+      const lastY = lastSibling.y + (lastSibling.height || 64) / 2;
+      const midY = (firstY + lastY) / 2;
+      
+      // Posición del nuevo nodo (debajo del centro de la línea)
+      const verticalGap = 100;
+      const horizontalSpacing = 180;
+      
+      // Distribuir hijos de línea horizontalmente
+      const totalLineChildren = existingLineChildren.length + 1;
+      const totalWidth = (totalLineChildren - 1) * horizontalSpacing;
+      const startX = lineX - totalWidth / 2;
+      const newIndex = existingLineChildren.length;
+      
+      const newX = startX + (newIndex * horizontalSpacing);
+      const newY = midY + verticalGap;
+      
+      const newNode = {
+        id: newId,
+        text: 'Nuevo Nodo',
+        x: newX,
+        y: newY,
+        color: 'purple', // Color distintivo para nodos de línea
+        parentId,
+        width: 160,
+        height: 64,
+        nodeType: options?.nodeType || 'default',
+        childDirection: 'vertical-from-line', // Nuevo tipo de dirección
+        lineParentSiblings: siblingIds // Guardar referencia a los hermanos de la línea
+      };
+      
+      console.log('[MindHybrid] Creando nodo desde línea:', newNode);
+      
+      let newNodes = [...currentNodes, newNode];
+      
+      // Redistribuir todos los nodos hijos de línea
+      const allLineChildren = [...existingLineChildren, newNode];
+      const totalWidthNew = (allLineChildren.length - 1) * horizontalSpacing;
+      const startXNew = lineX - totalWidthNew / 2;
+      
+      allLineChildren.forEach((child, idx) => {
+        const childNewX = startXNew + (idx * horizontalSpacing);
+        newNodes = newNodes.map(n => 
+          n.id === child.id ? { ...n, x: childNewX } : n
+        );
+      });
+      
+      pushToHistory(activeProjectId, newNodes);
+      
+      return prev.map(p => 
+        p.id === activeProjectId 
+          ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+          : p
+      );
+    });
+    
+    setSelectedNodeId(newId);
+    return newId;
+  }, [activeProjectId, pushToHistory]);
+
   // Algoritmo de alineación para MindHybrid
   // Organiza hijos horizontales a la derecha y verticales abajo
   const autoAlignMindHybrid = useCallback((parentId, currentNodes) => {

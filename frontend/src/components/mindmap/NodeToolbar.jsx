@@ -108,6 +108,16 @@ const NodeToolbar = ({
       onMouseDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
     >
+      {/* Marcar como completado (tachado) - PRIMERO EN EL TOOLBAR */}
+      <ToolbarButton 
+        icon={CheckCircle2} 
+        label={isCompleted ? "Desmarcar tarea" : "Marcar como completada"}
+        onClick={onToggleCompleted}
+        active={isCompleted}
+      />
+      
+      <Divider />
+
       {/* Editar texto */}
       <ToolbarButton 
         icon={Type} 

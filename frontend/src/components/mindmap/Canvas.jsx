@@ -78,15 +78,28 @@ const Canvas = ({
 
   // Calcular posiciones transformadas para los controles
   const controlPositions = useMemo(() => {
-    if (!selectedNode) return { addButton: null, toolbar: null };
+    if (!selectedNode) return { addButton: null, addButtonRight: null, addButtonBottom: null, toolbar: null };
     
     // Usar tamaño del nodo si está disponible, sino usar valores por defecto
     const nodeW = selectedNode.width || NODE_WIDTH;
     const nodeH = selectedNode.height || NODE_HEIGHT;
     
     let addButtonX, addButtonY;
+    let addButtonRightX, addButtonRightY;
+    let addButtonBottomX, addButtonBottomY;
     
-    if (layoutType === 'mindtree') {
+    if (layoutType === 'mindhybrid') {
+      // MindHybrid: DOS botones - derecha (horizontal) e inferior (vertical)
+      // Botón derecho (crear hijo horizontal)
+      addButtonRightX = (selectedNode.x + nodeW + 15) * zoom + pan.x;
+      addButtonRightY = (selectedNode.y + nodeH / 2 - 14) * zoom + pan.y;
+      // Botón inferior (crear hijo vertical)
+      addButtonBottomX = (selectedNode.x + nodeW / 2 - 14) * zoom + pan.x;
+      addButtonBottomY = (selectedNode.y + nodeH + 15) * zoom + pan.y;
+      // No mostrar botón único
+      addButtonX = null;
+      addButtonY = null;
+    } else if (layoutType === 'mindtree') {
       // MindTree (Organigrama): botón "+" DEBAJO del nodo
       addButtonX = (selectedNode.x + nodeW / 2) * zoom + pan.x;
       addButtonY = (selectedNode.y + nodeH + 20) * zoom + pan.y;
@@ -100,7 +113,9 @@ const Canvas = ({
     const toolbarY = (selectedNode.y - 50) * zoom + pan.y;
     
     return {
-      addButton: { x: addButtonX, y: addButtonY },
+      addButton: addButtonX !== null ? { x: addButtonX, y: addButtonY } : null,
+      addButtonRight: addButtonRightX ? { x: addButtonRightX, y: addButtonRightY } : null,
+      addButtonBottom: addButtonBottomX ? { x: addButtonBottomX, y: addButtonBottomY } : null,
       toolbar: { x: toolbarX, y: toolbarY }
     };
   }, [selectedNode, zoom, pan, layoutType]);

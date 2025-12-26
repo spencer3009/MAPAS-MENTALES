@@ -1,13 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Copy, Trash2, Square, Minus, ChevronRight } from 'lucide-react';
 
-const COLOR_OPTIONS = [
-  { key: 'blue', bg: 'bg-sky-300', hover: 'hover:bg-sky-400' },
-  { key: 'pink', bg: 'bg-rose-300', hover: 'hover:bg-rose-400' },
-  { key: 'green', bg: 'bg-emerald-300', hover: 'hover:bg-emerald-400' },
-  { key: 'yellow', bg: 'bg-amber-300', hover: 'hover:bg-amber-400' },
-];
-
 // Opciones de grosor de línea para nodos dashed_text
 const LINE_WIDTH_OPTIONS = [
   { value: 1, label: 'Normal (1px)' },
@@ -18,13 +11,11 @@ const LINE_WIDTH_OPTIONS = [
 const ContextMenu = ({
   position,
   nodeId,
-  currentColor,
   currentNodeType,
   currentLineWidth,
   onAddChild,
   onDuplicate,
   onDelete,
-  onChangeColor,
   onChangeNodeType,
   onChangeLineWidth,
   onClose

@@ -1834,11 +1834,6 @@ export const useNodes = () => {
       n.parentId === parentId && n.childDirection === 'vertical'
     ).sort((a, b) => a.x - b.x); // Ordenar por X
     
-    // Hijos que cuelgan de la línea horizontal (entre hermanos horizontales)
-    const lineChildren = updatedNodes.filter(n => 
-      n.parentId === parentId && n.childDirection === 'vertical-from-line'
-    ).sort((a, b) => a.x - b.x); // Ordenar por X
-    
     // Constantes de espaciado
     const horizontalGap = 200; // Distancia horizontal desde el padre
     const verticalGap = 100; // Distancia vertical desde el padre

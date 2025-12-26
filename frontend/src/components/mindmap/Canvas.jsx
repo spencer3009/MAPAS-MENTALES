@@ -142,6 +142,25 @@ const Canvas = ({
     setShowControls(true);
   }, []);
 
+  // Wrapper para crear nodo hijo con auto-alineación
+  const handleAddChildWithAutoAlign = useCallback((parentId, position, options) => {
+    const newId = onAddChildNode(parentId, position, options);
+    // Aplicar alineación jerárquica automática si está habilitada
+    if (autoAlignEnabled && onAutoAlign) {
+      setTimeout(() => onAutoAlign(), 100);
+    }
+    return newId;
+  }, [onAddChildNode, autoAlignEnabled, onAutoAlign]);
+
+  // Wrapper para eliminar nodo con auto-alineación
+  const handleDeleteWithAutoAlign = useCallback((nodeId) => {
+    onDeleteNode(nodeId);
+    // Aplicar alineación jerárquica automática si está habilitada
+    if (autoAlignEnabled && onAutoAlign) {
+      setTimeout(() => onAutoAlign(), 100);
+    }
+  }, [onDeleteNode, autoAlignEnabled, onAutoAlign]);
+
   // Handlers de la toolbar
   const handleToolbarEdit = useCallback(() => {
     if (selectedNodeId) {

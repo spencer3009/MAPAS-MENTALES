@@ -1833,18 +1833,26 @@ export const useNodes = () => {
       return descendants;
     };
 
+    // Obtener el proyecto activo para saber el layoutType
+    const project = projects.find(p => p.id === activeProjectId);
+    const layoutType = project?.layoutType || 'mindflow';
+
     const nodesToDelete = new Set(findDescendants(id, nodes));
     let newNodes = nodes.filter(n => !nodesToDelete.has(n.id));
     
-    // Si autoAlign está activo, aplicar alineación jerárquica a los nuevos nodos
+    // Si autoAlign está activo, aplicar alineación según el tipo de layout
     if (autoAlignAfter) {
-      console.log('[deleteNode] Aplicando alineación jerárquica después de eliminar');
+      console.log('[deleteNode] Aplicando alineación después de eliminar. Layout:', layoutType);
       // Encontrar todos los nodos raíz
       const rootNodes = newNodes.filter(n => !n.parentId);
       rootNodes.forEach(root => {
         const children = newNodes.filter(n => n.parentId === root.id);
         if (children.length > 0) {
-          newNodes = autoAlignHierarchy(root.id, newNodes);
+          if (layoutType === 'mindtree') {
+            newNodes = autoAlignMindTree(root.id, newNodes);
+          } else {
+            newNodes = autoAlignHierarchy(root.id, newNodes);
+          }
         }
       });
     }
@@ -1856,7 +1864,7 @@ export const useNodes = () => {
         : p
     ));
     setSelectedNodeId(null);
-  }, [nodes, activeProjectId, pushToHistory, autoAlignHierarchy]);
+  }, [nodes, projects, activeProjectId, pushToHistory, autoAlignHierarchy, autoAlignMindTree]);
 
   const duplicateNode = useCallback((id) => {
     const original = nodes.find(n => n.id === id);

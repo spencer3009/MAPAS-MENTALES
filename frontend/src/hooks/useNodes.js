@@ -1866,15 +1866,16 @@ export const useNodes = () => {
   // ==========================================
 
   // Crear proyecto en blanco (AGREGA, no reemplaza)
-  const createBlankMap = useCallback(async (name = 'Nuevo Mapa') => {
+  // layoutType: 'mindflow' (horizontal) o 'mindtree' (vertical)
+  const createBlankMap = useCallback(async (name = 'Nuevo Mapa', layoutType = 'mindflow') => {
     try {
-      console.log('Creando nuevo proyecto en blanco...');
+      console.log('Creando nuevo proyecto en blanco con layout:', layoutType);
       
       const initialNodes = [{ 
         id: crypto.randomUUID(), 
         text: 'Idea Central', 
-        x: 300, 
-        y: 300, 
+        x: 400, 
+        y: layoutType === 'mindtree' ? 100 : 300, 
         color: 'blue', 
         parentId: null,
         width: 160,
@@ -1884,6 +1885,7 @@ export const useNodes = () => {
       const newProject = {
         id: crypto.randomUUID(),
         name: name,
+        layoutType: layoutType, // 'mindflow' o 'mindtree'
         nodes: initialNodes,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()

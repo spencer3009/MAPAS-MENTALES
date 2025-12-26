@@ -35,6 +35,7 @@ const MindMapApp = () => {
     updateNodeText,
     updateNodeColor,
     updateNodeComment,
+    toggleNodeCompleted,
     updateNodeStyle,
     updateNodeSize,
     updateNodeIcon,

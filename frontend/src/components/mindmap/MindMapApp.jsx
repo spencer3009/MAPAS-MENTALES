@@ -78,6 +78,10 @@ const MindMapApp = () => {
     alignTextLeft,
     alignTextCenter,
     alignTextRight,
+    // Alineación de TEXTO para nodo individual (toolbar)
+    alignSingleNodeTextLeft,
+    alignSingleNodeTextCenter,
+    alignSingleNodeTextRight,
     // Distribución
     distributeNodesVertically,
     distributeNodesHorizontally,

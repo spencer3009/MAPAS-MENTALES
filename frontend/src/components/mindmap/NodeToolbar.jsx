@@ -107,13 +107,15 @@ const NodeToolbar = ({
         onClick={onEdit}
       />
       
-      {/* Panel de estilos - ícono de paleta */}
-      <ToolbarButton 
-        icon={Palette} 
-        label="Personalizar estilo" 
-        onClick={handleStyleClick}
-        active={stylePanelOpen}
-      />
+      {/* Panel de estilos - ícono de paleta (solo para nodos con fondo) */}
+      {!isDashedNode && (
+        <ToolbarButton 
+          icon={Palette} 
+          label="Personalizar estilo" 
+          onClick={handleStyleClick}
+          active={stylePanelOpen}
+        />
+      )}
 
       {/* Comentario */}
       <ToolbarButton 

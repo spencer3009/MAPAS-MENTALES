@@ -59,6 +59,42 @@ const MindTreeIcon = ({ className }) => (
   </svg>
 );
 
+// Ícono personalizado para MindHybrid (mixto horizontal + vertical)
+const MindHybridIcon = ({ className }) => (
+  <svg 
+    viewBox="0 0 48 48" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    {/* Nodo central (padre) */}
+    <rect x="4" y="16" width="12" height="12" rx="2" />
+    
+    {/* Hijos HORIZONTALES (a la derecha) */}
+    <rect x="32" y="8" width="10" height="8" rx="1.5" />
+    <rect x="32" y="20" width="10" height="8" rx="1.5" />
+    
+    {/* Hijos VERTICALES (abajo) */}
+    <rect x="2" y="38" width="10" height="8" rx="1.5" />
+    <rect x="14" y="38" width="10" height="8" rx="1.5" />
+    
+    {/* Conector horizontal */}
+    <path d="M16 22 H24" />
+    <path d="M24 12 V24" />
+    <path d="M24 12 H32" />
+    <path d="M24 24 H32" />
+    
+    {/* Conector vertical */}
+    <path d="M10 28 V34" />
+    <path d="M7 34 H19" />
+    <path d="M7 34 V38" />
+    <path d="M19 34 V38" />
+  </svg>
+);
+
 const LayoutTemplateSelector = ({ isOpen, onSelect, onClose }) => {
   const [selectedLayout, setSelectedLayout] = useState(null);
 
@@ -96,6 +132,19 @@ const LayoutTemplateSelector = ({ isOpen, onSelect, onClose }) => {
       selectedBg: 'bg-emerald-50',
       iconBg: 'bg-emerald-100',
       iconColor: 'text-emerald-600'
+    },
+    {
+      id: 'mindhybrid',
+      name: 'MindHybrid',
+      description: 'Combinación flexible. Crea nodos hacia la derecha o hacia abajo según necesites.',
+      icon: MindHybridIcon,
+      color: 'purple',
+      bgGradient: 'from-purple-500 to-purple-600',
+      borderColor: 'border-purple-500',
+      hoverBg: 'hover:bg-purple-50',
+      selectedBg: 'bg-purple-50',
+      iconBg: 'bg-purple-100',
+      iconColor: 'text-purple-600'
     }
   ];
 

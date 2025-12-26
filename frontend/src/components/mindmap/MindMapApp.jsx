@@ -579,6 +579,7 @@ const MindMapApp = () => {
             onAddChildNode={addNode}
             onAddNodeHorizontal={addNodeHorizontal}
             onAddNodeVertical={addNodeVertical}
+            onAddNodeFromLine={addNodeFromLine}
             onDuplicateNode={duplicateNode}
             onDeleteNode={deleteNode}
             onChangeNodeColor={updateNodeColor}

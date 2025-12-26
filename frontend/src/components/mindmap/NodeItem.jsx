@@ -594,7 +594,7 @@ const NodeItem = memo(({
               />
             ) : (
               <span 
-                className={`flex-1 font-medium text-sm break-words ${node.icon ? 'text-left' : textAlignClass}`}
+                className={`flex-1 font-medium text-sm break-words ${node.icon ? 'text-left' : textAlignClass} ${node.isCompleted ? 'line-through opacity-60' : ''}`}
                 style={{ color: textColor }}
               >
                 {displayText}

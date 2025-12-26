@@ -470,12 +470,12 @@ const NodeItem = memo(({
                 onBlur={handleBlur}
                 onKeyDown={handleKeyDown}
                 onMouseDown={(e) => e.stopPropagation()}
-                className="flex-1 text-left bg-transparent outline-none font-medium text-sm text-gray-700"
+                className={`flex-1 ${textAlignClass} bg-transparent outline-none font-medium text-sm text-gray-700`}
                 placeholder="Escribe aquí..."
                 autoFocus
               />
             ) : (
-              <span className="flex-1 text-left font-medium text-sm text-gray-700 break-words">
+              <span className={`flex-1 ${textAlignClass} font-medium text-sm text-gray-700 break-words`}>
                 {displayText || 'Nodo nuevo'}
               </span>
             )}

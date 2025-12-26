@@ -2251,6 +2251,7 @@ export const useNodes = () => {
     updateNodeText,
     updateNodeColor,
     updateNodeComment,
+    toggleNodeCompleted,
     updateNodeStyle,
     updateNodeSize,
     updateNodeDimensions,

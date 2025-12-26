@@ -656,15 +656,57 @@ export const useNodes = () => {
     ));
   }, [nodes, selectedNodeIds, activeProjectId, pushToHistory, getSelectedNodes]);
 
-  // Alinear nodos al centro vertical
+  // Alinear nodos al centro vertical Y distribuir uniformemente
+  // Este botón hace ambas cosas: centra verticalmente y distribuye el espacio
   const alignNodesMiddle = useCallback(() => {
     const selectedNodes = getSelectedNodes();
     if (selectedNodes.length < 2) return;
 
-    const centerY = selectedNodes.reduce((sum, n) => sum + n.y + (n.height || 64) / 2, 0) / selectedNodes.length;
+    console.log('[alignNodesMiddle] Alineando y distribuyendo', selectedNodes.length, 'nodos verticalmente');
+
+    // Función para obtener la altura del nodo
+    const getNodeHeight = (node) => {
+      if (node.height && node.height > 0) return node.height;
+      const baseHeight = 64;
+      const text = node.text || '';
+      const nodeWidth = node.width || 160;
+      const charsPerLine = Math.floor(nodeWidth / 9);
+      const estimatedLines = Math.max(1, Math.ceil(text.length / charsPerLine));
+      return Math.max(baseHeight, 30 + (estimatedLines * 22));
+    };
+
+    // 1. Ordenar nodos por posición Y actual (de arriba hacia abajo)
+    const sortedNodes = [...selectedNodes].sort((a, b) => a.y - b.y);
+    
+    // 2. Calcular el centro vertical del área ocupada
+    const topY = sortedNodes[0].y;
+    const lastNode = sortedNodes[sortedNodes.length - 1];
+    const bottomY = lastNode.y + getNodeHeight(lastNode);
+    const centerY = (topY + bottomY) / 2;
+    
+    // 3. Calcular la altura total de todos los nodos
+    const totalHeights = sortedNodes.reduce((sum, n) => sum + getNodeHeight(n), 0);
+    
+    // 4. Calcular el espacio uniforme entre nodos
+    const N = sortedNodes.length;
+    const totalArea = bottomY - topY;
+    const espacio = (totalArea - totalHeights) / (N - 1);
+    
+    console.log('[alignNodesMiddle] Centro Y:', centerY, 'Espacio uniforme:', espacio);
+
+    // 5. Reposicionar cada nodo con distribución uniforme
+    const newPositions = new Map();
+    let currentY = topY;
+    
+    sortedNodes.forEach((node) => {
+      newPositions.set(node.id, currentY);
+      currentY += getNodeHeight(node) + espacio;
+    });
+
+    // 6. Aplicar las nuevas posiciones
     const newNodes = nodes.map(n => {
-      if (selectedNodeIds.has(n.id)) {
-        return { ...n, y: centerY - (n.height || 64) / 2 };
+      if (newPositions.has(n.id)) {
+        return { ...n, y: newPositions.get(n.id) };
       }
       return n;
     });
@@ -675,6 +717,8 @@ export const useNodes = () => {
         ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
         : p
     ));
+    
+    console.log('[alignNodesMiddle] Distribución completada');
   }, [nodes, selectedNodeIds, activeProjectId, pushToHistory, getSelectedNodes]);
 
   // Alinear nodos abajo

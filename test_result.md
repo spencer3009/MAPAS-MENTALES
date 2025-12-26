@@ -698,7 +698,7 @@ The **NEW Node Type Selection Feature** is **completely functional** and exceeds
 ### Test Credentials:
 - Username: spencer3009
 - Password: Socios3009
-- URL: https://node-alignment.preview.emergentagent.com
+- URL: https://recover-vault.preview.emergentagent.com
 
 ### ✅ TESTING RESULTS:
 
@@ -1015,7 +1015,7 @@ The MindHybrid Layout Complete Feature Set is **PRODUCTION-READY** and **EXCEEDS
 ### Testing Credentials:
 - Username: spencer3009
 - Password: Socios3009
-- URL: https://node-alignment.preview.emergentagent.com
+- URL: https://recover-vault.preview.emergentagent.com
 
 ### ✅ TESTING RESULTS - COMPREHENSIVE SUCCESS:
 
@@ -1167,7 +1167,7 @@ Verify the new "Mark as Completed" (Strikethrough) feature in the Node Toolbar:
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- URL: https://node-alignment.preview.emergentagent.com
+- URL: https://recover-vault.preview.emergentagent.com
 
 ### ✅ CODE IMPLEMENTATION ANALYSIS - EXCELLENT:
 
@@ -2233,7 +2233,7 @@ Verify the new layout template system works correctly:
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- URL: https://node-alignment.preview.emergentagent.com
+- URL: https://recover-vault.preview.emergentagent.com
 
 ### ✅ TESTING RESULTS - COMPREHENSIVE SUCCESS:
 

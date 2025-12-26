@@ -574,6 +574,8 @@ const MindMapApp = () => {
             onOpenReminderPanel={handleOpenReminderPanel}
             styleSidebarOpen={showStyleSidebar}
             sidebarTab={sidebarTab}
+            autoAlignEnabled={autoAlignEnabled}
+            onAutoAlign={applyAutoAlignment}
           />
 
           {/* Toolbar de selección múltiple */}

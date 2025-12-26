@@ -2455,6 +2455,8 @@ export const useNodes = () => {
     
     // Funciones de nodos
     addNode,
+    addNodeHorizontal,
+    addNodeVertical,
     updateNode: updateProjectNodes,
     updateNodePosition,
     updateNodeText,

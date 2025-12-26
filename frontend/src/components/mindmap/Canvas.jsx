@@ -143,14 +143,12 @@ const Canvas = ({
   }, []);
 
   // Wrapper para crear nodo hijo con auto-alineación
-  const handleAddChildWithAutoAlign = useCallback((parentId, position, options) => {
-    const newId = onAddChildNode(parentId, position, options);
-    // Aplicar alineación jerárquica automática si está habilitada
-    if (autoAlignEnabled && onAutoAlign) {
-      setTimeout(() => onAutoAlign(), 100);
-    }
+  const handleAddChildWithAutoAlign = useCallback((parentId, position, options = {}) => {
+    // Agregar flag de autoAlign a las opciones
+    const newOptions = { ...options, autoAlign: autoAlignEnabled };
+    const newId = onAddChildNode(parentId, position, newOptions);
     return newId;
-  }, [onAddChildNode, autoAlignEnabled, onAutoAlign]);
+  }, [onAddChildNode, autoAlignEnabled]);
 
   // Wrapper para eliminar nodo con auto-alineación
   const handleDeleteWithAutoAlign = useCallback((nodeId) => {

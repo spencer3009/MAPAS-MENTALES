@@ -862,6 +862,77 @@ export const useNodes = () => {
     ));
   }, [nodes, selectedNodeId, selectedNodeIds, activeProjectId]);
 
+  // ==========================================
+  // FUNCIONES DE ALINEACIÓN DE TEXTO
+  // (Cambian la propiedad textAlign dentro del nodo, NO mueven el nodo)
+  // ==========================================
+
+  // Alinear texto a la izquierda
+  const alignTextLeft = useCallback(() => {
+    const selectedNodes = getSelectedNodes();
+    if (selectedNodes.length < 1) return;
+
+    console.log('[alignTextLeft] Alineando texto de', selectedNodes.length, 'nodos a la izquierda');
+
+    const newNodes = nodes.map(n => {
+      if (selectedNodeIds.has(n.id)) {
+        return { ...n, textAlign: 'left' };
+      }
+      return n;
+    });
+
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, selectedNodeIds, activeProjectId, pushToHistory, getSelectedNodes]);
+
+  // Alinear texto al centro
+  const alignTextCenter = useCallback(() => {
+    const selectedNodes = getSelectedNodes();
+    if (selectedNodes.length < 1) return;
+
+    console.log('[alignTextCenter] Alineando texto de', selectedNodes.length, 'nodos al centro');
+
+    const newNodes = nodes.map(n => {
+      if (selectedNodeIds.has(n.id)) {
+        return { ...n, textAlign: 'center' };
+      }
+      return n;
+    });
+
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, selectedNodeIds, activeProjectId, pushToHistory, getSelectedNodes]);
+
+  // Alinear texto a la derecha
+  const alignTextRight = useCallback(() => {
+    const selectedNodes = getSelectedNodes();
+    if (selectedNodes.length < 1) return;
+
+    console.log('[alignTextRight] Alineando texto de', selectedNodes.length, 'nodos a la derecha');
+
+    const newNodes = nodes.map(n => {
+      if (selectedNodeIds.has(n.id)) {
+        return { ...n, textAlign: 'right' };
+      }
+      return n;
+    });
+
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, selectedNodeIds, activeProjectId, pushToHistory, getSelectedNodes]);
+
   // Calcular canUndo y canRedo
   const getHistoryState = useCallback((projectId) => {
     return historyRef.current[projectId] || { states: [], pointer: 0 };

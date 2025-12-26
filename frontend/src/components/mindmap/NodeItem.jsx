@@ -163,10 +163,10 @@ const NodeItem = memo(({
       
       // Solo actualizar si la altura cambió significativamente (más de 5px de diferencia)
       if (Math.abs((node.height || 64) - actualHeight) > 5) {
-        onUpdateSize(node.id, { height: actualHeight });
+        onUpdateSize(node.id, node.width || 160, actualHeight, false);
       }
     }
-  }, [node.text, node.id, node.height, onUpdateSize]);
+  }, [node.text, node.id, node.height, node.width, onUpdateSize]);
 
   const handleStartEdit = useCallback(() => {
     setLocalText(node.text);

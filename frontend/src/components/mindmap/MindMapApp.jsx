@@ -73,6 +73,8 @@ const MindMapApp = () => {
     alignNodesTop,
     alignNodesMiddle,
     alignNodesBottom,
+    distributeNodesVertically,
+    distributeNodesHorizontally,
     moveSelectedNodes
   } = useNodes();
 

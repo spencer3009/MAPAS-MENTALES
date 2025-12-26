@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Plus, Copy, Trash2, Square, Minus, ChevronRight } from 'lucide-react';
 
 // Opciones de grosor de línea para nodos dashed_text

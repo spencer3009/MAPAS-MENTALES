@@ -31,6 +31,8 @@ const MindMapApp = () => {
     selectedNodeId,
     setSelectedNodeId,
     addNode,
+    addNodeHorizontal,
+    addNodeVertical,
     updateNodePosition,
     updateNodeText,
     updateNodeColor,

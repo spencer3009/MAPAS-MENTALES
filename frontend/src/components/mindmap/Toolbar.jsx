@@ -169,6 +169,18 @@ const Toolbar = ({
             <RotateCcw size={14} />
           </button>
         </div>
+
+        <Divider />
+
+        {/* Switch de Alineación Automática */}
+        <div className="flex items-center gap-2 px-2">
+          <AlignLeft size={16} className={autoAlignEnabled ? 'text-blue-500' : 'text-gray-400'} />
+          <ToggleSwitch
+            enabled={autoAlignEnabled}
+            onChange={onToggleAutoAlign}
+            label="Alineación automática"
+          />
+        </div>
       </div>
 
       {/* Grupo derecho: Exportación, Notificaciones y Usuario */}

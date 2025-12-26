@@ -698,6 +698,136 @@ export const useNodes = () => {
     ));
   }, [nodes, selectedNodeIds, activeProjectId, pushToHistory, getSelectedNodes]);
 
+  // Distribuir nodos verticalmente (espaciado uniforme)
+  const distributeNodesVertically = useCallback(() => {
+    const selectedNodes = getSelectedNodes();
+    
+    if (selectedNodes.length < 2) {
+      console.log('[distributeNodesVertically] Se necesitan al menos 2 nodos para distribuir verticalmente');
+      return;
+    }
+
+    console.log('[distributeNodesVertically] Distribuyendo', selectedNodes.length, 'nodos verticalmente');
+
+    // Ordenar nodos por posición Y (de arriba hacia abajo)
+    const sortedNodes = [...selectedNodes].sort((a, b) => a.y - b.y);
+    
+    // Obtener el nodo más alto (primer punto) y el más bajo (último punto)
+    const topNode = sortedNodes[0];
+    const bottomNode = sortedNodes[sortedNodes.length - 1];
+    
+    // Calcular la altura total del área de distribución
+    const topY = topNode.y;
+    const bottomY = bottomNode.y + (bottomNode.height || 64);
+    const totalHeight = bottomY - topY;
+    
+    // Calcular la suma de las alturas de todos los nodos
+    const totalNodesHeight = sortedNodes.reduce((sum, n) => sum + (n.height || 64), 0);
+    
+    // Calcular el espacio disponible para distribuir
+    const availableSpace = totalHeight - totalNodesHeight;
+    
+    // Calcular el espaciado uniforme entre nodos
+    const spacing = availableSpace / (sortedNodes.length - 1);
+    
+    console.log('[distributeNodesVertically] Espacio disponible:', availableSpace, 'Espaciado:', spacing);
+
+    // Crear mapa de nuevas posiciones Y
+    const newPositions = new Map();
+    let currentY = topY;
+    
+    sortedNodes.forEach((node, index) => {
+      if (index === 0) {
+        // El primer nodo mantiene su posición
+        newPositions.set(node.id, topY);
+      } else {
+        // Los siguientes nodos se posicionan con espaciado uniforme
+        newPositions.set(node.id, currentY);
+      }
+      currentY += (node.height || 64) + spacing;
+    });
+
+    // Aplicar las nuevas posiciones (solo Y, X no cambia)
+    const newNodes = nodes.map(n => {
+      if (newPositions.has(n.id)) {
+        return { ...n, y: newPositions.get(n.id) };
+      }
+      return n;
+    });
+
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+    
+    console.log('[distributeNodesVertically] Distribución completada');
+  }, [nodes, selectedNodeIds, activeProjectId, pushToHistory, getSelectedNodes]);
+
+  // Distribuir nodos horizontalmente (espaciado uniforme) - Preparado para futuro uso
+  const distributeNodesHorizontally = useCallback(() => {
+    const selectedNodes = getSelectedNodes();
+    
+    if (selectedNodes.length < 2) {
+      console.log('[distributeNodesHorizontally] Se necesitan al menos 2 nodos para distribuir horizontalmente');
+      return;
+    }
+
+    console.log('[distributeNodesHorizontally] Distribuyendo', selectedNodes.length, 'nodos horizontalmente');
+
+    // Ordenar nodos por posición X (de izquierda a derecha)
+    const sortedNodes = [...selectedNodes].sort((a, b) => a.x - b.x);
+    
+    // Obtener el nodo más a la izquierda y el más a la derecha
+    const leftNode = sortedNodes[0];
+    const rightNode = sortedNodes[sortedNodes.length - 1];
+    
+    // Calcular el ancho total del área de distribución
+    const leftX = leftNode.x;
+    const rightX = rightNode.x + (rightNode.width || 160);
+    const totalWidth = rightX - leftX;
+    
+    // Calcular la suma de los anchos de todos los nodos
+    const totalNodesWidth = sortedNodes.reduce((sum, n) => sum + (n.width || 160), 0);
+    
+    // Calcular el espacio disponible para distribuir
+    const availableSpace = totalWidth - totalNodesWidth;
+    
+    // Calcular el espaciado uniforme entre nodos
+    const spacing = availableSpace / (sortedNodes.length - 1);
+
+    // Crear mapa de nuevas posiciones X
+    const newPositions = new Map();
+    let currentX = leftX;
+    
+    sortedNodes.forEach((node, index) => {
+      if (index === 0) {
+        newPositions.set(node.id, leftX);
+      } else {
+        newPositions.set(node.id, currentX);
+      }
+      currentX += (node.width || 160) + spacing;
+    });
+
+    // Aplicar las nuevas posiciones (solo X, Y no cambia)
+    const newNodes = nodes.map(n => {
+      if (newPositions.has(n.id)) {
+        return { ...n, x: newPositions.get(n.id) };
+      }
+      return n;
+    });
+
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+    
+    console.log('[distributeNodesHorizontally] Distribución completada');
+  }, [nodes, selectedNodeIds, activeProjectId, pushToHistory, getSelectedNodes]);
+
   // Mover nodos seleccionados en grupo
   const moveSelectedNodes = useCallback((deltaX, deltaY) => {
     const idsToMove = selectedNodeIds.size > 0 

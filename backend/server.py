@@ -1081,6 +1081,9 @@ async def update_project(
     if update_data.customOrder is not None:
         update_dict["customOrder"] = update_data.customOrder
     
+    if update_data.layoutType is not None:
+        update_dict["layoutType"] = update_data.layoutType
+    
     await db.projects.update_one(
         {"id": project_id},
         {"$set": update_dict}
@@ -1095,6 +1098,8 @@ async def update_project(
         updated["lastActiveAt"] = updated.get("updatedAt")
     if "customOrder" not in updated:
         updated["customOrder"] = None
+    if "layoutType" not in updated:
+        updated["layoutType"] = "mindflow"
     return updated
 
 @api_router.delete("/projects/{project_id}")

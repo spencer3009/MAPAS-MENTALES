@@ -1042,7 +1042,8 @@ async def create_project(
         "updatedAt": now,
         "lastActiveAt": now,
         "isPinned": project_data.isPinned or False,
-        "customOrder": project_data.customOrder
+        "customOrder": project_data.customOrder,
+        "layoutType": project_data.layoutType or "mindflow"
     }
     
     await db.projects.insert_one(project)

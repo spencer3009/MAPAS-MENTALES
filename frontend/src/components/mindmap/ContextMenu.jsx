@@ -85,14 +85,15 @@ const ContextMenu = ({
 
   return (
     <div
+      ref={menuRef}
       className="
         absolute bg-white rounded-xl shadow-xl
         border border-gray-200 w-56 overflow-hidden
         animate-in fade-in zoom-in-95 duration-150
       "
       style={{
-        left: position.x,
-        top: position.y,
+        left: adjustedPosition.x || position.x,
+        top: adjustedPosition.y || position.y,
         zIndex: 100
       }}
       onClick={(e) => e.stopPropagation()}

@@ -44,7 +44,10 @@ const ConnectionsLayer = memo(({
       let start, end, path;
 
       // Caso especial: nodo creado desde un conector horizontal
-      // El conector debe ir desde el punto medio del conector original
+      // El conector debe tener forma de "escalera": ⬇️ ➡️ ⬇️
+      // 1. Vertical hacia abajo desde el punto medio del conector
+      // 2. Horizontal hacia el nodo
+      // 3. Vertical corto hacia abajo (entrando al nodo desde arriba)
       if (node.connectorParentId && node.connectorTargetId && layoutType === 'mindhybrid') {
         const connectorTarget = nodes.find(n => n.id === node.connectorTargetId);
         if (connectorTarget) {
@@ -60,19 +63,29 @@ const ConnectionsLayer = memo(({
             const ctLeft = connectorTarget.x;
             const ctCenterY = connectorTarget.y + ctHeight / 2;
             
-            // Punto medio del conector horizontal
+            // Punto medio del conector horizontal (donde está el botón "+")
             const midX = (tpRight + ctLeft) / 2;
             const midY = (tpCenterY + ctCenterY) / 2;
             
-            // Conector vertical desde el punto medio hacia el nodo
+            // Punto de entrada al nodo hijo (centro superior)
             const endX = node.x + nodeWidth / 2;
             const endY = node.y;
             
             start = { x: midX, y: midY };
             end = { x: endX, y: endY };
             
-            // Línea recta vertical
-            path = `M ${midX} ${midY} L ${endX} ${endY}`;
+            // Calcular puntos intermedios para el patrón ⬇️ ➡️ ⬇️
+            // Punto 1: Bajamos verticalmente hasta un punto intermedio (a mitad de camino entre midY y endY)
+            const verticalMidY = midY + (endY - midY) * 0.5;
+            
+            // Punto 2: Desde ahí vamos horizontal hasta estar alineados con el nodo
+            // Punto 3: Bajamos verticalmente hasta el nodo
+            
+            // Path con 3 tramos ortogonales: ⬇️ ➡️ ⬇️
+            path = `M ${midX} ${midY} ` +           // Inicio en el punto medio del conector
+                   `L ${midX} ${verticalMidY} ` +   // 1️⃣ Vertical hacia abajo
+                   `L ${endX} ${verticalMidY} ` +   // 2️⃣ Horizontal hacia el nodo
+                   `L ${endX} ${endY}`;             // 3️⃣ Vertical hacia abajo (entrada al nodo)
           }
         }
       } else if (layoutType === 'mindhybrid') {

@@ -276,7 +276,7 @@ const MultiSelectToolbar = ({
         <button
           onClick={onAlignNodesMiddle}
           className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-          title="Alinear nodos al centro vertical"
+          title="Alinear y distribuir verticalmente — iguala el espacio entre nodos"
         >
           <AlignNodesMiddleIcon size={18} className="text-gray-600" />
         </button>

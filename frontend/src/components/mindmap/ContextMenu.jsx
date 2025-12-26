@@ -90,8 +90,8 @@ const ContextMenu = ({
         animate-in fade-in zoom-in-95 duration-150
       "
       style={{
-        left: adjustedPosition.x || position.x,
-        top: adjustedPosition.y || position.y,
+        left: adjustedPos.x,
+        top: adjustedPos.y,
         zIndex: 100
       }}
       onClick={(e) => e.stopPropagation()}

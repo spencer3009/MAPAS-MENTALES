@@ -40,8 +40,9 @@ const ConnectionsLayer = memo(({ nodes, layoutType = 'mindflow' }) => {
 
       if (layoutType === 'mindtree') {
         // MindTree (Organigrama): conectores verticales tipo org chart
+        // Padre: centro inferior, Hijo: centro superior
         start = getNodeOutputPointOrgChart(parent, parentWidth, parentHeight);
-        end = getNodeInputPointOrgChart(node, nodeHeight);
+        end = getNodeInputPointOrgChart(node, nodeWidth);
         path = generateOrgChartPath(start.x, start.y, end.x, end.y);
       } else {
         // MindFlow: conectores horizontales con curvas bezier

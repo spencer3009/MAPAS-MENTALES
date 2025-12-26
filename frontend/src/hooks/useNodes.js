@@ -737,72 +737,198 @@ export const useNodes = () => {
     return Math.max(baseHeight, 30 + (estimatedLines * 22));
   }, []);
 
-  // Alinear hijos de un padre y reposicionar el padre al centro
-  const autoAlignHierarchy = useCallback((parentId, currentNodes) => {
-    if (!parentId) return currentNodes;
+  // ==========================================
+  // ALGORITMO DE ALINEACIÓN POR BLOQUES
+  // Evita superposición entre subárboles
+  // ==========================================
 
-    const parent = currentNodes.find(n => n.id === parentId);
-    if (!parent) return currentNodes;
+  // Constantes de layout
+  const BLOCK_MARGIN = 30; // Margen vertical entre bloques
+  const CHILD_SPACING = 20; // Espacio entre nodos hijos
+  const HORIZONTAL_OFFSET = 280; // Distancia horizontal padre-hijos
 
-    // Obtener todos los hijos del padre
-    const children = currentNodes.filter(n => n.parentId === parentId);
-    if (children.length === 0) return currentNodes;
+  // Calcular la altura total de un bloque (nodo + todos sus descendientes)
+  const calculateBlockHeight = useCallback((nodeId, allNodes) => {
+    const children = allNodes.filter(n => n.parentId === nodeId);
+    
+    if (children.length === 0) {
+      // Nodo hoja: solo su propia altura
+      const node = allNodes.find(n => n.id === nodeId);
+      return getNodeHeight(node);
+    }
 
-    console.log('[AutoAlignHierarchy] Alineando', children.length, 'hijos del padre:', parent.text?.substring(0, 20));
+    // Calcular altura de cada hijo (recursivamente)
+    let totalHeight = 0;
+    children.forEach((child, index) => {
+      const childBlockHeight = calculateBlockHeight(child.id, allNodes);
+      totalHeight += childBlockHeight;
+      if (index < children.length - 1) {
+        totalHeight += BLOCK_MARGIN; // Margen entre bloques hermanos
+      }
+    });
 
-    // 1. Ordenar hijos por posición Y actual
+    return totalHeight;
+  }, [getNodeHeight, BLOCK_MARGIN]);
+
+  // Alinear un subárbol completo (nodo + todos sus descendientes)
+  // Retorna los nodos actualizados y la altura del bloque
+  const alignSubtree = useCallback((nodeId, startY, allNodes) => {
+    const node = allNodes.find(n => n.id === nodeId);
+    if (!node) return { nodes: allNodes, blockHeight: 0 };
+
+    const children = allNodes.filter(n => n.parentId === nodeId);
+    let updatedNodes = [...allNodes];
+
+    if (children.length === 0) {
+      // Nodo hoja: solo posicionar el nodo
+      const nodeHeight = getNodeHeight(node);
+      updatedNodes = updatedNodes.map(n => 
+        n.id === nodeId ? { ...n, y: startY } : n
+      );
+      return { nodes: updatedNodes, blockHeight: nodeHeight };
+    }
+
+    // Ordenar hijos por su posición Y actual (mantener orden visual)
     const sortedChildren = [...children].sort((a, b) => a.y - b.y);
 
-    // 2. Calcular el eje X de los hijos (a la derecha del padre)
-    const childrenX = parent.x + 280;
+    // Calcular la altura total del bloque de hijos
+    const childrenBlockHeights = sortedChildren.map(child => 
+      calculateBlockHeight(child.id, updatedNodes)
+    );
+    
+    const totalChildrenHeight = childrenBlockHeights.reduce((sum, h, i) => {
+      return sum + h + (i < childrenBlockHeights.length - 1 ? BLOCK_MARGIN : 0);
+    }, 0);
 
-    // 3. Calcular distribución vertical uniforme
-    const spacing = 20; // Espacio fijo entre hijos
-    const totalChildrenHeight = sortedChildren.reduce((sum, child) => 
-      sum + getNodeHeight(child) + spacing, -spacing);
-
-    // 4. Calcular posición inicial Y para centrar los hijos respecto al padre
-    const parentCenterY = parent.y + getNodeHeight(parent) / 2;
-    let startY = parentCenterY - totalChildrenHeight / 2;
-
-    // 5. Crear mapa de nuevas posiciones para los hijos
-    const newPositions = new Map();
+    // Posicionar cada hijo y su subárbol
+    const childrenX = node.x + HORIZONTAL_OFFSET;
     let currentY = startY;
-    sortedChildren.forEach((child) => {
-      newPositions.set(child.id, { x: childrenX, y: currentY });
-      currentY += getNodeHeight(child) + spacing;
-    });
 
-    // 6. Calcular el centro vertical del bloque de hijos
-    const firstChildY = startY;
-    const lastChildY = currentY - spacing;
-    const childrenCenterY = (firstChildY + lastChildY) / 2;
+    for (let i = 0; i < sortedChildren.length; i++) {
+      const child = sortedChildren[i];
+      
+      // Actualizar posición X del hijo
+      updatedNodes = updatedNodes.map(n => 
+        n.id === child.id ? { ...n, x: childrenX } : n
+      );
 
-    // 7. Reposicionar el padre para que quede centrado verticalmente respecto a los hijos
-    const newParentY = childrenCenterY - getNodeHeight(parent) / 2;
+      // Alinear el subárbol del hijo
+      const result = alignSubtree(child.id, currentY, updatedNodes);
+      updatedNodes = result.nodes;
 
-    // 8. Aplicar las nuevas posiciones
-    let updatedNodes = currentNodes.map(n => {
-      if (n.id === parentId) {
-        return { ...n, y: newParentY };
+      // Avanzar Y para el siguiente bloque
+      currentY += childrenBlockHeights[i];
+      if (i < sortedChildren.length - 1) {
+        currentY += BLOCK_MARGIN;
       }
-      if (newPositions.has(n.id)) {
-        const pos = newPositions.get(n.id);
-        return { ...n, x: pos.x, y: pos.y };
-      }
-      return n;
-    });
+    }
 
-    // 9. Recursivamente alinear los hijos que también son padres
-    sortedChildren.forEach(child => {
-      const grandchildren = updatedNodes.filter(n => n.parentId === child.id);
-      if (grandchildren.length > 0) {
-        updatedNodes = autoAlignHierarchy(child.id, updatedNodes);
+    // Calcular el centro vertical del bloque de hijos
+    const blockTop = startY;
+    const blockBottom = startY + totalChildrenHeight;
+    const blockCenterY = (blockTop + blockBottom) / 2;
+
+    // Posicionar el padre centrado verticalmente respecto a sus hijos
+    const parentHeight = getNodeHeight(node);
+    const newParentY = blockCenterY - parentHeight / 2;
+
+    updatedNodes = updatedNodes.map(n => 
+      n.id === nodeId ? { ...n, y: newParentY } : n
+    );
+
+    return { nodes: updatedNodes, blockHeight: totalChildrenHeight };
+  }, [getNodeHeight, calculateBlockHeight, BLOCK_MARGIN, HORIZONTAL_OFFSET]);
+
+  // Función principal: alinear toda la jerarquía desde un nodo raíz
+  const autoAlignHierarchy = useCallback((rootId, currentNodes) => {
+    if (!rootId) return currentNodes;
+
+    const root = currentNodes.find(n => n.id === rootId);
+    if (!root) return currentNodes;
+
+    const children = currentNodes.filter(n => n.parentId === rootId);
+    if (children.length === 0) return currentNodes;
+
+    console.log('[AutoAlignHierarchy] Alineando subárbol de:', root.text?.substring(0, 20));
+
+    // Ordenar hijos por posición Y actual
+    const sortedChildren = [...children].sort((a, b) => a.y - b.y);
+
+    // Calcular la altura de cada bloque hijo
+    const childBlockHeights = sortedChildren.map(child => 
+      calculateBlockHeight(child.id, currentNodes)
+    );
+
+    // Calcular altura total de todos los bloques hijos
+    const totalBlocksHeight = childBlockHeights.reduce((sum, h, i) => {
+      return sum + h + (i < childBlockHeights.length - 1 ? BLOCK_MARGIN : 0);
+    }, 0);
+
+    // Posicionar el primer bloque para que el conjunto quede centrado respecto al padre
+    const rootHeight = getNodeHeight(root);
+    const rootCenterY = root.y + rootHeight / 2;
+    let startY = rootCenterY - totalBlocksHeight / 2;
+
+    // Asegurar que no se posicione muy arriba (mínimo Y = 50)
+    startY = Math.max(50, startY);
+
+    let updatedNodes = [...currentNodes];
+
+    // Posicionar cada hijo y su subárbol
+    const childrenX = root.x + HORIZONTAL_OFFSET;
+
+    for (let i = 0; i < sortedChildren.length; i++) {
+      const child = sortedChildren[i];
+
+      // Actualizar posición X del hijo
+      updatedNodes = updatedNodes.map(n => 
+        n.id === child.id ? { ...n, x: childrenX } : n
+      );
+
+      // Alinear el subárbol completo del hijo
+      const result = alignSubtree(child.id, startY, updatedNodes);
+      updatedNodes = result.nodes;
+
+      // Avanzar al siguiente bloque
+      startY += childBlockHeights[i] + BLOCK_MARGIN;
+    }
+
+    // Recalcular la posición del nodo raíz para que quede centrado
+    const firstChildBlock = sortedChildren[0];
+    const lastChildBlock = sortedChildren[sortedChildren.length - 1];
+    
+    const firstChild = updatedNodes.find(n => n.id === firstChildBlock.id);
+    const lastChild = updatedNodes.find(n => n.id === lastChildBlock.id);
+    
+    if (firstChild && lastChild) {
+      // Encontrar el top del primer bloque y el bottom del último
+      const allDescendantsYs = [];
+      const collectDescendantYs = (nodeId) => {
+        const node = updatedNodes.find(n => n.id === nodeId);
+        if (node) {
+          allDescendantsYs.push(node.y);
+          allDescendantsYs.push(node.y + getNodeHeight(node));
+        }
+        const nodeChildren = updatedNodes.filter(n => n.parentId === nodeId);
+        nodeChildren.forEach(c => collectDescendantYs(c.id));
+      };
+      
+      sortedChildren.forEach(c => collectDescendantYs(c.id));
+      
+      if (allDescendantsYs.length > 0) {
+        const blockTop = Math.min(...allDescendantsYs);
+        const blockBottom = Math.max(...allDescendantsYs);
+        const blockCenterY = (blockTop + blockBottom) / 2;
+        const newRootY = blockCenterY - rootHeight / 2;
+        
+        updatedNodes = updatedNodes.map(n => 
+          n.id === rootId ? { ...n, y: newRootY } : n
+        );
       }
-    });
+    }
 
     return updatedNodes;
-  }, [getNodeHeight]);
+  }, [getNodeHeight, calculateBlockHeight, alignSubtree, BLOCK_MARGIN, HORIZONTAL_OFFSET]);
 
   // Aplicar alineación automática a toda la jerarquía desde la raíz
   const applyFullAutoAlignment = useCallback(() => {

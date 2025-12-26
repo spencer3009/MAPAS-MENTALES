@@ -1006,6 +1006,8 @@ async def get_projects(current_user: dict = Depends(get_current_user)):
             project["lastActiveAt"] = project.get("updatedAt")
         if "customOrder" not in project:
             project["customOrder"] = None
+        if "layoutType" not in project:
+            project["layoutType"] = "mindflow"  # Default for existing projects
     
     return projects
 

@@ -2,13 +2,15 @@ import React from 'react';
 import { 
   Type, 
   Palette, 
-  Image, 
   Link2, 
   Copy, 
   Trash2,
   Laugh,
   MessageSquare,
-  Bell
+  Bell,
+  AlignLeft,
+  AlignCenter,
+  AlignRight
 } from 'lucide-react';
 
 const ToolbarButton = ({ icon: Icon, label, onClick, danger = false, active = false, hasIndicator = false, badge = null }) => (

@@ -8,9 +8,30 @@ import {
   AlignCenterVertical,
   AlignEndVertical,
   X,
-  Move,
   Copy
 } from 'lucide-react';
+
+// Icono personalizado para "Distribuir verticalmente"
+const DistributeVerticalIcon = ({ size = 18, className = "" }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+    className={className}
+  >
+    {/* Rectángulo superior */}
+    <rect x="6" y="4" width="12" height="4" rx="1" />
+    {/* Línea vertical de conexión */}
+    <line x1="12" y1="8" x2="12" y2="16" strokeDasharray="2 2" />
+    {/* Rectángulo inferior */}
+    <rect x="6" y="16" width="12" height="4" rx="1" />
+  </svg>
+);
 
 /**
  * Toolbar que aparece cuando hay múltiples nodos seleccionados
@@ -23,6 +44,7 @@ const MultiSelectToolbar = ({
   onAlignTop,
   onAlignMiddle,
   onAlignBottom,
+  onDistributeVertically,
   onDeleteSelected,
   onDuplicateSelected,
   onClearSelection,

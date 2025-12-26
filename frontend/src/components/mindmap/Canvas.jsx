@@ -118,17 +118,16 @@ const Canvas = ({
   // Handler para cuando se selecciona un tipo de nodo
   const handleNodeTypeSelect = useCallback((nodeType) => {
     if (nodeTypeSelector.parentId) {
-      const newId = onAddChildNode(nodeTypeSelector.parentId, null, { nodeType });
+      // Pasar el flag de autoAlign en las opciones
+      const newId = onAddChildNode(nodeTypeSelector.parentId, null, { 
+        nodeType, 
+        autoAlign: autoAlignEnabled 
+      });
       setNewNodeId(newId);
       setNodeTypeSelector({ isOpen: false, position: null, parentId: null });
       setTimeout(() => setShowControls(true), 500);
-      
-      // Aplicar alineación jerárquica automática si está habilitada
-      if (autoAlignEnabled && onAutoAlign) {
-        setTimeout(() => onAutoAlign(), 100);
-      }
     }
-  }, [nodeTypeSelector.parentId, onAddChildNode, autoAlignEnabled, onAutoAlign]);
+  }, [nodeTypeSelector.parentId, onAddChildNode, autoAlignEnabled]);
 
   // Handler para cerrar el selector de tipo de nodo
   const handleCloseNodeTypeSelector = useCallback(() => {

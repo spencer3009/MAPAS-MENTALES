@@ -1689,12 +1689,18 @@ export const useNodes = () => {
     // Acciones en grupo
     deleteSelectedNodes,
     duplicateSelectedNodes,
+    // Alineación de NODOS (posición en canvas)
     alignNodesLeft,
     alignNodesCenter,
     alignNodesRight,
     alignNodesTop,
     alignNodesMiddle,
     alignNodesBottom,
+    // Alineación de TEXTO (dentro del nodo)
+    alignTextLeft,
+    alignTextCenter,
+    alignTextRight,
+    // Distribución
     distributeNodesVertically,
     distributeNodesHorizontally,
     moveSelectedNodes,

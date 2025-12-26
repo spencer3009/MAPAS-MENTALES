@@ -1824,6 +1824,7 @@ export const useNodes = () => {
     
     const parentWidth = parent.width || 160;
     const parentHeight = parent.height || 64;
+    const childWidth = 160; // Ancho estándar de nodos hijos
     
     // Separar hijos por dirección
     const horizontalChildren = updatedNodes.filter(n => 
@@ -1838,12 +1839,18 @@ export const useNodes = () => {
     const horizontalGap = 200; // Distancia horizontal desde el padre
     const verticalGap = 100; // Distancia vertical desde el padre
     const siblingSpacingH = 80; // Espacio entre hermanos horizontales
-    const siblingSpacingV = 180; // Espacio entre hermanos verticales
+    const siblingSpacingV = 180; // Espacio entre hermanos verticales (centro a centro)
+    
+    // Centro del padre
+    const parentCenterX = parent.x + (parentWidth / 2);
+    const parentCenterY = parent.y + (parentHeight / 2);
     
     // Posicionar hijos horizontales (a la derecha, apilados verticalmente)
+    // Centrados verticalmente respecto al padre
     horizontalChildren.forEach((child, index) => {
       const newX = parent.x + parentWidth + horizontalGap;
-      const newY = parent.y + (index * siblingSpacingH) - ((horizontalChildren.length - 1) * siblingSpacingH / 2);
+      const totalHeightH = (horizontalChildren.length - 1) * siblingSpacingH;
+      const newY = parentCenterY - (totalHeightH / 2) + (index * siblingSpacingH) - (childWidth / 4);
       
       updatedNodes = updatedNodes.map(n => 
         n.id === child.id ? { ...n, x: newX, y: newY } : n
@@ -1854,20 +1861,29 @@ export const useNodes = () => {
     });
     
     // Posicionar hijos verticales (abajo, distribuidos horizontalmente)
-    const totalVerticalWidth = verticalChildren.length * siblingSpacingV - siblingSpacingV;
-    const verticalStartX = parent.x + (parentWidth / 2) - (totalVerticalWidth / 2);
-    
-    verticalChildren.forEach((child, index) => {
-      const newX = verticalStartX + (index * siblingSpacingV);
-      const newY = parent.y + parentHeight + verticalGap;
+    // El CENTRO del grupo de hijos debe alinearse con el CENTRO del padre
+    if (verticalChildren.length > 0) {
+      // Calcular ancho total del grupo (de centro a centro del primer y último nodo)
+      const totalGroupWidth = (verticalChildren.length - 1) * siblingSpacingV;
       
-      updatedNodes = updatedNodes.map(n => 
-        n.id === child.id ? { ...n, x: newX, y: newY } : n
-      );
+      // Calcular X del primer nodo para que el grupo quede centrado
+      // El centro del grupo es: firstChildX + childWidth/2 + totalGroupWidth/2
+      // Queremos que ese centro = parentCenterX
+      // Entonces: firstChildX = parentCenterX - childWidth/2 - totalGroupWidth/2
+      const firstChildX = parentCenterX - (childWidth / 2) - (totalGroupWidth / 2);
+      const childY = parent.y + parentHeight + verticalGap;
       
-      // Recursivamente alinear subárboles
-      updatedNodes = autoAlignMindHybrid(child.id, updatedNodes);
-    });
+      verticalChildren.forEach((child, index) => {
+        const newX = firstChildX + (index * siblingSpacingV);
+        
+        updatedNodes = updatedNodes.map(n => 
+          n.id === child.id ? { ...n, x: newX, y: childY } : n
+        );
+        
+        // Recursivamente alinear subárboles
+        updatedNodes = autoAlignMindHybrid(child.id, updatedNodes);
+      });
+    }
     
     return updatedNodes;
   }, []);

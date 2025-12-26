@@ -962,12 +962,14 @@ class ProjectCreate(BaseModel):
     nodes: List[NodeData]
     isPinned: Optional[bool] = False
     customOrder: Optional[int] = None
+    layoutType: Optional[str] = "mindflow"  # 'mindflow', 'mindtree', or 'mindhybrid'
 
 class ProjectUpdate(BaseModel):
     name: Optional[str] = None
     nodes: Optional[List[NodeData]] = None
     isPinned: Optional[bool] = None
     customOrder: Optional[int] = None
+    layoutType: Optional[str] = None  # 'mindflow', 'mindtree', or 'mindhybrid'
 
 class ProjectResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -981,6 +983,7 @@ class ProjectResponse(BaseModel):
     lastActiveAt: Optional[str] = None
     isPinned: bool = False
     customOrder: Optional[int] = None
+    layoutType: str = "mindflow"  # 'mindflow', 'mindtree', or 'mindhybrid'
 
 
 # ==========================================

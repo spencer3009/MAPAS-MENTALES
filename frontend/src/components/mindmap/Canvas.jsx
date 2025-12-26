@@ -561,7 +561,7 @@ const Canvas = ({
           nodes={nodes} 
           layoutType={layoutType}
           onAddNodeFromLine={onAddNodeFromLine}
-          showLineButtons={layoutType === 'mindhybrid' && showControls}
+          showLineButtons={layoutType === 'mindhybrid' || layoutType === 'mindtree'}
         />
 
         {nodes.map(node => (

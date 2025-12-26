@@ -853,3 +853,23 @@ The **Multi-Selection Feature** is **FULLY FUNCTIONAL** and **EXCEEDS EXPECTATIO
 
 **Recommendation**: The multi-selection feature is **PRODUCTION-READY** with only a minor X button issue that doesn't affect core functionality. The implementation successfully delivers all requested multi-selection capabilities with excellent user experience and technical quality.
 
+---
+
+## 🧪 NEXT TEST: Node Toolbar Text Alignment Buttons
+
+### Test Objective
+Verify that the image button has been replaced by 3 text alignment buttons (left, center, right) in the node toolbar.
+
+### Test Credentials
+- Username: `spencer3009`
+- Password: `Socios3009`
+
+### Test Cases
+1. **Button Visibility**: When selecting a node, verify 3 alignment buttons appear (left, center, right icons)
+2. **Image Button Removal**: Verify the image button no longer appears in the toolbar
+3. **Left Align**: Click left align button and verify text aligns to the left
+4. **Center Align**: Click center align button and verify text aligns to center  
+5. **Right Align**: Click right align button and verify text aligns to the right
+6. **Active State**: Verify active button is highlighted based on current alignment
+7. **No Node Movement**: Verify clicking alignment buttons does NOT move the node position
+

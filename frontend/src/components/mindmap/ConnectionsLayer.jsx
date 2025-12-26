@@ -43,7 +43,39 @@ const ConnectionsLayer = memo(({
 
       let start, end, path;
 
-      if (layoutType === 'mindhybrid') {
+      // Caso especial: nodo creado desde un conector horizontal
+      // El conector debe ir desde el punto medio del conector original
+      if (node.connectorParentId && node.connectorTargetId && layoutType === 'mindhybrid') {
+        const connectorTarget = nodes.find(n => n.id === node.connectorTargetId);
+        if (connectorTarget) {
+          // Calcular el punto medio del conector horizontal original
+          const targetParent = nodes.find(n => n.id === connectorTarget.parentId);
+          if (targetParent) {
+            const tpWidth = targetParent.width || DEFAULT_NODE_WIDTH;
+            const tpHeight = targetParent.height || DEFAULT_NODE_HEIGHT;
+            const ctHeight = connectorTarget.height || DEFAULT_NODE_HEIGHT;
+            
+            const tpRight = targetParent.x + tpWidth;
+            const tpCenterY = targetParent.y + tpHeight / 2;
+            const ctLeft = connectorTarget.x;
+            const ctCenterY = connectorTarget.y + ctHeight / 2;
+            
+            // Punto medio del conector horizontal
+            const midX = (tpRight + ctLeft) / 2;
+            const midY = (tpCenterY + ctCenterY) / 2;
+            
+            // Conector vertical desde el punto medio hacia el nodo
+            const endX = node.x + nodeWidth / 2;
+            const endY = node.y;
+            
+            start = { x: midX, y: midY };
+            end = { x: endX, y: endY };
+            
+            // Línea recta vertical
+            path = `M ${midX} ${midY} L ${endX} ${endY}`;
+          }
+        }
+      } else if (layoutType === 'mindhybrid') {
         // MindHybrid: el tipo de conector depende de la dirección del nodo hijo
         // Si childDirection no está definido, inferir de la posición relativa al padre
         let effectiveDirection = node.childDirection;

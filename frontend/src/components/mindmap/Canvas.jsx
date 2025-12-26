@@ -94,10 +94,10 @@ const Canvas = ({
       // MindHybrid: DOS botones - derecha (horizontal) e inferior (vertical)
       // Botón derecho (crear hijo horizontal)
       addButtonRightX = (selectedNode.x + nodeW + 15) * zoom + pan.x;
-      addButtonRightY = (selectedNode.y + nodeH / 2 - 14) * zoom + pan.y;
+      addButtonRightY = (selectedNode.y + nodeH / 2) * zoom + pan.y;
       // Botón inferior (crear hijo vertical)
-      addButtonBottomX = (selectedNode.x + nodeW / 2 - 14) * zoom + pan.x;
-      addButtonBottomY = (selectedNode.y + nodeH + 15) * zoom + pan.y;
+      addButtonBottomX = (selectedNode.x + nodeW / 2) * zoom + pan.x;
+      addButtonBottomY = (selectedNode.y + nodeH + 20) * zoom + pan.y;
       // No mostrar botón único
       addButtonX = null;
       addButtonY = null;

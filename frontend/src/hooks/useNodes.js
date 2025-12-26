@@ -2543,6 +2543,7 @@ export const useNodes = () => {
     addNode,
     addNodeHorizontal,
     addNodeVertical,
+    addNodeFromLine,
     updateNode: updateProjectNodes,
     updateNodePosition,
     updateNodeText,

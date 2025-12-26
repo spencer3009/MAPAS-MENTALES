@@ -279,9 +279,9 @@ const Canvas = ({
 
   const handleToolbarDelete = useCallback(() => {
     if (selectedNodeId) {
-      onDeleteNode(selectedNodeId);
+      handleDeleteWithAutoAlign(selectedNodeId);
     }
-  }, [selectedNodeId, onDeleteNode]);
+  }, [selectedNodeId, handleDeleteWithAutoAlign]);
 
   // Manejar inicio de arrastre de nodo
   const handleNodeDragStart = useCallback((e, node) => {

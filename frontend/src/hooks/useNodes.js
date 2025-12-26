@@ -1619,6 +1619,215 @@ export const useNodes = () => {
     return newId;
   }, [activeProjectId, pushToHistory, autoAlignHierarchy, autoAlignMindTree]);
 
+  // ==========================================
+  // FUNCIONES ESPECÍFICAS PARA MINDHYBRID
+  // ==========================================
+
+  // Agregar nodo hijo en dirección HORIZONTAL (a la derecha)
+  const addNodeHorizontal = useCallback((parentId, options = {}) => {
+    if (!parentId) return null;
+    
+    const newId = crypto.randomUUID();
+    const autoAlignAfter = options?.autoAlign || false;
+    
+    setProjects(prev => {
+      const project = prev.find(p => p.id === activeProjectId);
+      if (!project) return prev;
+      
+      const currentNodes = project.nodes;
+      const parent = currentNodes.find(n => n.id === parentId);
+      if (!parent) return prev;
+      
+      // Filtrar hermanos horizontales
+      const horizontalSiblings = currentNodes.filter(n => 
+        n.parentId === parentId && n.childDirection === 'horizontal'
+      );
+      
+      const parentWidth = parent.width || 160;
+      const parentHeight = parent.height || 64;
+      const horizontalGap = 280; // Distancia horizontal del padre
+      const verticalSpacing = 80; // Espacio vertical entre hermanos horizontales
+      
+      // Posición: a la derecha del padre, apilados verticalmente
+      const newX = parent.x + parentWidth + horizontalGap - parentWidth;
+      const newY = parent.y + (horizontalSiblings.length * verticalSpacing);
+      
+      const newNode = {
+        id: newId,
+        text: 'Nuevo Nodo',
+        x: newX,
+        y: newY,
+        color: 'blue',
+        parentId,
+        width: 160,
+        height: 64,
+        nodeType: options?.nodeType || 'default',
+        childDirection: 'horizontal' // Marca la dirección
+      };
+      
+      console.log('[MindHybrid] Creando nodo HORIZONTAL:', newNode);
+      
+      let newNodes = [...currentNodes, newNode];
+      
+      // Si autoAlign está activo, reorganizar
+      if (autoAlignAfter) {
+        newNodes = autoAlignMindHybrid(parentId, newNodes);
+      }
+      
+      pushToHistory(activeProjectId, newNodes);
+      
+      return prev.map(p => 
+        p.id === activeProjectId 
+          ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+          : p
+      );
+    });
+    
+    setSelectedNodeId(newId);
+    return newId;
+  }, [activeProjectId, pushToHistory]);
+
+  // Agregar nodo hijo en dirección VERTICAL (abajo)
+  const addNodeVertical = useCallback((parentId, options = {}) => {
+    if (!parentId) return null;
+    
+    const newId = crypto.randomUUID();
+    const autoAlignAfter = options?.autoAlign || false;
+    
+    setProjects(prev => {
+      const project = prev.find(p => p.id === activeProjectId);
+      if (!project) return prev;
+      
+      const currentNodes = project.nodes;
+      const parent = currentNodes.find(n => n.id === parentId);
+      if (!parent) return prev;
+      
+      // Filtrar hermanos verticales
+      const verticalSiblings = currentNodes.filter(n => 
+        n.parentId === parentId && n.childDirection === 'vertical'
+      );
+      
+      const parentHeight = parent.height || 64;
+      const verticalGap = 100; // Distancia vertical del padre
+      const horizontalSpacing = 180; // Espacio horizontal entre hermanos verticales
+      
+      // Posición: debajo del padre, distribuidos horizontalmente
+      const newX = parent.x + (verticalSiblings.length * horizontalSpacing);
+      const newY = parent.y + parentHeight + verticalGap;
+      
+      const newNode = {
+        id: newId,
+        text: 'Nuevo Nodo',
+        x: newX,
+        y: newY,
+        color: 'blue',
+        parentId,
+        width: 160,
+        height: 64,
+        nodeType: options?.nodeType || 'default',
+        childDirection: 'vertical' // Marca la dirección
+      };
+      
+      console.log('[MindHybrid] Creando nodo VERTICAL:', newNode);
+      
+      let newNodes = [...currentNodes, newNode];
+      
+      // Si autoAlign está activo, reorganizar
+      if (autoAlignAfter) {
+        newNodes = autoAlignMindHybrid(parentId, newNodes);
+      }
+      
+      pushToHistory(activeProjectId, newNodes);
+      
+      return prev.map(p => 
+        p.id === activeProjectId 
+          ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+          : p
+      );
+    });
+    
+    setSelectedNodeId(newId);
+    return newId;
+  }, [activeProjectId, pushToHistory]);
+
+  // Algoritmo de alineación para MindHybrid
+  // Organiza hijos horizontales a la derecha y verticales abajo
+  const autoAlignMindHybrid = useCallback((parentId, currentNodes) => {
+    if (!parentId) return currentNodes;
+    
+    const parent = currentNodes.find(n => n.id === parentId);
+    if (!parent) return currentNodes;
+    
+    let updatedNodes = [...currentNodes];
+    
+    const parentWidth = parent.width || 160;
+    const parentHeight = parent.height || 64;
+    
+    // Separar hijos por dirección
+    const horizontalChildren = updatedNodes.filter(n => 
+      n.parentId === parentId && n.childDirection === 'horizontal'
+    ).sort((a, b) => a.y - b.y); // Ordenar por Y
+    
+    const verticalChildren = updatedNodes.filter(n => 
+      n.parentId === parentId && n.childDirection === 'vertical'
+    ).sort((a, b) => a.x - b.x); // Ordenar por X
+    
+    // Constantes de espaciado
+    const horizontalGap = 200; // Distancia horizontal desde el padre
+    const verticalGap = 100; // Distancia vertical desde el padre
+    const siblingSpacingH = 80; // Espacio entre hermanos horizontales
+    const siblingSpacingV = 180; // Espacio entre hermanos verticales
+    
+    // Posicionar hijos horizontales (a la derecha, apilados verticalmente)
+    horizontalChildren.forEach((child, index) => {
+      const newX = parent.x + parentWidth + horizontalGap;
+      const newY = parent.y + (index * siblingSpacingH) - ((horizontalChildren.length - 1) * siblingSpacingH / 2);
+      
+      updatedNodes = updatedNodes.map(n => 
+        n.id === child.id ? { ...n, x: newX, y: newY } : n
+      );
+      
+      // Recursivamente alinear subárboles
+      updatedNodes = autoAlignMindHybrid(child.id, updatedNodes);
+    });
+    
+    // Posicionar hijos verticales (abajo, distribuidos horizontalmente)
+    const totalVerticalWidth = verticalChildren.length * siblingSpacingV - siblingSpacingV;
+    const verticalStartX = parent.x + (parentWidth / 2) - (totalVerticalWidth / 2);
+    
+    verticalChildren.forEach((child, index) => {
+      const newX = verticalStartX + (index * siblingSpacingV);
+      const newY = parent.y + parentHeight + verticalGap;
+      
+      updatedNodes = updatedNodes.map(n => 
+        n.id === child.id ? { ...n, x: newX, y: newY } : n
+      );
+      
+      // Recursivamente alinear subárboles
+      updatedNodes = autoAlignMindHybrid(child.id, updatedNodes);
+    });
+    
+    return updatedNodes;
+  }, []);
+
+  // Aplicar alineación completa MindHybrid
+  const applyFullMindHybridAlignment = useCallback(() => {
+    console.log('[MindHybrid] Aplicando alineación completa');
+    
+    const rootNodes = nodes.filter(n => !n.parentId);
+    let updatedNodes = [...nodes];
+    
+    rootNodes.forEach(root => {
+      updatedNodes = autoAlignMindHybrid(root.id, updatedNodes);
+    });
+    
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: updatedNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, activeProjectId, autoAlignMindHybrid]);
+
   // Guardar posición al FINALIZAR el drag (no durante)
   const saveNodePositionToHistory = useCallback(() => {
     saveToHistory(activeProjectId, nodes);

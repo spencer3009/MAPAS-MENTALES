@@ -550,6 +550,9 @@ const MindMapApp = () => {
             sidebarTab={sidebarTab}
             autoAlignEnabled={autoAlignEnabled}
             onAutoAlign={applyAutoAlignment}
+            onAlignTextLeft={alignSingleNodeTextLeft}
+            onAlignTextCenter={alignSingleNodeTextCenter}
+            onAlignTextRight={alignSingleNodeTextRight}
           />
 
           {/* Toolbar de selección múltiple */}

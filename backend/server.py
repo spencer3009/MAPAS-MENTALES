@@ -991,6 +991,9 @@ class ProjectResponse(BaseModel):
     isPinned: bool = False
     customOrder: Optional[int] = None
     layoutType: str = "mindflow"  # 'mindflow', 'mindtree', or 'mindhybrid'
+    # Campos para papelera de reciclaje
+    isDeleted: bool = False
+    deletedAt: Optional[str] = None
 
 
 # ==========================================
@@ -999,9 +1002,15 @@ class ProjectResponse(BaseModel):
 
 @api_router.get("/projects", response_model=List[ProjectResponse])
 async def get_projects(current_user: dict = Depends(get_current_user)):
-    """Obtener todos los proyectos del usuario con ordenamiento inteligente"""
+    """Obtener todos los proyectos del usuario (excluyendo eliminados)"""
     projects = await db.projects.find(
-        {"username": current_user["username"]},
+        {
+            "username": current_user["username"],
+            "$or": [
+                {"isDeleted": {"$exists": False}},
+                {"isDeleted": False}
+            ]
+        },
         {"_id": 0}
     ).to_list(100)
     

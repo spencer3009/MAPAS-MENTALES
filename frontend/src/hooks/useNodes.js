@@ -1213,6 +1213,59 @@ export const useNodes = () => {
     ));
   }, [nodes, selectedNodeIds, activeProjectId, pushToHistory, getSelectedNodes]);
 
+  // ==========================================
+  // FUNCIONES DE ALINEACIÓN DE TEXTO PARA NODO INDIVIDUAL
+  // (Para uso desde el NodeToolbar cuando hay un solo nodo seleccionado)
+  // ==========================================
+
+  const alignSingleNodeTextLeft = useCallback((nodeId) => {
+    if (!nodeId) return;
+    console.log('[alignSingleNodeTextLeft] Alineando texto del nodo', nodeId, 'a la izquierda');
+
+    const newNodes = nodes.map(n => 
+      n.id === nodeId ? { ...n, textAlign: 'left' } : n
+    );
+
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, activeProjectId, pushToHistory]);
+
+  const alignSingleNodeTextCenter = useCallback((nodeId) => {
+    if (!nodeId) return;
+    console.log('[alignSingleNodeTextCenter] Alineando texto del nodo', nodeId, 'al centro');
+
+    const newNodes = nodes.map(n => 
+      n.id === nodeId ? { ...n, textAlign: 'center' } : n
+    );
+
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, activeProjectId, pushToHistory]);
+
+  const alignSingleNodeTextRight = useCallback((nodeId) => {
+    if (!nodeId) return;
+    console.log('[alignSingleNodeTextRight] Alineando texto del nodo', nodeId, 'a la derecha');
+
+    const newNodes = nodes.map(n => 
+      n.id === nodeId ? { ...n, textAlign: 'right' } : n
+    );
+
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, activeProjectId, pushToHistory]);
+
   // Calcular canUndo y canRedo
   const getHistoryState = useCallback((projectId) => {
     return historyRef.current[projectId] || { states: [], pointer: 0 };

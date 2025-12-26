@@ -1874,43 +1874,6 @@ export const useNodes = () => {
       updatedNodes = autoAlignMindHybrid(child.id, updatedNodes);
     });
     
-    // Posicionar hijos de línea (cuelgan del centro de la línea horizontal entre hermanos)
-    if (lineChildren.length > 0 && horizontalChildren.length >= 2) {
-      // Calcular el centro de la línea horizontal
-      const sortedHorizontal = [...horizontalChildren].sort((a, b) => {
-        const aNode = updatedNodes.find(n => n.id === a.id);
-        const bNode = updatedNodes.find(n => n.id === b.id);
-        return (aNode?.y || 0) - (bNode?.y || 0);
-      });
-      
-      const firstH = updatedNodes.find(n => n.id === sortedHorizontal[0].id);
-      const lastH = updatedNodes.find(n => n.id === sortedHorizontal[sortedHorizontal.length - 1].id);
-      
-      if (firstH && lastH) {
-        const lineX = firstH.x - 30; // La línea está a la izquierda de los nodos horizontales
-        const firstY = firstH.y + (firstH.height || 64) / 2;
-        const lastY = lastH.y + (lastH.height || 64) / 2;
-        const midY = (firstY + lastY) / 2;
-        
-        // Distribuir hijos de línea horizontalmente debajo del punto medio
-        const lineChildrenSpacing = 180;
-        const totalLineWidth = (lineChildren.length - 1) * lineChildrenSpacing;
-        const lineStartX = lineX - totalLineWidth / 2;
-        
-        lineChildren.forEach((child, index) => {
-          const newX = lineStartX + (index * lineChildrenSpacing);
-          const newY = midY + verticalGap;
-          
-          updatedNodes = updatedNodes.map(n => 
-            n.id === child.id ? { ...n, x: newX, y: newY } : n
-          );
-          
-          // Recursivamente alinear subárboles
-          updatedNodes = autoAlignMindHybrid(child.id, updatedNodes);
-        });
-      }
-    }
-    
     return updatedNodes;
   }, []);
 

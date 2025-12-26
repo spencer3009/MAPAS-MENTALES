@@ -585,6 +585,7 @@ const MindMapApp = () => {
             onAlignTextLeft={alignSingleNodeTextLeft}
             onAlignTextCenter={alignSingleNodeTextCenter}
             onAlignTextRight={alignSingleNodeTextRight}
+            onToggleNodeCompleted={toggleNodeCompleted}
             layoutType={currentLayoutType}
           />
 

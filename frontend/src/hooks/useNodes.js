@@ -1158,6 +1158,7 @@ export const useNodes = () => {
 
   const addNode = useCallback((parentId = null, position = null, options = {}) => {
     const newId = crypto.randomUUID();
+    const autoAlignAfter = options?.autoAlign || false;
     
     setProjects(prev => {
       const project = prev.find(p => p.id === activeProjectId);
@@ -1198,8 +1199,29 @@ export const useNodes = () => {
 
       console.log('Creating new node:', newNode);
       
+      // Agregar el nuevo nodo
+      let newNodes = [...currentNodes, newNode];
+      
+      // Si autoAlign está activo, aplicar alineación jerárquica
+      if (autoAlignAfter && parentId) {
+        console.log('[addNode] Aplicando alineación jerárquica después de crear nodo');
+        // Encontrar el nodo raíz de esta jerarquía
+        let currentParentId = parentId;
+        let rootId = parentId;
+        while (currentParentId) {
+          const parent = newNodes.find(n => n.id === currentParentId);
+          if (parent && parent.parentId) {
+            currentParentId = parent.parentId;
+            rootId = parent.parentId;
+          } else {
+            break;
+          }
+        }
+        // Aplicar alineación desde la raíz
+        newNodes = autoAlignHierarchy(rootId, newNodes);
+      }
+      
       // Guardar el NUEVO estado en el historial (después del cambio)
-      const newNodes = [...currentNodes, newNode];
       pushToHistory(activeProjectId, newNodes);
 
       return prev.map(p => 
@@ -1211,7 +1233,7 @@ export const useNodes = () => {
 
     setSelectedNodeId(newId);
     return newId;
-  }, [activeProjectId, pushToHistory]);
+  }, [activeProjectId, pushToHistory, autoAlignHierarchy]);
 
   // Guardar posición al FINALIZAR el drag (no durante)
   const saveNodePositionToHistory = useCallback(() => {

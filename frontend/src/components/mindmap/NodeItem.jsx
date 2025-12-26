@@ -133,6 +133,16 @@ const NodeItem = memo(({
   const nodeType = node.nodeType || 'default';
   const isDashedNode = nodeType === 'dashed' || nodeType === 'dashed_text';
   
+  // Alineación de texto (left, center, right) - por defecto center
+  const textAlign = node.textAlign || 'center';
+  
+  // Clase CSS para alineación de texto
+  const textAlignClass = {
+    'left': 'text-left',
+    'center': 'text-center',
+    'right': 'text-right'
+  }[textAlign] || 'text-center';
+  
   // Color de acento del sistema para la línea (celeste)
   const ACCENT_COLOR = '#38bdf8'; // sky-400 - celeste brillante
 

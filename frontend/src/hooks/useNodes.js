@@ -1593,6 +1593,8 @@ export const useNodes = () => {
     alignNodesTop,
     alignNodesMiddle,
     alignNodesBottom,
+    distributeNodesVertically,
+    distributeNodesHorizontally,
     moveSelectedNodes,
     
     // Compatibilidad

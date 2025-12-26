@@ -48,7 +48,10 @@ const Canvas = ({
   onOpenIconPanel,
   onOpenReminderPanel,
   styleSidebarOpen,
-  sidebarTab
+  sidebarTab,
+  // Alineación automática
+  autoAlignEnabled,
+  onAutoAlign
 }) => {
   const containerRef = useRef(null);
   const [dragging, setDragging] = useState(null);

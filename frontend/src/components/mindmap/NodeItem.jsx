@@ -584,17 +584,17 @@ const NodeItem = memo(({
                 onBlur={handleBlur}
                 onKeyDown={handleKeyDown}
                 onMouseDown={(e) => e.stopPropagation()}
-                className="
-                  flex-1 text-center bg-transparent outline-none
+                className={`
+                  flex-1 ${textAlignClass} bg-transparent outline-none
                   font-medium text-sm
                   border-b-2 border-current opacity-50
-                "
+                `}
                 style={{ color: textColor }}
                 placeholder="Nombre del nodo"
               />
             ) : (
               <span 
-                className={`flex-1 font-medium text-sm break-words ${node.icon ? 'text-left' : 'text-center'}`}
+                className={`flex-1 font-medium text-sm break-words ${node.icon ? 'text-left' : textAlignClass}`}
                 style={{ color: textColor }}
               >
                 {displayText}

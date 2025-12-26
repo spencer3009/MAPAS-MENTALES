@@ -423,6 +423,8 @@ const NodeItem = memo(({
         color: isDashedNode ? '#374151' : textColor,
         zIndex: isInSelection ? 20 : 10,
         padding: isDashedNode ? '8px 4px' : undefined,
+        // Opacidad reducida cuando está completado (41%)
+        opacity: node.isCompleted ? 0.41 : 1,
         // Agregar box-shadow extra para selección múltiple (más visible)
         boxShadow: isMultiSelected 
           ? '0 0 0 4px rgba(37, 99, 235, 0.6), 0 10px 25px -5px rgba(0, 0, 0, 0.2)' 

@@ -584,6 +584,7 @@ const MindMapApp = () => {
             onAlignTextLeft={alignSingleNodeTextLeft}
             onAlignTextCenter={alignSingleNodeTextCenter}
             onAlignTextRight={alignSingleNodeTextRight}
+            layoutType={currentLayoutType}
           />
 
           {/* Toolbar de selección múltiple */}

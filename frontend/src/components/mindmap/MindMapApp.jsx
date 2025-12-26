@@ -698,6 +698,13 @@ const MindMapApp = () => {
         onPinProject={pinProject}
         onReorderProjects={reorderProjects}
       />
+
+      {/* Modal: Selector de plantilla de layout */}
+      <LayoutTemplateSelector
+        isOpen={showLayoutSelector}
+        onSelect={handleLayoutSelect}
+        onClose={() => setShowLayoutSelector(false)}
+      />
     </div>
   );
 };

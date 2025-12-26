@@ -155,6 +155,19 @@ const NodeItem = memo(({
     }
   }, [isEditing]);
 
+  // Actualizar altura real del nodo cuando se renderiza
+  useEffect(() => {
+    if (nodeRef.current && onUpdateSize) {
+      const rect = nodeRef.current.getBoundingClientRect();
+      const actualHeight = Math.round(rect.height);
+      
+      // Solo actualizar si la altura cambió significativamente (más de 5px de diferencia)
+      if (Math.abs((node.height || 64) - actualHeight) > 5) {
+        onUpdateSize(node.id, { height: actualHeight });
+      }
+    }
+  }, [node.text, node.id, node.height, onUpdateSize]);
+
   const handleStartEdit = useCallback(() => {
     setLocalText(node.text);
     setIsEditing(true);

@@ -100,51 +100,72 @@ const ConnectionsLayer = memo(({
 
   // ==========================================
   // DETECTAR LÍNEAS HORIZONTALES COMPARTIDAS
-  // Para MindHybrid: encontrar grupos de hermanos horizontales
+  // Para MindHybrid/MindTree: encontrar padres con múltiples hijos verticales
+  // La línea horizontal está entre el padre y sus hijos
   // ==========================================
   const horizontalLineButtons = useMemo(() => {
-    if (layoutType !== 'mindhybrid' || !showLineButtons || !onAddNodeFromLine) {
+    if (!showLineButtons || !onAddNodeFromLine) {
+      return [];
+    }
+    
+    // Solo para MindHybrid y MindTree
+    if (layoutType !== 'mindhybrid' && layoutType !== 'mindtree') {
       return [];
     }
 
-    // Agrupar nodos por parentId que tengan childDirection: 'horizontal'
-    const horizontalGroups = {};
+    const buttons = [];
+
+    // Agrupar nodos por parentId
+    const childrenByParent = {};
     nodes.forEach(node => {
-      if (node.parentId && node.childDirection === 'horizontal') {
-        if (!horizontalGroups[node.parentId]) {
-          horizontalGroups[node.parentId] = [];
+      if (node.parentId) {
+        if (!childrenByParent[node.parentId]) {
+          childrenByParent[node.parentId] = [];
         }
-        horizontalGroups[node.parentId].push(node);
+        childrenByParent[node.parentId].push(node);
       }
     });
 
-    const buttons = [];
+    // Para cada padre con hijos
+    Object.entries(childrenByParent).forEach(([parentId, children]) => {
+      const parent = nodes.find(n => n.id === parentId);
+      if (!parent) return;
 
-    // Para cada grupo de hermanos horizontales con 2+ nodos
-    Object.entries(horizontalGroups).forEach(([parentId, siblings]) => {
-      if (siblings.length < 2) return;
+      // Filtrar según el tipo de layout
+      let verticalChildren;
+      if (layoutType === 'mindtree') {
+        // En MindTree, todos los hijos son "verticales"
+        verticalChildren = children;
+      } else {
+        // En MindHybrid, solo hijos con childDirection: 'vertical'
+        verticalChildren = children.filter(c => c.childDirection === 'vertical');
+      }
 
-      // Ordenar hermanos por posición Y (de arriba a abajo)
-      const sortedSiblings = [...siblings].sort((a, b) => a.y - b.y);
+      // Necesitamos al menos 2 hijos para formar una línea horizontal
+      if (verticalChildren.length < 2) return;
 
-      // Calcular la línea horizontal que conecta los hermanos
-      // La línea va desde el primero hasta el último hermano
-      const firstSibling = sortedSiblings[0];
-      const lastSibling = sortedSiblings[sortedSiblings.length - 1];
+      // Ordenar por X para encontrar los extremos
+      const sortedByX = [...verticalChildren].sort((a, b) => a.x - b.x);
+      const leftChild = sortedByX[0];
+      const rightChild = sortedByX[sortedByX.length - 1];
 
-      // Punto medio de la línea horizontal
-      // La línea horizontal está a la izquierda de los hermanos (punto de entrada)
-      const firstY = firstSibling.y + (firstSibling.height || DEFAULT_NODE_HEIGHT) / 2;
-      const lastY = lastSibling.y + (lastSibling.height || DEFAULT_NODE_HEIGHT) / 2;
-      const midY = (firstY + lastY) / 2;
-      const lineX = firstSibling.x; // El lado izquierdo de los nodos (punto de entrada)
+      // Calcular la posición de la línea horizontal
+      // Está a medio camino entre el borde inferior del padre y el borde superior de los hijos
+      const parentBottom = parent.y + (parent.height || DEFAULT_NODE_HEIGHT);
+      const childTop = leftChild.y;
+      const lineY = (parentBottom + childTop) / 2;
+
+      // Centro X de la línea
+      const leftX = leftChild.x + (leftChild.width || DEFAULT_NODE_WIDTH) / 2;
+      const rightX = rightChild.x + (rightChild.width || DEFAULT_NODE_WIDTH) / 2;
+      const centerX = (leftX + rightX) / 2;
 
       buttons.push({
         id: `line-btn-${parentId}`,
         parentId,
-        x: lineX - 30, // Un poco a la izquierda de la línea
-        y: midY,
-        siblingIds: sortedSiblings.map(s => s.id)
+        x: centerX,
+        y: lineY,
+        childIds: verticalChildren.map(c => c.id)
       });
     });
 

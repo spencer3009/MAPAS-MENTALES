@@ -122,8 +122,13 @@ const Canvas = ({
       setNewNodeId(newId);
       setNodeTypeSelector({ isOpen: false, position: null, parentId: null });
       setTimeout(() => setShowControls(true), 500);
+      
+      // Aplicar alineación jerárquica automática si está habilitada
+      if (autoAlignEnabled && onAutoAlign) {
+        setTimeout(() => onAutoAlign(), 100);
+      }
     }
-  }, [nodeTypeSelector.parentId, onAddChildNode]);
+  }, [nodeTypeSelector.parentId, onAddChildNode, autoAlignEnabled, onAutoAlign]);
 
   // Handler para cerrar el selector de tipo de nodo
   const handleCloseNodeTypeSelector = useCallback(() => {

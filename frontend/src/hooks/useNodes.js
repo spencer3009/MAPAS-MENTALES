@@ -1664,6 +1664,25 @@ export const useNodes = () => {
     ));
   }, [nodes, activeProjectId, pushToHistory]);
 
+  // Toggle estado de tarea completada (texto tachado)
+  const toggleNodeCompleted = useCallback((id) => {
+    const node = nodes.find(n => n.id === id);
+    if (!node) return;
+    
+    const newIsCompleted = !node.isCompleted;
+    console.log('[toggleNodeCompleted] Nodo:', id, 'isCompleted:', newIsCompleted);
+    
+    const newNodes = nodes.map(n => 
+      n.id === id ? { ...n, isCompleted: newIsCompleted } : n
+    );
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, [nodes, activeProjectId, pushToHistory]);
+
   // Actualizar estilos del nodo (forma, colores, borde, línea)
   const updateNodeStyle = useCallback((id, styleUpdates) => {
     const newNodes = nodes.map(n => {

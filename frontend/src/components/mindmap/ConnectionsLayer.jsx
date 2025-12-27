@@ -278,26 +278,31 @@ const ConnectionsLayer = memo(({
         // =====================================================
         // CASO 3: Botón en CADA conector horizontal individual
         // Entre un padre y su hijo horizontal directo
+        // SOLO EN EL PRIMER NIVEL (padre es nodo raíz sin parentId)
         // =====================================================
-        horizontalChildren.forEach(child => {
-          const parentRight = parent.x + (parent.width || DEFAULT_NODE_WIDTH);
-          const parentCenterY = parent.y + (parent.height || DEFAULT_NODE_HEIGHT) / 2;
-          const childLeft = child.x;
-          const childCenterY = child.y + (child.height || DEFAULT_NODE_HEIGHT) / 2;
-          
-          // Centro del conector horizontal (línea recta entre padre e hijo)
-          const centerX = (parentRight + childLeft) / 2;
-          const centerY = (parentCenterY + childCenterY) / 2;
-          
-          buttons.push({
-            id: `hconn-btn-${parent.id}-${child.id}`,
-            parentId: parent.id,
-            targetChildId: child.id,
-            x: centerX,
-            y: centerY,
-            lineType: 'horizontal-connector' // Para crear ramas verticales desde el conector
+        // El botón púrpura solo aparece en el primer nivel del árbol
+        // Es decir, solo en conectores que salen del nodo central/raíz
+        if (!parent.parentId) {
+          horizontalChildren.forEach(child => {
+            const parentRight = parent.x + (parent.width || DEFAULT_NODE_WIDTH);
+            const parentCenterY = parent.y + (parent.height || DEFAULT_NODE_HEIGHT) / 2;
+            const childLeft = child.x;
+            const childCenterY = child.y + (child.height || DEFAULT_NODE_HEIGHT) / 2;
+            
+            // Centro del conector horizontal (línea recta entre padre e hijo)
+            const centerX = (parentRight + childLeft) / 2;
+            const centerY = (parentCenterY + childCenterY) / 2;
+            
+            buttons.push({
+              id: `hconn-btn-${parent.id}-${child.id}`,
+              parentId: parent.id,
+              targetChildId: child.id,
+              x: centerX,
+              y: centerY,
+              lineType: 'horizontal-connector' // Para crear ramas verticales desde el conector
+            });
           });
-        });
+        }
       }
     });
 

@@ -1,49 +1,64 @@
 <analysis>**original_problem_statement:**
-The user has requested the implementation of a comprehensive recycle bin system for projects. This involves a two-stage deletion process: a soft delete that moves projects to a trash area, and a permanent delete from within that trash area.
+The user initiated this session with several objectives:
+1.  **Recycle Bin System:** Implement a full soft-delete system (Papelera de Reciclaje) allowing users to send projects to a trash area, from which they can either be restored or permanently deleted. This was the primary initial goal.
+2.  **Dock Sidebar:** Implement a new vertical dock to the left of the main project sidebar for navigating between different app sections (Panel, Proyectos, Plantillas, etc.).
+3.  **MindHybrid Bug Fixes:** The user reported a series of complex bugs related to the MindHybrid layout:
+    *   Horizontal connectors would become inclined after creation when the user clicked elsewhere.
+    *   Connectors created from the purple + button on another connector were not starting as a straight vertical line, instead defaulting to an elbow shape.
+    *   The layout would automatically shrink after being correctly expanded to prevent node collisions, simply by the user clicking away (losing focus). This is the current active issue.
+    *   Adding new nodes caused them to overlap with existing, unrelated nodes in other branches. The layout was not expanding horizontally to accommodate the new nodes.
 
 **PRODUCT REQUIREMENTS:**
-1.  **Soft Delete:** When a user clicks Delete Project, the project must not be removed from the database. Instead, it should be marked as deleted (e.g., , ) and hidden from the main My Projects list.
-2.  **Recycle Bin Section:** A new section, Trash or Papelera, must be created and be accessible from the main UI.
-3.  **List Trashed Projects:** This new section must display a list of all soft-deleted projects, showing at least the project name and the date it was deleted.
-4.  **Restore Action:** Inside the trash, each project must have a Restore option. This action should reset the deletion flag (e.g., ) and return the project to the My Projects list.
-5.  **Permanent Deletion:** Each trashed project must also have a Delete Permanently option. This action must trigger a clear confirmation dialog warning the user that the action is irreversible. Upon confirmation, the project must be permanently removed from the database.
-6.  **Safety and UX:** All deletions must go through the recycle bin first (no direct permanent deletes). The UI should be clear, using appropriate icons (e.g., 🗑️, ♻️).
+*   **Recycle Bin:**
+    *    should perform a soft delete.
+    *   A Papelera (Trash) section must be added to the UI.
+    *   This section must list trashed projects with Restore and Delete Permanently options.
+    *   Permanent deletion requires a strong confirmation dialog.
+*   **Dock Sidebar:**
+    *   A new vertical dock on the far left, always visible on desktop.
+    *   Buttons for Panel, Proyectos, Plantillas, Recordatorios, Integraciones, Configuración.
+    *   Clicking a button shows the corresponding view.
+    *   It should be hidden on mobile.
+*   **MindHybrid Bug Fixes:**
+    *   Horizontal connectors must *always* remain perfectly straight.
+    *   Connectors created from other connectors must start as a straight vertical line and only change shape if the user manually drags the node.
+    *   Layout expansions to prevent collisions must be persistent and not revert on blur or selection change.
 
 **User's preferred language**: Spanish. The next agent MUST respond in Spanish.
 
 **what currently exists?**
-The application is a feature-rich mind-mapping tool supporting multiple layouts (MindFlow, MindTree, MindHybrid). In this session, the agent successfully completed the complex MindHybrid layout, including adding nodes from connector lines. Several critical bugs related to layout persistence after page refresh, incorrect node alignment, and persistence of the completed status were also identified and fixed.
-
-The agent has just begun implementing the new Recycle Bin feature. It has correctly identified the need for backend changes and has added the  and  fields to the Pydantic models in , and created stubs for the new API endpoints.
+The application is a mind-mapping tool with three layouts. In this session, the agent successfully implemented two major features from scratch: a complete Recycle Bin system and a new vertical Dock Sidebar with placeholder views. The agent also addressed and fixed several critical, complex bugs within the  layout's connector rendering and node positioning logic. The application is stable, with the current focus being the final bug in the  auto-alignment behavior.
 
 **Last working item**:
-*   **Last item agent was working:** The agent was in the initial phase of building the Recycle Bin feature. It successfully modified the backend Pydantic models in  to support soft deletion and started adding the necessary API endpoints for managing the trash (, restore, and permanent delete).
+*   **Last item agent was working:** Fixing a bug in the  layout where the canvas would correctly expand horizontally to prevent sub-branches from colliding, but would then incorrectly shrink back to its original compressed size as soon as the user clicked on another node or the canvas (on blur/deselect). The agent identified that  was reverting the layout and attempted a fix by modifying it to respect the existing expanded width.
 *   **Status:** IN PROGRESS
 *   **Agent Testing Done:** N
-*   **Which testing method agent to use?** Both. Use the backend testing agent to validate the new soft delete, restore, and permanent delete API endpoints. Afterward, use the frontend testing agent to conduct a full E2E test of the new Trash UI, verifying that projects can be sent to the trash, restored, and permanently deleted (including the confirmation step).
+*   **Which testing method agent to use?** Frontend testing agent. This is a complex UI interaction bug that requires creating a large map to trigger the collision, verifying the expansion, and then clicking away to see if it reverts. The test should codify these steps.
 *   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-*   **Issue 1: 'X' button in MultiSelectToolbar is not working (P2)**
+*   **Issue 1: MindHybrid Layout Shrinks on Blur (P0)**
+    *   **Description:** The layout correctly auto-expands to prevent node collisions but shrinks back to a compressed state upon losing focus, causing nodes to overlap again. This negates the collision-avoidance logic.
+    *   **Attempted fixes:** The agent modified the  function in  to try and preserve the calculated width of sub-trees, preventing the layout from compressing. This change has not been tested.
+    *   **Next debug checklist:**
+        1.  Create a large  map with multiple vertical branches that are close to each other.
+        2.  Add nodes to one branch until it expands horizontally to avoid colliding with the adjacent branch.
+        3.  Click on another node or the empty canvas.
+        4.  Observe if the layout shrinks and the branches overlap.
+        5.  If it still fails, review the  logic in  again. The issue lies in the fact that it recalculates positions based on a fixed spacing, ignoring the dynamically required space determined during collision checks. The fix needs to make the expanded state stick.
+    *   **Why fix this issue and what will be achieved with the fix?** Fixing this will make the  layout stable and usable for complex maps, ensuring that automatic layout adjustments are persistent and reliable.
+    *   **Status:** IN PROGRESS
+    *   **Is recurring issue?** Y
+    *   **Should Test frontend/backend/both after fix?** Frontend
+*   **Issue 2: 'X' button in MultiSelectToolbar is not working (P2)**
     *   **Description:** The 'X' button designed to clear a multi-node selection is non-functional. The current workaround is using the  key.
     *   **Status:** NOT STARTED
-*   **Issue 2: Mobile Layout Overlap (P2)**
+*   **Issue 3: Mobile Layout Overlap (P2)**
     *   **Description:** On mobile devices, the user dropdown menu overlaps with the sidebar, causing a UI issue.
-    - **Status:** NOT STARTED
+    *   **Status:** NOT STARTED
 
 **In progress Task List**:
-*   **Task 1: Implement the Recycle Bin Feature (P0)**
-    *   **Where to resume:** Resume in . The Pydantic models and endpoint stubs are in place. The next steps are:
-        1.  Modify the existing  endpoint to perform a *soft delete* (set  and ).
-        2.  Change  to filter out projects where  is true.
-        3.  Implement the logic for  to return only trashed projects.
-        4.  Implement  to set .
-        5.  Implement  for hard deletion.
-        6.  Once the backend is complete, proceed to build the frontend Trash section.
-    *   **What will be achieved with this?** A secure, two-stage deletion system that prevents accidental project loss and gives users full control over their data.
-    *   **Status:** IN PROGRESS
-    *   **Should Test frontend/backend/both after fix?** Both.
-    *   **Blocked on something:** None.
+None. All efforts are focused on the bug fix above.
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks:**
@@ -55,14 +70,21 @@ The agent has just begun implementing the new Recycle Bin feature. It has correc
     *   **Twilio Outgoing Messages (P2):** Implement the ability to send outgoing WhatsApp messages.
 
 **Completed work in this session**
-- **MindHybrid Feature Suite (DONE):**
-    - Implemented a purple + button on connector lines (both horizontal and vertical) to create new child branches, a key user requirement for org-charts.
-    - Corrected MindHybrid's horizontal connectors to be perfectly straight lines.
-    - Refined the connector style for branches created from other connectors to use a professional  elbow shape.
-- **Critical Bug Fixes (DONE):**
-    - **Layout Persistence:** Fixed a bug where  and  layouts would incorrectly revert to curved connectors after a page refresh. This was resolved by adding  to the backend  model and making the frontend rendering more robust.
-    - **MindHybrid Alignment:** Fixed the alignment algorithm for vertical children in MindHybrid to ensure they are always perfectly centered under their parent node.
-    - **Mark as Completed Persistence:** Investigated and confirmed that the feature works correctly and persists its state, clarifying a user-reported issue.
+- **Recycle Bin Feature (DONE):**
+  - Implemented backend endpoints (, restore, permanent delete) in .
+  - Modified  to perform a soft delete.
+  - Created the  component to display, restore, and permanently delete projects.
+  - Integrated the Trash link and counter into the .
+  - Fully tested via manual screenshots and the backend/frontend testing agents.
+- **Dock Sidebar Feature (DONE):**
+  - Created the  component with icons and hover-to-expand functionality.
+  - Created placeholder components: , , .
+  - Integrated the dock and view-switching logic into .
+  - Tested via screenshots and the frontend testing agent.
+- **MindHybrid Bug Fixes (DONE):**
+  - **Straight Horizontal Connectors:** Fixed a bug where horizontal connectors would become inclined.
+  - **Correct Connector Creation:** Fixed a bug where nodes created from a connector's + button would start with an elbow shape instead of a straight vertical line.
+  - **Collision-driven Expansion:** Implemented logic to auto-expand the layout horizontally to prevent vertical sub-branches from overlapping when new nodes are added.
 
 **Earlier issues found/mentioned but not fixed**
 *   **Issue 1: 'X' button in MultiSelectToolbar:** The button to clear the multi-node selection does not work.  key is the workaround.
@@ -75,78 +97,71 @@ The agent has just begun implementing the new Recycle Bin feature. It has correc
 
 
 **Key Technical Concepts**
-*   **Soft Deletes:** The core concept for the current task. Instead of direct database deletion, a flag () and a timestamp () are used to manage project visibility and state.
-*   **Stateful Connectors:** A novel feature where connectors themselves can be parents to new nodes. This is managed via  and  properties on nodes, with custom rendering logic in .
-*   **Backend Model Extension:** The backend  model was extended significantly to persist frontend state, including , , , , and , which was crucial for fixing persistence bugs.
+*   **Soft Deletes:** Implemented using  and  fields in the  collection.
+*   **Stateful UI Navigation:** Use of  in  to manage which main view (Canvas, Dashboard, Templates, etc.) is active.
+*   **Dynamic Layout Algorithms:** The  hook contains complex logic for  layout, including collision detection () and auto-alignment (). The current bug is in the interaction between these two.
+*   **Event-Driven Recalculation:** The core of the current bug is that layout recalculations are triggered on selection/blur events, which incorrectly revert persistent layout changes.
 
 **key DB schema**
 *   ** collection:**
-    *   : (string) e.g., 'mindflow', 'mindtree', 'mindhybrid'.
-    *   : (boolean) **NEW**.  if the project is in the trash.
-    *   : (datetime) **NEW**. Timestamp of when the project was soft-deleted.
+    *   : (string)
+    *   : (boolean)  if the project is in the trash.
+    *   : (datetime) Timestamp of the soft deletion.
 *   ** array:**
-    *   : (string) 'horizontal', 'vertical'.
-    *   : (boolean) For the mark as completed feature.
-    *   : (string) 'left', 'center', 'right'.
-    *   : (string) **NEW**. ID of the parent of the connector from which this node was created.
-    *   : (string) **NEW**. ID of the target of the connector from which this node was created.
+    *   , , , ,  are all in use.
 
 **changes in tech stack**
 *   None.
 
 **All files of reference**
-*   : Primary file for the current task. It requires implementation of the soft delete logic and new API endpoints.
-*   : Will require new functions to call the trash, restore, and permanent delete APIs.
-*   : Will need modification to add a link to the new Trash section.
-*   A new frontend component for the Trash view (e.g., ) will need to be created.
+*   **/app/frontend/src/hooks/useNodes.js**: This is the most critical file for the current bug. The  and  (which calls ) functions are the focus.
+*   **/app/frontend/src/components/mindmap/MindMapApp.jsx**: The main component where layout alignment functions are called.
+*   **/app/frontend/src/components/mindmap/ConnectionsLayer.jsx**: Contains rendering logic for connectors, relevant to all visual bugs.
 
 **Areas that need refactoring**:
-*   The  hook is now exceedingly large and handles all business logic, API calls, and multiple layout algorithms. It is a strong candidate for being broken down into smaller, more specialized hooks (e.g., , ).
-*   The  component has also become very complex due to the logic for rendering multiple types of connector buttons. This could be simplified.
+*   The  hook has become extremely large and complex, handling API calls, state management, history (undo/redo), and multiple complex layout algorithms. It urgently needs to be broken down into smaller, specialized hooks (e.g., , , ).
 
 **key api endpoints**
-*   : **TO BE MODIFIED** to perform a soft delete.
-*   : **TO BE MODIFIED** to filter out soft-deleted projects.
-*   : **NEW/IN-PROGRESS** to list trashed projects.
-*   : **NEW/IN-PROGRESS** to restore a project.
-*   : **NEW/IN-PROGRESS** for permanent deletion.
+*   : Performs a soft delete.
+*   : Filters out soft-deleted projects.
+*   : Lists trashed projects.
+*   : Restores a project.
+*   : For permanent deletion.
 
 **Critical Info for New Agent**
-*   The immediate and highest priority task is to implement the Recycle Bin feature. Begin by completing the backend logic in  for the new and modified endpoints, then build the corresponding frontend UI.
-*   The user is highly detail-oriented regarding UI/UX. Pay close attention to their visual specifications, such as the  connector style and the centering of elements, and use screenshots to verify your work.
-*   Be mindful of the complexity in  and . Changes there should be made carefully.
+*   The immediate, highest-priority task is to test and, if necessary, fix the  layout bug where it shrinks after being expanded. The agent has already applied a potential fix in  but did not test it.
+*   A user project named PROYECTO ACADEMIA was permanently deleted during testing of the recycle bin feature. The user opted not to use the rollback feature and to proceed with development. Be cautious with tests that involve permanent deletion.
+*   The environment has a very aggressive session timeout. Chain commands within a single tool call or use the testing agent for multi-step tests to avoid repeated logins.
 
 **documents and test reports created in this job**
-*    was updated by the testing agent to confirm the successful implementation of the MindHybrid features.
+*    was updated several times, with the testing agent confirming the successful implementation of the Recycle Bin and Dock Sidebar features.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Reports bug: isCompleted state does not persist after refresh.
-2.  **Agent:** Investigates and confirms the feature works, but the user must wait for the 1s debounced save before refreshing.
-3.  **User:** New requirement for MindHybrid: horizontal connectors must be straight (not curved) and have a purple + button in the center. (with images)
-4.  **Agent:** Implements the straight connectors and the purple button.
-5.  **User:** Refines requirement: the connector from the purple button must be an elbow  shape. (with images)
-6.  **Agent:** Implements, tests, and confirms the  connector shape works as requested.
-7.  **User:** New major feature request: Implement a two-stage recycle bin system (soft delete, restore, permanent delete).
-8.  **Agent:** Acknowledges and begins implementation by updating backend models.
-9.  **Agent:** Adds new fields to Pydantic models in .
-10. **Agent:** Starts adding the new API endpoint stubs for the recycle bin feature.
-
-*   **Pending Human Messages:** None. The last message was the user's request for the recycle bin feature, which the agent is currently working on.
+1.  **User:** Reports bug: In MindHybrid, nodes created from a connector's purple + button have an elbow shaped connector instead of starting straight down.
+2.  **Agent:** Fixes the connector path logic in  and the node creation logic in .
+3.  **User:** Reports new bug: The straight connector is correct at creation, but it automatically moves to the elbow shape as soon as the user clicks anywhere else.
+4.  **Agent:** Fixes this by preventing the  function from affecting nodes created from connectors.
+5.  **User:** Reports new bug: When adding many child nodes, they overlap with other branches. The parent horizontal connector should stretch to make room.
+6.  **Agent:** Implements collision detection and a push mechanism in  within  to expand the layout.
+7.  **User:** Confirms the new collision bug is that nodes still overlap, providing an image.
+8.  **Agent:** Refines the collision detection logic in .
+9.  **User:** Reports the final, current bug: The layout expands correctly to avoid collision, but then shrinks back as soon as focus is lost (e.g., clicking another node), causing the collision to happen again.
+10. **Agent:** Identifies that  is reverting the changes and applies a patch to make it respect the expanded layout. This patch was the last action and is untested.
 
 **Project Health Check:**
-*   **Broken:** None. The application is stable, and the current work is on a new feature.
-*   **Mocked:** User authentication remains a hardcoded dictionary in .
+*   **Broken:** The  feature is partially broken, as it reverts necessary layout changes.
+*   **Mocked:** User authentication is still a hardcoded dictionary in .
 
 **3rd Party Integrations**
 *   **Lucide React:** Used for UI icons.
 *   **Twilio WhatsApp API:** Integrated for receiving incoming messages.
-*   **react-beautiful-dnd:** Used for drag-and-drop reordering of projects in the sidebar.
+*   **react-beautiful-dnd:** Used for drag-and-drop reordering of projects.
 
 **Testing status**
-*   **Testing agent used after significant changes:** YES. It was used multiple times to validate the complex MindHybrid features.
+*   **Testing agent used after significant changes:** YES. Used for the Recycle Bin and Dock Sidebar features.
 *   **Troubleshoot agent used after agent stuck in loop:** NO
 *   **Test files created:** None.
-*   **Known regressions:** None.
+*   **Known regressions:** The  function regresses the layout to a previous state, causing the current primary bug.
 
 **Credentials to test flow:**
 *   **User 1:**
@@ -154,4 +169,4 @@ The agent has just begun implementing the new Recycle Bin feature. It has correc
     *   Password: 
 
 **What agent forgot to execute**
-*   The agent has correctly prioritized the user's major feature requests and critical bug fixes over the two long-standing, lower-priority issues (the non-functional 'X' button and the mobile layout overlap). These remain in the backlog.</analysis>
+*   The agent did not test the final code change made to  to fix the layout-shrinking bug. The immediate next step should be to thoroughly test this change.</analysis>

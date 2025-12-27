@@ -90,6 +90,8 @@ const Toolbar = ({
   user,
   onOpenProfile,
   onLogout,
+  onAdminClick,
+  isAdmin,
   // Alineación automática
   autoAlignEnabled,
   onToggleAutoAlign

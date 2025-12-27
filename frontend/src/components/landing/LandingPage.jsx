@@ -50,23 +50,75 @@ const LandingPage = ({ onLogin, onRegister }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
   const [content, setContent] = useState(null);
+  const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Cargar contenido desde la BD
+  // Cargar contenido y planes desde la BD
   useEffect(() => {
-    const loadContent = async () => {
+    const loadData = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/landing-content`);
-        if (response.ok) {
-          const data = await response.json();
+        // Cargar contenido de landing y planes en paralelo
+        const [contentRes, plansRes] = await Promise.all([
+          fetch(`${API_URL}/api/landing-content`),
+          fetch(`${API_URL}/api/plans`)
+        ]);
+        
+        if (contentRes.ok) {
+          const data = await contentRes.json();
           setContent(data);
         }
+        
+        if (plansRes.ok) {
+          const plansData = await plansRes.json();
+          setPlans(plansData.plans || []);
+        }
       } catch (error) {
-        console.error('Error loading landing content:', error);
+        console.error('Error loading data:', error);
+        // Fallback plans in case API fails
+        setPlans([
+          {
+            id: 'free',
+            name: 'Free',
+            display_name: 'Gratis',
+            price_display: 'Gratis',
+            period: 'para siempre',
+            description: 'Perfecto para probar',
+            features: ['Hasta 3 mapas activos', 'Máximo 5 mapas en total', '40-50 nodos por mapa', 'Exportación PNG'],
+            cta: 'Comenzar gratis',
+            popular: false,
+            gradient: 'from-gray-600 to-gray-700'
+          },
+          {
+            id: 'personal',
+            name: 'Personal',
+            display_name: 'Personal',
+            price_display: '$3',
+            period: '/mes',
+            description: 'Para creadores',
+            badge: '🚀 Early Access',
+            features: ['Mapas ilimitados', 'Nodos ilimitados', 'Exportación PDF + PNG', 'Uso comercial'],
+            cta: 'Actualizar ahora',
+            popular: true,
+            gradient: 'from-blue-600 to-indigo-600'
+          },
+          {
+            id: 'team',
+            name: 'Team',
+            display_name: 'Team',
+            price_display: '$8',
+            period: '/usuario/mes',
+            description: 'Para equipos',
+            badge: '🚀 Early Access',
+            features: ['Todo lo del Personal', '2-10 usuarios', 'Colaboración', 'Mapas compartidos'],
+            cta: 'Probar Team',
+            popular: false,
+            gradient: 'from-purple-600 to-indigo-600'
+          }
+        ]);
       }
       setLoading(false);
     };
-    loadContent();
+    loadData();
   }, []);
 
   // Navegación - usa datos de BD si existen

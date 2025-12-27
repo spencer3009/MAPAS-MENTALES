@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
-Backend API Testing for MindoraMap Collision Detection Feature
-Testing MindHybrid layout support and node positioning APIs that enable collision detection
+Backend API Testing for MindoraMap Registration and Google OAuth Authentication
+Testing authentication endpoints and user registration functionality
 """
 
 import requests
 import json
 import sys
+import uuid
 from datetime import datetime
 from typing import Dict, List, Optional
 

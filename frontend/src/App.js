@@ -2,7 +2,9 @@ import "./App.css";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { MindMapApp } from "./components/mindmap";
 import { LoginPage } from "./components/auth";
+import { LandingPage } from "./components/landing";
 import { Loader2 } from "lucide-react";
+import { useState } from "react";
 
 // Componente de carga
 const LoadingScreen = () => (
@@ -17,16 +19,29 @@ const LoadingScreen = () => (
 // Componente principal con lógica de autenticación
 const AppContent = () => {
   const { isAuthenticated, loading } = useAuth();
+  const [showLogin, setShowLogin] = useState(false);
 
   if (loading) {
     return <LoadingScreen />;
   }
 
-  if (!isAuthenticated) {
-    return <LoginPage />;
+  // Si está autenticado, mostrar la app
+  if (isAuthenticated) {
+    return <MindMapApp />;
   }
 
-  return <MindMapApp />;
+  // Si el usuario eligió ir al login, mostrar LoginPage
+  if (showLogin) {
+    return <LoginPage onBackToLanding={() => setShowLogin(false)} />;
+  }
+
+  // Por defecto, mostrar la landing page
+  return (
+    <LandingPage 
+      onLogin={() => setShowLogin(true)} 
+      onRegister={() => setShowLogin(true)} 
+    />
+  );
 };
 
 function App() {

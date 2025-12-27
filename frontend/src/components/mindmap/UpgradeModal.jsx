@@ -1,10 +1,91 @@
-import React from 'react';
-import { X, Crown, Zap, Infinity, CheckCircle2, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Crown, Zap, Infinity, CheckCircle2, Sparkles, Loader2 } from 'lucide-react';
+
+const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
 const UpgradeModal = ({ isOpen, onClose, limitType = 'active', onUpgrade }) => {
+  const [upgradePlan, setUpgradePlan] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Cargar plan de upgrade desde el backend (source of truth)
+  useEffect(() => {
+    if (isOpen) {
+      const loadPlan = async () => {
+        try {
+          const response = await fetch(`${API_URL}/api/plans`);
+          if (response.ok) {
+            const data = await response.json();
+            setUpgradePlan(data.upgrade_plan);
+          }
+        } catch (error) {
+          console.error('Error loading upgrade plan:', error);
+          // Fallback en caso de error
+          setUpgradePlan({
+            name: 'Personal',
+            price: 3,
+            price_display: '$3',
+            period: '/mes',
+            features: [
+              'Mapas ilimitados',
+              'Nodos ilimitados',
+              'Exportación PDF + PNG',
+              'Uso comercial incluido'
+            ]
+          });
+        }
+        setLoading(false);
+      };
+      loadPlan();
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const isHistoricLimit = limitType === 'total';
+  const isNodeLimit = limitType === 'nodes';
+
+  const getTitle = () => {
+    if (isHistoricLimit) return '¡Has probado bien la plataforma!';
+    if (isNodeLimit) return '¡Necesitas más nodos!';
+    return '¡Necesitas más espacio!';
+  };
+
+  const getSubtitle = () => {
+    if (isHistoricLimit) return 'Has alcanzado el límite de mapas del plan gratuito';
+    if (isNodeLimit) return 'Has alcanzado el límite de nodos por mapa';
+    return 'Has alcanzado el límite de mapas activos';
+  };
+
+  const getMessage = () => {
+    if (isHistoricLimit) {
+      return (
+        <>
+          <strong>Tu cuenta gratuita ha creado el máximo de 5 mapas.</strong>
+          <br />
+          Este límite existe para que puedas probar la plataforma. 
+          Para seguir creando sin límites, actualiza al Plan Personal.
+        </>
+      );
+    }
+    if (isNodeLimit) {
+      return (
+        <>
+          <strong>Has alcanzado el límite de 50 nodos por mapa.</strong>
+          <br />
+          El plan gratuito permite hasta 50 nodos. Actualiza al Plan Personal 
+          para tener nodos ilimitados.
+        </>
+      );
+    }
+    return (
+      <>
+        <strong>Ya tienes 3 mapas activos.</strong>
+        <br />
+        Puedes eliminar alguno para crear espacio, o actualizar al Plan Personal 
+        para tener mapas ilimitados.
+      </>
+    );
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center">
@@ -38,101 +119,84 @@ const UpgradeModal = ({ isOpen, onClose, limitType = 'active', onUpgrade }) => {
           </div>
           
           <h2 className="text-2xl font-bold text-white mb-2">
-            {isHistoricLimit 
-              ? '¡Has probado bien la plataforma!' 
-              : '¡Necesitas más espacio!'}
+            {getTitle()}
           </h2>
           <p className="text-blue-100 text-sm">
-            {isHistoricLimit 
-              ? 'Has alcanzado el límite de mapas del plan gratuito'
-              : 'Has alcanzado el límite de mapas activos'}
+            {getSubtitle()}
           </p>
         </div>
         
         {/* Contenido */}
         <div className="px-6 py-6">
-          {/* Mensaje principal */}
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
-            <p className="text-amber-800 text-sm">
-              {isHistoricLimit ? (
-                <>
-                  <strong>Tu cuenta gratuita ha creado el máximo de 5 mapas.</strong>
-                  <br />
-                  Este límite existe para que puedas probar la plataforma. 
-                  Para seguir creando sin límites, actualiza a Pro.
-                </>
-              ) : (
-                <>
-                  <strong>Ya tienes 3 mapas activos.</strong>
-                  <br />
-                  Puedes eliminar alguno para crear espacio, o actualizar a Pro 
-                  para tener mapas ilimitados.
-                </>
-              )}
-            </p>
-          </div>
-          
-          {/* Beneficios Pro */}
-          <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-purple-500" />
-            Con el Plan Pro obtienes:
-          </h3>
-          
-          <ul className="space-y-3 mb-6">
-            <li className="flex items-center gap-3">
-              <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                <Infinity className="w-3.5 h-3.5 text-green-600" />
-              </div>
-              <span className="text-gray-700 text-sm">Mapas mentales <strong>ilimitados</strong></span>
-            </li>
-            <li className="flex items-center gap-3">
-              <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
-              </div>
-              <span className="text-gray-700 text-sm">Nodos <strong>ilimitados</strong> por mapa</span>
-            </li>
-            <li className="flex items-center gap-3">
-              <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
-              </div>
-              <span className="text-gray-700 text-sm">Exportación en <strong>PDF y PNG</strong></span>
-            </li>
-            <li className="flex items-center gap-3">
-              <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
-              </div>
-              <span className="text-gray-700 text-sm"><strong>Soporte prioritario</strong></span>
-            </li>
-          </ul>
-          
-          {/* Precio */}
-          <div className="text-center mb-6">
-            <div className="inline-flex items-baseline gap-1">
-              <span className="text-4xl font-bold text-gray-900">$12</span>
-              <span className="text-gray-500">/mes</span>
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
             </div>
-            <p className="text-xs text-gray-500 mt-1">Cancela cuando quieras</p>
-          </div>
-          
-          {/* Botones */}
-          <div className="space-y-3">
-            <button
-              onClick={onUpgrade}
-              className="w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
-            >
-              <Zap className="w-5 h-5" />
-              Actualizar a Pro
-            </button>
-            
-            {!isHistoricLimit && (
-              <button
-                onClick={onClose}
-                className="w-full py-3 px-4 text-gray-600 hover:text-gray-800 font-medium text-sm transition-colors"
-              >
-                Eliminar un mapa para hacer espacio
-              </button>
-            )}
-          </div>
+          ) : (
+            <>
+              {/* Mensaje principal */}
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+                <p className="text-amber-800 text-sm">
+                  {getMessage()}
+                </p>
+              </div>
+              
+              {/* Beneficios del Plan Personal */}
+              <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-purple-500" />
+                Con el Plan {upgradePlan?.name || 'Personal'} obtienes:
+              </h3>
+              
+              <ul className="space-y-3 mb-6">
+                {(upgradePlan?.features || []).slice(0, 4).map((feature, index) => (
+                  <li key={index} className="flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                      {index === 0 || index === 1 ? (
+                        <Infinity className="w-3.5 h-3.5 text-green-600" />
+                      ) : (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
+                      )}
+                    </div>
+                    <span className="text-gray-700 text-sm">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              
+              {/* Precio - Desde el backend */}
+              <div className="text-center mb-6">
+                <div className="inline-block bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 mb-2">
+                  <span className="text-xs text-blue-600 font-medium">🚀 Precio Early Access</span>
+                </div>
+                <div className="inline-flex items-baseline gap-1">
+                  <span className="text-4xl font-bold text-gray-900">
+                    {upgradePlan?.price_display || '$3'}
+                  </span>
+                  <span className="text-gray-500">{upgradePlan?.period || '/mes'}</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Cancela cuando quieras</p>
+              </div>
+              
+              {/* Botones */}
+              <div className="space-y-3">
+                <button
+                  onClick={onUpgrade}
+                  className="w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
+                >
+                  <Zap className="w-5 h-5" />
+                  Actualizar a {upgradePlan?.name || 'Personal'}
+                </button>
+                
+                {!isHistoricLimit && !isNodeLimit && (
+                  <button
+                    onClick={onClose}
+                    className="w-full py-3 px-4 text-gray-600 hover:text-gray-800 font-medium text-sm transition-colors"
+                  >
+                    Eliminar un mapa para hacer espacio
+                  </button>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

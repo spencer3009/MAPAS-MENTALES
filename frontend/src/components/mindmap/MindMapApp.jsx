@@ -248,11 +248,15 @@ const MindMapApp = () => {
   // ==========================================
   
   const handleToggleProjectsSidebar = useCallback(() => {
-    setIsProjectsSidebarOpen(prev => !prev);
-    if (!isProjectsSidebarOpen) {
+    if (activeView !== 'projects') {
+      // Si estamos en otra vista, volver a projects con sidebar abierto
       setActiveView('projects');
+      setIsProjectsSidebarOpen(true);
+    } else {
+      // Si ya estamos en projects, toggle del sidebar
+      setIsProjectsSidebarOpen(prev => !prev);
     }
-  }, [isProjectsSidebarOpen]);
+  }, [activeView]);
 
   const handleOpenDashboard = useCallback(() => {
     setActiveView('dashboard');
@@ -263,9 +267,10 @@ const MindMapApp = () => {
   }, []);
 
   const handleOpenRemindersPanel = useCallback(() => {
+    setActiveView('projects');
+    setIsProjectsSidebarOpen(true);
     setShowStyleSidebar(true);
     setSidebarTab('reminders');
-    setActiveView('projects');
   }, []);
 
   const handleOpenIntegrations = useCallback(() => {

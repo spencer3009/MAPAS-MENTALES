@@ -172,8 +172,8 @@ const MindMapApp = ({ onAdminClick }) => {
   const [trashCount, setTrashCount] = useState(0);
 
   // Estado para el Dock y vistas principales
-  const [activeView, setActiveView] = useState('projects'); // 'projects' | 'dashboard' | 'templates' | 'integrations'
-  const [isProjectsSidebarOpen, setIsProjectsSidebarOpen] = useState(true);
+  const [activeView, setActiveView] = useState('dashboard'); // 'projects' | 'dashboard' | 'templates' | 'integrations'
+  const [isProjectsSidebarOpen, setIsProjectsSidebarOpen] = useState(false); // Inicialmente cerrado cuando está en dashboard
 
   // Estado para alineación automática (ON por defecto)
   const [autoAlignEnabled, setAutoAlignEnabled] = useState(true);

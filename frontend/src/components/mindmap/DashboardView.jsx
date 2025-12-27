@@ -159,6 +159,27 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
     }
   };
 
+  // Formato de fecha relativa (hace X minutos, horas, días)
+  const formatDateRelative = (dateString) => {
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+
+      if (diffMins < 1) return 'Ahora mismo';
+      if (diffMins < 60) return `Hace ${diffMins} min`;
+      if (diffHours < 24) return `Hace ${diffHours} h`;
+      if (diffDays < 7) return `Hace ${diffDays} día${diffDays > 1 ? 's' : ''}`;
+      if (diffDays < 30) return `Hace ${Math.floor(diffDays / 7)} semana${Math.floor(diffDays / 7) > 1 ? 's' : ''}`;
+      return formatDate(dateString);
+    } catch {
+      return 'Sin fecha';
+    }
+  };
+
   const planColors = PLAN_COLORS[planInfo?.plan] || PLAN_COLORS.free;
   const isUnlimited = planInfo?.limits?.max_active_maps === -1;
 

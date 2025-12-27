@@ -611,7 +611,7 @@ const MindMapApp = ({ onAdminClick }) => {
   const renderMainContent = () => {
     switch (activeView) {
       case 'dashboard':
-        return <DashboardView projects={projects} />;
+        return <DashboardView projects={projects} token={token} />;
       case 'templates':
         return <TemplatesView onSelectTemplate={(type) => {
           setActiveView('projects');

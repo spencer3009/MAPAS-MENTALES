@@ -585,27 +585,63 @@ const MindMapApp = () => {
   // Obtener nombre del proyecto a eliminar para el modal
   const projectToDeleteName = projects.find(p => p.id === projectToDelete)?.name || 'este proyecto';
 
+  // Renderizar vista según activeView
+  const renderMainContent = () => {
+    switch (activeView) {
+      case 'dashboard':
+        return <DashboardView projects={projects} />;
+      case 'templates':
+        return <TemplatesView onSelectTemplate={(type) => {
+          setActiveView('projects');
+          setIsProjectsSidebarOpen(true);
+          // Abrir el selector de layout con el tipo seleccionado
+          setShowLayoutSelector(true);
+        }} />;
+      case 'integrations':
+        return <IntegrationsView />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="flex h-screen w-full bg-gray-50 overflow-hidden">
-      {/* Sidebar izquierdo con lista de proyectos */}
-      <Sidebar
-        projects={projects}
-        activeProjectId={activeProjectId}
-        onNewBlank={handleNewBlankClick}
-        onNewFromTemplate={handleNewFromTemplateClick}
-        onDeleteProject={handleDeleteProjectClick}
-        onSwitchProject={handleSwitchProject}
-        onRenameProject={renameProject}
-        onProjectReminder={handleProjectReminder}
-        onPinProject={pinProject}
-        onReorderProjects={reorderProjects}
-        onOpenAllProjects={() => setShowAllProjectsModal(true)}
-        onOpenTrash={handleOpenTrash}
-        trashCount={trashCount}
+      {/* Dock Sidebar - Barra lateral izquierda compacta */}
+      <DockSidebar
+        onToggleProjectsSidebar={handleToggleProjectsSidebar}
+        onOpenDashboard={handleOpenDashboard}
+        onOpenTemplates={handleOpenTemplatesView}
+        onOpenReminders={handleOpenRemindersPanel}
+        onOpenIntegrations={handleOpenIntegrations}
+        onOpenSettings={handleOpenSettings}
+        isProjectsSidebarOpen={isProjectsSidebarOpen}
+        activeView={activeView}
       />
 
-      {/* Área principal */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden">
+      {/* Sidebar de proyectos - Solo visible cuando isProjectsSidebarOpen y activeView === 'projects' */}
+      {isProjectsSidebarOpen && activeView === 'projects' && (
+        <Sidebar
+          projects={projects}
+          activeProjectId={activeProjectId}
+          onNewBlank={handleNewBlankClick}
+          onNewFromTemplate={handleNewFromTemplateClick}
+          onDeleteProject={handleDeleteProjectClick}
+          onSwitchProject={handleSwitchProject}
+          onRenameProject={renameProject}
+          onProjectReminder={handleProjectReminder}
+          onPinProject={pinProject}
+          onReorderProjects={reorderProjects}
+          onOpenAllProjects={() => setShowAllProjectsModal(true)}
+          onOpenTrash={handleOpenTrash}
+          trashCount={trashCount}
+        />
+      )}
+
+      {/* Área principal - Cambia según la vista activa */}
+      {activeView !== 'projects' ? (
+        renderMainContent()
+      ) : (
+        <div className="flex-1 flex flex-col h-full overflow-hidden">
         {/* Toolbar superior */}
         <Toolbar
           onAddNode={handleAddNode}

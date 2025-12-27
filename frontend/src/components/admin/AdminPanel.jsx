@@ -1061,7 +1061,6 @@ const AdminPanel = ({ onBack }) => {
               loading={loading}
               token={token}
               onUpdate={fetchData}
-              onEditLanding={onEditLanding}
             />
           )}
         </div>

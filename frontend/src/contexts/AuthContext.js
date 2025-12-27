@@ -75,9 +75,26 @@ export const AuthProvider = ({ children }) => {
       
       if (response.ok) {
         setToken(data.access_token);
-        setUser(data.user);
+        // Guardar usuario y luego obtener datos completos con rol
+        const userWithRole = { ...data.user };
+        setUser(userWithRole);
         localStorage.setItem('mm_auth_token', data.access_token);
-        localStorage.setItem('mm_auth_user', JSON.stringify(data.user));
+        localStorage.setItem('mm_auth_user', JSON.stringify(userWithRole));
+        
+        // Obtener datos completos (incluyendo rol) después del login
+        try {
+          const meResponse = await fetch(`${API_URL}/api/auth/me`, {
+            headers: { 'Authorization': `Bearer ${data.access_token}` }
+          });
+          if (meResponse.ok) {
+            const fullUserData = await meResponse.json();
+            setUser(fullUserData);
+            localStorage.setItem('mm_auth_user', JSON.stringify(fullUserData));
+          }
+        } catch (e) {
+          console.error('Error getting user role:', e);
+        }
+        
         return { success: true };
       } else {
         setError(data.detail || 'Error al iniciar sesión');

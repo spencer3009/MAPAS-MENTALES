@@ -254,7 +254,20 @@ const Sidebar = ({
 
       {/* Lista de proyectos - Scrollable */}
       <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-        {visibleProjects.map((project) => {
+        {visibleProjects.length === 0 ? (
+          <div className="text-center py-8 px-4">
+            <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-2xl flex items-center justify-center">
+              <FileText className="w-8 h-8 text-gray-400" />
+            </div>
+            <h3 className="text-sm font-medium text-gray-700 mb-1">
+              No hay mapas todavía
+            </h3>
+            <p className="text-xs text-gray-500 mb-4">
+              Crea tu primer mapa mental para comenzar
+            </p>
+          </div>
+        ) : (
+          visibleProjects.map((project) => {
           const isActive = project.id === activeProjectId;
           const nodeCount = project.nodes?.length || 0;
           const isEditing = editingProjectId === project.id;

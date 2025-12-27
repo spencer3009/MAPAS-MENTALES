@@ -634,10 +634,11 @@ const MindMapApp = ({ onAdminClick }) => {
         onOpenDashboard={handleOpenDashboard}
         onOpenTemplates={handleOpenTemplatesView}
         onOpenReminders={handleOpenRemindersPanel}
-        onOpenIntegrations={handleOpenIntegrations}
+        onOpenTrash={handleOpenTrash}
         onOpenSettings={handleOpenSettings}
         isProjectsSidebarOpen={isProjectsSidebarOpen}
         activeView={activeView}
+        trashCount={trashCount}
       />
 
       {/* Sidebar de proyectos - Solo visible cuando isProjectsSidebarOpen y activeView === 'projects' */}

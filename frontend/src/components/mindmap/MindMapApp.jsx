@@ -713,12 +713,12 @@ const MindMapApp = () => {
         onSelectTemplate={handleSelectTemplate}
       />
 
-      {/* Modal: Eliminar proyecto */}
+      {/* Modal: Eliminar proyecto (ahora va a la papelera) */}
       <ConfirmModal
         isOpen={showDeleteModal}
-        title="Eliminar Proyecto"
-        message={`¿Estás seguro de eliminar "${projectToDeleteName}"? Esta acción no se puede deshacer.`}
-        confirmText="Eliminar"
+        title="Enviar a la Papelera"
+        message={`¿Estás seguro de enviar "${projectToDeleteName}" a la papelera? Podrás restaurarlo después.`}
+        confirmText="Enviar a Papelera"
         cancelText="Cancelar"
         onConfirm={handleConfirmDelete}
         onCancel={() => {

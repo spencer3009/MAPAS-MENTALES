@@ -44,7 +44,18 @@ const AppContent = () => {
   if (isAuthenticated) {
     // Si está en el panel de admin
     if (authView === 'admin' && isAdmin) {
-      return <AdminPanel onBack={() => setAuthView(null)} />;
+      return <AdminPanel onBack={() => setAuthView(null)} onEditLanding={() => setAuthView('landing-editor')} />;
+    }
+    // Si está editando la landing page (modo CMS inline)
+    if (authView === 'landing-editor' && isAdmin) {
+      return (
+        <LandingPage 
+          onLogin={() => setAuthView(null)} 
+          onRegister={() => setAuthView(null)}
+          onBackToApp={() => setAuthView(null)}
+          isEditMode={true}
+        />
+      );
     }
     // Mostrar la app principal
     return <MindMapApp onAdminClick={isAdmin ? () => setAuthView('admin') : null} />;

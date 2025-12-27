@@ -1705,7 +1705,7 @@ export const useNodes = () => {
       const parent = currentNodes.find(n => n.id === parentId);
       if (!parent) return prev;
       
-      // Filtrar hermanos verticales
+      // Filtrar hermanos verticales existentes
       const verticalSiblings = currentNodes.filter(n => 
         n.parentId === parentId && n.childDirection === 'vertical'
       );
@@ -1714,99 +1714,22 @@ export const useNodes = () => {
       const parentHeight = parent.height || 64;
       const nodeWidth = 160;
       const nodeHeight = 64;
-      const verticalGap = 100; // Distancia vertical del padre
-      const horizontalSpacing = 180; // Espacio horizontal entre hermanos verticales
+      const verticalGap = 100;
+      const horizontalSpacing = 180;
       
-      // Calcular posición inicial del nuevo nodo
+      const parentCenterX = parent.x + parentWidth / 2;
       const newY = parent.y + parentHeight + verticalGap;
       
-      // Calcular X centrado: el grupo de hijos debe estar centrado debajo del padre
+      // Calcular posición del nuevo nodo centrado con sus hermanos
       const totalChildren = verticalSiblings.length + 1;
       const totalWidth = (totalChildren - 1) * horizontalSpacing;
-      const parentCenterX = parent.x + parentWidth / 2;
       const groupStartX = parentCenterX - totalWidth / 2 - nodeWidth / 2;
       
-      // Calcular el área que ocupará el grupo completo de hijos
-      const leftmostX = groupStartX;
-      const rightmostX = groupStartX + totalWidth + nodeWidth;
-      const topY = newY;
-      const bottomY = newY + nodeHeight;
-      
-      // Obtener IDs de todos los descendientes del padre (para excluirlos de la colisión)
-      const getDescendantIds = (nodeId, nodes) => {
-        const descendants = new Set([nodeId]);
-        const queue = [nodeId];
-        while (queue.length > 0) {
-          const currentId = queue.shift();
-          nodes.forEach(n => {
-            if (n.parentId === currentId && !descendants.has(n.id)) {
-              descendants.add(n.id);
-              queue.push(n.id);
-            }
-          });
-        }
-        return descendants;
-      };
-      
-      const descendantIds = getDescendantIds(parentId, currentNodes);
-      
-      // Buscar TODOS los nodos que colisionarían con el área del nuevo grupo
-      const collidingNodes = currentNodes.filter(n => {
-        // Ignorar descendientes del padre y el padre mismo
-        if (descendantIds.has(n.id) || n.id === parentId) return false;
-        
-        const nWidth = n.width || 160;
-        const nHeight = n.height || 64;
-        const nLeft = n.x;
-        const nRight = n.x + nWidth;
-        const nTop = n.y;
-        const nBottom = n.y + nHeight;
-        
-        // Verificar colisión de rectángulos (con margen de 20px)
-        const margin = 20;
-        const horizontalOverlap = !(nRight + margin < leftmostX || nLeft - margin > rightmostX);
-        const verticalOverlap = !(nBottom + margin < topY || nTop - margin > bottomY);
-        
-        return horizontalOverlap && verticalOverlap;
-      });
-      
-      console.log('[MindHybrid Collision Check]', {
-        parent: parent.text,
-        parentX: parent.x,
-        groupArea: { leftmostX, rightmostX, topY, bottomY },
-        totalChildren,
-        collidingNodes: collidingNodes.map(n => ({ text: n.text, x: n.x, y: n.y }))
-      });
-      
-      // Si hay colisión, calcular cuánto empujar hacia la derecha
-      let pushAmount = 0;
-      if (collidingNodes.length > 0) {
-        // Encontrar el nodo que más se extiende hacia la derecha
-        const maxCollidingRight = Math.max(...collidingNodes.map(n => n.x + (n.width || 160)));
-        // Calcular cuánto necesitamos mover para que el leftmostX esté después de maxCollidingRight
-        pushAmount = maxCollidingRight - leftmostX + 60; // 60px de margen
-        
-        console.log('[MindHybrid] ¡Colisión detectada! Empujando', pushAmount, 'px hacia la derecha');
-        
-        // Empujar el padre y todos sus descendientes hacia la derecha
-        currentNodes = currentNodes.map(n => {
-          if (descendantIds.has(n.id)) {
-            return { ...n, x: n.x + pushAmount };
-          }
-          return n;
-        });
-      }
-      
-      // Recalcular posición del nuevo nodo después del push
-      const updatedParent = currentNodes.find(n => n.id === parentId);
-      const newParentCenterX = updatedParent.x + parentWidth / 2;
-      const newTotalWidth = totalChildren * horizontalSpacing - horizontalSpacing;
-      const newGroupStartX = newParentCenterX - newTotalWidth / 2 - nodeWidth / 2;
-      
+      // Crear el nuevo nodo
       const newNode = {
         id: newId,
         text: 'Nuevo Nodo',
-        x: newGroupStartX + (verticalSiblings.length * horizontalSpacing),
+        x: groupStartX + (verticalSiblings.length * horizontalSpacing),
         y: newY,
         color: 'blue',
         parentId,
@@ -1816,10 +1739,10 @@ export const useNodes = () => {
         childDirection: 'vertical'
       };
       
-      // Redistribuir todos los hermanos verticales para centrarlos
+      // Redistribuir hermanos existentes
       let newNodes = [...currentNodes];
       verticalSiblings.forEach((sibling, idx) => {
-        const siblingNewX = newGroupStartX + (idx * horizontalSpacing);
+        const siblingNewX = groupStartX + (idx * horizontalSpacing);
         newNodes = newNodes.map(n => 
           n.id === sibling.id ? { ...n, x: siblingNewX } : n
         );
@@ -1828,11 +1751,137 @@ export const useNodes = () => {
       // Agregar el nuevo nodo
       newNodes = [...newNodes, newNode];
       
-      console.log('[MindHybrid] Nuevo nodo creado:', { 
+      // =====================================================
+      // NUEVO: PROPAGAR EXPANSIÓN HACIA ARRIBA
+      // Si el padre tiene un abuelo, recalcular el layout completo
+      // para que los nodos superiores se expandan si es necesario
+      // =====================================================
+      
+      // Encontrar el nodo raíz (sin padre)
+      const findRoot = (nodeId, nodes) => {
+        const node = nodes.find(n => n.id === nodeId);
+        if (!node || !node.parentId) return nodeId;
+        return findRoot(node.parentId, nodes);
+      };
+      
+      const rootId = findRoot(parentId, newNodes);
+      
+      // Aplicar el nuevo algoritmo de alineación que expande hacia arriba
+      // Esto redistribuirá todos los nodos basándose en el ancho de sus subárboles
+      const applyHybridAlignment = (rootNodeId, nodes) => {
+        const root = nodes.find(n => n.id === rootNodeId);
+        if (!root) return nodes;
+        
+        let alignedNodes = [...nodes];
+        
+        // Función recursiva para alinear un nodo y sus hijos
+        const alignNode = (nodeId, currentNodes) => {
+          const node = currentNodes.find(n => n.id === nodeId);
+          if (!node) return currentNodes;
+          
+          let updated = [...currentNodes];
+          
+          const pWidth = node.width || 160;
+          const pHeight = node.height || 64;
+          const cWidth = 160;
+          const vGap = 100;
+          const hGap = 200;
+          const minSpacing = 180;
+          const margin = 40;
+          
+          const nodeCenterX = node.x + pWidth / 2;
+          const nodeCenterY = node.y + pHeight / 2;
+          
+          // Procesar hijos horizontales
+          const hChildren = updated.filter(n => 
+            n.parentId === nodeId && n.childDirection === 'horizontal' && !n.connectorParentId
+          ).sort((a, b) => a.y - b.y);
+          
+          hChildren.forEach((child, idx) => {
+            const newX = node.x + pWidth + hGap;
+            const newYPos = nodeCenterY - 32 + (idx * 80);
+            updated = updated.map(n => 
+              n.id === child.id ? { ...n, x: newX, y: newYPos } : n
+            );
+            updated = alignNode(child.id, updated);
+          });
+          
+          // Procesar hijos verticales con expansión basada en subárboles
+          const vChildren = updated.filter(n => 
+            n.parentId === nodeId && n.childDirection === 'vertical' && !n.connectorParentId
+          ).sort((a, b) => a.x - b.x);
+          
+          if (vChildren.length > 0) {
+            const childY = node.y + pHeight + vGap;
+            
+            // Calcular ancho de cada subárbol
+            const getWidth = (nId, allNodes) => {
+              const nd = allNodes.find(x => x.id === nId);
+              if (!nd) return cWidth;
+              
+              const vertKids = allNodes.filter(x => 
+                x.parentId === nId && x.childDirection === 'vertical' && !x.connectorParentId
+              );
+              
+              if (vertKids.length === 0) return cWidth;
+              
+              const kidWidths = vertKids.map(k => getWidth(k.id, allNodes));
+              const totalKids = kidWidths.reduce((s, w) => s + w, 0);
+              const spacing = (vertKids.length - 1) * minSpacing;
+              return Math.max(cWidth, totalKids + spacing);
+            };
+            
+            const subtreeWidths = vChildren.map(c => ({
+              id: c.id,
+              width: getWidth(c.id, updated)
+            }));
+            
+            // Calcular posiciones relativas
+            const positions = [];
+            subtreeWidths.forEach((data, idx) => {
+              if (idx === 0) {
+                positions.push({ id: data.id, relX: 0, width: data.width });
+              } else {
+                const prev = subtreeWidths[idx - 1];
+                const spacing = (prev.width / 2) + margin + (data.width / 2);
+                positions.push({ 
+                  id: data.id, 
+                  relX: positions[idx - 1].relX + spacing,
+                  width: data.width
+                });
+              }
+            });
+            
+            // Centrar bajo el padre
+            const totalWidth = positions.length > 0 ? positions[positions.length - 1].relX : 0;
+            const startX = nodeCenterX - (totalWidth / 2) - (cWidth / 2);
+            
+            // Aplicar posiciones
+            positions.forEach(p => {
+              const newX = startX + p.relX;
+              updated = updated.map(n => 
+                n.id === p.id ? { ...n, x: newX, y: childY } : n
+              );
+            });
+            
+            // Recursivamente alinear subárboles
+            vChildren.forEach(child => {
+              updated = alignNode(child.id, updated);
+            });
+          }
+          
+          return updated;
+        };
+        
+        return alignNode(rootNodeId, alignedNodes);
+      };
+      
+      // Aplicar alineación desde la raíz
+      newNodes = applyHybridAlignment(rootId, newNodes);
+      
+      console.log('[MindHybrid] Nuevo nodo creado con expansión hacia arriba:', { 
         text: newNode.text, 
-        x: newNode.x, 
-        y: newNode.y,
-        pushApplied: pushAmount > 0
+        totalChildren
       });
       
       pushToHistory(activeProjectId, newNodes);

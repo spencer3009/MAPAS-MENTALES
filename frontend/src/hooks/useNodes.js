@@ -1790,19 +1790,30 @@ export const useNodes = () => {
         // Posicionar el nuevo nodo debajo del punto medio del conector
         const verticalGap = 100;
         const horizontalSpacing = 180;
-        const totalChildren = existingConnectorChildren.length + 1;
-        const totalWidth = (totalChildren - 1) * horizontalSpacing;
-        const startX = connectorCenterX - totalWidth / 2;
-        const newIndex = existingConnectorChildren.length;
+        const nodeWidth = 160;
+        
+        // El PRIMER nodo siempre debe quedar CENTRADO debajo del "+"
+        // Los siguientes se redistribuyen horizontalmente
+        let newX;
+        if (existingConnectorChildren.length === 0) {
+          // Primer nodo: centrado exactamente debajo del botón "+"
+          newX = connectorCenterX - (nodeWidth / 2);
+        } else {
+          // Nodos adicionales: calcular posición considerando redistribución
+          const totalChildren = existingConnectorChildren.length + 1;
+          const totalWidth = (totalChildren - 1) * horizontalSpacing;
+          const startX = connectorCenterX - totalWidth / 2 - (nodeWidth / 2);
+          newX = startX + (existingConnectorChildren.length * horizontalSpacing);
+        }
         
         const newNode = {
           id: newId,
           text: 'Nuevo Nodo',
-          x: startX + (newIndex * horizontalSpacing) - 80,
+          x: newX,
           y: connectorCenterY + verticalGap,
           color: 'default',
           parentId: parentId,
-          width: 160,
+          width: nodeWidth,
           height: 64,
           nodeType: options?.nodeType || 'default',
           childDirection: 'vertical',
@@ -1815,17 +1826,21 @@ export const useNodes = () => {
         
         let newNodes = [...currentNodes, newNode];
         
-        // Redistribuir todos los hijos del conector
-        const allConnectorChildren = [...existingConnectorChildren, newNode];
-        const newTotalWidth = (allConnectorChildren.length - 1) * horizontalSpacing;
-        const newStartX = connectorCenterX - newTotalWidth / 2;
-        
-        allConnectorChildren.forEach((child, idx) => {
-          const childNewX = newStartX + (idx * horizontalSpacing) - 80;
-          newNodes = newNodes.map(n => 
-            n.id === child.id ? { ...n, x: childNewX } : n
-          );
-        });
+        // Solo redistribuir si hay más de un hijo
+        if (existingConnectorChildren.length > 0) {
+          // Redistribuir todos los hijos del conector
+          const allConnectorChildren = [...existingConnectorChildren, newNode];
+          const totalChildren = allConnectorChildren.length;
+          const totalWidth = (totalChildren - 1) * horizontalSpacing;
+          const startX = connectorCenterX - totalWidth / 2 - (nodeWidth / 2);
+          
+          allConnectorChildren.forEach((child, idx) => {
+            const childNewX = startX + (idx * horizontalSpacing);
+            newNodes = newNodes.map(n => 
+              n.id === child.id ? { ...n, x: childNewX } : n
+            );
+          });
+        }
         
         pushToHistory(activeProjectId, newNodes);
         

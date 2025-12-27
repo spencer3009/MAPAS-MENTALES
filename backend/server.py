@@ -2047,57 +2047,62 @@ async def unblock_user(username: str, current_user: dict = Depends(require_admin
 
 @api_router.get("/admin/landing-content")
 async def get_landing_content(current_user: dict = Depends(require_admin)):
-    """Obtener contenido editable de la landing page"""
+    """Obtener todo el contenido editable de la landing page"""
     content = await db.landing_content.find_one({"id": "main"}, {"_id": 0})
-    if not content:
-        # Crear contenido por defecto si no existe
-        content = {
-            "id": "main",
-            "hero": {
-                "title": "Convierte el caos en claridad",
-                "subtitle": "Organiza tus ideas, proyectos y metas con mapas mentales intuitivos.",
-                "cta_primary": "Empezar gratis",
-                "cta_secondary": "Ver demo"
-            },
-            "platform": {
-                "title": "Una plataforma diseñada para potenciar tu productividad",
-                "subtitle": "Descubre todas las herramientas que MindoraMap pone a tu disposición"
-            },
-            "benefits": {
-                "title": "Beneficios que transformarán tu forma de trabajar",
-                "subtitle": "Descubre por qué miles de profesionales eligen MindoraMap"
-            },
-            "how_it_works": {
-                "title": "¿Cómo funciona?",
-                "subtitle": "Comienza a organizar tus ideas en 4 simples pasos"
-            },
-            "pricing": {
-                "title": "Planes y Precios",
-                "subtitle": "Elige el plan que mejor se adapte a tus necesidades"
-            },
-            "faq": {
-                "title": "Preguntas Frecuentes",
-                "subtitle": "Resolvemos tus dudas"
-            },
-            "final_cta": {
-                "title": "¿Listo para transformar tu manera de pensar?",
-                "subtitle": "Únete a miles de profesionales que ya organizan sus ideas con MindoraMap",
-                "button_text": "Comenzar gratis ahora"
-            },
-            "updated_at": datetime.now(timezone.utc).isoformat(),
-            "updated_by": "system"
-        }
-        await db.landing_content.insert_one(content)
-    
-    return content
+    return content or {}
 
 @api_router.put("/admin/landing-content")
 async def update_landing_content(
-    content_data: LandingContentUpdate,
+    request: Request,
     current_user: dict = Depends(require_admin)
 ):
-    """Actualizar contenido de la landing page"""
+    """Actualizar cualquier sección del contenido de la landing page"""
+    content_data = await request.json()
+    
     update_data = {
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "updated_by": current_user["username"]
+    }
+    
+    # Actualizar cada campo enviado
+    for key, value in content_data.items():
+        if key not in ["id", "_id", "updated_at", "updated_by"]:
+            update_data[key] = value
+    
+    await db.landing_content.update_one(
+        {"id": "main"},
+        {"$set": update_data},
+        upsert=True
+    )
+    
+    logger.info(f"Admin {current_user['username']} actualizó contenido de landing page")
+    
+    return {"message": "Contenido actualizado correctamente"}
+
+@api_router.put("/admin/landing-content/{section}")
+async def update_landing_section(
+    section: str,
+    request: Request,
+    current_user: dict = Depends(require_admin)
+):
+    """Actualizar una sección específica del contenido de la landing"""
+    section_data = await request.json()
+    
+    update_data = {
+        section: section_data,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "updated_by": current_user["username"]
+    }
+    
+    await db.landing_content.update_one(
+        {"id": "main"},
+        {"$set": update_data},
+        upsert=True
+    )
+    
+    logger.info(f"Admin {current_user['username']} actualizó sección {section}")
+    
+    return {"message": f"Sección {section} actualizada correctamente"}
         "updated_at": datetime.now(timezone.utc).isoformat(),
         "updated_by": current_user["username"]
     }

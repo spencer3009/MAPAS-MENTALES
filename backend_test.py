@@ -951,6 +951,10 @@ class AdminUserManagementTester:
 
     def test_non_admin_access_denied(self) -> bool:
         """Test that non-admin users cannot access admin endpoints"""
+        NON_ADMIN_CREDENTIALS = {
+            "username": "carlos3009",
+            "password": "Socios3009"
+        }
         try:
             if not self.non_admin_token:
                 self.log_test("Non-Admin Access Denied", False, "No non-admin token available")

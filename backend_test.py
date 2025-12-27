@@ -1003,6 +1003,10 @@ class AdminUserManagementTester:
         print("=" * 80)
         print(f"Base URL: {self.base_url}")
         print(f"Admin User: {ADMIN_CREDENTIALS['username']}")
+        NON_ADMIN_CREDENTIALS = {
+            "username": "carlos3009",
+            "password": "Socios3009"
+        }
         print(f"Non-Admin User: {NON_ADMIN_CREDENTIALS['username']}")
         print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print()

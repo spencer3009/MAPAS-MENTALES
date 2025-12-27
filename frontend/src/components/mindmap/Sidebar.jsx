@@ -1,14 +1,24 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { 
   Plus, LayoutTemplate, FileText, Trash2, Check, Pencil, 
-  Bell, Pin, PinOff, GripVertical, ArrowUpDown, ExternalLink, Archive
+  Bell, Pin, PinOff, GripVertical, ArrowUpDown, ExternalLink, Archive,
+  Crown, Zap, Sparkles
 } from 'lucide-react';
 
 // URL del logo MindoraMap (horizontal)
 const LOGO_URL = 'https://customer-assets.emergentagent.com/job_mindviz-app/artifacts/k1kioask_image.png';
+const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
 const MAX_VISIBLE_PROJECTS = 5;
 const MAX_PINNED = 2;
+
+// Nombres de planes para mostrar
+const PLAN_NAMES = {
+  'free': 'Gratis',
+  'pro': 'Pro',
+  'team': 'Team',
+  'admin': 'Admin'
+};
 
 const Sidebar = ({
   projects = [],
@@ -23,12 +33,33 @@ const Sidebar = ({
   onReorderProjects,
   onOpenAllProjects,
   onOpenTrash,
-  trashCount = 0
+  trashCount = 0,
+  token
 }) => {
   const [editingProjectId, setEditingProjectId] = useState(null);
   const [editingName, setEditingName] = useState('');
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [draggedProject, setDraggedProject] = useState(null);
+  const [planInfo, setPlanInfo] = useState(null);
+
+  // Cargar información del plan
+  useEffect(() => {
+    const loadPlanInfo = async () => {
+      if (!token) return;
+      try {
+        const response = await fetch(`${API_URL}/api/user/plan-limits`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setPlanInfo(data);
+        }
+      } catch (error) {
+        console.error('Error loading plan info:', error);
+      }
+    };
+    loadPlanInfo();
+  }, [token, projects.length]); // Recargar cuando cambie el número de proyectos
 
   // Ordenar proyectos: Anclados > Activo > Recientes
   const sortedProjects = useMemo(() => {

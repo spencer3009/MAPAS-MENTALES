@@ -273,11 +273,8 @@ const LandingPage = ({ onLogin, onRegister }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Logo */}
-            <a href="#inicio" className="flex items-center gap-2 group">
-              <img src={LOGO_URL} alt="MindoraMap" className="h-8 lg:h-10 w-auto" />
-              <span className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent group-hover:from-indigo-600 group-hover:to-purple-600 transition-all">
-                MindoraMap
-              </span>
+            <a href="#inicio" className="flex items-center group">
+              <img src={LOGO_URL} alt="MindoraMap" className="h-10 lg:h-12 w-auto" />
             </a>
             
             {/* Desktop Navigation */}

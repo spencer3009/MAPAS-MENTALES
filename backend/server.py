@@ -2028,6 +2028,14 @@ async def update_user(
             raise HTTPException(status_code=400, detail="Rol inválido")
         update_data["role"] = user_data.role
     
+    if user_data.plan is not None:
+        # Validar que el plan sea válido
+        if user_data.plan not in ["free", "pro", "team"]:
+            raise HTTPException(status_code=400, detail="Plan inválido. Opciones: free, pro, team")
+        update_data["plan"] = user_data.plan
+        # Actualizar is_pro basado en el plan
+        update_data["is_pro"] = user_data.plan in ["pro", "team"]
+    
     if user_data.is_pro is not None:
         update_data["is_pro"] = user_data.is_pro
     

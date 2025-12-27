@@ -120,8 +120,61 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  // Google Login - Redirect to Emergent Auth
+  // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
+  const loginWithGoogle = useCallback(() => {
+    const redirectUrl = window.location.origin + '/auth/callback';
+    window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
+  }, []);
+
+  // Process Google Session
+  const processGoogleSession = useCallback(async (sessionId) => {
+    setError(null);
+    setLoading(true);
+    
+    try {
+      const response = await fetch(`${API_URL}/api/auth/google/session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ session_id: sessionId })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setToken(data.access_token);
+        setUser(data.user);
+        localStorage.setItem('mm_auth_token', data.access_token);
+        localStorage.setItem('mm_auth_user', JSON.stringify(data.user));
+        return { success: true, user: data.user };
+      } else {
+        setError(data.detail || 'Error al procesar la sesión de Google');
+        return { success: false, error: data.detail };
+      }
+    } catch (err) {
+      const errorMsg = 'Error de conexión. Intenta de nuevo.';
+      setError(errorMsg);
+      return { success: false, error: errorMsg };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   // Logout
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try {
+      // Llamar al backend para limpiar la cookie
+      await fetch(`${API_URL}/api/auth/logout`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+    } catch (err) {
+      console.error('Error en logout:', err);
+    }
+    
     setUser(null);
     setToken(null);
     setError(null);
@@ -138,9 +191,18 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!user && !!token,
     login,
     register,
+    loginWithGoogle,
+    processGoogleSession,
     logout,
     clearError: () => setError(null)
   };
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
 
   return (
     <AuthContext.Provider value={value}>

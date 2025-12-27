@@ -1866,6 +1866,7 @@ class UserListItem(BaseModel):
     email: str
     full_name: str
     role: str
+    plan: str = "free"
     auth_provider: Optional[str] = "local"
     created_at: Optional[str] = None
     is_pro: bool = False
@@ -1875,6 +1876,7 @@ class UserUpdate(BaseModel):
     email: Optional[str] = None
     full_name: Optional[str] = None
     role: Optional[str] = None
+    plan: Optional[str] = None
     is_pro: Optional[bool] = None
     disabled: Optional[bool] = None
 

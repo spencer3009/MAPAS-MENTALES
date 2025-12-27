@@ -16,8 +16,10 @@ const MAX_PINNED = 2;
 // Nombres de planes para mostrar
 const PLAN_NAMES = {
   'free': 'Gratis',
-  'pro': 'Pro',
+  'personal': 'Personal',
+  'pro': 'Personal',  // Alias para compatibilidad
   'team': 'Team',
+  'business': 'Business',
   'admin': 'Admin'
 };
 

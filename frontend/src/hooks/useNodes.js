@@ -1746,7 +1746,8 @@ export const useNodes = () => {
       
       const descendantIds = getDescendantIds(parentId, currentNodes);
       
-      // Buscar nodos que podrían colisionar (misma altura Y, a la izquierda)
+      // Buscar nodos que podrían colisionar (misma zona horizontal, a la izquierda)
+      // Verificamos colisión en un rango Y amplio (desde el padre hasta abajo)
       const collidingNodes = currentNodes.filter(n => {
         if (descendantIds.has(n.id)) return false; // Ignorar descendientes
         if (n.id === parentId) return false; // Ignorar el padre mismo
@@ -1754,15 +1755,27 @@ export const useNodes = () => {
         const nWidth = n.width || 160;
         const nHeight = n.height || 64;
         const nRight = n.x + nWidth;
-        const nBottom = n.y + nHeight;
         
-        // Verificar si el nodo está en la zona de colisión
-        // Zona Y: desde newY hasta newY + 64 (altura del nodo)
-        // Zona X: desde leftmostX hasta leftmostX + nodeWidth
-        const verticalOverlap = !(nBottom < newY - 20 || n.y > newY + 64 + 20);
-        const horizontalOverlap = nRight > leftmostX - 20;
+        // Verificar si el nodo está en la zona de colisión horizontal
+        // El nodo colisiona si su borde derecho está a la derecha del leftmostX
+        const horizontalOverlap = nRight > leftmostX - 40; // 40px de margen
         
-        return verticalOverlap && horizontalOverlap && n.x < leftmostX;
+        // El nodo debe estar en algún lugar entre el padre y más abajo
+        // (no importa exactamente la Y, lo que importa es que esté visualmente en el camino)
+        const isInVerticalRange = n.y >= parent.y - 100 && n.y <= newY + 200;
+        
+        // Solo considerar nodos que están a la IZQUIERDA del grupo nuevo
+        const isToTheLeft = n.x < leftmostX;
+        
+        return horizontalOverlap && isInVerticalRange && isToTheLeft;
+      });
+      
+      console.log('[MindHybrid Collision Check]', {
+        parentId,
+        parentX: parent.x,
+        leftmostX,
+        newY,
+        collidingNodes: collidingNodes.map(n => ({ text: n.text, x: n.x, y: n.y }))
       });
       
       // Si hay colisión, calcular cuánto empujar hacia la derecha

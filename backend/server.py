@@ -182,7 +182,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 
 @api_router.post("/auth/login", response_model=Token)
 async def login(login_data: LoginRequest):
-    user = authenticate_user(login_data.username, login_data.password)
+    user = await authenticate_user(login_data.username, login_data.password)
     if not user:
         raise HTTPException(
             status_code=401,

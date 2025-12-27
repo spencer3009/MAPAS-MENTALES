@@ -49,8 +49,27 @@ const MINDMAP_IMAGES = {
 const LandingPage = ({ onLogin, onRegister }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
+  const [content, setContent] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Navegación
+  // Cargar contenido desde la BD
+  useEffect(() => {
+    const loadContent = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/landing-content`);
+        if (response.ok) {
+          const data = await response.json();
+          setContent(data);
+        }
+      } catch (error) {
+        console.error('Error loading landing content:', error);
+      }
+      setLoading(false);
+    };
+    loadContent();
+  }, []);
+
+  // Navegación - usa datos de BD si existen
   const navItems = [
     { label: 'Inicio', href: '#inicio' },
     { label: 'Plataforma', href: '#plataforma' },

@@ -299,13 +299,13 @@ const LandingPage = ({ onLogin, onRegister }) => {
                 onClick={onLogin}
                 className="px-5 py-2.5 text-sm font-semibold text-gray-700 hover:text-blue-600 transition-colors"
               >
-                Iniciar sesión
+                {content?.nav?.btn_login || 'Iniciar sesión'}
               </button>
               <button
                 onClick={onRegister}
                 className="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all hover:scale-105"
               >
-                Empezar gratis
+                {content?.nav?.btn_registro || 'Empezar gratis'}
               </button>
             </div>
 

@@ -603,13 +603,10 @@ const LandingPage = ({ onLogin, onRegister }) => {
               Beneficios comprobados
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
-              Resultados que puedes
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-                medir desde el día 1
-              </span>
+              {content?.benefits?.title || 'Resultados que puedes medir desde el día 1'}
             </h2>
             <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-              Miles de empresarios ya transformaron su forma de trabajar. Estos son los beneficios que más valoran.
+              {content?.benefits?.subtitle || 'Miles de empresarios ya transformaron su forma de trabajar. Estos son los beneficios que más valoran.'}
             </p>
           </div>
 

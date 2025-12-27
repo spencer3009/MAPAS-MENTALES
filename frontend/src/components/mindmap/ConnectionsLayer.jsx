@@ -68,19 +68,30 @@ const ConnectionsLayer = memo(({
             const midY = (tpCenterY + ctCenterY) / 2;
             
             // Punto de entrada al nodo hijo (centro superior)
-            const endX = node.x + nodeWidth / 2;
+            // IMPORTANTE: usar el ancho real del nodo, no la variable nodeWidth que puede estar desactualizada
+            const actualNodeWidth = node.width || DEFAULT_NODE_WIDTH;
+            const endX = node.x + actualNodeWidth / 2;
             const endY = node.y;
             
             start = { x: midX, y: midY };
             end = { x: endX, y: endY };
             
             // Calcular si el nodo está centrado o desplazado
-            const tolerance = 10; // Tolerancia en píxeles para considerar "centrado"
+            const tolerance = 15; // Tolerancia en píxeles para considerar "centrado" (aumentada a 15)
             const horizontalOffset = endX - midX;
+            
+            console.log('[ConnectorFromLine] Debug:', {
+              node: node.text,
+              midX, midY, endX, endY,
+              horizontalOffset,
+              tolerance,
+              isRecto: Math.abs(horizontalOffset) <= tolerance
+            });
             
             if (Math.abs(horizontalOffset) <= tolerance) {
               // CASO 1: Nodo centrado → Conector RECTO vertical (solo ⬇️)
-              path = `M ${midX} ${midY} L ${midX} ${endY}`;
+              // Usamos endX para que la línea llegue exactamente al centro del nodo
+              path = `M ${endX} ${midY} L ${endX} ${endY}`;
             } else {
               // CASO 2 y 3: Nodo desplazado → Conector tipo CODO
               // Punto intermedio: bajamos verticalmente hasta un punto intermedio

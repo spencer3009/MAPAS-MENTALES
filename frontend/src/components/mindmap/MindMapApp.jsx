@@ -16,6 +16,7 @@ import DockSidebar from './DockSidebar';
 import DashboardView from './DashboardView';
 import TemplatesView from './TemplatesView';
 import IntegrationsView from './IntegrationsView';
+import UpgradeModal from './UpgradeModal';
 import { useNodes } from '../../hooks/useNodes';
 import { usePanning } from '../../hooks/usePanning';
 import { useZoom } from '../../hooks/useZoom';

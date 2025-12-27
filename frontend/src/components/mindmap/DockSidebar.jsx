@@ -88,25 +88,6 @@ const DockSidebar = ({
           ${isExpanded ? 'w-52' : 'w-16'}
         `}
       >
-        {/* Logo / Brand Area */}
-        <div className="h-16 flex items-center justify-center border-b border-slate-700/50 overflow-hidden">
-          <div className={`
-            flex items-center gap-2 overflow-hidden
-            transition-all duration-300
-            ${isExpanded ? 'px-3' : 'px-0'}
-          `}>
-            <img 
-              src={LOGO_URL} 
-              alt="MindoraMap" 
-              className={`
-                object-contain transition-all duration-300
-                ${isExpanded ? 'h-10' : 'h-8 w-8 rounded-lg'}
-              `}
-              style={!isExpanded ? { objectFit: 'cover', objectPosition: 'left' } : {}}
-            />
-          </div>
-        </div>
-
         {/* Menu Items */}
         <nav className="flex-1 py-4 px-2 space-y-1">
           {menuItems.map((item) => {

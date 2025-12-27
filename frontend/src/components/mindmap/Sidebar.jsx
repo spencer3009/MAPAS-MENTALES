@@ -199,7 +199,7 @@ const Sidebar = ({
       flex flex-col p-5 shadow-sm z-20 shrink-0 h-full
     ">
       {/* Logo MindoraMap */}
-      <div className="flex items-center justify-center py-3 mb-4 border-b border-gray-100">
+      <div className="flex items-center justify-center py-1 mb-2 border-b border-gray-100">
         <img 
           src={LOGO_URL} 
           alt="MindoraMap" 

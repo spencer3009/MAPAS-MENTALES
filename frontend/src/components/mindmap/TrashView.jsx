@@ -48,6 +48,24 @@ const TrashView = ({ isOpen, onClose, onProjectRestored, token }) => {
     }
   }, [isOpen, fetchTrashProjects]);
 
+  // Handle ESC key to close modal
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        if (confirmDelete) {
+          setConfirmDelete(null);
+        } else {
+          onClose();
+        }
+      }
+    };
+
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isOpen, onClose, confirmDelete]);
+
   // Restaurar proyecto
   const handleRestore = async (projectId) => {
     setActionLoading(projectId);

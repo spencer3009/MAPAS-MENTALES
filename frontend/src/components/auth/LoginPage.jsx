@@ -41,8 +41,8 @@ const FEATURES = [
   }
 ];
 
-const LoginPage = ({ onBackToLanding, onSwitchToRegister }) => {
-  const { login, loading, error, clearError } = useAuth();
+const LoginPage = ({ onBackToLanding, onSwitchToRegister, externalError }) => {
+  const { login, loginWithGoogle, loading, error, clearError } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);

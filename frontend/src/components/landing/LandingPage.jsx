@@ -836,9 +836,8 @@ const LandingPage = ({ onLogin, onRegister }) => {
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             {/* Brand */}
             <div className="md:col-span-2">
-              <div className="flex items-center gap-2 mb-4">
-                <img src={LOGO_URL} alt="MindoraMap" className="h-10 w-auto" />
-                <span className="text-2xl font-bold text-white">MindoraMap</span>
+              <div className="flex items-center mb-4">
+                <img src={LOGO_URL} alt="MindoraMap" className="h-12 w-auto" />
               </div>
               <p className="text-gray-400 mb-6 max-w-md">
                 La plataforma de mapas mentales diseñada para empresarios que buscan claridad, organización y resultados.

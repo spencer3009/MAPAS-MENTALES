@@ -455,10 +455,15 @@ const MindMapApp = ({ onAdminClick }) => {
     } else {
       // Crear nuevo proyecto con el layout seleccionado
       const layoutType = projectNameModalConfig.layoutType || 'mindflow';
-      const success = await createBlankMap(name, layoutType);
-      if (success) {
+      const result = await createBlankMap(name, layoutType);
+      
+      if (result.success) {
         resetPan();
         resetZoom();
+      } else if (result.error) {
+        // Mostrar modal de upgrade si hay error de límites
+        setUpgradeLimitType(result.limitType || 'active');
+        setShowUpgradeModal(true);
       }
     }
     setShowProjectNameModal(false);

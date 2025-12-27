@@ -68,10 +68,52 @@ class Token(BaseModel):
     token_type: str
     user: dict
 
+# ==================== SISTEMA DE PLANES ====================
+# Límites por plan
+PLAN_LIMITS = {
+    "free": {
+        "max_maps": 3,
+        "max_nodes_per_map": 50,
+        "can_collaborate": False,
+        "can_export_pdf": False,
+        "priority_support": False
+    },
+    "pro": {
+        "max_maps": -1,  # -1 = ilimitado
+        "max_nodes_per_map": -1,
+        "can_collaborate": False,
+        "can_export_pdf": True,
+        "priority_support": True
+    },
+    "team": {
+        "max_maps": -1,
+        "max_nodes_per_map": -1,
+        "can_collaborate": True,
+        "can_export_pdf": True,
+        "priority_support": True
+    },
+    "admin": {
+        "max_maps": -1,
+        "max_nodes_per_map": -1,
+        "can_collaborate": True,
+        "can_export_pdf": True,
+        "priority_support": True
+    }
+}
+
+def get_user_plan_limits(user: dict) -> dict:
+    """Obtiene los límites del plan del usuario"""
+    # Admins siempre tienen plan máximo
+    if user.get("role") == "admin":
+        return PLAN_LIMITS["admin"]
+    plan = user.get("plan", "free")
+    return PLAN_LIMITS.get(plan, PLAN_LIMITS["free"])
+
 class UserResponse(BaseModel):
     username: str
     full_name: str
     role: str = "user"
+    plan: str = "free"
     is_pro: bool = False
 
 class UserProfile(BaseModel):

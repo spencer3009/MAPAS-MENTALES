@@ -36,8 +36,15 @@ export const AuthProvider = ({ children }) => {
       
       if (response.ok) {
         const userData = await response.json();
-        setUser(userData);
+        // Actualizar usuario con datos completos incluyendo rol
+        const updatedUser = {
+          ...userData,
+          role: userData.role || 'user',
+          is_pro: userData.is_pro || false
+        };
+        setUser(updatedUser);
         setToken(tokenToVerify);
+        localStorage.setItem('mm_auth_user', JSON.stringify(updatedUser));
       } else {
         // Token inválido, limpiar sesión
         logout();

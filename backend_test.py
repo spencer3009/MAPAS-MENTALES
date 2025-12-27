@@ -12,7 +12,7 @@ from datetime import datetime
 from typing import Dict, List, Optional
 
 # Test Configuration
-BASE_URL = "https://admin-panel-tool.preview.emergentagent.com/api"
+BASE_URL = "https://mindmap-cms.preview.emergentagent.com/api"
 ADMIN_CREDENTIALS = {
     "username": "spencer3009",
     "password": "Socios3009"

@@ -520,5 +520,5 @@ class AdminUserManagementTester:
         print("=" * 80)
 
 if __name__ == "__main__":
-    tester = AuthenticationTester()
+    tester = AdminUserManagementTester()
     tester.run_comprehensive_test()

@@ -118,6 +118,11 @@ const TrashView = ({ isOpen, onClose, onProjectRestored, token }) => {
       // Actualizar lista local
       setTrashProjects(prev => prev.filter(p => p.id !== projectId));
       setConfirmDelete(null);
+      
+      // Notificar al componente padre para actualizar el contador del sidebar
+      if (onProjectRestored) {
+        onProjectRestored();
+      }
     } catch (err) {
       console.error('Error deleting permanently:', err);
       setError('No se pudo eliminar el proyecto');

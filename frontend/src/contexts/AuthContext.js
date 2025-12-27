@@ -204,13 +204,6 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
-
 // Hook para usar el contexto de autenticación
 export const useAuth = () => {
   const context = useContext(AuthContext);

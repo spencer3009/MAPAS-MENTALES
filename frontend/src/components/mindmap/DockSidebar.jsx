@@ -4,7 +4,7 @@ import {
   FolderKanban, 
   LayoutTemplate, 
   Bell, 
-  Puzzle, 
+  Trash2, 
   Settings,
   ChevronRight
 } from 'lucide-react';

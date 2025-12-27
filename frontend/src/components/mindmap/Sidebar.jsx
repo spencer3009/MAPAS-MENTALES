@@ -462,6 +462,29 @@ const Sidebar = ({
           )}
         </p>
       </div>
+
+      {/* Botón de Papelera */}
+      <button
+        onClick={onOpenTrash}
+        className="
+          mt-3 w-full py-2.5 px-3
+          text-sm font-medium text-gray-600
+          bg-white hover:bg-red-50
+          border border-gray-200 hover:border-red-200
+          rounded-xl
+          flex items-center justify-center gap-2
+          transition-all duration-200
+          hover:text-red-600
+        "
+      >
+        <Trash2 size={16} />
+        <span>Papelera</span>
+        {trashCount > 0 && (
+          <span className="ml-1 px-2 py-0.5 text-xs bg-red-100 text-red-600 rounded-full">
+            {trashCount}
+          </span>
+        )}
+      </button>
     </div>
   );
 };

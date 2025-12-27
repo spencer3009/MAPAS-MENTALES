@@ -43,7 +43,7 @@ const FEATURES = [
 ];
 
 const RegisterPage = ({ onBackToLanding, onSwitchToLogin }) => {
-  const { register, loading, error, clearError } = useAuth();
+  const { register, loginWithGoogle, loading, error, clearError } = useAuth();
   const [formData, setFormData] = useState({
     nombre: '',
     apellidos: '',

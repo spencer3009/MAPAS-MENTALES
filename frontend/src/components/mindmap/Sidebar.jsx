@@ -498,7 +498,7 @@ const Sidebar = ({
                 Plan {PLAN_NAMES[planInfo.plan] || planInfo.plan}
               </span>
             </div>
-            {planInfo.limits.max_maps === -1 && (
+            {planInfo.limits.max_active_maps === -1 && (
               <span className="text-xs font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
                 ∞ Ilimitado
               </span>
@@ -506,42 +506,65 @@ const Sidebar = ({
           </div>
 
           {/* Uso de mapas - solo mostrar si hay límite */}
-          {planInfo.limits.max_maps !== -1 && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-gray-600">Mapas creados</span>
-                <span className="font-semibold text-gray-800">
-                  {planInfo.usage.maps_count} / {planInfo.limits.max_maps}
-                </span>
-              </div>
-              
-              {/* Barra de progreso */}
-              <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                <div 
-                  className={`h-full rounded-full transition-all duration-300 ${
-                    planInfo.usage.maps_count >= planInfo.limits.max_maps
-                      ? 'bg-red-500'
-                      : planInfo.usage.maps_count >= planInfo.limits.max_maps * 0.8
-                      ? 'bg-amber-500'
-                      : 'bg-blue-500'
-                  }`}
-                  style={{ width: `${Math.min(100, (planInfo.usage.maps_count / planInfo.limits.max_maps) * 100)}%` }}
-                />
+          {planInfo.limits.max_active_maps !== -1 && (
+            <div className="space-y-3">
+              {/* Mapas activos */}
+              <div>
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span className="text-gray-600">Mapas activos</span>
+                  <span className="font-semibold text-gray-800">
+                    {planInfo.usage.active_maps} / {planInfo.limits.max_active_maps}
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                  <div 
+                    className={`h-full rounded-full transition-all duration-300 ${
+                      planInfo.usage.active_maps >= planInfo.limits.max_active_maps
+                        ? 'bg-red-500'
+                        : planInfo.usage.active_maps >= planInfo.limits.max_active_maps * 0.8
+                        ? 'bg-amber-500'
+                        : 'bg-blue-500'
+                    }`}
+                    style={{ width: `${Math.min(100, (planInfo.usage.active_maps / planInfo.limits.max_active_maps) * 100)}%` }}
+                  />
+                </div>
               </div>
 
-              {/* Mensaje de límite */}
-              {planInfo.usage.maps_remaining === 0 ? (
-                <p className="text-xs text-red-600 font-medium">
-                  ¡Has alcanzado el límite de tu plan!
+              {/* Mapas totales (histórico) */}
+              <div>
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span className="text-gray-600">Mapas creados (total)</span>
+                  <span className="font-semibold text-gray-800">
+                    {planInfo.usage.total_maps_created} / {planInfo.limits.max_total_maps_created}
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                  <div 
+                    className={`h-full rounded-full transition-all duration-300 ${
+                      planInfo.usage.total_maps_created >= planInfo.limits.max_total_maps_created
+                        ? 'bg-red-500'
+                        : planInfo.usage.total_maps_created >= planInfo.limits.max_total_maps_created * 0.8
+                        ? 'bg-amber-500'
+                        : 'bg-purple-500'
+                    }`}
+                    style={{ width: `${Math.min(100, (planInfo.usage.total_maps_created / planInfo.limits.max_total_maps_created) * 100)}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Mensajes de límite */}
+              {!planInfo.usage.can_create_map ? (
+                <p className="text-xs text-red-600 font-medium bg-red-50 p-2 rounded-lg">
+                  ⚠️ Has alcanzado el límite del plan gratuito. ¡Actualiza a Pro!
                 </p>
-              ) : planInfo.usage.maps_remaining <= 1 ? (
-                <p className="text-xs text-amber-600">
-                  Te queda {planInfo.usage.maps_remaining} mapa disponible
+              ) : planInfo.usage.active_remaining <= 1 || planInfo.usage.total_remaining <= 1 ? (
+                <p className="text-xs text-amber-600 bg-amber-50 p-2 rounded-lg">
+                  💡 Te quedan pocos mapas disponibles
                 </p>
               ) : null}
 
               {/* Botón de upgrade */}
-              <button className="w-full mt-2 py-2 px-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all shadow-sm hover:shadow-md">
+              <button className="w-full mt-1 py-2.5 px-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all shadow-sm hover:shadow-md">
                 <Zap className="w-3.5 h-3.5" />
                 Actualizar a Pro
               </button>
@@ -549,7 +572,7 @@ const Sidebar = ({
           )}
 
           {/* Info para planes ilimitados */}
-          {planInfo.limits.max_maps === -1 && (
+          {planInfo.limits.max_active_maps === -1 && (
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-xs text-gray-600">
                 <Sparkles className="w-3.5 h-3.5 text-green-500" />
@@ -566,7 +589,7 @@ const Sidebar = ({
                 </div>
               )}
               <p className="text-xs text-gray-500 mt-2">
-                {planInfo.usage.maps_count} mapas creados
+                {planInfo.usage.active_maps} mapas activos
               </p>
             </div>
           )}

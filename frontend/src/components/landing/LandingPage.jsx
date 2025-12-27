@@ -249,7 +249,7 @@ const LandingPage = ({ onLogin, onRegister }) => {
       {/* ==================== HEADER ==================== */}
       <header className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-lg z-50 border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 lg:h-20">
+          <div className="flex items-center justify-between h-24 lg:h-28">
             {/* Logo */}
             <a href="#inicio" className="flex items-center group">
               <img src={LOGO_URL} alt="MindoraMap" className="h-20 lg:h-24 w-auto" />

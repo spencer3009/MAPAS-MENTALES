@@ -2739,16 +2739,12 @@ export const useNodes = () => {
       const remainingProjects = projects.filter(p => p.id !== projectIdToDelete);
       
       if (remainingProjects.length === 0) {
-        // Si no quedan proyectos, crear uno nuevo
-        const newProject = createDefaultProject();
-        newProject.name = 'Nuevo Mapa';
-        setProjects([newProject]);
-        setActiveProjectId(newProject.id);
-        
-        // Guardar el nuevo proyecto en servidor
-        await saveProjectToServer(newProject);
-        
-        console.log('Último proyecto eliminado, creado uno nuevo');
+        // Si no quedan proyectos, simplemente limpiar el estado
+        // NO crear uno nuevo automáticamente
+        setProjects([]);
+        setActiveProjectId(null);
+        setNodes([]);
+        console.log('Último proyecto eliminado, cuenta en cero mapas');
       } else {
         setProjects(remainingProjects);
         // Si eliminamos el proyecto activo, activar el más reciente
@@ -2767,7 +2763,7 @@ export const useNodes = () => {
       console.error('Error al eliminar proyecto:', error);
       return false;
     }
-  }, [activeProjectId, projects, deleteProjectFromServer, saveProjectToServer]);
+  }, [activeProjectId, projects, deleteProjectFromServer]);
 
   // Renombrar proyecto
   const renameProject = useCallback(async (projectId, newName) => {

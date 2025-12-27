@@ -1713,6 +1713,7 @@ export const useNodes = () => {
       const parentWidth = parent.width || 160;
       const parentHeight = parent.height || 64;
       const nodeWidth = 160;
+      const nodeHeight = 64;
       const verticalGap = 100; // Distancia vertical del padre
       const horizontalSpacing = 180; // Espacio horizontal entre hermanos verticales
       
@@ -1725,10 +1726,13 @@ export const useNodes = () => {
       const parentCenterX = parent.x + parentWidth / 2;
       const groupStartX = parentCenterX - totalWidth / 2 - nodeWidth / 2;
       
-      // Calcular la X más a la izquierda que ocuparía el grupo
+      // Calcular el área que ocupará el grupo completo de hijos
       const leftmostX = groupStartX;
+      const rightmostX = groupStartX + totalWidth + nodeWidth;
+      const topY = newY;
+      const bottomY = newY + nodeHeight;
       
-      // Verificar colisión con otros nodos existentes (que no son descendientes del padre)
+      // Obtener IDs de todos los descendientes del padre (para excluirlos de la colisión)
       const getDescendantIds = (nodeId, nodes) => {
         const descendants = new Set([nodeId]);
         const queue = [nodeId];
@@ -1746,45 +1750,43 @@ export const useNodes = () => {
       
       const descendantIds = getDescendantIds(parentId, currentNodes);
       
-      // Buscar nodos que podrían colisionar (misma zona horizontal, a la izquierda)
-      // Verificamos colisión en un rango Y amplio (desde el padre hasta abajo)
+      // Buscar TODOS los nodos que colisionarían con el área del nuevo grupo
       const collidingNodes = currentNodes.filter(n => {
-        if (descendantIds.has(n.id)) return false; // Ignorar descendientes
-        if (n.id === parentId) return false; // Ignorar el padre mismo
+        // Ignorar descendientes del padre y el padre mismo
+        if (descendantIds.has(n.id) || n.id === parentId) return false;
         
         const nWidth = n.width || 160;
         const nHeight = n.height || 64;
+        const nLeft = n.x;
         const nRight = n.x + nWidth;
+        const nTop = n.y;
+        const nBottom = n.y + nHeight;
         
-        // Verificar si el nodo está en la zona de colisión horizontal
-        // El nodo colisiona si su borde derecho está a la derecha del leftmostX
-        const horizontalOverlap = nRight > leftmostX - 40; // 40px de margen
+        // Verificar colisión de rectángulos (con margen de 20px)
+        const margin = 20;
+        const horizontalOverlap = !(nRight + margin < leftmostX || nLeft - margin > rightmostX);
+        const verticalOverlap = !(nBottom + margin < topY || nTop - margin > bottomY);
         
-        // El nodo debe estar en algún lugar entre el padre y más abajo
-        // (no importa exactamente la Y, lo que importa es que esté visualmente en el camino)
-        const isInVerticalRange = n.y >= parent.y - 100 && n.y <= newY + 200;
-        
-        // Solo considerar nodos que están a la IZQUIERDA del grupo nuevo
-        const isToTheLeft = n.x < leftmostX;
-        
-        return horizontalOverlap && isInVerticalRange && isToTheLeft;
+        return horizontalOverlap && verticalOverlap;
       });
       
       console.log('[MindHybrid Collision Check]', {
-        parentId,
+        parent: parent.text,
         parentX: parent.x,
-        leftmostX,
-        newY,
+        groupArea: { leftmostX, rightmostX, topY, bottomY },
+        totalChildren,
         collidingNodes: collidingNodes.map(n => ({ text: n.text, x: n.x, y: n.y }))
       });
       
       // Si hay colisión, calcular cuánto empujar hacia la derecha
       let pushAmount = 0;
       if (collidingNodes.length > 0) {
+        // Encontrar el nodo que más se extiende hacia la derecha
         const maxCollidingRight = Math.max(...collidingNodes.map(n => n.x + (n.width || 160)));
-        pushAmount = maxCollidingRight - leftmostX + 40; // 40px de margen
+        // Calcular cuánto necesitamos mover para que el leftmostX esté después de maxCollidingRight
+        pushAmount = maxCollidingRight - leftmostX + 60; // 60px de margen
         
-        console.log('[MindHybrid] Colisión detectada! Empujando', pushAmount, 'px hacia la derecha');
+        console.log('[MindHybrid] ¡Colisión detectada! Empujando', pushAmount, 'px hacia la derecha');
         
         // Empujar el padre y todos sus descendientes hacia la derecha
         currentNodes = currentNodes.map(n => {
@@ -1795,43 +1797,43 @@ export const useNodes = () => {
         });
       }
       
-      // Recalcular posición después de empujar
+      // Recalcular posición del nuevo nodo después del push
       const updatedParent = currentNodes.find(n => n.id === parentId);
       const newParentCenterX = updatedParent.x + parentWidth / 2;
-      const newGroupStartX = newParentCenterX - totalWidth / 2 - nodeWidth / 2;
-      const newX = newGroupStartX + (verticalSiblings.length * horizontalSpacing);
+      const newTotalWidth = totalChildren * horizontalSpacing - horizontalSpacing;
+      const newGroupStartX = newParentCenterX - newTotalWidth / 2 - nodeWidth / 2;
       
       const newNode = {
         id: newId,
         text: 'Nuevo Nodo',
-        x: newX,
+        x: newGroupStartX + (verticalSiblings.length * horizontalSpacing),
         y: newY,
         color: 'blue',
         parentId,
         width: nodeWidth,
-        height: 64,
+        height: nodeHeight,
         nodeType: options?.nodeType || 'default',
-        childDirection: 'vertical' // Marca la dirección
+        childDirection: 'vertical'
       };
       
-      console.log('[MindHybrid] Creando nodo VERTICAL:', newNode);
-      
       // Redistribuir todos los hermanos verticales para centrarlos
-      const allVerticalChildren = [...verticalSiblings, newNode];
-      const newTotalWidth = (allVerticalChildren.length - 1) * horizontalSpacing;
-      const finalGroupStartX = newParentCenterX - newTotalWidth / 2 - nodeWidth / 2;
-      
-      let newNodes = currentNodes.map(n => {
-        const idx = verticalSiblings.findIndex(s => s.id === n.id);
-        if (idx !== -1) {
-          return { ...n, x: finalGroupStartX + (idx * horizontalSpacing) };
-        }
-        return n;
+      let newNodes = [...currentNodes];
+      verticalSiblings.forEach((sibling, idx) => {
+        const siblingNewX = newGroupStartX + (idx * horizontalSpacing);
+        newNodes = newNodes.map(n => 
+          n.id === sibling.id ? { ...n, x: siblingNewX } : n
+        );
       });
       
-      // Agregar el nuevo nodo con posición final
-      newNode.x = finalGroupStartX + (verticalSiblings.length * horizontalSpacing);
+      // Agregar el nuevo nodo
       newNodes = [...newNodes, newNode];
+      
+      console.log('[MindHybrid] Nuevo nodo creado:', { 
+        text: newNode.text, 
+        x: newNode.x, 
+        y: newNode.y,
+        pushApplied: pushAmount > 0
+      });
       
       pushToHistory(activeProjectId, newNodes);
       

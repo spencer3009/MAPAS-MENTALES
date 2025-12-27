@@ -876,6 +876,18 @@ const MindMapApp = ({ onAdminClick }) => {
         onProjectRestored={handleProjectRestored}
         token={token}
       />
+
+      {/* Modal de Upgrade a Pro */}
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        limitType={upgradeLimitType}
+        onUpgrade={() => {
+          setShowUpgradeModal(false);
+          // TODO: Aquí iría la lógica de pago con Stripe
+          window.open('/upgrade', '_blank');
+        }}
+      />
     </div>
   );
 };

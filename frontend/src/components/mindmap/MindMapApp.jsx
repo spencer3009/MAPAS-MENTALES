@@ -640,6 +640,7 @@ const MindMapApp = ({ onAdminClick }) => {
           onOpenAllProjects={() => setShowAllProjectsModal(true)}
           onOpenTrash={handleOpenTrash}
           trashCount={trashCount}
+          token={token}
         />
       )}
 

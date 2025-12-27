@@ -627,6 +627,7 @@ const MindMapApp = ({ onAdminClick }) => {
               }
             }}
             onOpenTemplates={handleOpenTemplatesView}
+            onToggleFavorite={handleTogglePin}
           />
         );
       case 'templates':
@@ -636,6 +637,51 @@ const MindMapApp = ({ onAdminClick }) => {
           // Abrir el selector de layout con el tipo seleccionado
           setShowLayoutSelector(true);
         }} />;
+      case 'favorites':
+        return (
+          <div className="flex-1 h-full overflow-y-auto bg-white p-6">
+            <div className="max-w-4xl mx-auto">
+              <h1 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                <Star className="text-yellow-500" size={28} />
+                Favoritos
+              </h1>
+              {projects.filter(p => p.isPinned).length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {projects.filter(p => p.isPinned).map((project) => (
+                    <div
+                      key={project.id}
+                      onClick={() => {
+                        handleSwitchProject(project.id);
+                        setActiveView('projects');
+                        setIsProjectsSidebarOpen(true);
+                      }}
+                      className="p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
+                          <FolderKanban className="text-white" size={18} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-gray-900 truncate">{project.name}</p>
+                          <p className="text-xs text-gray-500">{project.nodes?.length || 0} nodos</p>
+                        </div>
+                        <Star className="text-yellow-400 fill-yellow-400" size={18} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                    <Star className="text-gray-400" size={24} />
+                  </div>
+                  <p className="text-gray-500 mb-2">No tienes favoritos</p>
+                  <p className="text-sm text-gray-400">Haz clic en la estrella de un proyecto para agregarlo aquí</p>
+                </div>
+              )}
+            </div>
+          </div>
+        );
       case 'integrations':
         return <IntegrationsView />;
       default:

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Trash2, RotateCcw, AlertTriangle, X, Clock, 
-  FileText, Loader2, ArrowLeft, Layers
+  FileText, Loader2, ArrowLeft, Layers, Trash
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -11,7 +11,9 @@ const TrashView = ({ isOpen, onClose, onProjectRestored, token }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [confirmEmptyTrash, setConfirmEmptyTrash] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
+  const [emptyingTrash, setEmptyingTrash] = useState(false);
 
   // Cargar proyectos de la papelera
   const fetchTrashProjects = useCallback(async () => {

@@ -2015,6 +2015,7 @@ export const useNodes = () => {
 
   // Algoritmo de alineación para MindHybrid
   // Organiza hijos horizontales a la derecha y verticales abajo
+  // IMPORTANTE: Este algoritmo RESPETA el espacio expandido y NUNCA comprime
   const autoAlignMindHybrid = useCallback((parentId, currentNodes) => {
     if (!parentId) return currentNodes;
     
@@ -2025,39 +2026,33 @@ export const useNodes = () => {
     
     const parentWidth = parent.width || 160;
     const parentHeight = parent.height || 64;
-    const childWidth = 160; // Ancho estándar de nodos hijos
-    const childHeight = 64; // Alto estándar de nodos hijos
+    const childWidth = 160;
+    const childHeight = 64;
     
     // Separar hijos por dirección
     // IMPORTANTE: Excluir nodos creados desde el botón "+" púrpura (tienen connectorParentId)
-    // Estos nodos NO deben redistribuirse automáticamente
     const horizontalChildren = updatedNodes.filter(n => 
       n.parentId === parentId && n.childDirection === 'horizontal' && !n.connectorParentId
-    ).sort((a, b) => a.y - b.y); // Ordenar por Y
+    ).sort((a, b) => a.y - b.y);
     
     const verticalChildren = updatedNodes.filter(n => 
       n.parentId === parentId && n.childDirection === 'vertical' && !n.connectorParentId
-    ).sort((a, b) => a.x - b.x); // Ordenar por X
+    ).sort((a, b) => a.x - b.x);
     
-    // Constantes de espaciado
-    const horizontalGap = 200; // Distancia horizontal desde el padre
-    const verticalGap = 100; // Distancia vertical desde el padre
-    const siblingSpacingH = 80; // Espacio entre hermanos horizontales
-    const siblingSpacingV = 180; // Espacio entre hermanos verticales (centro a centro)
+    // Constantes de espaciado MÍNIMO
+    const horizontalGap = 200;
+    const verticalGap = 100;
+    const siblingSpacingH = 80;
+    const minSiblingSpacingV = 180; // Espaciado MÍNIMO entre hermanos verticales
     
-    // Centro del padre
     const parentCenterX = parent.x + (parentWidth / 2);
     const parentCenterY = parent.y + (parentHeight / 2);
     
-    // Posicionar hijos horizontales (a la derecha, apilados verticalmente)
-    // El PRIMER hijo debe estar centrado verticalmente con el padre
-    // Los siguientes se apilan hacia abajo
+    // =====================================================
+    // HIJOS HORIZONTALES
+    // =====================================================
     horizontalChildren.forEach((child, index) => {
       const newX = parent.x + parentWidth + horizontalGap;
-      // Para el primer hijo: su centro Y debe coincidir con el centro Y del padre
-      // childY + childHeight/2 = parentCenterY
-      // childY = parentCenterY - childHeight/2
-      // Los siguientes se apilan con siblingSpacingH
       const baseY = parentCenterY - (childHeight / 2);
       const newY = baseY + (index * siblingSpacingH);
       
@@ -2069,22 +2064,107 @@ export const useNodes = () => {
       updatedNodes = autoAlignMindHybrid(child.id, updatedNodes);
     });
     
-    // Posicionar hijos verticales (abajo, distribuidos horizontalmente)
-    // El CENTRO del grupo de hijos debe alinearse con el CENTRO del padre
-    // NOTA: Solo se redistribuyen los nodos verticales "normales", NO los del botón "+"
+    // =====================================================
+    // HIJOS VERTICALES - CON DETECCIÓN DE ESPACIO REQUERIDO
+    // =====================================================
     if (verticalChildren.length > 0) {
-      // Calcular ancho total del grupo (de centro a centro del primer y último nodo)
-      const totalGroupWidth = (verticalChildren.length - 1) * siblingSpacingV;
+      // Calcular el espacio requerido por cada subárbol
+      const getSubtreeWidth = (nodeId, nodes) => {
+        const node = nodes.find(n => n.id === nodeId);
+        if (!node) return childWidth;
+        
+        // Buscar todos los descendientes verticales
+        const descendants = nodes.filter(n => n.parentId === nodeId && n.childDirection === 'vertical');
+        
+        if (descendants.length === 0) {
+          return childWidth;
+        }
+        
+        // Calcular el ancho del grupo de descendientes
+        const sortedDesc = [...descendants].sort((a, b) => a.x - b.x);
+        const leftmost = sortedDesc[0].x;
+        const rightmost = sortedDesc[sortedDesc.length - 1].x + childWidth;
+        const descendantsWidth = rightmost - leftmost;
+        
+        // El ancho del subárbol es el máximo entre el nodo y sus descendientes
+        return Math.max(childWidth, descendantsWidth);
+      };
       
-      // Calcular X del primer nodo para que el grupo quede centrado
-      // El centro del grupo es: firstChildX + childWidth/2 + totalGroupWidth/2
-      // Queremos que ese centro = parentCenterX
-      // Entonces: firstChildX = parentCenterX - childWidth/2 - totalGroupWidth/2
+      // Calcular el espaciado actual entre hijos (si ya existen)
+      let currentSpacing = minSiblingSpacingV;
+      if (verticalChildren.length >= 2) {
+        const sorted = [...verticalChildren].sort((a, b) => a.x - b.x);
+        const actualSpacing = (sorted[1].x - sorted[0].x);
+        // NUNCA reducir el espaciado - solo mantener o expandir
+        currentSpacing = Math.max(minSiblingSpacingV, actualSpacing);
+      }
+      
+      // Calcular el ancho requerido por cada subárbol
+      const subtreeWidths = verticalChildren.map(child => ({
+        id: child.id,
+        width: getSubtreeWidth(child.id, updatedNodes)
+      }));
+      
+      // El espaciado debe ser suficiente para el subárbol más ancho
+      const maxSubtreeWidth = Math.max(...subtreeWidths.map(s => s.width));
+      const requiredSpacing = Math.max(currentSpacing, maxSubtreeWidth + 20); // 20px de margen
+      
+      // Calcular ancho total del grupo
+      const totalGroupWidth = (verticalChildren.length - 1) * requiredSpacing;
       const firstChildX = parentCenterX - (childWidth / 2) - (totalGroupWidth / 2);
       const childY = parent.y + parentHeight + verticalGap;
       
+      // =====================================================
+      // DETECCIÓN DE COLISIONES CON OTROS SUBÁRBOLES
+      // =====================================================
+      // Buscar nodos que NO son descendientes de este padre
+      const getDescendantIds = (nodeId, nodes) => {
+        const descendants = new Set([nodeId]);
+        const queue = [nodeId];
+        while (queue.length > 0) {
+          const currentId = queue.shift();
+          nodes.forEach(n => {
+            if (n.parentId === currentId && !descendants.has(n.id)) {
+              descendants.add(n.id);
+              queue.push(n.id);
+            }
+          });
+        }
+        return descendants;
+      };
+      
+      const descendantIds = getDescendantIds(parentId, updatedNodes);
+      
+      // Verificar colisiones con nodos externos en la misma zona Y
+      const potentialCollisions = updatedNodes.filter(n => {
+        if (descendantIds.has(n.id) || n.id === parentId) return false;
+        
+        const nHeight = n.height || 64;
+        const nBottom = n.y + nHeight;
+        
+        // Verificar si está en el rango Y de los hijos
+        const verticalOverlap = !(nBottom < childY - 20 || n.y > childY + childHeight + 20);
+        return verticalOverlap;
+      });
+      
+      // Si hay colisiones potenciales, ajustar posición
+      let adjustedFirstChildX = firstChildX;
+      if (potentialCollisions.length > 0) {
+        const maxCollidingRight = Math.max(...potentialCollisions.map(n => n.x + (n.width || 160)));
+        // Si el primer hijo colisionaría, moverlo a la derecha
+        if (firstChildX < maxCollidingRight + 40) {
+          adjustedFirstChildX = maxCollidingRight + 40;
+          console.log('[MindHybrid AutoAlign] Ajustando para evitar colisión:', {
+            originalFirstX: firstChildX,
+            adjustedFirstX: adjustedFirstChildX,
+            maxCollidingRight
+          });
+        }
+      }
+      
+      // Posicionar hijos verticales
       verticalChildren.forEach((child, index) => {
-        const newX = firstChildX + (index * siblingSpacingV);
+        const newX = adjustedFirstChildX + (index * requiredSpacing);
         
         updatedNodes = updatedNodes.map(n => 
           n.id === child.id ? { ...n, x: newX, y: childY } : n

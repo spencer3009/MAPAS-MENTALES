@@ -17,7 +17,7 @@ TEST_CREDENTIALS = {
     "password": "Socios3009"
 }
 
-class RecycleBinTester:
+class CollisionDetectionTester:
     def __init__(self):
         self.base_url = BASE_URL
         self.session = requests.Session()

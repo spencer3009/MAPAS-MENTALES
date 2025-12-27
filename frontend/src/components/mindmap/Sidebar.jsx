@@ -212,13 +212,13 @@ const Sidebar = ({
         onClick={onNewBlank}
         className="
           w-full bg-blue-600 hover:bg-blue-700
-          text-white font-medium py-3 px-4 rounded-xl
-          flex items-center justify-center gap-2 mb-4
+          text-white font-medium py-2 px-3 rounded-lg
+          flex items-center justify-center gap-2 mb-3
           shadow-md hover:shadow-lg transition-all duration-200
-          active:scale-[0.98]
+          active:scale-[0.98] text-sm
         "
       >
-        <Plus size={18} />
+        <Plus size={16} />
         <span>Nuevo Mapa</span>
       </button>
 
@@ -480,9 +480,9 @@ const Sidebar = ({
         )}
       </div>
 
-      {/* Sección del Plan */}
+      {/* Sección del Plan - Compacta */}
       {planInfo && (
-        <div className={`mt-4 p-4 rounded-xl border ${
+        <div className={`mt-2 p-2.5 rounded-lg border ${
           planInfo.plan === 'free' 
             ? 'bg-gray-50 border-gray-200'
             : planInfo.plan === 'pro'
@@ -492,16 +492,16 @@ const Sidebar = ({
             : 'bg-gradient-to-br from-red-50 to-pink-50 border-red-200'
         }`}>
           {/* Header del plan */}
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-1.5">
               {planInfo.plan !== 'free' && (
-                <Crown className={`w-4 h-4 ${
+                <Crown className={`w-3.5 h-3.5 ${
                   planInfo.plan === 'pro' ? 'text-amber-500' 
                   : planInfo.plan === 'team' ? 'text-purple-500'
                   : 'text-red-500'
                 }`} />
               )}
-              <span className={`text-sm font-bold ${
+              <span className={`text-xs font-bold ${
                 planInfo.plan === 'free' ? 'text-gray-700'
                 : planInfo.plan === 'pro' ? 'text-amber-700'
                 : planInfo.plan === 'team' ? 'text-purple-700'
@@ -511,7 +511,7 @@ const Sidebar = ({
               </span>
             </div>
             {planInfo.limits.max_active_maps === -1 && (
-              <span className="text-xs font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
+              <span className="text-[10px] font-medium text-green-600 bg-green-100 px-1.5 py-0.5 rounded-full">
                 ∞ Ilimitado
               </span>
             )}
@@ -519,22 +519,21 @@ const Sidebar = ({
 
           {/* Uso de mapas - solo mostrar si hay límite */}
           {planInfo.limits.max_active_maps !== -1 && (
-            <div className="space-y-3">
-              {/* Indicadores circulares en una fila */}
-              <div className="flex items-center justify-center gap-4">
+            <div className="space-y-2">
+              {/* Indicadores circulares en una fila - más compactos */}
+              <div className="flex items-center justify-center gap-3">
                 {/* Círculo: Mapas activos */}
                 <div className="flex flex-col items-center">
-                  <div className="relative w-14 h-14">
-                    {/* Círculo de fondo */}
-                    <svg className="w-14 h-14 -rotate-90">
+                  <div className="relative w-10 h-10">
+                    <svg className="w-10 h-10 -rotate-90">
                       <circle
-                        cx="28" cy="28" r="24"
+                        cx="20" cy="20" r="16"
                         stroke="#e5e7eb"
-                        strokeWidth="4"
+                        strokeWidth="3"
                         fill="none"
                       />
                       <circle
-                        cx="28" cy="28" r="24"
+                        cx="20" cy="20" r="16"
                         stroke={
                           planInfo.usage.active_maps >= planInfo.limits.max_active_maps
                             ? '#ef4444'
@@ -542,35 +541,34 @@ const Sidebar = ({
                             ? '#f59e0b'
                             : '#3b82f6'
                         }
-                        strokeWidth="4"
+                        strokeWidth="3"
                         fill="none"
                         strokeLinecap="round"
-                        strokeDasharray={`${(planInfo.usage.active_maps / planInfo.limits.max_active_maps) * 150.8} 150.8`}
+                        strokeDasharray={`${(planInfo.usage.active_maps / planInfo.limits.max_active_maps) * 100.5} 100.5`}
                         className="transition-all duration-500"
                       />
                     </svg>
-                    {/* Número en el centro */}
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-sm font-bold text-gray-800">
+                      <span className="text-[10px] font-bold text-gray-800">
                         {planInfo.usage.active_maps}/{planInfo.limits.max_active_maps}
                       </span>
                     </div>
                   </div>
-                  <span className="text-[10px] text-gray-500 mt-1">Activos</span>
+                  <span className="text-[9px] text-gray-500">Activos</span>
                 </div>
 
                 {/* Círculo: Mapas totales */}
                 <div className="flex flex-col items-center">
-                  <div className="relative w-14 h-14">
-                    <svg className="w-14 h-14 -rotate-90">
+                  <div className="relative w-10 h-10">
+                    <svg className="w-10 h-10 -rotate-90">
                       <circle
-                        cx="28" cy="28" r="24"
+                        cx="20" cy="20" r="16"
                         stroke="#e5e7eb"
-                        strokeWidth="4"
+                        strokeWidth="3"
                         fill="none"
                       />
                       <circle
-                        cx="28" cy="28" r="24"
+                        cx="20" cy="20" r="16"
                         stroke={
                           planInfo.usage.total_maps_created >= planInfo.limits.max_total_maps_created
                             ? '#ef4444'
@@ -578,37 +576,37 @@ const Sidebar = ({
                             ? '#f59e0b'
                             : '#8b5cf6'
                         }
-                        strokeWidth="4"
+                        strokeWidth="3"
                         fill="none"
                         strokeLinecap="round"
-                        strokeDasharray={`${(planInfo.usage.total_maps_created / planInfo.limits.max_total_maps_created) * 150.8} 150.8`}
+                        strokeDasharray={`${(planInfo.usage.total_maps_created / planInfo.limits.max_total_maps_created) * 100.5} 100.5`}
                         className="transition-all duration-500"
                       />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-sm font-bold text-gray-800">
+                      <span className="text-[10px] font-bold text-gray-800">
                         {planInfo.usage.total_maps_created}/{planInfo.limits.max_total_maps_created}
                       </span>
                     </div>
                   </div>
-                  <span className="text-[10px] text-gray-500 mt-1">Creados</span>
+                  <span className="text-[9px] text-gray-500">Creados</span>
                 </div>
               </div>
 
-              {/* Mensajes de límite */}
+              {/* Mensajes de límite - más compactos */}
               {!planInfo.usage.can_create_map ? (
-                <p className="text-xs text-red-600 font-medium bg-red-50 p-2 rounded-lg text-center">
+                <p className="text-[10px] text-red-600 font-medium bg-red-50 px-2 py-1 rounded text-center">
                   ⚠️ Límite alcanzado
                 </p>
               ) : planInfo.usage.active_remaining <= 1 || planInfo.usage.total_remaining <= 1 ? (
-                <p className="text-xs text-amber-600 bg-amber-50 p-2 rounded-lg text-center">
+                <p className="text-[10px] text-amber-600 bg-amber-50 px-2 py-1 rounded text-center">
                   💡 Pocos mapas disponibles
                 </p>
               ) : null}
 
-              {/* Botón de upgrade */}
-              <button className="w-full py-2 px-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all shadow-sm hover:shadow-md">
-                <Zap className="w-3.5 h-3.5" />
+              {/* Botón de upgrade - más compacto */}
+              <button className="w-full py-1.5 px-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-[10px] font-semibold rounded flex items-center justify-center gap-1 transition-all shadow-sm hover:shadow-md">
+                <Zap className="w-3 h-3" />
                 Actualizar a Pro
               </button>
             </div>

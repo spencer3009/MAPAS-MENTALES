@@ -1745,6 +1745,325 @@ async def get_status_checks():
     
     return status_checks
 
+
+# ==========================================
+# ADMIN ENDPOINTS
+# ==========================================
+
+# Models for Admin
+class UserListItem(BaseModel):
+    username: str
+    email: str
+    full_name: str
+    role: str
+    auth_provider: Optional[str] = "local"
+    created_at: Optional[str] = None
+    is_pro: bool = False
+
+class UserUpdate(BaseModel):
+    email: Optional[str] = None
+    full_name: Optional[str] = None
+    role: Optional[str] = None
+    is_pro: Optional[bool] = None
+    disabled: Optional[bool] = None
+
+class LandingContentSection(BaseModel):
+    title: Optional[str] = None
+    subtitle: Optional[str] = None
+    cta_primary: Optional[str] = None
+    cta_secondary: Optional[str] = None
+    button_text: Optional[str] = None
+
+class LandingContentUpdate(BaseModel):
+    hero: Optional[LandingContentSection] = None
+    platform: Optional[LandingContentSection] = None
+    benefits: Optional[LandingContentSection] = None
+    how_it_works: Optional[LandingContentSection] = None
+    pricing: Optional[LandingContentSection] = None
+    faq: Optional[LandingContentSection] = None
+    final_cta: Optional[LandingContentSection] = None
+
+class AdminMetrics(BaseModel):
+    total_users: int
+    new_users_7_days: int
+    new_users_30_days: int
+    pro_users: int
+    total_projects: int
+
+# Admin middleware - verify user is admin
+async def require_admin(current_user: dict = Depends(get_current_user)):
+    """Verificar que el usuario actual es administrador"""
+    user = await db.users.find_one({"username": current_user["username"]}, {"_id": 0})
+    if not user or user.get("role") != "admin":
+        raise HTTPException(
+            status_code=403,
+            detail="Acceso denegado. Se requieren permisos de administrador."
+        )
+    return current_user
+
+@api_router.get("/admin/metrics", response_model=AdminMetrics)
+async def get_admin_metrics(current_user: dict = Depends(require_admin)):
+    """Obtener métricas del dashboard de administración"""
+    now = datetime.now(timezone.utc)
+    seven_days_ago = (now - timedelta(days=7)).isoformat()
+    thirty_days_ago = (now - timedelta(days=30)).isoformat()
+    
+    # Total usuarios
+    total_users = await db.users.count_documents({})
+    
+    # Usuarios nuevos últimos 7 días
+    new_users_7 = await db.users.count_documents({
+        "created_at": {"$gte": seven_days_ago}
+    })
+    
+    # Usuarios nuevos últimos 30 días
+    new_users_30 = await db.users.count_documents({
+        "created_at": {"$gte": thirty_days_ago}
+    })
+    
+    # Usuarios Pro (membresía pagada)
+    pro_users = await db.users.count_documents({"is_pro": True})
+    
+    # Total de proyectos
+    total_projects = await db.projects.count_documents({"isDeleted": {"$ne": True}})
+    
+    return {
+        "total_users": total_users,
+        "new_users_7_days": new_users_7,
+        "new_users_30_days": new_users_30,
+        "pro_users": pro_users,
+        "total_projects": total_projects
+    }
+
+@api_router.get("/admin/users", response_model=List[UserListItem])
+async def get_all_users(current_user: dict = Depends(require_admin)):
+    """Obtener lista de todos los usuarios"""
+    users = await db.users.find({}, {"_id": 0}).to_list(1000)
+    
+    result = []
+    for user in users:
+        result.append({
+            "username": user.get("username", ""),
+            "email": user.get("email", ""),
+            "full_name": user.get("full_name", ""),
+            "role": user.get("role", "user"),
+            "auth_provider": user.get("auth_provider", "local"),
+            "created_at": user.get("created_at"),
+            "is_pro": user.get("is_pro", False)
+        })
+    
+    return result
+
+@api_router.get("/admin/users/{username}")
+async def get_user_details(username: str, current_user: dict = Depends(require_admin)):
+    """Obtener detalles de un usuario específico"""
+    user = await db.users.find_one({"username": username}, {"_id": 0, "hashed_password": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    # Obtener perfil adicional
+    profile = await db.user_profiles.find_one({"username": username}, {"_id": 0})
+    
+    # Contar proyectos del usuario
+    projects_count = await db.projects.count_documents({
+        "username": username,
+        "isDeleted": {"$ne": True}
+    })
+    
+    return {
+        **user,
+        "profile": profile,
+        "projects_count": projects_count
+    }
+
+@api_router.put("/admin/users/{username}")
+async def update_user(
+    username: str, 
+    user_data: UserUpdate, 
+    current_user: dict = Depends(require_admin)
+):
+    """Actualizar datos de un usuario"""
+    existing_user = await db.users.find_one({"username": username})
+    if not existing_user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    # Preparar datos a actualizar
+    update_data = {"updated_at": datetime.now(timezone.utc).isoformat()}
+    
+    if user_data.email is not None:
+        # Verificar que el email no esté en uso por otro usuario
+        email_exists = await db.users.find_one({
+            "email": user_data.email,
+            "username": {"$ne": username}
+        })
+        if email_exists:
+            raise HTTPException(status_code=400, detail="Este email ya está en uso")
+        update_data["email"] = user_data.email
+    
+    if user_data.full_name is not None:
+        update_data["full_name"] = user_data.full_name
+    
+    if user_data.role is not None:
+        # Solo el admin puede cambiar roles
+        if user_data.role not in ["user", "admin"]:
+            raise HTTPException(status_code=400, detail="Rol inválido")
+        update_data["role"] = user_data.role
+    
+    if user_data.is_pro is not None:
+        update_data["is_pro"] = user_data.is_pro
+    
+    if user_data.disabled is not None:
+        update_data["disabled"] = user_data.disabled
+    
+    await db.users.update_one({"username": username}, {"$set": update_data})
+    
+    # También actualizar el perfil si existe
+    if user_data.email is not None:
+        await db.user_profiles.update_one(
+            {"username": username},
+            {"$set": {"email": user_data.email, "updated_at": update_data["updated_at"]}}
+        )
+    
+    logger.info(f"Admin {current_user['username']} actualizó usuario {username}")
+    
+    return {"message": "Usuario actualizado correctamente"}
+
+@api_router.get("/admin/landing-content")
+async def get_landing_content(current_user: dict = Depends(require_admin)):
+    """Obtener contenido editable de la landing page"""
+    content = await db.landing_content.find_one({"id": "main"}, {"_id": 0})
+    if not content:
+        # Crear contenido por defecto si no existe
+        content = {
+            "id": "main",
+            "hero": {
+                "title": "Convierte el caos en claridad",
+                "subtitle": "Organiza tus ideas, proyectos y metas con mapas mentales intuitivos.",
+                "cta_primary": "Empezar gratis",
+                "cta_secondary": "Ver demo"
+            },
+            "platform": {
+                "title": "Una plataforma diseñada para potenciar tu productividad",
+                "subtitle": "Descubre todas las herramientas que MindoraMap pone a tu disposición"
+            },
+            "benefits": {
+                "title": "Beneficios que transformarán tu forma de trabajar",
+                "subtitle": "Descubre por qué miles de profesionales eligen MindoraMap"
+            },
+            "how_it_works": {
+                "title": "¿Cómo funciona?",
+                "subtitle": "Comienza a organizar tus ideas en 4 simples pasos"
+            },
+            "pricing": {
+                "title": "Planes y Precios",
+                "subtitle": "Elige el plan que mejor se adapte a tus necesidades"
+            },
+            "faq": {
+                "title": "Preguntas Frecuentes",
+                "subtitle": "Resolvemos tus dudas"
+            },
+            "final_cta": {
+                "title": "¿Listo para transformar tu manera de pensar?",
+                "subtitle": "Únete a miles de profesionales que ya organizan sus ideas con MindoraMap",
+                "button_text": "Comenzar gratis ahora"
+            },
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": "system"
+        }
+        await db.landing_content.insert_one(content)
+    
+    return content
+
+@api_router.put("/admin/landing-content")
+async def update_landing_content(
+    content_data: LandingContentUpdate,
+    current_user: dict = Depends(require_admin)
+):
+    """Actualizar contenido de la landing page"""
+    update_data = {
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "updated_by": current_user["username"]
+    }
+    
+    # Solo actualizar las secciones que se enviaron
+    if content_data.hero:
+        for key, value in content_data.hero.model_dump(exclude_none=True).items():
+            update_data[f"hero.{key}"] = value
+    
+    if content_data.platform:
+        for key, value in content_data.platform.model_dump(exclude_none=True).items():
+            update_data[f"platform.{key}"] = value
+    
+    if content_data.benefits:
+        for key, value in content_data.benefits.model_dump(exclude_none=True).items():
+            update_data[f"benefits.{key}"] = value
+    
+    if content_data.how_it_works:
+        for key, value in content_data.how_it_works.model_dump(exclude_none=True).items():
+            update_data[f"how_it_works.{key}"] = value
+    
+    if content_data.pricing:
+        for key, value in content_data.pricing.model_dump(exclude_none=True).items():
+            update_data[f"pricing.{key}"] = value
+    
+    if content_data.faq:
+        for key, value in content_data.faq.model_dump(exclude_none=True).items():
+            update_data[f"faq.{key}"] = value
+    
+    if content_data.final_cta:
+        for key, value in content_data.final_cta.model_dump(exclude_none=True).items():
+            update_data[f"final_cta.{key}"] = value
+    
+    await db.landing_content.update_one(
+        {"id": "main"},
+        {"$set": update_data}
+    )
+    
+    logger.info(f"Admin {current_user['username']} actualizó contenido de landing page")
+    
+    return {"message": "Contenido actualizado correctamente"}
+
+# Endpoint público para obtener contenido de landing (sin autenticación)
+@api_router.get("/landing-content")
+async def get_public_landing_content():
+    """Obtener contenido de la landing page (público)"""
+    content = await db.landing_content.find_one({"id": "main"}, {"_id": 0})
+    if not content:
+        return {
+            "hero": {
+                "title": "Convierte el caos en claridad",
+                "subtitle": "Organiza tus ideas, proyectos y metas con mapas mentales intuitivos.",
+                "cta_primary": "Empezar gratis",
+                "cta_secondary": "Ver demo"
+            },
+            "platform": {
+                "title": "Una plataforma diseñada para potenciar tu productividad",
+                "subtitle": "Descubre todas las herramientas que MindoraMap pone a tu disposición"
+            },
+            "benefits": {
+                "title": "Beneficios que transformarán tu forma de trabajar",
+                "subtitle": "Descubre por qué miles de profesionales eligen MindoraMap"
+            },
+            "how_it_works": {
+                "title": "¿Cómo funciona?",
+                "subtitle": "Comienza a organizar tus ideas en 4 simples pasos"
+            },
+            "pricing": {
+                "title": "Planes y Precios",
+                "subtitle": "Elige el plan que mejor se adapte a tus necesidades"
+            },
+            "faq": {
+                "title": "Preguntas Frecuentes",
+                "subtitle": "Resolvemos tus dudas"
+            },
+            "final_cta": {
+                "title": "¿Listo para transformar tu manera de pensar?",
+                "subtitle": "Únete a miles de profesionales que ya organizan sus ideas con MindoraMap",
+                "button_text": "Comenzar gratis ahora"
+            }
+        }
+    return content
+
 # Include the router in the main app
 app.include_router(api_router)
 

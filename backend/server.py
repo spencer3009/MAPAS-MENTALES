@@ -2103,61 +2103,13 @@ async def update_landing_section(
     logger.info(f"Admin {current_user['username']} actualizó sección {section}")
     
     return {"message": f"Sección {section} actualizada correctamente"}
-        "updated_at": datetime.now(timezone.utc).isoformat(),
-        "updated_by": current_user["username"]
-    }
-    
-    # Solo actualizar las secciones que se enviaron
-    if content_data.hero:
-        for key, value in content_data.hero.model_dump(exclude_none=True).items():
-            update_data[f"hero.{key}"] = value
-    
-    if content_data.platform:
-        for key, value in content_data.platform.model_dump(exclude_none=True).items():
-            update_data[f"platform.{key}"] = value
-    
-    if content_data.benefits:
-        for key, value in content_data.benefits.model_dump(exclude_none=True).items():
-            update_data[f"benefits.{key}"] = value
-    
-    if content_data.how_it_works:
-        for key, value in content_data.how_it_works.model_dump(exclude_none=True).items():
-            update_data[f"how_it_works.{key}"] = value
-    
-    if content_data.pricing:
-        for key, value in content_data.pricing.model_dump(exclude_none=True).items():
-            update_data[f"pricing.{key}"] = value
-    
-    if content_data.faq:
-        for key, value in content_data.faq.model_dump(exclude_none=True).items():
-            update_data[f"faq.{key}"] = value
-    
-    if content_data.final_cta:
-        for key, value in content_data.final_cta.model_dump(exclude_none=True).items():
-            update_data[f"final_cta.{key}"] = value
-    
-    await db.landing_content.update_one(
-        {"id": "main"},
-        {"$set": update_data}
-    )
-    
-    logger.info(f"Admin {current_user['username']} actualizó contenido de landing page")
-    
-    return {"message": "Contenido actualizado correctamente"}
 
 # Endpoint público para obtener contenido de landing (sin autenticación)
 @api_router.get("/landing-content")
 async def get_public_landing_content():
     """Obtener contenido de la landing page (público)"""
     content = await db.landing_content.find_one({"id": "main"}, {"_id": 0})
-    if not content:
-        return {
-            "hero": {
-                "title": "Convierte el caos en claridad",
-                "subtitle": "Organiza tus ideas, proyectos y metas con mapas mentales intuitivos.",
-                "cta_primary": "Empezar gratis",
-                "cta_secondary": "Ver demo"
-            },
+    return content or {}
             "platform": {
                 "title": "Una plataforma diseñada para potenciar tu productividad",
                 "subtitle": "Descubre todas las herramientas que MindoraMap pone a tu disposición"

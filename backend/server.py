@@ -108,16 +108,9 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 async def get_user(username: str) -> Optional[dict]:
-    # Primero buscar en HARDCODED_USERS
-    if username in HARDCODED_USERS:
-        return HARDCODED_USERS[username]
-    
-    # Luego buscar en la base de datos
-    db_user = await db.users.find_one({"username": username}, {"_id": 0})
-    if db_user:
-        return db_user
-    
-    return None
+    """Busca un usuario en la base de datos por username"""
+    user = await db.users.find_one({"username": username}, {"_id": 0})
+    return user
 
 async def authenticate_user(username: str, password: str) -> Optional[dict]:
     user = await get_user(username)

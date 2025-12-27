@@ -198,6 +198,15 @@ const Sidebar = ({
       w-72 bg-white border-r border-gray-200
       flex flex-col p-5 shadow-sm z-20 shrink-0 h-full
     ">
+      {/* Logo MindoraMap */}
+      <div className="flex items-center justify-center py-2 mb-4 border-b border-gray-100">
+        <img 
+          src={LOGO_URL} 
+          alt="MindoraMap" 
+          className="h-12 w-auto object-contain"
+        />
+      </div>
+
       {/* Botón de nuevo proyecto */}
       <button
         onClick={onNewBlank}

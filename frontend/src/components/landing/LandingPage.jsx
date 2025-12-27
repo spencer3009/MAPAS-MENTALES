@@ -104,12 +104,12 @@ const EditableText = ({ value, onChange, onSave, isAdmin, className, as: Tag = '
 const featureIcons = [Brain, Zap, Layers, Download, GitBranch, MousePointer];
 const benefitIcons = [Lightbulb, Clock, Palette, Users, Target, Brain];
 
-const LandingPage = ({ onLogin, onRegister }) => {
+const LandingPage = ({ onLogin, onRegister, onBackToApp, isEditMode = false }) => {
   const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(isEditMode);
   const [token, setToken] = useState(null);
 
   // Cargar contenido desde la BD

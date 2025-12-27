@@ -137,6 +137,7 @@ export const AuthProvider = ({ children }) => {
     error,
     isAuthenticated: !!user && !!token,
     login,
+    register,
     logout,
     clearError: () => setError(null)
   };

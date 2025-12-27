@@ -1284,7 +1284,7 @@ async def empty_trash(
     # Obtener todos los proyectos en papelera del usuario
     trash_projects = await db.projects.find({
         "username": username,
-        "is_deleted": True
+        "isDeleted": True
     }).to_list(1000)
     
     if not trash_projects:
@@ -1293,7 +1293,7 @@ async def empty_trash(
     # Eliminar todos los proyectos de la papelera
     result = await db.projects.delete_many({
         "username": username,
-        "is_deleted": True
+        "isDeleted": True
     })
     
     logger.info(f"Papelera vaciada: {result.deleted_count} proyectos eliminados permanentemente por {username}")

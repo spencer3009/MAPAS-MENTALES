@@ -36,10 +36,11 @@ export const AuthProvider = ({ children }) => {
       
       if (response.ok) {
         const userData = await response.json();
-        // Actualizar usuario con datos completos incluyendo rol
+        // Actualizar usuario con datos completos incluyendo rol y plan
         const updatedUser = {
           ...userData,
           role: userData.role || 'user',
+          plan: userData.plan || 'free',
           is_pro: userData.is_pro || false
         };
         setUser(updatedUser);

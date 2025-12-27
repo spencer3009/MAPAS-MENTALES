@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Backend API Testing for MindoraMap Recycle Bin (Papelera) System
-Testing comprehensive trash functionality including soft delete, restore, and permanent delete
+Backend API Testing for MindoraMap Collision Detection Feature
+Testing MindHybrid layout support and node positioning APIs that enable collision detection
 """
 
 import requests

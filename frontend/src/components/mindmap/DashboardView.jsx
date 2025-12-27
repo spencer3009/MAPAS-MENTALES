@@ -113,7 +113,7 @@ const TEMPLATES = [
   }
 ];
 
-const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOpenTemplates }) => {
+const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOpenTemplates, onToggleFavorite }) => {
   const [planInfo, setPlanInfo] = useState(null);
   const [loadingPlan, setLoadingPlan] = useState(true);
   const [hoveredTemplate, setHoveredTemplate] = useState(null);

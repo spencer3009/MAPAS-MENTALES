@@ -1911,6 +1911,7 @@ export const useNodes = () => {
     const parentWidth = parent.width || 160;
     const parentHeight = parent.height || 64;
     const childWidth = 160; // Ancho estándar de nodos hijos
+    const childHeight = 64; // Alto estándar de nodos hijos
     
     // Separar hijos por dirección
     const horizontalChildren = updatedNodes.filter(n => 
@@ -1932,11 +1933,16 @@ export const useNodes = () => {
     const parentCenterY = parent.y + (parentHeight / 2);
     
     // Posicionar hijos horizontales (a la derecha, apilados verticalmente)
-    // Centrados verticalmente respecto al padre
+    // El PRIMER hijo debe estar centrado verticalmente con el padre
+    // Los siguientes se apilan hacia abajo
     horizontalChildren.forEach((child, index) => {
       const newX = parent.x + parentWidth + horizontalGap;
-      const totalHeightH = (horizontalChildren.length - 1) * siblingSpacingH;
-      const newY = parentCenterY - (totalHeightH / 2) + (index * siblingSpacingH) - (childWidth / 4);
+      // Para el primer hijo: su centro Y debe coincidir con el centro Y del padre
+      // childY + childHeight/2 = parentCenterY
+      // childY = parentCenterY - childHeight/2
+      // Los siguientes se apilan con siblingSpacingH
+      const baseY = parentCenterY - (childHeight / 2);
+      const newY = baseY + (index * siblingSpacingH);
       
       updatedNodes = updatedNodes.map(n => 
         n.id === child.id ? { ...n, x: newX, y: newY } : n

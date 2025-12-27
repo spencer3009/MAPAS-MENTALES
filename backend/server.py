@@ -586,8 +586,8 @@ async def change_password(
             detail="La contraseña debe tener al menos 6 caracteres"
         )
     
-    # Verificar contraseña actual
-    user = HARDCODED_USERS.get(username)
+    # Verificar contraseña actual desde la base de datos
+    user = await db.users.find_one({"username": username}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     
@@ -600,20 +600,16 @@ async def change_password(
     # Hashear nueva contraseña
     new_hashed = pwd_context.hash(password_data.new_password)
     
-    # Guardar en MongoDB (para persistencia futura)
-    await db.user_passwords.update_one(
+    # Actualizar en la base de datos
+    await db.users.update_one(
         {"username": username},
         {
             "$set": {
                 "hashed_password": new_hashed,
                 "updated_at": datetime.now(timezone.utc).isoformat()
             }
-        },
-        upsert=True
+        }
     )
-    
-    # Actualizar en memoria (para sesión actual)
-    HARDCODED_USERS[username]["hashed_password"] = new_hashed
     
     logger.info(f"Contraseña cambiada para {username}")
     return {"message": "Contraseña actualizada correctamente"}

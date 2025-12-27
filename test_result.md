@@ -698,7 +698,7 @@ The **NEW Node Type Selection Feature** is **completely functional** and exceeds
 ### Test Credentials:
 - Username: spencer3009
 - Password: Socios3009
-- URL: https://softdelete-canvas.preview.emergentagent.com
+- URL: https://mindflow-89.preview.emergentagent.com
 
 ### ✅ TESTING RESULTS:
 
@@ -755,7 +755,7 @@ Verify the user's reported critical bug where MindHybrid nodes shift/move to the
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- URL: https://softdelete-canvas.preview.emergentagent.com
+- URL: https://mindflow-89.preview.emergentagent.com
 
 ### ✅ TESTING RESULTS - BUG NOT REPRODUCED:
 
@@ -880,7 +880,7 @@ Verify the user's reported critical bug where MindHybrid nodes should redistribu
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- URL: https://softdelete-canvas.preview.emergentagent.com
+- URL: https://mindflow-89.preview.emergentagent.com
 
 ### ❌ TESTING RESULTS - CRITICAL SESSION MANAGEMENT ISSUES:
 
@@ -1027,7 +1027,7 @@ Verify the user's reported critical bug where MindHybrid parent nodes should exp
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- URL: https://softdelete-canvas.preview.emergentagent.com
+- URL: https://mindflow-89.preview.emergentagent.com
 
 ### ❌ TESTING RESULTS - CRITICAL SESSION MANAGEMENT ISSUES PREVENT VERIFICATION:
 
@@ -1160,7 +1160,7 @@ Verify the user's reported critical bug where MindHybrid parent nodes should exp
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- URL: https://softdelete-canvas.preview.emergentagent.com
+- URL: https://mindflow-89.preview.emergentagent.com
 
 ### ❌ TESTING RESULTS - CRITICAL SESSION MANAGEMENT ISSUES PREVENT VERIFICATION:
 
@@ -1628,7 +1628,7 @@ The MindHybrid Layout Complete Feature Set is **PRODUCTION-READY** and **EXCEEDS
 ### Testing Credentials:
 - Username: spencer3009
 - Password: Socios3009
-- URL: https://softdelete-canvas.preview.emergentagent.com
+- URL: https://mindflow-89.preview.emergentagent.com
 
 ### ✅ TESTING RESULTS - COMPREHENSIVE SUCCESS:
 
@@ -1780,7 +1780,7 @@ Verify the new "Mark as Completed" (Strikethrough) feature in the Node Toolbar:
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- URL: https://softdelete-canvas.preview.emergentagent.com
+- URL: https://mindflow-89.preview.emergentagent.com
 
 ### ✅ CODE IMPLEMENTATION ANALYSIS - EXCELLENT:
 
@@ -1925,7 +1925,7 @@ Verify the new Dock Sidebar feature for the MindoraMap application including:
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- URL: https://softdelete-canvas.preview.emergentagent.com
+- URL: https://mindflow-89.preview.emergentagent.com
 
 ### ✅ TESTING RESULTS - COMPREHENSIVE SUCCESS:
 
@@ -2091,7 +2091,7 @@ Verify the complete Recycle Bin (Papelera) system for the MindoraMap application
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- Base URL: https://softdelete-canvas.preview.emergentagent.com/api
+- Base URL: https://mindflow-89.preview.emergentagent.com/api
 
 ### ✅ TESTING RESULTS - 100% SUCCESS RATE:
 
@@ -2235,7 +2235,7 @@ Verify the complete Recycle Bin (Papelera) frontend UI for the MindoraMap applic
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- URL: https://softdelete-canvas.preview.emergentagent.com
+- URL: https://mindflow-89.preview.emergentagent.com
 
 ### ✅ TESTING RESULTS - 100% SUCCESS RATE:
 
@@ -3322,7 +3322,7 @@ Verify the new layout template system works correctly:
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- URL: https://softdelete-canvas.preview.emergentagent.com
+- URL: https://mindflow-89.preview.emergentagent.com
 
 ### ✅ TESTING RESULTS - COMPREHENSIVE SUCCESS:
 
@@ -3489,7 +3489,7 @@ Verify the complete Recycle Bin (Papelera) feature implementation:
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- URL: https://softdelete-canvas.preview.emergentagent.com
+- URL: https://mindflow-89.preview.emergentagent.com
 
 ### 📋 TEST SCENARIOS:
 
@@ -3529,7 +3529,7 @@ Test the collision detection feature when adding vertical nodes in MindHybrid pr
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- Base URL: https://softdelete-canvas.preview.emergentagent.com/api
+- Base URL: https://mindflow-89.preview.emergentagent.com/api
 
 ### ✅ BACKEND TESTING RESULTS - COMPREHENSIVE SUCCESS:
 

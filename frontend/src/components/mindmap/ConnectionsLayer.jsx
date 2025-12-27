@@ -106,18 +106,30 @@ const ConnectionsLayer = memo(({
           end = getNodeInputPointOrgChart(node, nodeWidth);
           path = generateOrgChartPath(start.x, start.y, end.x, end.y);
         } else {
-          // Hijo horizontal: LÍNEA COMPLETAMENTE RECTA Y HORIZONTAL
+          // Hijo horizontal: CONECTOR ORTOGONAL (sin inclinaciones)
           // Sale del centro derecho del padre, entra al centro izquierdo del hijo
           const startX = parent.x + parentWidth;
           const startY = parent.y + parentHeight / 2;
           const endX = node.x;
-          // IMPORTANTE: Usar la misma Y del padre para mantener la línea perfectamente horizontal
-          // El nodo hijo puede estar a diferente altura pero el conector siempre es horizontal
-          const horizontalY = startY;
-          start = { x: startX, y: horizontalY };
-          end = { x: endX, y: horizontalY };
-          // Línea perfectamente horizontal
-          path = `M ${startX} ${horizontalY} L ${endX} ${horizontalY}`;
+          const endY = node.y + nodeHeight / 2;
+          
+          start = { x: startX, y: startY };
+          end = { x: endX, y: endY };
+          
+          // Si los nodos están a la misma altura (tolerancia de 5px) → línea recta horizontal
+          if (Math.abs(startY - endY) < 5) {
+            path = `M ${startX} ${startY} L ${endX} ${endY}`;
+          } else {
+            // Si hay diferencia de altura → conector tipo codo: ➡️ ⬇️ ➡️
+            // 1. Horizontal hasta la mitad del espacio
+            // 2. Vertical hasta la altura del hijo
+            // 3. Horizontal hasta el hijo
+            const midX = startX + (endX - startX) / 2;
+            path = `M ${startX} ${startY} ` +      // Inicio
+                   `L ${midX} ${startY} ` +        // 1️⃣ Horizontal hasta el punto medio
+                   `L ${midX} ${endY} ` +          // 2️⃣ Vertical hasta la altura del hijo
+                   `L ${endX} ${endY}`;            // 3️⃣ Horizontal hasta el hijo
+          }
         }
       } else if (layoutType === 'mindtree') {
         // MindTree (Organigrama): conectores verticales tipo org chart

@@ -531,21 +531,26 @@ const UsersSection = ({ users, loading, onEditUser, token }) => {
                   <td className="px-6 py-4">
                     {editingUser === user.username ? (
                       <select
-                        value={editForm.is_pro ? 'pro' : 'free'}
-                        onChange={(e) => setEditForm({...editForm, is_pro: e.target.value === 'pro'})}
+                        value={editForm.plan || 'free'}
+                        onChange={(e) => setEditForm({...editForm, plan: e.target.value})}
                         className="px-3 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="free">Gratis</option>
                         <option value="pro">Pro</option>
+                        <option value="team">Team</option>
                       </select>
                     ) : (
                       <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
-                        user.is_pro 
+                        user.plan === 'team' 
+                          ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700'
+                          : user.plan === 'pro' || user.is_pro
                           ? 'bg-gradient-to-r from-amber-100 to-orange-100 text-amber-700' 
+                          : user.role === 'admin'
+                          ? 'bg-gradient-to-r from-red-100 to-pink-100 text-red-700'
                           : 'bg-gray-100 text-gray-700'
                       }`}>
-                        {user.is_pro && <Crown className="w-3 h-3" />}
-                        {user.is_pro ? 'Pro' : 'Gratis'}
+                        {(user.plan === 'pro' || user.plan === 'team' || user.role === 'admin') && <Crown className="w-3 h-3" />}
+                        {user.role === 'admin' ? 'Admin' : user.plan === 'team' ? 'Team' : user.plan === 'pro' ? 'Pro' : 'Gratis'}
                       </span>
                     )}
                   </td>

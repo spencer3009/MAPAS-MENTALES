@@ -327,7 +327,7 @@ const LandingPage = ({ onLogin, onRegister }) => {
       </header>
 
       {/* ==================== HERO SECTION ==================== */}
-      <section id="inicio" className="relative pt-24 lg:pt-32 pb-20 lg:pb-32 overflow-hidden">
+      <section id="inicio" className="relative pt-32 lg:pt-40 pb-20 lg:pb-32 overflow-hidden">
         {/* Background decorations */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50/50 to-purple-50" />
         <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400/20 rounded-full blur-3xl" />

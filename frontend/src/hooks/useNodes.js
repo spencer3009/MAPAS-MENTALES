@@ -1787,8 +1787,10 @@ export const useNodes = () => {
         const nodeCenterY = node.y + pHeight / 2;
         
         // === HIJOS HORIZONTALES ===
+        // NOTA: Incluimos TODOS los hijos horizontales, incluyendo los creados desde conectores
+        // porque sus propios hijos también necesitan ser alineados
         const hChildren = aligned.filter(n => 
-          n.parentId === nodeId && n.childDirection === 'horizontal' && !n.connectorParentId
+          n.parentId === nodeId && n.childDirection === 'horizontal'
         ).sort((a, b) => a.y - b.y);
         
         if (hChildren.length > 0) {
@@ -1807,21 +1809,30 @@ export const useNodes = () => {
               currentY += spacing;
             }
             
-            aligned = aligned.map(n => 
-              n.id === data.id ? { ...n, x: node.x + pWidth + hGap, y: currentY } : n
-            );
+            // Solo reposicionar si NO es un nodo de conector (esos mantienen su posición especial)
+            const childNode = aligned.find(n => n.id === data.id);
+            if (childNode && !childNode.connectorParentId) {
+              aligned = aligned.map(n => 
+                n.id === data.id ? { ...n, x: node.x + pWidth + hGap, y: currentY } : n
+              );
+            }
           });
           
-          // Recursivamente alinear subárboles horizontales
+          // Recursivamente alinear subárboles de TODOS los hijos horizontales
           hChildren.forEach(child => {
             aligned = alignFromRoot(child.id, aligned);
           });
         }
         
         // === HIJOS VERTICALES ===
+        // Incluir TODOS los hijos verticales para procesarlos recursivamente
         const vChildren = aligned.filter(n => 
-          n.parentId === nodeId && n.childDirection === 'vertical' && !n.connectorParentId
+          n.parentId === nodeId && n.childDirection === 'vertical'
         ).sort((a, b) => a.x - b.x);
+        
+        // Separar en dos grupos: normales y de conectores
+        const normalVChildren = vChildren.filter(n => !n.connectorParentId);
+        const connectorVChildren = vChildren.filter(n => n.connectorParentId);
         
         if (vChildren.length > 0) {
           const childY = node.y + pHeight + vGap;

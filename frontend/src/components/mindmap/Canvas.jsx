@@ -451,7 +451,7 @@ const Canvas = ({
     }
     setDragging(null);
     onStopPanning();
-  }, [dragging, isSelectingArea, selectionBox, pan, zoom, onStopPanning, onSaveNodePositionToHistory, onSelectNodesInArea, autoAlignEnabled, onAutoAlign]);
+  }, [dragging, isSelectingArea, selectionBox, pan, zoom, onStopPanning, onSaveNodePositionToHistory, onSelectNodesInArea]);
 
   // Manejar click en el canvas (para panning o selección por área)
   const handleCanvasMouseDown = useCallback((e) => {

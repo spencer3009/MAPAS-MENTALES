@@ -2720,7 +2720,16 @@ export const useNodes = () => {
         updatedAt: new Date().toISOString()
       };
 
-      // Inicializar historial para el nuevo proyecto
+      // Intentar guardar en servidor PRIMERO
+      const result = await saveProjectToServer(newProject);
+      
+      if (!result.success) {
+        console.error('Servidor rechazó la creación desde template:', result.error);
+        alert(result.error || 'No se pudo crear el mapa. Verifica los límites de tu plan.');
+        return false;
+      }
+
+      // Solo si el servidor aceptó, actualizar estado local
       historyRef.current[newProject.id] = {
         states: [JSON.stringify(mappedNodes)],
         pointer: 0
@@ -2730,9 +2739,6 @@ export const useNodes = () => {
       setActiveProjectId(newProject.id);
       setSelectedNodeId(null);
       setHistoryVersion(v => v + 1);
-      
-      // Guardar en servidor inmediatamente
-      await saveProjectToServer(newProject);
       
       console.log('Proyecto desde template creado:', newProject.name);
       return true;

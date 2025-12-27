@@ -1765,6 +1765,7 @@ class UserListItem(BaseModel):
     auth_provider: Optional[str] = "local"
     created_at: Optional[str] = None
     is_pro: bool = False
+    disabled: bool = False
 
 class UserUpdate(BaseModel):
     email: Optional[str] = None

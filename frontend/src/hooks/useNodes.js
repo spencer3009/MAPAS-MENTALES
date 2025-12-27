@@ -2143,14 +2143,19 @@ export const useNodes = () => {
     const parentCenterX = parent.x + (parentWidth / 2);
     const parentCenterY = parent.y + (parentHeight / 2);
     
-    // Separar hijos por dirección
-    const horizontalChildren = updatedNodes.filter(n => 
-      n.parentId === parentId && n.childDirection === 'horizontal' && !n.connectorParentId
+    // Separar hijos por dirección - INCLUIR TODOS para procesamiento recursivo
+    const allHorizontalChildren = updatedNodes.filter(n => 
+      n.parentId === parentId && n.childDirection === 'horizontal'
     ).sort((a, b) => a.y - b.y);
     
-    const verticalChildren = updatedNodes.filter(n => 
-      n.parentId === parentId && n.childDirection === 'vertical' && !n.connectorParentId
+    const allVerticalChildren = updatedNodes.filter(n => 
+      n.parentId === parentId && n.childDirection === 'vertical'
     ).sort((a, b) => a.x - b.x);
+    
+    // Separar en normales y de conectores
+    const horizontalChildren = allHorizontalChildren.filter(n => !n.connectorParentId);
+    const verticalChildren = allVerticalChildren.filter(n => !n.connectorParentId);
+    const connectorChildren = allVerticalChildren.filter(n => n.connectorParentId);
     
     // =====================================================
     // HIJOS HORIZONTALES - CON ESPACIO PARA SUS SUBÁRBOLES
@@ -2185,12 +2190,12 @@ export const useNodes = () => {
           n.id === data.id ? { ...n, x: newX, y: currentY } : n
         );
       });
-      
-      // TERCERO: Recursivamente alinear subárboles de hijos horizontales
-      horizontalChildren.forEach((child) => {
-        updatedNodes = autoAlignMindHybrid(child.id, updatedNodes, false);
-      });
     }
+    
+    // Recursivamente alinear TODOS los subárboles horizontales (incluyendo de conectores)
+    allHorizontalChildren.forEach((child) => {
+      updatedNodes = autoAlignMindHybrid(child.id, updatedNodes, false);
+    });
     
     // =====================================================
     // HIJOS VERTICALES - CON EXPANSIÓN BASADA EN SUBÁRBOLES

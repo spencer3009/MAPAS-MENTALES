@@ -483,14 +483,17 @@ const MindMapApp = ({ onAdminClick }) => {
   }, []);
 
   // Handler para confirmar "En Blanco" - DEPRECATED, usar handleConfirmProjectName
-  const handleConfirmBlank = useCallback(() => {
+  const handleConfirmBlank = useCallback(async () => {
     try {
       console.log('Creando nuevo proyecto en blanco...');
-      const success = createBlankMap();
-      if (success) {
+      const result = await createBlankMap();
+      if (result.success) {
         resetPan();
         resetZoom();
         console.log('Nuevo proyecto creado exitosamente');
+      } else if (result.error) {
+        setUpgradeLimitType(result.limitType || 'active');
+        setShowUpgradeModal(true);
       }
     } catch (error) {
       console.error('Error al crear proyecto en blanco:', error);

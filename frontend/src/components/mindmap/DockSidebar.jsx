@@ -87,22 +87,21 @@ const DockSidebar = ({
         `}
       >
         {/* Logo / Brand Area */}
-        <div className="h-16 flex items-center justify-center border-b border-slate-700/50">
+        <div className="h-16 flex items-center justify-center border-b border-slate-700/50 overflow-hidden">
           <div className={`
-            flex items-center gap-3 overflow-hidden
+            flex items-center gap-2 overflow-hidden
             transition-all duration-300
-            ${isExpanded ? 'px-4' : 'px-0'}
+            ${isExpanded ? 'px-3' : 'px-0'}
           `}>
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shrink-0">
-              <span className="text-white font-bold text-sm">M</span>
-            </div>
-            <span className={`
-              text-white font-semibold text-sm whitespace-nowrap
-              transition-all duration-300
-              ${isExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0'}
-            `}>
-              MindoraMap
-            </span>
+            <img 
+              src={LOGO_URL} 
+              alt="MindoraMap" 
+              className={`
+                object-contain transition-all duration-300
+                ${isExpanded ? 'h-10' : 'h-8 w-8 rounded-lg'}
+              `}
+              style={!isExpanded ? { objectFit: 'cover', objectPosition: 'left' } : {}}
+            />
           </div>
         </div>
 

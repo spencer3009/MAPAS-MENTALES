@@ -1027,6 +1027,51 @@ async def get_projects(current_user: dict = Depends(get_current_user)):
     
     return projects
 
+
+# ==========================================
+# TRASH (PAPELERA) ENDPOINTS - ANTES de {project_id}
+# ==========================================
+
+class TrashProjectResponse(BaseModel):
+    """Respuesta para proyectos en papelera"""
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str
+    name: str
+    username: str
+    deletedAt: str
+    nodeCount: int = 0
+    layoutType: str = "mindflow"
+
+
+@api_router.get("/projects/trash", response_model=List[TrashProjectResponse])
+async def get_trash_projects(current_user: dict = Depends(get_current_user)):
+    """Obtener proyectos en la papelera"""
+    username = current_user["username"]
+    
+    projects = await db.projects.find(
+        {
+            "username": username,
+            "isDeleted": True
+        },
+        {"_id": 0}
+    ).sort("deletedAt", -1).to_list(100)
+    
+    # Formatear respuesta
+    trash_projects = []
+    for project in projects:
+        trash_projects.append({
+            "id": project["id"],
+            "name": project["name"],
+            "username": project["username"],
+            "deletedAt": project.get("deletedAt", ""),
+            "nodeCount": len(project.get("nodes", [])),
+            "layoutType": project.get("layoutType", "mindflow")
+        })
+    
+    return trash_projects
+
+
 @api_router.get("/projects/{project_id}", response_model=ProjectResponse)
 async def get_project(
     project_id: str,

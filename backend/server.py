@@ -1934,6 +1934,115 @@ async def update_user(
     
     return {"message": "Usuario actualizado correctamente"}
 
+@api_router.delete("/admin/users/{username}")
+async def delete_user(username: str, current_user: dict = Depends(require_admin)):
+    """Eliminar un usuario permanentemente"""
+    # No permitir eliminar al propio admin
+    if username == current_user["username"]:
+        raise HTTPException(
+            status_code=400,
+            detail="No puedes eliminarte a ti mismo"
+        )
+    
+    # Verificar que el usuario existe
+    existing_user = await db.users.find_one({"username": username})
+    if not existing_user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    # No permitir eliminar otros admins (solo el superadmin podría)
+    if existing_user.get("role") == "admin" and username != current_user["username"]:
+        raise HTTPException(
+            status_code=403,
+            detail="No puedes eliminar a otro administrador"
+        )
+    
+    # Eliminar usuario
+    await db.users.delete_one({"username": username})
+    
+    # Eliminar perfil del usuario
+    await db.user_profiles.delete_one({"username": username})
+    
+    # Eliminar sesiones del usuario
+    await db.user_sessions.delete_many({"user_id": existing_user.get("user_id")})
+    
+    # Opcionalmente, eliminar los proyectos del usuario (o marcarlos como huérfanos)
+    # Por ahora solo los marcamos como eliminados
+    await db.projects.update_many(
+        {"username": username},
+        {"$set": {"isDeleted": True, "deleted_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    logger.info(f"Admin {current_user['username']} eliminó usuario {username}")
+    
+    return {"message": f"Usuario {username} eliminado correctamente"}
+
+@api_router.post("/admin/users/{username}/block")
+async def block_user(username: str, current_user: dict = Depends(require_admin)):
+    """Bloquear acceso a un usuario"""
+    # No permitir bloquearse a sí mismo
+    if username == current_user["username"]:
+        raise HTTPException(
+            status_code=400,
+            detail="No puedes bloquearte a ti mismo"
+        )
+    
+    # Verificar que el usuario existe
+    existing_user = await db.users.find_one({"username": username})
+    if not existing_user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    # No permitir bloquear otros admins
+    if existing_user.get("role") == "admin":
+        raise HTTPException(
+            status_code=403,
+            detail="No puedes bloquear a un administrador"
+        )
+    
+    # Bloquear usuario
+    await db.users.update_one(
+        {"username": username},
+        {"$set": {
+            "disabled": True,
+            "blocked_at": datetime.now(timezone.utc).isoformat(),
+            "blocked_by": current_user["username"]
+        }}
+    )
+    
+    # Eliminar todas las sesiones activas del usuario
+    await db.user_sessions.delete_many({"user_id": existing_user.get("user_id")})
+    
+    logger.info(f"Admin {current_user['username']} bloqueó usuario {username}")
+    
+    return {"message": f"Usuario {username} bloqueado correctamente"}
+
+@api_router.post("/admin/users/{username}/unblock")
+async def unblock_user(username: str, current_user: dict = Depends(require_admin)):
+    """Desbloquear acceso a un usuario"""
+    # Verificar que el usuario existe
+    existing_user = await db.users.find_one({"username": username})
+    if not existing_user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    # Desbloquear usuario
+    await db.users.update_one(
+        {"username": username},
+        {
+            "$set": {
+                "disabled": False,
+                "unblocked_at": datetime.now(timezone.utc).isoformat(),
+                "unblocked_by": current_user["username"]
+            },
+            "$unset": {
+                "blocked_at": "",
+                "blocked_by": ""
+            }
+        }
+    )
+    
+    logger.info(f"Admin {current_user['username']} desbloqueó usuario {username}")
+    
+    return {"message": f"Usuario {username} desbloqueado correctamente"}
+
 @api_router.get("/admin/landing-content")
 async def get_landing_content(current_user: dict = Depends(require_admin)):
     """Obtener contenido editable de la landing page"""

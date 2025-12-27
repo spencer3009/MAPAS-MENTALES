@@ -233,63 +233,6 @@ const LandingPage = ({ onLogin, onRegister }) => {
     }
   ];
 
-  // Planes
-  const plans = [
-    {
-      name: 'Starter',
-      price: 'Gratis',
-      period: 'para siempre',
-      description: 'Ideal para comenzar',
-      features: [
-        'Hasta 5 mapas mentales',
-        '3 layouts disponibles',
-        'Exportación PNG',
-        'Guardado en la nube',
-        'Soporte por email'
-      ],
-      cta: 'Comenzar gratis',
-      popular: false,
-      gradient: 'from-gray-600 to-gray-700'
-    },
-    {
-      name: 'Professional',
-      price: '$15',
-      period: '/mes',
-      description: 'Para empresarios serios',
-      features: [
-        'Mapas ilimitados',
-        'Todos los layouts premium',
-        'Exportación PDF + PNG',
-        'Colaboración en tiempo real',
-        'Historial de versiones',
-        'Plantillas profesionales',
-        'Soporte prioritario 24/7'
-      ],
-      cta: '14 días gratis',
-      popular: true,
-      gradient: 'from-blue-600 to-indigo-600'
-    },
-    {
-      name: 'Enterprise',
-      price: '$49',
-      period: '/mes',
-      description: 'Para equipos grandes',
-      features: [
-        'Todo lo de Professional',
-        'Hasta 25 usuarios',
-        'Espacios de trabajo ilimitados',
-        'SSO / SAML',
-        'API completa',
-        'Analytics avanzados',
-        'Gerente de cuenta dedicado',
-        'SLA garantizado'
-      ],
-      cta: 'Contactar ventas',
-      popular: false,
-      gradient: 'from-purple-600 to-pink-600'
-    }
-  ];
-
   // FAQs
   const faqs = [
     {

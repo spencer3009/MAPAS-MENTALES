@@ -2110,33 +2110,6 @@ async def get_public_landing_content():
     """Obtener contenido de la landing page (público)"""
     content = await db.landing_content.find_one({"id": "main"}, {"_id": 0})
     return content or {}
-            "platform": {
-                "title": "Una plataforma diseñada para potenciar tu productividad",
-                "subtitle": "Descubre todas las herramientas que MindoraMap pone a tu disposición"
-            },
-            "benefits": {
-                "title": "Beneficios que transformarán tu forma de trabajar",
-                "subtitle": "Descubre por qué miles de profesionales eligen MindoraMap"
-            },
-            "how_it_works": {
-                "title": "¿Cómo funciona?",
-                "subtitle": "Comienza a organizar tus ideas en 4 simples pasos"
-            },
-            "pricing": {
-                "title": "Planes y Precios",
-                "subtitle": "Elige el plan que mejor se adapte a tus necesidades"
-            },
-            "faq": {
-                "title": "Preguntas Frecuentes",
-                "subtitle": "Resolvemos tus dudas"
-            },
-            "final_cta": {
-                "title": "¿Listo para transformar tu manera de pensar?",
-                "subtitle": "Únete a miles de profesionales que ya organizan sus ideas con MindoraMap",
-                "button_text": "Comenzar gratis ahora"
-            }
-        }
-    return content
 
 # Include the router in the main app
 app.include_router(api_router)

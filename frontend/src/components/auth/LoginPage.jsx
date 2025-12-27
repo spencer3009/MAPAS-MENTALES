@@ -68,7 +68,7 @@ const LoginPage = ({ onBackToLanding, onSwitchToRegister, externalError }) => {
     }
   };
 
-  const displayError = localError || error;
+  const displayError = localError || error || externalError;
 
   return (
     <div className="min-h-screen flex">

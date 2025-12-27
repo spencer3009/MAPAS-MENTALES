@@ -1,7 +1,7 @@
 import "./App.css";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { MindMapApp } from "./components/mindmap";
-import { LoginPage } from "./components/auth";
+import { LoginPage, RegisterPage } from "./components/auth";
 import { LandingPage } from "./components/landing";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
@@ -19,7 +19,7 @@ const LoadingScreen = () => (
 // Componente principal con lógica de autenticación
 const AppContent = () => {
   const { isAuthenticated, loading } = useAuth();
-  const [showLogin, setShowLogin] = useState(false);
+  const [authView, setAuthView] = useState(null); // null = landing, 'login' = login, 'register' = register
 
   if (loading) {
     return <LoadingScreen />;
@@ -30,16 +30,31 @@ const AppContent = () => {
     return <MindMapApp />;
   }
 
-  // Si el usuario eligió ir al login, mostrar LoginPage
-  if (showLogin) {
-    return <LoginPage onBackToLanding={() => setShowLogin(false)} />;
+  // Si el usuario eligió ir al login
+  if (authView === 'login') {
+    return (
+      <LoginPage 
+        onBackToLanding={() => setAuthView(null)} 
+        onSwitchToRegister={() => setAuthView('register')}
+      />
+    );
+  }
+
+  // Si el usuario eligió ir al registro
+  if (authView === 'register') {
+    return (
+      <RegisterPage 
+        onBackToLanding={() => setAuthView(null)} 
+        onSwitchToLogin={() => setAuthView('login')}
+      />
+    );
   }
 
   // Por defecto, mostrar la landing page
   return (
     <LandingPage 
-      onLogin={() => setShowLogin(true)} 
-      onRegister={() => setShowLogin(true)} 
+      onLogin={() => setAuthView('login')} 
+      onRegister={() => setAuthView('register')} 
     />
   );
 };

@@ -524,13 +524,10 @@ const LandingPage = ({ onLogin, onRegister }) => {
               Plataforma completa
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-              Todo lo que necesitas para
-              <span className="block bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                organizar tu negocio
-              </span>
+              {content?.platform?.title || 'Todo lo que necesitas para organizar tu negocio'}
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Una suite completa de herramientas diseñadas específicamente para empresarios que buscan claridad y resultados.
+              {content?.platform?.subtitle || 'Una suite completa de herramientas diseñadas específicamente para empresarios que buscan claridad y resultados.'}
             </p>
           </div>
 

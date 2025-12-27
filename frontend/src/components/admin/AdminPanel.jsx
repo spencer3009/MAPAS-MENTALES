@@ -541,16 +541,16 @@ const UsersSection = ({ users, loading, onEditUser, token }) => {
                       </select>
                     ) : (
                       <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
-                        user.plan === 'team' 
-                          ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700'
-                          : user.plan === 'pro' || user.is_pro
-                          ? 'bg-gradient-to-r from-amber-100 to-orange-100 text-amber-700' 
-                          : user.role === 'admin'
+                        user.plan === 'admin' || user.role === 'admin'
                           ? 'bg-gradient-to-r from-red-100 to-pink-100 text-red-700'
+                          : user.plan === 'team' 
+                          ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700'
+                          : user.plan === 'pro'
+                          ? 'bg-gradient-to-r from-amber-100 to-orange-100 text-amber-700' 
                           : 'bg-gray-100 text-gray-700'
                       }`}>
-                        {(user.plan === 'pro' || user.plan === 'team' || user.role === 'admin') && <Crown className="w-3 h-3" />}
-                        {user.role === 'admin' ? 'Admin' : user.plan === 'team' ? 'Team' : user.plan === 'pro' ? 'Pro' : 'Gratis'}
+                        {(user.plan === 'pro' || user.plan === 'team' || user.plan === 'admin' || user.role === 'admin') && <Crown className="w-3 h-3" />}
+                        {user.plan === 'admin' || user.role === 'admin' ? 'Admin ∞' : user.plan === 'team' ? 'Team' : user.plan === 'pro' ? 'Pro' : 'Gratis'}
                       </span>
                     )}
                   </td>

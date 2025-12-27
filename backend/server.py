@@ -1955,14 +1955,19 @@ async def get_all_users(current_user: dict = Depends(require_admin)):
     
     result = []
     for user in users:
+        # Admin siempre tiene plan máximo
+        user_role = user.get("role", "user")
+        user_plan = "admin" if user_role == "admin" else user.get("plan", "free")
+        
         result.append({
             "username": user.get("username", ""),
             "email": user.get("email", ""),
             "full_name": user.get("full_name", ""),
-            "role": user.get("role", "user"),
+            "role": user_role,
+            "plan": user_plan,
             "auth_provider": user.get("auth_provider", "local"),
             "created_at": user.get("created_at"),
-            "is_pro": user.get("is_pro", False),
+            "is_pro": user_plan in ["pro", "team", "admin"],
             "disabled": user.get("disabled", False)
         })
     

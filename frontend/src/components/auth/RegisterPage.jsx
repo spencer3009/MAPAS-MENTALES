@@ -228,7 +228,7 @@ const RegisterPage = ({ onBackToLanding, onSwitchToLogin }) => {
           {onBackToLanding && (
             <button
               onClick={onBackToLanding}
-              className="mb-6 flex items-center gap-2 text-sm text-gray-500 hover:text-emerald-600 transition-colors"
+              className="mb-6 flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600 transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 12H5M12 19l-7-7 7-7"/>
@@ -250,7 +250,7 @@ const RegisterPage = ({ onBackToLanding, onSwitchToLogin }) => {
           <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 p-8 xl:p-10 border border-slate-100">
             {/* Header */}
             <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/30 mb-4">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30 mb-4">
                 <UserPlus className="w-7 h-7 text-white" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -290,7 +290,7 @@ const RegisterPage = ({ onBackToLanding, onSwitchToLogin }) => {
                     className="
                       w-full px-4 py-3 rounded-xl
                       bg-slate-50 border-2 border-slate-100
-                      focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10
+                      focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10
                       outline-none transition-all duration-200
                       text-gray-900 placeholder:text-gray-400
                       hover:border-slate-200
@@ -310,7 +310,7 @@ const RegisterPage = ({ onBackToLanding, onSwitchToLogin }) => {
                     className="
                       w-full px-4 py-3 rounded-xl
                       bg-slate-50 border-2 border-slate-100
-                      focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10
+                      focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10
                       outline-none transition-all duration-200
                       text-gray-900 placeholder:text-gray-400
                       hover:border-slate-200
@@ -378,7 +378,7 @@ const RegisterPage = ({ onBackToLanding, onSwitchToLogin }) => {
                     className="
                       w-full px-4 py-3 pr-12 rounded-xl
                       bg-slate-50 border-2 border-slate-100
-                      focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10
+                      focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10
                       outline-none transition-all duration-200
                       text-gray-900 placeholder:text-gray-400
                       hover:border-slate-200
@@ -414,7 +414,7 @@ const RegisterPage = ({ onBackToLanding, onSwitchToLogin }) => {
                     className="
                       w-full px-4 py-3 pr-12 rounded-xl
                       bg-slate-50 border-2 border-slate-100
-                      focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10
+                      focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10
                       outline-none transition-all duration-200
                       text-gray-900 placeholder:text-gray-400
                       hover:border-slate-200
@@ -442,15 +442,15 @@ const RegisterPage = ({ onBackToLanding, onSwitchToLogin }) => {
                   id="acceptTerms"
                   checked={acceptTerms}
                   onChange={(e) => setAcceptTerms(e.target.checked)}
-                  className="w-4 h-4 mt-1 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 focus:ring-offset-0"
+                  className="w-4 h-4 mt-1 rounded border-slate-300 text-blue-600 focus:ring-blue-500 focus:ring-offset-0"
                 />
                 <label htmlFor="acceptTerms" className="text-sm text-gray-600">
                   Acepto los{' '}
-                  <button type="button" className="text-emerald-600 hover:text-emerald-700 font-medium hover:underline">
+                  <button type="button" className="text-blue-600 hover:text-blue-700 font-medium hover:underline">
                     Términos de Servicio
                   </button>
                   {' '}y la{' '}
-                  <button type="button" className="text-emerald-600 hover:text-emerald-700 font-medium hover:underline">
+                  <button type="button" className="text-blue-600 hover:text-blue-700 font-medium hover:underline">
                     Política de Privacidad
                   </button>
                 </label>
@@ -462,12 +462,12 @@ const RegisterPage = ({ onBackToLanding, onSwitchToLogin }) => {
                 disabled={loading}
                 className="
                   w-full py-4 px-4 mt-2 rounded-xl
-                  bg-gradient-to-r from-emerald-600 to-teal-600
-                  hover:from-emerald-700 hover:to-teal-700
-                  disabled:from-emerald-400 disabled:to-teal-400 disabled:cursor-not-allowed
+                  bg-gradient-to-r from-blue-600 to-indigo-600
+                  hover:from-blue-700 hover:to-indigo-700
+                  disabled:from-blue-400 disabled:to-indigo-400 disabled:cursor-not-allowed
                   text-white font-semibold text-base
-                  shadow-lg shadow-emerald-600/30
-                  hover:shadow-xl hover:shadow-emerald-600/40
+                  shadow-lg shadow-blue-600/30
+                  hover:shadow-xl hover:shadow-blue-600/40
                   active:scale-[0.98]
                   transition-all duration-200
                   flex items-center justify-center gap-2
@@ -525,7 +525,7 @@ const RegisterPage = ({ onBackToLanding, onSwitchToLogin }) => {
             ¿Ya tienes una cuenta?{' '}
             <button 
               onClick={onSwitchToLogin}
-              className="text-emerald-600 hover:text-emerald-700 font-semibold hover:underline"
+              className="text-blue-600 hover:text-blue-700 font-semibold hover:underline"
             >
               Inicia sesión
             </button>

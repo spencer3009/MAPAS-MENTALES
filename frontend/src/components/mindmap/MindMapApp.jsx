@@ -669,6 +669,8 @@ const MindMapApp = ({ onAdminClick }) => {
           user={user}
           onOpenProfile={() => setShowProfileModal(true)}
           onLogout={logout}
+          onAdminClick={onAdminClick}
+          isAdmin={isAdmin}
           autoAlignEnabled={autoAlignEnabled}
           onToggleAutoAlign={handleToggleAutoAlign}
         />

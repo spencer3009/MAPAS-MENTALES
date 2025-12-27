@@ -68,41 +68,181 @@ class Token(BaseModel):
     token_type: str
     user: dict
 
-# ==================== SISTEMA DE PLANES ====================
-# Límites por plan
-PLAN_LIMITS = {
+# ==================== SISTEMA DE PLANES (SOURCE OF TRUTH) ====================
+# Configuración completa de planes - Esta es la ÚNICA fuente de verdad
+# Cualquier cambio aquí se refleja en landing, pop-ups y sistema
+
+PLANS_CONFIG = {
     "free": {
-        "max_active_maps": 3,        # Mapas activos al mismo tiempo
-        "max_total_maps_created": 5, # Mapas creados en total (histórico)
-        "max_nodes_per_map": 50,
-        "can_collaborate": False,
-        "can_export_pdf": False,
-        "priority_support": False
+        "id": "free",
+        "name": "Free",
+        "display_name": "Gratis",
+        "price": 0,
+        "price_display": "Gratis",
+        "currency": "USD",
+        "period": "para siempre",
+        "period_months": 0,
+        "description": "Perfecto para probar la plataforma",
+        "users_min": 1,
+        "users_max": 1,
+        "limits": {
+            "max_active_maps": 3,
+            "max_total_maps_created": 5,
+            "max_nodes_per_map": 50,
+            "can_collaborate": False,
+            "can_export_pdf": False,
+            "commercial_use": False,
+            "priority_support": False
+        },
+        "features": [
+            "Hasta 3 mapas activos",
+            "Máximo 5 mapas en total",
+            "40-50 nodos por mapa",
+            "3 layouts disponibles",
+            "Exportación PNG",
+            "Guardado en la nube"
+        ],
+        "cta": "Comenzar gratis",
+        "popular": False,
+        "badge": None,
+        "gradient": "from-gray-600 to-gray-700",
+        "order": 1
     },
-    "pro": {
-        "max_active_maps": -1,       # -1 = ilimitado
-        "max_total_maps_created": -1,
-        "max_nodes_per_map": -1,
-        "can_collaborate": False,
-        "can_export_pdf": True,
-        "priority_support": True
+    "personal": {
+        "id": "personal",
+        "name": "Personal",
+        "display_name": "Personal",
+        "price": 3,
+        "price_display": "$3",
+        "currency": "USD",
+        "period": "/mes",
+        "period_months": 1,
+        "description": "Para creadores y emprendedores",
+        "badge": "🚀 Early Access",
+        "users_min": 1,
+        "users_max": 1,
+        "limits": {
+            "max_active_maps": -1,
+            "max_total_maps_created": -1,
+            "max_nodes_per_map": -1,
+            "can_collaborate": False,
+            "can_export_pdf": True,
+            "commercial_use": True,
+            "priority_support": True
+        },
+        "features": [
+            "Mapas ilimitados",
+            "Nodos ilimitados",
+            "Todos los layouts premium",
+            "Exportación PDF + PNG",
+            "Uso comercial incluido",
+            "Soporte prioritario"
+        ],
+        "cta": "Actualizar ahora",
+        "popular": True,
+        "gradient": "from-blue-600 to-indigo-600",
+        "order": 2
     },
     "team": {
-        "max_active_maps": -1,
-        "max_total_maps_created": -1,
-        "max_nodes_per_map": -1,
-        "can_collaborate": True,
-        "can_export_pdf": True,
-        "priority_support": True
+        "id": "team",
+        "name": "Team",
+        "display_name": "Team",
+        "price": 8,
+        "price_display": "$8",
+        "currency": "USD",
+        "period": "/usuario/mes",
+        "period_months": 1,
+        "description": "Para equipos colaborativos",
+        "badge": "🚀 Early Access",
+        "users_min": 2,
+        "users_max": 10,
+        "limits": {
+            "max_active_maps": -1,
+            "max_total_maps_created": -1,
+            "max_nodes_per_map": -1,
+            "can_collaborate": True,
+            "can_export_pdf": True,
+            "commercial_use": True,
+            "priority_support": True
+        },
+        "features": [
+            "Todo lo del Plan Personal",
+            "2-10 usuarios",
+            "Colaboración en tiempo real",
+            "Mapas compartidos",
+            "Roles básicos de equipo",
+            "Uso comercial incluido"
+        ],
+        "cta": "Probar Team",
+        "popular": False,
+        "gradient": "from-purple-600 to-indigo-600",
+        "order": 3
     },
+    "business": {
+        "id": "business",
+        "name": "Business",
+        "display_name": "Business",
+        "price": 15,
+        "price_display": "$15",
+        "currency": "USD",
+        "period": "/usuario/mes",
+        "period_months": 1,
+        "description": "Para empresas y organizaciones",
+        "badge": "Próximamente",
+        "users_min": 10,
+        "users_max": -1,
+        "limits": {
+            "max_active_maps": -1,
+            "max_total_maps_created": -1,
+            "max_nodes_per_map": -1,
+            "can_collaborate": True,
+            "can_export_pdf": True,
+            "commercial_use": True,
+            "priority_support": True
+        },
+        "features": [
+            "Todo lo del Plan Team",
+            "10+ usuarios",
+            "Roles avanzados",
+            "Control de accesos",
+            "Analytics avanzados",
+            "Soporte preferente"
+        ],
+        "cta": "Contactar ventas",
+        "popular": False,
+        "coming_soon": True,
+        "gradient": "from-amber-600 to-orange-600",
+        "order": 4
+    },
+    # Plan interno para administradores
     "admin": {
-        "max_active_maps": -1,
-        "max_total_maps_created": -1,
-        "max_nodes_per_map": -1,
-        "can_collaborate": True,
-        "can_export_pdf": True,
-        "priority_support": True
+        "id": "admin",
+        "name": "Admin",
+        "display_name": "Administrador",
+        "price": 0,
+        "internal": True,  # No mostrar en landing
+        "limits": {
+            "max_active_maps": -1,
+            "max_total_maps_created": -1,
+            "max_nodes_per_map": -1,
+            "can_collaborate": True,
+            "can_export_pdf": True,
+            "commercial_use": True,
+            "priority_support": True
+        },
+        "order": 99
     }
+}
+
+# Plan recomendado para upgrade desde Free
+UPGRADE_TARGET_PLAN = "personal"
+
+# Límites por plan (formato simplificado para uso interno)
+PLAN_LIMITS = {plan_id: config["limits"] for plan_id, config in PLANS_CONFIG.items()}
+
+# Mapeo de nombres de plan antiguos a nuevos (para compatibilidad)
+PLAN_ALIASES = {
+    "pro": "personal",  # 'pro' ahora es 'personal'
 }
 
 def get_user_plan_limits(user: dict) -> dict:
@@ -111,6 +251,8 @@ def get_user_plan_limits(user: dict) -> dict:
     if user.get("role") == "admin":
         return PLAN_LIMITS["admin"]
     plan = user.get("plan", "free")
+    # Aplicar alias si existe
+    plan = PLAN_ALIASES.get(plan, plan)
     return PLAN_LIMITS.get(plan, PLAN_LIMITS["free"])
 
 class UserResponse(BaseModel):

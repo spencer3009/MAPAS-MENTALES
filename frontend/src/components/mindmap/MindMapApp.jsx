@@ -636,6 +636,7 @@ const MindMapApp = ({ onAdminClick }) => {
         onOpenReminders={handleOpenRemindersPanel}
         onOpenTrash={handleOpenTrash}
         onOpenSettings={handleOpenSettings}
+        onLogout={logout}
         isProjectsSidebarOpen={isProjectsSidebarOpen}
         activeView={activeView}
         trashCount={trashCount}

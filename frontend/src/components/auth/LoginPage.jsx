@@ -41,7 +41,7 @@ const FEATURES = [
   }
 ];
 
-const LoginPage = () => {
+const LoginPage = ({ onBackToLanding }) => {
   const { login, loading, error, clearError } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');

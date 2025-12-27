@@ -2655,13 +2655,23 @@ export const useNodes = () => {
       const newProject = {
         id: crypto.randomUUID(),
         name: name,
-        layoutType: layoutType, // 'mindflow' o 'mindtree'
+        layoutType: layoutType,
         nodes: initialNodes,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
 
-      // Inicializar historial para el nuevo proyecto
+      // Intentar guardar en servidor PRIMERO antes de actualizar el estado local
+      const result = await saveProjectToServer(newProject);
+      
+      if (!result.success) {
+        // Si el servidor rechazó (por límite de plan), mostrar error
+        console.error('Servidor rechazó la creación:', result.error);
+        alert(result.error || 'No se pudo crear el mapa. Verifica los límites de tu plan.');
+        return false;
+      }
+
+      // Solo si el servidor aceptó, actualizar estado local
       historyRef.current[newProject.id] = {
         states: [JSON.stringify(initialNodes)],
         pointer: 0
@@ -2672,13 +2682,11 @@ export const useNodes = () => {
       setSelectedNodeId(null);
       setHistoryVersion(v => v + 1);
       
-      // Guardar en servidor inmediatamente
-      await saveProjectToServer(newProject);
-      
       console.log('Nuevo proyecto creado:', newProject.name);
       return true;
     } catch (error) {
       console.error('Error al crear proyecto en blanco:', error);
+      alert('Error al crear el proyecto. Intenta de nuevo.');
       return false;
     }
   }, [saveProjectToServer]);

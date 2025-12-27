@@ -7,6 +7,9 @@ import {
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
+// URL del logo MindoraMap
+const LOGO_URL = 'https://customer-assets.emergentagent.com/job_mindviz-app/artifacts/k1kioask_image.png';
+
 const MAX_VISIBLE_PROJECTS = 5;
 const MAX_PINNED = 2;
 

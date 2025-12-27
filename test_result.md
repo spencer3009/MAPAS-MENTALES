@@ -2383,3 +2383,41 @@ The **Layout Template System (MindFlow / MindTree)** is **MOSTLY FUNCTIONAL** an
 
 **Recommendation**: The layout template selection system is **PRODUCTION-READY** for the template selection and project creation aspects. However, the **node creation functionality requires immediate attention** to enable full testing and verification of the MindTree vertical layout behavior. The foundation is excellent, but the core functionality needs debugging to complete the feature implementation.
 
+
+---
+
+## PAPELERA (RECYCLE BIN) FEATURE TESTING (December 27, 2025)
+
+### 🎯 TESTING REQUIREMENTS:
+
+#### Test Objective:
+Verify the complete Recycle Bin (Papelera) feature implementation:
+1. **Soft Delete**: Projects are moved to trash instead of being permanently deleted
+2. **Trash View**: Modal showing all deleted projects with name, date, and node count
+3. **Restore**: Projects can be restored from trash to main projects list
+4. **Permanent Delete**: Projects can be permanently deleted with strong confirmation
+
+#### Test Credentials:
+- Username: `spencer3009`
+- Password: `Socios3009`
+- URL: https://recover-vault.preview.emergentagent.com
+
+### 📋 TEST SCENARIOS:
+
+#### Backend API Tests:
+1. `DELETE /api/projects/{id}` - Soft delete (mark as deleted)
+2. `GET /api/projects` - Should NOT show deleted projects
+3. `GET /api/projects/trash` - Should return only deleted projects
+4. `POST /api/projects/{id}/restore` - Restore project from trash
+5. `DELETE /api/projects/{id}/permanent` - Permanent deletion
+
+#### Frontend UI Tests:
+1. "Papelera" button visible in sidebar
+2. Trash count badge shows number of deleted projects
+3. Clicking delete shows "Enviar a Papelera" confirmation
+4. Trash view modal opens with correct styling
+5. Deleted projects show: name, "Eliminado" badge (red), date, node count
+6. "Restaurar" button (green) restores project
+7. "Eliminar" button shows strong confirmation modal
+8. Permanent delete confirmation has clear warning message
+

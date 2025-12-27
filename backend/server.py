@@ -71,6 +71,8 @@ class Token(BaseModel):
 class UserResponse(BaseModel):
     username: str
     full_name: str
+    role: str = "user"
+    is_pro: bool = False
 
 class UserProfile(BaseModel):
     """Modelo completo del perfil de usuario"""

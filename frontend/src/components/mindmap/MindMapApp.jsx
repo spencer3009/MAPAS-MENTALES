@@ -628,7 +628,7 @@ const MindMapApp = ({ onAdminClick }) => {
               }
             }}
             onOpenTemplates={handleOpenTemplatesView}
-            onToggleFavorite={handleTogglePin}
+            onToggleFavorite={pinProject}
           />
         );
       case 'templates':

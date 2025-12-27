@@ -74,6 +74,13 @@ class LoginRequest(BaseModel):
     username: str
     password: str
 
+class RegisterRequest(BaseModel):
+    nombre: str
+    apellidos: Optional[str] = ""
+    email: str
+    username: str
+    password: str
+
 class Token(BaseModel):
     access_token: str
     token_type: str

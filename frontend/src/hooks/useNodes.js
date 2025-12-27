@@ -347,19 +347,10 @@ export const useNodes = () => {
             setProjects(syncedProjects);
           }
         } else {
-          // Crear proyecto por defecto
-          const defaultProject = createDefaultProject();
-          defaultProject.name = 'Mi Primer Mapa';
-          setProjects([defaultProject]);
-          setActiveProjectId(defaultProject.id);
-          
-          historyRef.current[defaultProject.id] = {
-            states: [JSON.stringify(defaultProject.nodes)],
-            pointer: 0
-          };
-          
-          // Guardar en servidor
-          await saveProjectToServer(defaultProject);
+          // No hay proyectos - dejar cuenta vacía
+          console.log('No hay proyectos, cuenta vacía');
+          setProjects([]);
+          setActiveProjectId(null);
         }
       }
       
@@ -367,12 +358,12 @@ export const useNodes = () => {
     };
 
     initializeProjects();
-  }, [loadFromServer, syncLocalToServer, saveProjectToServer]);
+  }, [loadFromServer, syncLocalToServer]);
 
   // Obtener proyecto activo
-  const activeProject = projects.find(p => p.id === activeProjectId) || projects[0];
+  const activeProject = projects.find(p => p.id === activeProjectId) || projects[0] || null;
   const nodes = activeProject?.nodes || [];
-  const projectName = activeProject?.name || 'Sin nombre';
+  const projectName = activeProject?.name || '';
 
   // Si activeProjectId no coincide con ningún proyecto, actualizar
   useEffect(() => {

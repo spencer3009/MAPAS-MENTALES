@@ -277,9 +277,211 @@ async def get_me(current_user: dict = Depends(get_current_user)):
     }
 
 @api_router.post("/auth/logout")
-async def logout():
-    # Con JWT stateless, el logout se maneja en el frontend
+async def logout(response: Response):
+    # Limpiar la cookie de sesión de Google OAuth si existe
+    response.delete_cookie(
+        key="session_token",
+        path="/",
+        secure=True,
+        samesite="none"
+    )
     return {"message": "Sesión cerrada exitosamente"}
+
+
+# ==========================================
+# GOOGLE OAUTH ENDPOINTS (Emergent Auth)
+# ==========================================
+
+class GoogleSessionRequest(BaseModel):
+    session_id: str
+
+@api_router.post("/auth/google/session")
+async def process_google_session(request: GoogleSessionRequest, response: Response):
+    """
+    Procesa el session_id de Emergent Auth y crea una sesión local.
+    REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
+    """
+    try:
+        # Llamar al endpoint de Emergent Auth para obtener los datos del usuario
+        async with httpx.AsyncClient() as client:
+            auth_response = await client.get(
+                "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
+                headers={"X-Session-ID": request.session_id},
+                timeout=10.0
+            )
+        
+        if auth_response.status_code != 200:
+            raise HTTPException(
+                status_code=401,
+                detail="Sesión de Google inválida o expirada"
+            )
+        
+        google_data = auth_response.json()
+        email = google_data.get("email")
+        name = google_data.get("name", "")
+        picture = google_data.get("picture", "")
+        session_token = google_data.get("session_token")
+        
+        if not email or not session_token:
+            raise HTTPException(
+                status_code=400,
+                detail="Datos de sesión incompletos"
+            )
+        
+        # Buscar o crear usuario
+        existing_user = await db.users.find_one({"email": email}, {"_id": 0})
+        
+        if existing_user:
+            user_id = existing_user.get("user_id") or existing_user.get("id")
+            username = existing_user.get("username")
+            full_name = existing_user.get("full_name", name)
+            # Actualizar datos si es necesario
+            await db.users.update_one(
+                {"email": email},
+                {"$set": {
+                    "full_name": name,
+                    "picture": picture,
+                    "updated_at": datetime.now(timezone.utc).isoformat()
+                }}
+            )
+        else:
+            # Crear nuevo usuario
+            user_id = f"user_{uuid.uuid4().hex[:12]}"
+            username = email.split("@")[0]  # Usar parte del email como username
+            
+            # Verificar si el username ya existe
+            existing_username = await db.users.find_one({"username": username})
+            if existing_username:
+                username = f"{username}_{uuid.uuid4().hex[:6]}"
+            
+            full_name = name
+            new_user = {
+                "user_id": user_id,
+                "id": user_id,  # Para compatibilidad
+                "username": username,
+                "email": email,
+                "full_name": name,
+                "picture": picture,
+                "auth_provider": "google",
+                "disabled": False,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.users.insert_one(new_user)
+            
+            # Crear perfil
+            nombre_parts = name.split(" ", 1)
+            user_profile = {
+                "username": username,
+                "nombre": nombre_parts[0] if nombre_parts else "",
+                "apellidos": nombre_parts[1] if len(nombre_parts) > 1 else "",
+                "email": email,
+                "whatsapp": "",
+                "pais": "",
+                "timezone": "America/Lima",
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.user_profiles.insert_one(user_profile)
+        
+        # Guardar sesión en la base de datos
+        await db.user_sessions.delete_many({"user_id": user_id})  # Limpiar sesiones anteriores
+        await db.user_sessions.insert_one({
+            "user_id": user_id,
+            "session_token": session_token,
+            "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
+            "created_at": datetime.now(timezone.utc)
+        })
+        
+        # Establecer cookie httpOnly
+        response.set_cookie(
+            key="session_token",
+            value=session_token,
+            path="/",
+            secure=True,
+            httponly=True,
+            samesite="none",
+            max_age=7 * 24 * 60 * 60  # 7 días
+        )
+        
+        # Crear token JWT para compatibilidad con el sistema existente
+        access_token = create_access_token(data={"sub": username})
+        
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": {
+                "username": username,
+                "full_name": full_name,
+                "email": email,
+                "picture": picture
+            }
+        }
+        
+    except httpx.RequestError as e:
+        logging.error(f"Error conectando con Emergent Auth: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail="Error conectando con el servicio de autenticación"
+        )
+
+@api_router.get("/auth/google/me")
+async def get_google_user(request: Request):
+    """
+    Verifica la sesión de Google OAuth y devuelve los datos del usuario.
+    """
+    # Intentar obtener token de cookie primero, luego de header
+    session_token = request.cookies.get("session_token")
+    
+    if not session_token:
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            session_token = auth_header[7:]
+    
+    if not session_token:
+        raise HTTPException(status_code=401, detail="No autenticado")
+    
+    # Buscar sesión en la base de datos
+    session = await db.user_sessions.find_one(
+        {"session_token": session_token},
+        {"_id": 0}
+    )
+    
+    if not session:
+        raise HTTPException(status_code=401, detail="Sesión no encontrada")
+    
+    # Verificar expiración
+    expires_at = session.get("expires_at")
+    if isinstance(expires_at, str):
+        expires_at = datetime.fromisoformat(expires_at.replace("Z", "+00:00"))
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    
+    if expires_at < datetime.now(timezone.utc):
+        await db.user_sessions.delete_one({"session_token": session_token})
+        raise HTTPException(status_code=401, detail="Sesión expirada")
+    
+    # Obtener usuario
+    user = await db.users.find_one(
+        {"user_id": session["user_id"]},
+        {"_id": 0}
+    )
+    
+    if not user:
+        # Intentar buscar por id también
+        user = await db.users.find_one(
+            {"id": session["user_id"]},
+            {"_id": 0}
+        )
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    return {
+        "username": user.get("username"),
+        "full_name": user.get("full_name"),
+        "email": user.get("email"),
+        "picture": user.get("picture")
+    }
 
 
 # ==========================================

@@ -2727,8 +2727,11 @@ export const useNodes = () => {
       
       if (!result.success) {
         console.error('Servidor rechazó la creación desde template:', result.error);
-        alert(result.error || 'No se pudo crear el mapa. Verifica los límites de tu plan.');
-        return false;
+        return { 
+          success: false, 
+          error: result.error,
+          limitType: result.error?.includes('total') || result.error?.includes('5 mapas') ? 'total' : 'active'
+        };
       }
 
       // Solo si el servidor aceptó, actualizar estado local
@@ -2743,7 +2746,7 @@ export const useNodes = () => {
       setHistoryVersion(v => v + 1);
       
       console.log('Proyecto desde template creado:', newProject.name);
-      return true;
+      return { success: true };
     } catch (error) {
       console.error('Error al cargar template:', error);
       return false;

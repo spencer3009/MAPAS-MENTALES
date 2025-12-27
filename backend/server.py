@@ -1466,17 +1466,30 @@ async def create_project(
     user = await db.users.find_one({"username": current_user["username"]}, {"_id": 0})
     plan_limits = get_user_plan_limits(user or {})
     
-    # Verificar límite de mapas (solo contar proyectos no eliminados)
-    if plan_limits["max_maps"] != -1:
-        current_maps_count = await db.projects.count_documents({
-            "username": current_user["username"],
-            "isDeleted": {"$ne": True}
-        })
-        if current_maps_count >= plan_limits["max_maps"]:
-            raise HTTPException(
-                status_code=403, 
-                detail=f"Has alcanzado el límite de {plan_limits['max_maps']} mapas de tu plan. Actualiza a Pro para mapas ilimitados."
-            )
+    # Contar mapas activos (no eliminados)
+    active_maps_count = await db.projects.count_documents({
+        "username": current_user["username"],
+        "isDeleted": {"$ne": True}
+    })
+    
+    # Obtener histórico de mapas creados
+    total_maps_created = user.get("total_maps_created", 0) if user else 0
+    
+    # Verificar límite de mapas ACTIVOS
+    max_active = plan_limits["max_active_maps"]
+    if max_active != -1 and active_maps_count >= max_active:
+        raise HTTPException(
+            status_code=403, 
+            detail=f"Has alcanzado el límite de {max_active} mapas activos de tu plan. Elimina algún mapa o actualiza a Pro para mapas ilimitados."
+        )
+    
+    # Verificar límite de mapas TOTALES (histórico)
+    max_total = plan_limits["max_total_maps_created"]
+    if max_total != -1 and total_maps_created >= max_total:
+        raise HTTPException(
+            status_code=403, 
+            detail=f"Has alcanzado el límite de {max_total} mapas creados del plan gratuito. Tu cuenta Free permite probar la plataforma, pero has llegado al máximo. ¡Actualiza a Pro para crear mapas sin límites!"
+        )
     
     # Verificar límite de nodos
     if plan_limits["max_nodes_per_map"] != -1:
@@ -1498,6 +1511,20 @@ async def create_project(
         "lastActiveAt": now,
         "isPinned": project_data.isPinned or False,
         "customOrder": project_data.customOrder,
+        "layoutType": project_data.layoutType or "mindflow"
+    }
+    
+    await db.projects.insert_one(project)
+    
+    # Incrementar contador histórico de mapas creados
+    await db.users.update_one(
+        {"username": current_user["username"]},
+        {"$inc": {"total_maps_created": 1}}
+    )
+    
+    # Return without _id
+    project.pop("_id", None)
+    return project
         "layoutType": project_data.layoutType or "mindflow"
     }
     

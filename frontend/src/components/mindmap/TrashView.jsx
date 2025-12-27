@@ -408,6 +408,64 @@ const TrashView = ({ isOpen, onClose, onProjectRestored, token }) => {
           </div>
         </div>
       )}
+
+      {/* Confirm Empty Trash Modal */}
+      {confirmEmptyTrash && (
+        <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                <Trash className="text-red-500" size={24} />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">¿Vaciar papelera?</h3>
+                <p className="text-sm text-gray-500">Esta acción no se puede deshacer</p>
+              </div>
+            </div>
+            
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+              <p className="text-sm text-red-700">
+                <strong>Se eliminarán {trashProjects.length} proyecto{trashProjects.length !== 1 ? 's' : ''} permanentemente.</strong>
+                <br /><br />
+                Todos los proyectos en la papelera serán eliminados de forma definitiva y no podrás recuperarlos.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmEmptyTrash(false)}
+                className="
+                  flex-1 px-4 py-3 rounded-xl
+                  bg-gray-100 hover:bg-gray-200
+                  text-gray-700 font-medium
+                  transition-colors
+                "
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleEmptyTrash}
+                disabled={emptyingTrash}
+                className="
+                  flex-1 px-4 py-3 rounded-xl
+                  bg-red-500 hover:bg-red-600
+                  text-white font-medium
+                  flex items-center justify-center gap-2
+                  transition-colors
+                  disabled:opacity-50
+                "
+              >
+                {emptyingTrash ? (
+                  <Loader2 className="animate-spin" size={18} />
+                ) : (
+                  <Trash size={18} />
+                )}
+                Vaciar papelera ({trashProjects.length})
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

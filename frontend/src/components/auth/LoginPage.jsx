@@ -378,8 +378,11 @@ const LoginPage = ({ onBackToLanding, onSwitchToRegister }) => {
           {/* Footer */}
           <p className="text-center text-sm text-gray-500 mt-8">
             ¿No tienes una cuenta?{' '}
-            <button className="text-blue-600 hover:text-blue-700 font-semibold hover:underline">
-              Solicitar acceso
+            <button 
+              onClick={onSwitchToRegister}
+              className="text-blue-600 hover:text-blue-700 font-semibold hover:underline"
+            >
+              Regístrate gratis
             </button>
           </p>
 

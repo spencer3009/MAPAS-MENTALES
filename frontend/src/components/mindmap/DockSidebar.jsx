@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   LayoutDashboard, 
   FolderKanban, 
-  LayoutTemplate, 
+  Star, 
   Bell, 
   Trash2, 
   Settings,
@@ -13,7 +13,7 @@ import {
 const DockSidebar = ({ 
   onToggleProjectsSidebar,
   onOpenDashboard,
-  onOpenTemplates,
+  onOpenFavorites,
   onOpenReminders,
   onOpenTrash,
   onOpenSettings,
@@ -39,10 +39,10 @@ const DockSidebar = ({
       isActive: isProjectsSidebarOpen,
     },
     {
-      id: 'templates',
-      icon: LayoutTemplate,
-      label: 'Plantillas',
-      onClick: onOpenTemplates,
+      id: 'favorites',
+      icon: Star,
+      label: 'Favoritos',
+      onClick: onOpenFavorites,
     },
     {
       id: 'reminders',

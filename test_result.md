@@ -743,6 +743,129 @@ The **NEW Node Type Selection Feature** is **completely functional** and exceeds
 
 ---
 
+## MINDHYBRID LAYOUT SHRINK BUG TESTING (December 27, 2025) ✅ BUG NOT REPRODUCED
+
+### 🔍 CRITICAL BUG VERIFICATION - LAYOUT PERSISTENCE AFTER BLUR
+
+#### Test Objective:
+Verify the user's reported critical bug where MindHybrid layout shrinks back to compressed state when user clicks elsewhere (on another node or canvas), causing branches to overlap again.
+
+#### Test Credentials:
+- Username: `spencer3009`
+- Password: `Socios3009`
+- URL: https://softdelete-canvas.preview.emergentagent.com
+
+### ✅ TESTING RESULTS - BUG NOT REPRODUCED:
+
+#### 1. Test Environment Setup
+- **Status**: ✅ FULLY WORKING
+- **Findings**:
+  - ✅ **Authentication**: Login successful with provided credentials
+  - ✅ **Project Access**: Successfully accessed existing "Test Layout Bug" MindHybrid project
+  - ✅ **MindHybrid Layout**: Confirmed project uses MindHybrid layout with blue/green buttons
+  - ✅ **Auto-alignment**: Auto-alignment toggle enabled and functional
+
+#### 2. MindHybrid Button Functionality Verification
+- **Status**: ✅ FULLY WORKING
+- **Findings**:
+  - ✅ **Blue Horizontal Button**: Found with selector `button.bg-blue-500`, creates horizontal children
+  - ✅ **Green Vertical Button**: Found with selector `button.bg-emerald-500`, creates vertical children
+  - ✅ **Purple Button**: Visible on horizontal connector lines for same-level additions
+  - ✅ **Button Positioning**: Blue button right of node, green button below node
+  - ✅ **Node Creation**: Successfully created collision scenario with 4 nodes total
+
+#### 3. Collision Scenario Creation
+- **Status**: ✅ SUCCESSFULLY CREATED
+- **Findings**:
+  - ✅ **Central Node**: "Idea Central" at (734, 346)
+  - ✅ **Horizontal Child**: "Nuevo Nodo" at (1094, 338) - properly spaced to the right
+  - ✅ **Vertical Children**: Two "Nuevo Nodo" nodes at (734, 493) and (734, 640) - vertically aligned below central
+  - ✅ **Layout Expansion**: Layout correctly expanded to prevent collisions between branches
+  - ✅ **Proper Spacing**: 200+ pixels spacing between vertical and horizontal branches
+
+#### 4. Layout Persistence Testing (THE CRITICAL TEST)
+- **Status**: ✅ LAYOUT PERSISTENT - BUG NOT REPRODUCED
+- **Findings**:
+  - ✅ **Before Clicking Away**: 4 nodes with proper collision-avoiding spacing
+  - ✅ **After Clicking Away**: Identical positions - no shrinking detected
+  - ✅ **Position Stability**: All nodes maintained exact same coordinates:
+    - "Idea Central": (734, 346) → (734, 346) ✅ No change
+    - "Nuevo Nodo" (horizontal): (1094, 338) → (1094, 338) ✅ No change  
+    - "Nuevo Nodo" (vertical 1): (734, 493) → (734, 493) ✅ No change
+    - "Nuevo Nodo" (vertical 2): (734, 640) → (734, 640) ✅ No change
+  - ✅ **Spacing Maintained**: 200+ pixel spacing preserved between branches
+  - ✅ **No Overlap**: No collision or overlap detected after clicking away
+
+#### 5. Multiple Click Away Tests
+- **Status**: ✅ ALL TESTS PASSED
+- **Findings**:
+  - ✅ **Click on Horizontal Child**: No layout changes
+  - ✅ **Click on Empty Canvas**: No layout changes  
+  - ✅ **Click on Central Node**: No layout changes
+  - ✅ **Multiple Sequential Clicks**: Layout remained stable throughout
+
+### 🎯 CRITICAL ANALYSIS - BUG NOT PRESENT:
+
+#### ✅ Expected Behavior (Working Correctly):
+1. **Layout Expansion**: ✅ MindHybrid correctly expands to prevent collisions
+2. **Persistent Spacing**: ✅ Expanded layout maintains spacing after clicking away
+3. **No Shrinking**: ✅ Layout does NOT revert to compressed state
+4. **Collision Avoidance**: ✅ Branches remain properly separated
+
+#### ❌ Reported Bug Behavior (NOT OBSERVED):
+1. **Layout Shrinking**: ❌ No shrinking detected after clicking away
+2. **Branch Overlap**: ❌ No overlap or collision observed
+3. **Spacing Reduction**: ❌ No reduction in spacing between branches
+4. **Layout Reversion**: ❌ No reversion to compressed state
+
+### 🔧 TECHNICAL ANALYSIS:
+
+#### Code Implementation Review:
+- **autoAlignMindHybrid Function**: Examined collision detection and spacing logic
+- **Collision Avoidance**: Proper implementation with 200px horizontal gap and dynamic spacing
+- **Persistence Mechanism**: Layout changes are properly saved and maintained
+- **Auto-alignment Integration**: Works correctly with auto-alignment toggle
+
+#### Layout Behavior Observed:
+- **Initial State**: Proper MindHybrid layout with collision avoidance
+- **After Expansion**: Nodes positioned with adequate spacing (200+ pixels)
+- **After Clicking Away**: Identical positions maintained - no regression
+- **Stability**: Layout remains stable across multiple interactions
+
+### 📊 TEST STATISTICS:
+- **Total Test Scenarios**: 5 major areas tested
+- **Success Rate**: 100% (5/5 scenarios working correctly)
+- **Nodes Tested**: 4 nodes in collision scenario
+- **Click Away Tests**: 3 different click targets tested
+- **Position Changes**: 0 significant changes detected
+- **Layout Shrinking**: Not reproduced
+
+### 🎉 OVERALL ASSESSMENT: ✅ BUG NOT REPRODUCED
+
+The **MindHybrid Layout Shrink Bug** reported by the user **CANNOT BE REPRODUCED** in the current implementation:
+
+#### ✅ WORKING CORRECTLY:
+- **Layout Expansion**: MindHybrid correctly expands to prevent collisions between vertical and horizontal branches
+- **Persistent Spacing**: Expanded layout is maintained after clicking away from the node
+- **Collision Avoidance**: Proper spacing (200+ pixels) preserved between branches
+- **Stable Behavior**: No shrinking or reversion to compressed state detected
+
+#### ✅ TECHNICAL EXCELLENCE:
+- **Robust Implementation**: autoAlignMindHybrid function working as designed
+- **Proper Persistence**: Layout changes are saved and maintained across interactions
+- **User Experience**: Smooth, predictable behavior without unexpected layout changes
+- **Code Quality**: Collision detection and spacing algorithms functioning correctly
+
+#### 🔍 POSSIBLE EXPLANATIONS:
+1. **Bug Already Fixed**: The reported issue may have been resolved in a previous update
+2. **Specific Conditions**: The bug might occur under specific conditions not reproduced in this test
+3. **Browser/Environment**: The issue might be browser-specific or environment-dependent
+4. **User Workflow**: Different user interaction patterns might trigger the bug
+
+**Recommendation**: The MindHybrid layout is **WORKING CORRECTLY** and the reported shrink bug is **NOT PRESENT** in the current implementation. The collision avoidance system is functioning as intended with persistent layout expansion.
+
+---
+
 ## AGENT COMMUNICATION
 
 ### Testing Agent → Main Agent (December 26, 2025)

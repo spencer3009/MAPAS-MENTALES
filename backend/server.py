@@ -1446,9 +1446,12 @@ async def create_project(
     user = await db.users.find_one({"username": current_user["username"]}, {"_id": 0})
     plan_limits = get_user_plan_limits(user or {})
     
-    # Verificar límite de mapas
+    # Verificar límite de mapas (solo contar proyectos no eliminados)
     if plan_limits["max_maps"] != -1:
-        current_maps_count = await db.projects.count_documents({"username": current_user["username"]})
+        current_maps_count = await db.projects.count_documents({
+            "username": current_user["username"],
+            "isDeleted": {"$ne": True}
+        })
         if current_maps_count >= plan_limits["max_maps"]:
             raise HTTPException(
                 status_code=403, 

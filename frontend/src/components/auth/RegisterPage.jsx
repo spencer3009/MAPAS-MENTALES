@@ -132,13 +132,13 @@ const RegisterPage = ({ onBackToLanding, onSwitchToLogin }) => {
   return (
     <div className="min-h-screen flex">
       {/* Panel Izquierdo - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 xl:w-[55%] relative bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 xl:w-[55%] relative bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700 overflow-hidden">
         {/* Elementos decorativos de fondo */}
         <div className="absolute inset-0">
           {/* Círculos decorativos */}
           <div className="absolute top-20 left-20 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-20 right-20 w-96 h-96 bg-teal-400/20 rounded-full blur-3xl" />
-          <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-cyan-400/15 rounded-full blur-2xl" />
+          <div className="absolute bottom-20 right-20 w-96 h-96 bg-indigo-400/20 rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-violet-400/15 rounded-full blur-2xl" />
           
           {/* Patrón de puntos */}
           <div 
@@ -184,9 +184,9 @@ const RegisterPage = ({ onBackToLanding, onSwitchToLogin }) => {
             <h1 className="text-4xl xl:text-5xl font-bold text-white leading-tight mb-4">
               Únete a miles de
               <br />
-              <span className="text-emerald-200">empresarios exitosos</span>
+              <span className="text-blue-200">empresarios exitosos</span>
             </h1>
-            <p className="text-lg text-emerald-100/80 max-w-md">
+            <p className="text-lg text-blue-100/80 max-w-md">
               Crea tu cuenta gratis y comienza a organizar tus ideas como nunca antes.
             </p>
           </div>
@@ -202,7 +202,7 @@ const RegisterPage = ({ onBackToLanding, onSwitchToLogin }) => {
                   <feature.icon className="w-5 h-5 text-white" />
                 </div>
                 <h3 className="font-semibold text-white text-sm mb-1">{feature.title}</h3>
-                <p className="text-xs text-emerald-100/70">{feature.description}</p>
+                <p className="text-xs text-blue-100/70">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -210,12 +210,12 @@ const RegisterPage = ({ onBackToLanding, onSwitchToLogin }) => {
           {/* Estadísticas o social proof */}
           <div className="mt-12 flex items-center gap-8">
             <div className="flex items-center gap-2">
-              <Users className="w-5 h-5 text-emerald-200" />
-              <span className="text-emerald-100/80 text-sm">+2,500 usuarios activos</span>
+              <Users className="w-5 h-5 text-blue-200" />
+              <span className="text-blue-100/80 text-sm">+2,500 usuarios activos</span>
             </div>
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-emerald-200" />
-              <span className="text-emerald-100/80 text-sm">4.9 ★ valoración</span>
+              <Sparkles className="w-5 h-5 text-blue-200" />
+              <span className="text-blue-100/80 text-sm">4.9 ★ valoración</span>
             </div>
           </div>
         </div>

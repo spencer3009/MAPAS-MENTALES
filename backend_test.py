@@ -584,6 +584,7 @@ class AdminUserManagementTester:
             "username": "carlos3009",
             "password": "Socios3009"
         }
+        self.non_admin_token = None
         self.test_results = []
         self.temp_user_data = None
         

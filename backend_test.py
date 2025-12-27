@@ -22,13 +22,14 @@ NON_ADMIN_CREDENTIALS = {
     "password": "Socios3009"
 }
 
-class AuthenticationTester:
+class AdminUserManagementTester:
     def __init__(self):
         self.base_url = BASE_URL
         self.session = requests.Session()
-        self.auth_token = None
+        self.admin_token = None
+        self.non_admin_token = None
         self.test_results = []
-        self.test_user_data = None
+        self.temp_user_data = None
         
     def log_test(self, test_name: str, success: bool, details: str = "", response_data: dict = None):
         """Log test results"""
@@ -52,419 +53,436 @@ class AuthenticationTester:
             print(f"    Response: {response_data}")
         print()
 
-    def test_existing_user_login(self) -> bool:
-        """Test login with existing user credentials"""
+    def get_admin_token(self) -> bool:
+        """Get admin authentication token"""
         try:
             url = f"{self.base_url}/auth/login"
-            response = self.session.post(url, json=TEST_CREDENTIALS)
+            response = self.session.post(url, json=ADMIN_CREDENTIALS)
             
             if response.status_code == 200:
                 data = response.json()
-                self.auth_token = data.get("access_token")
+                self.admin_token = data.get("access_token")
                 
-                if self.auth_token:
-                    # Set authorization header for future requests
-                    self.session.headers.update({
-                        "Authorization": f"Bearer {self.auth_token}"
-                    })
-                    
-                    user_info = data.get("user", {})
-                    token_type = data.get("token_type")
-                    
-                    # Verify response structure
-                    has_required_fields = all([
-                        self.auth_token,
-                        token_type == "bearer",
-                        user_info.get("username"),
-                        user_info.get("full_name")
-                    ])
-                    
+                if self.admin_token:
                     self.log_test(
-                        "Existing User Login", 
-                        has_required_fields, 
-                        f"Successfully logged in as {user_info.get('username')} ({user_info.get('full_name')})",
-                        {
-                            "token_received": bool(self.auth_token),
-                            "token_type": token_type,
-                            "user": user_info,
-                            "has_required_fields": has_required_fields
-                        }
+                        "Admin Login", 
+                        True, 
+                        f"Successfully logged in as admin: {ADMIN_CREDENTIALS['username']}",
+                        {"token_received": True}
                     )
-                    return has_required_fields
+                    return True
                 else:
-                    self.log_test("Existing User Login", False, "No access token received", data)
+                    self.log_test("Admin Login", False, "No access token received", data)
                     return False
             else:
-                self.log_test("Existing User Login", False, f"HTTP {response.status_code}", response.json())
+                self.log_test("Admin Login", False, f"HTTP {response.status_code}", response.json())
                 return False
                 
         except Exception as e:
-            self.log_test("Existing User Login", False, f"Exception: {str(e)}")
+            self.log_test("Admin Login", False, f"Exception: {str(e)}")
             return False
 
-    def test_user_registration(self) -> bool:
-        """Test user registration with new user data"""
+    def get_non_admin_token(self) -> bool:
+        """Get non-admin authentication token"""
+        try:
+            url = f"{self.base_url}/auth/login"
+            response = self.session.post(url, json=NON_ADMIN_CREDENTIALS)
+            
+            if response.status_code == 200:
+                data = response.json()
+                self.non_admin_token = data.get("access_token")
+                
+                if self.non_admin_token:
+                    self.log_test(
+                        "Non-Admin Login", 
+                        True, 
+                        f"Successfully logged in as non-admin: {NON_ADMIN_CREDENTIALS['username']}",
+                        {"token_received": True}
+                    )
+                    return True
+                else:
+                    self.log_test("Non-Admin Login", False, "No access token received", data)
+                    return False
+            else:
+                self.log_test("Non-Admin Login", False, f"HTTP {response.status_code}", response.json())
+                return False
+                
+        except Exception as e:
+            self.log_test("Non-Admin Login", False, f"Exception: {str(e)}")
+            return False
+
+    def create_temp_user(self) -> bool:
+        """Create a temporary user for deletion testing"""
         try:
             # Generate unique test user data
             unique_id = str(uuid.uuid4())[:8]
-            test_user = {
-                "nombre": "Test",
+            temp_user = {
+                "nombre": "Temp",
                 "apellidos": "User",
-                "email": f"newuser{unique_id}@test.com",
-                "username": f"newuser{unique_id}",
+                "email": f"tempdelete@test.com",
+                "username": "tempdeleteuser",
                 "password": "test123456"
             }
             
-            self.test_user_data = test_user
+            self.temp_user_data = temp_user
             
             url = f"{self.base_url}/auth/register"
-            response = self.session.post(url, json=test_user)
+            response = self.session.post(url, json=temp_user)
             
             if response.status_code == 200:
                 data = response.json()
-                access_token = data.get("access_token")
-                token_type = data.get("token_type")
                 user_info = data.get("user", {})
                 
-                # Verify response structure
-                registration_success = all([
-                    access_token,
-                    token_type == "bearer",
-                    user_info.get("username") == test_user["username"],
-                    user_info.get("full_name") == f"{test_user['nombre']} {test_user['apellidos']}"
-                ])
-                
                 self.log_test(
-                    "User Registration", 
-                    registration_success, 
-                    f"Successfully registered user {test_user['username']}",
-                    {
-                        "username": test_user["username"],
-                        "email": test_user["email"],
-                        "token_received": bool(access_token),
-                        "token_type": token_type,
-                        "user_info": user_info,
-                        "registration_success": registration_success
-                    }
+                    "Create Temp User", 
+                    True, 
+                    f"Successfully created temp user: {temp_user['username']}",
+                    {"username": temp_user["username"], "email": temp_user["email"]}
                 )
-                return registration_success
+                return True
             else:
                 error_data = response.json() if response.content else {}
-                self.log_test("User Registration", False, f"HTTP {response.status_code}", error_data)
+                self.log_test("Create Temp User", False, f"HTTP {response.status_code}", error_data)
                 return False
                 
         except Exception as e:
-            self.log_test("User Registration", False, f"Exception: {str(e)}")
+            self.log_test("Create Temp User", False, f"Exception: {str(e)}")
             return False
 
-    def test_duplicate_username_registration(self) -> bool:
-        """Test registration with existing username - should fail"""
+    def test_block_user(self) -> bool:
+        """Test blocking a user (admin only)"""
         try:
-            if not self.test_user_data:
-                self.log_test("Duplicate Username Registration", False, "No test user data available")
+            if not self.admin_token:
+                self.log_test("Block User", False, "No admin token available")
                 return False
             
-            # Try to register with same username but different email
-            duplicate_user = {
-                "nombre": "Another",
-                "apellidos": "User",
-                "email": f"different{uuid.uuid4().hex[:8]}@test.com",
-                "username": self.test_user_data["username"],  # Same username
-                "password": "different123"
-            }
+            # Use testuser123 as specified in the requirements
+            username = "testuser123"
+            url = f"{self.base_url}/admin/users/{username}/block"
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
             
-            url = f"{self.base_url}/auth/register"
-            response = self.session.post(url, json=duplicate_user)
-            
-            # Should fail with 400 status code
-            if response.status_code == 400:
-                error_data = response.json()
-                error_message = error_data.get("detail", "")
-                
-                username_error_detected = "nombre de usuario" in error_message.lower() or "username" in error_message.lower()
-                
-                self.log_test(
-                    "Duplicate Username Registration", 
-                    username_error_detected, 
-                    f"Correctly rejected duplicate username with error: {error_message}",
-                    {
-                        "status_code": response.status_code,
-                        "error_message": error_message,
-                        "username_error_detected": username_error_detected
-                    }
-                )
-                return username_error_detected
-            else:
-                self.log_test("Duplicate Username Registration", False, f"Expected 400, got HTTP {response.status_code}", response.json())
-                return False
-                
-        except Exception as e:
-            self.log_test("Duplicate Username Registration", False, f"Exception: {str(e)}")
-            return False
-
-    def test_duplicate_email_registration(self) -> bool:
-        """Test registration with existing email - should fail"""
-        try:
-            if not self.test_user_data:
-                self.log_test("Duplicate Email Registration", False, "No test user data available")
-                return False
-            
-            # Try to register with same email but different username
-            duplicate_user = {
-                "nombre": "Another",
-                "apellidos": "User",
-                "email": self.test_user_data["email"],  # Same email
-                "username": f"differentuser{uuid.uuid4().hex[:8]}",
-                "password": "different123"
-            }
-            
-            url = f"{self.base_url}/auth/register"
-            response = self.session.post(url, json=duplicate_user)
-            
-            # Should fail with 400 status code
-            if response.status_code == 400:
-                error_data = response.json()
-                error_message = error_data.get("detail", "")
-                
-                email_error_detected = "correo" in error_message.lower() or "email" in error_message.lower()
-                
-                self.log_test(
-                    "Duplicate Email Registration", 
-                    email_error_detected, 
-                    f"Correctly rejected duplicate email with error: {error_message}",
-                    {
-                        "status_code": response.status_code,
-                        "error_message": error_message,
-                        "email_error_detected": email_error_detected
-                    }
-                )
-                return email_error_detected
-            else:
-                self.log_test("Duplicate Email Registration", False, f"Expected 400, got HTTP {response.status_code}", response.json())
-                return False
-                
-        except Exception as e:
-            self.log_test("Duplicate Email Registration", False, f"Exception: {str(e)}")
-            return False
-
-    def test_new_user_login(self) -> bool:
-        """Test login with newly registered user"""
-        try:
-            if not self.test_user_data:
-                self.log_test("New User Login", False, "No test user data available")
-                return False
-            
-            login_data = {
-                "username": self.test_user_data["username"],
-                "password": self.test_user_data["password"]
-            }
-            
-            url = f"{self.base_url}/auth/login"
-            response = self.session.post(url, json=login_data)
+            response = self.session.post(url, headers=headers)
             
             if response.status_code == 200:
                 data = response.json()
-                access_token = data.get("access_token")
-                token_type = data.get("token_type")
-                user_info = data.get("user", {})
+                success_message = data.get("message", "")
                 
-                # Verify login success
-                login_success = all([
-                    access_token,
-                    token_type == "bearer",
-                    user_info.get("username") == self.test_user_data["username"]
-                ])
+                # Check if response indicates success
+                block_success = "bloqueado" in success_message.lower() or "blocked" in success_message.lower()
                 
                 self.log_test(
-                    "New User Login", 
-                    login_success, 
-                    f"Successfully logged in new user {self.test_user_data['username']}",
-                    {
-                        "username": self.test_user_data["username"],
-                        "token_received": bool(access_token),
-                        "token_type": token_type,
-                        "user_info": user_info,
-                        "login_success": login_success
-                    }
+                    "Block User", 
+                    block_success, 
+                    f"Successfully blocked user {username}: {success_message}",
+                    {"username": username, "message": success_message}
                 )
-                return login_success
+                return block_success
             else:
                 error_data = response.json() if response.content else {}
-                self.log_test("New User Login", False, f"HTTP {response.status_code}", error_data)
+                self.log_test("Block User", False, f"HTTP {response.status_code}", error_data)
                 return False
                 
         except Exception as e:
-            self.log_test("New User Login", False, f"Exception: {str(e)}")
+            self.log_test("Block User", False, f"Exception: {str(e)}")
             return False
 
-    def test_jwt_authentication(self) -> bool:
-        """Test JWT authentication with protected endpoint"""
+    def test_verify_user_blocked(self) -> bool:
+        """Verify user is blocked by checking admin users list"""
         try:
-            if not self.auth_token:
-                self.log_test("JWT Authentication", False, "No auth token available")
+            if not self.admin_token:
+                self.log_test("Verify User Blocked", False, "No admin token available")
                 return False
             
-            url = f"{self.base_url}/auth/me"
-            response = self.session.get(url)
+            url = f"{self.base_url}/admin/users"
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            
+            response = self.session.get(url, headers=headers)
+            
+            if response.status_code == 200:
+                users = response.json()
+                
+                # Find testuser123 in the list
+                target_user = None
+                for user in users:
+                    if user.get("username") == "testuser123":
+                        target_user = user
+                        break
+                
+                if target_user:
+                    is_disabled = target_user.get("disabled", False)
+                    
+                    self.log_test(
+                        "Verify User Blocked", 
+                        is_disabled, 
+                        f"User testuser123 disabled status: {is_disabled}",
+                        {"username": "testuser123", "disabled": is_disabled, "user_data": target_user}
+                    )
+                    return is_disabled
+                else:
+                    self.log_test("Verify User Blocked", False, "User testuser123 not found in users list")
+                    return False
+            else:
+                error_data = response.json() if response.content else {}
+                self.log_test("Verify User Blocked", False, f"HTTP {response.status_code}", error_data)
+                return False
+                
+        except Exception as e:
+            self.log_test("Verify User Blocked", False, f"Exception: {str(e)}")
+            return False
+
+    def test_unblock_user(self) -> bool:
+        """Test unblocking a user (admin only)"""
+        try:
+            if not self.admin_token:
+                self.log_test("Unblock User", False, "No admin token available")
+                return False
+            
+            username = "testuser123"
+            url = f"{self.base_url}/admin/users/{username}/unblock"
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            
+            response = self.session.post(url, headers=headers)
             
             if response.status_code == 200:
                 data = response.json()
-                username = data.get("username")
-                full_name = data.get("full_name")
+                success_message = data.get("message", "")
                 
-                # Verify response structure
-                auth_success = all([
-                    username,
-                    full_name,
-                    username == TEST_CREDENTIALS["username"]
-                ])
+                # Check if response indicates success
+                unblock_success = "desbloqueado" in success_message.lower() or "unblocked" in success_message.lower()
                 
                 self.log_test(
-                    "JWT Authentication", 
-                    auth_success, 
-                    f"Successfully accessed protected endpoint as {username}",
-                    {
-                        "username": username,
-                        "full_name": full_name,
-                        "auth_success": auth_success
-                    }
+                    "Unblock User", 
+                    unblock_success, 
+                    f"Successfully unblocked user {username}: {success_message}",
+                    {"username": username, "message": success_message}
                 )
-                return auth_success
+                return unblock_success
             else:
                 error_data = response.json() if response.content else {}
-                self.log_test("JWT Authentication", False, f"HTTP {response.status_code}", error_data)
+                self.log_test("Unblock User", False, f"HTTP {response.status_code}", error_data)
                 return False
                 
         except Exception as e:
-            self.log_test("JWT Authentication", False, f"Exception: {str(e)}")
+            self.log_test("Unblock User", False, f"Exception: {str(e)}")
             return False
 
-    def test_google_oauth_session_endpoint(self) -> bool:
-        """Test Google OAuth session endpoint (should return proper error for invalid session)"""
+    def test_verify_user_unblocked(self) -> bool:
+        """Verify user is unblocked by checking admin users list"""
         try:
-            url = f"{self.base_url}/auth/google/session"
+            if not self.admin_token:
+                self.log_test("Verify User Unblocked", False, "No admin token available")
+                return False
             
-            # Test with invalid session_id
-            invalid_session_data = {
-                "session_id": "invalid_session_id_12345"
-            }
+            url = f"{self.base_url}/admin/users"
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
             
-            response = self.session.post(url, json=invalid_session_data)
+            response = self.session.get(url, headers=headers)
             
-            # Should return 401 or 503 for invalid session
-            if response.status_code in [401, 503]:
-                error_data = response.json() if response.content else {}
-                error_message = error_data.get("detail", "")
+            if response.status_code == 200:
+                users = response.json()
                 
-                proper_error = any([
-                    "sesión" in error_message.lower(),
-                    "session" in error_message.lower(),
-                    "inválida" in error_message.lower(),
-                    "invalid" in error_message.lower(),
-                    "expirada" in error_message.lower(),
-                    "expired" in error_message.lower(),
-                    "conectando" in error_message.lower(),
-                    "connecting" in error_message.lower()
-                ])
+                # Find testuser123 in the list
+                target_user = None
+                for user in users:
+                    if user.get("username") == "testuser123":
+                        target_user = user
+                        break
                 
-                self.log_test(
-                    "Google OAuth Session Endpoint", 
-                    proper_error, 
-                    f"Correctly handled invalid session with status {response.status_code}: {error_message}",
-                    {
-                        "status_code": response.status_code,
-                        "error_message": error_message,
-                        "proper_error": proper_error
-                    }
-                )
-                return proper_error
+                if target_user:
+                    is_disabled = target_user.get("disabled", False)
+                    is_enabled = not is_disabled
+                    
+                    self.log_test(
+                        "Verify User Unblocked", 
+                        is_enabled, 
+                        f"User testuser123 disabled status: {is_disabled} (should be False)",
+                        {"username": "testuser123", "disabled": is_disabled, "user_data": target_user}
+                    )
+                    return is_enabled
+                else:
+                    self.log_test("Verify User Unblocked", False, "User testuser123 not found in users list")
+                    return False
             else:
-                self.log_test("Google OAuth Session Endpoint", False, f"Expected 401/503, got HTTP {response.status_code}", response.json())
+                error_data = response.json() if response.content else {}
+                self.log_test("Verify User Unblocked", False, f"HTTP {response.status_code}", error_data)
                 return False
                 
         except Exception as e:
-            self.log_test("Google OAuth Session Endpoint", False, f"Exception: {str(e)}")
+            self.log_test("Verify User Unblocked", False, f"Exception: {str(e)}")
             return False
 
-    def test_google_oauth_me_endpoint(self) -> bool:
-        """Test Google OAuth me endpoint (should return proper error for no session)"""
+    def test_delete_temp_user(self) -> bool:
+        """Test deleting the temporary user"""
         try:
-            url = f"{self.base_url}/auth/google/me"
+            if not self.admin_token or not self.temp_user_data:
+                self.log_test("Delete Temp User", False, "No admin token or temp user data available")
+                return False
             
-            # Test without session token
-            response = self.session.get(url)
+            username = self.temp_user_data["username"]
+            url = f"{self.base_url}/admin/users/{username}"
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
             
-            # Should return 401 for no authentication
-            if response.status_code == 401:
-                error_data = response.json() if response.content else {}
-                error_message = error_data.get("detail", "")
+            response = self.session.delete(url, headers=headers)
+            
+            if response.status_code == 200:
+                data = response.json()
+                success_message = data.get("message", "")
                 
-                proper_error = any([
-                    "autenticado" in error_message.lower(),
-                    "authenticated" in error_message.lower(),
-                    "sesión" in error_message.lower(),
-                    "session" in error_message.lower()
-                ])
+                # Check if response indicates success
+                delete_success = "eliminado" in success_message.lower() or "deleted" in success_message.lower()
                 
                 self.log_test(
-                    "Google OAuth Me Endpoint", 
-                    proper_error, 
-                    f"Correctly handled no session with status {response.status_code}: {error_message}",
-                    {
-                        "status_code": response.status_code,
-                        "error_message": error_message,
-                        "proper_error": proper_error
-                    }
+                    "Delete Temp User", 
+                    delete_success, 
+                    f"Successfully deleted user {username}: {success_message}",
+                    {"username": username, "message": success_message}
                 )
-                return proper_error
+                return delete_success
             else:
-                self.log_test("Google OAuth Me Endpoint", False, f"Expected 401, got HTTP {response.status_code}", response.json())
+                error_data = response.json() if response.content else {}
+                self.log_test("Delete Temp User", False, f"HTTP {response.status_code}", error_data)
                 return False
                 
         except Exception as e:
-            self.log_test("Google OAuth Me Endpoint", False, f"Exception: {str(e)}")
+            self.log_test("Delete Temp User", False, f"Exception: {str(e)}")
+            return False
+
+    def test_cannot_delete_admin(self) -> bool:
+        """Test that admin cannot delete themselves"""
+        try:
+            if not self.admin_token:
+                self.log_test("Cannot Delete Admin", False, "No admin token available")
+                return False
+            
+            # Try to delete the admin user (spencer3009)
+            username = ADMIN_CREDENTIALS["username"]
+            url = f"{self.base_url}/admin/users/{username}"
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            
+            response = self.session.delete(url, headers=headers)
+            
+            # Should return 400 error
+            if response.status_code == 400:
+                data = response.json()
+                error_message = data.get("detail", "")
+                
+                # Check for expected error message
+                self_delete_error = any([
+                    "eliminarte a ti mismo" in error_message.lower(),
+                    "delete yourself" in error_message.lower(),
+                    "cannot delete" in error_message.lower()
+                ])
+                
+                self.log_test(
+                    "Cannot Delete Admin", 
+                    self_delete_error, 
+                    f"Correctly prevented admin self-deletion: {error_message}",
+                    {"status_code": response.status_code, "error_message": error_message}
+                )
+                return self_delete_error
+            else:
+                self.log_test("Cannot Delete Admin", False, f"Expected 400, got HTTP {response.status_code}", response.json())
+                return False
+                
+        except Exception as e:
+            self.log_test("Cannot Delete Admin", False, f"Exception: {str(e)}")
+            return False
+
+    def test_non_admin_access_denied(self) -> bool:
+        """Test that non-admin users cannot access admin endpoints"""
+        try:
+            if not self.non_admin_token:
+                self.log_test("Non-Admin Access Denied", False, "No non-admin token available")
+                return False
+            
+            # Try to block a user with non-admin token
+            username = "testuser123"
+            url = f"{self.base_url}/admin/users/{username}/block"
+            headers = {"Authorization": f"Bearer {self.non_admin_token}"}
+            
+            response = self.session.post(url, headers=headers)
+            
+            # Should return 403 error
+            if response.status_code == 403:
+                data = response.json()
+                error_message = data.get("detail", "")
+                
+                # Check for expected error message
+                access_denied = any([
+                    "acceso denegado" in error_message.lower(),
+                    "access denied" in error_message.lower(),
+                    "forbidden" in error_message.lower(),
+                    "permisos" in error_message.lower(),
+                    "permission" in error_message.lower()
+                ])
+                
+                self.log_test(
+                    "Non-Admin Access Denied", 
+                    access_denied, 
+                    f"Correctly denied non-admin access: {error_message}",
+                    {"status_code": response.status_code, "error_message": error_message}
+                )
+                return access_denied
+            else:
+                self.log_test("Non-Admin Access Denied", False, f"Expected 403, got HTTP {response.status_code}", response.json())
+                return False
+                
+        except Exception as e:
+            self.log_test("Non-Admin Access Denied", False, f"Exception: {str(e)}")
             return False
 
     def run_comprehensive_test(self):
-        """Run all authentication tests in sequence"""
+        """Run all admin user management tests in sequence"""
         print("=" * 80)
-        print("🔐 MINDORAMAP REGISTRATION & GOOGLE OAUTH AUTHENTICATION TESTING")
+        print("🔐 MINDORAMAP ADMIN USER MANAGEMENT TESTING")
         print("=" * 80)
         print(f"Base URL: {self.base_url}")
-        print(f"Test User: {TEST_CREDENTIALS['username']}")
+        print(f"Admin User: {ADMIN_CREDENTIALS['username']}")
+        print(f"Non-Admin User: {NON_ADMIN_CREDENTIALS['username']}")
         print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print()
         
-        # Step 1: Test existing user login
-        print("🔍 Testing Existing User Login...")
-        self.test_existing_user_login()
+        # Step 1: Get admin token
+        print("🔍 Getting Admin Token...")
+        if not self.get_admin_token():
+            print("❌ Cannot proceed without admin token")
+            return
         
-        # Step 2: Test JWT authentication with existing user
-        print("🔍 Testing JWT Authentication...")
-        self.test_jwt_authentication()
+        # Step 2: Get non-admin token
+        print("🔍 Getting Non-Admin Token...")
+        self.get_non_admin_token()
         
-        # Step 3: Test user registration
-        print("🔍 Testing User Registration...")
-        self.test_user_registration()
+        # Step 3: Create temporary user for deletion testing
+        print("🔍 Creating Temporary User...")
+        self.create_temp_user()
         
-        # Step 4: Test duplicate username registration (should fail)
-        print("🔍 Testing Duplicate Username Registration...")
-        self.test_duplicate_username_registration()
+        # Step 4: Test block user endpoint
+        print("🔍 Testing Block User Endpoint...")
+        self.test_block_user()
         
-        # Step 5: Test duplicate email registration (should fail)
-        print("🔍 Testing Duplicate Email Registration...")
-        self.test_duplicate_email_registration()
+        # Step 5: Verify user is blocked
+        print("🔍 Verifying User is Blocked...")
+        self.test_verify_user_blocked()
         
-        # Step 6: Test login with newly registered user
-        print("🔍 Testing New User Login...")
-        self.test_new_user_login()
+        # Step 6: Test unblock user endpoint
+        print("🔍 Testing Unblock User Endpoint...")
+        self.test_unblock_user()
         
-        # Step 7: Test Google OAuth endpoints
-        print("🔍 Testing Google OAuth Session Endpoint...")
-        self.test_google_oauth_session_endpoint()
+        # Step 7: Verify user is unblocked
+        print("🔍 Verifying User is Unblocked...")
+        self.test_verify_user_unblocked()
         
-        print("🔍 Testing Google OAuth Me Endpoint...")
-        self.test_google_oauth_me_endpoint()
+        # Step 8: Test delete temporary user
+        print("🔍 Testing Delete User Endpoint...")
+        self.test_delete_temp_user()
+        
+        # Step 9: Test security - cannot delete admin
+        print("🔍 Testing Security - Cannot Delete Admin...")
+        self.test_cannot_delete_admin()
+        
+        # Step 10: Test security - non-admin access denied
+        print("🔍 Testing Security - Non-Admin Access Denied...")
+        self.test_non_admin_access_denied()
         
         # Print summary
         self.print_summary()
@@ -472,7 +490,7 @@ class AuthenticationTester:
     def print_summary(self):
         """Print test summary"""
         print("\n" + "=" * 80)
-        print("📊 AUTHENTICATION TEST SUMMARY")
+        print("📊 ADMIN USER MANAGEMENT TEST SUMMARY")
         print("=" * 80)
         
         total_tests = len(self.test_results)

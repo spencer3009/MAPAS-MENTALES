@@ -670,7 +670,7 @@ const UsersSection = ({ users, loading, onEditUser, token }) => {
 };
 
 // Sección de Editor de Landing Page mejorada
-const LandingEditorSection = ({ content, loading, token, onUpdate, onEditLanding }) => {
+const LandingEditorSection = ({ content, loading, token, onUpdate }) => {
   const [editContent, setEditContent] = useState(content || {});
   const [saving, setSaving] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');

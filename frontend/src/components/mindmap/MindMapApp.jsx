@@ -232,10 +232,8 @@ const MindMapApp = () => {
   const handleProjectRestored = useCallback(() => {
     // Recargar proyectos y conteo de papelera
     loadTrashCount();
-    // El hook useNodes debería actualizar automáticamente la lista de proyectos
-    // cuando se hace fetch, pero podemos forzar una recarga si es necesario
-    window.location.reload(); // Simple pero efectivo para recargar proyectos
-  }, [loadTrashCount]);
+    reloadProjects();
+  }, [loadTrashCount, reloadProjects]);
 
   // Enriquecer nodos con información de recordatorio
   const nodesWithReminders = nodes.map(node => ({

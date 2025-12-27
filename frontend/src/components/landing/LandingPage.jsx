@@ -687,47 +687,83 @@ const LandingPage = ({ onLogin, onRegister }) => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
             {plans.map((plan, i) => (
               <div 
-                key={i}
-                className={`relative rounded-3xl p-8 transition-all ${
+                key={plan.id || i}
+                className={`relative rounded-3xl p-6 lg:p-8 transition-all ${
                   plan.popular 
-                    ? 'bg-white shadow-2xl shadow-blue-500/20 scale-105 border-2 border-blue-500' 
+                    ? 'bg-white shadow-2xl shadow-blue-500/20 scale-105 border-2 border-blue-500 z-10' 
+                    : plan.coming_soon
+                    ? 'bg-gray-50 shadow-lg border border-gray-200 opacity-80'
                     : 'bg-white shadow-xl border border-gray-200 hover:shadow-2xl hover:border-gray-300'
                 }`}
               >
+                {/* Badge Popular */}
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <div className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold rounded-full shadow-lg">
+                    <div className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold rounded-full shadow-lg whitespace-nowrap">
                       <Star size={14} fill="currentColor" />
-                      MÁS POPULAR
+                      RECOMENDADO
                     </div>
                   </div>
                 )}
 
-                <div className="text-center mb-8">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                {/* Badge Coming Soon */}
+                {plan.coming_soon && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                    <div className="flex items-center gap-1.5 px-4 py-1.5 bg-gray-600 text-white text-sm font-bold rounded-full shadow-lg whitespace-nowrap">
+                      Próximamente
+                    </div>
+                  </div>
+                )}
+
+                <div className="text-center mb-6">
+                  {/* Early Access Badge */}
+                  {plan.badge && !plan.coming_soon && (
+                    <div className="inline-block mb-3">
+                      <span className="text-xs font-semibold px-3 py-1 bg-blue-100 text-blue-700 rounded-full">
+                        {plan.badge}
+                      </span>
+                    </div>
+                  )}
+                  
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{plan.display_name || plan.name}</h3>
                   <div className="flex items-baseline justify-center gap-1 mb-2">
-                    <span className="text-5xl font-black text-gray-900">{plan.price}</span>
-                    <span className="text-gray-500 font-medium">{plan.period}</span>
+                    <span className="text-4xl lg:text-5xl font-black text-gray-900">{plan.price_display || plan.price}</span>
+                    <span className="text-gray-500 font-medium text-sm">{plan.period}</span>
                   </div>
                   <p className="text-gray-500 text-sm">{plan.description}</p>
+                  
+                  {/* Usuarios */}
+                  {plan.users_max && plan.users_max > 1 && (
+                    <p className="text-xs text-blue-600 mt-2 font-medium">
+                      {plan.users_min === plan.users_max 
+                        ? `${plan.users_max} usuarios`
+                        : plan.users_max === -1 
+                        ? `${plan.users_min}+ usuarios`
+                        : `${plan.users_min}-${plan.users_max} usuarios`
+                      }
+                    </p>
+                  )}
                 </div>
 
-                <ul className="space-y-4 mb-8">
-                  {plan.features.map((feature, j) => (
-                    <li key={j} className="flex items-start gap-3">
-                      <CheckCircle2 size={20} className={plan.popular ? 'text-blue-600' : 'text-emerald-500'} />
+                <ul className="space-y-3 mb-6">
+                  {(plan.features || []).map((feature, j) => (
+                    <li key={j} className="flex items-start gap-2">
+                      <CheckCircle2 size={18} className={`flex-shrink-0 mt-0.5 ${plan.popular ? 'text-blue-600' : 'text-emerald-500'}`} />
                       <span className="text-gray-700 text-sm">{feature}</span>
                     </li>
                   ))}
                 </ul>
 
                 <button
-                  onClick={onRegister}
-                  className={`w-full py-4 px-6 rounded-xl font-bold transition-all ${
-                    plan.popular
+                  onClick={plan.coming_soon ? undefined : onRegister}
+                  disabled={plan.coming_soon}
+                  className={`w-full py-3.5 px-6 rounded-xl font-bold transition-all text-sm ${
+                    plan.coming_soon
+                      ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                      : plan.popular
                       ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105'
                       : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                   }`}
@@ -736,6 +772,13 @@ const LandingPage = ({ onLogin, onRegister }) => {
                 </button>
               </div>
             ))}
+          </div>
+
+          {/* Nota de Early Access */}
+          <div className="mt-12 text-center">
+            <p className="text-sm text-gray-500">
+              🚀 <strong>Precios Early Access</strong> - Aprovecha ahora y mantén tu precio para siempre
+            </p>
           </div>
         </div>
       </section>

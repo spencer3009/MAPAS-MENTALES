@@ -2665,10 +2665,13 @@ export const useNodes = () => {
       const result = await saveProjectToServer(newProject);
       
       if (!result.success) {
-        // Si el servidor rechazó (por límite de plan), mostrar error
+        // Si el servidor rechazó (por límite de plan), retornar el error
         console.error('Servidor rechazó la creación:', result.error);
-        alert(result.error || 'No se pudo crear el mapa. Verifica los límites de tu plan.');
-        return false;
+        return { 
+          success: false, 
+          error: result.error,
+          limitType: result.error?.includes('total') || result.error?.includes('5 mapas') ? 'total' : 'active'
+        };
       }
 
       // Solo si el servidor aceptó, actualizar estado local
@@ -2683,11 +2686,10 @@ export const useNodes = () => {
       setHistoryVersion(v => v + 1);
       
       console.log('Nuevo proyecto creado:', newProject.name);
-      return true;
+      return { success: true };
     } catch (error) {
       console.error('Error al crear proyecto en blanco:', error);
-      alert('Error al crear el proyecto. Intenta de nuevo.');
-      return false;
+      return { success: false, error: 'Error al crear el proyecto. Intenta de nuevo.' };
     }
   }, [saveProjectToServer]);
 

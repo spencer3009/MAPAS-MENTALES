@@ -469,23 +469,25 @@ const MindMapApp = () => {
     setShowDeleteModal(true);
   }, [activeProjectId]);
 
-  // Handler para confirmar eliminación
+  // Handler para confirmar eliminación (soft delete - va a la papelera)
   const handleConfirmDelete = useCallback(() => {
     try {
-      console.log('Eliminando proyecto:', projectToDelete);
+      console.log('Enviando proyecto a la papelera:', projectToDelete);
       const success = deleteProject(projectToDelete);
       if (success) {
         resetPan();
         resetZoom();
-        console.log('Proyecto eliminado exitosamente');
+        console.log('Proyecto enviado a la papelera exitosamente');
+        // Actualizar conteo de la papelera
+        loadTrashCount();
       }
     } catch (error) {
-      console.error('Error al eliminar proyecto:', error);
+      console.error('Error al enviar proyecto a la papelera:', error);
     } finally {
       setShowDeleteModal(false);
       setProjectToDelete(null);
     }
-  }, [deleteProject, projectToDelete, resetPan, resetZoom]);
+  }, [deleteProject, projectToDelete, resetPan, resetZoom, loadTrashCount]);
 
   // Handler para cambiar de proyecto
   const handleSwitchProject = useCallback((projectId) => {

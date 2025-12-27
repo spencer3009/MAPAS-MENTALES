@@ -17,10 +17,11 @@ const DockSidebar = ({
   onOpenDashboard,
   onOpenTemplates,
   onOpenReminders,
-  onOpenIntegrations,
+  onOpenTrash,
   onOpenSettings,
   isProjectsSidebarOpen = true,
-  activeView = 'projects'
+  activeView = 'projects',
+  trashCount = 0
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 

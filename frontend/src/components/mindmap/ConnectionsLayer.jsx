@@ -195,6 +195,8 @@ const ConnectionsLayer = memo(({
 
       // =====================================================
       // CASO 1: Botón en línea HORIZONTAL (entre hijos verticales)
+      // En MindHybrid: SOLO en el primer nivel (padre es nodo raíz)
+      // En MindTree: en todos los niveles
       // =====================================================
       let verticalChildren;
       if (layoutType === 'mindtree') {
@@ -214,7 +216,10 @@ const ConnectionsLayer = memo(({
       }
 
       // Si hay 2+ hijos verticales, crear botón en la línea horizontal
-      if (verticalChildren.length >= 2) {
+      // En MindHybrid: SOLO si el padre es el nodo raíz (primer nivel)
+      const shouldShowHorizontalLineButton = layoutType === 'mindtree' || !parent.parentId;
+      
+      if (verticalChildren.length >= 2 && shouldShowHorizontalLineButton) {
         const sortedByX = [...verticalChildren].sort((a, b) => a.x - b.x);
         const leftChild = sortedByX[0];
         const rightChild = sortedByX[sortedByX.length - 1];

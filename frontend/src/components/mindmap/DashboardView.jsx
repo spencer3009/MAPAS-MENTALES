@@ -9,9 +9,17 @@ import {
   Crown,
   Zap,
   Sparkles,
-  Infinity,
   Users,
-  CheckCircle2
+  CheckCircle2,
+  Plus,
+  Upload,
+  GitBranch,
+  List,
+  Target,
+  Briefcase,
+  FileText,
+  Grid3X3,
+  MoreHorizontal
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
@@ -35,9 +43,79 @@ const PLAN_COLORS = {
   'admin': { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200', icon: 'text-red-500' }
 };
 
-const DashboardView = ({ projects = [], onClose, token }) => {
+// Plantillas disponibles
+const TEMPLATES = [
+  {
+    id: 'blank',
+    name: 'Mapa en blanco',
+    icon: Plus,
+    color: 'bg-blue-500',
+    textColor: 'text-white',
+    description: 'Comienza desde cero'
+  },
+  {
+    id: 'mindmap',
+    name: 'Mapa mental',
+    icon: GitBranch,
+    color: 'bg-gradient-to-br from-cyan-400 to-teal-500',
+    preview: '🧠',
+    description: 'Ideas conectadas'
+  },
+  {
+    id: 'orgchart',
+    name: 'Organigrama',
+    icon: Grid3X3,
+    color: 'bg-gradient-to-br from-amber-400 to-orange-500',
+    preview: '📊',
+    description: 'Estructura jerárquica'
+  },
+  {
+    id: 'list',
+    name: 'Lista',
+    icon: List,
+    color: 'bg-gradient-to-br from-gray-400 to-gray-600',
+    preview: '📋',
+    description: 'Tareas y pendientes'
+  },
+  {
+    id: 'smart',
+    name: 'Objetivos SMART',
+    icon: Target,
+    color: 'bg-gradient-to-br from-blue-400 to-indigo-500',
+    preview: '🎯',
+    description: 'Metas específicas'
+  },
+  {
+    id: 'business',
+    name: 'Plan de negocios',
+    icon: Briefcase,
+    color: 'bg-gradient-to-br from-emerald-400 to-green-600',
+    preview: '💼',
+    description: 'Estrategia empresarial'
+  },
+  {
+    id: 'notes',
+    name: 'Toma de notas',
+    icon: FileText,
+    color: 'bg-gradient-to-br from-purple-400 to-violet-500',
+    preview: '📝',
+    description: 'Apuntes rápidos'
+  },
+  {
+    id: 'all',
+    name: 'Todas las plantillas',
+    icon: MoreHorizontal,
+    color: 'bg-gradient-to-br from-blue-100 to-indigo-100',
+    textColor: 'text-blue-600',
+    preview: '🗂️',
+    description: 'Ver más opciones'
+  }
+];
+
+const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOpenTemplates }) => {
   const [planInfo, setPlanInfo] = useState(null);
   const [loadingPlan, setLoadingPlan] = useState(true);
+  const [hoveredTemplate, setHoveredTemplate] = useState(null);
 
   // Cargar información del plan
   useEffect(() => {
@@ -97,229 +175,313 @@ const DashboardView = ({ projects = [], onClose, token }) => {
     return 'bg-blue-500';
   };
 
+  // Obtener nombre del usuario
+  const userName = user?.full_name?.split(' ')[0] || user?.username || 'Usuario';
+
+  // Manejar click en plantilla
+  const handleTemplateClick = (template) => {
+    if (template.id === 'all') {
+      onOpenTemplates?.();
+    } else if (template.id === 'blank') {
+      onNewProject?.('blank');
+    } else {
+      onNewProject?.(template.id);
+    }
+  };
+
   return (
-    <div className="flex-1 h-full overflow-y-auto bg-gray-50 p-6">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-            <LayoutDashboard className="text-white" size={20} />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Panel de Control</h1>
-            <p className="text-sm text-gray-500">Vista general de tu espacio de trabajo</p>
+    <div className="flex-1 h-full overflow-y-auto bg-white">
+      {/* Header con bienvenida y avatar */}
+      <div className="border-b border-gray-100 bg-white sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto px-6 py-6">
+          <div className="flex items-center justify-between">
+            <h1 className="text-3xl font-light text-gray-900">
+              ¡Te damos la bienvenida, <span className="font-semibold">{userName}</span>!
+            </h1>
+            
+            {/* Avatar */}
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white font-semibold text-lg shadow-lg">
+              {userName.charAt(0).toUpperCase()}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Plan Card - NUEVO */}
-      {planInfo && (
-        <div className={`mb-6 rounded-2xl border-2 ${planColors.border} ${planColors.bg} overflow-hidden`}>
-          <div className="p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className={`w-12 h-12 rounded-xl ${isUnlimited ? 'bg-gradient-to-br from-amber-400 to-orange-500' : 'bg-white'} flex items-center justify-center shadow-sm`}>
-                  {isUnlimited ? (
-                    <Crown className="text-white" size={24} />
-                  ) : (
-                    <Zap className={planColors.icon} size={24} />
-                  )}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className={`text-lg font-bold ${planColors.text}`}>
-                      Plan {PLAN_NAMES[planInfo.plan] || planInfo.plan}
-                    </h2>
-                    {isUnlimited && (
-                      <span className="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
-                        ∞ Ilimitado
-                      </span>
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        {/* Sección: Crear un mapa */}
+        <div className="mb-10">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-lg font-medium text-gray-900">Crear un mapa</h2>
+            <button 
+              onClick={() => {}}
+              className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              <Upload size={16} />
+              Importar
+            </button>
+          </div>
+
+          {/* Grid de plantillas */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+            {TEMPLATES.map((template) => {
+              const Icon = template.icon;
+              const isHovered = hoveredTemplate === template.id;
+              
+              return (
+                <button
+                  key={template.id}
+                  onClick={() => handleTemplateClick(template)}
+                  onMouseEnter={() => setHoveredTemplate(template.id)}
+                  onMouseLeave={() => setHoveredTemplate(null)}
+                  className={`
+                    relative flex flex-col items-center justify-center
+                    rounded-xl p-4 h-32
+                    transition-all duration-200
+                    ${template.id === 'blank' 
+                      ? 'bg-blue-500 hover:bg-blue-600' 
+                      : 'bg-gray-50 hover:bg-gray-100 border border-gray-200 hover:border-gray-300'
+                    }
+                    ${isHovered ? 'scale-105 shadow-lg' : 'shadow-sm'}
+                  `}
+                >
+                  {/* Icono o Preview */}
+                  <div className={`
+                    mb-2 text-3xl
+                    ${template.id === 'blank' ? 'text-white' : ''}
+                  `}>
+                    {template.preview ? (
+                      <span>{template.preview}</span>
+                    ) : (
+                      <Icon size={28} className={template.textColor || ''} />
                     )}
                   </div>
-                  <p className="text-sm text-gray-500">
-                    {isUnlimited 
-                      ? 'Acceso completo a todas las funciones' 
-                      : 'Límites de tu plan actual'}
-                  </p>
-                </div>
-              </div>
+                  
+                  {/* Nombre */}
+                  <span className={`
+                    text-xs font-medium text-center leading-tight
+                    ${template.id === 'blank' ? 'text-white' : 'text-gray-700'}
+                  `}>
+                    {template.name}
+                  </span>
 
-              {/* Botón de upgrade solo para plan free */}
-              {planInfo.plan === 'free' && (
-                <button className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-lg flex items-center gap-2 transition-all shadow-md hover:shadow-lg">
-                  <Zap size={16} />
-                  Actualizar a Personal - $3/mes
+                  {/* Tooltip al hover */}
+                  {isHovered && template.id !== 'blank' && template.id !== 'all' && (
+                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 translate-y-full z-20">
+                      <div className="bg-gray-900 text-white text-xs px-3 py-2 rounded-lg shadow-xl whitespace-nowrap">
+                        <div className="font-medium mb-0.5">Vista previa</div>
+                        <button className="px-3 py-1 bg-blue-500 hover:bg-blue-600 rounded text-white text-xs font-medium mt-1">
+                          Usar plantilla
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </button>
-              )}
-            </div>
-
-            {/* Barras de progreso para plan free */}
-            {!isUnlimited && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Mapas Activos */}
-                <div className="bg-white rounded-xl p-4 border border-gray-200">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">Mapas Activos</span>
-                    <span className="text-sm font-bold text-gray-900">
-                      {planInfo.usage.active_maps} / {planInfo.limits.max_active_maps}
-                    </span>
-                  </div>
-                  <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full ${getProgressColor(planInfo.usage.active_maps, planInfo.limits.max_active_maps)} rounded-full transition-all duration-500`}
-                      style={{ width: `${getProgressPercentage(planInfo.usage.active_maps, planInfo.limits.max_active_maps)}%` }}
-                    />
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {planInfo.usage.active_remaining > 0 
-                      ? `${planInfo.usage.active_remaining} disponibles`
-                      : '⚠️ Límite alcanzado'}
-                  </p>
-                </div>
-
-                {/* Mapas Creados (histórico) */}
-                <div className="bg-white rounded-xl p-4 border border-gray-200">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">Mapas Creados (total)</span>
-                    <span className="text-sm font-bold text-gray-900">
-                      {planInfo.usage.total_maps_created} / {planInfo.limits.max_total_maps_created}
-                    </span>
-                  </div>
-                  <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full ${getProgressColor(planInfo.usage.total_maps_created, planInfo.limits.max_total_maps_created)} rounded-full transition-all duration-500`}
-                      style={{ width: `${getProgressPercentage(planInfo.usage.total_maps_created, planInfo.limits.max_total_maps_created)}%` }}
-                    />
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {planInfo.usage.total_remaining > 0 
-                      ? `${planInfo.usage.total_remaining} disponibles`
-                      : '⚠️ Límite de prueba alcanzado'}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Beneficios del plan ilimitado */}
-            {isUnlimited && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Sparkles className="w-4 h-4 text-green-500" />
-                  <span>Mapas ilimitados</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Sparkles className="w-4 h-4 text-green-500" />
-                  <span>Nodos ilimitados</span>
-                </div>
-                {planInfo.limits.can_collaborate && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Users className="w-4 h-4 text-green-500" />
-                    <span>Colaboración</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <CheckCircle2 className="w-4 h-4 text-green-500" />
-                  <span>Exportación PDF</span>
-                </div>
-              </div>
-            )}
-
-            {/* Mensaje de advertencia si está cerca del límite */}
-            {!isUnlimited && !planInfo.usage.can_create_map && (
-              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-700 font-medium flex items-center gap-2">
-                  <Bell size={16} />
-                  Has alcanzado el límite de tu plan. Actualiza a Personal para seguir creando mapas.
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
-              <FolderKanban className="text-blue-600" size={24} />
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-gray-900">{totalProjects}</p>
-              <p className="text-sm text-gray-500">Proyectos</p>
-            </div>
+              );
+            })}
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
-              <TrendingUp className="text-green-600" size={24} />
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-gray-900">{totalNodes}</p>
-              <p className="text-sm text-gray-500">Nodos totales</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
-              <Calendar className="text-purple-600" size={24} />
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-gray-900">{new Date().getDate()}</p>
-              <p className="text-sm text-gray-500">{new Date().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Projects */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-5 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <Clock size={18} className="text-gray-400" />
-            Proyectos recientes
-          </h2>
-        </div>
-        
-        {recentProjects.length > 0 ? (
-          <div className="divide-y divide-gray-100">
-            {recentProjects.map((project) => (
-              <div 
-                key={project.id} 
-                className="px-5 py-4 hover:bg-gray-50 transition-colors flex items-center justify-between"
-              >
+        {/* Plan Card */}
+        {planInfo && (
+          <div className={`mb-8 rounded-2xl border-2 ${planColors.border} ${planColors.bg} overflow-hidden`}>
+            <div className="p-5">
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                    <FolderKanban className="text-blue-600" size={18} />
+                  <div className={`w-12 h-12 rounded-xl ${isUnlimited ? 'bg-gradient-to-br from-amber-400 to-orange-500' : 'bg-white'} flex items-center justify-center shadow-sm`}>
+                    {isUnlimited ? (
+                      <Crown className="text-white" size={24} />
+                    ) : (
+                      <Zap className={planColors.icon} size={24} />
+                    )}
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">{project.name}</p>
-                    <p className="text-sm text-gray-500">{project.nodes?.length || 0} nodos</p>
+                    <div className="flex items-center gap-2">
+                      <h2 className={`text-lg font-bold ${planColors.text}`}>
+                        Plan {PLAN_NAMES[planInfo.plan] || planInfo.plan}
+                      </h2>
+                      {isUnlimited && (
+                        <span className="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
+                          ∞ Ilimitado
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500">
+                      {isUnlimited 
+                        ? 'Acceso completo a todas las funciones' 
+                        : 'Límites de tu plan actual'}
+                    </p>
                   </div>
                 </div>
-                <span className="text-sm text-gray-400">
-                  {formatDate(project.updatedAt)}
-                </span>
+
+                {/* Botón de upgrade solo para plan free */}
+                {planInfo.plan === 'free' && (
+                  <button className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-lg flex items-center gap-2 transition-all shadow-md hover:shadow-lg">
+                    <Zap size={16} />
+                    Actualizar a Personal - $3/mes
+                  </button>
+                )}
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="px-5 py-8 text-center text-gray-500">
-            No hay proyectos todavía
+
+              {/* Barras de progreso para plan free */}
+              {!isUnlimited && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Mapas Activos */}
+                  <div className="bg-white rounded-xl p-4 border border-gray-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-700">Mapas Activos</span>
+                      <span className="text-sm font-bold text-gray-900">
+                        {planInfo.usage.active_maps} / {planInfo.limits.max_active_maps}
+                      </span>
+                    </div>
+                    <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full ${getProgressColor(planInfo.usage.active_maps, planInfo.limits.max_active_maps)} rounded-full transition-all duration-500`}
+                        style={{ width: `${getProgressPercentage(planInfo.usage.active_maps, planInfo.limits.max_active_maps)}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {planInfo.usage.active_remaining > 0 
+                        ? `${planInfo.usage.active_remaining} disponibles`
+                        : '⚠️ Límite alcanzado'}
+                    </p>
+                  </div>
+
+                  {/* Mapas Creados (histórico) */}
+                  <div className="bg-white rounded-xl p-4 border border-gray-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-700">Mapas Creados (total)</span>
+                      <span className="text-sm font-bold text-gray-900">
+                        {planInfo.usage.total_maps_created} / {planInfo.limits.max_total_maps_created}
+                      </span>
+                    </div>
+                    <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full ${getProgressColor(planInfo.usage.total_maps_created, planInfo.limits.max_total_maps_created)} rounded-full transition-all duration-500`}
+                        style={{ width: `${getProgressPercentage(planInfo.usage.total_maps_created, planInfo.limits.max_total_maps_created)}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {planInfo.usage.total_remaining > 0 
+                        ? `${planInfo.usage.total_remaining} disponibles`
+                        : '⚠️ Límite de prueba alcanzado'}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Beneficios del plan ilimitado */}
+              {isUnlimited && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Sparkles className="w-4 h-4 text-green-500" />
+                    <span>Mapas ilimitados</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Sparkles className="w-4 h-4 text-green-500" />
+                    <span>Nodos ilimitados</span>
+                  </div>
+                  {planInfo.limits.can_collaborate && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Users className="w-4 h-4 text-green-500" />
+                      <span>Colaboración</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                    <span>Exportación PDF</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Mensaje de advertencia si está cerca del límite */}
+              {!isUnlimited && !planInfo.usage.can_create_map && (
+                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-700 font-medium flex items-center gap-2">
+                    <Bell size={16} />
+                    Has alcanzado el límite de tu plan. Actualiza a Personal para seguir creando mapas.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         )}
-      </div>
 
-      {/* Quick Actions placeholder */}
-      <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
-        <p className="text-sm text-blue-700 flex items-center gap-2">
-          <Bell size={16} />
-          <span>Próximamente: Widgets personalizables y más estadísticas.</span>
-        </p>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                <FolderKanban className="text-blue-600" size={24} />
+              </div>
+              <div>
+                <p className="text-3xl font-bold text-gray-900">{totalProjects}</p>
+                <p className="text-sm text-gray-500">Proyectos</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
+                <TrendingUp className="text-green-600" size={24} />
+              </div>
+              <div>
+                <p className="text-3xl font-bold text-gray-900">{totalNodes}</p>
+                <p className="text-sm text-gray-500">Nodos totales</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
+                <Calendar className="text-purple-600" size={24} />
+              </div>
+              <div>
+                <p className="text-3xl font-bold text-gray-900">{new Date().getDate()}</p>
+                <p className="text-sm text-gray-500">{new Date().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Projects */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-100">
+            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <Clock size={18} className="text-gray-400" />
+              Proyectos recientes
+            </h2>
+          </div>
+          
+          {recentProjects.length > 0 ? (
+            <div className="divide-y divide-gray-100">
+              {recentProjects.map((project) => (
+                <div 
+                  key={project.id} 
+                  className="px-5 py-4 hover:bg-gray-50 transition-colors flex items-center justify-between cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                      <FolderKanban className="text-blue-600" size={18} />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">{project.name}</p>
+                      <p className="text-sm text-gray-500">{project.nodes?.length || 0} nodos</p>
+                    </div>
+                  </div>
+                  <span className="text-sm text-gray-400">
+                    {formatDate(project.updatedAt)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="px-5 py-8 text-center text-gray-500">
+              No hay proyectos todavía. ¡Crea tu primer mapa!
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

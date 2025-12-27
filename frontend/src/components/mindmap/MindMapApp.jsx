@@ -219,6 +219,7 @@ const MindMapApp = () => {
       
       if (response.ok) {
         const trashProjects = await response.json();
+        console.log('[MindMapApp] Actualizando trashCount:', trashProjects.length);
         setTrashCount(trashProjects.length);
       }
     } catch (error) {

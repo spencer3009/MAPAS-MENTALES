@@ -338,13 +338,13 @@ const LandingPage = ({ onLogin, onRegister }) => {
                 onClick={() => { onLogin(); setMobileMenuOpen(false); }}
                 className="px-4 py-3 text-gray-700 font-medium text-left"
               >
-                Iniciar sesión
+                {content?.nav?.btn_login || 'Iniciar sesión'}
               </button>
               <button
                 onClick={() => { onRegister(); setMobileMenuOpen(false); }}
                 className="px-4 py-3 text-white font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl text-center"
               >
-                Empezar gratis
+                {content?.nav?.btn_registro || 'Empezar gratis'}
               </button>
             </nav>
           </div>

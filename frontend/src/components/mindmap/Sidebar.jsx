@@ -199,43 +199,19 @@ const Sidebar = ({
       w-72 bg-white border-r border-gray-200
       flex flex-col p-5 shadow-sm z-20 shrink-0 h-full
     ">
-      {/* Header con Logo MindoraMap - Branding Principal */}
-      <div className="flex flex-col items-center justify-center py-1.5 mb-2 border-b border-gray-100">
-        <img 
-          src={LOGO_URL} 
-          alt="MindoraMap" 
-          className="h-20 w-auto object-contain"
-        />
-      </div>
-
-      {/* Botones de acción */}
+      {/* Botón de nuevo proyecto */}
       <button
-        onClick={onNewFromTemplate}
+        onClick={onNewBlank}
         className="
           w-full bg-blue-600 hover:bg-blue-700
           text-white font-medium py-3 px-4 rounded-xl
-          flex items-center justify-center gap-2 mb-3
+          flex items-center justify-center gap-2 mb-4
           shadow-md hover:shadow-lg transition-all duration-200
           active:scale-[0.98]
         "
       >
-        <LayoutTemplate size={18} />
-        <span>Desde Template</span>
-      </button>
-
-      <button
-        onClick={onNewBlank}
-        className="
-          w-full bg-white hover:bg-gray-50
-          text-gray-700 border-2 border-gray-200
-          font-medium py-3 px-4 rounded-xl
-          flex items-center justify-center gap-2 mb-4
-          transition-all duration-200
-          hover:border-gray-300 active:scale-[0.98]
-        "
-      >
         <Plus size={18} />
-        <span>En Blanco</span>
+        <span>Nuevo Mapa</span>
       </button>
 
       {/* Sección de proyectos */}

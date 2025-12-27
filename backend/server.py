@@ -445,7 +445,7 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         "full_name": current_user.get("full_name", ""),
         "role": user_role,
         "plan": user_plan,
-        "is_pro": user_plan in ["pro", "team", "admin"]
+        "is_pro": user_plan in ["personal", "pro", "team", "admin"]
     }
 
 @api_router.post("/auth/logout")

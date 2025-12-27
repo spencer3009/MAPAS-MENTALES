@@ -753,6 +753,15 @@ const LandingEditorSection = ({ content, loading, token, onUpdate }) => {
           <Eye className="w-4 h-4" />
           Ver Landing
         </a>
+        {onEditLanding && (
+          <button
+            onClick={onEditLanding}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-xl text-sm font-medium text-white transition-colors"
+          >
+            <Edit3 className="w-4 h-4" />
+            Editar Inline
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-12 gap-6">

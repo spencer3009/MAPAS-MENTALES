@@ -191,9 +191,20 @@ const LandingPage = ({ onLogin, onRegister, onBackToApp, isEditMode = false }) =
     <div className="min-h-screen bg-white">
       {/* Admin indicator */}
       {isAdmin && (
-        <div className="fixed bottom-4 left-4 z-50 bg-purple-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 text-sm">
-          <Edit3 className="w-4 h-4" />
-          Modo edición activo
+        <div className="fixed bottom-4 left-4 z-50 flex items-center gap-3">
+          <div className="bg-purple-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 text-sm">
+            <Edit3 className="w-4 h-4" />
+            Modo edición activo
+          </div>
+          {onBackToApp && (
+            <button
+              onClick={onBackToApp}
+              className="bg-gray-900 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 text-sm hover:bg-gray-800 transition-colors"
+            >
+              <ArrowRight className="w-4 h-4 rotate-180" />
+              Volver a la app
+            </button>
+          )}
         </div>
       )}
 

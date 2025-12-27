@@ -641,6 +641,10 @@ class AdminUserManagementTester:
 
     def get_non_admin_token(self) -> bool:
         """Get non-admin authentication token"""
+        NON_ADMIN_CREDENTIALS = {
+            "username": "carlos3009",
+            "password": "Socios3009"
+        }
         try:
             url = f"{self.base_url}/auth/login"
             response = self.session.post(url, json=NON_ADMIN_CREDENTIALS)

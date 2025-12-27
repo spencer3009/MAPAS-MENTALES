@@ -5,8 +5,6 @@ import {
   Crown, Zap, Sparkles
 } from 'lucide-react';
 
-// URL del logo MindoraMap (horizontal)
-const LOGO_URL = 'https://customer-assets.emergentagent.com/job_mindviz-app/artifacts/k1kioask_image.png';
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
 const MAX_VISIBLE_PROJECTS = 5;

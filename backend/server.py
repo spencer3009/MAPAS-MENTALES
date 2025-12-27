@@ -72,28 +72,32 @@ class Token(BaseModel):
 # Límites por plan
 PLAN_LIMITS = {
     "free": {
-        "max_maps": 3,
+        "max_active_maps": 3,        # Mapas activos al mismo tiempo
+        "max_total_maps_created": 5, # Mapas creados en total (histórico)
         "max_nodes_per_map": 50,
         "can_collaborate": False,
         "can_export_pdf": False,
         "priority_support": False
     },
     "pro": {
-        "max_maps": -1,  # -1 = ilimitado
+        "max_active_maps": -1,       # -1 = ilimitado
+        "max_total_maps_created": -1,
         "max_nodes_per_map": -1,
         "can_collaborate": False,
         "can_export_pdf": True,
         "priority_support": True
     },
     "team": {
-        "max_maps": -1,
+        "max_active_maps": -1,
+        "max_total_maps_created": -1,
         "max_nodes_per_map": -1,
         "can_collaborate": True,
         "can_export_pdf": True,
         "priority_support": True
     },
     "admin": {
-        "max_maps": -1,
+        "max_active_maps": -1,
+        "max_total_maps_created": -1,
         "max_nodes_per_map": -1,
         "can_collaborate": True,
         "can_export_pdf": True,

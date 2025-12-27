@@ -1274,6 +1274,36 @@ async def permanent_delete_project(
     return {"message": "Proyecto eliminado permanentemente"}
 
 
+@api_router.delete("/projects/trash/empty")
+async def empty_trash(
+    current_user: dict = Depends(get_current_user)
+):
+    """Vaciar la papelera - eliminar todos los proyectos permanentemente"""
+    username = current_user["username"]
+    
+    # Obtener todos los proyectos en papelera del usuario
+    trash_projects = await db.projects.find({
+        "username": username,
+        "is_deleted": True
+    }).to_list(1000)
+    
+    if not trash_projects:
+        return {"message": "La papelera ya está vacía", "deleted_count": 0}
+    
+    # Eliminar todos los proyectos de la papelera
+    result = await db.projects.delete_many({
+        "username": username,
+        "is_deleted": True
+    })
+    
+    logger.info(f"Papelera vaciada: {result.deleted_count} proyectos eliminados permanentemente por {username}")
+    
+    return {
+        "message": f"Se eliminaron {result.deleted_count} proyecto(s) permanentemente",
+        "deleted_count": result.deleted_count
+    }
+
+
 # ==========================================
 # PROJECT MANAGEMENT ENDPOINTS
 # ==========================================

@@ -2026,8 +2026,8 @@ export const useNodes = () => {
   // 3. El espacio se propaga hacia arriba
   // =====================================================
 
-  // Función auxiliar: Calcular el ancho total requerido por un subárbol
-  const calculateSubtreeWidth = useCallback((nodeId, allNodes, childWidth = 160, minSpacing = 180) => {
+  // Función auxiliar: Calcular el ancho total requerido por un subárbol en MindHybrid
+  const calculateHybridSubtreeWidth = useCallback((nodeId, allNodes, childWidth = 160, minSpacing = 180) => {
     const node = allNodes.find(n => n.id === nodeId);
     if (!node) return childWidth;
     
@@ -2044,7 +2044,7 @@ export const useNodes = () => {
     
     // Calcular el ancho de cada subárbol hijo
     const childWidths = verticalChildren.map(child => 
-      calculateSubtreeWidth(child.id, allNodes, childWidth, minSpacing)
+      calculateHybridSubtreeWidth(child.id, allNodes, childWidth, minSpacing)
     );
     
     // El ancho total es la suma de los anchos de los subárboles + espaciado entre ellos
@@ -2113,7 +2113,7 @@ export const useNodes = () => {
       const subtreeData = verticalChildren.map(child => ({
         id: child.id,
         node: child,
-        requiredWidth: calculateSubtreeWidth(child.id, updatedNodes, childWidth, minSiblingSpacingV)
+        requiredWidth: calculateHybridSubtreeWidth(child.id, updatedNodes, childWidth, minSiblingSpacingV)
       }));
       
       // PASO 2: Calcular el espaciado necesario entre hermanos
@@ -2172,7 +2172,7 @@ export const useNodes = () => {
     }
     
     return updatedNodes;
-  }, [calculateSubtreeWidth]);
+  }, [calculateHybridSubtreeWidth]);
 
   // Aplicar alineación completa MindHybrid
   const applyFullMindHybridAlignment = useCallback(() => {

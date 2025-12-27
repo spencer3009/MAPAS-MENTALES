@@ -445,10 +445,9 @@ const Canvas = ({
       if (onSaveNodePositionToHistory) {
         onSaveNodePositionToHistory();
       }
-      // Aplicar alineación automática si está habilitada
-      if (autoAlignEnabled && onAutoAlign) {
-        setTimeout(() => onAutoAlign(), 50);
-      }
+      // NO aplicar auto-alineación después del drag manual
+      // El usuario movió el nodo intencionalmente, respetar su posición
+      // El auto-align solo se aplica al CREAR o ELIMINAR nodos
     }
     setDragging(null);
     onStopPanning();

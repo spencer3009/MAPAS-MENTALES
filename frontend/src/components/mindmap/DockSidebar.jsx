@@ -156,8 +156,35 @@ const DockSidebar = ({
           })}
         </nav>
 
+        {/* Logout Button */}
+        <div className="p-2 border-t border-slate-700/50">
+          <button
+            onClick={onLogout}
+            className={`
+              w-full flex items-center gap-3
+              py-3 px-3 rounded-xl
+              transition-all duration-200
+              text-slate-400 hover:bg-red-500/20 hover:text-red-400
+              group
+            `}
+          >
+            <LogOut 
+              size={22} 
+              className="shrink-0 transition-transform duration-200 group-hover:scale-110"
+            />
+            
+            <span className={`
+              text-sm font-medium whitespace-nowrap
+              transition-all duration-300
+              ${isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2 absolute'}
+            `}>
+              Cerrar sesión
+            </span>
+          </button>
+        </div>
+
         {/* Bottom decoration */}
-        <div className="p-4 border-t border-slate-700/50">
+        <div className="px-4 pb-3 pt-1">
           <div className={`
             text-xs text-slate-500 text-center
             transition-all duration-300

@@ -24,7 +24,13 @@ import {
   Sparkles,
   Eye,
   Mail,
-  Clock
+  Clock,
+  Trash2,
+  Ban,
+  UserX,
+  CheckCircle,
+  AlertTriangle,
+  MoreVertical
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';

@@ -127,17 +127,19 @@ const LandingPage = ({ onLogin, onRegister, onBackToApp, isEditMode = false }) =
       setLoading(false);
     };
 
-    // Check if user is admin
+    // Check if user is admin (either from prop or from localStorage)
     const storedToken = localStorage.getItem('mm_auth_token');
     const storedUser = localStorage.getItem('mm_auth_user');
     if (storedToken && storedUser) {
       const user = JSON.parse(storedUser);
-      setIsAdmin(user.role === 'admin');
+      if (isEditMode || user.role === 'admin') {
+        setIsAdmin(true);
+      }
       setToken(storedToken);
     }
 
     loadContent();
-  }, []);
+  }, [isEditMode]);
 
   // Guardar cambios en una sección
   const saveSection = async (section, data) => {

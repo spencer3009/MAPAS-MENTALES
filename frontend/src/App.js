@@ -1,10 +1,10 @@
 import "./App.css";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { MindMapApp } from "./components/mindmap";
-import { LoginPage, RegisterPage } from "./components/auth";
+import { LoginPage, RegisterPage, AuthCallback } from "./components/auth";
 import { LandingPage } from "./components/landing";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // Componente de carga
 const LoadingScreen = () => (
@@ -19,9 +19,24 @@ const LoadingScreen = () => (
 // Componente principal con lógica de autenticación
 const AppContent = () => {
   const { isAuthenticated, loading } = useAuth();
-  const [authView, setAuthView] = useState(null); // null = landing, 'login' = login, 'register' = register
+  const [authView, setAuthView] = useState(null); // null = landing, 'login' = login, 'register' = register, 'callback' = procesando google
+  const [authError, setAuthError] = useState(null);
 
-  if (loading) {
+  // Detectar session_id en la URL (Google OAuth callback)
+  // IMPORTANTE: Esto debe ejecutarse ANTES del render para evitar race conditions
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash && hash.includes('session_id=')) {
+      setAuthView('callback');
+    }
+  }, []);
+
+  // También verificar en cada render (por si el useEffect no se ejecutó a tiempo)
+  if (window.location.hash?.includes('session_id=') && authView !== 'callback') {
+    setAuthView('callback');
+  }
+
+  if (loading && authView !== 'callback') {
     return <LoadingScreen />;
   }
 
@@ -30,12 +45,29 @@ const AppContent = () => {
     return <MindMapApp />;
   }
 
+  // Si estamos procesando el callback de Google OAuth
+  if (authView === 'callback') {
+    return (
+      <AuthCallback 
+        onSuccess={() => {
+          // El usuario será redirigido automáticamente porque isAuthenticated será true
+          setAuthView(null);
+        }}
+        onError={(error) => {
+          setAuthError(error);
+          setAuthView('login');
+        }}
+      />
+    );
+  }
+
   // Si el usuario eligió ir al login
   if (authView === 'login') {
     return (
       <LoginPage 
-        onBackToLanding={() => setAuthView(null)} 
-        onSwitchToRegister={() => setAuthView('register')}
+        onBackToLanding={() => { setAuthView(null); setAuthError(null); }} 
+        onSwitchToRegister={() => { setAuthView('register'); setAuthError(null); }}
+        externalError={authError}
       />
     );
   }
@@ -44,8 +76,8 @@ const AppContent = () => {
   if (authView === 'register') {
     return (
       <RegisterPage 
-        onBackToLanding={() => setAuthView(null)} 
-        onSwitchToLogin={() => setAuthView('login')}
+        onBackToLanding={() => { setAuthView(null); setAuthError(null); }} 
+        onSwitchToLogin={() => { setAuthView('login'); setAuthError(null); }}
       />
     );
   }

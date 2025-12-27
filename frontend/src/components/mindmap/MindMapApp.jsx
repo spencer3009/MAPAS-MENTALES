@@ -611,7 +611,24 @@ const MindMapApp = ({ onAdminClick }) => {
   const renderMainContent = () => {
     switch (activeView) {
       case 'dashboard':
-        return <DashboardView projects={projects} token={token} />;
+        return (
+          <DashboardView 
+            projects={projects} 
+            token={token}
+            user={user}
+            onNewProject={(templateType) => {
+              setActiveView('projects');
+              setIsProjectsSidebarOpen(true);
+              // Crear nuevo proyecto con plantilla
+              if (templateType === 'blank') {
+                handleNewBlankClick();
+              } else {
+                setShowLayoutSelector(true);
+              }
+            }}
+            onOpenTemplates={handleOpenTemplatesView}
+          />
+        );
       case 'templates':
         return <TemplatesView onSelectTemplate={(type) => {
           setActiveView('projects');

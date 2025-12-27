@@ -368,32 +368,36 @@ const LandingPage = ({ onLogin, onRegister }) => {
             <div className="text-center lg:text-left">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 rounded-full text-sm font-semibold mb-6 border border-blue-200/50">
                 <Sparkles size={16} className="text-blue-500" />
-                +2,500 empresarios ya confían en nosotros
+                {content?.hero?.badge || '+2,500 empresarios ya confían en nosotros'}
               </div>
               
               <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-gray-900 leading-[1.1] mb-6">
-                Convierte el
-                <span className="relative inline-block mx-2">
-                  <span className="relative z-10 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                    caos
-                  </span>
-                  <svg className="absolute -bottom-2 left-0 w-full" height="12" viewBox="0 0 100 12" preserveAspectRatio="none">
-                    <path d="M0 8 Q 25 0, 50 8 T 100 8" stroke="url(#gradient)" strokeWidth="4" fill="none" strokeLinecap="round"/>
-                    <defs>
-                      <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="#3b82f6"/>
-                        <stop offset="100%" stopColor="#8b5cf6"/>
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </span>
-                en claridad
+                {(content?.hero?.title || 'Convierte el caos en claridad').split(' ').map((word, i, arr) => {
+                  // La palabra "caos" tiene estilo especial
+                  if (word.toLowerCase() === 'caos') {
+                    return (
+                      <span key={i} className="relative inline-block mx-2">
+                        <span className="relative z-10 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                          {word}
+                        </span>
+                        <svg className="absolute -bottom-2 left-0 w-full" height="12" viewBox="0 0 100 12" preserveAspectRatio="none">
+                          <path d="M0 8 Q 25 0, 50 8 T 100 8" stroke="url(#gradient)" strokeWidth="4" fill="none" strokeLinecap="round"/>
+                          <defs>
+                            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                              <stop offset="0%" stopColor="#3b82f6"/>
+                              <stop offset="100%" stopColor="#8b5cf6"/>
+                            </linearGradient>
+                          </defs>
+                        </svg>
+                      </span>
+                    );
+                  }
+                  return <span key={i}>{word}{i < arr.length - 1 ? ' ' : ''}</span>;
+                })}
               </h1>
               
               <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                La plataforma de mapas mentales más potente para empresarios. 
-                Organiza ideas, planifica estrategias y toma mejores decisiones 
-                <span className="font-semibold text-gray-800"> en minutos, no en horas.</span>
+                {content?.hero?.subtitle || 'La plataforma de mapas mentales más potente para empresarios. Organiza ideas, planifica estrategias y toma mejores decisiones en minutos, no en horas.'}
               </p>
               
               <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start mb-8">
@@ -401,7 +405,7 @@ const LandingPage = ({ onLogin, onRegister }) => {
                   onClick={onRegister}
                   className="group w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-lg rounded-2xl shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 flex items-center justify-center gap-2 transition-all hover:scale-105"
                 >
-                  Empieza gratis ahora
+                  {content?.hero?.btn_primary || 'Empieza gratis ahora'}
                   <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                 </button>
                 <button
@@ -409,7 +413,7 @@ const LandingPage = ({ onLogin, onRegister }) => {
                   className="w-full sm:w-auto px-8 py-4 bg-white hover:bg-gray-50 text-gray-700 font-semibold text-lg rounded-2xl border-2 border-gray-200 hover:border-blue-300 flex items-center justify-center gap-2 transition-all"
                 >
                   <Play size={18} className="text-blue-600" />
-                  Ver demo
+                  {content?.hero?.btn_secondary || 'Ver demo'}
                 </button>
               </div>
 
@@ -423,13 +427,13 @@ const LandingPage = ({ onLogin, onRegister }) => {
                       </div>
                     ))}
                   </div>
-                  <span className="font-medium">+2,500 usuarios</span>
+                  <span className="font-medium">{content?.hero?.trust_users || '+2,500 usuarios'}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   {[1,2,3,4,5].map(i => (
                     <Star key={i} size={16} className="text-yellow-400 fill-yellow-400" />
                   ))}
-                  <span className="font-medium ml-1">4.9/5</span>
+                  <span className="font-medium ml-1">{content?.hero?.trust_rating || '4.9/5'}</span>
                 </div>
               </div>
             </div>

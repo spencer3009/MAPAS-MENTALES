@@ -870,10 +870,24 @@ The **MindHybrid Layout Displacement Bug** reported by the user **CANNOT BE REPR
 
 ## MINDHYBRID NODE DELETION BUG TESTING (December 27, 2025) ⚠️ SESSION MANAGEMENT ISSUES PREVENT FULL VERIFICATION
 
-### 🔍 CRITICAL BUG VERIFICATION - NODE DELETION AND SIBLING REDISTRIBUTION
+(Previous test data truncated)
 
-#### Test Objective:
-Verify the user's reported critical bug where MindHybrid nodes should redistribute correctly after deleting a sibling node:
+---
+
+## LANDING PAGE REDESIGN TESTING (December 27, 2025)
+
+### 🔍 TESTING REQUIREMENTS:
+
+#### Visual Requirements:
+1. **Logo**: Only ONE logo (the image with MindoraMap icon), no duplicated text
+2. **Header**: Navigation menu with all required items
+3. **Sections**: Hero, Platform, Benefits, How It Works, Pricing, FAQ, CTA
+4. **Responsive**: Mobile menu with hamburger icon
+5. **Buttons**: "Iniciar sesión" and "Empezar gratis" redirect to login page
+
+### Test URL: http://localhost:3000
+
+### ⏳ TESTING IN PROGRESS...tical bug where MindHybrid nodes should redistribute correctly after deleting a sibling node:
 - **Expected Behavior**: When deleting a middle node (e.g., "Nieto 2"), remaining siblings ("Nieto 1" and "Nieto 3") should redistribute centered under the parent
 - **Bug Report**: Before fix, nodes were disorganized and connectors crossed after deletion
 

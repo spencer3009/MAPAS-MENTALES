@@ -498,5 +498,5 @@ class AuthenticationTester:
         print("=" * 80)
 
 if __name__ == "__main__":
-    tester = CollisionDetectionTester()
+    tester = AuthenticationTester()
     tester.run_comprehensive_test()

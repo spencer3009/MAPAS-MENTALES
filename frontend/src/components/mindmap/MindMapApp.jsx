@@ -163,6 +163,10 @@ const MindMapApp = ({ onAdminClick }) => {
   const [showLayoutSelector, setShowLayoutSelector] = useState(false);
   const [pendingProjectName, setPendingProjectName] = useState(null);
 
+  // Estado para el modal de Upgrade a Pro
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeLimitType, setUpgradeLimitType] = useState('active');
+
   // Estado para la Papelera
   const [showTrashView, setShowTrashView] = useState(false);
   const [trashCount, setTrashCount] = useState(0);

@@ -273,6 +273,9 @@ const UsersSection = ({ users, loading, onEditUser, token }) => {
   const [editingUser, setEditingUser] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [saving, setSaving] = useState(false);
+  const [actionLoading, setActionLoading] = useState(null);
+  const [confirmModal, setConfirmModal] = useState(null);
+  const [openMenuUser, setOpenMenuUser] = useState(null);
 
   const filteredUsers = users.filter(user => 
     user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -288,6 +291,7 @@ const UsersSection = ({ users, loading, onEditUser, token }) => {
       role: user.role,
       is_pro: user.is_pro
     });
+    setOpenMenuUser(null);
   };
 
   const handleSave = async () => {
@@ -312,6 +316,53 @@ const UsersSection = ({ users, loading, onEditUser, token }) => {
     setSaving(false);
   };
 
+  const handleDelete = async (username) => {
+    setActionLoading(username);
+    try {
+      const response = await fetch(`${API_URL}/api/admin/users/${username}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        onEditUser();
+      } else {
+        const data = await response.json();
+        alert(data.detail || 'Error al eliminar usuario');
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+    }
+    setActionLoading(null);
+    setConfirmModal(null);
+  };
+
+  const handleBlock = async (username, isBlocked) => {
+    setActionLoading(username);
+    try {
+      const endpoint = isBlocked ? 'unblock' : 'block';
+      const response = await fetch(`${API_URL}/api/admin/users/${username}/${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        onEditUser();
+      } else {
+        const data = await response.json();
+        alert(data.detail || `Error al ${isBlocked ? 'desbloquear' : 'bloquear'} usuario`);
+      }
+    } catch (error) {
+      console.error('Error blocking user:', error);
+    }
+    setActionLoading(null);
+    setOpenMenuUser(null);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -322,6 +373,47 @@ const UsersSection = ({ users, loading, onEditUser, token }) => {
 
   return (
     <div className="space-y-6">
+      {/* Modal de confirmación */}
+      {confirmModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-3 bg-red-100 rounded-full">
+                <AlertTriangle className="w-6 h-6 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Eliminar Usuario</h3>
+                <p className="text-sm text-gray-500">Esta acción no se puede deshacer</p>
+              </div>
+            </div>
+            <p className="text-gray-600 mb-6">
+              ¿Estás seguro de que deseas eliminar permanentemente al usuario <strong>@{confirmModal}</strong>? 
+              Se eliminarán todos sus datos y proyectos.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setConfirmModal(null)}
+                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => handleDelete(confirmModal)}
+                disabled={actionLoading === confirmModal}
+                className="px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-xl font-medium transition-colors flex items-center gap-2"
+              >
+                {actionLoading === confirmModal ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )}
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Gestión de Usuarios</h1>
@@ -343,7 +435,7 @@ const UsersSection = ({ users, loading, onEditUser, token }) => {
       </div>
 
       {/* Stats rápidas */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div className="bg-white rounded-xl border border-gray-100 p-4">
           <p className="text-2xl font-bold text-gray-900">{users.length}</p>
           <p className="text-sm text-gray-500">Total usuarios</p>
@@ -357,8 +449,12 @@ const UsersSection = ({ users, loading, onEditUser, token }) => {
           <p className="text-sm text-gray-500">Usuarios Pro</p>
         </div>
         <div className="bg-white rounded-xl border border-gray-100 p-4">
-          <p className="text-2xl font-bold text-blue-600">{users.filter(u => !u.is_pro).length}</p>
+          <p className="text-2xl font-bold text-blue-600">{users.filter(u => !u.is_pro && !u.disabled).length}</p>
           <p className="text-sm text-gray-500">Usuarios Free</p>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-100 p-4">
+          <p className="text-2xl font-bold text-red-600">{users.filter(u => u.disabled).length}</p>
+          <p className="text-sm text-gray-500">Bloqueados</p>
         </div>
       </div>
 
@@ -371,20 +467,27 @@ const UsersSection = ({ users, loading, onEditUser, token }) => {
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Rol</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Plan</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Registrado</th>
                 <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {filteredUsers.map((user) => (
-                <tr key={user.username} className="hover:bg-gray-50 transition-colors">
+                <tr key={user.username} className={`hover:bg-gray-50 transition-colors ${user.disabled ? 'bg-red-50/50' : ''}`}>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold shadow-lg shadow-blue-500/30">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold shadow-lg ${
+                        user.disabled 
+                          ? 'bg-gray-400' 
+                          : 'bg-gradient-to-br from-blue-500 to-indigo-600 shadow-blue-500/30'
+                      }`}>
                         {user.full_name?.charAt(0) || user.username.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">{user.full_name || user.username}</p>
+                        <p className={`font-medium ${user.disabled ? 'text-gray-400' : 'text-gray-900'}`}>
+                          {user.full_name || user.username}
+                        </p>
                         <p className="text-sm text-gray-500">@{user.username}</p>
                       </div>
                     </div>
@@ -400,7 +503,7 @@ const UsersSection = ({ users, loading, onEditUser, token }) => {
                     ) : (
                       <div className="flex items-center gap-2">
                         <Mail className="w-4 h-4 text-gray-400" />
-                        <span className="text-gray-600">{user.email}</span>
+                        <span className={user.disabled ? 'text-gray-400' : 'text-gray-600'}>{user.email}</span>
                       </div>
                     )}
                   </td>
@@ -446,6 +549,25 @@ const UsersSection = ({ users, loading, onEditUser, token }) => {
                       </span>
                     )}
                   </td>
+                  <td className="px-6 py-4">
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
+                      user.disabled 
+                        ? 'bg-red-100 text-red-700' 
+                        : 'bg-green-100 text-green-700'
+                    }`}>
+                      {user.disabled ? (
+                        <>
+                          <Ban className="w-3 h-3" />
+                          Bloqueado
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle className="w-3 h-3" />
+                          Activo
+                        </>
+                      )}
+                    </span>
+                  </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
                     {user.created_at ? new Date(user.created_at).toLocaleDateString('es-ES', {
                       day: '2-digit',
@@ -471,12 +593,63 @@ const UsersSection = ({ users, loading, onEditUser, token }) => {
                         </button>
                       </div>
                     ) : (
-                      <button
-                        onClick={() => handleEdit(user)}
-                        className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
-                      >
-                        <Edit3 className="w-4 h-4" />
-                      </button>
+                      <div className="relative">
+                        <button
+                          onClick={() => setOpenMenuUser(openMenuUser === user.username ? null : user.username)}
+                          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        >
+                          <MoreVertical className="w-5 h-5" />
+                        </button>
+                        
+                        {/* Dropdown menu */}
+                        {openMenuUser === user.username && (
+                          <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-10">
+                            <button
+                              onClick={() => handleEdit(user)}
+                              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                              Editar usuario
+                            </button>
+                            
+                            {user.role !== 'admin' && (
+                              <>
+                                <button
+                                  onClick={() => handleBlock(user.username, user.disabled)}
+                                  disabled={actionLoading === user.username}
+                                  className={`w-full flex items-center gap-3 px-4 py-2 text-sm ${
+                                    user.disabled 
+                                      ? 'text-green-600 hover:bg-green-50' 
+                                      : 'text-orange-600 hover:bg-orange-50'
+                                  }`}
+                                >
+                                  {actionLoading === user.username ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                  ) : user.disabled ? (
+                                    <CheckCircle className="w-4 h-4" />
+                                  ) : (
+                                    <Ban className="w-4 h-4" />
+                                  )}
+                                  {user.disabled ? 'Desbloquear' : 'Bloquear acceso'}
+                                </button>
+                                
+                                <div className="border-t border-gray-100 my-1" />
+                                
+                                <button
+                                  onClick={() => {
+                                    setConfirmModal(user.username);
+                                    setOpenMenuUser(null);
+                                  }}
+                                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                  Eliminar usuario
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     )}
                   </td>
                 </tr>

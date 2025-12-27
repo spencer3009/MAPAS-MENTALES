@@ -213,6 +213,8 @@ export const AuthProvider = ({ children }) => {
     loading,
     error,
     isAuthenticated: !!user && !!token,
+    isAdmin: user?.role === 'admin',
+    isPro: user?.is_pro || false,
     login,
     register,
     loginWithGoogle,

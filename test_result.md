@@ -3062,6 +3062,36 @@ Based on code analysis of `/app/frontend/src/hooks/useNodes.js`, the collision d
 
 The **Collision Detection Feature Backend Support** is **FULLY FUNCTIONAL** and **COMPLETELY READY**:
 
+---
+
+## 🧪 PENDING TEST - MindHybrid Layout Shrink Bug (December 2024)
+
+### Test Objective:
+Verify that the MindHybrid layout does NOT shrink/collapse after being expanded to avoid collisions, when user clicks on another node or empty canvas.
+
+### Bug Description:
+- When adding multiple vertical child nodes that would collide with adjacent branches, the layout correctly expands horizontally
+- HOWEVER, when clicking on another node or empty canvas (blur/deselect), the layout shrinks back to compressed state, causing overlap
+
+### Test Scenario:
+1. Login with credentials: `spencer3009` / `Socios3009`
+2. Create a new MindHybrid project or use existing one
+3. Create a root node
+4. Add 2+ horizontal children from root (these become vertical branches)
+5. Add many vertical children to ONE branch until it would collide with adjacent branch
+6. Verify layout expands correctly
+7. Click on another node or empty canvas
+8. **CRITICAL CHECK:** Verify layout does NOT shrink and nodes do NOT overlap
+
+### Expected Behavior:
+- Layout expansion should be PERSISTENT
+- Clicking away should NOT revert the layout
+- Branches should maintain proper spacing
+
+### Files to Focus:
+- `/app/frontend/src/hooks/useNodes.js` - `autoAlignMindHybrid` function (lines 2019-2179)
+- Fix attempted at lines 2094-2100: preserving `currentSpacing` to prevent shrinking
+
 #### ✅ CORE ACHIEVEMENTS:
 - **Complete API Support**: All backend APIs support collision detection requirements
 - **MindHybrid Implementation**: Full support for MindHybrid layout with mixed directions

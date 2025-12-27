@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Backend API Testing for MindoraMap Registration and Google OAuth Authentication
-Testing authentication endpoints and user registration functionality
+Backend API Testing for MindoraMap Admin User Management Features
+Testing admin endpoints for blocking, unblocking, and deleting users
 """
 
 import requests
@@ -13,8 +13,12 @@ from typing import Dict, List, Optional
 
 # Test Configuration
 BASE_URL = "https://mindflow-89.preview.emergentagent.com/api"
-TEST_CREDENTIALS = {
+ADMIN_CREDENTIALS = {
     "username": "spencer3009",
+    "password": "Socios3009"
+}
+NON_ADMIN_CREDENTIALS = {
+    "username": "carlos3009",
     "password": "Socios3009"
 }
 

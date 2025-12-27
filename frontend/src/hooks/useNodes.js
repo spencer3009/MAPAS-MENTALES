@@ -1929,12 +1929,14 @@ export const useNodes = () => {
     const childHeight = 64; // Alto estándar de nodos hijos
     
     // Separar hijos por dirección
+    // IMPORTANTE: Excluir nodos creados desde el botón "+" púrpura (tienen connectorParentId)
+    // Estos nodos NO deben redistribuirse automáticamente
     const horizontalChildren = updatedNodes.filter(n => 
-      n.parentId === parentId && n.childDirection === 'horizontal'
+      n.parentId === parentId && n.childDirection === 'horizontal' && !n.connectorParentId
     ).sort((a, b) => a.y - b.y); // Ordenar por Y
     
     const verticalChildren = updatedNodes.filter(n => 
-      n.parentId === parentId && n.childDirection === 'vertical'
+      n.parentId === parentId && n.childDirection === 'vertical' && !n.connectorParentId
     ).sort((a, b) => a.x - b.x); // Ordenar por X
     
     // Constantes de espaciado
@@ -1969,6 +1971,7 @@ export const useNodes = () => {
     
     // Posicionar hijos verticales (abajo, distribuidos horizontalmente)
     // El CENTRO del grupo de hijos debe alinearse con el CENTRO del padre
+    // NOTA: Solo se redistribuyen los nodos verticales "normales", NO los del botón "+"
     if (verticalChildren.length > 0) {
       // Calcular ancho total del grupo (de centro a centro del primer y último nodo)
       const totalGroupWidth = (verticalChildren.length - 1) * siblingSpacingV;

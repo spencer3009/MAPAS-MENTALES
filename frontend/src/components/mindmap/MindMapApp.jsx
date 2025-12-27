@@ -764,6 +764,14 @@ const MindMapApp = () => {
         onSelect={handleLayoutSelect}
         onClose={() => setShowLayoutSelector(false)}
       />
+
+      {/* Vista de Papelera */}
+      <TrashView
+        isOpen={showTrashView}
+        onClose={() => setShowTrashView(false)}
+        onProjectRestored={handleProjectRestored}
+        token={token}
+      />
     </div>
   );
 };

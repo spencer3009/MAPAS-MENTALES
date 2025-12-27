@@ -6,7 +6,8 @@ import {
   Bell, 
   Trash2, 
   Settings,
-  ChevronRight
+  ChevronRight,
+  LogOut
 } from 'lucide-react';
 
 const DockSidebar = ({ 
@@ -16,6 +17,7 @@ const DockSidebar = ({
   onOpenReminders,
   onOpenTrash,
   onOpenSettings,
+  onLogout,
   isProjectsSidebarOpen = true,
   activeView = 'projects',
   trashCount = 0

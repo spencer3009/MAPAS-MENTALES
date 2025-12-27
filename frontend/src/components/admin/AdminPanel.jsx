@@ -916,7 +916,7 @@ const LandingEditorSection = ({ content, loading, token, onUpdate }) => {
 };
 
 // Componente Principal del Panel de Admin
-const AdminPanel = ({ onBack }) => {
+const AdminPanel = ({ onBack, onEditLanding }) => {
   const { token, user } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [metrics, setMetrics] = useState({});

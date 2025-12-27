@@ -212,6 +212,8 @@ const Toolbar = ({
           user={user}
           onOpenProfile={onOpenProfile}
           onLogout={onLogout}
+          onAdminClick={onAdminClick}
+          isAdmin={isAdmin}
         />
       </div>
     </div>

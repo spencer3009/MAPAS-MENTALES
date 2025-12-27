@@ -149,6 +149,18 @@ const DockSidebar = ({
                   {item.label}
                 </span>
 
+                {/* Badge para contador (ej: Papelera) */}
+                {item.badge && (
+                  <span className={`
+                    min-w-[18px] h-[18px] px-1 
+                    bg-red-500 text-white text-xs font-bold 
+                    rounded-full flex items-center justify-center
+                    ${isExpanded ? 'ml-auto' : 'absolute -top-1 -right-1'}
+                  `}>
+                    {item.badge > 99 ? '99+' : item.badge}
+                  </span>
+                )}
+
                 {/* Expand indicator for Projects */}
                 {item.id === 'projects' && isExpanded && (
                   <ChevronRight 

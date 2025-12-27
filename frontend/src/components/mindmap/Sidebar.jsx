@@ -447,7 +447,8 @@ const Sidebar = ({
               )}
             </div>
           );
-        })}
+        })
+        )}
         
         {/* Ver todos - si hay más proyectos */}
         {hasMoreProjects && (

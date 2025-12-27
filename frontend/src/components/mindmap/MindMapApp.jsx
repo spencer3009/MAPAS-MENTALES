@@ -199,6 +199,43 @@ const MindMapApp = () => {
     loadReminders();
   }, [loadReminders, activeProjectId]);
 
+  // Cargar conteo de proyectos en la papelera
+  const loadTrashCount = useCallback(async () => {
+    if (!token) return;
+    
+    try {
+      const response = await fetch(`${API_URL}/api/projects/trash`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        const trashProjects = await response.json();
+        setTrashCount(trashProjects.length);
+      }
+    } catch (error) {
+      console.error('Error loading trash count:', error);
+    }
+  }, [token]);
+
+  // Cargar conteo de papelera al montar
+  useEffect(() => {
+    loadTrashCount();
+  }, [loadTrashCount]);
+
+  // Handler para abrir la papelera
+  const handleOpenTrash = useCallback(() => {
+    setShowTrashView(true);
+  }, []);
+
+  // Handler para cuando se restaura un proyecto
+  const handleProjectRestored = useCallback(() => {
+    // Recargar proyectos y conteo de papelera
+    loadTrashCount();
+    // El hook useNodes debería actualizar automáticamente la lista de proyectos
+    // cuando se hace fetch, pero podemos forzar una recarga si es necesario
+    window.location.reload(); // Simple pero efectivo para recargar proyectos
+  }, [loadTrashCount]);
+
   // Enriquecer nodos con información de recordatorio
   const nodesWithReminders = nodes.map(node => ({
     ...node,

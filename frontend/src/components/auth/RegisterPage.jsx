@@ -501,6 +501,7 @@ const RegisterPage = ({ onBackToLanding, onSwitchToLogin }) => {
             <div className="grid grid-cols-1 gap-3">
               <button
                 type="button"
+                onClick={loginWithGoogle}
                 className="
                   flex items-center justify-center gap-3 py-3.5 px-4 rounded-xl
                   bg-slate-50 hover:bg-slate-100 border border-slate-200

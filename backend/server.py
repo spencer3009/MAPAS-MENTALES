@@ -1856,7 +1856,8 @@ async def get_all_users(current_user: dict = Depends(require_admin)):
             "role": user.get("role", "user"),
             "auth_provider": user.get("auth_provider", "local"),
             "created_at": user.get("created_at"),
-            "is_pro": user.get("is_pro", False)
+            "is_pro": user.get("is_pro", False),
+            "disabled": user.get("disabled", False)
         })
     
     return result

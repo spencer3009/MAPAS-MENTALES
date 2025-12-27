@@ -318,6 +318,29 @@ async def logout(response: Response):
 # GOOGLE OAUTH ENDPOINTS (Emergent Auth)
 # ==========================================
 
+# Endpoint para obtener límites del plan
+@api_router.get("/user/plan-limits")
+async def get_plan_limits(current_user: dict = Depends(get_current_user)):
+    """Obtiene los límites del plan del usuario actual"""
+    user = await db.users.find_one({"username": current_user["username"]}, {"_id": 0})
+    plan_limits = get_user_plan_limits(user or {})
+    
+    # Contar mapas actuales del usuario
+    current_maps = await db.projects.count_documents({"username": current_user["username"]})
+    
+    # Determinar el plan
+    user_role = user.get("role", "user") if user else "user"
+    user_plan = "admin" if user_role == "admin" else user.get("plan", "free") if user else "free"
+    
+    return {
+        "plan": user_plan,
+        "limits": plan_limits,
+        "usage": {
+            "maps_count": current_maps,
+            "maps_remaining": -1 if plan_limits["max_maps"] == -1 else max(0, plan_limits["max_maps"] - current_maps)
+        }
+    }
+
 class GoogleSessionRequest(BaseModel):
     session_id: str
 

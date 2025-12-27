@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { 
-  Plus, LayoutTemplate, FileText, Trash2, Check, Pencil, 
+  Plus, FileText, Check, Pencil, 
   Bell, Pin, PinOff, GripVertical, ArrowUpDown, ExternalLink, Archive,
   Crown, Zap, Sparkles
 } from 'lucide-react';

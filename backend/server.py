@@ -329,22 +329,38 @@ async def get_plan_limits(current_user: dict = Depends(get_current_user)):
     user = await db.users.find_one({"username": current_user["username"]}, {"_id": 0})
     plan_limits = get_user_plan_limits(user or {})
     
-    # Contar mapas actuales del usuario (solo los no eliminados)
-    current_maps = await db.projects.count_documents({
+    # Contar mapas activos del usuario (solo los no eliminados)
+    active_maps = await db.projects.count_documents({
         "username": current_user["username"],
         "isDeleted": {"$ne": True}
     })
+    
+    # Obtener contador histórico de mapas creados
+    total_maps_created = user.get("total_maps_created", 0) if user else 0
     
     # Determinar el plan
     user_role = user.get("role", "user") if user else "user"
     user_plan = "admin" if user_role == "admin" else user.get("plan", "free") if user else "free"
     
+    # Calcular mapas restantes
+    max_active = plan_limits["max_active_maps"]
+    max_total = plan_limits["max_total_maps_created"]
+    
+    active_remaining = -1 if max_active == -1 else max(0, max_active - active_maps)
+    total_remaining = -1 if max_total == -1 else max(0, max_total - total_maps_created)
+    
+    # El usuario puede crear si tiene espacio en ambos límites
+    can_create = (active_remaining == -1 or active_remaining > 0) and (total_remaining == -1 or total_remaining > 0)
+    
     return {
         "plan": user_plan,
         "limits": plan_limits,
         "usage": {
-            "maps_count": current_maps,
-            "maps_remaining": -1 if plan_limits["max_maps"] == -1 else max(0, plan_limits["max_maps"] - current_maps)
+            "active_maps": active_maps,
+            "active_remaining": active_remaining,
+            "total_maps_created": total_maps_created,
+            "total_remaining": total_remaining,
+            "can_create_map": can_create
         }
     }
 

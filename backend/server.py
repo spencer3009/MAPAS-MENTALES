@@ -325,8 +325,11 @@ async def get_plan_limits(current_user: dict = Depends(get_current_user)):
     user = await db.users.find_one({"username": current_user["username"]}, {"_id": 0})
     plan_limits = get_user_plan_limits(user or {})
     
-    # Contar mapas actuales del usuario
-    current_maps = await db.projects.count_documents({"username": current_user["username"]})
+    # Contar mapas actuales del usuario (solo los no eliminados)
+    current_maps = await db.projects.count_documents({
+        "username": current_user["username"],
+        "isDeleted": {"$ne": True}
+    })
     
     # Determinar el plan
     user_role = user.get("role", "user") if user else "user"

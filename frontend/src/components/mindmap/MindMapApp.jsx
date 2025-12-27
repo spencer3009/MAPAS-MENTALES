@@ -24,8 +24,8 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
-const MindMapApp = () => {
-  const { user, logout, token } = useAuth();
+const MindMapApp = ({ onAdminClick }) => {
+  const { user, logout, token, isAdmin } = useAuth();
   
   const {
     nodes,

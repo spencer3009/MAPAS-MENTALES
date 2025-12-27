@@ -1644,12 +1644,22 @@ export const useNodes = () => {
       
       const parentWidth = parent.width || 160;
       const parentHeight = parent.height || 64;
+      const newNodeHeight = 64;
       const horizontalGap = 280; // Distancia horizontal del padre
       const verticalSpacing = 80; // Espacio vertical entre hermanos horizontales
       
-      // Posición: a la derecha del padre, apilados verticalmente
+      // Posición X: a la derecha del padre
       const newX = parent.x + parentWidth + horizontalGap - parentWidth;
-      const newY = parent.y + (horizontalSiblings.length * verticalSpacing);
+      
+      // Posición Y: El PRIMER nodo se centra verticalmente con el padre
+      // Los siguientes se apilan hacia abajo
+      // El centro del padre está en parent.y + parentHeight/2
+      // El centro del nuevo nodo debe estar en esa misma Y
+      // Entonces: newNode.y + newNodeHeight/2 = parent.y + parentHeight/2
+      // newNode.y = parent.y + parentHeight/2 - newNodeHeight/2
+      const parentCenterY = parent.y + parentHeight / 2;
+      const baseY = parentCenterY - newNodeHeight / 2; // Y donde el centro del nodo se alinea con el centro del padre
+      const newY = baseY + (horizontalSiblings.length * verticalSpacing);
       
       const newNode = {
         id: newId,
@@ -1659,7 +1669,7 @@ export const useNodes = () => {
         color: 'blue',
         parentId,
         width: 160,
-        height: 64,
+        height: newNodeHeight,
         nodeType: options?.nodeType || 'default',
         childDirection: 'horizontal' // Marca la dirección
       };

@@ -1416,6 +1416,27 @@ async def create_project(
     current_user: dict = Depends(get_current_user)
 ):
     """Crear un nuevo proyecto"""
+    # Obtener usuario y sus límites de plan
+    user = await db.users.find_one({"username": current_user["username"]}, {"_id": 0})
+    plan_limits = get_user_plan_limits(user or {})
+    
+    # Verificar límite de mapas
+    if plan_limits["max_maps"] != -1:
+        current_maps_count = await db.projects.count_documents({"username": current_user["username"]})
+        if current_maps_count >= plan_limits["max_maps"]:
+            raise HTTPException(
+                status_code=403, 
+                detail=f"Has alcanzado el límite de {plan_limits['max_maps']} mapas de tu plan. Actualiza a Pro para mapas ilimitados."
+            )
+    
+    # Verificar límite de nodos
+    if plan_limits["max_nodes_per_map"] != -1:
+        if len(project_data.nodes) > plan_limits["max_nodes_per_map"]:
+            raise HTTPException(
+                status_code=403, 
+                detail=f"Has alcanzado el límite de {plan_limits['max_nodes_per_map']} nodos por mapa de tu plan."
+            )
+    
     now = datetime.now(timezone.utc).isoformat()
     
     project = {

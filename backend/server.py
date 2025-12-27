@@ -170,7 +170,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     except JWTError:
         raise credentials_exception
     
-    user = get_user(username)
+    user = await get_user(username)
     if user is None:
         raise credentials_exception
     return user

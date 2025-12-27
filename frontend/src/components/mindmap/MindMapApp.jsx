@@ -558,6 +558,8 @@ const MindMapApp = () => {
         onPinProject={pinProject}
         onReorderProjects={reorderProjects}
         onOpenAllProjects={() => setShowAllProjectsModal(true)}
+        onOpenTrash={handleOpenTrash}
+        trashCount={trashCount}
       />
 
       {/* Área principal */}

@@ -289,11 +289,17 @@ async def register(register_data: RegisterRequest):
 async def get_me(current_user: dict = Depends(get_current_user)):
     # Obtener datos completos del usuario desde la BD
     user = await db.users.find_one({"username": current_user["username"]}, {"_id": 0})
+    
+    # Determinar el plan (admin siempre tiene plan máximo)
+    user_role = user.get("role", "user") if user else "user"
+    user_plan = "admin" if user_role == "admin" else user.get("plan", "free") if user else "free"
+    
     return {
         "username": current_user["username"],
         "full_name": current_user.get("full_name", ""),
-        "role": user.get("role", "user") if user else "user",
-        "is_pro": user.get("is_pro", False) if user else False
+        "role": user_role,
+        "plan": user_plan,
+        "is_pro": user_plan in ["pro", "team", "admin"]
     }
 
 @api_router.post("/auth/logout")

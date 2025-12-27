@@ -126,6 +126,38 @@ const TrashView = ({ isOpen, onClose, onProjectRestored, token }) => {
     }
   };
 
+  // Vaciar toda la papelera
+  const handleEmptyTrash = async () => {
+    setEmptyingTrash(true);
+    
+    try {
+      const response = await fetch(`${API_URL}/api/projects/trash/empty`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Error al vaciar la papelera');
+      }
+      
+      // Limpiar lista local
+      setTrashProjects([]);
+      setConfirmEmptyTrash(false);
+      
+      // Notificar al componente padre
+      if (onProjectRestored) {
+        onProjectRestored();
+      }
+    } catch (err) {
+      console.error('Error emptying trash:', err);
+      setError('No se pudo vaciar la papelera');
+    } finally {
+      setEmptyingTrash(false);
+    }
+  };
+
   // Formatear fecha
   const formatDate = (dateString) => {
     try {

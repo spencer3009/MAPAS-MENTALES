@@ -62,6 +62,7 @@ const MindMapApp = () => {
     renameProject,
     pinProject,
     reorderProjects,
+    reloadProjects,
     // Selección múltiple
     selectedNodeIds,
     addToSelection,

@@ -1473,6 +1473,18 @@ async def update_project(
     if not project:
         raise HTTPException(status_code=404, detail="Proyecto no encontrado")
     
+    # Verificar límite de nodos si se están actualizando
+    if update_data.nodes is not None:
+        user = await db.users.find_one({"username": current_user["username"]}, {"_id": 0})
+        plan_limits = get_user_plan_limits(user or {})
+        
+        if plan_limits["max_nodes_per_map"] != -1:
+            if len(update_data.nodes) > plan_limits["max_nodes_per_map"]:
+                raise HTTPException(
+                    status_code=403, 
+                    detail=f"Has alcanzado el límite de {plan_limits['max_nodes_per_map']} nodos por mapa de tu plan. Actualiza a Pro para nodos ilimitados."
+                )
+    
     update_dict = {"updatedAt": datetime.now(timezone.utc).isoformat()}
     
     if update_data.name is not None:

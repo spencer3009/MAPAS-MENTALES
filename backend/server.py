@@ -464,6 +464,91 @@ async def logout(response: Response):
 # GOOGLE OAUTH ENDPOINTS (Emergent Auth)
 # ==========================================
 
+# ==========================================
+# ENDPOINTS DE PLANES (SOURCE OF TRUTH)
+# ==========================================
+
+@api_router.get("/plans")
+async def get_plans():
+    """
+    Obtiene la configuración completa de planes.
+    Este endpoint es la ÚNICA fuente de verdad para planes y precios.
+    Usado por: Landing page, Pop-ups de upgrade, Sistema interno.
+    """
+    # Filtrar planes internos y ordenar
+    public_plans = [
+        {
+            "id": config["id"],
+            "name": config["name"],
+            "display_name": config["display_name"],
+            "price": config["price"],
+            "price_display": config["price_display"],
+            "currency": config.get("currency", "USD"),
+            "period": config["period"],
+            "description": config["description"],
+            "badge": config.get("badge"),
+            "users_min": config.get("users_min", 1),
+            "users_max": config.get("users_max", 1),
+            "features": config["features"],
+            "cta": config["cta"],
+            "popular": config.get("popular", False),
+            "coming_soon": config.get("coming_soon", False),
+            "gradient": config.get("gradient", "from-gray-600 to-gray-700"),
+            "limits": {
+                "max_active_maps": config["limits"]["max_active_maps"],
+                "max_nodes_per_map": config["limits"]["max_nodes_per_map"],
+                "can_collaborate": config["limits"]["can_collaborate"],
+                "commercial_use": config["limits"].get("commercial_use", False)
+            }
+        }
+        for plan_id, config in PLANS_CONFIG.items()
+        if not config.get("internal", False)
+    ]
+    
+    # Ordenar por el campo 'order'
+    public_plans.sort(key=lambda x: PLANS_CONFIG[x["id"]].get("order", 99))
+    
+    return {
+        "plans": public_plans,
+        "upgrade_target": UPGRADE_TARGET_PLAN,
+        "upgrade_plan": {
+            "id": PLANS_CONFIG[UPGRADE_TARGET_PLAN]["id"],
+            "name": PLANS_CONFIG[UPGRADE_TARGET_PLAN]["name"],
+            "price": PLANS_CONFIG[UPGRADE_TARGET_PLAN]["price"],
+            "price_display": PLANS_CONFIG[UPGRADE_TARGET_PLAN]["price_display"],
+            "period": PLANS_CONFIG[UPGRADE_TARGET_PLAN]["period"],
+            "features": PLANS_CONFIG[UPGRADE_TARGET_PLAN]["features"]
+        }
+    }
+
+@api_router.get("/plans/{plan_id}")
+async def get_plan_by_id(plan_id: str):
+    """Obtiene la configuración de un plan específico"""
+    # Aplicar alias si existe
+    resolved_plan_id = PLAN_ALIASES.get(plan_id, plan_id)
+    
+    if resolved_plan_id not in PLANS_CONFIG:
+        raise HTTPException(status_code=404, detail="Plan no encontrado")
+    
+    config = PLANS_CONFIG[resolved_plan_id]
+    
+    if config.get("internal", False):
+        raise HTTPException(status_code=404, detail="Plan no encontrado")
+    
+    return {
+        "id": config["id"],
+        "name": config["name"],
+        "display_name": config["display_name"],
+        "price": config["price"],
+        "price_display": config["price_display"],
+        "currency": config.get("currency", "USD"),
+        "period": config["period"],
+        "description": config["description"],
+        "badge": config.get("badge"),
+        "features": config["features"],
+        "limits": config["limits"]
+    }
+
 # Endpoint para obtener límites del plan
 @api_router.get("/user/plan-limits")
 async def get_plan_limits(current_user: dict = Depends(get_current_user)):

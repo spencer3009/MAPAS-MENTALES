@@ -111,7 +111,7 @@ export const useNodes = () => {
   // Guardar proyecto en servidor
   const saveProjectToServer = useCallback(async (project) => {
     const token = getAuthToken();
-    if (!token) return false;
+    if (!token) return { success: false, error: 'No autenticado' };
 
     try {
       // Verificar si existe
@@ -133,19 +133,25 @@ export const useNodes = () => {
         body: JSON.stringify({
           id: project.id,
           name: project.name,
-          layoutType: project.layoutType || 'mindflow', // Por defecto mindflow
+          layoutType: project.layoutType || 'mindflow',
           nodes: project.nodes
         })
       });
 
       if (response.ok) {
         console.log(`Proyecto ${method === 'PUT' ? 'actualizado' : 'creado'} en servidor:`, project.name);
-        return true;
+        return { success: true };
+      } else {
+        // Capturar el mensaje de error del servidor
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.detail || 'Error al guardar el proyecto';
+        console.error('Error del servidor:', errorMessage);
+        return { success: false, error: errorMessage, status: response.status };
       }
     } catch (error) {
       console.error('Error guardando proyecto en servidor:', error);
+      return { success: false, error: error.message };
     }
-    return false;
   }, []);
 
   // Eliminar proyecto del servidor

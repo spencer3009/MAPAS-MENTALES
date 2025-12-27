@@ -85,6 +85,41 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  // Register
+  const register = useCallback(async (userData) => {
+    setError(null);
+    setLoading(true);
+    
+    try {
+      const response = await fetch(`${API_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setToken(data.access_token);
+        setUser(data.user);
+        localStorage.setItem('mm_auth_token', data.access_token);
+        localStorage.setItem('mm_auth_user', JSON.stringify(data.user));
+        return { success: true };
+      } else {
+        setError(data.detail || 'Error al crear la cuenta');
+        return { success: false, error: data.detail };
+      }
+    } catch (err) {
+      const errorMsg = 'Error de conexión. Intenta de nuevo.';
+      setError(errorMsg);
+      return { success: false, error: errorMsg };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   // Logout
   const logout = useCallback(() => {
     setUser(null);

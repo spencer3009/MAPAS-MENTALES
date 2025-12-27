@@ -30,8 +30,6 @@ const Sidebar = ({
   onPinProject,
   onReorderProjects,
   onOpenAllProjects,
-  onOpenTrash,
-  trashCount = 0,
   token
 }) => {
   const [editingProjectId, setEditingProjectId] = useState(null);

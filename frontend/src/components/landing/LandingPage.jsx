@@ -252,7 +252,7 @@ const LandingPage = ({ onLogin, onRegister }) => {
           <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Logo */}
             <a href="#inicio" className="flex items-center group">
-              <img src={LOGO_URL} alt="MindoraMap" className="h-10 lg:h-12 w-auto" />
+              <img src={LOGO_URL} alt="MindoraMap" className="h-14 lg:h-16 w-auto" />
             </a>
             
             {/* Desktop Navigation */}
@@ -817,7 +817,7 @@ const LandingPage = ({ onLogin, onRegister }) => {
             {/* Brand */}
             <div className="md:col-span-2">
               <div className="flex items-center mb-4">
-                <img src={LOGO_URL} alt="MindoraMap" className="h-12 w-auto" />
+                <img src={LOGO_URL} alt="MindoraMap" className="h-16 w-auto" />
               </div>
               <p className="text-gray-400 mb-6 max-w-md">
                 La plataforma de mapas mentales diseñada para empresarios que buscan claridad, organización y resultados.

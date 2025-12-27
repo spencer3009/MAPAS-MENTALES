@@ -655,8 +655,6 @@ const MindMapApp = ({ onAdminClick }) => {
           onPinProject={pinProject}
           onReorderProjects={reorderProjects}
           onOpenAllProjects={() => setShowAllProjectsModal(true)}
-          onOpenTrash={handleOpenTrash}
-          trashCount={trashCount}
           token={token}
         />
       )}

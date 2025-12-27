@@ -1885,34 +1885,6 @@ export const useNodes = () => {
     setSelectedNodeId(newId);
     return newId;
   }, [activeProjectId, pushToHistory]);
-          }
-          
-          return updated;
-        };
-        
-        return alignNode(rootNodeId, alignedNodes);
-      };
-      
-      // Aplicar alineación desde la raíz
-      newNodes = applyHybridAlignment(rootId, newNodes);
-      
-      console.log('[MindHybrid] Nuevo nodo creado con expansión hacia arriba:', { 
-        text: newNode.text, 
-        totalChildren
-      });
-      
-      pushToHistory(activeProjectId, newNodes);
-      
-      return prev.map(p => 
-        p.id === activeProjectId 
-          ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
-          : p
-      );
-    });
-    
-    setSelectedNodeId(newId);
-    return newId;
-  }, [activeProjectId, pushToHistory]);
 
   // Agregar nodo desde una línea horizontal compartida (entre hermanos verticales)
   // Este nodo se agrega como un nuevo hijo vertical del padre

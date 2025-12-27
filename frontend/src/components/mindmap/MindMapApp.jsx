@@ -649,7 +649,10 @@ const MindMapApp = ({ onAdminClick }) => {
       <DockSidebar
         onToggleProjectsSidebar={handleToggleProjectsSidebar}
         onOpenDashboard={handleOpenDashboard}
-        onOpenTemplates={handleOpenTemplatesView}
+        onOpenFavorites={() => {
+          setActiveView('favorites');
+          setIsProjectsSidebarOpen(false);
+        }}
         onOpenReminders={handleOpenRemindersPanel}
         onOpenTrash={handleOpenTrash}
         onOpenSettings={handleOpenSettings}

@@ -2242,7 +2242,7 @@ export const useNodes = () => {
       
       const groupStartX = parentCenterX - (totalGroupWidth / 2) - (childWidth / 2);
       
-      // PASO 4: Aplicar las posiciones calculadas
+      // PASO 4: Aplicar las posiciones calculadas (solo a hijos normales)
       childPositions.forEach((data) => {
         const newX = groupStartX + data.relativeX;
         
@@ -2250,12 +2250,13 @@ export const useNodes = () => {
           n.id === data.id ? { ...n, x: newX, y: childY } : n
         );
       });
-      
-      // PASO 5: Recursivamente alinear los subárboles
-      verticalChildren.forEach((child) => {
-        updatedNodes = autoAlignMindHybrid(child.id, updatedNodes, false);
-      });
     }
+    
+    // PASO 5: Recursivamente alinear TODOS los subárboles verticales
+    // Esto incluye tanto los normales como los de conectores
+    allVerticalChildren.forEach((child) => {
+      updatedNodes = autoAlignMindHybrid(child.id, updatedNodes, false);
+    });
     
     return updatedNodes;
   }, [calculateTotalSubtreeWidth]);

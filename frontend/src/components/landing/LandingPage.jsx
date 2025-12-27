@@ -1,487 +1,353 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Brain, 
-  Zap, 
-  Target, 
-  Users, 
-  CheckCircle2, 
-  ArrowRight,
-  Sparkles,
-  TrendingUp,
-  Clock,
-  Lightbulb,
-  BarChart3,
-  Briefcase,
-  Rocket,
-  Shield,
-  Star,
-  ChevronDown,
-  ChevronUp,
-  Play,
-  Layers,
-  GitBranch,
-  Network,
-  PenTool,
-  Share2,
-  Download,
-  Menu,
-  X,
-  MousePointer,
-  Palette,
-  FolderTree,
-  Eye
+  Brain, Zap, Target, Users, CheckCircle2, ArrowRight, Sparkles, TrendingUp, Clock, Lightbulb,
+  BarChart3, Briefcase, Rocket, Shield, Star, ChevronDown, ChevronUp, Play, Layers, GitBranch,
+  Network, PenTool, Share2, Download, Menu, X, MousePointer, Palette, FolderTree, Eye, Edit3,
+  Save, Loader2, Check
 } from 'lucide-react';
 
-// URL del logo MindoraMap
+const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 const LOGO_URL = 'https://customer-assets.emergentagent.com/job_mindviz-app/artifacts/k1kioask_image.png';
 
-// Imágenes de ejemplo de mapas mentales
-const MINDMAP_IMAGES = {
-  hero: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=800&q=80',
-  platform1: 'https://images.unsplash.com/photo-1512758017271-d7b84c2113f1?w=600&q=80',
-  platform2: 'https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?w=600&q=80',
-  howItWorks: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80'
-};
+// Componente de texto editable inline
+const EditableText = ({ value, onChange, onSave, isAdmin, className, as: Tag = 'span', multiline = false }) => {
+  const [editing, setEditing] = useState(false);
+  const [tempValue, setTempValue] = useState(value);
+  const [saving, setSaving] = useState(false);
+  const inputRef = useRef(null);
 
-const LandingPage = ({ onLogin, onRegister }) => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [openFaq, setOpenFaq] = useState(null);
+  useEffect(() => {
+    setTempValue(value);
+  }, [value]);
 
-  // Navegación
-  const navItems = [
-    { label: 'Inicio', href: '#inicio' },
-    { label: 'Plataforma', href: '#plataforma' },
-    { label: 'Beneficios', href: '#beneficios' },
-    { label: 'Cómo funciona', href: '#como-funciona' },
-    { label: 'Planes', href: '#planes' },
-    { label: 'FAQ', href: '#faq' }
-  ];
-
-  // Características de la plataforma
-  const platformFeatures = [
-    {
-      icon: GitBranch,
-      title: 'Múltiples Layouts',
-      description: 'MindFlow, MindTree y MindHybrid para adaptarse a tu forma de pensar.'
-    },
-    {
-      icon: Palette,
-      title: 'Personalización Total',
-      description: 'Colores, iconos y estilos para que cada mapa sea único.'
-    },
-    {
-      icon: Share2,
-      title: 'Colaboración',
-      description: 'Trabaja en equipo en tiempo real sin complicaciones.'
-    },
-    {
-      icon: Download,
-      title: 'Exportación Pro',
-      description: 'Descarga en PNG, PDF o comparte con un enlace.'
-    },
-    {
-      icon: FolderTree,
-      title: 'Organización',
-      description: 'Carpetas, etiquetas y búsqueda para encontrar todo rápido.'
-    },
-    {
-      icon: Shield,
-      title: 'Seguridad',
-      description: 'Tus datos protegidos con encriptación de nivel empresarial.'
+  useEffect(() => {
+    if (editing && inputRef.current) {
+      inputRef.current.focus();
     }
-  ];
+  }, [editing]);
 
-  // Beneficios
-  const benefits = [
-    {
-      icon: Lightbulb,
-      title: 'Claridad Mental',
-      description: 'Transforma el caos de ideas en estructuras visuales claras que impulsan la toma de decisiones.',
-      color: 'from-amber-400 to-orange-500'
-    },
-    {
-      icon: Target,
-      title: 'Enfoque Estratégico',
-      description: 'Visualiza objetivos, identifica prioridades y mantén a tu equipo alineado.',
-      color: 'from-blue-400 to-indigo-500'
-    },
-    {
-      icon: Clock,
-      title: 'Ahorro de Tiempo',
-      description: 'Reduce un 40% el tiempo de planificación con herramientas intuitivas.',
-      color: 'from-emerald-400 to-teal-500'
-    },
-    {
-      icon: TrendingUp,
-      title: 'Productividad x3',
-      description: 'Empresarios reportan triplicar su productividad en las primeras semanas.',
-      color: 'from-purple-400 to-pink-500'
-    },
-    {
-      icon: Network,
-      title: 'Conexiones Claras',
-      description: 'Descubre relaciones ocultas entre ideas que impulsan la innovación.',
-      color: 'from-cyan-400 to-blue-500'
-    },
-    {
-      icon: Users,
-      title: 'Alineación de Equipo',
-      description: 'Todos en la misma página con mapas compartidos y actualizados.',
-      color: 'from-rose-400 to-red-500'
-    }
-  ];
+  const handleSave = async () => {
+    setSaving(true);
+    await onSave(tempValue);
+    setSaving(false);
+    setEditing(false);
+  };
 
-  // Pasos de cómo funciona
-  const howItWorksSteps = [
-    {
-      number: '01',
-      title: 'Crea tu cuenta gratis',
-      description: 'Regístrate en segundos y accede a todas las herramientas básicas sin costo.',
-      icon: MousePointer
-    },
-    {
-      number: '02',
-      title: 'Elige tu layout',
-      description: 'Selecciona MindFlow, MindTree o MindHybrid según tu estilo de pensamiento.',
-      icon: Layers
-    },
-    {
-      number: '03',
-      title: 'Construye tu mapa',
-      description: 'Agrega nodos, conecta ideas y personaliza con colores e iconos.',
-      icon: PenTool
-    },
-    {
-      number: '04',
-      title: 'Comparte y colabora',
-      description: 'Invita a tu equipo, exporta o presenta directamente desde la plataforma.',
-      icon: Share2
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !multiline) {
+      handleSave();
     }
-  ];
+    if (e.key === 'Escape') {
+      setTempValue(value);
+      setEditing(false);
+    }
+  };
 
-  // Planes
-  const plans = [
-    {
-      name: 'Starter',
-      price: 'Gratis',
-      period: 'para siempre',
-      description: 'Ideal para comenzar',
-      features: [
-        'Hasta 5 mapas mentales',
-        '3 layouts disponibles',
-        'Exportación PNG',
-        'Guardado en la nube',
-        'Soporte por email'
-      ],
-      cta: 'Comenzar gratis',
-      popular: false,
-      gradient: 'from-gray-600 to-gray-700'
-    },
-    {
-      name: 'Professional',
-      price: '$15',
-      period: '/mes',
-      description: 'Para empresarios serios',
-      features: [
-        'Mapas ilimitados',
-        'Todos los layouts premium',
-        'Exportación PDF + PNG',
-        'Colaboración en tiempo real',
-        'Historial de versiones',
-        'Plantillas profesionales',
-        'Soporte prioritario 24/7'
-      ],
-      cta: '14 días gratis',
-      popular: true,
-      gradient: 'from-blue-600 to-indigo-600'
-    },
-    {
-      name: 'Enterprise',
-      price: '$49',
-      period: '/mes',
-      description: 'Para equipos grandes',
-      features: [
-        'Todo lo de Professional',
-        'Hasta 25 usuarios',
-        'Espacios de trabajo ilimitados',
-        'SSO / SAML',
-        'API completa',
-        'Analytics avanzados',
-        'Gerente de cuenta dedicado',
-        'SLA garantizado'
-      ],
-      cta: 'Contactar ventas',
-      popular: false,
-      gradient: 'from-purple-600 to-pink-600'
-    }
-  ];
+  if (!isAdmin) {
+    return <Tag className={className}>{value}</Tag>;
+  }
 
-  // FAQs
-  const faqs = [
-    {
-      question: '¿Puedo probar MindoraMap antes de pagar?',
-      answer: 'Absolutamente. Ofrecemos un plan gratuito para siempre con funcionalidades completas para que pruebes la plataforma. Además, los planes de pago incluyen 14 días de prueba sin compromiso.'
-    },
-    {
-      question: '¿Mis datos están seguros?',
-      answer: 'La seguridad es nuestra prioridad. Utilizamos encriptación AES-256, servidores certificados SOC 2, y cumplimos con GDPR. Tus mapas mentales y datos nunca se comparten con terceros.'
-    },
-    {
-      question: '¿Puedo colaborar con mi equipo en tiempo real?',
-      answer: 'Sí, con los planes Professional y Enterprise puedes invitar a colaboradores para editar mapas en tiempo real. Verás los cambios instantáneamente y podrás dejar comentarios.'
-    },
-    {
-      question: '¿Qué diferencia hay entre MindFlow, MindTree y MindHybrid?',
-      answer: 'MindFlow es ideal para brainstorming libre, MindTree para jerarquías estructuradas, y MindHybrid combina lo mejor de ambos mundos con ramas horizontales y verticales.'
-    },
-    {
-      question: '¿Puedo exportar mis mapas mentales?',
-      answer: 'Sí, puedes exportar en PNG de alta resolución (todos los planes) y PDF profesional (planes de pago). También puedes compartir con enlaces públicos o privados.'
-    },
-    {
-      question: '¿Ofrecen descuentos para startups o educación?',
-      answer: 'Sí, ofrecemos 50% de descuento para startups en etapa temprana y 75% para instituciones educativas. Contáctanos con tu caso para aplicar.'
-    }
-  ];
+  if (editing) {
+    return (
+      <div className="inline-flex items-center gap-2 relative">
+        {multiline ? (
+          <textarea
+            ref={inputRef}
+            value={tempValue}
+            onChange={(e) => setTempValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className={`${className} bg-white/90 border-2 border-blue-500 rounded px-2 py-1 outline-none min-w-[200px]`}
+            rows={3}
+          />
+        ) : (
+          <input
+            ref={inputRef}
+            type="text"
+            value={tempValue}
+            onChange={(e) => setTempValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className={`${className} bg-white/90 border-2 border-blue-500 rounded px-2 py-1 outline-none min-w-[100px]`}
+          />
+        )}
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="p-1.5 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors shadow-lg"
+        >
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+        </button>
+        <button
+          onClick={() => { setTempValue(value); setEditing(false); }}
+          className="p-1.5 bg-gray-500 text-white rounded-full hover:bg-gray-600 transition-colors shadow-lg"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
+    <span className="group inline relative">
+      <Tag className={className}>{value}</Tag>
+      <button
+        onClick={() => setEditing(true)}
+        className="absolute -right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-1 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-all shadow-lg"
+        title="Editar texto"
+      >
+        <Edit3 className="w-3 h-3" />
+      </button>
+    </span>
+  );
+};
+
+// Iconos para las características
+const featureIcons = [Brain, Zap, Layers, Download, GitBranch, MousePointer];
+const benefitIcons = [Lightbulb, Clock, Palette, Users, Target, Brain];
+
+const LandingPage = ({ onLogin, onRegister }) => {
+  const [content, setContent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [openFaq, setOpenFaq] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [token, setToken] = useState(null);
+
+  // Cargar contenido desde la BD
+  useEffect(() => {
+    const loadContent = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/landing-content`);
+        if (response.ok) {
+          const data = await response.json();
+          setContent(data);
+        }
+      } catch (error) {
+        console.error('Error loading landing content:', error);
+      }
+      setLoading(false);
+    };
+
+    // Check if user is admin
+    const storedToken = localStorage.getItem('mm_auth_token');
+    const storedUser = localStorage.getItem('mm_auth_user');
+    if (storedToken && storedUser) {
+      const user = JSON.parse(storedUser);
+      setIsAdmin(user.role === 'admin');
+      setToken(storedToken);
+    }
+
+    loadContent();
+  }, []);
+
+  // Guardar cambios en una sección
+  const saveSection = async (section, data) => {
+    if (!isAdmin || !token) return;
+    
+    try {
+      await fetch(`${API_URL}/api/admin/landing-content/${section}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(data)
+      });
+      
+      // Actualizar estado local
+      setContent(prev => ({
+        ...prev,
+        [section]: data
+      }));
+    } catch (error) {
+      console.error('Error saving content:', error);
+    }
+  };
+
+  // Helper para actualizar un campo específico
+  const updateField = (section, field, value) => {
+    const sectionData = { ...content[section], [field]: value };
+    saveSection(section, sectionData);
+  };
+
+  // Helper para actualizar items de un array
+  const updateArrayItem = (section, arrayField, index, field, value) => {
+    const items = [...content[section][arrayField]];
+    items[index] = { ...items[index], [field]: value };
+    const sectionData = { ...content[section], [arrayField]: items };
+    saveSection(section, sectionData);
+  };
+
+  if (loading || !content) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+        <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+      </div>
+    );
+  }
+
+  const { nav = {}, hero = {}, platform = {}, benefits = {}, how_it_works = {}, pricing = {}, faq = {}, final_cta = {}, footer = {} } = content;
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Admin indicator */}
+      {isAdmin && (
+        <div className="fixed bottom-4 left-4 z-50 bg-purple-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 text-sm">
+          <Edit3 className="w-4 h-4" />
+          Modo edición activo
+        </div>
+      )}
+
       {/* ==================== HEADER ==================== */}
       <header className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-lg z-50 border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-24 lg:h-28">
-            {/* Logo */}
             <a href="#inicio" className="flex items-center group">
               <img src={LOGO_URL} alt="MindoraMap" className="h-20 lg:h-24 w-auto" />
             </a>
-            
+
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-1">
-              {navItems.map((item) => (
-                <a 
-                  key={item.href}
-                  href={item.href} 
-                  className="px-4 py-2 text-gray-600 hover:text-blue-600 font-medium text-sm rounded-lg hover:bg-blue-50 transition-all"
+              {['inicio', 'plataforma', 'beneficios', 'como_funciona', 'planes', 'faq'].map((key) => (
+                <a
+                  key={key}
+                  href={`#${key.replace('_', '-')}`}
+                  className="px-4 py-2 text-gray-600 hover:text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors text-sm"
                 >
-                  {item.label}
+                  <EditableText
+                    value={nav[`menu_${key}`] || key}
+                    isAdmin={isAdmin}
+                    onSave={(val) => updateField('nav', `menu_${key}`, val)}
+                  />
                 </a>
               ))}
             </nav>
 
-            {/* Desktop Auth buttons */}
+            {/* CTA Buttons */}
             <div className="hidden lg:flex items-center gap-3">
-              <button
-                onClick={onLogin}
-                className="px-5 py-2.5 text-sm font-semibold text-gray-700 hover:text-blue-600 transition-colors"
-              >
-                Iniciar sesión
+              <button onClick={onLogin} className="px-4 py-2 text-gray-600 hover:text-blue-600 font-medium transition-colors">
+                <EditableText
+                  value={nav.btn_login || 'Iniciar sesión'}
+                  isAdmin={isAdmin}
+                  onSave={(val) => updateField('nav', 'btn_login', val)}
+                />
               </button>
-              <button
-                onClick={onRegister}
-                className="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all hover:scale-105"
-              >
-                Empezar gratis
+              <button onClick={onRegister} className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg shadow-blue-600/30">
+                <EditableText
+                  value={nav.btn_registro || 'Empezar gratis'}
+                  isAdmin={isAdmin}
+                  onSave={(val) => updateField('nav', 'btn_registro', val)}
+                />
               </button>
             </div>
 
             {/* Mobile menu button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-lg hover:bg-gray-100"
-            >
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden p-2 text-gray-600 hover:text-blue-600 transition-colors">
               {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
 
-        {/* Mobile menu */}
+        {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-white border-t border-gray-100 py-4 px-4 shadow-lg">
-            <nav className="flex flex-col gap-2">
-              {navItems.map((item) => (
-                <a 
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="px-4 py-3 text-gray-700 hover:text-blue-600 font-medium rounded-lg hover:bg-blue-50"
-                >
-                  {item.label}
-                </a>
-              ))}
-              <hr className="my-2" />
-              <button
-                onClick={() => { onLogin(); setMobileMenuOpen(false); }}
-                className="px-4 py-3 text-gray-700 font-medium text-left"
-              >
-                Iniciar sesión
+          <div className="lg:hidden bg-white border-t border-gray-100 py-4 px-4 space-y-2">
+            {['inicio', 'plataforma', 'beneficios', 'como_funciona', 'planes', 'faq'].map((key) => (
+              <a key={key} href={`#${key.replace('_', '-')}`} onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-gray-600 hover:text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors">
+                {nav[`menu_${key}`] || key}
+              </a>
+            ))}
+            <div className="pt-4 border-t border-gray-100 space-y-2">
+              <button onClick={onLogin} className="w-full px-4 py-2 text-gray-600 hover:text-blue-600 font-medium transition-colors">
+                {nav.btn_login || 'Iniciar sesión'}
               </button>
-              <button
-                onClick={() => { onRegister(); setMobileMenuOpen(false); }}
-                className="px-4 py-3 text-white font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl text-center"
-              >
-                Empezar gratis
+              <button onClick={onRegister} className="w-full px-5 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl">
+                {nav.btn_registro || 'Empezar gratis'}
               </button>
-            </nav>
+            </div>
           </div>
         )}
       </header>
 
       {/* ==================== HERO SECTION ==================== */}
       <section id="inicio" className="relative pt-32 lg:pt-40 pb-20 lg:pb-32 overflow-hidden">
-        {/* Background decorations */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50/50 to-purple-50" />
-        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-blue-200/30 to-purple-200/30 rounded-full blur-3xl" />
-        
-        {/* Grid pattern */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM2MzY2ZjEiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50" />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left content */}
-            <div className="text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 rounded-full text-sm font-semibold mb-6 border border-blue-200/50">
-                <Sparkles size={16} className="text-blue-500" />
-                +2,500 empresarios ya confían en nosotros
+          <div className="text-center max-w-4xl mx-auto">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 rounded-full mb-6">
+              <Sparkles className="w-4 h-4 text-blue-600" />
+              <EditableText
+                value={hero.badge || '+2,500 empresarios ya confían en nosotros'}
+                isAdmin={isAdmin}
+                onSave={(val) => updateField('hero', 'badge', val)}
+                className="text-sm font-medium text-blue-700"
+              />
+            </div>
+
+            {/* Title */}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
+              <EditableText
+                value={hero.title || 'Convierte el caos en claridad'}
+                isAdmin={isAdmin}
+                onSave={(val) => updateField('hero', 'title', val)}
+                className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900"
+              />
+            </h1>
+
+            {/* Subtitle */}
+            <p className="text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto mb-10">
+              <EditableText
+                value={hero.subtitle || 'Organiza tus ideas, proyectos y metas con mapas mentales intuitivos.'}
+                isAdmin={isAdmin}
+                onSave={(val) => updateField('hero', 'subtitle', val)}
+                multiline
+                className="text-lg lg:text-xl text-gray-600"
+              />
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+              <button onClick={onRegister} className="group w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-xl shadow-blue-600/30 flex items-center justify-center gap-2">
+                <EditableText
+                  value={hero.btn_primary || 'Empieza gratis ahora'}
+                  isAdmin={isAdmin}
+                  onSave={(val) => updateField('hero', 'btn_primary', val)}
+                />
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+              <button className="group w-full sm:w-auto px-8 py-4 bg-white text-gray-700 font-semibold rounded-2xl border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all flex items-center justify-center gap-2">
+                <Play className="w-5 h-5 text-blue-600" />
+                <EditableText
+                  value={hero.btn_secondary || 'Ver demo'}
+                  isAdmin={isAdmin}
+                  onSave={(val) => updateField('hero', 'btn_secondary', val)}
+                />
+              </button>
+            </div>
+
+            {/* Trust indicators */}
+            <div className="flex items-center justify-center gap-8 text-sm text-gray-500">
+              <div className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-blue-600" />
+                <EditableText
+                  value={hero.trust_users || '+2,500 usuarios'}
+                  isAdmin={isAdmin}
+                  onSave={(val) => updateField('hero', 'trust_users', val)}
+                />
               </div>
-              
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-gray-900 leading-[1.1] mb-6">
-                Convierte el
-                <span className="relative inline-block mx-2">
-                  <span className="relative z-10 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                    caos
-                  </span>
-                  <svg className="absolute -bottom-2 left-0 w-full" height="12" viewBox="0 0 100 12" preserveAspectRatio="none">
-                    <path d="M0 8 Q 25 0, 50 8 T 100 8" stroke="url(#gradient)" strokeWidth="4" fill="none" strokeLinecap="round"/>
-                    <defs>
-                      <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="#3b82f6"/>
-                        <stop offset="100%" stopColor="#8b5cf6"/>
-                      </linearGradient>
-                    </defs>
-                  </svg>
+              <div className="flex items-center gap-1">
+                {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />)}
+                <span className="ml-1">
+                  <EditableText
+                    value={hero.trust_rating || '4.9/5'}
+                    isAdmin={isAdmin}
+                    onSave={(val) => updateField('hero', 'trust_rating', val)}
+                  />
                 </span>
-                en claridad
-              </h1>
-              
-              <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                La plataforma de mapas mentales más potente para empresarios. 
-                Organiza ideas, planifica estrategias y toma mejores decisiones 
-                <span className="font-semibold text-gray-800"> en minutos, no en horas.</span>
-              </p>
-              
-              <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start mb-8">
-                <button
-                  onClick={onRegister}
-                  className="group w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-lg rounded-2xl shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 flex items-center justify-center gap-2 transition-all hover:scale-105"
-                >
-                  Empieza gratis ahora
-                  <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                </button>
-                <button
-                  onClick={onLogin}
-                  className="w-full sm:w-auto px-8 py-4 bg-white hover:bg-gray-50 text-gray-700 font-semibold text-lg rounded-2xl border-2 border-gray-200 hover:border-blue-300 flex items-center justify-center gap-2 transition-all"
-                >
-                  <Play size={18} className="text-blue-600" />
-                  Ver demo
-                </button>
-              </div>
-
-              {/* Trust badges */}
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-gray-500">
-                <div className="flex items-center gap-2">
-                  <div className="flex -space-x-2">
-                    {[1,2,3,4].map(i => (
-                      <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 border-2 border-white flex items-center justify-center text-white text-xs font-bold">
-                        {['JM', 'AP', 'CL', 'RD'][i-1]}
-                      </div>
-                    ))}
-                  </div>
-                  <span className="font-medium">+2,500 usuarios</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  {[1,2,3,4,5].map(i => (
-                    <Star key={i} size={16} className="text-yellow-400 fill-yellow-400" />
-                  ))}
-                  <span className="font-medium ml-1">4.9/5</span>
-                </div>
               </div>
             </div>
-
-            {/* Right - Hero image */}
-            <div className="relative">
-              <div className="relative bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-2xl shadow-gray-300/50 p-2 border border-gray-200/50">
-                <div className="rounded-2xl overflow-hidden bg-gradient-to-br from-blue-600 to-indigo-700 p-6">
-                  {/* Mock mindmap visualization */}
-                  <div className="relative aspect-[4/3] flex items-center justify-center">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      {/* Central node */}
-                      <div className="absolute w-32 h-16 bg-white rounded-xl shadow-lg flex items-center justify-center z-20">
-                        <Brain className="text-blue-600 mr-2" size={20} />
-                        <span className="font-bold text-gray-800 text-sm">Tu Negocio</span>
-                      </div>
-                      
-                      {/* Branch nodes */}
-                      {[
-                        { x: -140, y: -80, label: 'Marketing', color: 'bg-emerald-500' },
-                        { x: 140, y: -80, label: 'Ventas', color: 'bg-amber-500' },
-                        { x: -140, y: 80, label: 'Producto', color: 'bg-purple-500' },
-                        { x: 140, y: 80, label: 'Finanzas', color: 'bg-rose-500' }
-                      ].map((node, i) => (
-                        <div 
-                          key={i}
-                          className="absolute w-24 h-12 bg-white/90 backdrop-blur rounded-lg shadow-md flex items-center justify-center z-10"
-                          style={{ transform: `translate(${node.x}px, ${node.y}px)` }}
-                        >
-                          <div className={`w-3 h-3 ${node.color} rounded-full mr-2`} />
-                          <span className="font-medium text-gray-700 text-xs">{node.label}</span>
-                        </div>
-                      ))}
-                      
-                      {/* Connection lines */}
-                      <svg className="absolute inset-0 w-full h-full" style={{ zIndex: 5 }}>
-                        <line x1="50%" y1="50%" x2="25%" y2="25%" stroke="white" strokeWidth="2" opacity="0.5" />
-                        <line x1="50%" y1="50%" x2="75%" y2="25%" stroke="white" strokeWidth="2" opacity="0.5" />
-                        <line x1="50%" y1="50%" x2="25%" y2="75%" stroke="white" strokeWidth="2" opacity="0.5" />
-                        <line x1="50%" y1="50%" x2="75%" y2="75%" stroke="white" strokeWidth="2" opacity="0.5" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Floating badges */}
-                <div className="absolute -top-4 -right-4 bg-white rounded-xl shadow-lg px-3 py-2 flex items-center gap-2 border border-gray-100">
-                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                    <CheckCircle2 className="text-green-600" size={18} />
-                  </div>
-                  <span className="text-sm font-semibold text-gray-700">Auto-guardado</span>
-                </div>
-                
-                <div className="absolute -bottom-4 -left-4 bg-white rounded-xl shadow-lg px-3 py-2 flex items-center gap-2 border border-gray-100">
-                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <Users className="text-blue-600" size={18} />
-                  </div>
-                  <span className="text-sm font-semibold text-gray-700">3 colaborando</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ==================== LOGOS / SOCIAL PROOF ==================== */}
-      <section className="py-12 bg-gray-50 border-y border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-sm font-medium text-gray-500 mb-8">
-            EMPRESAS QUE CONFÍAN EN MINDORAMAP
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-8 lg:gap-16 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all">
-            {['TechCorp', 'InnovateLab', 'StartupX', 'GrowthCo', 'FutureBiz'].map((company, i) => (
-              <div key={i} className="text-xl lg:text-2xl font-bold text-gray-400">
-                {company}
-              </div>
-            ))}
           </div>
         </div>
       </section>
@@ -489,235 +355,233 @@ const LandingPage = ({ onLogin, onRegister }) => {
       {/* ==================== PLATFORM SECTION ==================== */}
       <section id="plataforma" className="py-20 lg:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-semibold mb-4">
-              <Layers size={16} />
-              Plataforma completa
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-              Todo lo que necesitas para
-              <span className="block bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                organizar tu negocio
-              </span>
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              <EditableText
+                value={platform.title || 'Una plataforma diseñada para potenciar tu productividad'}
+                isAdmin={isAdmin}
+                onSave={(val) => updateField('platform', 'title', val)}
+                className="text-3xl lg:text-4xl font-bold text-gray-900"
+              />
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Una suite completa de herramientas diseñadas específicamente para empresarios que buscan claridad y resultados.
+            <p className="text-lg text-gray-600">
+              <EditableText
+                value={platform.subtitle || 'Descubre todas las herramientas que MindoraMap pone a tu disposición'}
+                isAdmin={isAdmin}
+                onSave={(val) => updateField('platform', 'subtitle', val)}
+                multiline
+              />
             </p>
           </div>
 
-          {/* Platform showcase */}
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center mb-16">
-            <div className="order-2 lg:order-1">
-              <div className="space-y-6">
-                {platformFeatures.slice(0, 3).map((feature, i) => (
-                  <div key={i} className="flex gap-4 p-4 rounded-2xl hover:bg-blue-50 transition-colors group">
-                    <div className="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform">
-                      <feature.icon className="text-white" size={24} />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-1">{feature.title}</h3>
-                      <p className="text-gray-600">{feature.description}</p>
-                    </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {(platform.features || []).map((feature, index) => {
+              const Icon = featureIcons[index % featureIcons.length];
+              return (
+                <div key={index} className="group p-6 bg-gray-50 rounded-2xl hover:bg-white hover:shadow-xl transition-all duration-300 border border-transparent hover:border-blue-100">
+                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                    <Icon className="w-6 h-6 text-blue-600 group-hover:text-white" />
                   </div>
-                ))}
-              </div>
-            </div>
-            <div className="order-1 lg:order-2">
-              <div className="relative">
-                <div className="absolute -inset-4 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-3xl blur-2xl opacity-20" />
-                <img 
-                  src={MINDMAP_IMAGES.platform1}
-                  alt="MindoraMap en acción"
-                  className="relative rounded-2xl shadow-2xl w-full"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            <div>
-              <div className="relative">
-                <div className="absolute -inset-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-3xl blur-2xl opacity-20" />
-                <img 
-                  src={MINDMAP_IMAGES.platform2}
-                  alt="Colaboración en tiempo real"
-                  className="relative rounded-2xl shadow-2xl w-full"
-                />
-              </div>
-            </div>
-            <div>
-              <div className="space-y-6">
-                {platformFeatures.slice(3).map((feature, i) => (
-                  <div key={i} className="flex gap-4 p-4 rounded-2xl hover:bg-purple-50 transition-colors group">
-                    <div className="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/30 group-hover:scale-110 transition-transform">
-                      <feature.icon className="text-white" size={24} />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-1">{feature.title}</h3>
-                      <p className="text-gray-600">{feature.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    <EditableText
+                      value={feature.title}
+                      isAdmin={isAdmin}
+                      onSave={(val) => updateArrayItem('platform', 'features', index, 'title', val)}
+                    />
+                  </h3>
+                  <p className="text-gray-600">
+                    <EditableText
+                      value={feature.description}
+                      isAdmin={isAdmin}
+                      onSave={(val) => updateArrayItem('platform', 'features', index, 'description', val)}
+                    />
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* ==================== BENEFITS SECTION ==================== */}
-      <section id="beneficios" className="py-20 lg:py-32 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden">
-        {/* Background decorations */}
-        <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 text-blue-300 rounded-full text-sm font-semibold mb-4 border border-white/10">
-              <Zap size={16} />
-              Beneficios comprobados
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
-              Resultados que puedes
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-                medir desde el día 1
-              </span>
+      <section id="beneficios" className="py-20 lg:py-32 bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
+              <EditableText
+                value={benefits.title || 'Beneficios que transformarán tu forma de trabajar'}
+                isAdmin={isAdmin}
+                onSave={(val) => updateField('benefits', 'title', val)}
+                className="text-3xl lg:text-4xl font-bold text-white"
+              />
             </h2>
-            <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-              Miles de empresarios ya transformaron su forma de trabajar. Estos son los beneficios que más valoran.
+            <p className="text-lg text-blue-200">
+              <EditableText
+                value={benefits.subtitle || 'Descubre por qué miles de profesionales eligen MindoraMap'}
+                isAdmin={isAdmin}
+                onSave={(val) => updateField('benefits', 'subtitle', val)}
+              />
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            {benefits.map((benefit, i) => (
-              <div 
-                key={i}
-                className="group relative p-6 lg:p-8 rounded-3xl bg-white/5 backdrop-blur border border-white/10 hover:border-white/20 hover:bg-white/10 transition-all"
-              >
-                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${benefit.color} flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform`}>
-                  <benefit.icon className="text-white" size={26} />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {(benefits.items || []).map((benefit, index) => {
+              const Icon = benefitIcons[index % benefitIcons.length];
+              return (
+                <div key={index} className="p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/20 transition-all">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center mb-4">
+                    <Icon className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-white mb-2">
+                    <EditableText
+                      value={benefit.title}
+                      isAdmin={isAdmin}
+                      onSave={(val) => updateArrayItem('benefits', 'items', index, 'title', val)}
+                    />
+                  </h3>
+                  <p className="text-blue-200">
+                    <EditableText
+                      value={benefit.description}
+                      isAdmin={isAdmin}
+                      onSave={(val) => updateArrayItem('benefits', 'items', index, 'description', val)}
+                    />
+                  </p>
                 </div>
-                <h3 className="text-xl font-bold text-white mb-3">{benefit.title}</h3>
-                <p className="text-gray-400 leading-relaxed">{benefit.description}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* ==================== HOW IT WORKS SECTION ==================== */}
-      <section id="como-funciona" className="py-20 lg:py-32 bg-white">
+      {/* ==================== HOW IT WORKS ==================== */}
+      <section id="como-funciona" className="py-20 lg:py-32 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 text-emerald-700 rounded-full text-sm font-semibold mb-4">
-              <Rocket size={16} />
-              Empieza en minutos
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-              Tan simple como
-              <span className="bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent"> 1, 2, 3, 4</span>
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              <EditableText
+                value={how_it_works.title || '¿Cómo funciona?'}
+                isAdmin={isAdmin}
+                onSave={(val) => updateField('how_it_works', 'title', val)}
+                className="text-3xl lg:text-4xl font-bold text-gray-900"
+              />
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              No necesitas tutoriales de horas. En menos de 5 minutos estarás creando tu primer mapa mental.
+            <p className="text-lg text-gray-600">
+              <EditableText
+                value={how_it_works.subtitle || 'Comienza a organizar tus ideas en 4 simples pasos'}
+                isAdmin={isAdmin}
+                onSave={(val) => updateField('how_it_works', 'subtitle', val)}
+              />
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {howItWorksSteps.map((step, i) => (
-              <div key={i} className="relative group">
-                {/* Connector line */}
-                {i < howItWorksSteps.length - 1 && (
-                  <div className="hidden lg:block absolute top-12 left-[60%] w-full h-0.5 bg-gradient-to-r from-emerald-300 to-transparent" />
-                )}
-                
-                <div className="relative bg-white rounded-3xl p-6 lg:p-8 border-2 border-gray-100 hover:border-emerald-300 hover:shadow-xl hover:shadow-emerald-100 transition-all">
-                  <div className="text-5xl lg:text-6xl font-black text-emerald-100 mb-4">
-                    {step.number}
-                  </div>
-                  <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform">
-                    <step.icon className="text-white" size={22} />
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">{step.title}</h3>
-                  <p className="text-gray-600 text-sm">{step.description}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {(how_it_works.steps || []).map((step, index) => (
+              <div key={index} className="relative text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-600/30">
+                  <span className="text-xl font-bold text-white">
+                    <EditableText
+                      value={step.number}
+                      isAdmin={isAdmin}
+                      onSave={(val) => updateArrayItem('how_it_works', 'steps', index, 'number', val)}
+                    />
+                  </span>
                 </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  <EditableText
+                    value={step.title}
+                    isAdmin={isAdmin}
+                    onSave={(val) => updateArrayItem('how_it_works', 'steps', index, 'title', val)}
+                  />
+                </h3>
+                <p className="text-gray-600">
+                  <EditableText
+                    value={step.description}
+                    isAdmin={isAdmin}
+                    onSave={(val) => updateArrayItem('how_it_works', 'steps', index, 'description', val)}
+                  />
+                </p>
+                {index < (how_it_works.steps?.length || 0) - 1 && (
+                  <div className="hidden lg:block absolute top-8 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-blue-300 to-transparent" />
+                )}
               </div>
             ))}
-          </div>
-
-          <div className="mt-16 text-center">
-            <button
-              onClick={onRegister}
-              className="group inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-lg rounded-2xl shadow-xl shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all hover:scale-105"
-            >
-              Comenzar ahora - Es gratis
-              <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-            </button>
           </div>
         </div>
       </section>
 
       {/* ==================== PRICING SECTION ==================== */}
-      <section id="planes" className="py-20 lg:py-32 bg-gradient-to-br from-gray-50 to-blue-50">
+      <section id="planes" className="py-20 lg:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold mb-4">
-              <BarChart3 size={16} />
-              Precios transparentes
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-              Un plan para cada
-              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"> etapa de tu negocio</span>
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              <EditableText
+                value={pricing.title || 'Planes y Precios'}
+                isAdmin={isAdmin}
+                onSave={(val) => updateField('pricing', 'title', val)}
+                className="text-3xl lg:text-4xl font-bold text-gray-900"
+              />
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Empieza gratis y escala cuando lo necesites. Sin sorpresas, sin cargos ocultos.
+            <p className="text-lg text-gray-600">
+              <EditableText
+                value={pricing.subtitle || 'Elige el plan que mejor se adapte a tus necesidades'}
+                isAdmin={isAdmin}
+                onSave={(val) => updateField('pricing', 'subtitle', val)}
+              />
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {plans.map((plan, i) => (
-              <div 
-                key={i}
-                className={`relative rounded-3xl p-8 transition-all ${
-                  plan.popular 
-                    ? 'bg-white shadow-2xl shadow-blue-500/20 scale-105 border-2 border-blue-500' 
-                    : 'bg-white shadow-xl border border-gray-200 hover:shadow-2xl hover:border-gray-300'
-                }`}
-              >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {(pricing.plans || []).map((plan, index) => (
+              <div key={index} className={`relative p-8 rounded-3xl border-2 ${plan.popular ? 'border-blue-600 bg-blue-50 shadow-xl' : 'border-gray-200 bg-white'}`}>
                 {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <div className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold rounded-full shadow-lg">
-                      <Star size={14} fill="currentColor" />
-                      MÁS POPULAR
-                    </div>
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-blue-600 text-white text-sm font-semibold rounded-full">
+                    Más popular
                   </div>
                 )}
-
-                <div className="text-center mb-8">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                  <div className="flex items-baseline justify-center gap-1 mb-2">
-                    <span className="text-5xl font-black text-gray-900">{plan.price}</span>
-                    <span className="text-gray-500 font-medium">{plan.period}</span>
-                  </div>
-                  <p className="text-gray-500 text-sm">{plan.description}</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  <EditableText
+                    value={plan.name}
+                    isAdmin={isAdmin}
+                    onSave={(val) => updateArrayItem('pricing', 'plans', index, 'name', val)}
+                  />
+                </h3>
+                <div className="flex items-baseline gap-1 mb-2">
+                  <span className="text-4xl font-bold text-gray-900">
+                    <EditableText
+                      value={plan.price}
+                      isAdmin={isAdmin}
+                      onSave={(val) => updateArrayItem('pricing', 'plans', index, 'price', val)}
+                    />
+                  </span>
+                  <span className="text-gray-500">
+                    <EditableText
+                      value={plan.period}
+                      isAdmin={isAdmin}
+                      onSave={(val) => updateArrayItem('pricing', 'plans', index, 'period', val)}
+                    />
+                  </span>
                 </div>
-
-                <ul className="space-y-4 mb-8">
-                  {plan.features.map((feature, j) => (
-                    <li key={j} className="flex items-start gap-3">
-                      <CheckCircle2 size={20} className={plan.popular ? 'text-blue-600' : 'text-emerald-500'} />
-                      <span className="text-gray-700 text-sm">{feature}</span>
+                <p className="text-gray-600 mb-6">
+                  <EditableText
+                    value={plan.description}
+                    isAdmin={isAdmin}
+                    onSave={(val) => updateArrayItem('pricing', 'plans', index, 'description', val)}
+                  />
+                </p>
+                <ul className="space-y-3 mb-8">
+                  {(plan.features || []).map((feature, fIndex) => (
+                    <li key={fIndex} className="flex items-center gap-2 text-gray-600">
+                      <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
+                      {feature}
                     </li>
                   ))}
                 </ul>
-
-                <button
-                  onClick={onRegister}
-                  className={`w-full py-4 px-6 rounded-xl font-bold transition-all ${
-                    plan.popular
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105'
-                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                  }`}
-                >
-                  {plan.cta}
+                <button onClick={onRegister} className={`w-full py-3 rounded-xl font-semibold transition-all ${plan.popular ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                  <EditableText
+                    value={plan.btn_text}
+                    isAdmin={isAdmin}
+                    onSave={(val) => updateArrayItem('pricing', 'plans', index, 'btn_text', val)}
+                  />
                 </button>
               </div>
             ))}
@@ -726,37 +590,50 @@ const LandingPage = ({ onLogin, onRegister }) => {
       </section>
 
       {/* ==================== FAQ SECTION ==================== */}
-      <section id="faq" className="py-20 lg:py-32 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="faq" className="py-20 lg:py-32 bg-gray-50">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-semibold mb-4">
-              <Lightbulb size={16} />
-              Resolvemos tus dudas
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-              Preguntas
-              <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent"> frecuentes</span>
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              <EditableText
+                value={faq.title || 'Preguntas Frecuentes'}
+                isAdmin={isAdmin}
+                onSave={(val) => updateField('faq', 'title', val)}
+                className="text-3xl lg:text-4xl font-bold text-gray-900"
+              />
             </h2>
+            <p className="text-lg text-gray-600">
+              <EditableText
+                value={faq.subtitle || 'Resolvemos tus dudas'}
+                isAdmin={isAdmin}
+                onSave={(val) => updateField('faq', 'subtitle', val)}
+              />
+            </p>
           </div>
 
           <div className="space-y-4">
-            {faqs.map((faq, i) => (
-              <div 
-                key={i}
-                className="border border-gray-200 rounded-2xl overflow-hidden hover:border-purple-300 transition-colors"
-              >
+            {(faq.questions || []).map((item, index) => (
+              <div key={index} className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
                 <button
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
+                  onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                  className="w-full flex items-center justify-between p-6 text-left"
                 >
-                  <span className="font-semibold text-gray-900 pr-4">{faq.question}</span>
-                  <div className={`flex-shrink-0 w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center transition-transform ${openFaq === i ? 'rotate-180' : ''}`}>
-                    <ChevronDown size={18} className="text-purple-600" />
-                  </div>
+                  <span className="font-semibold text-gray-900">
+                    <EditableText
+                      value={item.question}
+                      isAdmin={isAdmin}
+                      onSave={(val) => updateArrayItem('faq', 'questions', index, 'question', val)}
+                    />
+                  </span>
+                  {openFaq === index ? <ChevronUp className="w-5 h-5 text-gray-500" /> : <ChevronDown className="w-5 h-5 text-gray-500" />}
                 </button>
-                {openFaq === i && (
-                  <div className="px-6 pb-5 pt-0">
-                    <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
+                {openFaq === index && (
+                  <div className="px-6 pb-6 text-gray-600">
+                    <EditableText
+                      value={item.answer}
+                      isAdmin={isAdmin}
+                      onSave={(val) => updateArrayItem('faq', 'questions', index, 'answer', val)}
+                      multiline
+                    />
                   </div>
                 )}
               </div>
@@ -766,103 +643,103 @@ const LandingPage = ({ onLogin, onRegister }) => {
       </section>
 
       {/* ==================== FINAL CTA ==================== */}
-      <section className="py-20 lg:py-32 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 relative overflow-hidden">
-        {/* Background decorations */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl" />
-
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur text-white rounded-full text-sm font-semibold mb-6 border border-white/20">
-            <Sparkles size={16} />
-            Únete a +2,500 empresarios
-          </div>
-          
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-6 leading-tight">
-            ¿Listo para transformar
-            <span className="block">tu forma de pensar?</span>
+      <section className="py-20 lg:py-32 bg-gradient-to-r from-blue-600 to-indigo-600">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
+            <EditableText
+              value={final_cta.title || '¿Listo para transformar tu manera de pensar?'}
+              isAdmin={isAdmin}
+              onSave={(val) => updateField('final_cta', 'title', val)}
+              className="text-3xl lg:text-4xl font-bold text-white"
+            />
           </h2>
-          
-          <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
-            Empieza gratis hoy y descubre por qué miles de empresarios 
-            eligen MindoraMap para organizar sus ideas y negocios.
+          <p className="text-lg text-blue-100 mb-8">
+            <EditableText
+              value={final_cta.subtitle || 'Únete a miles de profesionales que ya organizan sus ideas con MindoraMap'}
+              isAdmin={isAdmin}
+              onSave={(val) => updateField('final_cta', 'subtitle', val)}
+            />
           </p>
-          
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button
-              onClick={onRegister}
-              className="group w-full sm:w-auto px-10 py-5 bg-white hover:bg-gray-100 text-blue-600 font-bold text-lg rounded-2xl shadow-2xl flex items-center justify-center gap-2 transition-all hover:scale-105"
-            >
-              Crear cuenta gratis
-              <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
-            </button>
-            <button
-              onClick={onLogin}
-              className="w-full sm:w-auto px-10 py-5 bg-white/10 hover:bg-white/20 backdrop-blur text-white font-bold text-lg rounded-2xl border-2 border-white/30 transition-all"
-            >
-              Ya tengo cuenta
-            </button>
-          </div>
-
-          <p className="mt-8 text-blue-200 text-sm">
-            ✓ Sin tarjeta de crédito &nbsp;&nbsp; ✓ Configuración en 2 minutos &nbsp;&nbsp; ✓ Cancela cuando quieras
-          </p>
+          <button onClick={onRegister} className="px-8 py-4 bg-white text-blue-600 font-semibold rounded-2xl hover:bg-blue-50 transition-all shadow-xl flex items-center gap-2 mx-auto">
+            <EditableText
+              value={final_cta.btn_text || 'Comenzar gratis ahora'}
+              isAdmin={isAdmin}
+              onSave={(val) => updateField('final_cta', 'btn_text', val)}
+            />
+            <ArrowRight className="w-5 h-5" />
+          </button>
         </div>
       </section>
 
       {/* ==================== FOOTER ==================== */}
-      <footer className="py-16 bg-gray-900">
+      <footer className="bg-gray-900 text-gray-400 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-12 mb-12">
-            {/* Brand */}
-            <div className="md:col-span-2">
-              <div className="flex items-center mb-4">
-                <img src={LOGO_URL} alt="MindoraMap" className="h-16 w-auto" />
-              </div>
-              <p className="text-gray-400 mb-6 max-w-md">
-                La plataforma de mapas mentales diseñada para empresarios que buscan claridad, organización y resultados.
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+            <div className="md:col-span-1">
+              <img src={LOGO_URL} alt="MindoraMap" className="h-16 w-auto mb-4" />
+              <p className="text-sm">
+                <EditableText
+                  value={footer.description || 'La herramienta de mapas mentales más potente.'}
+                  isAdmin={isAdmin}
+                  onSave={(val) => updateField('footer', 'description', val)}
+                />
               </p>
-              <div className="flex gap-4">
-                {['Twitter', 'LinkedIn', 'YouTube'].map((social, i) => (
-                  <a key={i} href="#" className="w-10 h-10 bg-gray-800 hover:bg-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-white transition-colors">
-                    <span className="text-xs font-bold">{social[0]}</span>
-                  </a>
-                ))}
-              </div>
             </div>
-
-            {/* Links */}
             <div>
-              <h4 className="text-white font-semibold mb-4">Producto</h4>
-              <ul className="space-y-3">
-                {['Características', 'Precios', 'Integraciones', 'Actualizaciones'].map((link, i) => (
-                  <li key={i}>
-                    <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">{link}</a>
-                  </li>
+              <h4 className="text-white font-semibold mb-4">
+                <EditableText
+                  value={footer.col1_title || 'Producto'}
+                  isAdmin={isAdmin}
+                  onSave={(val) => updateField('footer', 'col1_title', val)}
+                />
+              </h4>
+              <ul className="space-y-2 text-sm">
+                {(footer.col1_links || []).map((link, i) => (
+                  <li key={i}><a href="#" className="hover:text-white transition-colors">{link}</a></li>
                 ))}
               </ul>
             </div>
-
             <div>
-              <h4 className="text-white font-semibold mb-4">Empresa</h4>
-              <ul className="space-y-3">
-                {['Sobre nosotros', 'Blog', 'Contacto', 'Empleo'].map((link, i) => (
-                  <li key={i}>
-                    <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">{link}</a>
-                  </li>
+              <h4 className="text-white font-semibold mb-4">
+                <EditableText
+                  value={footer.col2_title || 'Recursos'}
+                  isAdmin={isAdmin}
+                  onSave={(val) => updateField('footer', 'col2_title', val)}
+                />
+              </h4>
+              <ul className="space-y-2 text-sm">
+                {(footer.col2_links || []).map((link, i) => (
+                  <li key={i}><a href="#" className="hover:text-white transition-colors">{link}</a></li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-white font-semibold mb-4">
+                <EditableText
+                  value={footer.col3_title || 'Empresa'}
+                  isAdmin={isAdmin}
+                  onSave={(val) => updateField('footer', 'col3_title', val)}
+                />
+              </h4>
+              <ul className="space-y-2 text-sm">
+                {(footer.col3_links || []).map((link, i) => (
+                  <li key={i}><a href="#" className="hover:text-white transition-colors">{link}</a></li>
                 ))}
               </ul>
             </div>
           </div>
-
           <div className="pt-8 border-t border-gray-800 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-gray-500 text-sm">
-              © {new Date().getFullYear()} MindoraMap. Todos los derechos reservados.
+            <p className="text-sm">
+              <EditableText
+                value={footer.copyright || '© 2024 MindoraMap. Todos los derechos reservados.'}
+                isAdmin={isAdmin}
+                onSave={(val) => updateField('footer', 'copyright', val)}
+              />
             </p>
-            <div className="flex items-center gap-6 text-sm">
-              <a href="#" className="text-gray-500 hover:text-white transition-colors">Términos</a>
-              <a href="#" className="text-gray-500 hover:text-white transition-colors">Privacidad</a>
-              <a href="#" className="text-gray-500 hover:text-white transition-colors">Cookies</a>
+            <div className="flex items-center gap-4 text-sm">
+              {(footer.legal_links || []).map((link, i) => (
+                <a key={i} href="#" className="hover:text-white transition-colors">{link}</a>
+              ))}
             </div>
           </div>
         </div>

@@ -211,6 +211,35 @@ const UserDropdown = ({ user, onOpenProfile, onLogout, onAdminClick, isAdmin }) 
               </div>
             </button>
 
+            {/* Panel de Admin - solo visible para admins */}
+            {isAdmin && onAdminClick && (
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  onAdminClick();
+                }}
+                className="
+                  w-full px-4 py-2.5
+                  flex items-center gap-3
+                  text-sm text-purple-700
+                  hover:bg-purple-50
+                  transition-colors
+                "
+              >
+                <div className="
+                  w-8 h-8 rounded-lg
+                  bg-purple-100 text-purple-600
+                  flex items-center justify-center
+                ">
+                  <Shield size={16} />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium">Panel de Admin</p>
+                  <p className="text-xs text-purple-400">Dashboard, usuarios, contenido</p>
+                </div>
+              </button>
+            )}
+
             {/* Divider */}
             <div className="my-2 border-t border-gray-100" />
 

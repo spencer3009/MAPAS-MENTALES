@@ -612,24 +612,24 @@ const Sidebar = ({
             </div>
           )}
 
-          {/* Info para planes ilimitados */}
+          {/* Info para planes ilimitados - compacta */}
           {planInfo.limits.max_active_maps === -1 && (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-xs text-gray-600">
-                <Sparkles className="w-3.5 h-3.5 text-green-500" />
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-[10px] text-gray-600">
+                <Sparkles className="w-3 h-3 text-green-500" />
                 <span>Mapas ilimitados</span>
               </div>
-              <div className="flex items-center gap-2 text-xs text-gray-600">
-                <Sparkles className="w-3.5 h-3.5 text-green-500" />
+              <div className="flex items-center gap-1.5 text-[10px] text-gray-600">
+                <Sparkles className="w-3 h-3 text-green-500" />
                 <span>Nodos ilimitados</span>
               </div>
               {planInfo.limits.can_collaborate && (
-                <div className="flex items-center gap-2 text-xs text-gray-600">
-                  <Sparkles className="w-3.5 h-3.5 text-green-500" />
+                <div className="flex items-center gap-1.5 text-[10px] text-gray-600">
+                  <Sparkles className="w-3 h-3 text-green-500" />
                   <span>Colaboración en equipo</span>
                 </div>
               )}
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-[10px] text-gray-500">
                 {planInfo.usage.active_maps} mapas activos
               </p>
             </div>

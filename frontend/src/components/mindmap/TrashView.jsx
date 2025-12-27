@@ -146,9 +146,14 @@ const TrashView = ({ isOpen, onClose, onProjectRestored, token }) => {
       setTrashProjects([]);
       setConfirmEmptyTrash(false);
       
-      // Notificar al componente padre
+      // Notificar al componente padre PRIMERO para actualizar el contador
       if (onProjectRestored) {
         onProjectRestored();
+      }
+      
+      // Cerrar la papelera después de vaciarla
+      if (onClose) {
+        onClose();
       }
     } catch (err) {
       console.error('Error emptying trash:', err);

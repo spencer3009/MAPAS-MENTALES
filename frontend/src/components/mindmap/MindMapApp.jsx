@@ -243,6 +243,39 @@ const MindMapApp = () => {
     reloadProjects();
   }, [loadTrashCount, reloadProjects]);
 
+  // ==========================================
+  // HANDLERS PARA EL DOCK SIDEBAR
+  // ==========================================
+  
+  const handleToggleProjectsSidebar = useCallback(() => {
+    setIsProjectsSidebarOpen(prev => !prev);
+    if (!isProjectsSidebarOpen) {
+      setActiveView('projects');
+    }
+  }, [isProjectsSidebarOpen]);
+
+  const handleOpenDashboard = useCallback(() => {
+    setActiveView('dashboard');
+  }, []);
+
+  const handleOpenTemplatesView = useCallback(() => {
+    setActiveView('templates');
+  }, []);
+
+  const handleOpenRemindersPanel = useCallback(() => {
+    setShowStyleSidebar(true);
+    setSidebarTab('reminders');
+    setActiveView('projects');
+  }, []);
+
+  const handleOpenIntegrations = useCallback(() => {
+    setActiveView('integrations');
+  }, []);
+
+  const handleOpenSettings = useCallback(() => {
+    setShowProfileModal(true);
+  }, []);
+
   // Enriquecer nodos con información de recordatorio
   const nodesWithReminders = nodes.map(node => ({
     ...node,

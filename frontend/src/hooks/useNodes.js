@@ -2395,6 +2395,10 @@ export const useNodes = () => {
     // Obtener el proyecto activo para saber el layoutType
     const project = projects.find(p => p.id === activeProjectId);
     const layoutType = project?.layoutType || 'mindflow';
+    
+    // Encontrar el padre del nodo que se va a eliminar ANTES de eliminarlo
+    const nodeToDelete = nodes.find(n => n.id === id);
+    const parentOfDeleted = nodeToDelete?.parentId;
 
     const nodesToDelete = new Set(findDescendants(id, nodes));
     let newNodes = nodes.filter(n => !nodesToDelete.has(n.id));
@@ -2402,18 +2406,56 @@ export const useNodes = () => {
     // Si autoAlign está activo, aplicar alineación según el tipo de layout
     if (autoAlignAfter) {
       console.log('[deleteNode] Aplicando alineación después de eliminar. Layout:', layoutType);
-      // Encontrar todos los nodos raíz
-      const rootNodes = newNodes.filter(n => !n.parentId);
-      rootNodes.forEach(root => {
-        const children = newNodes.filter(n => n.parentId === root.id);
-        if (children.length > 0) {
-          if (layoutType === 'mindtree') {
-            newNodes = autoAlignMindTree(root.id, newNodes);
-          } else {
-            newNodes = autoAlignHierarchy(root.id, newNodes);
+      
+      if (layoutType === 'mindhybrid') {
+        // Para MindHybrid: Redistribuir los hermanos del nodo eliminado
+        if (parentOfDeleted) {
+          const parent = newNodes.find(n => n.id === parentOfDeleted);
+          if (parent) {
+            const parentWidth = parent.width || 160;
+            const parentHeight = parent.height || 64;
+            const childWidth = 160;
+            const verticalGap = 100;
+            const minSiblingSpacingV = 180;
+            
+            const parentCenterX = parent.x + (parentWidth / 2);
+            const childY = parent.y + parentHeight + verticalGap;
+            
+            // Obtener los hermanos verticales restantes
+            const verticalSiblings = newNodes.filter(n => 
+              n.parentId === parentOfDeleted && 
+              n.childDirection === 'vertical' && 
+              !n.connectorParentId
+            ).sort((a, b) => a.x - b.x);
+            
+            // Redistribuir los hermanos verticales centrados bajo el padre
+            if (verticalSiblings.length > 0) {
+              const totalGroupWidth = (verticalSiblings.length - 1) * minSiblingSpacingV;
+              const firstChildX = parentCenterX - (childWidth / 2) - (totalGroupWidth / 2);
+              
+              verticalSiblings.forEach((sibling, index) => {
+                const newX = firstChildX + (index * minSiblingSpacingV);
+                newNodes = newNodes.map(n => 
+                  n.id === sibling.id ? { ...n, x: newX, y: childY } : n
+                );
+              });
+            }
           }
         }
-      });
+      } else {
+        // Para otros layouts
+        const rootNodes = newNodes.filter(n => !n.parentId);
+        rootNodes.forEach(root => {
+          const children = newNodes.filter(n => n.parentId === root.id);
+          if (children.length > 0) {
+            if (layoutType === 'mindtree') {
+              newNodes = autoAlignMindTree(root.id, newNodes);
+            } else {
+              newNodes = autoAlignHierarchy(root.id, newNodes);
+            }
+          }
+        });
+      }
     }
     
     pushToHistory(activeProjectId, newNodes);

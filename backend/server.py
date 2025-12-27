@@ -31,24 +31,6 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # Security
 security = HTTPBearer()
 
-# Usuarios hardcodeados (temporales - se migrarán a BD)
-HARDCODED_USERS = {
-    "spencer3009": {
-        "username": "spencer3009",
-        "hashed_password": pwd_context.hash("Socios3009"),
-        "full_name": "Spencer",
-        "disabled": False,
-        "whatsapp": "+1234567890"  # Número de WhatsApp para recordatorios
-    },
-    "teresa3009": {
-        "username": "teresa3009",
-        "hashed_password": pwd_context.hash("Socios3009"),
-        "full_name": "Teresa",
-        "disabled": False,
-        "whatsapp": "+1234567890"
-    }
-}
-
 # Twilio WhatsApp Sandbox Configuration
 TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID', '')
 TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN', '')

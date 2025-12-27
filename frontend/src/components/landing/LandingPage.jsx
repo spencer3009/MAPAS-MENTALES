@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Brain, 
   Zap, 
@@ -29,8 +29,11 @@ import {
   MousePointer,
   Palette,
   FolderTree,
-  Eye
+  Eye,
+  Loader2
 } from 'lucide-react';
+
+const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
 // URL del logo MindoraMap
 const LOGO_URL = 'https://customer-assets.emergentagent.com/job_mindviz-app/artifacts/k1kioask_image.png';

@@ -43,11 +43,11 @@ const ConnectionsLayer = memo(({
 
       let start, end, path;
 
-      // Caso especial: nodo creado desde un conector horizontal
-      // El conector debe tener forma de "escalera": ⬇️ ➡️ ⬇️
-      // 1. Vertical hacia abajo desde el punto medio del conector
-      // 2. Horizontal hacia el nodo
-      // 3. Vertical corto hacia abajo (entrando al nodo desde arriba)
+      // Caso especial: nodo creado desde un conector horizontal (botón "+" púrpura)
+      // El conector puede ser:
+      // - RECTO: si el nodo está centrado debajo del "+" (solo ⬇️)
+      // - CODO IZQUIERDO: si el nodo fue arrastrado a la izquierda (⬇️ ⬅️ ⬇️)
+      // - CODO DERECHO: si el nodo fue arrastrado a la derecha (⬇️ ➡️ ⬇️)
       if (node.connectorParentId && node.connectorTargetId && layoutType === 'mindhybrid') {
         const connectorTarget = nodes.find(n => n.id === node.connectorTargetId);
         if (connectorTarget) {
@@ -74,18 +74,24 @@ const ConnectionsLayer = memo(({
             start = { x: midX, y: midY };
             end = { x: endX, y: endY };
             
-            // Calcular puntos intermedios para el patrón ⬇️ ➡️ ⬇️
-            // Punto 1: Bajamos verticalmente hasta un punto intermedio (a mitad de camino entre midY y endY)
-            const verticalMidY = midY + (endY - midY) * 0.5;
+            // Calcular si el nodo está centrado o desplazado
+            const tolerance = 10; // Tolerancia en píxeles para considerar "centrado"
+            const horizontalOffset = endX - midX;
             
-            // Punto 2: Desde ahí vamos horizontal hasta estar alineados con el nodo
-            // Punto 3: Bajamos verticalmente hasta el nodo
-            
-            // Path con 3 tramos ortogonales: ⬇️ ➡️ ⬇️
-            path = `M ${midX} ${midY} ` +           // Inicio en el punto medio del conector
-                   `L ${midX} ${verticalMidY} ` +   // 1️⃣ Vertical hacia abajo
-                   `L ${endX} ${verticalMidY} ` +   // 2️⃣ Horizontal hacia el nodo
-                   `L ${endX} ${endY}`;             // 3️⃣ Vertical hacia abajo (entrada al nodo)
+            if (Math.abs(horizontalOffset) <= tolerance) {
+              // CASO 1: Nodo centrado → Conector RECTO vertical (solo ⬇️)
+              path = `M ${midX} ${midY} L ${midX} ${endY}`;
+            } else {
+              // CASO 2 y 3: Nodo desplazado → Conector tipo CODO
+              // Punto intermedio: bajamos verticalmente hasta un punto intermedio
+              const verticalMidY = midY + (endY - midY) * 0.5;
+              
+              // Path con 3 tramos ortogonales: ⬇️ ➡️/⬅️ ⬇️
+              path = `M ${midX} ${midY} ` +           // Inicio en el punto medio del conector
+                     `L ${midX} ${verticalMidY} ` +   // 1️⃣ Vertical hacia abajo
+                     `L ${endX} ${verticalMidY} ` +   // 2️⃣ Horizontal hacia el nodo (izq o der)
+                     `L ${endX} ${endY}`;             // 3️⃣ Vertical hacia abajo (entrada al nodo)
+            }
           }
         }
       } else if (layoutType === 'mindhybrid') {

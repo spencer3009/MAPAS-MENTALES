@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Backend API Testing for MindoraMap Admin User Management Features
-Testing admin endpoints for blocking, unblocking, and deleting users
+Backend API Testing for MindoraMap Pricing/Plans System
+Testing pricing endpoints, plan limits, and user plan functionality
 """
 
 import requests
@@ -17,9 +17,9 @@ ADMIN_CREDENTIALS = {
     "username": "spencer3009",
     "password": "Socios3009"
 }
-NON_ADMIN_CREDENTIALS = {
-    "username": "carlos3009",
-    "password": "Socios3009"
+FREE_USER_CREDENTIALS = {
+    "username": "freetest2025",
+    "password": "Test1234!"
 }
 
 class AdminUserManagementTester:

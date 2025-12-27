@@ -1089,5 +1089,14 @@ class AdminUserManagementTester:
         print("=" * 80)
 
 if __name__ == "__main__":
-    tester = AdminUserManagementTester()
-    tester.run_comprehensive_test()
+    # Run pricing/plans tests
+    print("Starting Pricing/Plans System Tests...")
+    pricing_tester = PricingPlansTester()
+    pricing_tester.run_comprehensive_test()
+    
+    print("\n" + "="*80 + "\n")
+    
+    # Run admin user management tests  
+    print("Starting Admin User Management Tests...")
+    admin_tester = AdminUserManagementTester()
+    admin_tester.run_comprehensive_test()

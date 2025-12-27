@@ -481,17 +481,31 @@ async def get_profile(current_user: dict = Depends(get_current_user)):
             "updated_at": profile.get("updated_at")
         }
     
-    # Si no existe perfil, devolver datos básicos de HARDCODED_USERS
-    hardcoded = HARDCODED_USERS.get(username, {})
-    full_name = hardcoded.get("full_name", "")
-    nombre_parts = full_name.split(" ", 1) if full_name else ["", ""]
+    # Si no existe perfil, buscar datos básicos del usuario en la BD
+    user_data = await db.users.find_one({"username": username}, {"_id": 0})
+    if user_data:
+        full_name = user_data.get("full_name", "")
+        nombre_parts = full_name.split(" ", 1) if full_name else ["", ""]
+        
+        return {
+            "username": username,
+            "nombre": nombre_parts[0] if len(nombre_parts) > 0 else "",
+            "apellidos": nombre_parts[1] if len(nombre_parts) > 1 else "",
+            "email": user_data.get("email", ""),
+            "whatsapp": "",
+            "pais": "",
+            "timezone": "America/Lima",
+            "created_at": user_data.get("created_at"),
+            "updated_at": user_data.get("updated_at")
+        }
     
+    # Si no hay datos, devolver perfil vacío
     return {
         "username": username,
-        "nombre": nombre_parts[0] if len(nombre_parts) > 0 else "",
-        "apellidos": nombre_parts[1] if len(nombre_parts) > 1 else "",
-        "email": hardcoded.get("email", ""),
-        "whatsapp": hardcoded.get("whatsapp", ""),
+        "nombre": "",
+        "apellidos": "",
+        "email": "",
+        "whatsapp": "",
         "pais": "",
         "timezone": "America/Lima",
         "created_at": None,

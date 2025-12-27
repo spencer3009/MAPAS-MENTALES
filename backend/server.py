@@ -245,9 +245,13 @@ async def register(register_data: RegisterRequest):
 
 @api_router.get("/auth/me", response_model=UserResponse)
 async def get_me(current_user: dict = Depends(get_current_user)):
+    # Obtener datos completos del usuario desde la BD
+    user = await db.users.find_one({"username": current_user["username"]}, {"_id": 0})
     return {
         "username": current_user["username"],
-        "full_name": current_user["full_name"]
+        "full_name": current_user.get("full_name", ""),
+        "role": user.get("role", "user") if user else "user",
+        "is_pro": user.get("is_pro", False) if user else False
     }
 
 @api_router.post("/auth/logout")

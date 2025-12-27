@@ -494,6 +494,111 @@ const Sidebar = ({
         </p>
       </div>
 
+      {/* Sección del Plan */}
+      {planInfo && (
+        <div className={`mt-4 p-4 rounded-xl border ${
+          planInfo.plan === 'free' 
+            ? 'bg-gray-50 border-gray-200'
+            : planInfo.plan === 'pro'
+            ? 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200'
+            : planInfo.plan === 'team'
+            ? 'bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200'
+            : 'bg-gradient-to-br from-red-50 to-pink-50 border-red-200'
+        }`}>
+          {/* Header del plan */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              {planInfo.plan !== 'free' && (
+                <Crown className={`w-4 h-4 ${
+                  planInfo.plan === 'pro' ? 'text-amber-500' 
+                  : planInfo.plan === 'team' ? 'text-purple-500'
+                  : 'text-red-500'
+                }`} />
+              )}
+              <span className={`text-sm font-bold ${
+                planInfo.plan === 'free' ? 'text-gray-700'
+                : planInfo.plan === 'pro' ? 'text-amber-700'
+                : planInfo.plan === 'team' ? 'text-purple-700'
+                : 'text-red-700'
+              }`}>
+                Plan {PLAN_NAMES[planInfo.plan] || planInfo.plan}
+              </span>
+            </div>
+            {planInfo.limits.max_maps === -1 && (
+              <span className="text-xs font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
+                ∞ Ilimitado
+              </span>
+            )}
+          </div>
+
+          {/* Uso de mapas - solo mostrar si hay límite */}
+          {planInfo.limits.max_maps !== -1 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-600">Mapas creados</span>
+                <span className="font-semibold text-gray-800">
+                  {planInfo.usage.maps_count} / {planInfo.limits.max_maps}
+                </span>
+              </div>
+              
+              {/* Barra de progreso */}
+              <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                <div 
+                  className={`h-full rounded-full transition-all duration-300 ${
+                    planInfo.usage.maps_count >= planInfo.limits.max_maps
+                      ? 'bg-red-500'
+                      : planInfo.usage.maps_count >= planInfo.limits.max_maps * 0.8
+                      ? 'bg-amber-500'
+                      : 'bg-blue-500'
+                  }`}
+                  style={{ width: `${Math.min(100, (planInfo.usage.maps_count / planInfo.limits.max_maps) * 100)}%` }}
+                />
+              </div>
+
+              {/* Mensaje de límite */}
+              {planInfo.usage.maps_remaining === 0 ? (
+                <p className="text-xs text-red-600 font-medium">
+                  ¡Has alcanzado el límite de tu plan!
+                </p>
+              ) : planInfo.usage.maps_remaining <= 1 ? (
+                <p className="text-xs text-amber-600">
+                  Te queda {planInfo.usage.maps_remaining} mapa disponible
+                </p>
+              ) : null}
+
+              {/* Botón de upgrade */}
+              <button className="w-full mt-2 py-2 px-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all shadow-sm hover:shadow-md">
+                <Zap className="w-3.5 h-3.5" />
+                Actualizar a Pro
+              </button>
+            </div>
+          )}
+
+          {/* Info para planes ilimitados */}
+          {planInfo.limits.max_maps === -1 && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-xs text-gray-600">
+                <Sparkles className="w-3.5 h-3.5 text-green-500" />
+                <span>Mapas ilimitados</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-gray-600">
+                <Sparkles className="w-3.5 h-3.5 text-green-500" />
+                <span>Nodos ilimitados</span>
+              </div>
+              {planInfo.limits.can_collaborate && (
+                <div className="flex items-center gap-2 text-xs text-gray-600">
+                  <Sparkles className="w-3.5 h-3.5 text-green-500" />
+                  <span>Colaboración en equipo</span>
+                </div>
+              )}
+              <p className="text-xs text-gray-500 mt-2">
+                {planInfo.usage.maps_count} mapas creados
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Botón de Papelera */}
       <button
         onClick={onOpenTrash}

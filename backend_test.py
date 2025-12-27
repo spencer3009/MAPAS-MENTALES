@@ -658,5 +658,5 @@ class CollisionDetectionTester:
         print("=" * 80)
 
 if __name__ == "__main__":
-    tester = RecycleBinTester()
+    tester = CollisionDetectionTester()
     tester.run_comprehensive_test()

@@ -2016,7 +2016,7 @@ export const useNodes = () => {
   // Algoritmo de alineación para MindHybrid
   // Organiza hijos horizontales a la derecha y verticales abajo
   // IMPORTANTE: Este algoritmo RESPETA el espacio expandido y NUNCA comprime
-  const autoAlignMindHybrid = useCallback((parentId, currentNodes) => {
+  const autoAlignMindHybrid = useCallback((parentId, currentNodes, isInitialCall = true) => {
     if (!parentId) return currentNodes;
     
     const parent = currentNodes.find(n => n.id === parentId);
@@ -2049,7 +2049,7 @@ export const useNodes = () => {
     const parentCenterY = parent.y + (parentHeight / 2);
     
     // =====================================================
-    // HIJOS HORIZONTALES
+    // HIJOS HORIZONTALES - Solo ajustar Y, preservar X relativa al padre
     // =====================================================
     horizontalChildren.forEach((child, index) => {
       const newX = parent.x + parentWidth + horizontalGap;
@@ -2060,118 +2060,66 @@ export const useNodes = () => {
         n.id === child.id ? { ...n, x: newX, y: newY } : n
       );
       
-      // Recursivamente alinear subárboles
-      updatedNodes = autoAlignMindHybrid(child.id, updatedNodes);
+      // Recursivamente alinear subárboles (marcar como no inicial)
+      updatedNodes = autoAlignMindHybrid(child.id, updatedNodes, false);
     });
     
     // =====================================================
-    // HIJOS VERTICALES - CON DETECCIÓN DE ESPACIO REQUERIDO
+    // HIJOS VERTICALES - MODO CONSERVADOR
+    // Solo reorganizar si hay un problema real de espaciado
     // =====================================================
     if (verticalChildren.length > 0) {
-      // Calcular el espacio requerido por cada subárbol
-      const getSubtreeWidth = (nodeId, nodes) => {
-        const node = nodes.find(n => n.id === nodeId);
-        if (!node) return childWidth;
-        
-        // Buscar todos los descendientes verticales
-        const descendants = nodes.filter(n => n.parentId === nodeId && n.childDirection === 'vertical');
-        
-        if (descendants.length === 0) {
-          return childWidth;
-        }
-        
-        // Calcular el ancho del grupo de descendientes
-        const sortedDesc = [...descendants].sort((a, b) => a.x - b.x);
-        const leftmost = sortedDesc[0].x;
-        const rightmost = sortedDesc[sortedDesc.length - 1].x + childWidth;
-        const descendantsWidth = rightmost - leftmost;
-        
-        // El ancho del subárbol es el máximo entre el nodo y sus descendientes
-        return Math.max(childWidth, descendantsWidth);
-      };
+      const childY = parent.y + parentHeight + verticalGap;
       
-      // Calcular el espaciado actual entre hijos (si ya existen)
+      // Si ya hay hijos posicionados, verificar si necesitan ajuste
+      const existingPositions = verticalChildren.map(c => c.x);
+      const minExistingX = Math.min(...existingPositions);
+      const maxExistingX = Math.max(...existingPositions);
+      const currentGroupWidth = maxExistingX - minExistingX;
+      
+      // Calcular espaciado actual entre hijos
       let currentSpacing = minSiblingSpacingV;
       if (verticalChildren.length >= 2) {
         const sorted = [...verticalChildren].sort((a, b) => a.x - b.x);
-        const actualSpacing = (sorted[1].x - sorted[0].x);
-        // NUNCA reducir el espaciado - solo mantener o expandir
+        const actualSpacing = sorted[1].x - sorted[0].x;
         currentSpacing = Math.max(minSiblingSpacingV, actualSpacing);
       }
       
-      // Calcular el ancho requerido por cada subárbol
-      const subtreeWidths = verticalChildren.map(child => ({
-        id: child.id,
-        width: getSubtreeWidth(child.id, updatedNodes)
-      }));
+      // Solo ajustar posiciones si:
+      // 1. Hay hijos que necesitan posición inicial (x muy pequeño o no definido)
+      // 2. El espaciado actual es menor al mínimo requerido
+      const needsRepositioning = verticalChildren.some(c => 
+        c.x === undefined || c.x < 50
+      );
       
-      // El espaciado debe ser suficiente para el subárbol más ancho
-      const maxSubtreeWidth = Math.max(...subtreeWidths.map(s => s.width));
-      const requiredSpacing = Math.max(currentSpacing, maxSubtreeWidth + 20); // 20px de margen
+      const spacingTooSmall = verticalChildren.length >= 2 && 
+        currentSpacing < minSiblingSpacingV * 0.9; // 10% de tolerancia
       
-      // Calcular ancho total del grupo
-      const totalGroupWidth = (verticalChildren.length - 1) * requiredSpacing;
-      const firstChildX = parentCenterX - (childWidth / 2) - (totalGroupWidth / 2);
-      const childY = parent.y + parentHeight + verticalGap;
-      
-      // =====================================================
-      // DETECCIÓN DE COLISIONES CON OTROS SUBÁRBOLES
-      // =====================================================
-      // Buscar nodos que NO son descendientes de este padre
-      const getDescendantIds = (nodeId, nodes) => {
-        const descendants = new Set([nodeId]);
-        const queue = [nodeId];
-        while (queue.length > 0) {
-          const currentId = queue.shift();
-          nodes.forEach(n => {
-            if (n.parentId === currentId && !descendants.has(n.id)) {
-              descendants.add(n.id);
-              queue.push(n.id);
-            }
-          });
-        }
-        return descendants;
-      };
-      
-      const descendantIds = getDescendantIds(parentId, updatedNodes);
-      
-      // Verificar colisiones con nodos externos en la misma zona Y
-      const potentialCollisions = updatedNodes.filter(n => {
-        if (descendantIds.has(n.id) || n.id === parentId) return false;
+      if (needsRepositioning || spacingTooSmall) {
+        // Calcular nuevas posiciones centradas
+        const totalGroupWidth = (verticalChildren.length - 1) * currentSpacing;
+        const firstChildX = parentCenterX - (childWidth / 2) - (totalGroupWidth / 2);
         
-        const nHeight = n.height || 64;
-        const nBottom = n.y + nHeight;
-        
-        // Verificar si está en el rango Y de los hijos
-        const verticalOverlap = !(nBottom < childY - 20 || n.y > childY + childHeight + 20);
-        return verticalOverlap;
-      });
-      
-      // Si hay colisiones potenciales, ajustar posición
-      let adjustedFirstChildX = firstChildX;
-      if (potentialCollisions.length > 0) {
-        const maxCollidingRight = Math.max(...potentialCollisions.map(n => n.x + (n.width || 160)));
-        // Si el primer hijo colisionaría, moverlo a la derecha
-        if (firstChildX < maxCollidingRight + 40) {
-          adjustedFirstChildX = maxCollidingRight + 40;
-          console.log('[MindHybrid AutoAlign] Ajustando para evitar colisión:', {
-            originalFirstX: firstChildX,
-            adjustedFirstX: adjustedFirstChildX,
-            maxCollidingRight
-          });
-        }
+        // Posicionar hijos verticales
+        verticalChildren.forEach((child, index) => {
+          const newX = firstChildX + (index * currentSpacing);
+          
+          updatedNodes = updatedNodes.map(n => 
+            n.id === child.id ? { ...n, x: newX, y: childY } : n
+          );
+        });
+      } else {
+        // Solo ajustar Y para mantener distancia vertical del padre
+        verticalChildren.forEach((child) => {
+          updatedNodes = updatedNodes.map(n => 
+            n.id === child.id ? { ...n, y: childY } : n
+          );
+        });
       }
       
-      // Posicionar hijos verticales
-      verticalChildren.forEach((child, index) => {
-        const newX = adjustedFirstChildX + (index * requiredSpacing);
-        
-        updatedNodes = updatedNodes.map(n => 
-          n.id === child.id ? { ...n, x: newX, y: childY } : n
-        );
-        
-        // Recursivamente alinear subárboles
-        updatedNodes = autoAlignMindHybrid(child.id, updatedNodes);
+      // Recursivamente alinear subárboles de hijos verticales
+      verticalChildren.forEach((child) => {
+        updatedNodes = autoAlignMindHybrid(child.id, updatedNodes, false);
       });
     }
     

@@ -11,6 +11,7 @@ import ProfileModal from './ProfileModal';
 import AllProjectsModal from './AllProjectsModal';
 import MultiSelectToolbar from './MultiSelectToolbar';
 import LayoutTemplateSelector from './LayoutTemplateSelector';
+import TrashView from './TrashView';
 import { useNodes } from '../../hooks/useNodes';
 import { usePanning } from '../../hooks/usePanning';
 import { useZoom } from '../../hooks/useZoom';

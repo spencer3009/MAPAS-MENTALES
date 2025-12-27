@@ -203,7 +203,7 @@ const Sidebar = ({
         <img 
           src={LOGO_URL} 
           alt="MindoraMap" 
-          className="h-16 w-auto object-contain"
+          className="h-20 w-auto object-contain"
         />
       </div>
 

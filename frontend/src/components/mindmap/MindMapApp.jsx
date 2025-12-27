@@ -157,6 +157,10 @@ const MindMapApp = () => {
   const [showLayoutSelector, setShowLayoutSelector] = useState(false);
   const [pendingProjectName, setPendingProjectName] = useState(null);
 
+  // Estado para la Papelera
+  const [showTrashView, setShowTrashView] = useState(false);
+  const [trashCount, setTrashCount] = useState(0);
+
   // Estado para alineación automática (ON por defecto)
   const [autoAlignEnabled, setAutoAlignEnabled] = useState(true);
 

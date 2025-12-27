@@ -508,14 +508,17 @@ const MindMapApp = ({ onAdminClick }) => {
   }, []);
 
   // Handler para seleccionar template - CREA NUEVO PROYECTO
-  const handleSelectTemplate = useCallback((templateNodes, templateName) => {
+  const handleSelectTemplate = useCallback(async (templateNodes, templateName) => {
     try {
       console.log('Creando proyecto desde template:', templateName);
-      const success = loadFromTemplate(templateNodes, templateName);
-      if (success) {
+      const result = await loadFromTemplate(templateNodes, templateName);
+      if (result.success) {
         resetPan();
         resetZoom();
         console.log('Proyecto desde template creado exitosamente');
+      } else if (result.error) {
+        setUpgradeLimitType(result.limitType || 'active');
+        setShowUpgradeModal(true);
       }
     } catch (error) {
       console.error('Error al cargar template:', error);

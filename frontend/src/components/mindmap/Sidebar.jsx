@@ -522,63 +522,94 @@ const Sidebar = ({
           {/* Uso de mapas - solo mostrar si hay límite */}
           {planInfo.limits.max_active_maps !== -1 && (
             <div className="space-y-3">
-              {/* Mapas activos */}
-              <div>
-                <div className="flex items-center justify-between text-xs mb-1">
-                  <span className="text-gray-600">Mapas activos</span>
-                  <span className="font-semibold text-gray-800">
-                    {planInfo.usage.active_maps} / {planInfo.limits.max_active_maps}
-                  </span>
+              {/* Indicadores circulares en una fila */}
+              <div className="flex items-center justify-center gap-4">
+                {/* Círculo: Mapas activos */}
+                <div className="flex flex-col items-center">
+                  <div className="relative w-14 h-14">
+                    {/* Círculo de fondo */}
+                    <svg className="w-14 h-14 -rotate-90">
+                      <circle
+                        cx="28" cy="28" r="24"
+                        stroke="#e5e7eb"
+                        strokeWidth="4"
+                        fill="none"
+                      />
+                      <circle
+                        cx="28" cy="28" r="24"
+                        stroke={
+                          planInfo.usage.active_maps >= planInfo.limits.max_active_maps
+                            ? '#ef4444'
+                            : planInfo.usage.active_maps >= planInfo.limits.max_active_maps * 0.8
+                            ? '#f59e0b'
+                            : '#3b82f6'
+                        }
+                        strokeWidth="4"
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeDasharray={`${(planInfo.usage.active_maps / planInfo.limits.max_active_maps) * 150.8} 150.8`}
+                        className="transition-all duration-500"
+                      />
+                    </svg>
+                    {/* Número en el centro */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-sm font-bold text-gray-800">
+                        {planInfo.usage.active_maps}/{planInfo.limits.max_active_maps}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-[10px] text-gray-500 mt-1">Activos</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                  <div 
-                    className={`h-full rounded-full transition-all duration-300 ${
-                      planInfo.usage.active_maps >= planInfo.limits.max_active_maps
-                        ? 'bg-red-500'
-                        : planInfo.usage.active_maps >= planInfo.limits.max_active_maps * 0.8
-                        ? 'bg-amber-500'
-                        : 'bg-blue-500'
-                    }`}
-                    style={{ width: `${Math.min(100, (planInfo.usage.active_maps / planInfo.limits.max_active_maps) * 100)}%` }}
-                  />
-                </div>
-              </div>
 
-              {/* Mapas totales (histórico) */}
-              <div>
-                <div className="flex items-center justify-between text-xs mb-1">
-                  <span className="text-gray-600">Mapas creados (total)</span>
-                  <span className="font-semibold text-gray-800">
-                    {planInfo.usage.total_maps_created} / {planInfo.limits.max_total_maps_created}
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                  <div 
-                    className={`h-full rounded-full transition-all duration-300 ${
-                      planInfo.usage.total_maps_created >= planInfo.limits.max_total_maps_created
-                        ? 'bg-red-500'
-                        : planInfo.usage.total_maps_created >= planInfo.limits.max_total_maps_created * 0.8
-                        ? 'bg-amber-500'
-                        : 'bg-purple-500'
-                    }`}
-                    style={{ width: `${Math.min(100, (planInfo.usage.total_maps_created / planInfo.limits.max_total_maps_created) * 100)}%` }}
-                  />
+                {/* Círculo: Mapas totales */}
+                <div className="flex flex-col items-center">
+                  <div className="relative w-14 h-14">
+                    <svg className="w-14 h-14 -rotate-90">
+                      <circle
+                        cx="28" cy="28" r="24"
+                        stroke="#e5e7eb"
+                        strokeWidth="4"
+                        fill="none"
+                      />
+                      <circle
+                        cx="28" cy="28" r="24"
+                        stroke={
+                          planInfo.usage.total_maps_created >= planInfo.limits.max_total_maps_created
+                            ? '#ef4444'
+                            : planInfo.usage.total_maps_created >= planInfo.limits.max_total_maps_created * 0.8
+                            ? '#f59e0b'
+                            : '#8b5cf6'
+                        }
+                        strokeWidth="4"
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeDasharray={`${(planInfo.usage.total_maps_created / planInfo.limits.max_total_maps_created) * 150.8} 150.8`}
+                        className="transition-all duration-500"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-sm font-bold text-gray-800">
+                        {planInfo.usage.total_maps_created}/{planInfo.limits.max_total_maps_created}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-[10px] text-gray-500 mt-1">Creados</span>
                 </div>
               </div>
 
               {/* Mensajes de límite */}
               {!planInfo.usage.can_create_map ? (
-                <p className="text-xs text-red-600 font-medium bg-red-50 p-2 rounded-lg">
-                  ⚠️ Has alcanzado el límite del plan gratuito. ¡Actualiza a Pro!
+                <p className="text-xs text-red-600 font-medium bg-red-50 p-2 rounded-lg text-center">
+                  ⚠️ Límite alcanzado
                 </p>
               ) : planInfo.usage.active_remaining <= 1 || planInfo.usage.total_remaining <= 1 ? (
-                <p className="text-xs text-amber-600 bg-amber-50 p-2 rounded-lg">
-                  💡 Te quedan pocos mapas disponibles
+                <p className="text-xs text-amber-600 bg-amber-50 p-2 rounded-lg text-center">
+                  💡 Pocos mapas disponibles
                 </p>
               ) : null}
 
               {/* Botón de upgrade */}
-              <button className="w-full mt-1 py-2.5 px-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all shadow-sm hover:shadow-md">
+              <button className="w-full py-2 px-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all shadow-sm hover:shadow-md">
                 <Zap className="w-3.5 h-3.5" />
                 Actualizar a Pro
               </button>

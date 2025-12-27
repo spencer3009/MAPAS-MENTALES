@@ -1834,11 +1834,12 @@ export const useNodes = () => {
         const normalVChildren = vChildren.filter(n => !n.connectorParentId);
         const connectorVChildren = vChildren.filter(n => n.connectorParentId);
         
-        if (vChildren.length > 0) {
+        // Procesar hijos verticales NORMALES (centrar bajo el padre)
+        if (normalVChildren.length > 0) {
           const childY = node.y + pHeight + vGap;
           
           // Calcular ancho de cada subárbol
-          const subtreeData = vChildren.map(c => ({
+          const subtreeData = normalVChildren.map(c => ({
             id: c.id,
             width: getSubtreeWidth(c.id, aligned)
           }));
@@ -1863,18 +1864,22 @@ export const useNodes = () => {
           const totalWidth = positions.length > 0 ? positions[positions.length - 1].relX : 0;
           const startX = nodeCenterX - (totalWidth / 2) - (cWidth / 2);
           
-          // Aplicar posiciones
+          // Aplicar posiciones SOLO a hijos normales
           positions.forEach(p => {
             aligned = aligned.map(n => 
               n.id === p.id ? { ...n, x: startX + p.relX, y: childY } : n
             );
           });
-          
-          // Recursivamente alinear subárboles
-          vChildren.forEach(child => {
-            aligned = alignFromRoot(child.id, aligned);
-          });
         }
+        
+        // Los nodos de conectores mantienen su posición pero SÍ procesamos sus hijos
+        // No movemos los nodos de conectores, solo procesamos recursivamente
+        
+        // Recursivamente alinear subárboles de TODOS los hijos verticales
+        // (tanto normales como de conectores)
+        vChildren.forEach(child => {
+          aligned = alignFromRoot(child.id, aligned);
+        });
         
         return aligned;
       };

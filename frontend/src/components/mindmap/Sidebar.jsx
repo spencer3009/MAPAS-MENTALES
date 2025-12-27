@@ -480,18 +480,6 @@ const Sidebar = ({
         )}
       </div>
 
-      {/* Mensaje informativo */}
-      <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
-        <p className="text-xs text-gray-500 leading-relaxed">
-          💡 <span className="font-medium">Tip:</span> Ancla tus proyectos favoritos con 📌 para acceso rápido.
-          {pinnedCount > 0 && (
-            <span className="block mt-1 text-amber-600">
-              {pinnedCount}/{MAX_PINNED} anclados
-            </span>
-          )}
-        </p>
-      </div>
-
       {/* Sección del Plan */}
       {planInfo && (
         <div className={`mt-4 p-4 rounded-xl border ${

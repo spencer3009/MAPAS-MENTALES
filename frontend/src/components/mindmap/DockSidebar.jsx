@@ -52,10 +52,11 @@ const DockSidebar = ({
       onClick: onOpenReminders,
     },
     {
-      id: 'integrations',
-      icon: Puzzle,
-      label: 'Integraciones',
-      onClick: onOpenIntegrations,
+      id: 'trash',
+      icon: Trash2,
+      label: 'Papelera',
+      onClick: onOpenTrash,
+      badge: trashCount > 0 ? trashCount : null,
     },
     {
       id: 'settings',

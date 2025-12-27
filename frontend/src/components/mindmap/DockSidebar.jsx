@@ -9,6 +9,9 @@ import {
   ChevronRight
 } from 'lucide-react';
 
+// URL del logo MindoraMap
+const LOGO_URL = 'https://customer-assets.emergentagent.com/job_mindviz-app/artifacts/k1kioask_image.png';
+
 const DockSidebar = ({ 
   onToggleProjectsSidebar,
   onOpenDashboard,

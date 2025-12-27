@@ -580,7 +580,10 @@ class AdminUserManagementTester:
         self.base_url = BASE_URL
         self.session = requests.Session()
         self.admin_token = None
-        self.non_admin_token = None
+        NON_ADMIN_CREDENTIALS = {
+            "username": "carlos3009",
+            "password": "Socios3009"
+        }
         self.test_results = []
         self.temp_user_data = None
         

@@ -166,6 +166,10 @@ const MindMapApp = () => {
   const [showTrashView, setShowTrashView] = useState(false);
   const [trashCount, setTrashCount] = useState(0);
 
+  // Estado para el Dock y vistas principales
+  const [activeView, setActiveView] = useState('projects'); // 'projects' | 'dashboard' | 'templates' | 'integrations'
+  const [isProjectsSidebarOpen, setIsProjectsSidebarOpen] = useState(true);
+
   // Estado para alineación automática (ON por defecto)
   const [autoAlignEnabled, setAutoAlignEnabled] = useState(true);
 

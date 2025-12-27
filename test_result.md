@@ -887,14 +887,39 @@ The **MindHybrid Layout Displacement Bug** reported by the user **CANNOT BE REPR
 
 ### Test URL: http://localhost:3000
 
-### ⏳ TESTING IN PROGRESS...tical bug where MindHybrid nodes should redistribute correctly after deleting a sibling node:
-- **Expected Behavior**: When deleting a middle node (e.g., "Nieto 2"), remaining siblings ("Nieto 1" and "Nieto 3") should redistribute centered under the parent
-- **Bug Report**: Before fix, nodes were disorganized and connectors crossed after deletion
+### ✅ LANDING PAGE TESTING PASSED
 
-#### Test Credentials:
-- Username: `spencer3009`
-- Password: `Socios3009`
-- URL: https://mindflow-89.preview.emergentagent.com
+---
+
+## REGISTRATION & GOOGLE AUTH TESTING (December 27, 2025)
+
+### 🔍 TESTING REQUIREMENTS:
+
+#### Registration Form:
+1. Form fields: Nombre, Apellidos, Email, Username, Password, Confirm Password
+2. Terms checkbox validation
+3. Form validation (email format, password length, password match)
+4. Successful registration creates user in database
+5. User can login with new credentials after registration
+
+#### Google OAuth:
+1. "Continuar con Google" button redirects to Emergent Auth
+2. After Google auth, user is logged in automatically
+3. User data is saved in database
+4. Session is persisted
+
+### Backend Endpoints:
+- POST /api/auth/register - Register new user
+- POST /api/auth/google/session - Process Google OAuth session
+- GET /api/auth/google/me - Get Google authenticated user
+
+### Test Credentials:
+- Username: spencer3009
+- Password: Socios3009
+
+### ⏳ TESTING IN PROGRESS...
+
+---
 
 ### ❌ TESTING RESULTS - CRITICAL SESSION MANAGEMENT ISSUES:
 

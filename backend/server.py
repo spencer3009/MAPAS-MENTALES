@@ -178,13 +178,6 @@ async def login(login_data: LoginRequest):
 @api_router.post("/auth/register", response_model=Token)
 async def register(register_data: RegisterRequest):
     """Registrar un nuevo usuario"""
-    # Verificar si el username ya existe en HARDCODED_USERS
-    if register_data.username in HARDCODED_USERS:
-        raise HTTPException(
-            status_code=400,
-            detail="Este nombre de usuario ya está en uso"
-        )
-    
     # Verificar si el username ya existe en la base de datos
     existing_user = await db.users.find_one({"username": register_data.username})
     if existing_user:
@@ -204,15 +197,19 @@ async def register(register_data: RegisterRequest):
     # Crear el usuario en la base de datos
     hashed_password = pwd_context.hash(register_data.password)
     full_name = f"{register_data.nombre} {register_data.apellidos}".strip()
+    user_id = f"user_{uuid.uuid4().hex[:12]}"
     
     new_user = {
-        "id": str(uuid.uuid4()),
+        "user_id": user_id,
+        "id": user_id,
         "username": register_data.username,
         "email": register_data.email,
         "hashed_password": hashed_password,
         "full_name": full_name,
+        "auth_provider": "local",
         "disabled": False,
-        "created_at": datetime.now(timezone.utc).isoformat()
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
     }
     
     await db.users.insert_one(new_user)

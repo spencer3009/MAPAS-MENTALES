@@ -762,13 +762,13 @@ async def check_and_send_reminders():
                 try:
                     username = reminder["username"]
                     
-                    # Primero buscar número en MongoDB (user_profiles)
+                    # Buscar número en MongoDB (user_profiles)
                     profile = await db.user_profiles.find_one({"username": username}, {"_id": 0})
                     phone_number = profile.get("whatsapp") if profile else None
                     
-                    # Fallback a usuarios hardcodeados
+                    # Si no hay en perfil, buscar en la colección de usuarios
                     if not phone_number:
-                        user = HARDCODED_USERS.get(username)
+                        user = await db.users.find_one({"username": username}, {"_id": 0})
                         phone_number = user.get("whatsapp", "") if user else ""
                     
                     if not phone_number:

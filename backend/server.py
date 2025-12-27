@@ -193,6 +193,75 @@ async def login(login_data: LoginRequest):
         }
     }
 
+@api_router.post("/auth/register", response_model=Token)
+async def register(register_data: RegisterRequest):
+    """Registrar un nuevo usuario"""
+    # Verificar si el username ya existe en HARDCODED_USERS
+    if register_data.username in HARDCODED_USERS:
+        raise HTTPException(
+            status_code=400,
+            detail="Este nombre de usuario ya está en uso"
+        )
+    
+    # Verificar si el username ya existe en la base de datos
+    existing_user = await db.users.find_one({"username": register_data.username})
+    if existing_user:
+        raise HTTPException(
+            status_code=400,
+            detail="Este nombre de usuario ya está en uso"
+        )
+    
+    # Verificar si el email ya existe
+    existing_email = await db.users.find_one({"email": register_data.email})
+    if existing_email:
+        raise HTTPException(
+            status_code=400,
+            detail="Este correo electrónico ya está registrado"
+        )
+    
+    # Crear el usuario en la base de datos
+    hashed_password = pwd_context.hash(register_data.password)
+    full_name = f"{register_data.nombre} {register_data.apellidos}".strip()
+    
+    new_user = {
+        "id": str(uuid.uuid4()),
+        "username": register_data.username,
+        "email": register_data.email,
+        "hashed_password": hashed_password,
+        "full_name": full_name,
+        "disabled": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.users.insert_one(new_user)
+    
+    # Crear perfil del usuario
+    user_profile = {
+        "username": register_data.username,
+        "nombre": register_data.nombre,
+        "apellidos": register_data.apellidos,
+        "email": register_data.email,
+        "whatsapp": "",
+        "pais": "",
+        "timezone": "America/Lima",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.user_profiles.insert_one(user_profile)
+    
+    # Crear token de acceso
+    access_token = create_access_token(data={"sub": register_data.username})
+    
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "username": register_data.username,
+            "full_name": full_name
+        }
+    }
+
 @api_router.get("/auth/me", response_model=UserResponse)
 async def get_me(current_user: dict = Depends(get_current_user)):
     return {

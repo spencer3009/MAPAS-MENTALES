@@ -445,7 +445,7 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
           </div>
         </div>
 
-        {/* Recent Projects */}
+        {/* Recent Projects - Tabla */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
@@ -455,30 +455,88 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
           </div>
           
           {recentProjects.length > 0 ? (
-            <div className="divide-y divide-gray-100">
-              {recentProjects.map((project) => (
-                <div 
-                  key={project.id} 
-                  className="px-5 py-4 hover:bg-gray-50 transition-colors flex items-center justify-between cursor-pointer"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                      <FolderKanban className="text-blue-600" size={18} />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">{project.name}</p>
-                      <p className="text-sm text-gray-500">{project.nodes?.length || 0} nodos</p>
-                    </div>
-                  </div>
-                  <span className="text-sm text-gray-400">
-                    {formatDate(project.updatedAt)}
-                  </span>
-                </div>
-              ))}
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-100 text-left">
+                    <th className="px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-8"></th>
+                    <th className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                    <th className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Ubicación</th>
+                    <th className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Creado por</th>
+                    <th className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Modificado</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {recentProjects.map((project) => (
+                    <tr 
+                      key={project.id} 
+                      className="hover:bg-gray-50 transition-colors cursor-pointer group"
+                    >
+                      {/* Estrella de favoritos */}
+                      <td className="px-5 py-4">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleFavorite?.(project.id);
+                          }}
+                          className="text-gray-300 hover:text-yellow-400 transition-colors"
+                        >
+                          <Star 
+                            size={18} 
+                            className={project.isPinned ? 'fill-yellow-400 text-yellow-400' : ''} 
+                          />
+                        </button>
+                      </td>
+                      
+                      {/* Nombre con icono */}
+                      <td className="px-3 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center flex-shrink-0">
+                            <FolderKanban className="text-white" size={14} />
+                          </div>
+                          <span className="font-medium text-gray-900 truncate max-w-[200px]">
+                            {project.name}
+                          </span>
+                        </div>
+                      </td>
+                      
+                      {/* Ubicación */}
+                      <td className="px-3 py-4">
+                        <span className="text-sm text-gray-500">
+                          Mis mapas
+                        </span>
+                      </td>
+                      
+                      {/* Creado por */}
+                      <td className="px-3 py-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600">
+                            {(user?.username || 'U').charAt(0).toUpperCase()}
+                          </div>
+                          <span className="text-sm text-gray-600">
+                            {user?.full_name || user?.username || 'Usuario'}
+                          </span>
+                        </div>
+                      </td>
+                      
+                      {/* Modificado */}
+                      <td className="px-3 py-4 text-right">
+                        <span className="text-sm text-gray-400">
+                          {formatDateRelative(project.updatedAt)}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           ) : (
-            <div className="px-5 py-8 text-center text-gray-500">
-              No hay proyectos todavía. ¡Crea tu primer mapa!
+            <div className="px-5 py-12 text-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                <FolderKanban className="text-gray-400" size={24} />
+              </div>
+              <p className="text-gray-500 mb-2">No hay proyectos todavía</p>
+              <p className="text-sm text-gray-400">¡Crea tu primer mapa usando las plantillas de arriba!</p>
             </div>
           )}
         </div>

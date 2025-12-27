@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { MindMapApp } from "./components/mindmap";
 import { LoginPage, RegisterPage, AuthCallback } from "./components/auth";
 import { LandingPage } from "./components/landing";
+import { AdminPanel } from "./components/admin";
 import { Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -18,12 +19,11 @@ const LoadingScreen = () => (
 
 // Componente principal con lógica de autenticación
 const AppContent = () => {
-  const { isAuthenticated, loading } = useAuth();
-  const [authView, setAuthView] = useState(null); // null = landing, 'login' = login, 'register' = register, 'callback' = procesando google
+  const { isAuthenticated, isAdmin, loading } = useAuth();
+  const [authView, setAuthView] = useState(null); // null = landing, 'login', 'register', 'callback', 'admin'
   const [authError, setAuthError] = useState(null);
 
   // Detectar session_id en la URL (Google OAuth callback)
-  // IMPORTANTE: Esto debe ejecutarse ANTES del render para evitar race conditions
   useEffect(() => {
     const hash = window.location.hash;
     if (hash && hash.includes('session_id=')) {
@@ -31,7 +31,7 @@ const AppContent = () => {
     }
   }, []);
 
-  // También verificar en cada render (por si el useEffect no se ejecutó a tiempo)
+  // También verificar en cada render
   if (window.location.hash?.includes('session_id=') && authView !== 'callback') {
     setAuthView('callback');
   }
@@ -40,19 +40,21 @@ const AppContent = () => {
     return <LoadingScreen />;
   }
 
-  // Si está autenticado, mostrar la app
+  // Si está autenticado
   if (isAuthenticated) {
-    return <MindMapApp />;
+    // Si está en el panel de admin
+    if (authView === 'admin' && isAdmin) {
+      return <AdminPanel onBack={() => setAuthView(null)} />;
+    }
+    // Mostrar la app principal
+    return <MindMapApp onAdminClick={isAdmin ? () => setAuthView('admin') : null} />;
   }
 
   // Si estamos procesando el callback de Google OAuth
   if (authView === 'callback') {
     return (
       <AuthCallback 
-        onSuccess={() => {
-          // El usuario será redirigido automáticamente porque isAuthenticated será true
-          setAuthView(null);
-        }}
+        onSuccess={() => setAuthView(null)}
         onError={(error) => {
           setAuthError(error);
           setAuthView('login');

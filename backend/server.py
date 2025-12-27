@@ -1525,14 +1525,6 @@ async def create_project(
     # Return without _id
     project.pop("_id", None)
     return project
-        "layoutType": project_data.layoutType or "mindflow"
-    }
-    
-    await db.projects.insert_one(project)
-    
-    # Return without _id
-    project.pop("_id", None)
-    return project
 
 @api_router.put("/projects/{project_id}", response_model=ProjectResponse)
 async def update_project(

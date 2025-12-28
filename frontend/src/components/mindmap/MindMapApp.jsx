@@ -1013,7 +1013,11 @@ const MindMapApp = ({ onAdminClick }) => {
       <LayoutTemplateSelector
         isOpen={showLayoutSelector}
         onSelect={handleLayoutSelect}
-        onClose={() => setShowLayoutSelector(false)}
+        onClose={() => {
+          setShowLayoutSelector(false);
+          setPreselectedLayout(null); // Reset cuando se cierra
+        }}
+        initialLayout={preselectedLayout}
       />
 
       {/* Vista de Papelera */}

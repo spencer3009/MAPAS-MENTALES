@@ -135,6 +135,9 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
   // Estado para búsqueda de proyectos
   const [searchTerm, setSearchTerm] = useState('');
   
+  // Estado para el tipo de vista: 'list' o 'grid'
+  const [viewType, setViewType] = useState('list');
+  
   // Estado para el modal de confirmación de eliminar
   const [deleteConfirmModal, setDeleteConfirmModal] = useState({
     isOpen: false,

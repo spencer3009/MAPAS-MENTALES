@@ -581,7 +581,7 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
                               e.stopPropagation();
                               setOpenMenuId(isMenuOpen ? null : project.id);
                             }}
-                            className="p-1.5 rounded-lg hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors opacity-0 group-hover:opacity-100"
+                            className="p-1.5 rounded-lg hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors"
                             title="Acciones del mapa"
                           >
                             <MoreHorizontal size={18} />

@@ -629,6 +629,18 @@ const MindMapApp = ({ onAdminClick }) => {
             }}
             onOpenTemplates={handleOpenTemplatesView}
             onToggleFavorite={pinProject}
+            onDeleteProject={handleDeleteProjectClick}
+            onDuplicateProject={(projectId) => {
+              // Duplicar proyecto
+              const projectToDuplicate = projects.find(p => p.id === projectId);
+              if (projectToDuplicate) {
+                duplicateProject(projectId);
+              }
+            }}
+            onShowUpgradeModal={(reason) => {
+              setUpgradeLimitType(reason);
+              setShowUpgradeModal(true);
+            }}
           />
         );
       case 'templates':

@@ -659,15 +659,17 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
               {openMenuId && (
                 <div 
                   ref={menuRef}
-                  className="fixed w-64 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-[100]"
+                  className="fixed bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-[100]"
                   style={{ 
                     top: `${menuPosition.top}px`,
-                    left: `${menuPosition.left}px`
+                    left: `${menuPosition.left}px`,
+                    minWidth: '280px',
+                    width: 'auto'
                   }}
                 >
                   {/* Header */}
-                  <div className="px-4 py-2 border-b border-gray-100">
-                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones del mapa</p>
+                  <div className="px-4 py-2.5 border-b border-gray-100">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones del mapa</p>
                   </div>
 
                   {(() => {
@@ -684,10 +686,10 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
                             setOpenMenuId(null);
                             alert('Funcionalidad de compartir próximamente');
                           }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="w-full flex items-center gap-4 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                         >
-                          <Share2 size={16} className="text-gray-400 flex-shrink-0" />
-                          <span>Compartir mapa</span>
+                          <Share2 size={18} className="text-gray-400 flex-shrink-0" />
+                          <span className="font-medium">Compartir mapa</span>
                         </button>
 
                         {/* Duplicar */}
@@ -702,17 +704,17 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
                               onDuplicateProject?.(project.id);
                             }
                           }}
-                          className={`w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors ${
+                          className={`w-full flex items-center justify-between px-4 py-3 text-sm transition-colors ${
                             isFree ? 'text-gray-400' : 'text-gray-700 hover:bg-gray-50'
                           }`}
                         >
-                          <div className="flex items-center gap-3">
-                            <Copy size={16} className={`flex-shrink-0 ${isFree ? 'text-gray-300' : 'text-gray-400'}`} />
-                            <span>Duplicar</span>
+                          <div className="flex items-center gap-4">
+                            <Copy size={18} className={`flex-shrink-0 ${isFree ? 'text-gray-300' : 'text-gray-400'}`} />
+                            <span className="font-medium">Duplicar</span>
                           </div>
                           {isFree && (
-                            <span className="text-xs font-medium text-blue-600 flex items-center gap-0.5 flex-shrink-0">
-                              Cámbiate <ExternalLink size={11} />
+                            <span className="text-xs font-semibold text-blue-600 flex items-center gap-1 flex-shrink-0 ml-4">
+                              Cámbiate <ExternalLink size={12} />
                             </span>
                           )}
                         </button>
@@ -729,17 +731,17 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
                               alert('Mover a otra ubicación próximamente');
                             }
                           }}
-                          className={`w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors ${
+                          className={`w-full flex items-center justify-between px-4 py-3 text-sm transition-colors ${
                             isFree ? 'text-gray-400' : 'text-gray-700 hover:bg-gray-50'
                           }`}
                         >
-                          <div className="flex items-center gap-3">
-                            <FolderInput size={16} className={`flex-shrink-0 ${isFree ? 'text-gray-300' : 'text-gray-400'}`} />
-                            <span>Mover a Mis mapas</span>
+                          <div className="flex items-center gap-4">
+                            <FolderInput size={18} className={`flex-shrink-0 ${isFree ? 'text-gray-300' : 'text-gray-400'}`} />
+                            <span className="font-medium">Mover a Mis mapas</span>
                           </div>
                           {isFree && (
-                            <span className="text-xs font-medium text-blue-600 flex items-center gap-0.5 flex-shrink-0">
-                              Cámbiate <ExternalLink size={11} />
+                            <span className="text-xs font-semibold text-blue-600 flex items-center gap-1 flex-shrink-0 ml-4">
+                              Cámbiate <ExternalLink size={12} />
                             </span>
                           )}
                         </button>
@@ -756,17 +758,17 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
                               alert('Publicar en Universo próximamente');
                             }
                           }}
-                          className={`w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors ${
+                          className={`w-full flex items-center justify-between px-4 py-3 text-sm transition-colors ${
                             isFree ? 'text-gray-400' : 'text-gray-700 hover:bg-gray-50'
                           }`}
                         >
-                          <div className="flex items-center gap-3">
-                            <Globe size={16} className={`flex-shrink-0 ${isFree ? 'text-gray-300' : 'text-gray-400'}`} />
-                            <span>Publicar en Universo</span>
+                          <div className="flex items-center gap-4">
+                            <Globe size={18} className={`flex-shrink-0 ${isFree ? 'text-gray-300' : 'text-gray-400'}`} />
+                            <span className="font-medium">Publicar en Universo</span>
                           </div>
                           {isFree && (
-                            <span className="text-xs font-medium text-blue-600 flex items-center gap-0.5 flex-shrink-0">
-                              Cámbiate <ExternalLink size={11} />
+                            <span className="text-xs font-semibold text-blue-600 flex items-center gap-1 flex-shrink-0 ml-4">
+                              Cámbiate <ExternalLink size={12} />
                             </span>
                           )}
                         </button>
@@ -783,10 +785,10 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
                               onDeleteProject?.(project.id);
                             }
                           }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                          className="w-full flex items-center gap-4 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
                         >
-                          <Trash2 size={16} className="text-red-500 flex-shrink-0" />
-                          <span>Mover a la papelera</span>
+                          <Trash2 size={18} className="text-red-500 flex-shrink-0" />
+                          <span className="font-medium">Mover a la papelera</span>
                         </button>
                       </>
                     );

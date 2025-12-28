@@ -552,7 +552,7 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
         </div>
 
         {/* Recent Projects - Tabla */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-visible">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
           <div className="px-5 py-4 border-b border-gray-100">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <Clock size={18} className="text-gray-400" />
@@ -561,7 +561,7 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
           </div>
           
           {recentProjects.length > 0 ? (
-            <div className="overflow-x-auto overflow-y-visible">
+            <div>
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-100 text-left">

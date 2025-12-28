@@ -773,10 +773,15 @@ const RemindersView = ({ token }) => {
   const remindersByDate = useMemo(() => {
     const map = {};
     reminders.forEach(r => {
-      const date = new Date(r.reminder_date);
-      const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-      if (!map[key]) map[key] = [];
-      map[key].push(r);
+      try {
+        const date = new Date(r.reminder_date);
+        if (isNaN(date.getTime())) return; // Skip invalid dates
+        const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+        if (!map[key]) map[key] = [];
+        map[key].push(r);
+      } catch (e) {
+        console.warn('Invalid reminder date:', r.reminder_date);
+      }
     });
     return map;
   }, [reminders]);

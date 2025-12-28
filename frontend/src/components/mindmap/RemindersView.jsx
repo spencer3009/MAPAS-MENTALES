@@ -658,12 +658,21 @@ const WeekView = ({ currentDate, reminders, onTimeSlotClick, remindersByDate, on
           </div>
           {weekDays.map((day, idx) => {
             const isToday = day.getTime() === today.getTime();
+            const dateKey = `${day.getFullYear()}-${day.getMonth()}-${day.getDate()}`;
+            const dayReminders = remindersByDate[dateKey] || [];
             return (
-              <div key={idx} className={`py-3 text-center border-r border-gray-100 last:border-r-0 ${isToday ? 'bg-blue-50' : ''}`}>
+              <div 
+                key={idx} 
+                onClick={() => handleDayHeaderClick(day)}
+                className={`py-3 text-center border-r border-gray-100 last:border-r-0 cursor-pointer hover:bg-blue-100 transition-colors ${isToday ? 'bg-blue-50' : ''}`}
+              >
                 <div className="text-xs text-gray-500">{DAY_NAMES[day.getDay()]}</div>
                 <div className={`text-lg font-semibold ${isToday ? 'text-blue-600' : 'text-gray-800'}`}>
                   {day.getDate()}
                 </div>
+                {dayReminders.length > 0 && (
+                  <div className="text-[10px] text-blue-500 font-medium">{dayReminders.length} rec.</div>
+                )}
               </div>
             );
           })}
@@ -679,8 +688,10 @@ const WeekView = ({ currentDate, reminders, onTimeSlotClick, remindersByDate, on
               {weekDays.map((day, idx) => {
                 const dateKey = `${day.getFullYear()}-${day.getMonth()}-${day.getDate()}`;
                 const hourReminders = (remindersByDate[dateKey] || []).filter(r => {
-                  const h = new Date(r.reminder_date).getHours();
-                  return h === hour;
+                  try {
+                    const h = new Date(r.reminder_date || r.scheduled_datetime).getHours();
+                    return h === hour;
+                  } catch { return false; }
                 });
                 
                 return (
@@ -696,13 +707,13 @@ const WeekView = ({ currentDate, reminders, onTimeSlotClick, remindersByDate, on
                     {hourReminders.map(r => (
                       <div
                         key={r.id}
-                        className={`text-[10px] px-1.5 py-1 rounded mb-1 ${
+                        className={`text-[10px] px-1.5 py-1 rounded mb-1 truncate ${
                           r.is_completed 
                             ? 'bg-gray-200 text-gray-500' 
                             : 'bg-blue-500 text-white'
                         }`}
                       >
-                        {r.title}
+                        {r.title || r.message}
                       </div>
                     ))}
                   </button>
@@ -712,12 +723,29 @@ const WeekView = ({ currentDate, reminders, onTimeSlotClick, remindersByDate, on
           ))}
         </div>
       </div>
+      
+      {/* Modal de detalles del día */}
+      <DayDetailModal
+        isOpen={showDayModal}
+        onClose={() => setShowDayModal(false)}
+        date={selectedDay}
+        reminders={selectedDayReminders}
+        onEditReminder={(reminder) => {
+          setShowDayModal(false);
+          onEditReminder(reminder);
+        }}
+        onToggleComplete={onToggleComplete}
+        onCreateReminder={(date) => {
+          setShowDayModal(false);
+          onCreateReminder(date);
+        }}
+      />
     </div>
   );
 };
 
 // ==================== VISTA DÍA ====================
-const DayView = ({ currentDate, reminders, onTimeSlotClick, remindersByDate }) => {
+const DayView = ({ currentDate, reminders, onTimeSlotClick, remindersByDate, onEditReminder, onToggleComplete, onCreateReminder }) => {
   const dateKey = `${currentDate.getFullYear()}-${currentDate.getMonth()}-${currentDate.getDate()}`;
   const dayReminders = remindersByDate[dateKey] || [];
   const today = new Date();

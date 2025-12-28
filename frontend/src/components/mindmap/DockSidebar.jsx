@@ -98,7 +98,8 @@ const DockSidebar = ({
         <nav className="flex-1 py-4 px-2 space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
-            const isActive = activeView === item.id || item.isActive;
+            // Solo UN ítem puede estar activo: el que coincide con activeView
+            const isActive = activeView === item.id;
             
             return (
               <button

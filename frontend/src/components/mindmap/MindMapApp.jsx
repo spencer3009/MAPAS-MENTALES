@@ -20,6 +20,7 @@ import TemplatesView from './TemplatesView';
 import IntegrationsView from './IntegrationsView';
 import UpgradeModal from './UpgradeModal';
 import RemindersView from './RemindersView';
+import ToastProvider, { useToast } from './ToastProvider';
 import { useNodes } from '../../hooks/useNodes';
 import { usePanning } from '../../hooks/usePanning';
 import { useZoom } from '../../hooks/useZoom';

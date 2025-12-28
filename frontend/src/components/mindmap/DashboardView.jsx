@@ -575,7 +575,7 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
                         </td>
 
                         {/* Menú de acciones */}
-                        <td className="px-3 py-4 relative" ref={isMenuOpen ? menuRef : null}>
+                        <td className="px-3 py-4 relative">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -589,7 +589,11 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
 
                           {/* Dropdown Menu */}
                           {isMenuOpen && (
-                            <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                            <div 
+                              ref={menuRef}
+                              className="absolute right-0 top-full mt-1 w-56 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50"
+                              style={{ animation: 'fadeIn 0.15s ease-out' }}
+                            >
                               {/* Header */}
                               <div className="px-3 py-2 border-b border-gray-100">
                                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones del mapa</p>

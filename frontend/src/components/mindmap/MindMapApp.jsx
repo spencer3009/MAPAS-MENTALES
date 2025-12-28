@@ -29,7 +29,8 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
-const MindMapApp = ({ onAdminClick }) => {
+// Componente interno que usa el contexto de Toast
+const MindMapAppInner = ({ onAdminClick, showReminderToast }) => {
   const { user, logout, token, isAdmin } = useAuth();
   
   const {

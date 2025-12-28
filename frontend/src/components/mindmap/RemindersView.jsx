@@ -631,22 +631,10 @@ const MonthView = ({ currentDate, reminders, onDayClick, remindersByDate, onEdit
 };
 
 // ==================== VISTA SEMANA ====================
-const WeekView = ({ currentDate, reminders, onTimeSlotClick, remindersByDate, onEditReminder, onToggleComplete, onCreateReminder }) => {
+const WeekView = ({ currentDate, reminders, onTimeSlotClick, remindersByDate, onDayClick }) => {
   const weekDays = getWeekDays(currentDate);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
-  const [selectedDay, setSelectedDay] = useState(null);
-  const [showDayModal, setShowDayModal] = useState(false);
-  const [selectedDayReminders, setSelectedDayReminders] = useState([]);
-  
-  const handleDayHeaderClick = (day) => {
-    const dateKey = `${day.getFullYear()}-${day.getMonth()}-${day.getDate()}`;
-    const dayReminders = remindersByDate[dateKey] || [];
-    setSelectedDay(day);
-    setSelectedDayReminders(dayReminders);
-    setShowDayModal(true);
-  };
   
   return (
     <div className="flex-1 p-4 pb-16 overflow-hidden">
@@ -663,7 +651,7 @@ const WeekView = ({ currentDate, reminders, onTimeSlotClick, remindersByDate, on
             return (
               <div 
                 key={idx} 
-                onClick={() => handleDayHeaderClick(day)}
+                onClick={() => onDayClick(day)}
                 className={`py-3 text-center border-r border-gray-100 last:border-r-0 cursor-pointer hover:bg-blue-100 transition-colors ${isToday ? 'bg-blue-50' : ''}`}
               >
                 <div className="text-xs text-gray-500">{DAY_NAMES[day.getDay()]}</div>
@@ -723,23 +711,6 @@ const WeekView = ({ currentDate, reminders, onTimeSlotClick, remindersByDate, on
           ))}
         </div>
       </div>
-      
-      {/* Modal de detalles del día */}
-      <DayDetailModal
-        isOpen={showDayModal}
-        onClose={() => setShowDayModal(false)}
-        date={selectedDay}
-        reminders={selectedDayReminders}
-        onEditReminder={(reminder) => {
-          setShowDayModal(false);
-          onEditReminder(reminder);
-        }}
-        onToggleComplete={onToggleComplete}
-        onCreateReminder={(date) => {
-          setShowDayModal(false);
-          onCreateReminder(date);
-        }}
-      />
     </div>
   );
 };

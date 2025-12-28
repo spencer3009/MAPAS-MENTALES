@@ -657,6 +657,7 @@ const MindMapApp = ({ onAdminClick }) => {
             onOpenProject={(projectId) => {
               handleSwitchProject(projectId);
               setActiveView('projects');
+              setIsProjectsSidebarOpen(true);
             }}
             onNewProject={(templateType) => {
               setActiveView('projects');

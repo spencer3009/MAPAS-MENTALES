@@ -4781,3 +4781,45 @@ The "Mover a papelera" functionality is working correctly. The context menu acti
 3. Updates the dashboard UI in real-time
 4. Project is correctly marked as deleted in the database
 5. Project can be restored from trash
+
+---
+
+## BUG FIX (December 28, 2025)
+
+### Issue: "Mover a papelera" from Dashboard not working
+
+**Root Cause:** `ReferenceError: setNodes is not defined`
+
+In `/app/frontend/src/hooks/useNodes.js`, the `deleteProject` function was calling `setNodes([])` on line 2762 when the last project was deleted. However, `setNodes` is not defined in the hook's scope - it's mapped from `updateProjectNodes` in the return statement.
+
+**Fix Applied:**
+Removed the `setNodes([])` call since nodes are automatically cleared when there's no active project (nodes derive from `activeProject?.nodes`).
+
+**File Changed:** `/app/frontend/src/hooks/useNodes.js`
+
+**Before:**
+```javascript
+if (remainingProjects.length === 0) {
+  setProjects([]);
+  setActiveProjectId(null);
+  setNodes([]); // ← This line caused the error
+  ...
+}
+```
+
+**After:**
+```javascript
+if (remainingProjects.length === 0) {
+  setProjects([]);
+  setActiveProjectId(null);
+  // Los nodos se limpian automáticamente al no haber proyecto activo
+  ...
+}
+```
+
+**Verification:**
+- Tested with user `testtrash2025`
+- Project successfully moved to trash
+- Dashboard updated to show "0 Proyectos, 0 Nodos totales"
+- No console errors
+- API confirmed project in trash collection

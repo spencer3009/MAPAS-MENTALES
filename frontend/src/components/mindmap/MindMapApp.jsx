@@ -585,27 +585,6 @@ const MindMapApp = ({ onAdminClick }) => {
     }
   }, [deleteProject, projectToDelete, resetPan, resetZoom, loadTrashCount]);
 
-  // Función para capturar thumbnail del canvas
-  const captureThumbnail = useCallback(async () => {
-    if (!canvasRef.current || !activeProjectId) return null;
-    
-    try {
-      const canvas = await html2canvas(canvasRef.current, {
-        scale: 0.3, // Escala pequeña para thumbnail
-        backgroundColor: '#f9fafb',
-        logging: false,
-        useCORS: true
-      });
-      
-      // Convertir a base64 con calidad reducida
-      const thumbnail = canvas.toDataURL('image/jpeg', 0.6);
-      return thumbnail;
-    } catch (error) {
-      console.error('Error capturando thumbnail:', error);
-      return null;
-    }
-  }, [activeProjectId]);
-
   // Handler para cambiar de proyecto
   const handleSwitchProject = useCallback((projectId) => {
     try {
@@ -621,13 +600,6 @@ const MindMapApp = ({ onAdminClick }) => {
       console.error('Error al cambiar proyecto:', error);
     }
   }, [switchProject, resetPan, resetZoom, setSelectedNodeId]);
-
-  // Handler para ir al dashboard (captura thumbnail primero)
-  const handleGoToDashboard = useCallback(async () => {
-    // Capturar thumbnail del proyecto actual antes de ir al dashboard
-    if (activeProjectId && activeView === 'projects') {
-      const thumbnail = await captureThumbnail();
-      if (thumbnail) {
         await saveThumbnail(activeProjectId, thumbnail);
       }
     }

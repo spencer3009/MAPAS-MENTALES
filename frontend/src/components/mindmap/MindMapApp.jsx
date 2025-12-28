@@ -1,5 +1,6 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { Star, FolderKanban } from 'lucide-react';
+import html2canvas from 'html2canvas';
 import Sidebar from './Sidebar';
 import Toolbar from './Toolbar';
 import Canvas from './Canvas';

@@ -993,7 +993,7 @@ class ReminderResponse(BaseModel):
     scheduled_datetime: Optional[str] = None
     message: Optional[str] = None
     channel: Optional[str] = None
-    status: str = "pending"  # 'pending', 'sent', 'failed'
+    status: str = "pending"  # 'pending', 'sent', 'failed', 'completed'
     created_at: str
     sent_at: Optional[str] = None
     seen: bool = False
@@ -1005,6 +1005,9 @@ class ReminderResponse(BaseModel):
     description: Optional[str] = None
     reminder_date: Optional[str] = None
     is_completed: bool = False
+    
+    # Estado de notificación: 'pending', 'triggered', 'read'
+    notification_status: str = "pending"
 
 class ReminderUpdate(BaseModel):
     scheduled_date: Optional[str] = None
@@ -1016,6 +1019,8 @@ class ReminderUpdate(BaseModel):
     description: Optional[str] = None
     reminder_date: Optional[str] = None
     is_completed: Optional[bool] = None
+    # Estado de notificación
+    notification_status: Optional[str] = None  # 'pending', 'triggered', 'read'
 
 
 # ==========================================

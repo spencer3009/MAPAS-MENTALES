@@ -603,156 +603,159 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
                         </td>
 
                         {/* Menú de acciones */}
-                        <td className="px-3 py-4 relative">
+                        <td className="px-3 py-4">
                           <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setOpenMenuId(isMenuOpen ? null : project.id);
-                            }}
+                            onClick={(e) => handleOpenMenu(e, project.id)}
                             className="p-1.5 rounded-lg hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors"
                             title="Acciones del mapa"
                           >
                             <MoreHorizontal size={18} />
                           </button>
-
-                          {/* Dropdown Menu */}
-                          {isMenuOpen && (
-                            <div 
-                              ref={menuRef}
-                              className="fixed w-56 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-[100]"
-                              style={{ 
-                                top: 'auto',
-                                right: '40px',
-                                bottom: 'auto',
-                                transform: 'translateY(-50%)'
-                              }}
-                            >
-                              {/* Header */}
-                              <div className="px-3 py-2 border-b border-gray-100">
-                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones del mapa</p>
-                              </div>
-
-                              {/* Compartir mapa */}
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setOpenMenuId(null);
-                                  // TODO: Abrir modal de compartir
-                                  alert('Funcionalidad de compartir próximamente');
-                                }}
-                                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                              >
-                                <Share2 size={16} className="text-gray-400" />
-                                <span>Compartir mapa</span>
-                              </button>
-
-                              {/* Duplicar */}
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (isFree) {
-                                    setOpenMenuId(null);
-                                    onShowUpgradeModal?.('duplicate');
-                                  } else {
-                                    setOpenMenuId(null);
-                                    onDuplicateProject?.(project.id);
-                                  }
-                                }}
-                                className={`w-full flex items-center justify-between px-3 py-2.5 text-sm transition-colors ${
-                                  isFree ? 'text-gray-400' : 'text-gray-700 hover:bg-gray-50'
-                                }`}
-                              >
-                                <div className="flex items-center gap-3">
-                                  <Copy size={16} className={isFree ? 'text-gray-300' : 'text-gray-400'} />
-                                  <span>Duplicar</span>
-                                </div>
-                                {isFree && (
-                                  <span className="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-0.5">
-                                    Cámbiate <ExternalLink size={12} />
-                                  </span>
-                                )}
-                              </button>
-
-                              {/* Mover a Mis mapas */}
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (isFree) {
-                                    setOpenMenuId(null);
-                                    onShowUpgradeModal?.('move');
-                                  } else {
-                                    setOpenMenuId(null);
-                                    // TODO: Mover a otra ubicación
-                                    alert('Mover a otra ubicación próximamente');
-                                  }
-                                }}
-                                className={`w-full flex items-center justify-between px-3 py-2.5 text-sm transition-colors ${
-                                  isFree ? 'text-gray-400' : 'text-gray-700 hover:bg-gray-50'
-                                }`}
-                              >
-                                <div className="flex items-center gap-3">
-                                  <FolderInput size={16} className={isFree ? 'text-gray-300' : 'text-gray-400'} />
-                                  <span>Mover a Mis mapas</span>
-                                </div>
-                                {isFree && (
-                                  <span className="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-0.5">
-                                    Cámbiate <ExternalLink size={12} />
-                                  </span>
-                                )}
-                              </button>
-
-                              {/* Publicar en Universo */}
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (isFree) {
-                                    setOpenMenuId(null);
-                                    onShowUpgradeModal?.('publish');
-                                  } else {
-                                    setOpenMenuId(null);
-                                    // TODO: Publicar en Universo
-                                    alert('Publicar en Universo próximamente');
-                                  }
-                                }}
-                                className={`w-full flex items-center justify-between px-3 py-2.5 text-sm transition-colors ${
-                                  isFree ? 'text-gray-400' : 'text-gray-700 hover:bg-gray-50'
-                                }`}
-                              >
-                                <div className="flex items-center gap-3">
-                                  <Globe size={16} className={isFree ? 'text-gray-300' : 'text-gray-400'} />
-                                  <span>Publicar en Universo</span>
-                                </div>
-                                {isFree && (
-                                  <span className="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-0.5">
-                                    Cámbiate <ExternalLink size={12} />
-                                  </span>
-                                )}
-                              </button>
-
-                              {/* Separador */}
-                              <div className="my-2 border-t border-gray-100" />
-
-                              {/* Mover a la papelera */}
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setOpenMenuId(null);
-                                  if (window.confirm(`¿Estás seguro de mover "${project.name}" a la papelera?`)) {
-                                    onDeleteProject?.(project.id);
-                                  }
-                                }}
-                                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                              >
-                                <Trash2 size={16} className="text-red-500" />
-                                <span>Mover a la papelera</span>
-                              </button>
-                            </div>
-                          )}
                         </td>
                       </tr>
                     );
                   })}
                 </tbody>
+              </table>
+              
+              {/* Dropdown Menu - Portal style, fuera de la tabla */}
+              {openMenuId && (
+                <div 
+                  ref={menuRef}
+                  className="fixed w-56 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-[100]"
+                  style={{ 
+                    top: `${menuPosition.top}px`,
+                    left: `${menuPosition.left}px`
+                  }}
+                >
+                  {/* Header */}
+                  <div className="px-3 py-2 border-b border-gray-100">
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones del mapa</p>
+                  </div>
+
+                  {(() => {
+                    const isFree = planInfo?.plan === 'free';
+                    const project = projects.find(p => p.id === openMenuId);
+                    if (!project) return null;
+
+                    return (
+                      <>
+                        {/* Compartir mapa */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenMenuId(null);
+                            alert('Funcionalidad de compartir próximamente');
+                          }}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                          <Share2 size={16} className="text-gray-400" />
+                          <span>Compartir mapa</span>
+                        </button>
+
+                        {/* Duplicar */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (isFree) {
+                              setOpenMenuId(null);
+                              onShowUpgradeModal?.('duplicate');
+                            } else {
+                              setOpenMenuId(null);
+                              onDuplicateProject?.(project.id);
+                            }
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2.5 text-sm transition-colors ${
+                            isFree ? 'text-gray-400' : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <Copy size={16} className={isFree ? 'text-gray-300' : 'text-gray-400'} />
+                            <span>Duplicar</span>
+                          </div>
+                          {isFree && (
+                            <span className="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-0.5">
+                              Cámbiate <ExternalLink size={12} />
+                            </span>
+                          )}
+                        </button>
+
+                        {/* Mover a Mis mapas */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (isFree) {
+                              setOpenMenuId(null);
+                              onShowUpgradeModal?.('move');
+                            } else {
+                              setOpenMenuId(null);
+                              alert('Mover a otra ubicación próximamente');
+                            }
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2.5 text-sm transition-colors ${
+                            isFree ? 'text-gray-400' : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <FolderInput size={16} className={isFree ? 'text-gray-300' : 'text-gray-400'} />
+                            <span>Mover a Mis mapas</span>
+                          </div>
+                          {isFree && (
+                            <span className="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-0.5">
+                              Cámbiate <ExternalLink size={12} />
+                            </span>
+                          )}
+                        </button>
+
+                        {/* Publicar en Universo */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (isFree) {
+                              setOpenMenuId(null);
+                              onShowUpgradeModal?.('publish');
+                            } else {
+                              setOpenMenuId(null);
+                              alert('Publicar en Universo próximamente');
+                            }
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2.5 text-sm transition-colors ${
+                            isFree ? 'text-gray-400' : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <Globe size={16} className={isFree ? 'text-gray-300' : 'text-gray-400'} />
+                            <span>Publicar en Universo</span>
+                          </div>
+                          {isFree && (
+                            <span className="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-0.5">
+                              Cámbiate <ExternalLink size={12} />
+                            </span>
+                          )}
+                        </button>
+
+                        {/* Separador */}
+                        <div className="my-2 border-t border-gray-100" />
+
+                        {/* Mover a la papelera */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenMenuId(null);
+                            if (window.confirm(`¿Estás seguro de mover "${project.name}" a la papelera?`)) {
+                              onDeleteProject?.(project.id);
+                            }
+                          }}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                        >
+                          <Trash2 size={16} className="text-red-500" />
+                          <span>Mover a la papelera</span>
+                        </button>
+                      </>
+                    );
+                  })()}
+                </div>
+              )}
               </table>
             </div>
           ) : (

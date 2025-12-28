@@ -1045,4 +1045,13 @@ const MindMapApp = ({ onAdminClick }) => {
   );
 };
 
-export default MindMapApp;
+// Componente wrapper con ToastProvider
+const MindMapAppWithToast = (props) => {
+  return (
+    <ToastProvider>
+      <MindMapApp {...props} />
+    </ToastProvider>
+  );
+};
+
+export default MindMapAppWithToast;

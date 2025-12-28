@@ -70,6 +70,7 @@ const MindMapApp = ({ onAdminClick }) => {
     pinProject,
     reorderProjects,
     reloadProjects,
+    saveThumbnail,
     // Selección múltiple
     selectedNodeIds,
     addToSelection,

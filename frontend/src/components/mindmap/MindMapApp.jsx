@@ -133,9 +133,6 @@ const MindMapApp = ({ onAdminClick }) => {
     closeContextMenu
   } = useContextMenu();
 
-  // Referencia al canvas para capturar thumbnails
-  const canvasRef = useRef(null);
-
   // Estados para modales
   const [showBlankModal, setShowBlankModal] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);

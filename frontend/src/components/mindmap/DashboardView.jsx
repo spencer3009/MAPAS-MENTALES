@@ -313,7 +313,6 @@ const MapThumbnail = ({ nodes = [] }) => {
 const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject, onOpenTemplates, onToggleFavorite, onDeleteProject, onDuplicateProject, onShowUpgradeModal, onViewAllMaps }) => {
   const [planInfo, setPlanInfo] = useState(null);
   const [loadingPlan, setLoadingPlan] = useState(true);
-  const [hoveredTemplate, setHoveredTemplate] = useState(null);
   const [openMenuId, setOpenMenuId] = useState(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const menuRef = useRef(null);

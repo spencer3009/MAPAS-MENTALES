@@ -150,7 +150,7 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [openMenuId]);
 
-  // Función para abrir menú con posición
+  // Función para abrir menú con posición inteligente (smart positioning)
   const handleOpenMenu = (e, projectId) => {
     e.stopPropagation();
     if (openMenuId === projectId) {
@@ -159,10 +159,46 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
     }
     
     const rect = e.currentTarget.getBoundingClientRect();
-    setMenuPosition({
-      top: rect.bottom + 8,
-      left: rect.right - 224 // 224 = ancho del menú (w-56 = 14rem = 224px)
-    });
+    const menuHeight = 280; // Altura aproximada del menú
+    const menuWidth = 224;  // w-56 = 14rem = 224px
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+    const padding = 16; // Padding del viewport
+    
+    // Calcular posición vertical (flip up si no hay espacio abajo)
+    let top = rect.bottom + 8;
+    const spaceBelow = viewportHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    
+    if (spaceBelow < menuHeight + padding && spaceAbove > menuHeight + padding) {
+      // Flip up: mostrar arriba del botón
+      top = rect.top - menuHeight - 8;
+    }
+    
+    // Asegurar que no se salga por abajo
+    if (top + menuHeight > viewportHeight - padding) {
+      top = viewportHeight - menuHeight - padding;
+    }
+    
+    // Asegurar que no se salga por arriba
+    if (top < padding) {
+      top = padding;
+    }
+    
+    // Calcular posición horizontal
+    let left = rect.right - menuWidth;
+    
+    // Asegurar que no se salga por la izquierda
+    if (left < padding) {
+      left = padding;
+    }
+    
+    // Asegurar que no se salga por la derecha
+    if (left + menuWidth > viewportWidth - padding) {
+      left = viewportWidth - menuWidth - padding;
+    }
+    
+    setMenuPosition({ top, left });
     setOpenMenuId(projectId);
   };
 

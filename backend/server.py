@@ -1799,6 +1799,9 @@ async def update_project(
     if update_data.layoutType is not None:
         update_dict["layoutType"] = update_data.layoutType
     
+    if update_data.thumbnail is not None:
+        update_dict["thumbnail"] = update_data.thumbnail
+    
     await db.projects.update_one(
         {"id": project_id},
         {"$set": update_dict}

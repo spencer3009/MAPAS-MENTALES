@@ -351,10 +351,10 @@ const MonthView = ({ currentDate, reminders, onDayClick, remindersByDate }) => {
   today.setHours(0, 0, 0, 0);
   
   return (
-    <div className="flex-1 p-4 pb-16">
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden h-full">
+    <div className="flex-1 p-4 pb-16 overflow-y-auto">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden min-h-[600px]">
         {/* Header de días */}
-        <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50">
+        <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
           {DAY_NAMES.map(day => (
             <div key={day} className="py-3 text-center text-sm font-medium text-gray-600">
               {day}
@@ -363,7 +363,7 @@ const MonthView = ({ currentDate, reminders, onDayClick, remindersByDate }) => {
         </div>
         
         {/* Grid de días */}
-        <div className="grid grid-cols-7 grid-rows-6 h-[calc(100%-48px)]">
+        <div className="grid grid-cols-7 auto-rows-[minmax(100px,1fr)]">
           {days.map((dayInfo, idx) => {
             const dateKey = `${dayInfo.date.getFullYear()}-${dayInfo.date.getMonth()}-${dayInfo.date.getDate()}`;
             const dayReminders = remindersByDate[dateKey] || [];
@@ -374,7 +374,7 @@ const MonthView = ({ currentDate, reminders, onDayClick, remindersByDate }) => {
                 key={idx}
                 onClick={() => onDayClick(dayInfo.date)}
                 className={`
-                  border-r border-b border-gray-100 p-2 text-left hover:bg-blue-50 transition-colors
+                  border-r border-b border-gray-100 p-2 text-left hover:bg-blue-50 transition-colors min-h-[100px]
                   ${!dayInfo.isCurrentMonth ? 'bg-gray-50' : 'bg-white'}
                 `}
               >

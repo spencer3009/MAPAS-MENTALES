@@ -130,6 +130,9 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const menuRef = useRef(null);
   
+  // Estado para búsqueda de proyectos
+  const [searchTerm, setSearchTerm] = useState('');
+  
   // Estado para el modal de confirmación de eliminar
   const [deleteConfirmModal, setDeleteConfirmModal] = useState({
     isOpen: false,

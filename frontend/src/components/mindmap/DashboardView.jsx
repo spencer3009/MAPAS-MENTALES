@@ -460,7 +460,7 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
                 style={{ width: '200px', height: 'auto' }}
                 className="object-contain"
               />
-              <h1 className="text-3xl font-light text-gray-900">
+              <h1 className="text-xl font-light text-gray-900">
                 ¡Te damos la bienvenida, <span className="font-semibold">{userName}</span>!
               </h1>
             </div>

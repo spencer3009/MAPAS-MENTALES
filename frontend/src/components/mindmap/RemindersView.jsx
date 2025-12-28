@@ -745,36 +745,56 @@ const RemindersListView = ({ reminders, onEditReminder, onToggleComplete, onDele
   return (
     <div className="flex-1 p-4 pb-16 overflow-y-auto">
       <div className="max-w-3xl mx-auto space-y-6 pb-8">
-        {/* Pendientes */}
+        {/* Próximos / Vigentes (aún no vencen) */}
         <div>
           <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-            <AlertCircle size={16} />
-            Pendientes ({pendingReminders.length})
+            <Clock size={16} className="text-blue-500" />
+            Próximos ({upcomingReminders.length})
           </h3>
-          {pendingReminders.length === 0 ? (
-            <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-              <Check size={32} className="mx-auto text-green-400 mb-2" />
-              <p className="text-gray-500">¡Todo al día!</p>
+          {upcomingReminders.length === 0 ? (
+            <div className="text-center py-6 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+              <Calendar size={28} className="mx-auto text-gray-300 mb-2" />
+              <p className="text-gray-500 text-sm">No hay recordatorios próximos</p>
             </div>
           ) : (
             <div className="space-y-3">
-              {pendingReminders
-                .sort((a, b) => new Date(a.reminder_date) - new Date(b.reminder_date))
-                .map(r => <ReminderItem key={r.id} reminder={r} />)}
+              {upcomingReminders.map(r => <ReminderItem key={r.id} reminder={r} isOverdue={false} />)}
             </div>
           )}
         </div>
         
+        {/* Vencidos (fecha ya pasó) */}
+        {overdueReminders.length > 0 && (
+          <div>
+            <h3 className="text-sm font-semibold text-red-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <AlertCircle size={16} />
+              Vencidos ({overdueReminders.length})
+            </h3>
+            <div className="space-y-3">
+              {overdueReminders.map(r => <ReminderItem key={r.id} reminder={r} isOverdue={true} />)}
+            </div>
+          </div>
+        )}
+        
         {/* Completados */}
         {completedReminders.length > 0 && (
           <div>
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
               <Check size={16} />
               Completados ({completedReminders.length})
             </h3>
             <div className="space-y-3 opacity-60">
-              {completedReminders.map(r => <ReminderItem key={r.id} reminder={r} />)}
+              {completedReminders.map(r => <ReminderItem key={r.id} reminder={r} isOverdue={false} />)}
             </div>
+          </div>
+        )}
+        
+        {/* Mensaje si no hay nada */}
+        {upcomingReminders.length === 0 && overdueReminders.length === 0 && completedReminders.length === 0 && (
+          <div className="text-center py-12">
+            <Check size={48} className="mx-auto text-green-400 mb-3" />
+            <p className="text-gray-600 font-medium">¡Todo al día!</p>
+            <p className="text-gray-400 text-sm mt-1">No tienes recordatorios pendientes</p>
           </div>
         )}
       </div>

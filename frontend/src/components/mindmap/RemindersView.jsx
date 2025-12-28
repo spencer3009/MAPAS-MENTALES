@@ -621,21 +621,37 @@ const MonthView = ({ currentDate, reminders, onDayClick, remindersByDate, onEdit
           onEditReminder(reminder);
         }}
         onToggleComplete={onToggleComplete}
+        onCreateReminder={(date) => {
+          setShowDayModal(false);
+          onCreateReminder(date);
+        }}
       />
     </div>
   );
 };
 
 // ==================== VISTA SEMANA ====================
-const WeekView = ({ currentDate, reminders, onTimeSlotClick, remindersByDate }) => {
+const WeekView = ({ currentDate, reminders, onTimeSlotClick, remindersByDate, onEditReminder, onToggleComplete, onCreateReminder }) => {
   const weekDays = getWeekDays(currentDate);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [showDayModal, setShowDayModal] = useState(false);
+  const [selectedDayReminders, setSelectedDayReminders] = useState([]);
+  
+  const handleDayHeaderClick = (day) => {
+    const dateKey = `${day.getFullYear()}-${day.getMonth()}-${day.getDate()}`;
+    const dayReminders = remindersByDate[dateKey] || [];
+    setSelectedDay(day);
+    setSelectedDayReminders(dayReminders);
+    setShowDayModal(true);
+  };
+  
   return (
     <div className="flex-1 p-4 pb-16 overflow-hidden">
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden h-full flex flex-col">
-        {/* Header de días */}
+        {/* Header de días - clickeables */}
         <div className="grid grid-cols-8 border-b border-gray-200 bg-gray-50 flex-shrink-0">
           <div className="py-3 text-center text-sm font-medium text-gray-400 border-r border-gray-200">
             Hora

@@ -702,8 +702,8 @@ const RemindersListView = ({ reminders, onEditReminder, onToggleComplete, onDele
   };
   
   return (
-    <div className="flex-1 p-4 overflow-y-auto">
-      <div className="max-w-3xl mx-auto space-y-6">
+    <div className="flex-1 p-4 pb-16 overflow-y-auto">
+      <div className="max-w-3xl mx-auto space-y-6 pb-8">
         {/* Pendientes */}
         <div>
           <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">

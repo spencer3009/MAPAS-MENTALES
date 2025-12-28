@@ -1265,6 +1265,8 @@ const RemindersView = ({ token }) => {
           reminders={reminders}
           onDayClick={handleDayClick}
           remindersByDate={remindersByDate}
+          onEditReminder={handleEditReminder}
+          onToggleComplete={handleToggleComplete}
         />
       )}
       

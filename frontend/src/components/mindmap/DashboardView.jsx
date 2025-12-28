@@ -505,70 +505,216 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
                     <th className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
                     <th className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Ubicación</th>
                     <th className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Creado por</th>
-                    <th className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Modificado</th>
+                    <th className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Modificado</th>
+                    <th className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-12"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {recentProjects.map((project) => (
-                    <tr 
-                      key={project.id} 
-                      className="hover:bg-gray-50 transition-colors cursor-pointer group"
-                    >
-                      {/* Estrella de favoritos */}
-                      <td className="px-5 py-4">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onToggleFavorite?.(project.id);
-                          }}
-                          className="text-gray-300 hover:text-yellow-400 transition-colors"
-                        >
-                          <Star 
-                            size={18} 
-                            className={project.isPinned ? 'fill-yellow-400 text-yellow-400' : ''} 
-                          />
-                        </button>
-                      </td>
-                      
-                      {/* Nombre con icono */}
-                      <td className="px-3 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center flex-shrink-0">
-                            <FolderKanban className="text-white" size={14} />
+                  {recentProjects.map((project) => {
+                    const isMenuOpen = openMenuId === project.id;
+                    const isFree = planInfo?.plan === 'free';
+                    
+                    return (
+                      <tr 
+                        key={project.id} 
+                        className="hover:bg-gray-50 transition-colors cursor-pointer group"
+                      >
+                        {/* Estrella de favoritos */}
+                        <td className="px-5 py-4">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onToggleFavorite?.(project.id);
+                            }}
+                            className="text-gray-300 hover:text-yellow-400 transition-colors"
+                            title="Agregar a favoritos"
+                          >
+                            <Star 
+                              size={18} 
+                              className={project.isPinned ? 'fill-yellow-400 text-yellow-400' : ''} 
+                            />
+                          </button>
+                        </td>
+                        
+                        {/* Nombre con icono */}
+                        <td className="px-3 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center flex-shrink-0">
+                              <FolderKanban className="text-white" size={14} />
+                            </div>
+                            <span className="font-medium text-gray-900 truncate max-w-[200px]">
+                              {project.name}
+                            </span>
                           </div>
-                          <span className="font-medium text-gray-900 truncate max-w-[200px]">
-                            {project.name}
+                        </td>
+                        
+                        {/* Ubicación */}
+                        <td className="px-3 py-4">
+                          <span className="text-sm text-gray-500">
+                            Mis mapas
                           </span>
-                        </div>
-                      </td>
-                      
-                      {/* Ubicación */}
-                      <td className="px-3 py-4">
-                        <span className="text-sm text-gray-500">
-                          Mis mapas
-                        </span>
-                      </td>
-                      
-                      {/* Creado por */}
-                      <td className="px-3 py-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600">
-                            {(user?.username || 'U').charAt(0).toUpperCase()}
+                        </td>
+                        
+                        {/* Creado por */}
+                        <td className="px-3 py-4">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600">
+                              {(user?.username || 'U').charAt(0).toUpperCase()}
+                            </div>
+                            <span className="text-sm text-gray-600">
+                              {user?.full_name || user?.username || 'Usuario'}
+                            </span>
                           </div>
-                          <span className="text-sm text-gray-600">
-                            {user?.full_name || user?.username || 'Usuario'}
+                        </td>
+                        
+                        {/* Modificado */}
+                        <td className="px-3 py-4">
+                          <span className="text-sm text-gray-400">
+                            {formatDateRelative(project.updatedAt)}
                           </span>
-                        </div>
-                      </td>
-                      
-                      {/* Modificado */}
-                      <td className="px-3 py-4 text-right">
-                        <span className="text-sm text-gray-400">
-                          {formatDateRelative(project.updatedAt)}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+
+                        {/* Menú de acciones */}
+                        <td className="px-3 py-4 relative" ref={isMenuOpen ? menuRef : null}>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenMenuId(isMenuOpen ? null : project.id);
+                            }}
+                            className="p-1.5 rounded-lg hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors opacity-0 group-hover:opacity-100"
+                            title="Acciones del mapa"
+                          >
+                            <MoreHorizontal size={18} />
+                          </button>
+
+                          {/* Dropdown Menu */}
+                          {isMenuOpen && (
+                            <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                              {/* Header */}
+                              <div className="px-3 py-2 border-b border-gray-100">
+                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones del mapa</p>
+                              </div>
+
+                              {/* Compartir mapa */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenMenuId(null);
+                                  // TODO: Abrir modal de compartir
+                                  alert('Funcionalidad de compartir próximamente');
+                                }}
+                                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                              >
+                                <Share2 size={16} className="text-gray-400" />
+                                <span>Compartir mapa</span>
+                              </button>
+
+                              {/* Duplicar */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (isFree) {
+                                    setOpenMenuId(null);
+                                    onShowUpgradeModal?.('duplicate');
+                                  } else {
+                                    setOpenMenuId(null);
+                                    onDuplicateProject?.(project.id);
+                                  }
+                                }}
+                                className={`w-full flex items-center justify-between px-3 py-2.5 text-sm transition-colors ${
+                                  isFree ? 'text-gray-400' : 'text-gray-700 hover:bg-gray-50'
+                                }`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <Copy size={16} className={isFree ? 'text-gray-300' : 'text-gray-400'} />
+                                  <span>Duplicar</span>
+                                </div>
+                                {isFree && (
+                                  <span className="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-0.5">
+                                    Cámbiate <ExternalLink size={12} />
+                                  </span>
+                                )}
+                              </button>
+
+                              {/* Mover a Mis mapas */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (isFree) {
+                                    setOpenMenuId(null);
+                                    onShowUpgradeModal?.('move');
+                                  } else {
+                                    setOpenMenuId(null);
+                                    // TODO: Mover a otra ubicación
+                                    alert('Mover a otra ubicación próximamente');
+                                  }
+                                }}
+                                className={`w-full flex items-center justify-between px-3 py-2.5 text-sm transition-colors ${
+                                  isFree ? 'text-gray-400' : 'text-gray-700 hover:bg-gray-50'
+                                }`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <FolderInput size={16} className={isFree ? 'text-gray-300' : 'text-gray-400'} />
+                                  <span>Mover a Mis mapas</span>
+                                </div>
+                                {isFree && (
+                                  <span className="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-0.5">
+                                    Cámbiate <ExternalLink size={12} />
+                                  </span>
+                                )}
+                              </button>
+
+                              {/* Publicar en Universo */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (isFree) {
+                                    setOpenMenuId(null);
+                                    onShowUpgradeModal?.('publish');
+                                  } else {
+                                    setOpenMenuId(null);
+                                    // TODO: Publicar en Universo
+                                    alert('Publicar en Universo próximamente');
+                                  }
+                                }}
+                                className={`w-full flex items-center justify-between px-3 py-2.5 text-sm transition-colors ${
+                                  isFree ? 'text-gray-400' : 'text-gray-700 hover:bg-gray-50'
+                                }`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <Globe size={16} className={isFree ? 'text-gray-300' : 'text-gray-400'} />
+                                  <span>Publicar en Universo</span>
+                                </div>
+                                {isFree && (
+                                  <span className="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-0.5">
+                                    Cámbiate <ExternalLink size={12} />
+                                  </span>
+                                )}
+                              </button>
+
+                              {/* Separador */}
+                              <div className="my-2 border-t border-gray-100" />
+
+                              {/* Mover a la papelera */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenMenuId(null);
+                                  if (window.confirm(`¿Estás seguro de mover "${project.name}" a la papelera?`)) {
+                                    onDeleteProject?.(project.id);
+                                  }
+                                }}
+                                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                              >
+                                <Trash2 size={16} className="text-red-500" />
+                                <span>Mover a la papelera</span>
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

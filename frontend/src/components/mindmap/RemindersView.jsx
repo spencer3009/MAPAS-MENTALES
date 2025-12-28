@@ -1192,7 +1192,18 @@ const RemindersView = ({ token }) => {
     }
   };
   
+  // Handler para abrir el DayDetailModal (usado por Year, Week, Day views)
   const handleDayClick = (date) => {
+    const dateKey = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+    const dayReminders = remindersByDate[dateKey] || [];
+    setSelectedDayForDetail(date);
+    setSelectedDayReminders(dayReminders);
+    setShowDayDetailModal(true);
+  };
+  
+  // Handler para crear recordatorio desde el DayDetailModal
+  const handleCreateReminderFromDetail = (date) => {
+    setShowDayDetailModal(false);
     setSelectedDate(date);
     setEditingReminder(null);
     setShowModal(true);
@@ -1205,6 +1216,14 @@ const RemindersView = ({ token }) => {
   };
   
   const handleEditReminder = (reminder) => {
+    setEditingReminder(reminder);
+    setSelectedDate(null);
+    setShowModal(true);
+  };
+  
+  // Handler para editar recordatorio desde DayDetailModal
+  const handleEditReminderFromDetail = (reminder) => {
+    setShowDayDetailModal(false);
     setEditingReminder(reminder);
     setSelectedDate(null);
     setShowModal(true);

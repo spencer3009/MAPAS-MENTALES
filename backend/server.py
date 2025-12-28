@@ -1320,6 +1320,10 @@ async def update_reminder(
         if update_data.is_completed:
             update_dict["status"] = "completed"
     
+    # Estado de notificación (anti-spam)
+    if update_data.notification_status is not None:
+        update_dict["notification_status"] = update_data.notification_status
+    
     # Recalcular scheduled_datetime si cambió fecha u hora (para recordatorios de proyecto)
     if update_data.scheduled_date or update_data.scheduled_time:
         new_date = update_data.scheduled_date or reminder.get("scheduled_date")
@@ -1335,6 +1339,14 @@ async def update_reminder(
     
     # Obtener recordatorio actualizado
     updated = await db.reminders.find_one({"id": reminder_id}, {"_id": 0})
+    
+    # Asegurar campos por defecto
+    if updated:
+        if "notification_status" not in updated:
+            updated["notification_status"] = "pending"
+        if "is_completed" not in updated:
+            updated["is_completed"] = False
+    
     return updated
 
 @api_router.delete("/reminders/{reminder_id}")

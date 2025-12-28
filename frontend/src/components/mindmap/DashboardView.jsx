@@ -565,12 +565,11 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-100 text-left">
-                    <th className="px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-8"></th>
-                    <th className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                    <th className="px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
                     <th className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Ubicación</th>
                     <th className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Creado por</th>
                     <th className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Modificado</th>
-                    <th className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-12"></th>
+                    <th className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-24"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
@@ -579,25 +578,8 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
                       key={project.id} 
                       className="hover:bg-gray-50 transition-colors cursor-pointer group"
                     >
-                      {/* Estrella de favoritos */}
-                      <td className="px-5 py-4">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onToggleFavorite?.(project.id);
-                            }}
-                            className="text-gray-300 hover:text-yellow-400 transition-colors"
-                            title="Agregar a favoritos"
-                          >
-                            <Star 
-                              size={18} 
-                              className={project.isPinned ? 'fill-yellow-400 text-yellow-400' : ''} 
-                            />
-                          </button>
-                        </td>
-                        
                         {/* Nombre con icono */}
-                        <td className="px-3 py-4">
+                        <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center flex-shrink-0">
                               <FolderKanban className="text-white" size={14} />

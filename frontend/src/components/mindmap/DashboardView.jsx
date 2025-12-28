@@ -480,10 +480,7 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-lg font-medium text-gray-900">Crear un mapa</h2>
             <button 
-              onClick={() => {
-                // Abrir la vista de todos los proyectos
-                setActiveView?.('projects');
-              }}
+              onClick={() => onViewAllMaps?.()}
               className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
             >
               Ver todos los mapas

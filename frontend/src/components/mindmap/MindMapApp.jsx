@@ -464,6 +464,20 @@ const MindMapApp = ({ onAdminClick }) => {
 
   // Handler para "En Blanco" - Ahora abre primero el selector de layout
   const handleNewBlankClick = useCallback(() => {
+    setPreselectedLayout(null); // Sin pre-selección
+    setShowLayoutSelector(true);
+  }, []);
+
+  // Handler para abrir el selector de layout con una plantilla pre-seleccionada
+  const handleOpenLayoutSelectorWithTemplate = useCallback((templateId) => {
+    // Mapear el ID de plantilla del dashboard al ID del layout selector
+    const layoutMap = {
+      'mindflow': 'mindflow',
+      'mindtree': 'mindtree',
+      'mindhybrid': 'mindhybrid',
+      'blank': null // blank no tiene pre-selección
+    };
+    setPreselectedLayout(layoutMap[templateId] || null);
     setShowLayoutSelector(true);
   }, []);
 

@@ -508,7 +508,7 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
           </div>
 
           {/* Grid de plantillas */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {TEMPLATES.map((template) => {
               const Icon = template.icon;
               const isHovered = hoveredTemplate === template.id;

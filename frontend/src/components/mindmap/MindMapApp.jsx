@@ -600,11 +600,6 @@ const MindMapApp = ({ onAdminClick }) => {
       console.error('Error al cambiar proyecto:', error);
     }
   }, [switchProject, resetPan, resetZoom, setSelectedNodeId]);
-        await saveThumbnail(activeProjectId, thumbnail);
-      }
-    }
-    setActiveView('dashboard');
-  }, [activeProjectId, activeView, captureThumbnail, saveThumbnail]);
 
   // Handlers para el sidebar de estilos
   const handleToggleStyleSidebar = useCallback((tab = 'styles') => {

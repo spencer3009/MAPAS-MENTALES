@@ -2946,6 +2946,36 @@ export const useNodes = () => {
     return createBlankMap();
   }, [createBlankMap]);
 
+  // Guardar thumbnail del proyecto
+  const saveThumbnail = useCallback(async (projectId, thumbnailBase64) => {
+    const token = getAuthToken();
+    if (!token) return false;
+
+    try {
+      const response = await fetch(`${API_URL}/api/projects/${projectId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ thumbnail: thumbnailBase64 })
+      });
+
+      if (response.ok) {
+        // Actualizar el proyecto local con el thumbnail
+        setProjects(prev => prev.map(p => 
+          p.id === projectId ? { ...p, thumbnail: thumbnailBase64 } : p
+        ));
+        console.log('Thumbnail guardado para proyecto:', projectId);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error guardando thumbnail:', error);
+      return false;
+    }
+  }, []);
+
   return {
     // Estado de nodos del proyecto activo
     nodes,

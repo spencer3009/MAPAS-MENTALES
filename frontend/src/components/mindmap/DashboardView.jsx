@@ -159,8 +159,8 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
     }
     
     const rect = e.currentTarget.getBoundingClientRect();
-    const menuHeight = 280; // Altura aproximada del menú
-    const menuWidth = 224;  // w-56 = 14rem = 224px
+    const menuHeight = 300; // Altura aproximada del menú
+    const menuWidth = 256;  // w-64 = 16rem = 256px
     const viewportHeight = window.innerHeight;
     const viewportWidth = window.innerWidth;
     const padding = 16; // Padding del viewport

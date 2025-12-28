@@ -270,9 +270,16 @@ const MindMapApp = ({ onAdminClick }) => {
     }
   }, [activeView]);
 
-  const handleOpenDashboard = useCallback(() => {
+  const handleOpenDashboard = useCallback(async () => {
+    // Capturar thumbnail del proyecto actual antes de ir al dashboard
+    if (activeProjectId && activeView === 'projects') {
+      const thumbnail = await captureThumbnail();
+      if (thumbnail) {
+        await saveThumbnail(activeProjectId, thumbnail);
+      }
+    }
     setActiveView('dashboard');
-  }, []);
+  }, [activeProjectId, activeView, captureThumbnail, saveThumbnail]);
 
   const handleOpenTemplatesView = useCallback(() => {
     setActiveView('templates');

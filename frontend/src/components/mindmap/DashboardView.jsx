@@ -31,7 +31,15 @@ import {
   AlertTriangle,
   Search,
   LayoutGrid,
-  List as ListIcon
+  List as ListIcon,
+  Network,
+  Workflow,
+  ListTree,
+  ListChecks,
+  Crosshair,
+  ClipboardList,
+  StickyNote,
+  Layers
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';

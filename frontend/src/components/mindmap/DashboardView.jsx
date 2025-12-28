@@ -586,17 +586,13 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
                     ${isHovered ? 'scale-105 shadow-lg' : 'shadow-sm'}
                   `}
                 >
-                  {/* Icono o Preview */}
-                  <div className="mb-2 text-3xl text-white">
-                    {template.preview ? (
-                      <span className="text-white font-bold text-2xl">{template.preview}</span>
-                    ) : (
-                      <Icon size={28} className="text-white" />
-                    )}
+                  {/* Icono */}
+                  <div className="mb-2">
+                    <Icon className="w-10 h-10 text-white" />
                   </div>
                   
                   {/* Nombre */}
-                  <span className="text-xs font-medium text-center leading-tight text-white">
+                  <span className="text-sm font-medium text-center leading-tight text-white">
                     {template.name}
                   </span>
 

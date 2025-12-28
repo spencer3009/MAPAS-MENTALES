@@ -29,7 +29,9 @@ import {
   ExternalLink,
   X,
   AlertTriangle,
-  Search
+  Search,
+  LayoutGrid,
+  List as ListIcon
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';

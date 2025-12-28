@@ -259,6 +259,27 @@ const MindMapApp = ({ onAdminClick }) => {
   // HANDLERS PARA EL DOCK SIDEBAR
   // ==========================================
   
+  // Función para capturar thumbnail del canvas
+  const captureThumbnail = useCallback(async () => {
+    if (!canvasRef.current || !activeProjectId) return null;
+    
+    try {
+      const canvas = await html2canvas(canvasRef.current, {
+        scale: 0.3, // Escala pequeña para thumbnail
+        backgroundColor: '#f9fafb',
+        logging: false,
+        useCORS: true
+      });
+      
+      // Convertir a base64 con calidad reducida
+      const thumbnail = canvas.toDataURL('image/jpeg', 0.6);
+      return thumbnail;
+    } catch (error) {
+      console.error('Error capturando thumbnail:', error);
+      return null;
+    }
+  }, [activeProjectId]);
+
   const handleToggleProjectsSidebar = useCallback(() => {
     if (activeView !== 'projects') {
       // Si estamos en otra vista, volver a projects con sidebar abierto

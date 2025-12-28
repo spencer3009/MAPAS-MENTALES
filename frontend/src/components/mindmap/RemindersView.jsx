@@ -168,8 +168,8 @@ const ReminderModal = ({ isOpen, onClose, onSave, selectedDate, editingReminder 
     
     await onSave({
       id: editingReminder?.id,
-      title: title.trim(),
-      description: description.trim(),
+      title: trimmedTitle,
+      description: (description || '').trim(),
       reminder_date: reminderDateTime.toISOString()
     });
     

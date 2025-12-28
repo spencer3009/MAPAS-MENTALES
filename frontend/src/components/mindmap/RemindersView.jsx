@@ -252,13 +252,18 @@ const YearView = ({ year, reminders, onDayClick, remindersByDate }) => {
   today.setHours(0, 0, 0, 0);
   
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
-      {MONTH_NAMES.map((monthName, monthIndex) => {
-        const days = getDaysInMonth(year, monthIndex);
-        const monthReminders = reminders.filter(r => {
-          const d = new Date(r.reminder_date);
-          return d.getFullYear() === year && d.getMonth() === monthIndex;
-        });
+    <div className="flex-1 overflow-y-auto p-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {MONTH_NAMES.map((monthName, monthIndex) => {
+          const days = getDaysInMonth(year, monthIndex);
+          const monthReminders = reminders.filter(r => {
+            try {
+              const d = new Date(r.reminder_date);
+              return !isNaN(d.getTime()) && d.getFullYear() === year && d.getMonth() === monthIndex;
+            } catch (e) {
+              return false;
+            }
+          });
         
         return (
           <div key={monthIndex} className="bg-white rounded-xl border border-gray-200 p-3 hover:shadow-md transition-shadow">

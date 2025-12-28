@@ -974,7 +974,7 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
                   {recentProjects.map((project) => (
                     <div
                       key={project.id}
-                      onClick={() => onClose?.(project.id)}
+                      onClick={() => onOpenProject?.(project.id)}
                       className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg hover:border-blue-300 transition-all cursor-pointer group relative"
                     >
                       {/* Preview del mapa - Miniatura real */}

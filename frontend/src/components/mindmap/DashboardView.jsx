@@ -821,6 +821,62 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
         {/* Espaciado de respiro inferior */}
         <div className="h-8" aria-hidden="true" />
       </div>
+
+      {/* Modal de confirmación para eliminar proyecto */}
+      {deleteConfirmModal.isOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center">
+          {/* Overlay oscuro */}
+          <div 
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setDeleteConfirmModal({ isOpen: false, projectId: null, projectName: '' })}
+          />
+          
+          {/* Modal */}
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 pt-6 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-red-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900">Enviar a la Papelera</h3>
+              </div>
+              <button
+                onClick={() => setDeleteConfirmModal({ isOpen: false, projectId: null, projectName: '' })}
+                className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <X size={20} className="text-gray-400" />
+              </button>
+            </div>
+            
+            {/* Contenido */}
+            <div className="px-6 pb-6">
+              <p className="text-gray-600 mb-6">
+                ¿Estás seguro de enviar "<span className="font-medium text-gray-900">{deleteConfirmModal.projectName}</span>" a la papelera? Podrás restaurarlo después.
+              </p>
+              
+              {/* Botones */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setDeleteConfirmModal({ isOpen: false, projectId: null, projectName: '' })}
+                  className="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => {
+                    onDeleteProject?.(deleteConfirmModal.projectId);
+                    setDeleteConfirmModal({ isOpen: false, projectId: null, projectName: '' });
+                  }}
+                  className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl transition-colors"
+                >
+                  Enviar a Papelera
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

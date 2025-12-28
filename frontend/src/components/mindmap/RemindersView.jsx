@@ -311,6 +311,7 @@ const YearView = ({ year, reminders, onDayClick, remindersByDate }) => {
           </div>
         );
       })}
+      </div>
     </div>
   );
 };

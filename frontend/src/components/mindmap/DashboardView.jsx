@@ -128,6 +128,13 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
   const [openMenuId, setOpenMenuId] = useState(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const menuRef = useRef(null);
+  
+  // Estado para el modal de confirmación de eliminar
+  const [deleteConfirmModal, setDeleteConfirmModal] = useState({
+    isOpen: false,
+    projectId: null,
+    projectName: ''
+  });
 
   // Cerrar menú al hacer clic fuera
   useEffect(() => {

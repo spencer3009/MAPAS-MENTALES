@@ -120,10 +120,23 @@ const TEMPLATES = [
   }
 ];
 
-const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOpenTemplates, onToggleFavorite }) => {
+const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOpenTemplates, onToggleFavorite, onDeleteProject, onDuplicateProject, onShowUpgradeModal }) => {
   const [planInfo, setPlanInfo] = useState(null);
   const [loadingPlan, setLoadingPlan] = useState(true);
   const [hoveredTemplate, setHoveredTemplate] = useState(null);
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const menuRef = useRef(null);
+
+  // Cerrar menú al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpenMenuId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Cargar información del plan
   useEffect(() => {

@@ -3034,6 +3034,7 @@ export const useNodes = () => {
     setProjectName,
     pinProject,
     reorderProjects,
+    saveThumbnail,
     
     // Selección múltiple
     selectedNodeIds,

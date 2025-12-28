@@ -1287,6 +1287,8 @@ async def update_reminder(
         raise HTTPException(status_code=404, detail="Recordatorio no encontrado")
     
     update_dict = {}
+    
+    # Campos de proyecto/nodo
     if update_data.scheduled_date:
         update_dict["scheduled_date"] = update_data.scheduled_date
     if update_data.scheduled_time:
@@ -1296,11 +1298,25 @@ async def update_reminder(
     if update_data.channel:
         update_dict["channel"] = update_data.channel
     
-    # Recalcular scheduled_datetime si cambió fecha u hora
+    # Campos de calendario
+    if update_data.title is not None:
+        update_dict["title"] = update_data.title
+    if update_data.description is not None:
+        update_dict["description"] = update_data.description
+    if update_data.reminder_date is not None:
+        update_dict["reminder_date"] = update_data.reminder_date
+        update_dict["scheduled_datetime"] = update_data.reminder_date
+    if update_data.is_completed is not None:
+        update_dict["is_completed"] = update_data.is_completed
+        if update_data.is_completed:
+            update_dict["status"] = "completed"
+    
+    # Recalcular scheduled_datetime si cambió fecha u hora (para recordatorios de proyecto)
     if update_data.scheduled_date or update_data.scheduled_time:
-        new_date = update_data.scheduled_date or reminder["scheduled_date"]
-        new_time = update_data.scheduled_time or reminder["scheduled_time"]
-        update_dict["scheduled_datetime"] = f"{new_date}T{new_time}:00"
+        new_date = update_data.scheduled_date or reminder.get("scheduled_date")
+        new_time = update_data.scheduled_time or reminder.get("scheduled_time")
+        if new_date and new_time:
+            update_dict["scheduled_datetime"] = f"{new_date}T{new_time}:00"
     
     if update_dict:
         await db.reminders.update_one(

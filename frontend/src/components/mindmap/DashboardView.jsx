@@ -609,8 +609,7 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
                           </button>
                         </td>
                       </tr>
-                    );
-                  })}
+                    ))}
                 </tbody>
               </table>
               

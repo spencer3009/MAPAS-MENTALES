@@ -814,7 +814,7 @@ const MindMapApp = ({ onAdminClick }) => {
         {/* Canvas y Sidebar derecho */}
         <div className="flex-1 flex overflow-hidden">
           {/* Canvas principal */}
-          <div ref={canvasRef} className="flex-1">
+          <div ref={canvasRef} className="flex-1 h-full relative">
             <Canvas
               nodes={nodesWithReminders}
               selectedNodeId={selectedNodeId}

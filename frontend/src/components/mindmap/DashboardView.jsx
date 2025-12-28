@@ -49,6 +49,30 @@ const PLAN_NAMES = {
   'admin': 'Admin'
 };
 
+// Jerarquía de planes para upgrade (de menor a mayor)
+const PLAN_HIERARCHY = ['free', 'personal', 'team', 'business'];
+
+// Precios de planes
+const PLAN_PRICES = {
+  'personal': '$3/mes',
+  'team': '$9/mes',
+  'business': '$19/mes'
+};
+
+// Función para obtener el siguiente plan de upgrade
+const getNextUpgradePlan = (currentPlan) => {
+  // Normalizar el plan (pro = personal, admin = business)
+  const normalizedPlan = currentPlan === 'pro' ? 'personal' : (currentPlan === 'admin' ? 'business' : currentPlan);
+  const currentIndex = PLAN_HIERARCHY.indexOf(normalizedPlan);
+  
+  // Si es el plan más alto o no se encuentra, no hay upgrade
+  if (currentIndex === -1 || currentIndex >= PLAN_HIERARCHY.length - 1) {
+    return null;
+  }
+  
+  return PLAN_HIERARCHY[currentIndex + 1];
+};
+
 const PLAN_COLORS = {
   'free': { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-200', icon: 'text-gray-500' },
   'personal': { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200', icon: 'text-blue-500' },

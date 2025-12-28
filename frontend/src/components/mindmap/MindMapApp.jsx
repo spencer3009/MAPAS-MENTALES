@@ -871,7 +871,8 @@ const MindMapApp = ({ onAdminClick }) => {
             onAlignTextRight={alignSingleNodeTextRight}
             onToggleNodeCompleted={toggleNodeCompleted}
             layoutType={currentLayoutType}
-          />
+            />
+          </div>
 
           {/* Toolbar de selección múltiple */}
           <MultiSelectToolbar

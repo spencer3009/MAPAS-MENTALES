@@ -480,11 +480,14 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-lg font-medium text-gray-900">Crear un mapa</h2>
             <button 
-              onClick={() => {}}
-              className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              onClick={() => {
+                // Abrir la vista de todos los proyectos
+                setActiveView?.('projects');
+              }}
+              className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
             >
-              <Upload size={16} />
-              Importar
+              Ver todos los mapas
+              <ExternalLink size={16} />
             </button>
           </div>
 

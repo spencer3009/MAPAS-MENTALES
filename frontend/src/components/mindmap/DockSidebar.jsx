@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, 
   FolderKanban, 
@@ -22,7 +22,15 @@ const DockSidebar = ({
   activeView = 'projects',
   trashCount = 0
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  
+  // Determinar si estamos en la vista de proyectos
+  const isInProjectsView = activeView === 'projects';
+  
+  // El sidebar está expandido si:
+  // - NO estamos en la vista de proyectos (siempre expandido)
+  // - O si estamos en proyectos Y el mouse está encima (hover)
+  const isExpanded = !isInProjectsView || isHovered;
 
   const menuItems = [
     {
@@ -73,8 +81,8 @@ const DockSidebar = ({
         transition-all duration-300 ease-in-out
         ${isExpanded ? 'w-52' : 'w-16'}
       `}
-      onMouseEnter={() => setIsExpanded(true)}
-      onMouseLeave={() => setIsExpanded(false)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {/* Dock Container */}
       <div 

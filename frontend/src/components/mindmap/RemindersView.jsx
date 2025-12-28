@@ -106,11 +106,23 @@ const ReminderModal = ({ isOpen, onClose, onSave, selectedDate, editingReminder 
     if (editingReminder) {
       setTitle(editingReminder.title);
       setDescription(editingReminder.description || '');
-      const reminderDate = new Date(editingReminder.reminder_date);
-      setDate(reminderDate.toISOString().split('T')[0]);
-      setTime(reminderDate.toTimeString().slice(0, 5));
+      try {
+        const reminderDate = new Date(editingReminder.reminder_date);
+        if (!isNaN(reminderDate.getTime())) {
+          setDate(reminderDate.toISOString().split('T')[0]);
+          setTime(reminderDate.toTimeString().slice(0, 5));
+        }
+      } catch (e) {
+        console.warn('Invalid reminder date:', editingReminder.reminder_date);
+      }
     } else if (selectedDate) {
-      setDate(selectedDate.toISOString().split('T')[0]);
+      try {
+        if (!isNaN(selectedDate.getTime())) {
+          setDate(selectedDate.toISOString().split('T')[0]);
+        }
+      } catch (e) {
+        console.warn('Invalid selected date');
+      }
       setTitle('');
       setDescription('');
       setTime('09:00');

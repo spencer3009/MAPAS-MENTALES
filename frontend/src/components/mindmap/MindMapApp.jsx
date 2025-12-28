@@ -484,12 +484,15 @@ const MindMapApp = ({ onAdminClick }) => {
   // Handler para cuando se selecciona un layout
   const handleLayoutSelect = useCallback((layoutType) => {
     setShowLayoutSelector(false);
+    setPreselectedLayout(null); // Reset después de seleccionar
     // Guardar el layout seleccionado y abrir modal de nombre
     setPendingProjectName(null); // Reset
     setProjectNameModalConfig({
       title: 'Nuevo Proyecto',
       subtitle: layoutType === 'mindtree' 
         ? 'Proyecto con layout vertical (MindTree)' 
+        : layoutType === 'mindhybrid'
+        ? 'Proyecto con layout híbrido (MindHybrid)'
         : 'Proyecto con layout horizontal (MindFlow)',
       confirmText: 'Crear',
       initialName: 'Nuevo Mapa',

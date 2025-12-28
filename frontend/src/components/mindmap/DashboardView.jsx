@@ -125,6 +125,7 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
   const [loadingPlan, setLoadingPlan] = useState(true);
   const [hoveredTemplate, setHoveredTemplate] = useState(null);
   const [openMenuId, setOpenMenuId] = useState(null);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const menuRef = useRef(null);
 
   // Cerrar menú al hacer clic fuera
@@ -148,6 +149,22 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
     
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [openMenuId]);
+
+  // Función para abrir menú con posición
+  const handleOpenMenu = (e, projectId) => {
+    e.stopPropagation();
+    if (openMenuId === projectId) {
+      setOpenMenuId(null);
+      return;
+    }
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMenuPosition({
+      top: rect.bottom + 8,
+      left: rect.right - 224 // 224 = ancho del menú (w-56 = 14rem = 224px)
+    });
+    setOpenMenuId(projectId);
+  };
 
   // Cargar información del plan
   useEffect(() => {

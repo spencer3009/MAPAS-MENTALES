@@ -103,29 +103,56 @@ const ReminderModal = ({ isOpen, onClose, onSave, selectedDate, editingReminder 
   const [loading, setLoading] = useState(false);
   
   useEffect(() => {
+    if (!isOpen) {
+      // Reset state when modal closes
+      return;
+    }
+    
     if (editingReminder) {
-      setTitle(editingReminder.title);
+      setTitle(editingReminder.title || '');
       setDescription(editingReminder.description || '');
       try {
         const reminderDate = new Date(editingReminder.reminder_date);
         if (!isNaN(reminderDate.getTime())) {
           setDate(reminderDate.toISOString().split('T')[0]);
           setTime(reminderDate.toTimeString().slice(0, 5));
+        } else {
+          setDate(new Date().toISOString().split('T')[0]);
+          setTime('09:00');
         }
       } catch (e) {
         console.warn('Invalid reminder date:', editingReminder.reminder_date);
+        setDate(new Date().toISOString().split('T')[0]);
+        setTime('09:00');
       }
     } else if (selectedDate) {
       try {
-        if (!isNaN(selectedDate.getTime())) {
+        if (selectedDate instanceof Date && !isNaN(selectedDate.getTime())) {
           setDate(selectedDate.toISOString().split('T')[0]);
+          // Si la hora está definida en selectedDate, usarla
+          const hours = selectedDate.getHours();
+          if (hours > 0) {
+            setTime(`${hours.toString().padStart(2, '0')}:00`);
+          } else {
+            setTime('09:00');
+          }
+        } else {
+          setDate(new Date().toISOString().split('T')[0]);
+          setTime('09:00');
         }
       } catch (e) {
         console.warn('Invalid selected date');
+        setDate(new Date().toISOString().split('T')[0]);
+        setTime('09:00');
       }
       setTitle('');
       setDescription('');
+    } else {
+      // Default: today
+      setDate(new Date().toISOString().split('T')[0]);
       setTime('09:00');
+      setTitle('');
+      setDescription('');
     }
   }, [selectedDate, editingReminder, isOpen]);
   
@@ -133,10 +160,11 @@ const ReminderModal = ({ isOpen, onClose, onSave, selectedDate, editingReminder 
   
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title.trim() || !date) return;
+    const trimmedTitle = (title || '').trim();
+    if (!trimmedTitle || !date) return;
     
     setLoading(true);
-    const reminderDateTime = new Date(`${date}T${time}`);
+    const reminderDateTime = new Date(`${date}T${time || '09:00'}`);
     
     await onSave({
       id: editingReminder?.id,

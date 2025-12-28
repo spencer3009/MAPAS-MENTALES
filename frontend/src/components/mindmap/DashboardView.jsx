@@ -37,6 +37,9 @@ import {
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
 // Nombres de planes para mostrar
+// URL del logo MindoraMap
+const LOGO_URL = 'https://customer-assets.emergentagent.com/job_mindviz-app/artifacts/k1kioask_image.png';
+
 const PLAN_NAMES = {
   'free': 'Gratis',
   'personal': 'Personal',

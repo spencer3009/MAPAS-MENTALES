@@ -249,7 +249,7 @@ const MapThumbnail = ({ nodes = [] }) => {
   );
 };
 
-const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOpenTemplates, onToggleFavorite, onDeleteProject, onDuplicateProject, onShowUpgradeModal }) => {
+const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject, onOpenTemplates, onToggleFavorite, onDeleteProject, onDuplicateProject, onShowUpgradeModal }) => {
   const [planInfo, setPlanInfo] = useState(null);
   const [loadingPlan, setLoadingPlan] = useState(true);
   const [hoveredTemplate, setHoveredTemplate] = useState(null);

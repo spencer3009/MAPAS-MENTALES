@@ -520,45 +520,6 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
           </div>
         )}
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
-                <FolderKanban className="text-blue-600" size={24} />
-              </div>
-              <div>
-                <p className="text-3xl font-bold text-gray-900">{totalProjects}</p>
-                <p className="text-sm text-gray-500">Proyectos</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
-                <TrendingUp className="text-green-600" size={24} />
-              </div>
-              <div>
-                <p className="text-3xl font-bold text-gray-900">{totalNodes}</p>
-                <p className="text-sm text-gray-500">Nodos totales</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
-                <Calendar className="text-purple-600" size={24} />
-              </div>
-              <div>
-                <p className="text-3xl font-bold text-gray-900">{new Date().getDate()}</p>
-                <p className="text-sm text-gray-500">{new Date().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Recent Projects - Tabla */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
           <div className="px-5 py-4 border-b border-gray-100">

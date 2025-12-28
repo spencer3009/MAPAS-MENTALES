@@ -528,54 +528,9 @@ const DayDetailModal = ({ isOpen, onClose, date, reminders, onEditReminder, onTo
     </div>
   );
 };
-                          className={`w-6 h-6 mt-0.5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
-                            reminder.is_completed 
-                              ? 'bg-green-500 border-green-500 text-white' 
-                              : isOverdue
-                              ? 'border-red-400 hover:border-red-500'
-                              : 'border-gray-300 hover:border-blue-500'
-                          }`}
-                        >
-                          {reminder.is_completed && <Check size={14} />}
-                        </button>
-                        
-                        <div className="flex-1 min-w-0">
-                          <div className={`font-medium ${reminder.is_completed ? 'line-through text-gray-400' : 'text-gray-800'}`}>
-                            {reminder.title || reminder.message || 'Sin título'}
-                          </div>
-                          
-                          {reminder.description && (
-                            <p className="text-sm text-gray-500 mt-1 line-clamp-2">
-                              {reminder.description}
-                            </p>
-                          )}
-                          
-                          <div className={`text-xs mt-2 flex items-center gap-2 ${isOverdue ? 'text-red-500' : 'text-gray-400'}`}>
-                            <Clock size={12} />
-                            {formatTime(reminder.reminder_date || reminder.scheduled_datetime)}
-                            {isOverdue && !reminder.is_completed && (
-                              <span className="text-[10px] font-medium bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">
-                                Vencido
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        
-                        <ChevronRight size={18} className="text-gray-400 flex-shrink-0" />
-                      </div>
-                    </div>
-                  );
-                })}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // ==================== VISTA MES ====================
-const MonthView = ({ currentDate, reminders, onDayClick, remindersByDate, onEditReminder, onToggleComplete }) => {
+const MonthView = ({ currentDate, reminders, onDayClick, remindersByDate, onEditReminder, onToggleComplete, onCreateReminder }) => {
   const days = getDaysInMonth(currentDate.getFullYear(), currentDate.getMonth());
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -585,14 +540,10 @@ const MonthView = ({ currentDate, reminders, onDayClick, remindersByDate, onEdit
   const [selectedDayReminders, setSelectedDayReminders] = useState([]);
   
   const handleDayClick = (date, dayReminders) => {
-    if (dayReminders.length > 0) {
-      setSelectedDay(date);
-      setSelectedDayReminders(dayReminders);
-      setShowDayModal(true);
-    } else {
-      // Si no hay recordatorios, abrir modal de crear
-      onDayClick(date);
-    }
+    // Siempre abrir el popup del día (tenga o no recordatorios)
+    setSelectedDay(date);
+    setSelectedDayReminders(dayReminders);
+    setShowDayModal(true);
   };
   
   return (

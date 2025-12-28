@@ -623,7 +623,8 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                onToggleFavorite?.(project.id);
+                                // Toggle: si isPinned, quitar; si no, agregar
+                                onToggleFavorite?.(project.id, !project.isPinned);
                               }}
                               className={`p-1.5 rounded-lg transition-colors ${
                                 project.isPinned 

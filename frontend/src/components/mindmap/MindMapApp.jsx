@@ -631,11 +631,8 @@ const MindMapApp = ({ onAdminClick }) => {
             onToggleFavorite={pinProject}
             onDeleteProject={handleDeleteProjectClick}
             onDuplicateProject={(projectId) => {
-              // Duplicar proyecto
-              const projectToDuplicate = projects.find(p => p.id === projectId);
-              if (projectToDuplicate) {
-                duplicateProject(projectId);
-              }
+              // TODO: Implementar duplicación de proyecto
+              alert('Función de duplicar proyecto próximamente disponible');
             }}
             onShowUpgradeModal={(reason) => {
               setUpgradeLimitType(reason);

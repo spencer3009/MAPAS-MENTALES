@@ -103,15 +103,15 @@ const TEMPLATES = [
   {
     id: 'mindmap',
     name: 'Mapa mental',
-    icon: GitBranch,
-    color: 'bg-gradient-to-br from-cyan-400 to-teal-500',
+    icon: Network,
+    color: 'bg-gradient-to-br from-pink-400 to-rose-500',
     preview: '🧠',
     description: 'Ideas conectadas'
   },
   {
     id: 'orgchart',
     name: 'Organigrama',
-    icon: Grid3X3,
+    icon: ListTree,
     color: 'bg-gradient-to-br from-amber-400 to-orange-500',
     preview: '📊',
     description: 'Estructura jerárquica'
@@ -119,15 +119,15 @@ const TEMPLATES = [
   {
     id: 'list',
     name: 'Lista',
-    icon: List,
-    color: 'bg-gradient-to-br from-gray-400 to-gray-600',
+    icon: ListChecks,
+    color: 'bg-gradient-to-br from-slate-400 to-slate-600',
     preview: '📋',
     description: 'Tareas y pendientes'
   },
   {
     id: 'smart',
     name: 'Objetivos SMART',
-    icon: Target,
+    icon: Crosshair,
     color: 'bg-gradient-to-br from-blue-400 to-indigo-500',
     preview: '🎯',
     description: 'Metas específicas'
@@ -135,7 +135,7 @@ const TEMPLATES = [
   {
     id: 'business',
     name: 'Plan de negocios',
-    icon: Briefcase,
+    icon: ClipboardList,
     color: 'bg-gradient-to-br from-emerald-400 to-green-600',
     preview: '💼',
     description: 'Estrategia empresarial'
@@ -143,7 +143,7 @@ const TEMPLATES = [
   {
     id: 'notes',
     name: 'Toma de notas',
-    icon: FileText,
+    icon: StickyNote,
     color: 'bg-gradient-to-br from-purple-400 to-violet-500',
     preview: '📝',
     description: 'Apuntes rápidos'
@@ -151,7 +151,7 @@ const TEMPLATES = [
   {
     id: 'all',
     name: 'Todas las plantillas',
-    icon: MoreHorizontal,
+    icon: Layers,
     color: 'bg-gradient-to-br from-blue-100 to-indigo-100',
     textColor: 'text-blue-600',
     preview: '🗂️',

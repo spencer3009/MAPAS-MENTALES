@@ -240,9 +240,15 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
   // Estadísticas básicas
   const totalProjects = projects.length;
   const totalNodes = projects.reduce((acc, p) => acc + (p.nodes?.length || 0), 0);
-  const recentProjects = [...projects]
-    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-    .slice(0, 3);
+  
+  // Filtrar proyectos por término de búsqueda
+  const filteredProjects = projects.filter(p => 
+    p.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+  // Proyectos recientes (ordenados por fecha, filtrados si hay búsqueda)
+  const recentProjects = [...filteredProjects]
+    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
 
   const formatDate = (dateString) => {
     try {

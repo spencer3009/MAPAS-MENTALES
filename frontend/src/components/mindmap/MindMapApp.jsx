@@ -30,7 +30,7 @@ import { useAuth } from '../../contexts/AuthContext';
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
 // Componente interno principal
-const MindMapAppInner = ({ onAdminClick, onNavigateToReminders }) => {
+const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clearForceView }) => {
   const { user, logout, token, isAdmin } = useAuth();
   
   const {

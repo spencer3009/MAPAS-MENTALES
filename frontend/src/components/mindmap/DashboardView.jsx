@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   LayoutDashboard, 
   FolderKanban, 
@@ -20,7 +20,14 @@ import {
   FileText,
   Grid3X3,
   MoreHorizontal,
-  Star
+  Star,
+  Share2,
+  Copy,
+  FolderInput,
+  Globe,
+  Trash2,
+  ExternalLink,
+  X
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';

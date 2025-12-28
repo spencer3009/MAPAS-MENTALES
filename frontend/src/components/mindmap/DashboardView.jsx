@@ -457,7 +457,8 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
               <img 
                 src={LOGO_URL} 
                 alt="MindoraMap" 
-                className="w-24 h-24 object-contain"
+                style={{ width: '200px', height: 'auto' }}
+                className="object-contain"
               />
               <h1 className="text-3xl font-light text-gray-900">
                 ¡Te damos la bienvenida, <span className="font-semibold">{userName}</span>!

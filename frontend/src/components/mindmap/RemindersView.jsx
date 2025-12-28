@@ -1083,6 +1083,11 @@ const RemindersView = ({ token }) => {
   const [editingReminder, setEditingReminder] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   
+  // Estado para el DayDetailModal global (usado por Year, Week, Day views)
+  const [showDayDetailModal, setShowDayDetailModal] = useState(false);
+  const [selectedDayForDetail, setSelectedDayForDetail] = useState(null);
+  const [selectedDayReminders, setSelectedDayReminders] = useState([]);
+  
   // Cargar recordatorios
   useEffect(() => {
     loadReminders();

@@ -1390,6 +1390,7 @@ const RemindersView = ({ token }) => {
           reminders={reminders}
           onTimeSlotClick={handleTimeSlotClick}
           remindersByDate={remindersByDate}
+          onDayClick={handleDayClick}
         />
       )}
       
@@ -1399,6 +1400,8 @@ const RemindersView = ({ token }) => {
           reminders={reminders}
           onTimeSlotClick={handleTimeSlotClick}
           remindersByDate={remindersByDate}
+          onDayClick={handleDayClick}
+          onEditReminder={handleEditReminder}
         />
       )}
       
@@ -1420,7 +1423,22 @@ const RemindersView = ({ token }) => {
         />
       )}
       
-      {/* Modal */}
+      {/* DayDetailModal Global - para Year, Week y Day views */}
+      <DayDetailModal
+        isOpen={showDayDetailModal}
+        onClose={() => {
+          setShowDayDetailModal(false);
+          setSelectedDayForDetail(null);
+          setSelectedDayReminders([]);
+        }}
+        date={selectedDayForDetail}
+        reminders={selectedDayReminders}
+        onEditReminder={handleEditReminderFromDetail}
+        onToggleComplete={handleToggleComplete}
+        onCreateReminder={handleCreateReminderFromDetail}
+      />
+      
+      {/* Modal de Creación/Edición */}
       <ReminderModal
         isOpen={showModal}
         onClose={() => {

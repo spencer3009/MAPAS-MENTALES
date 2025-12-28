@@ -1028,13 +1028,21 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
                   </div>
                 </div>
 
-                {/* Botón de upgrade solo para plan free */}
-                {planInfo.plan === 'free' && (
-                  <button className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-lg flex items-center gap-2 transition-all shadow-md hover:shadow-lg">
-                    <Zap size={16} />
-                    Actualizar a Personal - $3/mes
-                  </button>
-                )}
+                {/* Botón de upgrade dinámico (solo si hay plan superior disponible) */}
+                {(() => {
+                  const nextPlan = getNextUpgradePlan(planInfo.plan);
+                  if (!nextPlan) return null;
+                  
+                  return (
+                    <button 
+                      onClick={() => onShowUpgradeModal?.(nextPlan)}
+                      className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-lg flex items-center gap-2 transition-all shadow-md hover:shadow-lg"
+                    >
+                      <Zap size={16} />
+                      Actualizar a {PLAN_NAMES[nextPlan]} - {PLAN_PRICES[nextPlan]}
+                    </button>
+                  );
+                })()}
               </div>
 
               {/* Barras de progreso para plan free */}

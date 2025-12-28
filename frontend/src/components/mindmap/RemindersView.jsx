@@ -752,28 +752,40 @@ const DayView = ({ currentDate, reminders, onTimeSlotClick, remindersByDate, onE
   today.setHours(0, 0, 0, 0);
   const isToday = currentDate.getTime() === today.getTime();
   
+  const [showDayModal, setShowDayModal] = useState(false);
+  
   return (
     <div className="flex-1 p-4 pb-16 overflow-hidden">
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden h-full flex flex-col">
-        {/* Header del día */}
-        <div className={`py-4 px-6 border-b border-gray-200 ${isToday ? 'bg-blue-50' : 'bg-gray-50'}`}>
-          <div className="text-sm text-gray-500">{DAY_NAMES_FULL[currentDate.getDay()]}</div>
-          <div className={`text-3xl font-bold ${isToday ? 'text-blue-600' : 'text-gray-800'}`}>
-            {currentDate.getDate()} de {MONTH_NAMES[currentDate.getMonth()]}
-          </div>
-          {dayReminders.length > 0 && (
-            <div className="text-sm text-gray-500 mt-1">
-              {dayReminders.length} recordatorio{dayReminders.length !== 1 ? 's' : ''}
+        {/* Header del día - clickeable para ver todos los recordatorios */}
+        <div 
+          onClick={() => setShowDayModal(true)}
+          className={`py-4 px-6 border-b border-gray-200 cursor-pointer hover:bg-blue-100 transition-colors ${isToday ? 'bg-blue-50' : 'bg-gray-50'}`}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm text-gray-500">{DAY_NAMES_FULL[currentDate.getDay()]}</div>
+              <div className={`text-3xl font-bold ${isToday ? 'text-blue-600' : 'text-gray-800'}`}>
+                {currentDate.getDate()} de {MONTH_NAMES[currentDate.getMonth()]}
+              </div>
+              <div className="text-sm text-gray-500 mt-1">
+                {dayReminders.length > 0 
+                  ? `${dayReminders.length} recordatorio${dayReminders.length !== 1 ? 's' : ''} • Clic para ver todos`
+                  : 'Sin recordatorios • Clic para crear'}
+              </div>
             </div>
-          )}
+            <ChevronRight size={24} className="text-gray-400" />
+          </div>
         </div>
         
         {/* Grid de horas */}
         <div className="flex-1 overflow-y-auto">
           {HOURS.map(hour => {
             const hourReminders = dayReminders.filter(r => {
-              const h = new Date(r.reminder_date).getHours();
-              return h === hour;
+              try {
+                const h = new Date(r.reminder_date || r.scheduled_datetime).getHours();
+                return h === hour;
+              } catch { return false; }
             });
             
             return (
@@ -793,13 +805,17 @@ const DayView = ({ currentDate, reminders, onTimeSlotClick, remindersByDate, onE
                   {hourReminders.map(r => (
                     <div
                       key={r.id}
-                      className={`text-sm px-3 py-2 rounded-lg mb-1 ${
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEditReminder(r);
+                      }}
+                      className={`text-sm px-3 py-2 rounded-lg mb-1 cursor-pointer hover:opacity-80 ${
                         r.is_completed 
                           ? 'bg-gray-200 text-gray-500 line-through' 
                           : 'bg-blue-500 text-white'
                       }`}
                     >
-                      <div className="font-medium">{r.title}</div>
+                      <div className="font-medium">{r.title || r.message}</div>
                       {r.description && (
                         <div className="text-xs opacity-80 mt-0.5">{r.description}</div>
                       )}

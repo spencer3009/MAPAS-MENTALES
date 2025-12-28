@@ -673,12 +673,25 @@ const ScheduleView = ({ reminders, onEditReminder, onToggleComplete, onDeleteRem
 
 // ==================== VISTA RECORDATORIOS (Lista) ====================
 const RemindersListView = ({ reminders, onEditReminder, onToggleComplete, onDeleteReminder }) => {
-  const pendingReminders = reminders.filter(r => !r.is_completed);
+  const now = new Date();
+  
+  // Dividir en: Vigentes (no vencidos), Vencidos, Completados
+  const upcomingReminders = reminders.filter(r => {
+    if (r.is_completed) return false;
+    const date = new Date(r.reminder_date || r.scheduled_datetime);
+    return !isNaN(date.getTime()) && date > now;
+  }).sort((a, b) => new Date(a.reminder_date) - new Date(b.reminder_date));
+  
+  const overdueReminders = reminders.filter(r => {
+    if (r.is_completed) return false;
+    const date = new Date(r.reminder_date || r.scheduled_datetime);
+    return !isNaN(date.getTime()) && date <= now;
+  }).sort((a, b) => new Date(b.reminder_date) - new Date(a.reminder_date)); // Más reciente primero
+  
   const completedReminders = reminders.filter(r => r.is_completed);
   
-  const ReminderItem = ({ reminder }) => {
-    const date = new Date(reminder.reminder_date);
-    const isOverdue = date < new Date() && !reminder.is_completed;
+  const ReminderItem = ({ reminder, isOverdue }) => {
+    const date = new Date(reminder.reminder_date || reminder.scheduled_datetime);
     
     return (
       <div className={`p-4 rounded-xl border ${isOverdue ? 'border-red-200 bg-red-50' : 'border-gray-200 bg-white'} hover:shadow-md transition-shadow`}>

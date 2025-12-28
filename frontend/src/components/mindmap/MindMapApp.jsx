@@ -20,7 +20,7 @@ import TemplatesView from './TemplatesView';
 import IntegrationsView from './IntegrationsView';
 import UpgradeModal from './UpgradeModal';
 import RemindersView from './RemindersView';
-import ToastProvider, { useToast } from './ToastProvider';
+import { NotificationProvider } from './ToastProvider';
 import { useNodes } from '../../hooks/useNodes';
 import { usePanning } from '../../hooks/usePanning';
 import { useZoom } from '../../hooks/useZoom';
@@ -29,8 +29,8 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
-// Componente interno que usa el contexto de Toast
-const MindMapAppInner = ({ onAdminClick, showReminderToast }) => {
+// Componente interno principal
+const MindMapAppInner = ({ onAdminClick, onNavigateToReminders }) => {
   const { user, logout, token, isAdmin } = useAuth();
   
   const {

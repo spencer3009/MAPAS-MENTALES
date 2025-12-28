@@ -4741,3 +4741,43 @@ The **Pricing/Plans System** is **COMPLETELY FUNCTIONAL** and meets all specifie
 
 **Recommendation**: The Pricing/Plans System is **PRODUCTION-READY** and successfully delivers all required functionality for plan management, pricing display, and limit enforcement. All backend APIs are working correctly and the implementation follows best practices for SaaS pricing systems.
 
+
+---
+
+## Testing Results (December 28, 2025)
+
+### ✅ "MOVER A PAPELERA" FUNCTIONALITY VERIFIED
+
+#### Test: Dashboard Context Menu - Move to Trash
+- **Status**: ✅ WORKING
+- **Test Method**: Manual via Playwright screenshot tool
+- **Test User**: spencer3009 (Admin)
+
+#### Steps Performed:
+1. Logged in as spencer3009
+2. Verified initial state: 2 projects, 41 nodes total
+3. Clicked "⋯" button on "SISTEMA DE MAPAS" project
+4. Context menu appeared with all options including "Mover a la papelera" (red)
+5. Clicked "Mover a la papelera"
+6. Confirmation dialog appeared and was accepted
+7. Dashboard updated: 1 project, 12 nodes total
+8. Verified project is in trash via API: GET /api/projects/trash
+
+#### Verification Evidence:
+- **Before Delete**: 2 Projects, 41 Nodos totales, "SISTEMA DE MAPAS" visible
+- **After Delete**: 1 Proyecto, 12 Nodos totales, only "PROYECTO PRODUCTOS" visible
+- **API Confirmation**: Project "SISTEMA DE MAPAS" found in trash with deletedAt timestamp
+- **Restore Test**: POST /api/projects/{id}/restore successfully restored the project
+
+#### Backend Endpoints Verified:
+- `DELETE /api/projects/{project_id}` - Soft delete (moves to trash) ✅
+- `GET /api/projects/trash` - List trash projects ✅
+- `POST /api/projects/{project_id}/restore` - Restore from trash ✅
+
+### Conclusion
+The "Mover a papelera" functionality is working correctly. The context menu action properly:
+1. Shows confirmation dialog
+2. Calls the DELETE endpoint for soft delete
+3. Updates the dashboard UI in real-time
+4. Project is correctly marked as deleted in the database
+5. Project can be restored from trash

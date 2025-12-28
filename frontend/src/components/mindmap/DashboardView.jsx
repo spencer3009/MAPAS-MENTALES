@@ -570,20 +570,17 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {TEMPLATES.map((template) => {
               const Icon = template.icon;
-              const isHovered = hoveredTemplate === template.id;
               
               return (
                 <button
                   key={template.id}
                   onClick={() => handleTemplateClick(template)}
-                  onMouseEnter={() => setHoveredTemplate(template.id)}
-                  onMouseLeave={() => setHoveredTemplate(null)}
                   className={`
                     relative flex flex-col items-center justify-center
                     rounded-xl p-4 h-32
                     transition-all duration-200
                     ${template.color}
-                    ${isHovered ? 'scale-105 shadow-lg' : 'shadow-sm'}
+                    hover:scale-105 hover:shadow-lg shadow-sm
                   `}
                 >
                   {/* Icono */}
@@ -595,18 +592,6 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
                   <span className="text-sm font-medium text-center leading-tight text-white">
                     {template.name}
                   </span>
-
-                  {/* Tooltip al hover */}
-                  {isHovered && template.id !== 'blank' && (
-                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 translate-y-full z-20">
-                      <div className="bg-gray-900 text-white text-xs px-3 py-2 rounded-lg shadow-xl whitespace-nowrap">
-                        <div className="font-medium mb-0.5">{template.description}</div>
-                        <button className="px-3 py-1 bg-blue-500 hover:bg-blue-600 rounded text-white text-xs font-medium mt-1">
-                          Usar plantilla
-                        </button>
-                      </div>
-                    </div>
-                  )}
                 </button>
               );
             })}

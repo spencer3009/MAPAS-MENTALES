@@ -1249,12 +1249,16 @@ async def get_reminders(
         {"_id": 0}
     ).sort("sent_at", -1).skip(skip).limit(limit).to_list(limit)
     
-    # Asegurar que todos los recordatorios tengan el campo seen
+    # Asegurar que todos los recordatorios tengan los campos necesarios
     for reminder in reminders:
         if "seen" not in reminder:
             reminder["seen"] = False
         if "seen_at" not in reminder:
             reminder["seen_at"] = None
+        if "notification_status" not in reminder:
+            reminder["notification_status"] = "pending"
+        if "is_completed" not in reminder:
+            reminder["is_completed"] = False
     
     return reminders
 

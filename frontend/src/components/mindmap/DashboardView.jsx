@@ -840,7 +840,78 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
                   })()}
                 </div>
               )}
-            </div>
+                </div>
+              )}
+
+              {/* Vista de Grid (Tarjetas) */}
+              {viewType === 'grid' && (
+                <div className="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {recentProjects.map((project) => (
+                    <div
+                      key={project.id}
+                      onClick={() => onClose?.(project.id)}
+                      className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg hover:border-blue-300 transition-all cursor-pointer group relative"
+                    >
+                      {/* Preview del mapa */}
+                      <div className="w-full h-32 rounded-lg bg-gradient-to-br from-gray-50 to-gray-100 mb-3 flex items-center justify-center overflow-hidden">
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 rounded-full bg-blue-400"></div>
+                          <div className="w-8 h-0.5 bg-gray-300"></div>
+                          <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                          <div className="w-6 h-0.5 bg-gray-300"></div>
+                          <div className="w-3 h-3 rounded-full bg-purple-400"></div>
+                        </div>
+                      </div>
+
+                      {/* Nombre del proyecto */}
+                      <h3 className="font-medium text-gray-900 truncate mb-1" title={project.name}>
+                        {project.name}
+                      </h3>
+
+                      {/* Fecha */}
+                      <p className="text-xs text-gray-500">
+                        {formatDateRelative(project.updatedAt)}
+                      </p>
+
+                      {/* Acciones (favorito y menú) */}
+                      <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleFavorite?.(project.id);
+                          }}
+                          className={`p-1.5 rounded-lg transition-colors ${
+                            project.isPinned 
+                              ? 'text-yellow-500 bg-yellow-50' 
+                              : 'text-gray-400 hover:text-yellow-500 hover:bg-gray-100'
+                          }`}
+                          title={project.isPinned ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+                        >
+                          <Star size={16} fill={project.isPinned ? 'currentColor' : 'none'} />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenMenu(project.id, e);
+                          }}
+                          className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                          title="Acciones del mapa"
+                        >
+                          <MoreHorizontal size={16} />
+                        </button>
+                      </div>
+
+                      {/* Indicador de favorito visible siempre si está activo */}
+                      {project.isPinned && (
+                        <div className="absolute top-3 left-3">
+                          <Star size={14} className="text-yellow-500" fill="currentColor" />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
           ) : (
             <div className="px-5 py-12 text-center">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">

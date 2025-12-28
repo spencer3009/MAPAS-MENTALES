@@ -789,9 +789,12 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
                           onClick={(e) => {
                             e.stopPropagation();
                             setOpenMenuId(null);
-                            if (window.confirm(`¿Estás seguro de mover "${project.name}" a la papelera?`)) {
-                              onDeleteProject?.(project.id);
-                            }
+                            // Abrir modal de confirmación personalizado
+                            setDeleteConfirmModal({
+                              isOpen: true,
+                              projectId: project.id,
+                              projectName: project.name
+                            });
                           }}
                           className="w-full flex items-center gap-4 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
                         >

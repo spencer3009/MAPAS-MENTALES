@@ -1571,6 +1571,7 @@ class ProjectUpdate(BaseModel):
     isPinned: Optional[bool] = None
     customOrder: Optional[int] = None
     layoutType: Optional[str] = None  # 'mindflow', 'mindtree', or 'mindhybrid'
+    thumbnail: Optional[str] = None  # Base64 encoded image
 
 class ProjectResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -1585,6 +1586,7 @@ class ProjectResponse(BaseModel):
     isPinned: bool = False
     customOrder: Optional[int] = None
     layoutType: str = "mindflow"  # 'mindflow', 'mindtree', or 'mindhybrid'
+    thumbnail: Optional[str] = None  # Base64 encoded image
     # Campos para papelera de reciclaje
     isDeleted: bool = False
     deletedAt: Optional[str] = None

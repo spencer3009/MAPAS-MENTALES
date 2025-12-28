@@ -470,7 +470,7 @@ const DayView = ({ currentDate, reminders, onTimeSlotClick, remindersByDate }) =
   const isToday = currentDate.getTime() === today.getTime();
   
   return (
-    <div className="flex-1 p-4 overflow-hidden">
+    <div className="flex-1 p-4 pb-16 overflow-hidden">
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden h-full flex flex-col">
         {/* Header del día */}
         <div className={`py-4 px-6 border-b border-gray-200 ${isToday ? 'bg-blue-50' : 'bg-gray-50'}`}>

@@ -1,90 +1,117 @@
 <analysis>**original_problem_statement:**
-The user's initial goal was to unify the application's pricing and plan structure into a single source of truth. This has since evolved into a comprehensive redesign and enhancement of the user dashboard, with a strong focus on UI/UX, feature implementation, and dynamic behavior based on user state.
+The user's initial goal was to unify the application's pricing and plan structure, which evolved into a comprehensive redesign of the user dashboard and the creation of a professional-grade, fully-featured calendar and reminder system.
 
 **PRODUCT REQUIREMENTS:**
-*   **Unified Plan System (Single Source of Truth):**
-    *   Define four official plans (, , , ) in a centralized backend configuration, served via .
-*   **Dashboard Redesign & Functionality:**
-    *   Make the dashboard the default page after login.
-    *   **Welcome Header:** Display a large logo, a personalized welcome message (¡Te damos la bienvenida, [Nombre]!), and the user's avatar.
-    *   **Quick-Start Templates:** Display cards for creating a new map using different layouts (MindFlow, MindTree, MindHybrid), with representative custom SVG icons. When a template is clicked, the creation modal should open with that layout pre-selected.
-    *   **Project Management Bar:** Implement a functional search bar, a Crear button, and a view toggle (Grid/List) for the projects list.
-    *   **Recent Projects View:**
-        *   Display projects in either a table (List view) or cards (Grid view).
-        *   **Grid View Thumbnails:** Display a real, auto-generated thumbnail of the map's nodes.
-        *   Clicking a project card/row must open the project with the project sidebar visible.
-        *   Implement a context menu (⋯) with a functional Mover a la papelera action, using a custom confirmation modal.
-    *   **Dynamic Upgrade Button:** The main call-to-action button should dynamically change based on the user's current plan (e.g., a Free user sees Actualizar a Personal, while a Business user sees Plan actual: Business).
-    *   **Plan Information Card:** Display the user's current plan and usage limits below the Proyectos recientes section.
-*   **Dynamic Sidebar:**
-    *   The main  should be fully expanded in all views except the project/canvas view.
-    *   In the project view, the sidebar should be collapsed by default (showing only icons) and expand on hover to maximize workspace.
+*   **Unified Plan System:** Centralize plan definitions on the backend.
+*   **Dashboard Redesign:** Create a new dashboard with a welcome header, quick-start templates, a project management bar, and a recent projects list with real thumbnails. Implement a dynamic upgrade button and a user plan info card.
+*   **Dynamic Sidebar:** The main sidebar should collapse in the project view and be expanded elsewhere.
+*   **Template-to-Modal Flow:** Clicking a dashboard template card (e.g., MindTree) should open the creation modal with that layout pre-selected.
+*   **Bug Fixes:** Correct the sidebar active state logic, clean up template card hover effects, and add a favicon.
+*   **UI/UX Refinements:** Simplify the plan information card for paid users in the project sidebar.
+*   **Professional Reminder System (Multi-phase):**
+    1.  Create a basic Reminders page.
+    2.  Redesign it into a full calendar application with multiple views (Year, Month, Week, Day, Schedule) controlled by tabs *within* the view itself, not the main sidebar.
+    3.  Make the system fully functional: ensure reminders are saved to the database, are visually represented on the calendars, and persist across sessions.
+    4.  Implement a unified backend model to support both general calendar reminders and reminders linked to specific project nodes.
+    5.  Implement a global, elegant, non-spammy toast notification system that alerts users of due reminders anywhere in the app, only once per reminder.
+    6.  Ensure all calendar views are fully interactive: clicking any day (in Year, Month, Week, or Day view) should open a detailed modal listing that day's reminders (sorted: Current > Overdue > Completed) and allow the creation of new reminders with the date pre-filled.
+    7.  Fix all layout issues, including scrolling and spacing, to ensure a polished final product.
 
 **User's preferred language**: Spanish. The next agent MUST respond in Spanish.
 
 **what currently exists?**
-The dashboard has been significantly overhauled. It now features a welcome header with a large logo and aligned user info. Below that are quick-start template cards with custom SVG icons. A functional project management bar has been added with a search input, Grid/List view toggles, and a Crear (Create) button. The project list displays projects in either a grid with real, auto-generated map thumbnails or a table format. Clicking a project successfully navigates the user to the canvas with the project sidebar open. The Move to Trash functionality works via a custom modal. The layout also includes a dynamic upgrade button that changes based on the user's plan, and the plan information card has been relocated below the project list. The main sidebar now correctly collapses in the project view and expands everywhere else.
+The application features a completely redesigned dashboard and a sophisticated, multi-view calendar and reminder system. The backend supports a unified reminder data model for both general and project-specific reminders, including a  to prevent notification spam. A global  is integrated at the application's root, delivering elegant, non-repeating toast notifications for due reminders across all views. The reminder calendar is fully interactive; clicking on any day in the Year, Month, Week, or Day views opens a detailed modal that lists that day's reminders and allows for the creation of new ones with the date pre-filled. Numerous UI/UX fixes have been completed, including correcting the sidebar's active item logic, cleaning up dashboard card hover effects, adding a custom favicon, and implementing various layout adjustments for scrolling and spacing.
 
 **Last working item**:
-*   **Last item agent was working:** The user wants to connect the template cards on the dashboard to the layout selection modal. When a user clicks a template card (e.g., MindTree), the creation modal should appear over the dashboard with MindTree already pre-selected, avoiding a full page navigation.
-*   **Status:** NOT STARTED
+*   **Last item agent was working:** The user requested to make all calendar views (Year, Month, Week, Day) fully interactive. Clicking a day should open a detailed modal showing that day's reminders and allowing the creation of new ones. This required implementing a consistent modal () and wiring it up correctly in all views within .
+*   **Status:** IN PROGRESS
 *   **Agent Testing Done:** N
-*   **Which testing method agent to use?** Frontend testing agent. The agent should use the screenshot tool to:
-    1.  Click on a template card (e.g., MindTree).
-    2.  Capture the resulting modal to verify it appears over the dashboard and that the MindTree option is correctly highlighted/selected.
+*   **Which testing method agent to use?** Frontend testing agent. The agent must verify the following flow:
+    1. Navigate to the Recordatorios page.
+    2. Switch to each view (Año, Mes, Semana, Día).
+    3. In each view, click on a day with existing reminders. Verify the detail modal opens, showing correctly sorted reminders (Vigentes > Vencidos > Completados).
+    4. In each view, click on a day without reminders. Verify the modal opens and presents the Crear recordatorio button.
+    5. From the modal, click Crear recordatorio, and confirm the creation form appears with the correct date pre-filled.
 *   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-*   **Issue 1: MindHybrid Layout Instability (P1)**
-    *   **Description:** A critical and recurring issue. The core layout algorithms in  are fragile and prone to breaking. This has not been addressed.
+*   **Issue 1: Finalize and Verify Calendar Interactivity (P0)**
+*   **Issue 2: MindHybrid Layout Instability (P1)**
+*   **Issue 3: 'X' button in MultiSelectToolbar is not working (P2)**
+*   **Issue 4: Mobile Layout Overlap (P2)**
+
+**Issues Detail:**
+*   **Issue 1: Finalize and Verify Calendar Interactivity**
+    *   **Attempted fixes:** The agent has written the code to integrate the  into all calendar views (, , , ) within .
+    *   **Next debug checklist:** The code has been written but not thoroughly tested for consistency across all views. The next step is to perform the full test outlined in the Last working item section to ensure the functionality is seamless and bug-free in every calendar view.
+    *   **Why fix this issue and what will be achieved with the fix?** This will complete a major user requirement, making the calendar a fully interactive and central part of the application's UX.
+    *   **Status:** IN PROGRESS
+    *   **Is recurring issue?** N
+    *   **Should Test frontend/backend/both after fix?** Frontend
+    *   **Blocked on other issue:** None
+*   **Issue 2: MindHybrid Layout Instability**
+    *   **Attempted fixes:** None. This critical issue has been repeatedly postponed.
+    *   **Next debug checklist:** Investigate the layout algorithms in .
+    *   **Why fix this issue and what will be achieved with the fix?** To stabilize a core feature of the mind mapping tool and prevent data corruption or poor user experience.
     *   **Status:** NOT STARTED
-*   **Issue 2: 'X' button in MultiSelectToolbar is not working (P2)**
-    *   **Description:** The button to clear a multi-node selection is non-functional.
+    *   **Is recurring issue?** Y
+    *   **Should Test frontend/backend/both after fix?** Frontend
+    *   **Blocked on other issue:** None
+*   **Issue 3: 'X' button in MultiSelectToolbar is not working**
+    *   **Attempted fixes:** None.
+    *   **Next debug checklist:** Investigate the event handler for the 'X' button in the  component.
+    *   **Why fix this issue and what will be achieved with the fix?** To restore basic functionality for managing multiple selected nodes.
     *   **Status:** NOT STARTED
-*   **Issue 3: Mobile Layout Overlap (P2)**
-    *   **Description:** On mobile devices, the user dropdown menu overlaps with the sidebar.
+    *   **Is recurring issue?** N
+    *   **Should Test frontend/backend/both after fix?** Frontend
+    *   **Blocked on other issue:** None
+*   **Issue 4: Mobile Layout Overlap**
+    *   **Attempted fixes:** None.
+    *   **Next debug checklist:** Use browser developer tools to inspect the CSS for the sidebar and user dropdown menu on small screen sizes and apply appropriate z-index or layout fixes.
+    *   **Why fix this issue and what will be achieved with the fix?** To ensure the application is usable on mobile devices.
     *   **Status:** NOT STARTED
+    *   **Is recurring issue?** N
+    *   **Should Test frontend/backend/both after fix?** Frontend
+    *   **Blocked on other issue:** None
 
 **In progress Task List**:
-*   **Task 1: Pre-select Layout in Creation Modal (P0)**
-    *   **Where to resume:** In , modify the  handler for the template cards. It currently calls . This needs to be updated to open the  modal and pass the selected template ID to it as a default value.
-    *   **What will be achieved with this?** A seamless user experience where selecting a template on the dashboard directly prepares that template for creation in the modal, as requested by the user.
-    *   **Status:** IN PROGRESS
-    *   **Should Test frontend/backend/both after fix?** Frontend
-    *   **Blocked on something:** None
+*   None separate from the main pending issue.
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks:**
-    *   **Implement Context Menu Actions (P0):** The dashboard context menu actions Compartir mapa, Duplicar, Mover a Mis mapas, and Publicar en Universo are still non-functional mocks and need to be implemented.
-    *   **Data Migration for Existing Users (P1):** Run a one-time script to initialize the  counter for all existing users based on their current project count.
-    *   **Stripe Integration for Payments (P1):** The dynamic Actualizar button is a UI mock. Integrate Stripe to handle real payments for plan upgrades.
+    *   **Implement Context Menu Actions (P0):** Implement the Compartir mapa, Duplicar, Mover a Mis mapas, and Publicar en Universo actions in the dashboard's project context menu.
+    *   **Data Migration for Existing Users (P1):** Create and run a one-time script to initialize the  counter for all existing users.
+    *   **Stripe Integration for Payments (P1):** Integrate Stripe to make the Actualizar button functional for plan upgrades.
 *   **Future Tasks:**
-    *   **Admin Role Management (P1):** Implement UI for  to assign/revoke admin roles.
-    *   **Dashboard Enhancements (P2):** Add visual graphs for the admin dashboard metrics.
-    *   **Email Notification Channel (P2):** Add email as an option for reminder notifications.
-    *   **Twilio Outgoing Messages (P2):** Implement the ability to send outgoing WhatsApp messages.
+    *   **Admin Role Management (P1):** Implement a UI for admins to manage user roles.
+    *   **Dashboard Enhancements (P2):** Add visual graphs for the admin dashboard.
+    *   **Email Notification Channel (P2):** Integrate an email service for notifications.
+    *   **Twilio Outgoing Messages (P2):** Implement sending outgoing WhatsApp messages.
+    *   **Notification Sound (P2):** Add a subtle sound effect to the toast notifications.
 
 **Completed work in this session**
-- **Bug Fix: Mover a Papelera (DONE):** Fixed a  bug that occurred when deleting the last project from the dashboard.
-- **Custom Delete Modal (DONE):** Replaced the native  with a fully styled custom modal for project deletion ().
-- **Dashboard Project Management Bar (DONE):** Implemented a functional search bar, a Crear button that opens the template modal, and a view toggle (Grid/List) for the project list ().
-- **Real Project Thumbnails (DONE):** Implemented a system to generate real map thumbnails using  when a user leaves a project view and display them in the dashboard's grid view (, , ).
-- **Project Navigation Flow (DONE):**
-  - Fixed a bug where nodes were not visible on the canvas when opening a project from the dashboard.
-  - Ensured the project sidebar () is automatically displayed when opening a project from the dashboard.
-- **Dashboard Layout & UI (DONE):**
-  - Added the app logo and refined the welcome header layout, text size, and alignment.
-  - Removed the old statistics cards.
-  - Moved the user's plan information card to be below the project list.
-  - Replaced a static Importar button with a functional Ver todos los mapas link.
-- **Dynamic Upgrade Button (DONE):** Implemented a button in the header that dynamically changes its text, color, and action based on the user's current subscription plan ().
-- **Dynamic Sidebar Behavior (DONE):** The main sidebar now correctly collapses by default in the project view (expanding on hover) and remains expanded in all other views ().
-- **Updated Template Icons (DONE):** Replaced placeholder icons on the dashboard template cards with the correct custom SVG icons for MindFlow, MindTree, and MindHybrid to match the rest of the application.
+- **Dashboard Template Integration:** Clicking a template on the dashboard now correctly opens the creation modal with the layout pre-selected.
+- **Sidebar Active State Fix:** Corrected the logic in  so only one navigation item is active at a time.
+- **UI Cleanup:** Removed the unnecessary hover overlay from dashboard template cards.
+- **Favicon Implementation:** Added a new favicon with a transparent background.
+- **Plan Card Simplification:** Modified the plan info card in the project sidebar () to show a cleaner view for paid users.
+- **Reminder System - Phase 1 (Creation):** Built the initial  page and integrated it into the app's navigation.
+- **Reminder System - Phase 2 (Calendar Redesign):** Re-architected  into a full-featured calendar with multiple, internally-navigated views (Year, Month, Week, etc.).
+- **Reminder System - Phase 3 (Backend & Functionality):**
+    - Unified the backend  model in  to support both general and project-linked reminders.
+    - Implemented API endpoints to ensure reminders are correctly created, updated, and fetched.
+- **Reminder System - Phase 4 (Global Notifications):**
+    - Created a global, non-spammy  to show elegant toast notifications for due reminders anywhere in the app.
+    - Added a  field to the backend to ensure notifications fire only once.
+- **Reminder System - Phase 5 (UX & Interactivity):**
+    - Corrected the sorting order of reminder lists to Current > Overdue > Completed.
+    - Fixed scrolling and padding issues in all calendar views.
+    - Implemented the core logic for a fully interactive calendar, where clicking a day opens a detailed modal for viewing and creating reminders.
 
 **Earlier issues found/mentioned but not fixed**
-*   **Issue 1: 'X' button in MultiSelectToolbar:** The button to clear the multi-node selection does not work.
-*   **Issue 2: Mobile layout issue:** Sidebar overlaps the main content on small screens when the user dropdown is open.
-*   **Issue 3: MindHybrid Layout Instability:** A critical, recurring issue with the core mind map layout logic in .
+*   **Issue 1: MindHybrid Layout Instability:** A critical, recurring issue with the core mind map layout logic in .
+*   **Issue 2: 'X' button in MultiSelectToolbar:** The button to clear the multi-node selection does not work.
+*   **Issue 3: Mobile layout issue:** Sidebar overlaps the main content on small screens when the user dropdown is open.
 
 **Known issue recurrence from previous fork**
 *   **MindHybrid Layout Instability:** This critical, recurring issue remains unfixed and poses a significant risk to the mind map functionality. It was present in the previous session's summary and has not been addressed.
@@ -93,73 +120,89 @@ The dashboard has been significantly overhauled. It now features a welcome heade
 
 
 **Key Technical Concepts**
-*   **Dynamic UI based on User State:** The dashboard now heavily relies on the user's plan () to render different components, such as the  logic for the main call-to-action button.
-*   **Client-Side Image Generation:** Using  in  to capture the DOM state of the map canvas, convert it to a Base64 data URL, and send it to the backend to be saved as a project thumbnail.
-*   **Conditional View Rendering:** The  component uses a  state ('grid' or 'list') to conditionally render the project list as either a table or a grid of cards.
-*   **Prop-Driven Component Behavior:** The  component's collapsed/expanded state is now controlled by the  prop passed down from , making its behavior context-aware.
+*   **Unified Data Model:** Refactored the backend  model to serve both simple calendar events and project-node-specific reminders by making  and  optional.
+*   **Global State Management for Notifications:** Implemented a  at the root of the app to manage and display notifications globally, using React Context.
+*   **Anti-Spam Notification Logic:** The backend  model now includes a  ('pending', 'triggered', 'read') to ensure a toast is only shown once per reminder. The frontend polls for 'pending' reminders and updates their status after showing the notification.
+*   **Component-Scoped View Routing:** The  manages its own internal state () for switching between Year, Month, Week, etc., using tabs, keeping the main app navigation clean.
+*   **Contextual Modals:** Clicking a day in any calendar view triggers a . This is achieved by passing handler functions (, ) down through component props to set the selected date and open the relevant modals.
 
 **key DB schema**
 *   ** collection:**
-    *   : (string) - **NEW** field. Stores a Base64 data URL of the project's map thumbnail image.
+    *   uid=0(root) gid=0(root) groups=0(root): (string) - Primary key.
+    *   : (string) - Foreign key to .
+    *   : (string, **optional**) - Foreign key to .
+    *   : (string, **optional**) - ID of the node within a project.
+    *   : (string) - 'simple' or 'node'.
+    *   : (string)
+    *   : (string, optional)
+    *   : (datetime)
+    *   : (boolean) - Default .
+    *   : (string) - **NEW**. 'pending', 'triggered', or 'read'. Default .
 
 **changes in tech stack**
-*   **Added:**  (frontend dependency) for generating map thumbnails.
+*   None. (ImageMagick was used as a command-line tool, but is not a part of the application stack).
 
 **All files of reference**
-*   **/app/frontend/src/components/mindmap/DashboardView.jsx**: The main file for almost all recent work. Contains the logic for the header, templates, search, view toggles, project list/grid, custom delete modal, and dynamic buttons.
-*   **/app/frontend/src/components/mindmap/MindMapApp.jsx**: The parent component orchestrating views (). It now contains the crucial  logic and passes down state and handlers to the dashboard.
-*   **/app/frontend/src/components/mindmap/DockSidebar.jsx**: Modified to implement the dynamic collapse/expand behavior based on the  prop.
-*   **/app/frontend/src/hooks/useNodes.js**: Modified to fix a deletion bug and to add the  function.
-*   **/app/backend/server.py**: Modified to add the  field to the  model and the corresponding update logic.
+*   **/app/frontend/src/components/mindmap/RemindersView.jsx**: The core file for the entire multi-view calendar and reminder system. Contains all logic for views, modals, and interactivity.
+*   **/app/frontend/src/components/mindmap/ToastProvider.jsx**: The global notification system. Manages fetching due reminders, displaying toasts, and updating their status.
+*   **/app/backend/server.py**: Contains the unified  data model and all associated CRUD API endpoints, including the logic for .
+*   **/app/frontend/src/components/mindmap/MindMapApp.jsx**: The main application component, responsible for integrating the  and handling top-level view routing.
+*   **/app/frontend/src/hooks/useNodes.js**: A known source of the recurring  layout bug. Needs investigation.
 
 **Areas that need refactoring**
-*   **/app/frontend/src/components/mindmap/DashboardView.jsx**: This component is now extremely large (over 1000 lines) and manages too many concerns. It should be broken down into smaller, focused components (e.g., , , , , , ).
-*   **/app/frontend/src/components/mindmap/MindMapApp.jsx**: The thumbnail generation logic () could be extracted into a dedicated hook or utility function to clean up the component.
-*   **/app/frontend/src/hooks/useNodes.js**: Still a large and complex file that is a known source of bugs. It would benefit from being split into smaller, more manageable hooks.
+*   **/app/frontend/src/components/mindmap/RemindersView.jsx**: This file is now extremely large and complex. It should be broken down into smaller components for each view (, , etc.) and each modal (, ).
+*   **/app/frontend/src/components/mindmap/DashboardView.jsx**: This component remains oversized and should be refactored into smaller, more focused components.
+*   **/app/frontend/src/hooks/useNodes.js**: The source of a critical recurring bug. It is large, complex, and needs a thorough review and potential refactor.
 
 **key api endpoints**
-*   : Modified to accept an optional  field (Base64 string) in the request body.
+*   : (MODIFIED) Creates a unified reminder (simple or node-based). Sets  to 'pending' by default.
+*   : Retrieves all reminders for the current user.
+*   : (MODIFIED) Updates a reminder, including fields like  and .
+*   : Deletes a reminder.
 
 **Critical Info for New Agent**
-*   **The User is Highly Visual:** The user provides very specific feedback on UI elements, often with annotated images. Pay close attention to visual details and confirm changes with screenshots.
-*   ** is the Epicenter:** This file is the hub for almost all recent features. Any new dashboard-related request will likely start here. It is also in dire need of refactoring.
-*   **Thumbnail Generation:** The thumbnail capture logic in  relies on . This approach is brittle; ensure this selector remains valid. The capture is triggered when the user navigates from a project back to the dashboard.
+*   **The Reminder System is the Priority:** The user's primary focus is now on polishing the calendar and reminder system. The next agent should prioritize finishing and verifying the interactivity of all calendar views.
+*   **Unified Reminder Model is Key:** The backend now uses a single  collection for everything.  is for calendar-only events, while  links to a project. All new reminder logic must adhere to this unified model.
+*   **Global Notifications are Handled by :** Do not implement separate notification logic. All reminder alerts must flow through the existing , which handles fetching, displaying, and preventing spam by updating the  via the API.
+*   **Refactoring is Needed:** The  and  components have become monolithic and are difficult to maintain. Propose refactoring them into smaller components after the current high-priority tasks are completed.
 
 **documents and test reports created in this job**
-*   
+*    (Continuously updated by testing agents)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Requested to move the plan info card below the recent projects list. (Completed)
-2.  **User:** Requested to replace the Importar button with a dynamic Actualizar a Personal button. (Completed, after some clarification)
-3.  **User:** Provided detailed PRD for the dynamic upgrade button's behavior across all user plans (Free, Personal, Team, Business). (Completed)
-4.  **User:** Provided detailed PRD for the sidebar's dynamic behavior (expanded everywhere, collapsed on hover in project view). (Completed)
-5.  **User:** Requested to change the template icons to be more representative of the functionality. (Completed, after clarification)
-6.  **User:** Clarified that the template icons should represent the system's actual layouts: MindFlow, MindTree, MindHybrid. (Completed)
-7.  **User:** Provided images of the correct SVG icons to be used for the layout templates. (Completed)
-8.  **User:** **PENDING REQUEST:** When a template card is clicked on the dashboard, the layout selection modal should open on the dashboard with that template pre-selected.
+10. User reports the month view calendar is not scrollable to see the last weeks of the month. (Completed)
+9.  User requests that in the day detail modal, current reminders appear before overdue ones. (Completed)
+8.  User provides a detailed PRD for making all calendar views (Year, Month, Week, Day) fully interactive by opening a detail/creation modal when a day is clicked. (In Progress)
+7.  User requests that the month view calendar cells show up to 5 reminders, with a popup to see more. (Completed)
+6.  User requests that reminder lists be sorted with current reminders first, then overdue, then completed. (Completed)
+5.  User reports the Year view calendar is not scrollable. (Completed)
+4.  User provides a detailed PRD for a global, elegant, non-spammy notification system with sound and a View Details button. (Completed, except for sound)
+3.  User clarifies that the reminder system should be unified to handle both simple agenda items and project node reminders in a single system. (Completed)
+2.  User provides a PRD to make the reminder system fully functional: saving reminders, displaying them on the calendar, having a global notification bell, and showing toast notifications when they are due. (Completed)
+1.  User requests more bottom padding on all reminder views to prevent content from looking stuck to the bottom of the page. (Completed)
 
 **Project Health Check:**
 *   **Broken:**
-    *    layout functionality remains unstable.
+    *    layout functionality remains unstable and is a critical, recurring bug.
     *   The 'X' button in the  is non-functional.
     *   The user dropdown menu overlaps the sidebar on mobile devices.
 *   **Mocked:**
-    *   **Payment Flow:** The Actualizar a Personal button is a UI-only feature; Stripe is not integrated.
-    *   **Context Menu Actions:** Compartir mapa, Duplicar, Mover a Mis mapas, and Publicar en Universo are all non-functional placeholders.
-    *   **Social Login:** Continue with GitHub button on login/register pages is not functional.
+    *   **Payment Flow:** The Actualizar button is a UI-only feature; Stripe is not integrated.
+    *   **Context Menu Actions:** Compartir mapa, Duplicar, etc., are non-functional placeholders.
+    *   **Social Login:** Continue with GitHub button is not functional.
 
 **3rd Party Integrations**
 *   **Lucide React:** For UI icons.
-*   **Twilio WhatsApp API:** For receiving incoming messages.
+*   **Twilio WhatsApp API:** For receiving incoming messages (not sending).
 *   **react-beautiful-dnd:** For drag-and-drop functionality.
 *   **Emergent-managed Google Auth:** For social login and registration.
-*   **html2canvas:** **NEW**. For generating map thumbnail images on the client side.
+*   **html2canvas:** For generating map thumbnail images on the client side.
 
 **Testing status**
-*   **Testing agent used after significant changes:** NO. The agent performed extensive manual testing using the screenshot tool for all UI changes and bug fixes.
+*   **Testing agent used after significant changes:** YES, frequently used to test reminder functionalities.
 *   **Troubleshoot agent used after agent stuck in loop:** NO.
-*   **Test files created:** None in this session.
-*   **Known regressions:** The  layout has known, recurring regressions.
+*   **Test files created:** None.
+*   **Known regressions:** The  layout has known, recurring regressions that have not been addressed.
 
 **Credentials to test flow:**
 *   **Admin User:**
@@ -170,5 +213,6 @@ The dashboard has been significantly overhauled. It now features a welcome heade
     *   Password: 
 
 **What agent forgot to execute**
-*   The agent has been focused on the user's immediate UI requests and has not yet addressed the higher-level Upcoming tasks from the initial product requirements, such as implementing the other context menu actions or integrating Stripe.
-*   The data migration for  for existing users remains pending.</analysis>
+*   The agent has consistently de-prioritized the critical, recurring  layout instability issue.
+*   The Upcoming Tasks from the initial PRD (Stripe integration, dashboard context menu actions, data migration) have not been started.
+*   The user's request for a subtle sound with notifications was noted but not implemented.</analysis>

@@ -109,7 +109,7 @@ export const useNodes = () => {
   }, []);
 
   // Guardar proyecto en servidor
-  const saveProjectToServer = useCallback(async (project) => {
+  const saveProjectToServer = useCallback(async (project, thumbnail = null) => {
     const token = getAuthToken();
     if (!token) return { success: false, error: 'No autenticado' };
 
@@ -124,18 +124,25 @@ export const useNodes = () => {
         ? `${API_URL}/api/projects/${project.id}`
         : `${API_URL}/api/projects`;
 
+      const body = {
+        id: project.id,
+        name: project.name,
+        layoutType: project.layoutType || 'mindflow',
+        nodes: project.nodes
+      };
+      
+      // Agregar thumbnail si se proporciona
+      if (thumbnail) {
+        body.thumbnail = thumbnail;
+      }
+
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          id: project.id,
-          name: project.name,
-          layoutType: project.layoutType || 'mindflow',
-          nodes: project.nodes
-        })
+        body: JSON.stringify(body)
       });
 
       if (response.ok) {

@@ -1005,7 +1005,7 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
         {planInfo && (
           <div className={`mt-8 rounded-2xl border-2 ${planColors.border} ${planColors.bg} overflow-hidden`}>
             <div className="p-5">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className={`w-12 h-12 rounded-xl ${isUnlimited ? 'bg-gradient-to-br from-amber-400 to-orange-500' : 'bg-white'} flex items-center justify-center shadow-sm`}>
                     {isUnlimited ? (
@@ -1025,11 +1025,11 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-500">
-                      {isUnlimited 
-                        ? 'Acceso completo a todas las funciones' 
-                        : 'Límites de tu plan actual'}
-                    </p>
+                    {!isUnlimited && (
+                      <p className="text-sm text-gray-500">
+                        Límites de tu plan actual
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -1050,9 +1050,9 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
                 })()}
               </div>
 
-              {/* Barras de progreso para plan free */}
+              {/* Barras de progreso solo para plan free */}
               {!isUnlimited && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                   {/* Mapas Activos */}
                   <div className="bg-white rounded-xl p-4 border border-gray-200">
                     <div className="flex items-center justify-between mb-2">
@@ -1093,30 +1093,6 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
                         ? `${planInfo.usage.total_remaining} disponibles`
                         : '⚠️ Límite de prueba alcanzado'}
                     </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Beneficios del plan ilimitado */}
-              {isUnlimited && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Sparkles className="w-4 h-4 text-green-500" />
-                    <span>Mapas ilimitados</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Sparkles className="w-4 h-4 text-green-500" />
-                    <span>Nodos ilimitados</span>
-                  </div>
-                  {planInfo.limits.can_collaborate && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Users className="w-4 h-4 text-green-500" />
-                      <span>Colaboración</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <CheckCircle2 className="w-4 h-4 text-green-500" />
-                    <span>Exportación PDF</span>
                   </div>
                 </div>
               )}

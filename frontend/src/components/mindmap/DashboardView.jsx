@@ -296,7 +296,7 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
   };
 
   return (
-    <div className="flex-1 h-full overflow-y-auto bg-white">
+    <div className="flex-1 h-full overflow-y-auto bg-gray-50">
       {/* Header con bienvenida y avatar */}
       <div className="border-b border-gray-100 bg-white sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-6 py-6">
@@ -313,7 +313,7 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="max-w-6xl mx-auto px-6 py-8 pb-24">
         {/* Sección: Crear un mapa */}
         <div className="mb-10">
           <div className="flex items-center justify-between mb-5">

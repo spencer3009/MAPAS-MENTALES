@@ -2759,7 +2759,7 @@ export const useNodes = () => {
         // NO crear uno nuevo automáticamente
         setProjects([]);
         setActiveProjectId(null);
-        setNodes([]);
+        // Los nodos se limpian automáticamente al no haber proyecto activo
         console.log('Último proyecto eliminado, cuenta en cero mapas');
       } else {
         setProjects(remainingProjects);

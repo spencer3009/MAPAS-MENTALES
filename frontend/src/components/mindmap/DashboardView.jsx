@@ -538,21 +538,17 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {recentProjects.map((project) => {
-                    const isMenuOpen = openMenuId === project.id;
-                    const isFree = planInfo?.plan === 'free';
-                    
-                    return (
-                      <tr 
-                        key={project.id} 
-                        className="hover:bg-gray-50 transition-colors cursor-pointer group"
-                      >
-                        {/* Estrella de favoritos */}
-                        <td className="px-5 py-4">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onToggleFavorite?.(project.id);
+                  {recentProjects.map((project) => (
+                    <tr 
+                      key={project.id} 
+                      className="hover:bg-gray-50 transition-colors cursor-pointer group"
+                    >
+                      {/* Estrella de favoritos */}
+                      <td className="px-5 py-4">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleFavorite?.(project.id);
                             }}
                             className="text-gray-300 hover:text-yellow-400 transition-colors"
                             title="Agregar a favoritos"

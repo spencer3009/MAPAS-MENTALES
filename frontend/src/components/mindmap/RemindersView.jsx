@@ -531,13 +531,18 @@ const ScheduleView = ({ reminders, onEditReminder, onToggleComplete, onDeleteRem
   // Agrupar por fecha
   const groupedReminders = useMemo(() => {
     const groups = {};
-    const sorted = [...reminders].sort((a, b) => 
+    const validReminders = reminders.filter(r => {
+      const date = new Date(r.reminder_date);
+      return !isNaN(date.getTime());
+    });
+    
+    const sorted = [...validReminders].sort((a, b) => 
       new Date(a.reminder_date) - new Date(b.reminder_date)
     );
     
     sorted.forEach(r => {
       const date = new Date(r.reminder_date);
-      const key = date.toISOString().split('T')[0];
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
       if (!groups[key]) groups[key] = [];
       groups[key].push(r);
     });

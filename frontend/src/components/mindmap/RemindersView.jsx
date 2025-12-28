@@ -563,8 +563,10 @@ const ScheduleView = ({ reminders, onEditReminder, onToggleComplete, onDeleteRem
           </div>
         ) : (
           Object.entries(groupedReminders).map(([dateStr, dayReminders]) => {
-            const date = new Date(dateStr + 'T00:00:00');
-            const isToday = date.getTime() === today.getTime();
+            const date = new Date(dateStr + 'T12:00:00'); // Usar mediodía para evitar problemas de timezone
+            if (isNaN(date.getTime())) return null; // Skip invalid dates
+            
+            const isToday = date.toDateString() === today.toDateString();
             const isPast = date < today;
             
             return (

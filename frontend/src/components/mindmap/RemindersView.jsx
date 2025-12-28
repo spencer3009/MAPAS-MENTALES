@@ -323,7 +323,7 @@ const MonthView = ({ currentDate, reminders, onDayClick, remindersByDate }) => {
   today.setHours(0, 0, 0, 0);
   
   return (
-    <div className="flex-1 p-4">
+    <div className="flex-1 p-4 pb-16">
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden h-full">
         {/* Header de días */}
         <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50">

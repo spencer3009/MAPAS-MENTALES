@@ -1002,6 +1002,33 @@ class ReminderUpdate(BaseModel):
 
 
 # ==========================================
+# CALENDAR REMINDERS (Simple standalone reminders)
+# ==========================================
+
+class CalendarReminderCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    reminder_date: str  # ISO format datetime
+
+class CalendarReminderUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    reminder_date: Optional[str] = None
+    is_completed: Optional[bool] = None
+
+class CalendarReminderResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str
+    title: str
+    description: Optional[str] = None
+    reminder_date: str
+    is_completed: bool = False
+    created_at: str
+    username: str
+
+
+# ==========================================
 # TWILIO WHATSAPP FUNCTIONS
 # ==========================================
 

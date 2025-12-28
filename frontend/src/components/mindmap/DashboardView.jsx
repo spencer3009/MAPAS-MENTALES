@@ -924,7 +924,7 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
               {searchTerm ? (
                 <>
                   <p className="text-gray-500 mb-2">No se encontraron mapas</p>
-                  <p className="text-sm text-gray-400">No hay mapas que coincidan con "{searchTerm}"</p>
+                  <p className="text-sm text-gray-400">No hay mapas que coincidan con &ldquo;{searchTerm}&rdquo;</p>
                 </>
               ) : (
                 <>

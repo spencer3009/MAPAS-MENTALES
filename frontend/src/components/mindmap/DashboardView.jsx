@@ -523,38 +523,29 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
                     relative flex flex-col items-center justify-center
                     rounded-xl p-4 h-32
                     transition-all duration-200
-                    ${template.id === 'blank' 
-                      ? 'bg-blue-500 hover:bg-blue-600' 
-                      : 'bg-gray-50 hover:bg-gray-100 border border-gray-200 hover:border-gray-300'
-                    }
+                    ${template.color}
                     ${isHovered ? 'scale-105 shadow-lg' : 'shadow-sm'}
                   `}
                 >
                   {/* Icono o Preview */}
-                  <div className={`
-                    mb-2 text-3xl
-                    ${template.id === 'blank' ? 'text-white' : ''}
-                  `}>
+                  <div className="mb-2 text-3xl text-white">
                     {template.preview ? (
-                      <span>{template.preview}</span>
+                      <span className="text-white font-bold text-2xl">{template.preview}</span>
                     ) : (
-                      <Icon size={28} className={template.textColor || ''} />
+                      <Icon size={28} className="text-white" />
                     )}
                   </div>
                   
                   {/* Nombre */}
-                  <span className={`
-                    text-xs font-medium text-center leading-tight
-                    ${template.id === 'blank' ? 'text-white' : 'text-gray-700'}
-                  `}>
+                  <span className="text-xs font-medium text-center leading-tight text-white">
                     {template.name}
                   </span>
 
                   {/* Tooltip al hover */}
-                  {isHovered && template.id !== 'blank' && template.id !== 'all' && (
+                  {isHovered && template.id !== 'blank' && (
                     <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 translate-y-full z-20">
                       <div className="bg-gray-900 text-white text-xs px-3 py-2 rounded-lg shadow-xl whitespace-nowrap">
-                        <div className="font-medium mb-0.5">Vista previa</div>
+                        <div className="font-medium mb-0.5">{template.description}</div>
                         <button className="px-3 py-1 bg-blue-500 hover:bg-blue-600 rounded text-white text-xs font-medium mt-1">
                           Usar plantilla
                         </button>

@@ -686,6 +686,10 @@ const MindMapApp = ({ onAdminClick }) => {
               setUpgradeLimitType(reason);
               setShowUpgradeModal(true);
             }}
+            onViewAllMaps={() => {
+              setActiveView('projects');
+              setIsProjectsSidebarOpen(true);
+            }}
           />
         );
       case 'templates':

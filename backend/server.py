@@ -1172,14 +1172,24 @@ async def create_reminder(
     reminder_data: ReminderCreate,
     current_user: dict = Depends(get_current_user)
 ):
-    """Crear un nuevo recordatorio"""
+    """Crear un nuevo recordatorio (para nodos/proyectos o calendario simple)"""
     
-    # Combinar fecha y hora
-    scheduled_datetime = f"{reminder_data.scheduled_date}T{reminder_data.scheduled_time}:00"
+    # Determinar si es un recordatorio de proyecto/nodo o de calendario
+    is_project_reminder = reminder_data.project_id is not None
+    
+    # Para recordatorios de proyecto, usar scheduled_date y scheduled_time
+    if is_project_reminder:
+        scheduled_datetime = f"{reminder_data.scheduled_date}T{reminder_data.scheduled_time}:00"
+        reminder_date = scheduled_datetime
+    else:
+        # Para recordatorios de calendario, usar reminder_date directamente
+        scheduled_datetime = reminder_data.reminder_date
+        reminder_date = reminder_data.reminder_date
     
     reminder = {
         "id": str(uuid.uuid4()),
-        "type": reminder_data.type,
+        # Campos de proyecto/nodo
+        "type": reminder_data.type or "calendar",
         "node_id": reminder_data.node_id,
         "node_text": reminder_data.node_text,
         "project_id": reminder_data.project_id,
@@ -1188,13 +1198,18 @@ async def create_reminder(
         "scheduled_time": reminder_data.scheduled_time,
         "scheduled_datetime": scheduled_datetime,
         "message": reminder_data.message,
-        "channel": reminder_data.channel,
+        "channel": reminder_data.channel if is_project_reminder else None,
         "status": "pending",
         "created_at": datetime.now(timezone.utc).isoformat(),
         "sent_at": None,
         "seen": False,
         "seen_at": None,
-        "username": current_user["username"]
+        "username": current_user["username"],
+        # Campos de calendario
+        "title": reminder_data.title or reminder_data.message,
+        "description": reminder_data.description,
+        "reminder_date": reminder_date,
+        "is_completed": False
     }
     
     await db.reminders.insert_one(reminder)

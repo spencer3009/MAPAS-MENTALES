@@ -452,9 +452,17 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
       <div className="border-b border-gray-100 bg-white sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-light text-gray-900">
-              ¡Te damos la bienvenida, <span className="font-semibold">{userName}</span>!
-            </h1>
+            <div className="flex items-center gap-4">
+              {/* Logo */}
+              <img 
+                src={LOGO_URL} 
+                alt="MindoraMap" 
+                className="w-12 h-12 object-contain"
+              />
+              <h1 className="text-3xl font-light text-gray-900">
+                ¡Te damos la bienvenida, <span className="font-semibold">{userName}</span>!
+              </h1>
+            </div>
             
             {/* Avatar */}
             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white font-semibold text-lg shadow-lg">

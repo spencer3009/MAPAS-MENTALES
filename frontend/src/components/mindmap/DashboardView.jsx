@@ -503,13 +503,33 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
         <div className="mb-10">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-lg font-medium text-gray-900">Crear un mapa</h2>
-            <button 
-              onClick={() => onShowUpgradeModal?.('upgrade')}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md hover:shadow-lg"
-            >
-              <Zap size={16} />
-              Actualizar a Personal - $3/mes
-            </button>
+            
+            {/* Botón dinámico de Upgrade/Plan actual */}
+            {(() => {
+              const currentPlan = planInfo?.plan || 'free';
+              const nextPlan = getNextUpgradePlan(currentPlan);
+              
+              // Si hay un plan de upgrade disponible
+              if (nextPlan) {
+                return (
+                  <button 
+                    onClick={() => onShowUpgradeModal?.(nextPlan)}
+                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md hover:shadow-lg"
+                  >
+                    <Zap size={16} />
+                    Actualizar a {PLAN_NAMES[nextPlan]} - {PLAN_PRICES[nextPlan]}
+                  </button>
+                );
+              }
+              
+              // Si está en el plan más alto (Business o Admin), mostrar estado actual
+              return (
+                <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-semibold rounded-xl">
+                  <Crown size={16} />
+                  Plan actual: {PLAN_NAMES[currentPlan] || currentPlan}
+                </div>
+              );
+            })()}
           </div>
 
           {/* Grid de plantillas */}

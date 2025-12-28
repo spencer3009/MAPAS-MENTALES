@@ -101,61 +101,28 @@ const TEMPLATES = [
     description: 'Comienza desde cero'
   },
   {
-    id: 'mindmap',
-    name: 'Mapa mental',
-    icon: Network,
-    color: 'bg-gradient-to-br from-pink-400 to-rose-500',
-    preview: '🧠',
-    description: 'Ideas conectadas'
+    id: 'mindflow',
+    name: 'MindFlow',
+    icon: Workflow,
+    color: 'bg-gradient-to-br from-blue-500 to-blue-600',
+    preview: '→',
+    description: 'Flujo horizontal libre'
   },
   {
-    id: 'orgchart',
-    name: 'Organigrama',
+    id: 'mindtree',
+    name: 'MindTree',
     icon: ListTree,
-    color: 'bg-gradient-to-br from-amber-400 to-orange-500',
-    preview: '📊',
-    description: 'Estructura jerárquica'
+    color: 'bg-gradient-to-br from-emerald-500 to-emerald-600',
+    preview: '↓',
+    description: 'Flujo vertical jerárquico'
   },
   {
-    id: 'list',
-    name: 'Lista',
-    icon: ListChecks,
-    color: 'bg-gradient-to-br from-slate-400 to-slate-600',
-    preview: '📋',
-    description: 'Tareas y pendientes'
-  },
-  {
-    id: 'smart',
-    name: 'Objetivos SMART',
-    icon: Crosshair,
-    color: 'bg-gradient-to-br from-blue-400 to-indigo-500',
-    preview: '🎯',
-    description: 'Metas específicas'
-  },
-  {
-    id: 'business',
-    name: 'Plan de negocios',
-    icon: ClipboardList,
-    color: 'bg-gradient-to-br from-emerald-400 to-green-600',
-    preview: '💼',
-    description: 'Estrategia empresarial'
-  },
-  {
-    id: 'notes',
-    name: 'Toma de notas',
-    icon: StickyNote,
-    color: 'bg-gradient-to-br from-purple-400 to-violet-500',
-    preview: '📝',
-    description: 'Apuntes rápidos'
-  },
-  {
-    id: 'all',
-    name: 'Todas las plantillas',
-    icon: Layers,
-    color: 'bg-gradient-to-br from-blue-100 to-indigo-100',
-    textColor: 'text-blue-600',
-    preview: '🗂️',
-    description: 'Ver más opciones'
+    id: 'mindhybrid',
+    name: 'MindHybrid',
+    icon: Network,
+    color: 'bg-gradient-to-br from-purple-500 to-purple-600',
+    preview: '↔',
+    description: 'Combinación flexible'
   }
 ];
 

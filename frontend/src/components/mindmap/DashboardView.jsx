@@ -31,16 +31,79 @@ import {
   AlertTriangle,
   Search,
   LayoutGrid,
-  List as ListIcon,
-  Network,
-  Workflow,
-  ListTree,
-  ListChecks,
-  Crosshair,
-  ClipboardList,
-  StickyNote,
-  Layers
+  List as ListIcon
 } from 'lucide-react';
+
+// Ícono personalizado para MindFlow (horizontal)
+const MindFlowIcon = ({ className }) => (
+  <svg 
+    viewBox="0 0 48 48" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <rect x="4" y="16" width="12" height="12" rx="2" />
+    <rect x="32" y="6" width="12" height="12" rx="2" />
+    <rect x="32" y="26" width="12" height="12" rx="2" />
+    <path d="M16 22 H24" />
+    <path d="M24 12 V32" />
+    <path d="M24 12 H32" />
+    <path d="M24 32 H32" />
+  </svg>
+);
+
+// Ícono personalizado para MindTree (organigrama vertical)
+const MindTreeIcon = ({ className }) => (
+  <svg 
+    viewBox="0 0 48 48" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <rect x="16" y="4" width="16" height="10" rx="2" />
+    <rect x="4" y="32" width="12" height="10" rx="2" />
+    <rect x="18" y="32" width="12" height="10" rx="2" />
+    <rect x="32" y="32" width="12" height="10" rx="2" />
+    <path d="M24 14 V22" />
+    <path d="M10 22 H38" />
+    <path d="M10 22 V32" />
+    <path d="M24 22 V32" />
+    <path d="M38 22 V32" />
+  </svg>
+);
+
+// Ícono personalizado para MindHybrid (mixto horizontal + vertical)
+const MindHybridIcon = ({ className }) => (
+  <svg 
+    viewBox="0 0 48 48" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <rect x="4" y="16" width="12" height="12" rx="2" />
+    <rect x="32" y="8" width="10" height="8" rx="1.5" />
+    <rect x="32" y="20" width="10" height="8" rx="1.5" />
+    <rect x="2" y="38" width="10" height="8" rx="1.5" />
+    <rect x="14" y="38" width="10" height="8" rx="1.5" />
+    <path d="M16 22 H24" />
+    <path d="M24 12 V24" />
+    <path d="M24 12 H32" />
+    <path d="M24 24 H32" />
+    <path d="M10 28 V34" />
+    <path d="M7 34 H19" />
+    <path d="M7 34 V38" />
+    <path d="M19 34 V38" />
+  </svg>
+);
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 

@@ -600,23 +600,26 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
           </div>
           
           {recentProjects.length > 0 ? (
-            <div>
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-100 text-left">
-                    <th className="px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                    <th className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Ubicación</th>
-                    <th className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Creado por</th>
-                    <th className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Modificado</th>
-                    <th className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-24"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {recentProjects.map((project) => (
-                    <tr 
-                      key={project.id} 
-                      className="hover:bg-gray-50 transition-colors cursor-pointer group"
-                    >
+            <>
+              {/* Vista de Lista (Tabla) */}
+              {viewType === 'list' && (
+                <div>
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-100 text-left">
+                        <th className="px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                        <th className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Ubicación</th>
+                        <th className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Creado por</th>
+                        <th className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Modificado</th>
+                        <th className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-24"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {recentProjects.map((project) => (
+                        <tr 
+                          key={project.id} 
+                          className="hover:bg-gray-50 transition-colors cursor-pointer group"
+                        >
                         {/* Nombre con icono */}
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">

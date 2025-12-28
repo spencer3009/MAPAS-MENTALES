@@ -684,7 +684,8 @@ const MindMapApp = ({ onAdminClick }) => {
               if (templateType === 'blank') {
                 handleNewBlankClick();
               } else {
-                setShowLayoutSelector(true);
+                // Abrir selector de layout con la plantilla pre-seleccionada
+                handleOpenLayoutSelectorWithTemplate(templateType);
               }
             }}
             onOpenTemplates={handleOpenTemplatesView}

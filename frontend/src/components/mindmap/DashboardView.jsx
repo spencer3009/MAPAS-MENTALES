@@ -810,10 +810,23 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
           ) : (
             <div className="px-5 py-12 text-center">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-                <FolderKanban className="text-gray-400" size={24} />
+                {searchTerm ? (
+                  <Search className="text-gray-400" size={24} />
+                ) : (
+                  <FolderKanban className="text-gray-400" size={24} />
+                )}
               </div>
-              <p className="text-gray-500 mb-2">No hay proyectos todavía</p>
-              <p className="text-sm text-gray-400">¡Crea tu primer mapa usando las plantillas de arriba!</p>
+              {searchTerm ? (
+                <>
+                  <p className="text-gray-500 mb-2">No se encontraron mapas</p>
+                  <p className="text-sm text-gray-400">No hay mapas que coincidan con "{searchTerm}"</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-gray-500 mb-2">No hay proyectos todavía</p>
+                  <p className="text-sm text-gray-400">¡Crea tu primer mapa usando las plantillas de arriba!</p>
+                </>
+              )}
             </div>
           )}
         </div>

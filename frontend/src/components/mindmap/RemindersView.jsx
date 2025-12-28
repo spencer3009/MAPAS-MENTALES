@@ -344,11 +344,146 @@ const YearView = ({ year, reminders, onDayClick, remindersByDate }) => {
   );
 };
 
+// ==================== MODAL DETALLES DE DÍA ====================
+const DayDetailModal = ({ isOpen, onClose, date, reminders, onEditReminder, onToggleComplete }) => {
+  if (!isOpen || !date) return null;
+  
+  const formatTime = (dateStr) => {
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    } catch {
+      return '';
+    }
+  };
+  
+  const now = new Date();
+  
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div 
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] overflow-hidden"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-white">
+                {date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+              </h2>
+              <p className="text-blue-100 text-sm">
+                {reminders.length} recordatorio{reminders.length !== 1 ? 's' : ''}
+              </p>
+            </div>
+            <button 
+              onClick={onClose} 
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            >
+              <X size={20} className="text-white" />
+            </button>
+          </div>
+        </div>
+        
+        {/* Lista de recordatorios */}
+        <div className="p-4 overflow-y-auto max-h-[60vh]">
+          {reminders.length === 0 ? (
+            <div className="text-center py-8">
+              <Calendar size={40} className="mx-auto text-gray-300 mb-3" />
+              <p className="text-gray-500">No hay recordatorios este día</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {reminders
+                .sort((a, b) => new Date(a.reminder_date) - new Date(b.reminder_date))
+                .map(reminder => {
+                  const reminderDate = new Date(reminder.reminder_date || reminder.scheduled_datetime);
+                  const isOverdue = reminderDate < now && !reminder.is_completed;
+                  
+                  return (
+                    <div
+                      key={reminder.id}
+                      className={`p-4 rounded-xl border cursor-pointer hover:shadow-md transition-all ${
+                        reminder.is_completed 
+                          ? 'bg-gray-50 border-gray-200' 
+                          : isOverdue 
+                          ? 'bg-red-50 border-red-200' 
+                          : 'bg-white border-gray-200'
+                      }`}
+                      onClick={() => onEditReminder(reminder)}
+                    >
+                      <div className="flex items-start gap-3">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleComplete(reminder);
+                          }}
+                          className={`w-6 h-6 mt-0.5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                            reminder.is_completed 
+                              ? 'bg-green-500 border-green-500 text-white' 
+                              : isOverdue
+                              ? 'border-red-400 hover:border-red-500'
+                              : 'border-gray-300 hover:border-blue-500'
+                          }`}
+                        >
+                          {reminder.is_completed && <Check size={14} />}
+                        </button>
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className={`font-medium ${reminder.is_completed ? 'line-through text-gray-400' : 'text-gray-800'}`}>
+                            {reminder.title || reminder.message || 'Sin título'}
+                          </div>
+                          
+                          {reminder.description && (
+                            <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+                              {reminder.description}
+                            </p>
+                          )}
+                          
+                          <div className={`text-xs mt-2 flex items-center gap-2 ${isOverdue ? 'text-red-500' : 'text-gray-400'}`}>
+                            <Clock size={12} />
+                            {formatTime(reminder.reminder_date || reminder.scheduled_datetime)}
+                            {isOverdue && !reminder.is_completed && (
+                              <span className="text-[10px] font-medium bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">
+                                Vencido
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <ChevronRight size={18} className="text-gray-400 flex-shrink-0" />
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ==================== VISTA MES ====================
-const MonthView = ({ currentDate, reminders, onDayClick, remindersByDate }) => {
+const MonthView = ({ currentDate, reminders, onDayClick, remindersByDate, onEditReminder, onToggleComplete }) => {
   const days = getDaysInMonth(currentDate.getFullYear(), currentDate.getMonth());
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [showDayModal, setShowDayModal] = useState(false);
+  const [selectedDayReminders, setSelectedDayReminders] = useState([]);
+  
+  const handleDayClick = (date, dayReminders) => {
+    if (dayReminders.length > 0) {
+      setSelectedDay(date);
+      setSelectedDayReminders(dayReminders);
+      setShowDayModal(true);
+    } else {
+      // Si no hay recordatorios, abrir modal de crear
+      onDayClick(date);
+    }
+  };
   
   return (
     <div className="flex-1 p-4 pb-16 overflow-y-auto">
@@ -363,18 +498,19 @@ const MonthView = ({ currentDate, reminders, onDayClick, remindersByDate }) => {
         </div>
         
         {/* Grid de días */}
-        <div className="grid grid-cols-7 auto-rows-[minmax(100px,1fr)]">
+        <div className="grid grid-cols-7 auto-rows-[minmax(120px,1fr)]">
           {days.map((dayInfo, idx) => {
             const dateKey = `${dayInfo.date.getFullYear()}-${dayInfo.date.getMonth()}-${dayInfo.date.getDate()}`;
             const dayReminders = remindersByDate[dateKey] || [];
             const isToday = dayInfo.date.getTime() === today.getTime();
+            const maxVisible = 5;
             
             return (
-              <button
+              <div
                 key={idx}
-                onClick={() => onDayClick(dayInfo.date)}
+                onClick={() => handleDayClick(dayInfo.date, dayReminders)}
                 className={`
-                  border-r border-b border-gray-100 p-2 text-left hover:bg-blue-50 transition-colors min-h-[100px]
+                  border-r border-b border-gray-100 p-2 text-left hover:bg-blue-50 transition-colors min-h-[120px] cursor-pointer
                   ${!dayInfo.isCurrentMonth ? 'bg-gray-50' : 'bg-white'}
                 `}
               >
@@ -386,9 +522,9 @@ const MonthView = ({ currentDate, reminders, onDayClick, remindersByDate }) => {
                   {dayInfo.day}
                 </span>
                 
-                {/* Recordatorios del día */}
-                <div className="mt-1 space-y-1">
-                  {dayReminders.slice(0, 3).map((r, i) => (
+                {/* Recordatorios del día - hasta 5 visibles */}
+                <div className="mt-1 space-y-0.5">
+                  {dayReminders.slice(0, maxVisible).map((r) => (
                     <div
                       key={r.id}
                       className={`text-[10px] px-1.5 py-0.5 rounded truncate ${
@@ -396,21 +532,35 @@ const MonthView = ({ currentDate, reminders, onDayClick, remindersByDate }) => {
                           ? 'bg-gray-100 text-gray-400 line-through' 
                           : 'bg-blue-100 text-blue-700'
                       }`}
+                      title={r.title || r.message}
                     >
-                      {r.title}
+                      {r.title || r.message || 'Sin título'}
                     </div>
                   ))}
-                  {dayReminders.length > 3 && (
-                    <div className="text-[10px] text-gray-500 px-1.5">
-                      +{dayReminders.length - 3} más
+                  {dayReminders.length > maxVisible && (
+                    <div className="text-[10px] text-blue-600 font-medium px-1.5 hover:underline">
+                      +{dayReminders.length - maxVisible} más...
                     </div>
                   )}
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>
       </div>
+      
+      {/* Modal de detalles del día */}
+      <DayDetailModal
+        isOpen={showDayModal}
+        onClose={() => setShowDayModal(false)}
+        date={selectedDay}
+        reminders={selectedDayReminders}
+        onEditReminder={(reminder) => {
+          setShowDayModal(false);
+          onEditReminder(reminder);
+        }}
+        onToggleComplete={onToggleComplete}
+      />
     </div>
   );
 };

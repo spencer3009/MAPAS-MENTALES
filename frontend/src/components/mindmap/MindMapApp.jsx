@@ -762,6 +762,8 @@ const MindMapApp = ({ onAdminClick }) => {
             </div>
           </div>
         );
+      case 'reminders':
+        return <RemindersView token={token} />;
       case 'integrations':
         return <IntegrationsView />;
       default:

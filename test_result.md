@@ -5767,3 +5767,26 @@ if (remainingProjects.length === 0) {
 - Implementation completed
 - Awaiting frontend testing verification
 
+
+## CALENDAR INTERACTIVITY TESTING (December 28, 2025)
+
+### Test Objective:
+Verify that all calendar views (Year, Month, Week, Day) have full interactivity where clicking on any day opens a DayDetailModal showing reminders and allowing creation of new reminders with pre-filled date.
+
+### Test Credentials:
+- Username: spencer3009
+- Password: Socios3009
+- URL: http://localhost:3000
+
+### PRD Requirements:
+1. Click on any day in any view → Open DayDetailModal
+2. DayDetailModal shows reminders sorted: Vigentes > Vencidos > Completados
+3. "Crear recordatorio" button always visible
+4. When creating reminder from modal, date should be pre-filled
+
+### Expected Tests:
+- Year View: Click day → DayDetailModal opens
+- Month View: Click day → DayDetailModal opens
+- Week View: Click day header → DayDetailModal opens
+- Day View: Click day header → DayDetailModal opens
+- Create Reminder: Click "Crear recordatorio" → Form opens with date pre-filled

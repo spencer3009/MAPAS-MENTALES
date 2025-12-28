@@ -124,6 +124,131 @@ const TEMPLATES = [
   }
 ];
 
+// Componente de miniatura del mapa - renderiza una preview real de los nodos
+const MapThumbnail = ({ nodes = [] }) => {
+  if (!nodes || nodes.length === 0) {
+    // Placeholder si no hay nodos
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="flex items-center gap-2 opacity-50">
+          <div className="w-4 h-4 rounded-full bg-blue-300"></div>
+          <div className="w-8 h-0.5 bg-gray-300"></div>
+          <div className="w-3 h-3 rounded-full bg-green-300"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Calcular bounds de los nodos para normalizar posiciones
+  const xs = nodes.map(n => n.x || 0);
+  const ys = nodes.map(n => n.y || 0);
+  const minX = Math.min(...xs);
+  const maxX = Math.max(...xs);
+  const minY = Math.min(...ys);
+  const maxY = Math.max(...ys);
+  
+  const width = maxX - minX || 1;
+  const height = maxY - minY || 1;
+  
+  // Padding y escala
+  const padding = 20;
+  const containerWidth = 200;
+  const containerHeight = 120;
+  const scale = Math.min(
+    (containerWidth - padding * 2) / width,
+    (containerHeight - padding * 2) / height,
+    1
+  );
+
+  // Mapeo de colores a clases de Tailwind
+  const colorMap = {
+    'blue': '#3b82f6',
+    'red': '#ef4444',
+    'green': '#22c55e',
+    'yellow': '#eab308',
+    'purple': '#a855f7',
+    'pink': '#ec4899',
+    'orange': '#f97316',
+    'cyan': '#06b6d4',
+    'teal': '#14b8a6',
+    'indigo': '#6366f1',
+    'gray': '#6b7280',
+    'default': '#3b82f6'
+  };
+
+  const getNodeColor = (color) => {
+    if (!color) return colorMap.default;
+    if (color.startsWith('#')) return color;
+    return colorMap[color] || colorMap.default;
+  };
+
+  // Crear un mapa de nodos por ID para encontrar padres
+  const nodeMap = {};
+  nodes.forEach(n => { nodeMap[n.id] = n; });
+
+  return (
+    <svg 
+      viewBox={`0 0 ${containerWidth} ${containerHeight}`} 
+      className="w-full h-full"
+      preserveAspectRatio="xMidYMid meet"
+    >
+      {/* Fondo con gradiente */}
+      <defs>
+        <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#f9fafb" />
+          <stop offset="100%" stopColor="#f3f4f6" />
+        </linearGradient>
+      </defs>
+      <rect width={containerWidth} height={containerHeight} fill="url(#bgGradient)" rx="8" />
+      
+      {/* Líneas de conexión */}
+      {nodes.map(node => {
+        if (!node.parentId) return null;
+        const parent = nodeMap[node.parentId];
+        if (!parent) return null;
+        
+        const x1 = padding + ((parent.x || 0) - minX) * scale;
+        const y1 = padding + ((parent.y || 0) - minY) * scale;
+        const x2 = padding + ((node.x || 0) - minX) * scale;
+        const y2 = padding + ((node.y || 0) - minY) * scale;
+        
+        return (
+          <line
+            key={`line-${node.id}`}
+            x1={x1}
+            y1={y1}
+            x2={x2}
+            y2={y2}
+            stroke="#d1d5db"
+            strokeWidth="1.5"
+          />
+        );
+      })}
+      
+      {/* Nodos */}
+      {nodes.map((node, index) => {
+        const x = padding + ((node.x || 0) - minX) * scale;
+        const y = padding + ((node.y || 0) - minY) * scale;
+        const isRoot = !node.parentId;
+        const size = isRoot ? 8 : 5;
+        const color = getNodeColor(node.color || node.bgColor);
+        
+        return (
+          <circle
+            key={node.id}
+            cx={x}
+            cy={y}
+            r={size}
+            fill={color}
+            stroke="white"
+            strokeWidth="1.5"
+          />
+        );
+      })}
+    </svg>
+  );
+};
+
 const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOpenTemplates, onToggleFavorite, onDeleteProject, onDuplicateProject, onShowUpgradeModal }) => {
   const [planInfo, setPlanInfo] = useState(null);
   const [loadingPlan, setLoadingPlan] = useState(true);

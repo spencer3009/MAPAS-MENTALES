@@ -963,42 +963,59 @@ async def get_whatsapp_number_legacy(current_user: dict = Depends(get_current_us
 # ==========================================
 
 class ReminderCreate(BaseModel):
-    type: str  # 'node' or 'project'
+    # Campos para recordatorios de nodos/proyectos (opcionales)
+    type: Optional[str] = None  # 'node', 'project', or None for simple reminders
     node_id: Optional[str] = None
     node_text: Optional[str] = None
-    project_id: str
-    project_name: str
-    scheduled_date: str  # ISO format date
-    scheduled_time: str  # HH:MM format
-    message: str
+    project_id: Optional[str] = None
+    project_name: Optional[str] = None
+    scheduled_date: Optional[str] = None  # ISO format date (legacy)
+    scheduled_time: Optional[str] = None  # HH:MM format (legacy)
+    message: Optional[str] = None
     channel: str = "whatsapp"  # 'whatsapp' or 'email'
+    
+    # Campos para recordatorios de calendario/agenda
+    title: Optional[str] = None
+    description: Optional[str] = None
+    reminder_date: Optional[str] = None  # ISO format datetime (new unified field)
 
 class ReminderResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
     
     id: str
-    type: str
+    type: Optional[str] = None
     node_id: Optional[str] = None
     node_text: Optional[str] = None
-    project_id: str
-    project_name: str
-    scheduled_date: str
-    scheduled_time: str
-    scheduled_datetime: str
-    message: str
-    channel: str
-    status: str  # 'pending', 'sent', 'failed'
+    project_id: Optional[str] = None
+    project_name: Optional[str] = None
+    scheduled_date: Optional[str] = None
+    scheduled_time: Optional[str] = None
+    scheduled_datetime: Optional[str] = None
+    message: Optional[str] = None
+    channel: Optional[str] = None
+    status: str = "pending"  # 'pending', 'sent', 'failed'
     created_at: str
     sent_at: Optional[str] = None
-    seen: bool = False  # Si el usuario ha visto la notificación
+    seen: bool = False
     seen_at: Optional[str] = None
     username: str
+    
+    # Campos para recordatorios de calendario/agenda
+    title: Optional[str] = None
+    description: Optional[str] = None
+    reminder_date: Optional[str] = None
+    is_completed: bool = False
 
 class ReminderUpdate(BaseModel):
     scheduled_date: Optional[str] = None
     scheduled_time: Optional[str] = None
     message: Optional[str] = None
     channel: Optional[str] = None
+    # Campos adicionales para calendario
+    title: Optional[str] = None
+    description: Optional[str] = None
+    reminder_date: Optional[str] = None
+    is_completed: Optional[bool] = None
 
 
 # ==========================================

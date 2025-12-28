@@ -159,32 +159,28 @@ const TEMPLATES = [
     id: 'blank',
     name: 'Mapa en blanco',
     icon: Plus,
-    color: 'bg-blue-500',
-    textColor: 'text-white',
+    color: 'bg-gradient-to-br from-slate-600 to-slate-700',
     description: 'Comienza desde cero'
   },
   {
     id: 'mindflow',
     name: 'MindFlow',
-    icon: Workflow,
+    icon: MindFlowIcon,
     color: 'bg-gradient-to-br from-blue-500 to-blue-600',
-    preview: '→',
     description: 'Flujo horizontal libre'
   },
   {
     id: 'mindtree',
     name: 'MindTree',
-    icon: ListTree,
+    icon: MindTreeIcon,
     color: 'bg-gradient-to-br from-emerald-500 to-emerald-600',
-    preview: '↓',
     description: 'Flujo vertical jerárquico'
   },
   {
     id: 'mindhybrid',
     name: 'MindHybrid',
-    icon: Network,
+    icon: MindHybridIcon,
     color: 'bg-gradient-to-br from-purple-500 to-purple-600',
-    preview: '↔',
     description: 'Combinación flexible'
   }
 ];

@@ -1092,26 +1092,30 @@ const ReminderChecker = ({ token, showReminderToast }) => {
   return null;
 };
 
-// Componente wrapper con ToastProvider
+// Componente wrapper con NotificationProvider
 const MindMapApp = (props) => {
   const { token } = useAuth();
+  const [activeViewForNav, setActiveViewForNav] = useState(null);
+  
+  // Callback para navegar a recordatorios desde notificación
+  const handleNavigateToReminders = useCallback((reminderId) => {
+    // Este callback será pasado al NotificationProvider
+    // La navegación se maneja internamente en MindMapAppInner
+    setActiveViewForNav('reminders');
+  }, []);
   
   return (
-    <ToastProvider>
-      <MindMapAppWithToast {...props} token={token} />
-    </ToastProvider>
-  );
-};
-
-// Componente intermedio que usa el Toast context
-const MindMapAppWithToast = (props) => {
-  const { showReminder } = useToast();
-  
-  return (
-    <>
-      <ReminderChecker token={props.token} showReminderToast={showReminder} />
-      <MindMapAppInner {...props} showReminderToast={showReminder} />
-    </>
+    <NotificationProvider 
+      token={token}
+      onNavigateToReminders={handleNavigateToReminders}
+    >
+      <MindMapAppInner 
+        {...props} 
+        onNavigateToReminders={handleNavigateToReminders}
+        forceView={activeViewForNav}
+        clearForceView={() => setActiveViewForNav(null)}
+      />
+    </NotificationProvider>
   );
 };
 

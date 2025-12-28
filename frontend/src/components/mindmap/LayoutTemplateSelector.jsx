@@ -95,8 +95,18 @@ const MindHybridIcon = ({ className }) => (
   </svg>
 );
 
-const LayoutTemplateSelector = ({ isOpen, onSelect, onClose }) => {
+const LayoutTemplateSelector = ({ isOpen, onSelect, onClose, initialLayout = null }) => {
   const [selectedLayout, setSelectedLayout] = useState(null);
+
+  // Pre-seleccionar layout cuando se abre el modal con un initialLayout
+  React.useEffect(() => {
+    if (isOpen && initialLayout) {
+      setSelectedLayout(initialLayout);
+    } else if (!isOpen) {
+      // Reset cuando se cierra el modal
+      setSelectedLayout(null);
+    }
+  }, [isOpen, initialLayout]);
 
   if (!isOpen) return null;
 

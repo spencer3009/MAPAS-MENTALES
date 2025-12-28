@@ -165,6 +165,7 @@ const MindMapApp = ({ onAdminClick }) => {
   // Estado para selector de plantilla de layout
   const [showLayoutSelector, setShowLayoutSelector] = useState(false);
   const [pendingProjectName, setPendingProjectName] = useState(null);
+  const [preselectedLayout, setPreselectedLayout] = useState(null);
 
   // Estado para el modal de Upgrade a Pro
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);

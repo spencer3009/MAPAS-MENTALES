@@ -814,15 +814,15 @@ const MindMapApp = ({ onAdminClick }) => {
         {/* Canvas y Sidebar derecho */}
         <div className="flex-1 flex overflow-hidden">
           {/* Canvas principal */}
-          <div ref={canvasRef} className="flex-1 h-full relative">
-            <Canvas
-              nodes={nodesWithReminders}
-              selectedNodeId={selectedNodeId}
-              selectedNodeIds={selectedNodeIds}
-              pan={pan}
-              zoom={zoom}
-              isPanning={isPanning}
-              contextMenu={contextMenu}
+          <Canvas
+            ref={canvasRef}
+            nodes={nodesWithReminders}
+            selectedNodeId={selectedNodeId}
+            selectedNodeIds={selectedNodeIds}
+            pan={pan}
+            zoom={zoom}
+            isPanning={isPanning}
+            contextMenu={contextMenu}
               onSelectNode={selectSingleNode}
               onAddToSelection={addToSelection}
               onSelectNodesInArea={selectNodesInArea}

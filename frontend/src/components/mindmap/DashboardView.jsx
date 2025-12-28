@@ -751,7 +751,6 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
                   })()}
                 </div>
               )}
-              </table>
             </div>
           ) : (
             <div className="px-5 py-12 text-center">

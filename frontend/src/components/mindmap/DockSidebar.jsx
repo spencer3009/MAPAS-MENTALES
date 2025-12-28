@@ -44,7 +44,6 @@ const DockSidebar = ({
       icon: FolderKanban,
       label: 'Proyectos',
       onClick: onToggleProjectsSidebar,
-      isActive: isProjectsSidebarOpen,
     },
     {
       id: 'favorites',

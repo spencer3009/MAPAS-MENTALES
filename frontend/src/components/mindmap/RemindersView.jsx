@@ -560,8 +560,8 @@ const ScheduleView = ({ reminders, onEditReminder, onToggleComplete, onDeleteRem
   today.setHours(0, 0, 0, 0);
   
   return (
-    <div className="flex-1 p-4 overflow-y-auto">
-      <div className="max-w-3xl mx-auto space-y-4">
+    <div className="flex-1 p-4 pb-16 overflow-y-auto">
+      <div className="max-w-3xl mx-auto space-y-4 pb-8">
         {Object.keys(groupedReminders).length === 0 ? (
           <div className="text-center py-12">
             <CalendarCheck size={48} className="mx-auto text-gray-300 mb-4" />

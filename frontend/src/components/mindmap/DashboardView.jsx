@@ -952,6 +952,131 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
           )}
         </div>
 
+        {/* Plan Card - Debajo de Proyectos recientes */}
+        {planInfo && (
+          <div className={`mt-8 rounded-2xl border-2 ${planColors.border} ${planColors.bg} overflow-hidden`}>
+            <div className="p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-12 h-12 rounded-xl ${isUnlimited ? 'bg-gradient-to-br from-amber-400 to-orange-500' : 'bg-white'} flex items-center justify-center shadow-sm`}>
+                    {isUnlimited ? (
+                      <Crown className="text-white" size={24} />
+                    ) : (
+                      <Zap className={planColors.icon} size={24} />
+                    )}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className={`text-lg font-bold ${planColors.text}`}>
+                        Plan {PLAN_NAMES[planInfo.plan] || planInfo.plan}
+                      </h2>
+                      {isUnlimited && (
+                        <span className="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
+                          ∞ Ilimitado
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500">
+                      {isUnlimited 
+                        ? 'Acceso completo a todas las funciones' 
+                        : 'Límites de tu plan actual'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Botón de upgrade solo para plan free */}
+                {planInfo.plan === 'free' && (
+                  <button className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-lg flex items-center gap-2 transition-all shadow-md hover:shadow-lg">
+                    <Zap size={16} />
+                    Actualizar a Personal - $3/mes
+                  </button>
+                )}
+              </div>
+
+              {/* Barras de progreso para plan free */}
+              {!isUnlimited && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Mapas Activos */}
+                  <div className="bg-white rounded-xl p-4 border border-gray-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-700">Mapas Activos</span>
+                      <span className="text-sm font-bold text-gray-900">
+                        {planInfo.usage.active_maps} / {planInfo.limits.max_active_maps}
+                      </span>
+                    </div>
+                    <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full ${getProgressColor(planInfo.usage.active_maps, planInfo.limits.max_active_maps)} rounded-full transition-all duration-500`}
+                        style={{ width: `${getProgressPercentage(planInfo.usage.active_maps, planInfo.limits.max_active_maps)}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {planInfo.usage.active_remaining > 0 
+                        ? `${planInfo.usage.active_remaining} disponibles`
+                        : '⚠️ Límite alcanzado'}
+                    </p>
+                  </div>
+
+                  {/* Mapas Creados (histórico) */}
+                  <div className="bg-white rounded-xl p-4 border border-gray-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-700">Mapas Creados (total)</span>
+                      <span className="text-sm font-bold text-gray-900">
+                        {planInfo.usage.total_maps_created} / {planInfo.limits.max_total_maps_created}
+                      </span>
+                    </div>
+                    <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full ${getProgressColor(planInfo.usage.total_maps_created, planInfo.limits.max_total_maps_created)} rounded-full transition-all duration-500`}
+                        style={{ width: `${getProgressPercentage(planInfo.usage.total_maps_created, planInfo.limits.max_total_maps_created)}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {planInfo.usage.total_remaining > 0 
+                        ? `${planInfo.usage.total_remaining} disponibles`
+                        : '⚠️ Límite de prueba alcanzado'}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Beneficios del plan ilimitado */}
+              {isUnlimited && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Sparkles className="w-4 h-4 text-green-500" />
+                    <span>Mapas ilimitados</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Sparkles className="w-4 h-4 text-green-500" />
+                    <span>Nodos ilimitados</span>
+                  </div>
+                  {planInfo.limits.can_collaborate && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Users className="w-4 h-4 text-green-500" />
+                      <span>Colaboración</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                    <span>Exportación PDF</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Mensaje de advertencia si está cerca del límite */}
+              {!isUnlimited && !planInfo.usage.can_create_map && (
+                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-700 font-medium flex items-center gap-2">
+                    <Bell size={16} />
+                    Has alcanzado el límite de tu plan. Actualiza a Personal para seguir creando mapas.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Espaciado de respiro inferior */}
         <div className="h-8" aria-hidden="true" />
       </div>

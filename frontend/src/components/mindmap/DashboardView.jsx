@@ -970,7 +970,7 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
             {/* Contenido */}
             <div className="px-6 pb-6">
               <p className="text-gray-600 mb-6">
-                ¿Estás seguro de enviar "<span className="font-medium text-gray-900">{deleteConfirmModal.projectName}</span>" a la papelera? Podrás restaurarlo después.
+                ¿Estás seguro de enviar &ldquo;<span className="font-medium text-gray-900">{deleteConfirmModal.projectName}</span>&rdquo; a la papelera? Podrás restaurarlo después.
               </p>
               
               {/* Botones */}

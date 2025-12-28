@@ -629,7 +629,13 @@ const MindMapApp = ({ onAdminClick }) => {
             }}
             onOpenTemplates={handleOpenTemplatesView}
             onToggleFavorite={pinProject}
-            onDeleteProject={handleDeleteProjectClick}
+            onDeleteProject={(projectId) => {
+              // Llamar directamente a deleteProject ya que la confirmación se hace en el Dashboard
+              const success = deleteProject(projectId);
+              if (success) {
+                loadTrashCount();
+              }
+            }}
             onDuplicateProject={(projectId) => {
               // TODO: Implementar duplicación de proyecto
               alert('Función de duplicar proyecto próximamente disponible');

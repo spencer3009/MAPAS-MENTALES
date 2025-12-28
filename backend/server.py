@@ -1214,7 +1214,9 @@ async def create_reminder(
         "title": reminder_data.title or reminder_data.message,
         "description": reminder_data.description,
         "reminder_date": reminder_date,
-        "is_completed": False
+        "is_completed": False,
+        # Estado de notificación (anti-spam)
+        "notification_status": "pending"
     }
     
     await db.reminders.insert_one(reminder)

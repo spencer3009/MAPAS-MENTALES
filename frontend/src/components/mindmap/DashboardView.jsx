@@ -798,6 +798,9 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
             </div>
           )}
         </div>
+
+        {/* Espaciado de respiro inferior */}
+        <div className="h-8" aria-hidden="true" />
       </div>
     </div>
   );

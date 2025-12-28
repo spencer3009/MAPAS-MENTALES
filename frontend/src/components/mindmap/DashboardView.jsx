@@ -978,9 +978,17 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
                       onClick={() => onOpenProject?.(project.id)}
                       className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg hover:border-blue-300 transition-all cursor-pointer group relative"
                     >
-                      {/* Preview del mapa - Miniatura real */}
+                      {/* Preview del mapa - Miniatura real o captura guardada */}
                       <div className="w-full h-32 rounded-lg overflow-hidden mb-3 border border-gray-100">
-                        <MapThumbnail nodes={project.nodes} />
+                        {project.thumbnail ? (
+                          <img 
+                            src={project.thumbnail} 
+                            alt={project.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <MapThumbnail nodes={project.nodes} />
+                        )}
                       </div>
 
                       {/* Nombre del proyecto */}

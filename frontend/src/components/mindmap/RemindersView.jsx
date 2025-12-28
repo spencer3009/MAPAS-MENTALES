@@ -1381,6 +1381,7 @@ const RemindersView = ({ token }) => {
           remindersByDate={remindersByDate}
           onEditReminder={handleEditReminder}
           onToggleComplete={handleToggleComplete}
+          onCreateReminder={handleCreateReminderFromDetail}
         />
       )}
       

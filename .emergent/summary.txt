@@ -1,70 +1,66 @@
 <analysis>**original_problem_statement:**
-The user's initial request was to implement a Content Management System (CMS) for the application's landing page. This evolved into a series of significant feature implementations and UI/UX enhancements, including:
-1.  **Restoring a professional, graphic-rich landing page design** after an initial implementation broke the UI.
-2.  **Connecting the landing page to an Admin Panel-driven CMS**, allowing the administrator to edit content without touching the code.
-3.  **Implementing a full-fledged SaaS plan system** (               total        used        free      shared  buff/cache   available
-Mem:        32816332    17146660     2451884       47644    13648692    15669672
-Swap:              0           0           0, , , ).
-4.  **Creating a smart usage limit system** for the free plan to prevent abuse, based on both active maps (max 3) and total lifetime created maps (max 5).
-5.  **Building the frontend UI** to support the plan system, including plan status indicators, usage progress meters, and an upsell modal that appears when limits are reached.
-6.  **Refactoring the UI** to save space by replacing progress bars with circular indicators and relocating the Trash functionality.
-7.  **Iteratively refining the UI design** based on specific user feedback, particularly concerning logo size and placement.
+The user initially requested to unify the application's pricing and plan structure into a single source of truth, eliminating outdated prices and inconsistencies between the landing page, upgrade modals, and backend logic. This led to a major overhaul of the plan system and a complete redesign of the user dashboard.
 
 **PRODUCT REQUIREMENTS:**
-*   **Landing Page CMS:** The professional, image-heavy landing page must be fully editable through the Admin Panel. All text content should be fetched from the database, and the design must remain intact.
-*   **SaaS Plan & Limit Logic:**
-    *   The system must support                total        used        free      shared  buff/cache   available
-Mem:        32816332    17150984     2446844       47644    13649372    15665348
-Swap:              0           0           0, , , and  plans.
-    *   The  plan () must have unlimited access.
-    *   **Free Plan Limits:**
-        *   A maximum of **3 active maps** at any given time.
-        *   A maximum of **5 total maps created** over the lifetime of the account.
-    *   The backend must be the single source of truth for enforcing these limits.
-    *   The frontend must block map creation when a limit is hit and display a user-friendly modal () prompting an upgrade to the Pro plan.
-*   **User-Facing Plan UI:**
-    *   The main application sidebar must display the user's current plan and their usage against the limits (e.g., Active Maps: 2/3).
-    *   This UI should use compact, circular progress indicators.
+*   **Unified Plan System (Single Source of Truth):**
+    *   Define four official plans (, , , ) with specific prices and features in a centralized backend configuration.
+    *   The  plan at /month is the primary upgrade target from the  plan.
+    *   Create a new API endpoint () to serve this plan data to the entire frontend.
+*   **Landing Page Pricing Table:**
+    *   Replace the existing pricing table with one that dynamically loads data from the  endpoint.
+    *   Visually highlight the  plan as Recomendado and mark  and  plans with an Early Access badge.
+*   **System & Upgrade Modal Consistency:**
+    *   Ensure all upgrade prompts, particularly the modal shown when free users hit a limit, offer the  plan for **/month**, removing all references to the old 2 price.
+*   **Dashboard Redesign:**
+    *   Make the dashboard the default page after user login.
+    *   Create a new header section with a personalized welcome message (¡Te damos la bienvenida, [Nombre]!), user avatar, and quick-start templates (Crear un mapa).
+    *   Display a plan information card showing either usage-limit progress bars (for Free users) or a list of unlimited benefits (for paid users).
+    *   Redesign the Proyectos recientes section into a clean table format.
+*   **Recent Projects - Enhanced Functionality:**
+    *   Add a favorite (pin) functionality, represented by a star icon next to each project.
+    *   Implement a context menu (triggered by a ⋯ icon) for each recent project with actions: Compartir, Duplicar, Mover a Mis mapas, Publicar en Universo, and Mover a la papelera.
+    *   The context menu actions must be plan-aware, showing an Cámbiate ↗ (Upgrade) prompt for features unavailable on the user's current plan.
+    *   The Mover a la papelera action must be functional.
 *   **UI/UX Refinements:**
-    *   The Trash functionality should be moved from the project sidebar to the main vertical  on the left.
-    *   The Trash icon in the dock must display a badge with the count of items in the trash.
-    *   The project sidebar should be cleaned up to maximize space for the project list by removing extra buttons and text.
+    *   Add a Cerrar sesión (Logout) button to the main .
+    *   Change the Plantillas (Templates) sidebar item to Favoritos (Favorites) with a star icon, which displays pinned projects.
+    *   Improve the layout of the dashboard to remove internal scrollbars and add visual breathing room with better spacing.
+    *   Ensure the project context menu is wide enough for all text to fit and is intelligently positioned to always stay within the viewport.
 
 **User's preferred language**: Spanish. The next agent MUST respond in Spanish.
 
 **what currently exists?**
-The application is a full-stack mind-mapping tool with a complete user authentication system, an admin panel, and a professional landing page connected to a CMS. A sophisticated, backend-enforced plan and limitation system is now in place, restricting resource usage for free-tier users and providing a clear upgrade path. The UI has been significantly refined to display plan usage via compact circular indicators and improve navigation by relocating the Trash functionality to the main .
+The application has a fully unified SaaS plan structure, with a single source of truth in the backend serving pricing and feature information to the entire application via an  endpoint. The landing page and upgrade modals now display consistent, up-to-date plan information.
+
+A major feature is the completely redesigned dashboard, which is now the default view after login. It includes a personalized welcome header, quick-start templates, a dynamic plan-status card (showing usage limits for free users and benefits for paid users), and a Recent Projects section. This section has been enhanced with a professional table layout that includes a fully functional favorite system and a plan-aware contextual action menu for each project. The Move to Trash action from this menu is working correctly.
 
 **Last working item**:
-*   **Last item agent was working:** Iteratively adjusting the size of the MindoraMap logo within the project list sidebar () based on repeated user requests to make it más grande (bigger).
-*   **Status:** IN PROGRESS
-*   **Agent Testing Done:** Y
-*   **Which testing method agent to use?** screenshot tool. The agent needs to take a screenshot after each size adjustment and ask the user for confirmation.
+*   **Last item agent was working:** Fixing the Mover a papelera (Move to Trash) functionality within the contextual action menu on the dashboard's Recent Projects list. The issue was that the action was triggering a confirmation modal meant for another part of the app instead of directly deleting the project.
+*   **Status:** USER VERIFICATION PENDING
+*   **Agent Testing Done:** Y (Agent confirmed the fix by checking server logs and taking screenshots showing the project count decreasing after deletion).
+*   **Which testing method agent to use?** Manual testing. The user should log in, go to the dashboard, click the ⋯ icon on a project, select Mover a la papelera, confirm the action, and verify that the project is removed from the list.
 *   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-*   **Issue 1: Finalize Logo Size (P0)**
-    *   **Description:** The user is not satisfied with the logo size in the project sidebar and has repeatedly asked for it to be increased. The agent is in a loop of making it larger and asking for feedback.
-    *   **Status:** IN PROGRESS
-*   **Issue 2: MindHybrid Layout Instability (P1)**
-    *   **Description:** A critical and recurring issue from the previous session. The core layout algorithms in  are fragile and prone to breaking. This has not been addressed.
+*   **Issue 1: MindHybrid Layout Instability (P1)**
+    *   **Description:** A critical and recurring issue from a previous session. The core layout algorithms in  are fragile and prone to breaking. This has not been addressed.
     *   **Status:** NOT STARTED
-*   **Issue 3: 'X' button in MultiSelectToolbar is not working (P2)**
+*   **Issue 2: 'X' button in MultiSelectToolbar is not working (P2)**
     *   **Description:** The button to clear a multi-node selection is non-functional.
     *   **Status:** NOT STARTED
-*   **Issue 4: Mobile Layout Overlap (P2)**
+*   **Issue 3: Mobile Layout Overlap (P2)**
     *   **Description:** On mobile devices, the user dropdown menu overlaps with the sidebar.
     *   **Status:** NOT STARTED
 
 **In progress Task List**:
-*   None. The current work is a pending issue.
+*   None.
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks:**
-    *   **Data Migration for Existing Users (P1):** Run a one-time script to initialize the  counter for all existing users based on their current project count. This was missed during the implementation of the historical limit feature.
-    *   **Fix 'X' button on MultiSelectToolbar (P1):** Address the non-functional clear selection button.
-    *   **Stripe Integration for Payments (P1):** The Actualizar a Pro button is currently a mock. Integrate Stripe to handle payments for plan upgrades.
-    *   **Address Mobile Layout Overlap (P2):** Fix the UI overlap on smaller screens.
+    *   **Implement Context Menu Actions (P0):** The new dashboard context menu has several non-functional actions that need implementation: Compartir mapa, Duplicar, Mover a Mis mapas, and Publicar en Universo. Currently, they are disabled or show an alert.
+    *   **Implement Importar Functionality (P1):** The Importar button on the dashboard is a mock and needs to be implemented.
+    *   **Data Migration for Existing Users (P1):** Run a one-time script to initialize the  counter for all existing users based on their current project count. This was missed during a previous feature implementation.
+    *   **Stripe Integration for Payments (P1):** The Actualizar a Personal button is a mock. Integrate Stripe to handle payments for plan upgrades.
 *   **Future Tasks:**
     *   **Admin Role Management (P1):** Implement UI for  to assign/revoke admin roles to other users.
     *   **Dashboard Enhancements (P2):** Add visual graphs for the admin dashboard metrics.
@@ -72,22 +68,24 @@ The application is a full-stack mind-mapping tool with a complete user authentic
     *   **Twilio Outgoing Messages (P2):** Implement the ability to send outgoing WhatsApp messages.
 
 **Completed work in this session**
-- **Landing Page CMS Implementation & Restoration (DONE):**
-  - Successfully connected the professional landing page design to the backend CMS, allowing content updates via the Admin Panel while preserving the visual design.
-  - Corrected UI issues on the landing page, such as duplicated logos and incorrect logo sizes, based on user feedback.
-- **SaaS Plan & Smart Limit System (DONE):**
-  - **Backend:** Implemented a robust plan system (               total        used        free      shared  buff/cache   available
-Mem:        32816332    17156340     2439536       47644    13650960    15659992
-Swap:              0           0           0, , ) in  with a dual-limit logic for free users (3 active maps, 5 lifetime maps). Secured the project creation endpoint to enforce these rules.
-  - **Frontend:** Built the UI in the  to display plan status and usage with circular progress indicators. Created an  that appears when limits are hit, prompting an upgrade.
-- **Critical Bug Fixes (DONE):**
-  - Fixed a bug that allowed users to bypass creation limits because the frontend wasn't handling the backend error response.
-  - Fixed a bug that prevented users from deleting their last map by removing the logic that auto-created a new default map.
-  - Fixed an incorrect map count bug by ensuring the backend only counts non-deleted projects.
-- **Major UI/UX Refactor (DONE):**
-  - Replaced space-consuming progress bars with compact circular indicators in .
-  - Moved the Trash icon and functionality to the main , adding a dynamic counter badge.
-  - Cleaned up the project sidebar UI by removing the From Template button and other clutter to create more space for the project list.
+- **Unified Plan & Pricing System (DONE):**
+  - Centralized all plan definitions (, , , ) into .
+  - Created a new  endpoint to serve plan data.
+  - Updated  to dynamically render the new pricing table.
+  - Updated  and  to correctly display the  Personal plan upgrade, removing all old price references.
+- **Complete Dashboard Redesign (DONE):**
+  - Created and implemented  as the new default view post-login.
+  - Added a welcome header, quick-start templates, and plan-specific info cards.
+  - Redesigned the Recent Projects section into a professional table format.
+- **Enhanced Project Actions (DONE):**
+  - Implemented a favorite (pin) system for projects, visible on the dashboard and in a new Favoritos sidebar section.
+  - Created a plan-aware contextual action menu (⋯) for each recent project.
+  - Fixed the Mover a la papelera functionality from the new context menu.
+- **UI/UX Improvements (DONE):**
+  - Added a Cerrar sesión (Logout) button to the .
+  - Replaced the Plantillas sidebar link with Favoritos.
+  - Improved the dashboard layout to remove internal scrollbars and add better visual spacing.
+  - Refined the context menu's width, spacing, and positioning for better UX.
 
 **Earlier issues found/mentioned but not fixed**
 *   **Issue 1: 'X' button in MultiSelectToolbar:** The button to clear the multi-node selection does not work.
@@ -101,73 +99,71 @@ Swap:              0           0           0, , ) in  with a dual-limit logic fo
 
 
 **Key Technical Concepts**
-*   **Plan-Based Feature Gating:** Backend logic in  that checks a user's  before allowing actions like creating a new project.
-*   **Historical Usage Tracking:** The  field in the  collection tracks lifetime map creations to prevent free plan abuse, a key requirement from the user.
-*   **Dynamic UI based on Plan:** The  component fetches usage data from  and conditionally renders UI elements like progress indicators and upgrade buttons.
-*   **Graceful Limit Handling:** The frontend now displays a user-friendly  instead of a generic error when a creation limit is reached, improving the user experience and driving conversions.
-*   **Decoupled CMS:** The  component maintains its complex visual design while fetching all text content from the database via an API, with content being editable in the .
+*   **Single Source of Truth for Plans:** A critical architectural decision to centralize all plan definitions in the backend ( dictionary in ) and expose them via an  endpoint, ensuring consistency across the application.
+*   **Dynamic, Role-Based Dashboard:**  is now a central hub that fetches and displays user-specific information (plan, usage, stats, recent projects) upon login, adapting its UI based on the user's plan.
+*   **Plan-Aware Contextual Menus:** The ⋯ menu on the dashboard demonstrates how to build UI where actions are conditionally enabled, disabled, or show an upgrade prompt based on the user's subscription status ( or ).
+*   **Smart Dropdown Positioning:** The  function in  calculates if a dropdown menu has enough space below it and flips its position to appear above the trigger button if not, preventing the menu from being cut off by the viewport edge.
 
 **key DB schema**
 *   ** collection:**
-    *   , , , , , , 
-    *   : (string) - e.g., free, pro, team, admin **(NEW)**
-    *   : (integer) **(NEW)**
+    *   : (string) - free, personal, team, admin.
+    *   : (integer)
 *   ** collection:**
-    *   uid=0(root) gid=0(root) groups=0(root), , , , , , 
+    *   : (boolean) - **NEW** field to mark a project as a favorite.
 *   ** collection:**
-    *   A single document holding all editable text for the landing page.
+    *   Unchanged.
 
 **changes in tech stack**
 *   None.
 
 **All files of reference**
-*   **/app/backend/server.py**: The heart of the backend, containing all logic for plans, limits, and the CMS.
-*   **/app/frontend/src/hooks/useNodes.js**: Critical frontend hook managing all project state, including the new logic for limit enforcement.
-*   **/app/frontend/src/components/mindmap/Sidebar.jsx**: The main project sidebar, heavily refactored to show plan status and a cleaned-up project list.
-*   **/app/frontend/src/components/mindmap/MindMapApp.jsx**: The top-level app component, orchestrating the new modals and state.
-*   **/app/frontend/src/components/mindmap/UpgradeModal.jsx**: The new modal that appears when a user hits their plan limit.
-*   **/app/frontend/src/components/landing/LandingPage.jsx**: The professional landing page component.
-*   **/app/frontend/src/components/admin/AdminPanel.jsx**: The admin interface for managing user plans and landing page content.
+*   **/app/frontend/src/components/mindmap/DashboardView.jsx**: The new, central component for the user's post-login experience. Contains logic for the welcome header, templates, plan status, and recent projects table with its context menu.
+*   **/app/backend/server.py**: Contains the new centralized  dictionary, the  endpoint, and other plan-related logic.
+*   **/app/frontend/src/components/mindmap/MindMapApp.jsx**: Orchestrates the application state, now defaults to showing  and passes necessary props and handlers to it.
+*   **/app/frontend/src/components/mindmap/DockSidebar.jsx**: Modified to include the Logout button and Favorites link.
+*   **/app/frontend/src/components/landing/LandingPage.jsx**: Modified to fetch plan information from the  endpoint instead of using hardcoded data.
+*   **/app/frontend/src/components/mindmap/UpgradeModal.jsx**: Updated to reflect the new Personal plan and  price.
 
 **Areas that need refactoring**
-*   **/app/frontend/src/hooks/useNodes.js**: This file is now extremely large (~3000 lines) and highly complex. It handles state management, API calls, and local data manipulation, making it brittle and hard to maintain. It should be broken down into smaller, more focused hooks.
-*   **/app/backend/server.py**: Remains a monolithic file containing routes for authentication, admin, projects, and CMS. It should be split into separate router files (e.g., , ).
+*   **/app/frontend/src/hooks/useNodes.js**: This file remains extremely large and complex. It should be broken down into smaller, more focused hooks.
+*   **/app/frontend/src/components/mindmap/DashboardView.jsx**: This new component has grown significantly and contains a lot of presentation logic, state management, and data fetching. It could be broken down into smaller sub-components (e.g., , , ).
 
 **key api endpoints**
-*   : **MODIFIED** to enforce active and total map creation limits based on the user's plan. Returns an error if limits are exceeded.
-*   : **NEW** endpoint that provides the frontend with the user's current plan, usage stats (active count, total created), and limits.
-*   : **MODIFIED** to allow an administrator to change a user's .
-*   : **MODIFIED** to include the  for each user in the response.
+*   : **NEW** endpoint that returns the centrally defined list of all available subscription plans and their properties.
+*   : Modified to enforce plan limits.
+*   : Provides the frontend with the current user's plan and usage stats.
 
 **Critical Info for New Agent**
-*   **User is Design-Sensitive:** The user provides very specific feedback on UI elements like logo size and layout. Always confirm visual changes with screenshots. Do not deviate from the approved professional design of the landing page.
-*   **SaaS Limit Logic is Core:** The dual-limit system (3 active, 5 total) for free users is a critical business feature. The next agent must understand this logic is enforced on the backend () and handled gracefully on the frontend ( and ).
-*   ** is High-Risk:** This file is massive and controls almost all application state. Changes to it are risky and must be tested thoroughly.
-*   **Data Migration Needed:** The  counter needs to be initialized for all existing users. The agent must create and run a script to do this.
+*   **User is Design-Sensitive:** The user provides very specific feedback on UI elements, often with image references. Always confirm visual changes with screenshots and pay close attention to alignment, spacing, and component-level details.
+*   **Dashboard is the Core Hub:** The  is the new heart of the user experience. Most new feature requests will likely involve modifying this component.
+*   **Plan Logic is Centralized:** All plan-related UI (pricing tables, upgrade buttons, feature locks) is driven by the backend  endpoint and the user's current plan. Do not hardcode plan features in the frontend.
+*   **Mocked Functionality:** The context menu actions (, , etc.) and the Importar button on the dashboard are currently non-functional mocks. Implementing these is a high-priority upcoming task.
 
 **documents and test reports created in this job**
-*   None.
+*   **/app/test_result.md**: Was updated when the backend testing agent was run to validate the new plan structure.
 
-**Last 10 User Messages** 
-1.  **User:** Requests UI changes to save space in the project sidebar (remove button/text).
-2.  **User:** Reports a bug where the project count in the sidebar is incorrect (counting deleted maps).
-3.  **User:** Provides detailed requirements for the smart limit system (active vs. total created maps).
-4.  **User:** Reports a bug that the system is not stopping them from creating maps beyond the defined limit.
-5.  **User:** Requests that a modal appears when the creation limit is reached, prompting an upgrade to Pro.
-6.  **User:** Reports a bug where a default map keeps reappearing after deleting all maps.
-7.  **User:** Requests a major UI refactor: replace progress bars with circular indicators and move the Trash to the main sidebar.
-8.  **User:** Asks to put the logo back in the project sidebar and remove a tip message.
-9.  **User:** Asks to make the logo in the sidebar bigger.
-10. **User:** más grande - Asks again to make the logo even bigger.
+**Last 10 User Messages and any pending HUMAN messages**
+1.  **User:** Requests a complete overhaul of the pricing system to a single source of truth with new plans (, , , ) and prices.
+2.  **User:** Requests the dashboard to be the main landing page after login, showing plan usage and limits.
+3.  **User:** Requests a Cerrar sesión (Logout) button in the left sidebar.
+4.  **User:** Requests a new dashboard header with a welcome message, avatar, and quick-start templates.
+5.  **User:** Requests the Proyectos recientes list be a table with a favorite star icon and changes the Plantillas sidebar item to Favoritos.
+6.  **User:** Requests a ⋯ context menu for each recent project with specific actions (Compartir, Duplicar, etc.) that are plan-aware.
+7.  **User:** Reports layout issues: the context menu is cut off, the project list has an unwanted internal scrollbar, and there's no bottom spacing.
+8.  **User:** Requests UI refinements for the context menu: make it wider, align text, move the favorite star next to the ⋯ icon, and make the star's outline darker. Also asks for the favorite and trash functionalities to be connected.
+9.  **User:** Requests the context menu to be even wider for better readability and visual balance.
+10. **User:** Reports that the Mover a papelera action in the new context menu is not working.
 
 **Project Health Check:**
 *   **Broken:**
-    *   The  layout functionality is known to be unstable.
+    *    layout functionality is known to be unstable.
     *   The 'X' button in the  is non-functional.
     *   The user dropdown menu overlaps the sidebar on mobile.
 *   **Mocked:**
-    *   The Actualizar a Pro button in the  and sidebar does not trigger a payment flow.
-    *   The Continue with GitHub button on the login/register pages is not functional.
+    *   **Payment Flow:** The Actualizar a Personal button does not trigger a payment flow (Stripe not integrated).
+    *   **Dashboard Actions:** The Importar button is non-functional.
+    *   **Context Menu Actions:** Compartir mapa, Duplicar, Mover a Mis mapas, and Publicar en Universo are all non-functional placeholders.
+    *   **Social Login:** Continue with GitHub button on login/register pages is not functional.
 
 **3rd Party Integrations**
 *   **Lucide React:** For UI icons.
@@ -176,21 +172,23 @@ Swap:              0           0           0, , ) in  with a dual-limit logic fo
 *   **Emergent-managed Google Auth:** For social login and registration.
 
 **Testing status**
-*   **Testing agent used after significant changes:** YES. The agent used the testing agent, which highlighted some potential issues, but then validated the core CMS functionality manually with  and screenshots.
-*   **Troubleshoot agent used after agent stuck in loop:** NO
-*   **Test files created:** None.
+*   **Testing agent used after significant changes:** YES. The agent used the backend testing subagent to verify the new plan structure API endpoints.
+*   **Troubleshoot agent used after agent stuck in loop:** YES. The agent got stuck trying to fix the dropdown menu positioning and used multiple attempts before resolving it.
+*   **Test files created:** Test files were likely created by the backend testing agent in .
 *   **Known regressions:** The  layout has known, recurring regressions from the previous session.
 
 **Credentials to test flow:**
 *   **Admin User:**
     *   Username: 
     *   Password: 
-*   **Free User (for testing limits):**
+*   **Free User (newly created):**
     *   Username: 
     *   Password: 
-*   **Existing User (for testing migration):**
+*   **Free User (existing):**
     *   Username: 
-    *   Password: The one set during registration.
+    *   Password: (unknown, may need reset or use another account for testing)
 
 **What agent forgot to execute**
-*   The agent implemented the  feature but **did not initialize this value for existing users**. This means users created before this feature was added (like  and ) have an incorrect historical map count, breaking the limit logic for them. A data migration script is required.</analysis>
+*   **Data Migration:** The agent did not run the data migration script to initialize the  field for existing users. This is a critical pending task.
+*   **Full Implementation of Context Menu:** The agent built the UI for the context menu but left most of its actions (, , , ) as non-functional mocks.
+*   **Implementation of Importar:** The Importar button on the dashboard was added but is not connected to any functionality.</analysis>

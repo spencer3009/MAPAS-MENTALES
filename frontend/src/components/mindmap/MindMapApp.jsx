@@ -313,10 +313,8 @@ const MindMapApp = ({ onAdminClick }) => {
   }, []);
 
   const handleOpenRemindersPanel = useCallback(() => {
-    setActiveView('projects');
-    setIsProjectsSidebarOpen(true);
-    setShowStyleSidebar(true);
-    setSidebarTab('reminders');
+    setActiveView('reminders');
+    setIsProjectsSidebarOpen(false);
   }, []);
 
   const handleOpenIntegrations = useCallback(() => {

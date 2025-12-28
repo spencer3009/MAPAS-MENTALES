@@ -261,10 +261,17 @@ const MindMapApp = ({ onAdminClick }) => {
   
   // Función para capturar thumbnail del canvas
   const captureThumbnail = useCallback(async () => {
-    if (!canvasRef.current || !activeProjectId) return null;
+    if (!activeProjectId) return null;
+    
+    // Buscar el contenedor del canvas por su clase
+    const canvasContainer = document.querySelector('.bg-gradient-to-br.from-slate-50.to-slate-100');
+    if (!canvasContainer) {
+      console.log('No se encontró el canvas container');
+      return null;
+    }
     
     try {
-      const canvas = await html2canvas(canvasRef.current, {
+      const canvas = await html2canvas(canvasContainer, {
         scale: 0.3, // Escala pequeña para thumbnail
         backgroundColor: '#f9fafb',
         logging: false,

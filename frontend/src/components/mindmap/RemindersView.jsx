@@ -394,7 +394,7 @@ const WeekView = ({ currentDate, reminders, onTimeSlotClick, remindersByDate }) 
   today.setHours(0, 0, 0, 0);
   
   return (
-    <div className="flex-1 p-4 overflow-hidden">
+    <div className="flex-1 p-4 pb-16 overflow-hidden">
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden h-full flex flex-col">
         {/* Header de días */}
         <div className="grid grid-cols-8 border-b border-gray-200 bg-gray-50 flex-shrink-0">

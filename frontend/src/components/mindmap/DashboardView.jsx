@@ -480,11 +480,11 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-lg font-medium text-gray-900">Crear un mapa</h2>
             <button 
-              onClick={() => onViewAllMaps?.()}
-              className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
+              onClick={() => onShowUpgradeModal?.('upgrade')}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md hover:shadow-lg"
             >
-              Ver todos los mapas
-              <ExternalLink size={16} />
+              <Zap size={16} />
+              Actualizar a Personal - $3/mes
             </button>
           </div>
 

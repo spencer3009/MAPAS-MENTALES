@@ -345,7 +345,7 @@ const YearView = ({ year, reminders, onDayClick, remindersByDate }) => {
 };
 
 // ==================== MODAL DETALLES DE DÍA ====================
-const DayDetailModal = ({ isOpen, onClose, date, reminders, onEditReminder, onToggleComplete }) => {
+const DayDetailModal = ({ isOpen, onClose, date, reminders, onEditReminder, onToggleComplete, onCreateReminder }) => {
   if (!isOpen || !date) return null;
   
   const formatTime = (dateStr) => {
@@ -359,17 +359,85 @@ const DayDetailModal = ({ isOpen, onClose, date, reminders, onEditReminder, onTo
   
   const now = new Date();
   
+  // Dividir recordatorios en secciones: Vigentes, Vencidos, Completados
+  const upcomingReminders = reminders.filter(r => {
+    if (r.is_completed) return false;
+    const d = new Date(r.reminder_date || r.scheduled_datetime);
+    return !isNaN(d.getTime()) && d > now;
+  }).sort((a, b) => new Date(a.reminder_date) - new Date(b.reminder_date));
+  
+  const overdueReminders = reminders.filter(r => {
+    if (r.is_completed) return false;
+    const d = new Date(r.reminder_date || r.scheduled_datetime);
+    return !isNaN(d.getTime()) && d <= now;
+  }).sort((a, b) => new Date(b.reminder_date) - new Date(a.reminder_date));
+  
+  const completedReminders = reminders.filter(r => r.is_completed);
+  
+  const ReminderItem = ({ reminder, isOverdue }) => {
+    const reminderDate = new Date(reminder.reminder_date || reminder.scheduled_datetime);
+    
+    return (
+      <div
+        className={`p-3 rounded-xl border cursor-pointer hover:shadow-md transition-all ${
+          reminder.is_completed 
+            ? 'bg-gray-50 border-gray-200' 
+            : isOverdue 
+            ? 'bg-red-50 border-red-200' 
+            : 'bg-white border-gray-200'
+        }`}
+        onClick={() => onEditReminder(reminder)}
+      >
+        <div className="flex items-start gap-3">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleComplete(reminder);
+            }}
+            className={`w-5 h-5 mt-0.5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+              reminder.is_completed 
+                ? 'bg-green-500 border-green-500 text-white' 
+                : isOverdue
+                ? 'border-red-400 hover:border-red-500'
+                : 'border-gray-300 hover:border-blue-500'
+            }`}
+          >
+            {reminder.is_completed && <Check size={12} />}
+          </button>
+          
+          <div className="flex-1 min-w-0">
+            <div className={`font-medium text-sm ${reminder.is_completed ? 'line-through text-gray-400' : 'text-gray-800'}`}>
+              {reminder.title || reminder.message || 'Sin título'}
+            </div>
+            
+            <div className={`text-xs mt-1 flex items-center gap-2 ${isOverdue ? 'text-red-500' : 'text-gray-400'}`}>
+              <Clock size={11} />
+              {formatTime(reminder.reminder_date || reminder.scheduled_datetime)}
+              {isOverdue && !reminder.is_completed && (
+                <span className="text-[10px] font-medium bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">
+                  Vencido
+                </span>
+              )}
+            </div>
+          </div>
+          
+          <ChevronRight size={16} className="text-gray-400 flex-shrink-0 mt-1" />
+        </div>
+      </div>
+    );
+  };
+  
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div 
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] overflow-hidden"
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[85vh] overflow-hidden flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-4 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-white">
+              <h2 className="text-lg font-semibold text-white capitalize">
                 {date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
               </h2>
               <p className="text-blue-100 text-sm">
@@ -385,55 +453,81 @@ const DayDetailModal = ({ isOpen, onClose, date, reminders, onEditReminder, onTo
           </div>
         </div>
         
+        {/* Botón Crear Recordatorio - Siempre visible */}
+        <div className="px-4 py-3 border-b border-gray-100 flex-shrink-0">
+          <button
+            onClick={() => {
+              onClose();
+              onCreateReminder(date);
+            }}
+            className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium flex items-center justify-center gap-2 transition-colors"
+          >
+            <Plus size={18} />
+            Crear recordatorio
+          </button>
+        </div>
+        
         {/* Lista de recordatorios */}
-        <div className="p-4 overflow-y-auto max-h-[60vh]">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {reminders.length === 0 ? (
             <div className="text-center py-8">
               <Calendar size={40} className="mx-auto text-gray-300 mb-3" />
               <p className="text-gray-500">No hay recordatorios este día</p>
+              <p className="text-gray-400 text-sm mt-1">Haz clic en el botón de arriba para crear uno</p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {reminders
-                .sort((a, b) => {
-                  const dateA = new Date(a.reminder_date || a.scheduled_datetime);
-                  const dateB = new Date(b.reminder_date || b.scheduled_datetime);
-                  const isOverdueA = dateA < now && !a.is_completed;
-                  const isOverdueB = dateB < now && !b.is_completed;
-                  
-                  // Completados al final
-                  if (a.is_completed && !b.is_completed) return 1;
-                  if (!a.is_completed && b.is_completed) return -1;
-                  
-                  // Vencidos después de vigentes
-                  if (isOverdueA && !isOverdueB) return 1;
-                  if (!isOverdueA && isOverdueB) return -1;
-                  
-                  // Dentro de cada grupo, ordenar por fecha
-                  return dateA - dateB;
-                })
-                .map(reminder => {
-                  const reminderDate = new Date(reminder.reminder_date || reminder.scheduled_datetime);
-                  const isOverdue = reminderDate < now && !reminder.is_completed;
-                  
-                  return (
-                    <div
-                      key={reminder.id}
-                      className={`p-4 rounded-xl border cursor-pointer hover:shadow-md transition-all ${
-                        reminder.is_completed 
-                          ? 'bg-gray-50 border-gray-200' 
-                          : isOverdue 
-                          ? 'bg-red-50 border-red-200' 
-                          : 'bg-white border-gray-200'
-                      }`}
-                      onClick={() => onEditReminder(reminder)}
-                    >
-                      <div className="flex items-start gap-3">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onToggleComplete(reminder);
-                          }}
+            <>
+              {/* Sección: Vigentes */}
+              {upcomingReminders.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <Clock size={12} className="text-blue-500" />
+                    Próximos ({upcomingReminders.length})
+                  </h4>
+                  <div className="space-y-2">
+                    {upcomingReminders.map(r => (
+                      <ReminderItem key={r.id} reminder={r} isOverdue={false} />
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Sección: Vencidos */}
+              {overdueReminders.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-semibold text-red-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <AlertCircle size={12} />
+                    Vencidos ({overdueReminders.length})
+                  </h4>
+                  <div className="space-y-2">
+                    {overdueReminders.map(r => (
+                      <ReminderItem key={r.id} reminder={r} isOverdue={true} />
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Sección: Completados */}
+              {completedReminders.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <Check size={12} />
+                    Completados ({completedReminders.length})
+                  </h4>
+                  <div className="space-y-2 opacity-60">
+                    {completedReminders.map(r => (
+                      <ReminderItem key={r.id} reminder={r} isOverdue={false} />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
                           className={`w-6 h-6 mt-0.5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
                             reminder.is_completed 
                               ? 'bg-green-500 border-green-500 text-white' 

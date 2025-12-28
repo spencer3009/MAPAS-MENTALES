@@ -602,8 +602,13 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
                           {isMenuOpen && (
                             <div 
                               ref={menuRef}
-                              className="absolute right-0 top-full mt-1 w-56 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50"
-                              style={{ animation: 'fadeIn 0.15s ease-out' }}
+                              className="fixed w-56 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-[100]"
+                              style={{ 
+                                top: 'auto',
+                                right: '40px',
+                                bottom: 'auto',
+                                transform: 'translateY(-50%)'
+                              }}
                             >
                               {/* Header */}
                               <div className="px-3 py-2 border-b border-gray-100">

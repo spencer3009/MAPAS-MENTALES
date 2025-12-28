@@ -1046,13 +1046,73 @@ const MindMapAppInner = ({ onAdminClick, showReminderToast }) => {
   );
 };
 
+// Componente que verifica recordatorios vencidos
+const ReminderChecker = ({ token, showReminderToast }) => {
+  const [notifiedIds, setNotifiedIds] = useState(new Set());
+  
+  useEffect(() => {
+    if (!token) return;
+    
+    const checkReminders = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/reminders`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+          const reminders = await response.json();
+          const now = new Date();
+          
+          // Encontrar recordatorios que han vencido y no han sido notificados
+          reminders.forEach(reminder => {
+            if (reminder.is_completed) return;
+            
+            const reminderDate = new Date(reminder.reminder_date);
+            if (isNaN(reminderDate.getTime())) return;
+            
+            // Si el recordatorio ya venció y no ha sido notificado
+            if (reminderDate <= now && !notifiedIds.has(reminder.id)) {
+              showReminderToast(reminder);
+              setNotifiedIds(prev => new Set([...prev, reminder.id]));
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Error checking reminders:', error);
+      }
+    };
+    
+    // Verificar inmediatamente y luego cada 30 segundos
+    checkReminders();
+    const interval = setInterval(checkReminders, 30000);
+    
+    return () => clearInterval(interval);
+  }, [token, showReminderToast, notifiedIds]);
+  
+  return null;
+};
+
 // Componente wrapper con ToastProvider
-const MindMapAppWithToast = (props) => {
+const MindMapApp = (props) => {
+  const { token } = useAuth();
+  
   return (
     <ToastProvider>
-      <MindMapApp {...props} />
+      <MindMapAppWithToast {...props} token={token} />
     </ToastProvider>
   );
 };
 
-export default MindMapAppWithToast;
+// Componente intermedio que usa el Toast context
+const MindMapAppWithToast = (props) => {
+  const { showReminder } = useToast();
+  
+  return (
+    <>
+      <ReminderChecker token={props.token} showReminderToast={showReminder} />
+      <MindMapAppInner {...props} showReminderToast={showReminder} />
+    </>
+  );
+};
+
+export default MindMapApp;

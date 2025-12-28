@@ -743,6 +743,7 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
                       {recentProjects.map((project) => (
                         <tr 
                           key={project.id} 
+                          onClick={() => onOpenProject?.(project.id)}
                           className="hover:bg-gray-50 transition-colors cursor-pointer group"
                         >
                         {/* Nombre con icono */}

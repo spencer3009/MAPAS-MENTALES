@@ -4823,3 +4823,33 @@ if (remainingProjects.length === 0) {
 - Dashboard updated to show "0 Proyectos, 0 Nodos totales"
 - No console errors
 - API confirmed project in trash collection
+
+
+---
+
+## DASHBOARD TEMPLATE PRE-SELECTION FEATURE (December 28, 2025)
+
+### 🔍 FEATURE REQUIREMENTS:
+
+#### Expected Behavior:
+1. When user clicks a template card (MindFlow, MindTree, MindHybrid) on dashboard
+2. The Layout Selection modal should open OVER the dashboard
+3. The clicked template should appear PRE-SELECTED in the modal
+4. Visual indicators: highlighted card, active border, check visual
+
+#### Test Cases:
+1. Click on MindFlow card → Modal opens with MindFlow pre-selected
+2. Click on MindTree card → Modal opens with MindTree pre-selected  
+3. Click on MindHybrid card → Modal opens with MindHybrid pre-selected
+4. Click on 'Mapa en blanco' card → Modal opens WITHOUT pre-selection
+5. Click on 'Crear' button → Modal opens WITHOUT pre-selection
+
+### Test Credentials:
+- Username: testtrash2025
+- Password: testtrash2025
+- URL: http://localhost:3000
+
+### Testing Status:
+- Implementation completed
+- Awaiting frontend testing verification
+

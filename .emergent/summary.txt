@@ -1,49 +1,42 @@
 <analysis>**original_problem_statement:**
-The user initially requested to unify the application's pricing and plan structure into a single source of truth, eliminating outdated prices and inconsistencies between the landing page, upgrade modals, and backend logic. This led to a major overhaul of the plan system and a complete redesign of the user dashboard.
+The user's initial goal was to unify the application's pricing and plan structure into a single source of truth. This has since evolved into a comprehensive redesign and enhancement of the user dashboard, with a strong focus on UI/UX, feature implementation, and dynamic behavior based on user state.
 
 **PRODUCT REQUIREMENTS:**
 *   **Unified Plan System (Single Source of Truth):**
-    *   Define four official plans (, , , ) with specific prices and features in a centralized backend configuration.
-    *   The  plan at /month is the primary upgrade target from the  plan.
-    *   Create a new API endpoint () to serve this plan data to the entire frontend.
-*   **Landing Page Pricing Table:**
-    *   Replace the existing pricing table with one that dynamically loads data from the  endpoint.
-    *   Visually highlight the  plan as Recomendado and mark  and  plans with an Early Access badge.
-*   **System & Upgrade Modal Consistency:**
-    *   Ensure all upgrade prompts, particularly the modal shown when free users hit a limit, offer the  plan for **/month**, removing all references to the old 2 price.
-*   **Dashboard Redesign:**
-    *   Make the dashboard the default page after user login.
-    *   Create a new header section with a personalized welcome message (¡Te damos la bienvenida, [Nombre]!), user avatar, and quick-start templates (Crear un mapa).
-    *   Display a plan information card showing either usage-limit progress bars (for Free users) or a list of unlimited benefits (for paid users).
-    *   Redesign the Proyectos recientes section into a clean table format.
-*   **Recent Projects - Enhanced Functionality:**
-    *   Add a favorite (pin) functionality, represented by a star icon next to each project.
-    *   Implement a context menu (triggered by a ⋯ icon) for each recent project with actions: Compartir, Duplicar, Mover a Mis mapas, Publicar en Universo, and Mover a la papelera.
-    *   The context menu actions must be plan-aware, showing an Cámbiate ↗ (Upgrade) prompt for features unavailable on the user's current plan.
-    *   The Mover a la papelera action must be functional.
-*   **UI/UX Refinements:**
-    *   Add a Cerrar sesión (Logout) button to the main .
-    *   Change the Plantillas (Templates) sidebar item to Favoritos (Favorites) with a star icon, which displays pinned projects.
-    *   Improve the layout of the dashboard to remove internal scrollbars and add visual breathing room with better spacing.
-    *   Ensure the project context menu is wide enough for all text to fit and is intelligently positioned to always stay within the viewport.
+    *   Define four official plans (, , , ) in a centralized backend configuration, served via .
+*   **Dashboard Redesign & Functionality:**
+    *   Make the dashboard the default page after login.
+    *   **Welcome Header:** Display a large logo, a personalized welcome message (¡Te damos la bienvenida, [Nombre]!), and the user's avatar.
+    *   **Quick-Start Templates:** Display cards for creating a new map using different layouts (MindFlow, MindTree, MindHybrid), with representative custom SVG icons. When a template is clicked, the creation modal should open with that layout pre-selected.
+    *   **Project Management Bar:** Implement a functional search bar, a Crear button, and a view toggle (Grid/List) for the projects list.
+    *   **Recent Projects View:**
+        *   Display projects in either a table (List view) or cards (Grid view).
+        *   **Grid View Thumbnails:** Display a real, auto-generated thumbnail of the map's nodes.
+        *   Clicking a project card/row must open the project with the project sidebar visible.
+        *   Implement a context menu (⋯) with a functional Mover a la papelera action, using a custom confirmation modal.
+    *   **Dynamic Upgrade Button:** The main call-to-action button should dynamically change based on the user's current plan (e.g., a Free user sees Actualizar a Personal, while a Business user sees Plan actual: Business).
+    *   **Plan Information Card:** Display the user's current plan and usage limits below the Proyectos recientes section.
+*   **Dynamic Sidebar:**
+    *   The main  should be fully expanded in all views except the project/canvas view.
+    *   In the project view, the sidebar should be collapsed by default (showing only icons) and expand on hover to maximize workspace.
 
 **User's preferred language**: Spanish. The next agent MUST respond in Spanish.
 
 **what currently exists?**
-The application has a fully unified SaaS plan structure, with a single source of truth in the backend serving pricing and feature information to the entire application via an  endpoint. The landing page and upgrade modals now display consistent, up-to-date plan information.
-
-A major feature is the completely redesigned dashboard, which is now the default view after login. It includes a personalized welcome header, quick-start templates, a dynamic plan-status card (showing usage limits for free users and benefits for paid users), and a Recent Projects section. This section has been enhanced with a professional table layout that includes a fully functional favorite system and a plan-aware contextual action menu for each project. The Move to Trash action from this menu is working correctly.
+The dashboard has been significantly overhauled. It now features a welcome header with a large logo and aligned user info. Below that are quick-start template cards with custom SVG icons. A functional project management bar has been added with a search input, Grid/List view toggles, and a Crear (Create) button. The project list displays projects in either a grid with real, auto-generated map thumbnails or a table format. Clicking a project successfully navigates the user to the canvas with the project sidebar open. The Move to Trash functionality works via a custom modal. The layout also includes a dynamic upgrade button that changes based on the user's plan, and the plan information card has been relocated below the project list. The main sidebar now correctly collapses in the project view and expands everywhere else.
 
 **Last working item**:
-*   **Last item agent was working:** Fixing the Mover a papelera (Move to Trash) functionality within the contextual action menu on the dashboard's Recent Projects list. The issue was that the action was triggering a confirmation modal meant for another part of the app instead of directly deleting the project.
-*   **Status:** USER VERIFICATION PENDING
-*   **Agent Testing Done:** Y (Agent confirmed the fix by checking server logs and taking screenshots showing the project count decreasing after deletion).
-*   **Which testing method agent to use?** Manual testing. The user should log in, go to the dashboard, click the ⋯ icon on a project, select Mover a la papelera, confirm the action, and verify that the project is removed from the list.
+*   **Last item agent was working:** The user wants to connect the template cards on the dashboard to the layout selection modal. When a user clicks a template card (e.g., MindTree), the creation modal should appear over the dashboard with MindTree already pre-selected, avoiding a full page navigation.
+*   **Status:** NOT STARTED
+*   **Agent Testing Done:** N
+*   **Which testing method agent to use?** Frontend testing agent. The agent should use the screenshot tool to:
+    1.  Click on a template card (e.g., MindTree).
+    2.  Capture the resulting modal to verify it appears over the dashboard and that the MindTree option is correctly highlighted/selected.
 *   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
 *   **Issue 1: MindHybrid Layout Instability (P1)**
-    *   **Description:** A critical and recurring issue from a previous session. The core layout algorithms in  are fragile and prone to breaking. This has not been addressed.
+    *   **Description:** A critical and recurring issue. The core layout algorithms in  are fragile and prone to breaking. This has not been addressed.
     *   **Status:** NOT STARTED
 *   **Issue 2: 'X' button in MultiSelectToolbar is not working (P2)**
     *   **Description:** The button to clear a multi-node selection is non-functional.
@@ -53,39 +46,40 @@ A major feature is the completely redesigned dashboard, which is now the default
     *   **Status:** NOT STARTED
 
 **In progress Task List**:
-*   None.
+*   **Task 1: Pre-select Layout in Creation Modal (P0)**
+    *   **Where to resume:** In , modify the  handler for the template cards. It currently calls . This needs to be updated to open the  modal and pass the selected template ID to it as a default value.
+    *   **What will be achieved with this?** A seamless user experience where selecting a template on the dashboard directly prepares that template for creation in the modal, as requested by the user.
+    *   **Status:** IN PROGRESS
+    *   **Should Test frontend/backend/both after fix?** Frontend
+    *   **Blocked on something:** None
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks:**
-    *   **Implement Context Menu Actions (P0):** The new dashboard context menu has several non-functional actions that need implementation: Compartir mapa, Duplicar, Mover a Mis mapas, and Publicar en Universo. Currently, they are disabled or show an alert.
-    *   **Implement Importar Functionality (P1):** The Importar button on the dashboard is a mock and needs to be implemented.
-    *   **Data Migration for Existing Users (P1):** Run a one-time script to initialize the  counter for all existing users based on their current project count. This was missed during a previous feature implementation.
-    *   **Stripe Integration for Payments (P1):** The Actualizar a Personal button is a mock. Integrate Stripe to handle payments for plan upgrades.
+    *   **Implement Context Menu Actions (P0):** The dashboard context menu actions Compartir mapa, Duplicar, Mover a Mis mapas, and Publicar en Universo are still non-functional mocks and need to be implemented.
+    *   **Data Migration for Existing Users (P1):** Run a one-time script to initialize the  counter for all existing users based on their current project count.
+    *   **Stripe Integration for Payments (P1):** The dynamic Actualizar button is a UI mock. Integrate Stripe to handle real payments for plan upgrades.
 *   **Future Tasks:**
-    *   **Admin Role Management (P1):** Implement UI for  to assign/revoke admin roles to other users.
+    *   **Admin Role Management (P1):** Implement UI for  to assign/revoke admin roles.
     *   **Dashboard Enhancements (P2):** Add visual graphs for the admin dashboard metrics.
     *   **Email Notification Channel (P2):** Add email as an option for reminder notifications.
     *   **Twilio Outgoing Messages (P2):** Implement the ability to send outgoing WhatsApp messages.
 
 **Completed work in this session**
-- **Unified Plan & Pricing System (DONE):**
-  - Centralized all plan definitions (, , , ) into .
-  - Created a new  endpoint to serve plan data.
-  - Updated  to dynamically render the new pricing table.
-  - Updated  and  to correctly display the  Personal plan upgrade, removing all old price references.
-- **Complete Dashboard Redesign (DONE):**
-  - Created and implemented  as the new default view post-login.
-  - Added a welcome header, quick-start templates, and plan-specific info cards.
-  - Redesigned the Recent Projects section into a professional table format.
-- **Enhanced Project Actions (DONE):**
-  - Implemented a favorite (pin) system for projects, visible on the dashboard and in a new Favoritos sidebar section.
-  - Created a plan-aware contextual action menu (⋯) for each recent project.
-  - Fixed the Mover a la papelera functionality from the new context menu.
-- **UI/UX Improvements (DONE):**
-  - Added a Cerrar sesión (Logout) button to the .
-  - Replaced the Plantillas sidebar link with Favoritos.
-  - Improved the dashboard layout to remove internal scrollbars and add better visual spacing.
-  - Refined the context menu's width, spacing, and positioning for better UX.
+- **Bug Fix: Mover a Papelera (DONE):** Fixed a  bug that occurred when deleting the last project from the dashboard.
+- **Custom Delete Modal (DONE):** Replaced the native  with a fully styled custom modal for project deletion ().
+- **Dashboard Project Management Bar (DONE):** Implemented a functional search bar, a Crear button that opens the template modal, and a view toggle (Grid/List) for the project list ().
+- **Real Project Thumbnails (DONE):** Implemented a system to generate real map thumbnails using  when a user leaves a project view and display them in the dashboard's grid view (, , ).
+- **Project Navigation Flow (DONE):**
+  - Fixed a bug where nodes were not visible on the canvas when opening a project from the dashboard.
+  - Ensured the project sidebar () is automatically displayed when opening a project from the dashboard.
+- **Dashboard Layout & UI (DONE):**
+  - Added the app logo and refined the welcome header layout, text size, and alignment.
+  - Removed the old statistics cards.
+  - Moved the user's plan information card to be below the project list.
+  - Replaced a static Importar button with a functional Ver todos los mapas link.
+- **Dynamic Upgrade Button (DONE):** Implemented a button in the header that dynamically changes its text, color, and action based on the user's current subscription plan ().
+- **Dynamic Sidebar Behavior (DONE):** The main sidebar now correctly collapses by default in the project view (expanding on hover) and remains expanded in all other views ().
+- **Updated Template Icons (DONE):** Replaced placeholder icons on the dashboard template cards with the correct custom SVG icons for MindFlow, MindTree, and MindHybrid to match the rest of the application.
 
 **Earlier issues found/mentioned but not fixed**
 *   **Issue 1: 'X' button in MultiSelectToolbar:** The button to clear the multi-node selection does not work.
@@ -93,75 +87,64 @@ A major feature is the completely redesigned dashboard, which is now the default
 *   **Issue 3: MindHybrid Layout Instability:** A critical, recurring issue with the core mind map layout logic in .
 
 **Known issue recurrence from previous fork**
-*   **MindHybrid Layout Instability:** This critical, recurring issue remains unfixed and poses a significant risk to the mind map functionality.
+*   **MindHybrid Layout Instability:** This critical, recurring issue remains unfixed and poses a significant risk to the mind map functionality. It was present in the previous session's summary and has not been addressed.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-*   **Single Source of Truth for Plans:** A critical architectural decision to centralize all plan definitions in the backend ( dictionary in ) and expose them via an  endpoint, ensuring consistency across the application.
-*   **Dynamic, Role-Based Dashboard:**  is now a central hub that fetches and displays user-specific information (plan, usage, stats, recent projects) upon login, adapting its UI based on the user's plan.
-*   **Plan-Aware Contextual Menus:** The ⋯ menu on the dashboard demonstrates how to build UI where actions are conditionally enabled, disabled, or show an upgrade prompt based on the user's subscription status ( or ).
-*   **Smart Dropdown Positioning:** The  function in  calculates if a dropdown menu has enough space below it and flips its position to appear above the trigger button if not, preventing the menu from being cut off by the viewport edge.
+*   **Dynamic UI based on User State:** The dashboard now heavily relies on the user's plan () to render different components, such as the  logic for the main call-to-action button.
+*   **Client-Side Image Generation:** Using  in  to capture the DOM state of the map canvas, convert it to a Base64 data URL, and send it to the backend to be saved as a project thumbnail.
+*   **Conditional View Rendering:** The  component uses a  state ('grid' or 'list') to conditionally render the project list as either a table or a grid of cards.
+*   **Prop-Driven Component Behavior:** The  component's collapsed/expanded state is now controlled by the  prop passed down from , making its behavior context-aware.
 
 **key DB schema**
 *   ** collection:**
-    *   : (string) - free, personal, team, admin.
-    *   : (integer)
-*   ** collection:**
-    *   : (boolean) - **NEW** field to mark a project as a favorite.
-*   ** collection:**
-    *   Unchanged.
+    *   : (string) - **NEW** field. Stores a Base64 data URL of the project's map thumbnail image.
 
 **changes in tech stack**
-*   None.
+*   **Added:**  (frontend dependency) for generating map thumbnails.
 
 **All files of reference**
-*   **/app/frontend/src/components/mindmap/DashboardView.jsx**: The new, central component for the user's post-login experience. Contains logic for the welcome header, templates, plan status, and recent projects table with its context menu.
-*   **/app/backend/server.py**: Contains the new centralized  dictionary, the  endpoint, and other plan-related logic.
-*   **/app/frontend/src/components/mindmap/MindMapApp.jsx**: Orchestrates the application state, now defaults to showing  and passes necessary props and handlers to it.
-*   **/app/frontend/src/components/mindmap/DockSidebar.jsx**: Modified to include the Logout button and Favorites link.
-*   **/app/frontend/src/components/landing/LandingPage.jsx**: Modified to fetch plan information from the  endpoint instead of using hardcoded data.
-*   **/app/frontend/src/components/mindmap/UpgradeModal.jsx**: Updated to reflect the new Personal plan and  price.
+*   **/app/frontend/src/components/mindmap/DashboardView.jsx**: The main file for almost all recent work. Contains the logic for the header, templates, search, view toggles, project list/grid, custom delete modal, and dynamic buttons.
+*   **/app/frontend/src/components/mindmap/MindMapApp.jsx**: The parent component orchestrating views (). It now contains the crucial  logic and passes down state and handlers to the dashboard.
+*   **/app/frontend/src/components/mindmap/DockSidebar.jsx**: Modified to implement the dynamic collapse/expand behavior based on the  prop.
+*   **/app/frontend/src/hooks/useNodes.js**: Modified to fix a deletion bug and to add the  function.
+*   **/app/backend/server.py**: Modified to add the  field to the  model and the corresponding update logic.
 
 **Areas that need refactoring**
-*   **/app/frontend/src/hooks/useNodes.js**: This file remains extremely large and complex. It should be broken down into smaller, more focused hooks.
-*   **/app/frontend/src/components/mindmap/DashboardView.jsx**: This new component has grown significantly and contains a lot of presentation logic, state management, and data fetching. It could be broken down into smaller sub-components (e.g., , , ).
+*   **/app/frontend/src/components/mindmap/DashboardView.jsx**: This component is now extremely large (over 1000 lines) and manages too many concerns. It should be broken down into smaller, focused components (e.g., , , , , , ).
+*   **/app/frontend/src/components/mindmap/MindMapApp.jsx**: The thumbnail generation logic () could be extracted into a dedicated hook or utility function to clean up the component.
+*   **/app/frontend/src/hooks/useNodes.js**: Still a large and complex file that is a known source of bugs. It would benefit from being split into smaller, more manageable hooks.
 
 **key api endpoints**
-*   : **NEW** endpoint that returns the centrally defined list of all available subscription plans and their properties.
-*   : Modified to enforce plan limits.
-*   : Provides the frontend with the current user's plan and usage stats.
+*   : Modified to accept an optional  field (Base64 string) in the request body.
 
 **Critical Info for New Agent**
-*   **User is Design-Sensitive:** The user provides very specific feedback on UI elements, often with image references. Always confirm visual changes with screenshots and pay close attention to alignment, spacing, and component-level details.
-*   **Dashboard is the Core Hub:** The  is the new heart of the user experience. Most new feature requests will likely involve modifying this component.
-*   **Plan Logic is Centralized:** All plan-related UI (pricing tables, upgrade buttons, feature locks) is driven by the backend  endpoint and the user's current plan. Do not hardcode plan features in the frontend.
-*   **Mocked Functionality:** The context menu actions (, , etc.) and the Importar button on the dashboard are currently non-functional mocks. Implementing these is a high-priority upcoming task.
+*   **The User is Highly Visual:** The user provides very specific feedback on UI elements, often with annotated images. Pay close attention to visual details and confirm changes with screenshots.
+*   ** is the Epicenter:** This file is the hub for almost all recent features. Any new dashboard-related request will likely start here. It is also in dire need of refactoring.
+*   **Thumbnail Generation:** The thumbnail capture logic in  relies on . This approach is brittle; ensure this selector remains valid. The capture is triggered when the user navigates from a project back to the dashboard.
 
 **documents and test reports created in this job**
-*   **/app/test_result.md**: Was updated when the backend testing agent was run to validate the new plan structure.
+*   
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Requests a complete overhaul of the pricing system to a single source of truth with new plans (, , , ) and prices.
-2.  **User:** Requests the dashboard to be the main landing page after login, showing plan usage and limits.
-3.  **User:** Requests a Cerrar sesión (Logout) button in the left sidebar.
-4.  **User:** Requests a new dashboard header with a welcome message, avatar, and quick-start templates.
-5.  **User:** Requests the Proyectos recientes list be a table with a favorite star icon and changes the Plantillas sidebar item to Favoritos.
-6.  **User:** Requests a ⋯ context menu for each recent project with specific actions (Compartir, Duplicar, etc.) that are plan-aware.
-7.  **User:** Reports layout issues: the context menu is cut off, the project list has an unwanted internal scrollbar, and there's no bottom spacing.
-8.  **User:** Requests UI refinements for the context menu: make it wider, align text, move the favorite star next to the ⋯ icon, and make the star's outline darker. Also asks for the favorite and trash functionalities to be connected.
-9.  **User:** Requests the context menu to be even wider for better readability and visual balance.
-10. **User:** Reports that the Mover a papelera action in the new context menu is not working.
+1.  **User:** Requested to move the plan info card below the recent projects list. (Completed)
+2.  **User:** Requested to replace the Importar button with a dynamic Actualizar a Personal button. (Completed, after some clarification)
+3.  **User:** Provided detailed PRD for the dynamic upgrade button's behavior across all user plans (Free, Personal, Team, Business). (Completed)
+4.  **User:** Provided detailed PRD for the sidebar's dynamic behavior (expanded everywhere, collapsed on hover in project view). (Completed)
+5.  **User:** Requested to change the template icons to be more representative of the functionality. (Completed, after clarification)
+6.  **User:** Clarified that the template icons should represent the system's actual layouts: MindFlow, MindTree, MindHybrid. (Completed)
+7.  **User:** Provided images of the correct SVG icons to be used for the layout templates. (Completed)
+8.  **User:** **PENDING REQUEST:** When a template card is clicked on the dashboard, the layout selection modal should open on the dashboard with that template pre-selected.
 
 **Project Health Check:**
 *   **Broken:**
-    *    layout functionality is known to be unstable.
+    *    layout functionality remains unstable.
     *   The 'X' button in the  is non-functional.
-    *   The user dropdown menu overlaps the sidebar on mobile.
+    *   The user dropdown menu overlaps the sidebar on mobile devices.
 *   **Mocked:**
-    *   **Payment Flow:** The Actualizar a Personal button does not trigger a payment flow (Stripe not integrated).
-    *   **Dashboard Actions:** The Importar button is non-functional.
+    *   **Payment Flow:** The Actualizar a Personal button is a UI-only feature; Stripe is not integrated.
     *   **Context Menu Actions:** Compartir mapa, Duplicar, Mover a Mis mapas, and Publicar en Universo are all non-functional placeholders.
     *   **Social Login:** Continue with GitHub button on login/register pages is not functional.
 
@@ -170,25 +153,22 @@ A major feature is the completely redesigned dashboard, which is now the default
 *   **Twilio WhatsApp API:** For receiving incoming messages.
 *   **react-beautiful-dnd:** For drag-and-drop functionality.
 *   **Emergent-managed Google Auth:** For social login and registration.
+*   **html2canvas:** **NEW**. For generating map thumbnail images on the client side.
 
 **Testing status**
-*   **Testing agent used after significant changes:** YES. The agent used the backend testing subagent to verify the new plan structure API endpoints.
-*   **Troubleshoot agent used after agent stuck in loop:** YES. The agent got stuck trying to fix the dropdown menu positioning and used multiple attempts before resolving it.
-*   **Test files created:** Test files were likely created by the backend testing agent in .
-*   **Known regressions:** The  layout has known, recurring regressions from the previous session.
+*   **Testing agent used after significant changes:** NO. The agent performed extensive manual testing using the screenshot tool for all UI changes and bug fixes.
+*   **Troubleshoot agent used after agent stuck in loop:** NO.
+*   **Test files created:** None in this session.
+*   **Known regressions:** The  layout has known, recurring regressions.
 
 **Credentials to test flow:**
 *   **Admin User:**
     *   Username: 
     *   Password: 
-*   **Free User (newly created):**
+*   **Free User (for testing upgrades):**
     *   Username: 
     *   Password: 
-*   **Free User (existing):**
-    *   Username: 
-    *   Password: (unknown, may need reset or use another account for testing)
 
 **What agent forgot to execute**
-*   **Data Migration:** The agent did not run the data migration script to initialize the  field for existing users. This is a critical pending task.
-*   **Full Implementation of Context Menu:** The agent built the UI for the context menu but left most of its actions (, , , ) as non-functional mocks.
-*   **Implementation of Importar:** The Importar button on the dashboard was added but is not connected to any functionality.</analysis>
+*   The agent has been focused on the user's immediate UI requests and has not yet addressed the higher-level Upcoming tasks from the initial product requirements, such as implementing the other context menu actions or integrating Stripe.
+*   The data migration for  for existing users remains pending.</analysis>

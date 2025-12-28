@@ -395,7 +395,23 @@ const DayDetailModal = ({ isOpen, onClose, date, reminders, onEditReminder, onTo
           ) : (
             <div className="space-y-3">
               {reminders
-                .sort((a, b) => new Date(a.reminder_date) - new Date(b.reminder_date))
+                .sort((a, b) => {
+                  const dateA = new Date(a.reminder_date || a.scheduled_datetime);
+                  const dateB = new Date(b.reminder_date || b.scheduled_datetime);
+                  const isOverdueA = dateA < now && !a.is_completed;
+                  const isOverdueB = dateB < now && !b.is_completed;
+                  
+                  // Completados al final
+                  if (a.is_completed && !b.is_completed) return 1;
+                  if (!a.is_completed && b.is_completed) return -1;
+                  
+                  // Vencidos después de vigentes
+                  if (isOverdueA && !isOverdueB) return 1;
+                  if (!isOverdueA && isOverdueB) return -1;
+                  
+                  // Dentro de cada grupo, ordenar por fecha
+                  return dateA - dateB;
+                })
                 .map(reminder => {
                   const reminderDate = new Date(reminder.reminder_date || reminder.scheduled_datetime);
                   const isOverdue = reminderDate < now && !reminder.is_completed;

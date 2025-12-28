@@ -549,6 +549,32 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
             />
           </div>
           
+          {/* Botones de vista (Grid / Lista) */}
+          <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden bg-white">
+            <button
+              onClick={() => setViewType('grid')}
+              className={`p-2.5 transition-colors ${
+                viewType === 'grid'
+                  ? 'bg-blue-50 text-blue-600 border-2 border-blue-500 rounded-xl -m-px'
+                  : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
+              }`}
+              title="Vista de cuadrícula"
+            >
+              <LayoutGrid size={18} />
+            </button>
+            <button
+              onClick={() => setViewType('list')}
+              className={`p-2.5 transition-colors ${
+                viewType === 'list'
+                  ? 'bg-blue-50 text-blue-600 border-2 border-blue-500 rounded-xl -m-px'
+                  : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
+              }`}
+              title="Vista de lista"
+            >
+              <ListIcon size={18} />
+            </button>
+          </div>
+          
           {/* Botón Crear */}
           <button
             onClick={() => onNewProject?.('blank')}

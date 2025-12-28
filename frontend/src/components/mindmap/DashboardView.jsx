@@ -977,15 +977,9 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
                       onClick={() => onClose?.(project.id)}
                       className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg hover:border-blue-300 transition-all cursor-pointer group relative"
                     >
-                      {/* Preview del mapa */}
-                      <div className="w-full h-32 rounded-lg bg-gradient-to-br from-gray-50 to-gray-100 mb-3 flex items-center justify-center overflow-hidden">
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 rounded-full bg-blue-400"></div>
-                          <div className="w-8 h-0.5 bg-gray-300"></div>
-                          <div className="w-3 h-3 rounded-full bg-green-400"></div>
-                          <div className="w-6 h-0.5 bg-gray-300"></div>
-                          <div className="w-3 h-3 rounded-full bg-purple-400"></div>
-                        </div>
+                      {/* Preview del mapa - Miniatura real */}
+                      <div className="w-full h-32 rounded-lg overflow-hidden mb-3 border border-gray-100">
+                        <MapThumbnail nodes={project.nodes} />
                       </div>
 
                       {/* Nombre del proyecto */}

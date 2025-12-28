@@ -182,6 +182,14 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
   const [activeView, setActiveView] = useState('dashboard'); // 'projects' | 'dashboard' | 'templates' | 'integrations'
   const [isProjectsSidebarOpen, setIsProjectsSidebarOpen] = useState(false); // Inicialmente cerrado cuando está en dashboard
 
+  // Efecto para navegar desde notificaciones
+  useEffect(() => {
+    if (forceView) {
+      setActiveView(forceView);
+      if (clearForceView) clearForceView();
+    }
+  }, [forceView, clearForceView]);
+
   // Estado para alineación automática (ON por defecto)
   const [autoAlignEnabled, setAutoAlignEnabled] = useState(true);
 

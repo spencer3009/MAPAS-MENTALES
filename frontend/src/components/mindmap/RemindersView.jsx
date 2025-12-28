@@ -716,21 +716,19 @@ const WeekView = ({ currentDate, reminders, onTimeSlotClick, remindersByDate, on
 };
 
 // ==================== VISTA DÍA ====================
-const DayView = ({ currentDate, reminders, onTimeSlotClick, remindersByDate, onEditReminder, onToggleComplete, onCreateReminder }) => {
+const DayView = ({ currentDate, reminders, onTimeSlotClick, remindersByDate, onDayClick, onEditReminder }) => {
   const dateKey = `${currentDate.getFullYear()}-${currentDate.getMonth()}-${currentDate.getDate()}`;
   const dayReminders = remindersByDate[dateKey] || [];
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const isToday = currentDate.getTime() === today.getTime();
   
-  const [showDayModal, setShowDayModal] = useState(false);
-  
   return (
     <div className="flex-1 p-4 pb-16 overflow-hidden">
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden h-full flex flex-col">
         {/* Header del día - clickeable para ver todos los recordatorios */}
         <div 
-          onClick={() => setShowDayModal(true)}
+          onClick={() => onDayClick(currentDate)}
           className={`py-4 px-6 border-b border-gray-200 cursor-pointer hover:bg-blue-100 transition-colors ${isToday ? 'bg-blue-50' : 'bg-gray-50'}`}
         >
           <div className="flex items-center justify-between">

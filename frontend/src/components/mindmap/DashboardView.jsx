@@ -130,13 +130,24 @@ const DashboardView = ({ projects = [], onClose, token, user, onNewProject, onOp
   // Cerrar menú al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event) => {
+      // Ignorar clics en el botón de menú
+      if (event.target.closest('button[title="Acciones del mapa"]')) {
+        return;
+      }
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setOpenMenuId(null);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
+    
+    if (openMenuId) {
+      // Agregar listener solo cuando hay un menú abierto
+      setTimeout(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+      }, 10);
+    }
+    
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [openMenuId]);
 
   // Cargar información del plan
   useEffect(() => {

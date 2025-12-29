@@ -6149,3 +6149,14 @@ Verify the group node movement feature in the mind map editor:
 - Nodes should maintain relative positions during group drag
 - Selection should NOT be cleared when clicking on an already-selected node
 
+## Canvas Grid & Rulers Implementation - Mon Dec 29 06:05:43 UTC 2025
+
+### Feature: Visual Guides for Mind Map Canvas
+1. Canvas Grid - lightweight background grid that moves with pan/zoom
+2. Horizontal Ruler - top ruler showing X coordinates
+3. Vertical Ruler - left ruler showing Y coordinates
+
+### Test Credentials:
+- Username: spencer3009
+- Password: Socios3009
+

@@ -249,21 +249,27 @@ const NodeItem = memo(({
   };
 
   // ==========================================
-  // RESIZE HANDLE
+  // RESIZE HANDLES (4 lados: arriba, abajo, izquierda, derecha)
   // ==========================================
   
-  const handleResizeStart = useCallback((e) => {
+  // Crear handler de resize para una dirección específica
+  const createResizeHandler = useCallback((direction) => (e) => {
     e.stopPropagation();
     e.preventDefault();
     
     setIsResizing(true);
     resizeStartRef.current = {
+      direction,
       startX: e.clientX,
       startY: e.clientY,
       startWidth: nodeWidth,
       startHeight: nodeHeight,
+      startNodeX: node.x,
+      startNodeY: node.y,
       currentWidth: nodeWidth,
-      currentHeight: nodeHeight
+      currentHeight: nodeHeight,
+      currentX: node.x,
+      currentY: node.y
     };
 
     const handleResizeMove = (moveEvent) => {
@@ -272,15 +278,45 @@ const NodeItem = memo(({
       const deltaX = moveEvent.clientX - resizeStartRef.current.startX;
       const deltaY = moveEvent.clientY - resizeStartRef.current.startY;
       
-      const newWidth = Math.max(MIN_WIDTH, resizeStartRef.current.startWidth + deltaX);
-      const newHeight = Math.max(MIN_HEIGHT, resizeStartRef.current.startHeight + deltaY);
+      let newWidth = resizeStartRef.current.startWidth;
+      let newHeight = resizeStartRef.current.startHeight;
+      let newX = resizeStartRef.current.startNodeX;
+      let newY = resizeStartRef.current.startNodeY;
       
-      // Guardar las dimensiones actuales en el ref
+      switch (resizeStartRef.current.direction) {
+        case 'top':
+          // Arrastrar desde arriba: ajustar altura y posición Y
+          newHeight = Math.max(MIN_HEIGHT, resizeStartRef.current.startHeight - deltaY);
+          newY = resizeStartRef.current.startNodeY + (resizeStartRef.current.startHeight - newHeight);
+          break;
+        case 'bottom':
+          // Arrastrar desde abajo: solo ajustar altura
+          newHeight = Math.max(MIN_HEIGHT, resizeStartRef.current.startHeight + deltaY);
+          break;
+        case 'left':
+          // Arrastrar desde la izquierda: ajustar ancho y posición X
+          newWidth = Math.max(MIN_WIDTH, resizeStartRef.current.startWidth - deltaX);
+          newX = resizeStartRef.current.startNodeX + (resizeStartRef.current.startWidth - newWidth);
+          break;
+        case 'right':
+          // Arrastrar desde la derecha: solo ajustar ancho
+          newWidth = Math.max(MIN_WIDTH, resizeStartRef.current.startWidth + deltaX);
+          break;
+        default:
+          break;
+      }
+      
+      // Guardar las dimensiones y posición actuales en el ref
       resizeStartRef.current.currentWidth = Math.round(newWidth);
       resizeStartRef.current.currentHeight = Math.round(newHeight);
+      resizeStartRef.current.currentX = Math.round(newX);
+      resizeStartRef.current.currentY = Math.round(newY);
       
       if (onUpdateSize) {
-        onUpdateSize(node.id, Math.round(newWidth), Math.round(newHeight), false);
+        onUpdateSize(node.id, Math.round(newWidth), Math.round(newHeight), false, {
+          x: Math.round(newX),
+          y: Math.round(newY)
+        });
       }
     };
 
@@ -289,7 +325,12 @@ const NodeItem = memo(({
         // Usar las dimensiones finales del ref
         const finalWidth = resizeStartRef.current.currentWidth;
         const finalHeight = resizeStartRef.current.currentHeight;
-        onUpdateSize(node.id, finalWidth, finalHeight, true);
+        const finalX = resizeStartRef.current.currentX;
+        const finalY = resizeStartRef.current.currentY;
+        onUpdateSize(node.id, finalWidth, finalHeight, true, {
+          x: finalX,
+          y: finalY
+        });
       }
       
       setIsResizing(false);
@@ -300,7 +341,13 @@ const NodeItem = memo(({
 
     document.addEventListener('mousemove', handleResizeMove);
     document.addEventListener('mouseup', handleResizeEnd);
-  }, [node.id, nodeWidth, nodeHeight, onUpdateSize]);
+  }, [node.id, node.x, node.y, nodeWidth, nodeHeight, onUpdateSize]);
+
+  // Handlers individuales para cada dirección
+  const handleResizeTop = createResizeHandler('top');
+  const handleResizeBottom = createResizeHandler('bottom');
+  const handleResizeLeft = createResizeHandler('left');
+  const handleResizeRight = createResizeHandler('right');
 
   // Exponer método para iniciar edición
   const startEdit = useCallback(() => {

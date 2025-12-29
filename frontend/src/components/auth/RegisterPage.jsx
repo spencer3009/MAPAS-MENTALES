@@ -44,7 +44,14 @@ const FEATURES = [
   }
 ];
 
-const RegisterPage = ({ onBackToLanding, onSwitchToLogin }) => {
+// Nombres de planes para mostrar
+const PLAN_DISPLAY_NAMES = {
+  'personal': { name: 'Personal', price: '$3/mes', color: 'blue' },
+  'team': { name: 'Team', price: '$8/mes', color: 'indigo' },
+  'enterprise': { name: 'Enterprise', price: '$24/mes', color: 'violet' }
+};
+
+const RegisterPage = ({ onBackToLanding, onSwitchToLogin, selectedPlan }) => {
   const { register, loginWithGoogle, loading, error, clearError } = useAuth();
   const [formData, setFormData] = useState({
     nombre: '',

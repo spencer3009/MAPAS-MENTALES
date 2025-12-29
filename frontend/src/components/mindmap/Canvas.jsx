@@ -381,10 +381,9 @@ const Canvas = ({
 
   const handleToolbarDuplicate = useCallback(() => {
     if (selectedNodeId) {
-      // Pasar el flag de autoAlign para posicionar correctamente el duplicado
-      onDuplicateNode(selectedNodeId, autoAlignEnabled);
+      handleDuplicateWithAutoAlign(selectedNodeId);
     }
-  }, [selectedNodeId, onDuplicateNode, autoAlignEnabled]);
+  }, [selectedNodeId, handleDuplicateWithAutoAlign]);
 
   const handleToolbarDelete = useCallback(() => {
     if (selectedNodeId) {

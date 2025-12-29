@@ -617,8 +617,8 @@ const Canvas = ({
         <div 
           className="absolute inset-0 pointer-events-none"
           style={{ 
-            marginTop: showRulers ? RULER_SIZE : 0, 
-            marginLeft: showRulers ? RULER_SIZE : 0 
+            marginTop: rulerOffset, 
+            marginLeft: rulerOffset 
           }}
         >
           <CanvasGrid pan={pan} zoom={zoom} />
@@ -629,7 +629,7 @@ const Canvas = ({
       <div
         className="absolute origin-top-left will-change-transform"
         style={{
-          transform: `translate(${pan.x + (showRulers ? RULER_SIZE : 0)}px, ${pan.y + (showRulers ? RULER_SIZE : 0)}px) scale(${zoom})`,
+          transform: `translate(${pan.x + rulerOffset}px, ${pan.y + rulerOffset}px) scale(${zoom})`,
           width: '5000px',
           height: '5000px'
         }}

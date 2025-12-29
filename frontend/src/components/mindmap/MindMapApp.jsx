@@ -178,6 +178,9 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
   const [showTrashView, setShowTrashView] = useState(false);
   const [trashCount, setTrashCount] = useState(0);
 
+  // Estado para el modo de interacción: 'hand' (mover lienzo) o 'pointer' (seleccionar)
+  const [interactionMode, setInteractionMode] = useState('hand');
+
   // Estado para el Dock y vistas principales
   const [activeView, setActiveView] = useState('dashboard'); // 'projects' | 'dashboard' | 'templates' | 'integrations'
   const [isProjectsSidebarOpen, setIsProjectsSidebarOpen] = useState(false); // Inicialmente cerrado cuando está en dashboard

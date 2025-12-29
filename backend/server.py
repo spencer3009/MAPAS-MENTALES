@@ -441,6 +441,26 @@ async def register(register_data: RegisterRequest):
     
     await db.user_profiles.insert_one(user_profile)
     
+    # Si hay un mapa demo, convertirlo en el primer proyecto del usuario
+    if register_data.demo_map:
+        demo_map = register_data.demo_map
+        now = datetime.now(timezone.utc).isoformat()
+        
+        # Crear el proyecto desde el mapa demo
+        new_project = {
+            "project_id": f"proj_{uuid.uuid4().hex[:12]}",
+            "username": register_data.username,
+            "name": demo_map.name or "Mi primer mapa",
+            "description": "Mapa creado desde la demo",
+            "layout_type": demo_map.layoutType or "mindflow",
+            "nodes": [node.dict() for node in demo_map.nodes],
+            "created_at": now,
+            "updated_at": now,
+            "from_demo": True  # Marcar que viene del modo demo
+        }
+        
+        await db.projects.insert_one(new_project)
+    
     # Crear token de acceso
     access_token = create_access_token(data={"sub": register_data.username})
     

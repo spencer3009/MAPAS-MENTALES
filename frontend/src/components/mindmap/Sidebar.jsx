@@ -1,8 +1,8 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { 
   Plus, FileText, Trash2, Check, Pencil, 
   Bell, Pin, PinOff, GripVertical, ArrowUpDown, ExternalLink, Archive,
-  Crown, Zap, Sparkles
+  Crown, Zap, Sparkles, MoreHorizontal
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';

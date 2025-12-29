@@ -6512,3 +6512,48 @@ When duplicating a child node with auto-align enabled:
 - Username: spencer3009
 - Password: Socios3009
 
+## Demo Mode Implementation - Sun Dec 29 2025
+
+### Feature: "Ver demo" mode for unregistered users
+Allow users to try Mindora without registering, with nothing saved until they create an account.
+
+### Test Credentials (for existing user login):
+- Username: spencer3009
+- Password: Socios3009
+
+### Test Scenarios:
+
+#### 1. Demo Mode Entry
+- Click "Ver demo" button on landing page
+- Should navigate to demo editor
+- Should show demo banner at top: "Estás en modo demo. Los cambios no se guardarán."
+
+#### 2. Demo Map Interaction
+- Demo map should show 4 example nodes: "Mi Idea Principal", "Primer concepto", "Segundo concepto", "Tercer concepto"
+- User can create new nodes
+- User can move nodes
+- User can edit node text
+- User can delete nodes
+- Undo/redo should work
+
+#### 3. Save Modal Trigger
+- Click "Guardar mi mapa" button in toolbar or banner
+- Should show save modal with options:
+  - "Crear cuenta gratis"
+  - "Ya tengo cuenta"
+
+#### 4. Exit Demo Modal
+- Click "Volver al inicio" after making changes
+- If nodes were modified, show exit modal asking to save
+
+#### 5. Demo Map Transfer on Registration
+- Create/modify nodes in demo mode
+- Click "Crear cuenta gratis"
+- Complete registration with new user
+- After registration, the demo map should become the first project
+- New project should have "from_demo": true flag in database
+
+### Backend Changes:
+- RegisterRequest model now accepts optional `demo_map` field
+- `/api/auth/register` endpoint saves demo map as first project if provided
+

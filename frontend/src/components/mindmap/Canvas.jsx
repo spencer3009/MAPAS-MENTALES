@@ -86,6 +86,9 @@ const Canvas = ({
   const [selectionBox, setSelectionBox] = useState(null);
   const [isSelectingArea, setIsSelectingArea] = useState(false);
 
+  // Offset para las reglas (0 si están ocultas)
+  const rulerOffset = showRulers ? RULER_SIZE : 0;
+
   // Obtener nodo seleccionado (para toolbar individual)
   const selectedNode = selectedNodeIds.size === 0 ? nodes.find(n => n.id === selectedNodeId) : null;
 

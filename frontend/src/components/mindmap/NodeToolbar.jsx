@@ -11,7 +11,9 @@ import {
   AlignLeft,
   AlignCenter,
   AlignRight,
-  CheckCircle2
+  CheckCircle2,
+  MousePointer2,
+  Hand
 } from 'lucide-react';
 
 const ToolbarButton = ({ icon: Icon, label, onClick, danger = false, active = false, hasIndicator = false, badge = null }) => (
@@ -19,7 +21,7 @@ const ToolbarButton = ({ icon: Icon, label, onClick, danger = false, active = fa
     onClick={onClick}
     onMouseDown={(e) => e.stopPropagation()}
     className={`
-      relative p-2 rounded-lg transition-all duration-150
+      relative p-2.5 rounded-lg transition-all duration-150
       flex items-center justify-center
       ${danger 
         ? 'text-red-500 hover:bg-red-50 hover:text-red-600' 
@@ -30,12 +32,12 @@ const ToolbarButton = ({ icon: Icon, label, onClick, danger = false, active = fa
     `}
     title={label}
   >
-    <Icon size={16} />
+    <Icon size={18} />
     {hasIndicator && !badge && (
-      <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-500 rounded-full" />
+      <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-blue-500 rounded-full" />
     )}
     {badge !== null && badge > 0 && (
-      <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-blue-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+      <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-blue-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
         {badge}
       </span>
     )}
@@ -43,7 +45,7 @@ const ToolbarButton = ({ icon: Icon, label, onClick, danger = false, active = fa
 );
 
 const Divider = () => (
-  <div className="w-px h-6 bg-gray-200 mx-0.5" />
+  <div className="w-px h-7 bg-gray-200 mx-1" />
 );
 
 const NodeToolbar = ({

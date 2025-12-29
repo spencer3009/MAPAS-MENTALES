@@ -6322,3 +6322,15 @@ Verify the group node movement feature in the mind map editor:
 - Username: spencer3009
 - Password: Socios3009
 
+## Duplicate Node with Auto-Align - Mon Dec 29 06:25:18 UTC 2025
+
+### Feature: Auto-aligned node duplication
+When duplicating a child node with auto-align enabled:
+1. The duplicate should be positioned correctly among siblings
+2. It should maintain proper margins and alignment
+3. It should NOT overlap with other nodes
+
+### Test Credentials:
+- Username: spencer3009
+- Password: Socios3009
+

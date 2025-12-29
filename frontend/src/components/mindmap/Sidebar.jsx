@@ -43,23 +43,29 @@ const Sidebar = ({
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [draggedProject, setDraggedProject] = useState(null);
   const [planInfo, setPlanInfo] = useState(null);
-  const [openMenuId, setOpenMenuId] = useState(null); // Estado para el menú desplegable
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const menuContainerRef = useRef(null);
+  const menuButtonRefs = useRef({});
 
   // Cerrar menú al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // Verificar si el clic fue dentro del contenedor del menú
       if (menuContainerRef.current && !menuContainerRef.current.contains(event.target)) {
-        setOpenMenuId(null);
+        // Verificar si el clic fue en algún botón de menú
+        const isMenuButton = Object.values(menuButtonRefs.current).some(
+          ref => ref && ref.contains(event.target)
+        );
+        if (!isMenuButton) {
+          setOpenMenuId(null);
+        }
       }
     };
     
     if (openMenuId) {
-      // Usar setTimeout para evitar que el evento se dispare inmediatamente
       const timeoutId = setTimeout(() => {
         document.addEventListener('mousedown', handleClickOutside);
-      }, 0);
+      }, 10);
       
       return () => {
         clearTimeout(timeoutId);

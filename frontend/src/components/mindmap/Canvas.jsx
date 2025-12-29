@@ -626,7 +626,7 @@ const Canvas = ({
       <div
         className="absolute origin-top-left will-change-transform"
         style={{
-          transform: `translate(${pan.x + RULER_SIZE}px, ${pan.y + RULER_SIZE}px) scale(${zoom})`,
+          transform: `translate(${pan.x + (showRulers ? RULER_SIZE : 0)}px, ${pan.y + (showRulers ? RULER_SIZE : 0)}px) scale(${zoom})`,
           width: '5000px',
           height: '5000px'
         }}

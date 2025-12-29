@@ -407,73 +407,93 @@ const Sidebar = ({
                 </div>
               </div>
               
-              {/* Botones de acción - visibles en hover */}
-              {!isReorderMode && (
-                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
-                  {!isEditing && (
-                    <>
-                      {/* Pin/Unpin button */}
+              {/* Botón de menú de tres puntos */}
+              {!isReorderMode && !isEditing && (
+                <div className="absolute top-2 right-2" ref={openMenuId === project.id ? menuRef : null}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenMenuId(openMenuId === project.id ? null : project.id);
+                    }}
+                    className={`
+                      p-1.5 rounded-lg transition-all duration-200
+                      ${openMenuId === project.id
+                        ? 'bg-gray-200 text-gray-700'
+                        : 'opacity-0 group-hover:opacity-100 bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700'
+                      }
+                    `}
+                    title="Opciones"
+                  >
+                    <MoreHorizontal size={16} />
+                  </button>
+                  
+                  {/* Menú desplegable */}
+                  {openMenuId === project.id && (
+                    <div className="absolute top-full right-0 mt-1 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-1.5 z-50">
+                      {/* Anclar arriba */}
                       <button
-                        onClick={(e) => handlePinProject(project.id, !isPinned, e)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePinProject(project.id, !isPinned, e);
+                          setOpenMenuId(null);
+                        }}
                         disabled={!canPin && !isPinned}
                         className={`
-                          p-1.5 rounded-lg transition-all duration-200
-                          ${isPinned 
-                            ? 'bg-amber-100 hover:bg-amber-200 text-amber-600' 
-                            : canPin
-                              ? 'bg-gray-50 hover:bg-amber-100 text-gray-500 hover:text-amber-600'
-                              : 'bg-gray-50 text-gray-300 cursor-not-allowed'
+                          w-full px-3 py-2 text-left text-sm flex items-center gap-2.5
+                          ${!canPin && !isPinned 
+                            ? 'text-gray-300 cursor-not-allowed' 
+                            : 'text-gray-700 hover:bg-gray-50'
                           }
+                          transition-colors duration-150
                         `}
-                        title={isPinned ? 'Desanclar' : canPin ? 'Anclar arriba' : 'Máximo 2 anclados'}
                       >
-                        {isPinned ? <PinOff size={12} /> : <Pin size={12} />}
+                        {isPinned ? <PinOff size={16} className="text-gray-400" /> : <Pin size={16} className="text-gray-400" />}
+                        {isPinned ? 'Desanclar' : 'Anclar arriba'}
                       </button>
                       
+                      {/* Editar nombre */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleStartEdit(project, e);
+                          setOpenMenuId(null);
+                        }}
+                        className="w-full px-3 py-2 text-left text-sm flex items-center gap-2.5 text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                      >
+                        <Pencil size={16} className="text-gray-400" />
+                        Editar nombre
+                      </button>
+                      
+                      {/* Recordatorio */}
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           if (onProjectReminder) onProjectReminder(project);
+                          setOpenMenuId(null);
                         }}
-                        className="
-                          p-1.5 rounded-lg
-                          bg-purple-50 hover:bg-purple-100
-                          text-purple-500 hover:text-purple-600
-                          transition-all duration-200
-                        "
-                        title="Recordatorio de proyecto"
+                        className="w-full px-3 py-2 text-left text-sm flex items-center gap-2.5 text-gray-700 hover:bg-gray-50 transition-colors duration-150"
                       >
-                        <Bell size={12} />
+                        <Bell size={16} className="text-gray-400" />
+                        Recordatorio
                       </button>
+                      
+                      {/* Separador */}
+                      <div className="h-px bg-gray-100 my-1.5" />
+                      
+                      {/* Eliminar */}
                       <button
-                        onClick={(e) => handleStartEdit(project, e)}
-                        className="
-                          p-1.5 rounded-lg
-                          bg-gray-50 hover:bg-gray-100
-                          text-gray-500 hover:text-gray-600
-                          transition-all duration-200
-                        "
-                        title="Renombrar proyecto"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteProject(project.id);
+                          setOpenMenuId(null);
+                        }}
+                        className="w-full px-3 py-2 text-left text-sm flex items-center gap-2.5 text-red-500 hover:bg-red-50 transition-colors duration-150"
                       >
-                        <Pencil size={12} />
+                        <Trash2 size={16} />
+                        Eliminar
                       </button>
-                    </>
+                    </div>
                   )}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDeleteProject(project.id);
-                    }}
-                    className="
-                      p-1.5 rounded-lg
-                      bg-red-50 hover:bg-red-100
-                      text-red-500 hover:text-red-600
-                      transition-all duration-200
-                    "
-                    title="Eliminar proyecto"
-                  >
-                    <Trash2 size={12} />
-                  </button>
                 </div>
               )}
             </div>

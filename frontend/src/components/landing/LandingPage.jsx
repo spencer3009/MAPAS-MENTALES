@@ -57,7 +57,9 @@ const LandingPage = ({ onLogin, onRegister, onDemo, onTerms, onPrivacy, onCookie
 
   // Handler para seleccionar un plan
   const handlePlanSelect = (plan) => {
-    if (plan.name === 'free' || plan.price === 0 || plan.price === '$0') {
+    const planName = (plan.name || plan.id || '').toLowerCase();
+    
+    if (planName === 'free' || plan.price === 0 || plan.price === '$0') {
       // Plan gratuito -> ir a registro
       onRegister();
     } else if (plan.coming_soon) {
@@ -66,7 +68,7 @@ const LandingPage = ({ onLogin, onRegister, onDemo, onTerms, onPrivacy, onCookie
     } else {
       // Plan de pago -> notificar con el plan seleccionado
       if (onSelectPlan) {
-        onSelectPlan(plan.name || plan.id);
+        onSelectPlan(planName);
       } else {
         // Fallback: ir a registro
         onRegister();

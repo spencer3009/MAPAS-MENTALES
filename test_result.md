@@ -5963,3 +5963,22 @@ Verify that all calendar views (Year, Month, Week, Day) have full interactivity 
 - Week View: Click day header → DayDetailModal opens
 - Day View: Click day header → DayDetailModal opens
 - Create Reminder: Click "Crear recordatorio" → Form opens with date pre-filled
+## Group Node Movement Testing - Mon Dec 29 05:47:35 UTC 2025
+
+### Test Objective:
+Verify the group node movement feature in the mind map editor:
+1. Select multiple nodes using CTRL+click or marquee selection
+2. Drag any selected node to move all selected nodes together
+3. Verify nodes maintain their relative positions
+4. Verify connectors update correctly
+
+### Test Credentials:
+- Username: spencer3009
+- Password: Socios3009
+
+### Expected Behavior:
+- When in Pointer mode, user can draw a selection rectangle to select multiple nodes
+- When multiple nodes are selected (shown as '2 seleccionados' toolbar), dragging any selected node moves ALL selected nodes
+- Nodes should maintain relative positions during group drag
+- Selection should NOT be cleared when clicking on an already-selected node
+

@@ -42,6 +42,25 @@ const Sidebar = ({
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [draggedProject, setDraggedProject] = useState(null);
   const [planInfo, setPlanInfo] = useState(null);
+  const [openMenuId, setOpenMenuId] = useState(null); // Estado para el menú desplegable
+  const menuRef = useRef(null);
+
+  // Cerrar menú al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpenMenuId(null);
+      }
+    };
+    
+    if (openMenuId) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [openMenuId]);
 
   // Cargar información del plan
   useEffect(() => {

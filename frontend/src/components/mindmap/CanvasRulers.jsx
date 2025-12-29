@@ -191,13 +191,13 @@ const VerticalRuler = ({ pan, zoom, height, mouseY }) => {
             />
             {tick.isMajor && (
               <text
-                x={2}
-                y={tick.position - 3}
-                fontSize="9"
+                x={10}
+                y={tick.position + 3}
+                fontSize="8"
                 fill="#64748b"
                 fontFamily="system-ui, -apple-system, sans-serif"
-                writingMode="vertical-rl"
-                transform={`rotate(180, 10, ${tick.position - 3})`}
+                textAnchor="middle"
+                transform={`rotate(-90, 10, ${tick.position + 3})`}
               >
                 {tick.value}
               </text>

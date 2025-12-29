@@ -421,20 +421,24 @@ const Sidebar = ({
               
               {/* Botón de menú de tres puntos */}
               {!isReorderMode && !isEditing && (
-                <div 
-                  className="absolute top-2 right-2"
-                  ref={openMenuId === project.id ? menuContainerRef : null}
-                >
+                <div className="absolute top-2 right-2">
                   <button
+                    ref={el => menuButtonRefs.current[project.id] = el}
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      console.log('Menu button clicked for project:', project.id, 'Current openMenuId:', openMenuId);
-                      setOpenMenuId(prev => {
-                        const newValue = prev === project.id ? null : project.id;
-                        console.log('Setting openMenuId to:', newValue);
-                        return newValue;
-                      });
+                      
+                      if (openMenuId === project.id) {
+                        setOpenMenuId(null);
+                      } else {
+                        // Calcular posición del menú
+                        const buttonRect = e.currentTarget.getBoundingClientRect();
+                        setMenuPosition({
+                          top: buttonRect.top,
+                          left: buttonRect.right + 8
+                        });
+                        setOpenMenuId(project.id);
+                      }
                     }}
                     className={`
                       p-1.5 rounded-lg transition-all duration-200

@@ -185,17 +185,7 @@ const Toolbar = ({
 
       {/* Grupo derecho: Exportación, Notificaciones y Usuario */}
       <div className="flex items-center gap-2">
-        <ToolbarButton
-          icon={<FileJson size={18} />}
-          text="JSON"
-          onClick={onExportJSON}
-        />
-        
-        <ToolbarButton
-          icon={<Image size={18} />}
-          text="PNG"
-          onClick={onExportPNG}
-        />
+        <ExportMenu projectName={projectName} />
 
         <Divider />
 

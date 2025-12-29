@@ -212,16 +212,18 @@ const NodeToolbar = ({
 
       {/* Contenedor de botones */}
       <div className="flex items-center gap-1 px-1.5 py-2">
-        {/* Herramientas de selección */}
+        {/* Herramientas de modo de interacción */}
         <ToolbarButton 
           icon={MousePointer2} 
-          label="Seleccionar"
-          onClick={() => {}}
+          label="Modo Puntero (seleccionar por área)"
+          onClick={() => onSetInteractionMode?.('pointer')}
+          active={interactionMode === 'pointer'}
         />
         <ToolbarButton 
           icon={Hand} 
-          label="Mover"
-          onClick={() => {}}
+          label="Modo Mano (mover lienzo)"
+          onClick={() => onSetInteractionMode?.('hand')}
+          active={interactionMode === 'hand'}
         />
         
         <Divider />

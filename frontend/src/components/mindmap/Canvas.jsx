@@ -612,6 +612,10 @@ const Canvas = ({
         onSetInteractionMode={onSetInteractionMode}
         onEnterFullscreen={onEnterFullscreen}
         isFullscreen={isFullscreen}
+        showGrid={showGrid}
+        showRulers={showRulers}
+        onToggleGrid={onToggleGrid}
+        onToggleRulers={onToggleRulers}
       />
 
       {/* Cuadrícula del lienzo */}

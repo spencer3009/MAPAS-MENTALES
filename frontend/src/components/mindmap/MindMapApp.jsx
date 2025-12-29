@@ -1195,6 +1195,8 @@ const MindMapApp = (props) => {
         onNavigateToReminders={handleNavigateToReminders}
         forceView={activeViewForNav}
         clearForceView={() => setActiveViewForNav(null)}
+        pendingPlanId={props.pendingPlanId}
+        onClearPendingPlan={props.onClearPendingPlan}
       />
     </NotificationProvider>
   );

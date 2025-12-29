@@ -99,18 +99,32 @@ const NodeToolbar = ({
         absolute z-40
         bg-white rounded-xl shadow-xl
         border border-gray-200
-        flex items-center gap-0.5 p-1.5
+        flex items-center gap-1 p-2
         animate-in fade-in slide-in-from-bottom-2 duration-200
       "
       style={{
         left: position.x,
         top: position.y,
-        transform: 'translateX(-50%)'
+        transform: 'translateX(-55%)'
       }}
       onMouseDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
     >
-      {/* Marcar como completado (tachado) - PRIMERO EN EL TOOLBAR */}
+      {/* Herramientas de selección - NUEVOS ICONOS */}
+      <ToolbarButton 
+        icon={MousePointer2} 
+        label="Seleccionar"
+        onClick={() => {}}
+      />
+      <ToolbarButton 
+        icon={Hand} 
+        label="Mover"
+        onClick={() => {}}
+      />
+      
+      <Divider />
+
+      {/* Marcar como completado (tachado) */}
       <ToolbarButton 
         icon={CheckCircle2} 
         label={isCompleted ? "Desmarcar tarea" : "Marcar como completada"}

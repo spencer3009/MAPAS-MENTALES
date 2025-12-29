@@ -175,6 +175,20 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
   // Estado para el modal de Upgrade a Pro
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradeLimitType, setUpgradeLimitType] = useState('active');
+  const [pendingPlanForPayment, setPendingPlanForPayment] = useState(null);
+
+  // Efecto para abrir modal de PayPal si hay un plan pendiente
+  useEffect(() => {
+    if (pendingPlanId && !showUpgradeModal) {
+      setPendingPlanForPayment(pendingPlanId);
+      setUpgradeLimitType('active');
+      setShowUpgradeModal(true);
+      // Limpiar el plan pendiente después de mostrarlo
+      if (onClearPendingPlan) {
+        onClearPendingPlan();
+      }
+    }
+  }, [pendingPlanId, showUpgradeModal, onClearPendingPlan]);
 
   // Estado para la Papelera
   const [showTrashView, setShowTrashView] = useState(false);

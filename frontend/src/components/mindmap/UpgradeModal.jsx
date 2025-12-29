@@ -3,13 +3,30 @@ import { X, Crown, Zap, Infinity, CheckCircle2, Sparkles, Loader2, CreditCard, S
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
-const UpgradeModal = ({ isOpen, onClose, limitType = 'active', onUpgrade, token }) => {
+const UpgradeModal = ({ isOpen, onClose, limitType = 'active', onUpgrade, token, initialPlan }) => {
   const [upgradePlan, setUpgradePlan] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showPayment, setShowPayment] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState('personal');
+  const [selectedPlan, setSelectedPlan] = useState(initialPlan || 'personal');
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState(null);
+
+  // Si hay un plan inicial, ir directamente a la vista de pago
+  useEffect(() => {
+    if (isOpen && initialPlan) {
+      setSelectedPlan(initialPlan);
+      setShowPayment(true);
+    }
+  }, [isOpen, initialPlan]);
+
+  // Reset cuando se cierra
+  useEffect(() => {
+    if (!isOpen) {
+      setShowPayment(false);
+      setError(null);
+      setSelectedPlan(initialPlan || 'personal');
+    }
+  }, [isOpen, initialPlan]);
 
   // Planes disponibles
   const PLANS = {

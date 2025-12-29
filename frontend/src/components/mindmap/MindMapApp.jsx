@@ -917,7 +917,10 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
         />
 
         {/* Canvas y Sidebar derecho */}
-        <div className="flex-1 flex overflow-hidden">
+        <div 
+          ref={fullscreenContainerRef}
+          className={`flex-1 flex overflow-hidden ${isFullscreen ? 'fixed inset-0 z-[9998] bg-slate-50' : ''}`}
+        >
           {/* Canvas principal */}
           <Canvas
             nodes={nodesWithReminders}
@@ -972,6 +975,10 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
             onAlignTextRight={alignSingleNodeTextRight}
             onToggleNodeCompleted={toggleNodeCompleted}
             layoutType={currentLayoutType}
+            isFullscreen={isFullscreen}
+            onEnterFullscreen={enterFullscreen}
+            showGrid={isFullscreen ? showGridInFullscreen : true}
+            showRulers={isFullscreen ? showRulersInFullscreen : true}
             />
 
           {/* Toolbar de selección múltiple */}

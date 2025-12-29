@@ -103,9 +103,9 @@ const NodeToolbar = ({
         animate-in fade-in slide-in-from-bottom-2 duration-200
       "
       style={{
-        left: position.x,
+        left: `calc(${position.x}px - 50%)`,
         top: position.y - 4,
-        transform: 'translateX(-50%)'
+        transform: 'translateX(0)'
       }}
       onMouseDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}

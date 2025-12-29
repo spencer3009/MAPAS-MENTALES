@@ -285,6 +285,19 @@ const RegisterPage = ({ onBackToLanding, onSwitchToLogin }) => {
               </div>
             )}
 
+            {/* Banner de mapa demo pendiente */}
+            {hasDemoMapToSave && (
+              <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl animate-in fade-in duration-300">
+                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                  <Map size={20} className="text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-emerald-800">¡Tu mapa está listo!</p>
+                  <p className="text-xs text-emerald-600 mt-0.5">Tu mapa de la demo se guardará automáticamente al crear tu cuenta.</p>
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Nombre y Apellidos */}
               <div className="grid grid-cols-2 gap-3">

@@ -769,14 +769,27 @@ export const useNodes = () => {
   // ==========================================
 
   // Función auxiliar para obtener la altura de un nodo
+  // Prioridad: manualHeight > height > altura calculada
   const getNodeHeight = useCallback((node) => {
+    // Si tiene altura manual definida por el usuario, usarla siempre
+    if (node.manualHeight && node.manualHeight > 0) return node.manualHeight;
+    // Si tiene altura definida, usarla
     if (node.height && node.height > 0) return node.height;
+    // Calcular altura basada en el contenido
     const baseHeight = 64;
     const text = node.text || '';
-    const nodeWidth = node.width || 160;
+    const nodeWidth = node.manualWidth || node.width || 160;
     const charsPerLine = Math.floor(nodeWidth / 9);
     const estimatedLines = Math.max(1, Math.ceil(text.length / charsPerLine));
     return Math.max(baseHeight, 30 + (estimatedLines * 22));
+  }, []);
+
+  // Función auxiliar para obtener el ancho de un nodo
+  // Prioridad: manualWidth > width > ancho por defecto
+  const getNodeWidth = useCallback((node) => {
+    if (node.manualWidth && node.manualWidth > 0) return node.manualWidth;
+    if (node.width && node.width > 0) return node.width;
+    return 160; // Ancho por defecto
   }, []);
 
   // ==========================================

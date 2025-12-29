@@ -111,17 +111,23 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // Register
-  const register = useCallback(async (userData) => {
+  const register = useCallback(async (userData, demoMap = null) => {
     setError(null);
     setLoading(true);
     
     try {
+      // Incluir mapa demo si existe
+      const requestData = { ...userData };
+      if (demoMap) {
+        requestData.demo_map = demoMap;
+      }
+
       const response = await fetch(`${API_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(userData)
+        body: JSON.stringify(requestData)
       });
       
       const data = await response.json();
@@ -131,6 +137,8 @@ export const AuthProvider = ({ children }) => {
         setUser(data.user);
         localStorage.setItem('mm_auth_token', data.access_token);
         localStorage.setItem('mm_auth_user', JSON.stringify(data.user));
+        // Limpiar mapa demo del localStorage después de registro exitoso
+        localStorage.removeItem('mindora_demo_map');
         return { success: true };
       } else {
         setError(data.detail || 'Error al crear la cuenta');

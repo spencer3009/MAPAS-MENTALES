@@ -36,6 +36,7 @@ const Sidebar = ({
   onPinProject,
   onReorderProjects,
   onOpenAllProjects,
+  onShowUpgrade,
   token
 }) => {
   const [editingProjectId, setEditingProjectId] = useState(null);

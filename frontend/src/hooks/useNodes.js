@@ -2343,10 +2343,10 @@ export const useNodes = () => {
   }, [activeProjectId, nodes, saveToHistory]);
 
   const updateNodePosition = useCallback((id, x, y) => {
-    // No guardar en historial durante el drag (muy frecuente)
+    // Actualización rápida sin modificar updatedAt (se actualiza al soltar)
     setProjects(prev => prev.map(p => 
       p.id === activeProjectId 
-        ? { ...p, nodes: p.nodes.map(n => n.id === id ? { ...n, x, y } : n), updatedAt: new Date().toISOString() }
+        ? { ...p, nodes: p.nodes.map(n => n.id === id ? { ...n, x, y } : n) }
         : p
     ));
   }, [activeProjectId]);

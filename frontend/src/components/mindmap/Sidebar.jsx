@@ -414,7 +414,10 @@ const Sidebar = ({
               
               {/* Botón de menú de tres puntos */}
               {!isReorderMode && !isEditing && (
-                <div className="absolute top-2 right-2" ref={openMenuId === project.id ? menuRef : null}>
+                <div 
+                  className="absolute top-2 right-2" 
+                  ref={openMenuId === project.id ? menuContainerRef : null}
+                >
                   <button
                     onClick={(e) => {
                       e.stopPropagation();

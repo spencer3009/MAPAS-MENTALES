@@ -2351,6 +2351,57 @@ export const useNodes = () => {
     ));
   }, [activeProjectId]);
 
+  // Centrar todos los nodos en el canvas
+  // Calcula el bounding box de todos los nodos y los mueve para que estén centrados
+  // La nueva posición se guarda permanentemente
+  const centerAllNodes = useCallback((canvasWidth = 1920, canvasHeight = 800) => {
+    if (nodes.length === 0) return;
+
+    // Calcular el bounding box de todos los nodos
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    
+    nodes.forEach(node => {
+      const nodeWidth = node.manualWidth || node.width || 160;
+      const nodeHeight = node.manualHeight || node.height || 64;
+      
+      minX = Math.min(minX, node.x);
+      minY = Math.min(minY, node.y);
+      maxX = Math.max(maxX, node.x + nodeWidth);
+      maxY = Math.max(maxY, node.y + nodeHeight);
+    });
+
+    // Calcular el centro actual del grupo de nodos
+    const groupCenterX = (minX + maxX) / 2;
+    const groupCenterY = (minY + maxY) / 2;
+
+    // Calcular el centro deseado del canvas (con un margen)
+    const targetCenterX = canvasWidth / 2;
+    const targetCenterY = canvasHeight / 2;
+
+    // Calcular el desplazamiento necesario
+    const deltaX = targetCenterX - groupCenterX;
+    const deltaY = targetCenterY - groupCenterY;
+
+    // Mover todos los nodos
+    const centeredNodes = nodes.map(node => ({
+      ...node,
+      x: Math.round(node.x + deltaX),
+      y: Math.round(node.y + deltaY)
+    }));
+
+    // Guardar en historial y actualizar
+    pushToHistory(activeProjectId, centeredNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: centeredNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+
+    console.log('[CenterAllNodes] Nodos centrados. Delta:', { deltaX, deltaY });
+    
+    return { deltaX, deltaY };
+  }, [nodes, activeProjectId, pushToHistory]);
+
   const updateNodeText = useCallback((id, text) => {
     saveToHistory(activeProjectId, nodes);
     const newNodes = nodes.map(n => n.id === id ? { ...n, text } : n);

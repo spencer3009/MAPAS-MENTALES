@@ -6501,3 +6501,14 @@ When duplicating a child node with auto-align enabled:
 - Username: spencer3009
 - Password: Socios3009
 
+## Node Resize Handles Implementation - Mon Dec 29 06:38:09 UTC 2025
+
+### Feature: 4-sided resize handles for selected nodes
+- Top, Bottom, Left, Right circular handles
+- White circles with blue border
+- Selection border around selected node
+
+### Test Credentials:
+- Username: spencer3009
+- Password: Socios3009
+

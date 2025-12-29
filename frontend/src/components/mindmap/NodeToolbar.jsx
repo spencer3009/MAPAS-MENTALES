@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React from 'react';
 import { 
   Type, 
   Palette, 
@@ -14,7 +14,7 @@ import {
   CheckCircle2,
   MousePointer2,
   Hand,
-  GripHorizontal
+  X
 } from 'lucide-react';
 
 const ToolbarButton = ({ icon: Icon, label, onClick, danger = false, active = false, hasIndicator = false, badge = null }) => (
@@ -22,8 +22,8 @@ const ToolbarButton = ({ icon: Icon, label, onClick, danger = false, active = fa
     onClick={onClick}
     onMouseDown={(e) => e.stopPropagation()}
     className={`
-      relative p-2.5 rounded-lg transition-all duration-150
-      flex items-center justify-center
+      relative w-full p-3 rounded-lg transition-all duration-150
+      flex items-center gap-3
       ${danger 
         ? 'text-red-500 hover:bg-red-50 hover:text-red-600' 
         : active
@@ -33,28 +33,28 @@ const ToolbarButton = ({ icon: Icon, label, onClick, danger = false, active = fa
     `}
     title={label}
   >
-    <Icon size={18} />
+    <Icon size={18} className="shrink-0" />
+    <span className="text-sm font-medium truncate">{label}</span>
     {hasIndicator && !badge && (
-      <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-blue-500 rounded-full" />
+      <span className="absolute top-2 left-8 w-2 h-2 bg-blue-500 rounded-full" />
     )}
     {badge !== null && badge > 0 && (
-      <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-blue-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+      <span className="ml-auto min-w-[20px] h-5 px-1.5 bg-blue-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
         {badge}
       </span>
     )}
   </button>
 );
 
-const Divider = () => (
-  <div className="w-px h-7 bg-gray-200 mx-1" />
+const SectionDivider = ({ label }) => (
+  <div className="px-3 py-2 mt-2">
+    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{label}</span>
+  </div>
 );
 
 const NodeToolbar = ({
-  position,
   visible,
-  zoom = 1,
   nodeType = 'default',
-  currentColor,
   currentTextAlign = 'center',
   isCompleted = false,
   hasComment = false,
@@ -78,84 +78,8 @@ const NodeToolbar = ({
   onAddReminder,
   onComment
 }) => {
-  // Estado para el arrastre
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [customPosition, setCustomPosition] = useState(null);
-  const toolbarRef = useRef(null);
-  const lastNodePosition = useRef(null);
-
-  // Resetear posición cuando cambia el nodo seleccionado
-  useEffect(() => {
-    if (position && (
-      !lastNodePosition.current ||
-      lastNodePosition.current.x !== position.x ||
-      lastNodePosition.current.y !== position.y
-    )) {
-      setCustomPosition(null);
-      lastNodePosition.current = { x: position.x, y: position.y };
-    }
-  }, [position]);
-
-  // Iniciar arrastre
-  const handleDragStart = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (toolbarRef.current) {
-      const rect = toolbarRef.current.getBoundingClientRect();
-      setDragOffset({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      });
-      setIsDragging(true);
-    }
-  }, []);
-
-  // Mover durante el arrastre
-  const handleDrag = useCallback((e) => {
-    if (!isDragging) return;
-    
-    e.preventDefault();
-    
-    // Calcular nueva posición
-    let newX = e.clientX - dragOffset.x;
-    let newY = e.clientY - dragOffset.y;
-    
-    // Obtener dimensiones de la ventana y del toolbar
-    const toolbarWidth = toolbarRef.current?.offsetWidth || 600;
-    const toolbarHeight = toolbarRef.current?.offsetHeight || 50;
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
-    
-    // Limitar bordes (mantener al menos 50px visible)
-    const margin = 50;
-    newX = Math.max(-toolbarWidth + margin, Math.min(windowWidth - margin, newX));
-    newY = Math.max(margin, Math.min(windowHeight - toolbarHeight - margin, newY));
-    
-    setCustomPosition({ x: newX, y: newY });
-  }, [isDragging, dragOffset]);
-
-  // Finalizar arrastre
-  const handleDragEnd = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-
-  // Agregar/quitar event listeners para el arrastre
-  useEffect(() => {
-    if (isDragging) {
-      window.addEventListener('mousemove', handleDrag);
-      window.addEventListener('mouseup', handleDragEnd);
-      return () => {
-        window.removeEventListener('mousemove', handleDrag);
-        window.removeEventListener('mouseup', handleDragEnd);
-      };
-    }
-  }, [isDragging, handleDrag, handleDragEnd]);
-
   if (!visible) return null;
 
-  // Determinar si es un nodo de tipo "solo línea" (sin fondo)
   const isDashedNode = nodeType === 'dashed' || nodeType === 'dashed_text';
 
   const handleStyleClick = (e) => {
@@ -168,47 +92,31 @@ const NodeToolbar = ({
     if (onAddIcon) onAddIcon();
   };
 
-  // Determinar posición final
-  const finalPosition = customPosition 
-    ? { left: customPosition.x, top: customPosition.y, transform: 'none' }
-    : { left: position.x, top: position.y, transform: 'translateX(-65%)' };
-
   return (
     <div
-      ref={toolbarRef}
       data-toolbar="node-toolbar"
-      className={`
-        absolute z-40
-        bg-white rounded-xl shadow-xl
-        border border-gray-200
-        flex flex-col items-center
-        ${!customPosition ? 'animate-in fade-in slide-in-from-bottom-2 duration-200' : ''}
-        ${isDragging ? 'cursor-grabbing' : ''}
-      `}
-      style={finalPosition}
+      className="
+        absolute left-0 top-0 bottom-0 z-40
+        w-56 bg-white/95 backdrop-blur-sm
+        border-r border-gray-200
+        flex flex-col
+        shadow-lg
+        animate-in slide-in-from-left-2 duration-200
+      "
       onMouseDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
     >
-      {/* Handle de arrastre - Pestaña superior */}
-      <div
-        onMouseDown={handleDragStart}
-        className={`
-          w-12 h-3 -mt-1.5 mb-0.5
-          bg-gray-200 hover:bg-gray-300
-          rounded-t-lg rounded-b-sm
-          flex items-center justify-center
-          cursor-grab active:cursor-grabbing
-          transition-colors duration-150
-          ${isDragging ? 'bg-blue-300' : ''}
-        `}
-        title="Arrastrar para mover"
-      >
-        <GripHorizontal size={10} className="text-gray-400" />
+      {/* Header */}
+      <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/80">
+        <h3 className="text-sm font-semibold text-gray-700">Herramientas</h3>
+        <p className="text-[11px] text-gray-400 mt-0.5">Nodo seleccionado</p>
       </div>
 
-      {/* Contenedor de botones */}
-      <div className="flex items-center gap-1 p-2 pt-1">
-        {/* Herramientas de selección */}
+      {/* Contenedor scrolleable */}
+      <div className="flex-1 overflow-y-auto p-2 space-y-1">
+        
+        {/* Sección: Herramientas */}
+        <SectionDivider label="Selección" />
         <ToolbarButton 
           icon={MousePointer2} 
           label="Seleccionar"
@@ -219,106 +127,99 @@ const NodeToolbar = ({
           label="Mover"
           onClick={() => {}}
         />
-        
-        <Divider />
 
-        {/* Marcar como completado */}
+        {/* Sección: Estado */}
+        <SectionDivider label="Estado" />
         <ToolbarButton 
           icon={CheckCircle2} 
-          label={isCompleted ? "Desmarcar tarea" : "Marcar como completada"}
+          label={isCompleted ? "Desmarcar tarea" : "Completar tarea"}
           onClick={onToggleCompleted}
           active={isCompleted}
         />
-        
-        <Divider />
 
-        {/* Editar texto */}
+        {/* Sección: Edición */}
+        <SectionDivider label="Edición" />
         <ToolbarButton 
           icon={Type} 
           label="Editar texto" 
           onClick={onEdit}
         />
         
-        {/* Panel de estilos */}
         {!isDashedNode && (
           <ToolbarButton 
             icon={Palette} 
-            label="Personalizar estilo" 
+            label="Estilos" 
             onClick={handleStyleClick}
             active={stylePanelOpen}
           />
         )}
 
-        {/* Comentario */}
-        <ToolbarButton 
-          icon={MessageSquare} 
-          label={hasComment ? "Ver comentario" : "Agregar comentario"}
-          onClick={onComment}
-          hasIndicator={hasComment}
-        />
-
-        <Divider />
-
-        {/* Icono */}
         <ToolbarButton 
           icon={Laugh} 
-          label="Agregar icono" 
+          label="Agregar ícono" 
           onClick={handleIconClick}
           active={iconPanelOpen}
           hasIndicator={hasIcon}
         />
-        
-        <Divider />
 
-        {/* Alineación de texto */}
+        {/* Sección: Alineación */}
+        <SectionDivider label="Alineación" />
+        <div className="flex gap-1 px-1">
+          <button
+            onClick={onAlignTextLeft}
+            className={`flex-1 p-2.5 rounded-lg transition-all ${currentTextAlign === 'left' ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:bg-gray-100'}`}
+            title="Izquierda"
+          >
+            <AlignLeft size={16} className="mx-auto" />
+          </button>
+          <button
+            onClick={onAlignTextCenter}
+            className={`flex-1 p-2.5 rounded-lg transition-all ${currentTextAlign === 'center' ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:bg-gray-100'}`}
+            title="Centro"
+          >
+            <AlignCenter size={16} className="mx-auto" />
+          </button>
+          <button
+            onClick={onAlignTextRight}
+            className={`flex-1 p-2.5 rounded-lg transition-all ${currentTextAlign === 'right' ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:bg-gray-100'}`}
+            title="Derecha"
+          >
+            <AlignRight size={16} className="mx-auto" />
+          </button>
+        </div>
+
+        {/* Sección: Extras */}
+        <SectionDivider label="Extras" />
         <ToolbarButton 
-          icon={AlignLeft} 
-          label="Alinear texto a la izquierda" 
-          onClick={onAlignTextLeft}
-          active={currentTextAlign === 'left'}
-        />
-        <ToolbarButton 
-          icon={AlignCenter} 
-          label="Alinear texto al centro" 
-          onClick={onAlignTextCenter}
-          active={currentTextAlign === 'center'}
-        />
-        <ToolbarButton 
-          icon={AlignRight} 
-          label="Alinear texto a la derecha" 
-          onClick={onAlignTextRight}
-          active={currentTextAlign === 'right'}
+          icon={MessageSquare} 
+          label={hasComment ? "Ver comentario" : "Comentario"}
+          onClick={onComment}
+          hasIndicator={hasComment}
         />
         
-        <Divider />
-        
-        {/* Enlace */}
         <ToolbarButton 
           icon={Link2} 
-          label={hasLinks ? `Ver enlaces (${linksCount})` : "Agregar enlace"}
+          label={hasLinks ? `Enlaces (${linksCount})` : "Agregar enlace"}
           onClick={onAddLink}
           badge={linksCount > 0 ? linksCount : null}
         />
 
-        {/* Recordatorio */}
         <ToolbarButton 
           icon={Bell} 
-          label={hasReminder ? "Ver recordatorio" : "Agregar recordatorio"}
+          label={hasReminder ? "Ver recordatorio" : "Recordatorio"}
           onClick={onAddReminder}
           active={reminderPanelOpen}
           hasIndicator={hasReminder}
         />
-        
-        <Divider />
-        
-        {/* Duplicar */}
+
+        {/* Sección: Acciones */}
+        <SectionDivider label="Acciones" />
         <ToolbarButton 
           icon={Copy} 
           label="Duplicar nodo" 
           onClick={onDuplicate}
         />
         
-        {/* Eliminar */}
         <ToolbarButton 
           icon={Trash2} 
           label="Eliminar nodo" 

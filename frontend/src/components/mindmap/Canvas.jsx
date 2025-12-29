@@ -593,28 +593,34 @@ const Canvas = ({
       onContextMenu={handleContextMenu}
     >
       {/* Reglas horizontales y verticales */}
-      <CanvasRulers
-        pan={pan}
-        zoom={zoom}
-        containerRef={containerRef}
-      />
+      {showRulers && (
+        <CanvasRulers
+          pan={pan}
+          zoom={zoom}
+          containerRef={containerRef}
+        />
+      )}
 
-      {/* Panel de modos del lienzo - siempre visible */}
+      {/* Panel de modos del lienzo - oculto en fullscreen */}
       <CanvasModePanel
         interactionMode={interactionMode}
         onSetInteractionMode={onSetInteractionMode}
+        onEnterFullscreen={onEnterFullscreen}
+        isFullscreen={isFullscreen}
       />
 
       {/* Cuadrícula del lienzo */}
-      <div 
-        className="absolute inset-0 pointer-events-none"
-        style={{ 
-          marginTop: RULER_SIZE, 
-          marginLeft: RULER_SIZE 
-        }}
-      >
-        <CanvasGrid pan={pan} zoom={zoom} />
-      </div>
+      {showGrid && (
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{ 
+            marginTop: showRulers ? RULER_SIZE : 0, 
+            marginLeft: showRulers ? RULER_SIZE : 0 
+          }}
+        >
+          <CanvasGrid pan={pan} zoom={zoom} />
+        </div>
+      )}
 
       {/* Contenedor transformable para nodos y conexiones */}
       <div

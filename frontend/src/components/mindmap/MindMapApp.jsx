@@ -381,13 +381,13 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
       // CTRL/CMD + D - Duplicar seleccionados
       if (modifierKey && e.key.toLowerCase() === 'd') {
         e.preventDefault();
-        duplicateSelectedNodes();
+        duplicateSelectedNodes(autoAlignEnabled);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectAllNodes, clearSelection, closeContextMenu, selectedNodeId, selectedNodeIds, deleteSelectedNodes, duplicateSelectedNodes]);
+  }, [selectAllNodes, clearSelection, closeContextMenu, selectedNodeId, selectedNodeIds, deleteSelectedNodes, duplicateSelectedNodes, autoAlignEnabled]);
 
   // Handlers para toolbar
   const handleAddNode = useCallback(() => {

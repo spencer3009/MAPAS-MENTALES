@@ -534,8 +534,10 @@ const Canvas = ({
       className={`
         flex-1 bg-gradient-to-br from-slate-50 to-slate-100
         overflow-hidden relative
-        ${isPanning && !dragging ? 'cursor-grabbing' : ''}
-        ${!isPanning && !dragging ? 'cursor-grab' : ''}
+        ${interactionMode === 'hand' && isPanning && !dragging ? 'cursor-grabbing' : ''}
+        ${interactionMode === 'hand' && !isPanning && !dragging ? 'cursor-grab' : ''}
+        ${interactionMode === 'pointer' && !isSelectingArea ? 'cursor-crosshair' : ''}
+        ${interactionMode === 'pointer' && isSelectingArea ? 'cursor-crosshair' : ''}
         ${dragging ? 'cursor-grabbing' : ''}
       `}
       onMouseDown={handleCanvasMouseDown}

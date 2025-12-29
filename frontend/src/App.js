@@ -8,6 +8,7 @@ import { AdminPanel } from "./components/admin";
 import { DemoMindMapApp } from "./components/demo";
 import { CookieBanner, CookieSettingsPanel } from "./components/cookies";
 import { TermsPage, PrivacyPage, CookiesPage } from "./components/legal";
+import { PayPalCallback } from "./components/payment";
 import { Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 

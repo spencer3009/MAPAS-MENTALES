@@ -1,7 +1,15 @@
 import React from 'react';
-import { MousePointer2, Hand } from 'lucide-react';
+import { MousePointer2, Hand, Maximize2 } from 'lucide-react';
 
-const CanvasModePanel = ({ interactionMode, onSetInteractionMode }) => {
+const CanvasModePanel = ({ 
+  interactionMode, 
+  onSetInteractionMode,
+  onEnterFullscreen,
+  isFullscreen = false
+}) => {
+  // Ocultar el panel en modo fullscreen (se usan otros controles)
+  if (isFullscreen) return null;
+
   return (
     <div className="absolute left-6 top-1/2 -translate-y-1/2 z-30" style={{ marginTop: 10 }}>
       <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-1.5 flex flex-col gap-1">
@@ -35,6 +43,22 @@ const CanvasModePanel = ({ interactionMode, onSetInteractionMode }) => {
           title="Modo Mano: Mover el lienzo arrastrando"
         >
           <Hand size={20} />
+        </button>
+
+        {/* Separador */}
+        <div className="w-full h-px bg-gray-200 my-1" />
+
+        {/* Pantalla Completa */}
+        <button
+          onClick={onEnterFullscreen}
+          className="
+            p-2.5 rounded-lg transition-all duration-150
+            flex items-center justify-center
+            text-gray-500 hover:bg-gray-100 hover:text-gray-700
+          "
+          title="Pantalla completa"
+        >
+          <Maximize2 size={20} />
         </button>
       </div>
       

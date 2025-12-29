@@ -55,6 +55,36 @@ const AppContent = () => {
 
   // Si está autenticado
   if (isAuthenticated) {
+    // Mostrar callback de PayPal si corresponde
+    if (paypalCallback) {
+      return (
+        <>
+          <MindMapApp 
+            onAdminClick={isAdmin ? () => setAuthView('admin') : null}
+            pendingPlanId={null}
+            onClearPendingPlan={() => {}}
+          />
+          <PayPalCallback 
+            type={paypalCallback}
+            onSuccess={(data) => {
+              console.log('Subscription success:', data);
+              // Refrescar datos del usuario si es necesario
+              if (refreshUser) refreshUser();
+            }}
+            onError={(error) => {
+              console.error('Subscription error:', error);
+            }}
+            onClose={() => {
+              setPaypalCallback(null);
+              window.history.replaceState({}, document.title, window.location.pathname);
+              // Refrescar datos del usuario
+              if (refreshUser) refreshUser();
+            }}
+          />
+        </>
+      );
+    }
+    
     // Si está en el panel de admin
     if (authView === 'admin' && isAdmin) {
       return <AdminPanel onBack={() => setAuthView(null)} />;

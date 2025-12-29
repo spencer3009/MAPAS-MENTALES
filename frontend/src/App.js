@@ -78,6 +78,19 @@ const AppContent = () => {
     );
   }
 
+  // Páginas legales
+  if (authView === 'terms') {
+    return <TermsPage onBack={() => setAuthView(null)} />;
+  }
+
+  if (authView === 'privacy') {
+    return <PrivacyPage onBack={() => setAuthView(null)} />;
+  }
+
+  if (authView === 'cookies') {
+    return <CookiesPage onBack={() => setAuthView(null)} />;
+  }
+
   // Si el usuario eligió ir al login
   if (authView === 'login') {
     return (
@@ -105,14 +118,30 @@ const AppContent = () => {
       onLogin={() => setAuthView('login')} 
       onRegister={() => setAuthView('register')}
       onDemo={() => setAuthView('demo')}
+      onTerms={() => setAuthView('terms')}
+      onPrivacy={() => setAuthView('privacy')}
+      onCookies={() => setAuthView('cookies')}
     />
+  );
+};
+
+// Componente wrapper que incluye cookies
+const AppWithCookies = () => {
+  return (
+    <>
+      <AppContent />
+      <CookieBanner />
+      <CookieSettingsPanel />
+    </>
   );
 };
 
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <CookieProvider>
+        <AppWithCookies />
+      </CookieProvider>
     </AuthProvider>
   );
 }

@@ -3223,6 +3223,7 @@ export const useNodes = () => {
     saveNodePositionToHistory,
     deleteNode,
     duplicateNode,
+    centerAllNodes,
     
     // Funciones de historial
     undo,

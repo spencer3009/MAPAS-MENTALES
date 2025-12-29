@@ -1,11 +1,15 @@
 import React from 'react';
-import { MousePointer2, Hand, Maximize2 } from 'lucide-react';
+import { MousePointer2, Hand, Maximize2, Grid3X3, Ruler } from 'lucide-react';
 
 const CanvasModePanel = ({ 
   interactionMode, 
   onSetInteractionMode,
   onEnterFullscreen,
-  isFullscreen = false
+  isFullscreen = false,
+  showGrid = true,
+  showRulers = true,
+  onToggleGrid,
+  onToggleRulers
 }) => {
   // Ocultar el panel en modo fullscreen (se usan otros controles)
   if (isFullscreen) return null;
@@ -43,6 +47,41 @@ const CanvasModePanel = ({
           title="Modo Mano: Mover el lienzo arrastrando"
         >
           <Hand size={20} />
+        </button>
+
+        {/* Separador */}
+        <div className="w-full h-px bg-gray-200 my-1" />
+
+        {/* Toggle Cuadrícula */}
+        <button
+          onClick={onToggleGrid}
+          className={`
+            p-2.5 rounded-lg transition-all duration-150
+            flex items-center justify-center
+            ${showGrid
+              ? 'bg-blue-500 text-white shadow-md'
+              : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+            }
+          `}
+          title={showGrid ? 'Ocultar cuadrícula' : 'Mostrar cuadrícula'}
+        >
+          <Grid3X3 size={20} />
+        </button>
+
+        {/* Toggle Reglas */}
+        <button
+          onClick={onToggleRulers}
+          className={`
+            p-2.5 rounded-lg transition-all duration-150
+            flex items-center justify-center
+            ${showRulers
+              ? 'bg-blue-500 text-white shadow-md'
+              : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+            }
+          `}
+          title={showRulers ? 'Ocultar reglas' : 'Mostrar reglas'}
+        >
+          <Ruler size={20} />
         </button>
 
         {/* Separador */}

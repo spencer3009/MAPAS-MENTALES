@@ -92,6 +92,10 @@ const Canvas = ({
     const nodeW = selectedNode.width || NODE_WIDTH;
     const nodeH = selectedNode.height || NODE_HEIGHT;
     
+    // Ajustar por el offset de las reglas
+    const adjustedPanX = pan.x + RULER_SIZE;
+    const adjustedPanY = pan.y + RULER_SIZE;
+    
     let addButtonX, addButtonY;
     let addButtonRightX, addButtonRightY;
     let addButtonBottomX, addButtonBottomY;
@@ -99,26 +103,26 @@ const Canvas = ({
     if (layoutType === 'mindhybrid') {
       // MindHybrid: DOS botones - derecha (horizontal) e inferior (vertical)
       // Botón derecho (crear hijo horizontal)
-      addButtonRightX = (selectedNode.x + nodeW + 15) * zoom + pan.x;
-      addButtonRightY = (selectedNode.y + nodeH / 2) * zoom + pan.y;
+      addButtonRightX = (selectedNode.x + nodeW + 15) * zoom + adjustedPanX;
+      addButtonRightY = (selectedNode.y + nodeH / 2) * zoom + adjustedPanY;
       // Botón inferior (crear hijo vertical)
-      addButtonBottomX = (selectedNode.x + nodeW / 2) * zoom + pan.x;
-      addButtonBottomY = (selectedNode.y + nodeH + 20) * zoom + pan.y;
+      addButtonBottomX = (selectedNode.x + nodeW / 2) * zoom + adjustedPanX;
+      addButtonBottomY = (selectedNode.y + nodeH + 20) * zoom + adjustedPanY;
       // No mostrar botón único
       addButtonX = null;
       addButtonY = null;
     } else if (layoutType === 'mindtree') {
       // MindTree (Organigrama): botón "+" DEBAJO del nodo
-      addButtonX = (selectedNode.x + nodeW / 2) * zoom + pan.x;
-      addButtonY = (selectedNode.y + nodeH + 20) * zoom + pan.y;
+      addButtonX = (selectedNode.x + nodeW / 2) * zoom + adjustedPanX;
+      addButtonY = (selectedNode.y + nodeH + 20) * zoom + adjustedPanY;
     } else {
       // MindFlow: botón "+" al LADO derecho del nodo
-      addButtonX = (selectedNode.x + nodeW + 15) * zoom + pan.x;
-      addButtonY = (selectedNode.y + nodeH / 2 - 14) * zoom + pan.y;
+      addButtonX = (selectedNode.x + nodeW + 15) * zoom + adjustedPanX;
+      addButtonY = (selectedNode.y + nodeH / 2 - 14) * zoom + adjustedPanY;
     }
     
-    const toolbarX = (selectedNode.x + nodeW / 2) * zoom + pan.x;
-    const toolbarY = (selectedNode.y - 50) * zoom + pan.y;
+    const toolbarX = (selectedNode.x + nodeW / 2) * zoom + adjustedPanX;
+    const toolbarY = (selectedNode.y - 50) * zoom + adjustedPanY;
     
     return {
       addButton: addButtonX !== null ? { x: addButtonX, y: addButtonY } : null,
@@ -133,8 +137,12 @@ const Canvas = ({
     const node = nodes.find(n => n.id === nodeId);
     if (!node) return { x: 0, y: 0 };
     
-    const x = (node.x + NODE_WIDTH / 2) * zoom + pan.x;
-    const y = (node.y + NODE_HEIGHT + 10) * zoom + pan.y;
+    // Ajustar por el offset de las reglas
+    const adjustedPanX = pan.x + RULER_SIZE;
+    const adjustedPanY = pan.y + RULER_SIZE;
+    
+    const x = (node.x + NODE_WIDTH / 2) * zoom + adjustedPanX;
+    const y = (node.y + NODE_HEIGHT + 10) * zoom + adjustedPanY;
     
     return { x, y };
   }, [nodes, zoom, pan]);

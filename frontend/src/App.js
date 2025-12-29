@@ -24,7 +24,7 @@ const LoadingScreen = () => (
 // Componente principal con lógica de autenticación
 const AppContent = () => {
   const { isAuthenticated, isAdmin, loading } = useAuth();
-  const [authView, setAuthView] = useState(null); // null = landing, 'login', 'register', 'callback', 'admin', 'demo'
+  const [authView, setAuthView] = useState(null); // null = landing, 'login', 'register', 'callback', 'admin', 'demo', 'terms', 'privacy', 'cookies'
   const [authError, setAuthError] = useState(null);
 
   // Detectar session_id en la URL (Google OAuth callback)

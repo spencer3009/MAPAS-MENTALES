@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { 
   Eye, 
@@ -12,8 +12,10 @@ import {
   Users,
   Brain,
   Layers,
-  CheckCircle2
+  CheckCircle2,
+  Map
 } from 'lucide-react';
+import { getDemoMapForTransfer, hasDemoMap } from '../../hooks/useDemoNodes';
 
 // URL del logo MindoraMap
 const LOGO_URL = 'https://customer-assets.emergentagent.com/job_mindviz-app/artifacts/k1kioask_image.png';

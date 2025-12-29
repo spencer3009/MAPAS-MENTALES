@@ -435,13 +435,15 @@ const Canvas = ({
   const handleMouseUp = useCallback((e) => {
     // Finalizar selección por área
     if (isSelectingArea && selectionBox) {
-      const rect = containerRef.current.getBoundingClientRect();
+      // Ajustar por el offset de las reglas
+      const adjustedPanX = pan.x + RULER_SIZE;
+      const adjustedPanY = pan.y + RULER_SIZE;
       
       // Convertir coordenadas de pantalla a coordenadas del canvas
-      const startX = (selectionBox.startX - pan.x) / zoom;
-      const startY = (selectionBox.startY - pan.y) / zoom;
-      const endX = (selectionBox.endX - pan.x) / zoom;
-      const endY = (selectionBox.endY - pan.y) / zoom;
+      const startX = (selectionBox.startX - adjustedPanX) / zoom;
+      const startY = (selectionBox.startY - adjustedPanY) / zoom;
+      const endX = (selectionBox.endX - adjustedPanX) / zoom;
+      const endY = (selectionBox.endY - adjustedPanY) / zoom;
       
       // Verificar si el área es suficientemente grande
       const width = Math.abs(endX - startX);

@@ -730,8 +730,6 @@ const Canvas = ({
           onAddReminder={handleToolbarReminder}
           onDuplicate={handleToolbarDuplicate}
           onDelete={handleToolbarDelete}
-          interactionMode={interactionMode}
-          onSetInteractionMode={onSetInteractionMode}
         />
       )}
 

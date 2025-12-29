@@ -104,14 +104,17 @@ const UpgradeModal = ({ isOpen, onClose, limitType = 'active', onUpgrade, token,
       });
 
       const data = await response.json();
+      console.log('PayPal response:', data);
 
       if (response.ok && data.approval_url) {
         // Redirigir a PayPal para aprobación
         window.location.href = data.approval_url;
       } else {
+        console.error('PayPal error:', data);
         setError(data.detail || 'Error creando la suscripción');
       }
     } catch (err) {
+      console.error('PayPal connection error:', err);
       setError('Error de conexión. Intenta de nuevo.');
     } finally {
       setProcessing(false);

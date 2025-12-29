@@ -171,7 +171,7 @@ const NodeToolbar = ({
   // Determinar posición final
   const finalPosition = customPosition 
     ? { left: customPosition.x, top: customPosition.y, transform: 'none' }
-    : { left: position.x, top: position.y, transform: 'translateX(-55%)' };
+    : { left: position.x, top: position.y, transform: 'translateX(-65%)' };
 
   return (
     <div

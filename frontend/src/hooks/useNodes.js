@@ -1365,19 +1365,19 @@ export const useNodes = () => {
     
     if (idsToMove.length === 0) return;
 
-    const newNodes = nodes.map(n => {
-      if (idsToMove.includes(n.id)) {
-        return { ...n, x: n.x + deltaX, y: n.y + deltaY };
-      }
-      return n;
-    });
-
-    setProjects(prev => prev.map(p => 
-      p.id === activeProjectId 
-        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
-        : p
-    ));
-  }, [nodes, selectedNodeId, selectedNodeIds, activeProjectId]);
+    // Actualización rápida sin modificar updatedAt durante el drag
+    setProjects(prev => prev.map(p => {
+      if (p.id !== activeProjectId) return p;
+      return {
+        ...p,
+        nodes: p.nodes.map(n => 
+          idsToMove.includes(n.id) 
+            ? { ...n, x: n.x + deltaX, y: n.y + deltaY }
+            : n
+        )
+      };
+    }));
+  }, [selectedNodeId, selectedNodeIds, activeProjectId]);
 
   // ==========================================
   // FUNCIONES DE ALINEACIÓN DE TEXTO

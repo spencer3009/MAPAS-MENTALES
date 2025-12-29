@@ -557,14 +557,15 @@ export const useNodes = () => {
   }, [nodes, selectedNodeId, selectedNodeIds, activeProjectId, pushToHistory, clearSelection]);
 
   // Duplicar nodos seleccionados
-  const duplicateSelectedNodes = useCallback((autoAlignAfter = false) => {
+  // Nota: La alineación automática se aplicará mediante el callback setProjectsWithAutoAlign si está habilitada
+  const duplicateSelectedNodes = useCallback(() => {
     const nodesToDuplicate = getSelectedNodes();
     if (nodesToDuplicate.length === 0) return;
 
     const currentProject = projects.find(p => p.id === activeProjectId);
     const layoutType = currentProject?.layoutType || 'mindflow';
 
-    // Para cada nodo a duplicar, calcular su posición correcta
+    // Para cada nodo a duplicar, calcular su posición correcta basada en hermanos
     const newDuplicatedNodes = nodesToDuplicate.map(node => {
       let newX = node.x + 50;
       let newY = node.y + 50;
@@ -572,7 +573,7 @@ export const useNodes = () => {
       if (node.parentId) {
         const parent = nodes.find(n => n.id === node.parentId);
         if (parent) {
-          // Obtener hermanos actuales + los nodos ya duplicados con el mismo padre
+          // Obtener hermanos actuales
           const existingSiblings = nodes.filter(n => n.parentId === node.parentId);
           
           if (layoutType === 'mindtree') {
@@ -599,37 +600,7 @@ export const useNodes = () => {
       };
     });
 
-    let updatedNodes = [...nodes, ...newDuplicatedNodes];
-    
-    // Si autoAlign está activo, aplicar alineación
-    if (autoAlignAfter) {
-      // Encontrar todos los nodos raíz afectados
-      const affectedParentIds = new Set(nodesToDuplicate.map(n => n.parentId).filter(Boolean));
-      
-      for (const parentId of affectedParentIds) {
-        // Encontrar el nodo raíz de esta jerarquía
-        let currentParentId = parentId;
-        let rootId = parentId;
-        while (currentParentId) {
-          const parent = updatedNodes.find(n => n.id === currentParentId);
-          if (parent && parent.parentId) {
-            currentParentId = parent.parentId;
-            rootId = parent.parentId;
-          } else {
-            break;
-          }
-        }
-        
-        // Aplicar alineación según el tipo de layout
-        if (layoutType === 'mindtree') {
-          updatedNodes = autoAlignMindTree(rootId, updatedNodes);
-        } else if (layoutType === 'mindhybrid') {
-          updatedNodes = autoAlignMindHybrid(rootId, updatedNodes);
-        } else {
-          updatedNodes = autoAlignHierarchy(rootId, updatedNodes);
-        }
-      }
-    }
+    const updatedNodes = [...nodes, ...newDuplicatedNodes];
     
     pushToHistory(activeProjectId, updatedNodes);
     setProjects(prev => prev.map(p => 
@@ -641,7 +612,7 @@ export const useNodes = () => {
     // Seleccionar los nuevos nodos
     setSelectedNodeIds(new Set(newDuplicatedNodes.map(n => n.id)));
     setSelectedNodeId(null);
-  }, [nodes, projects, activeProjectId, pushToHistory, getSelectedNodes, autoAlignHierarchy, autoAlignMindTree, autoAlignMindHybrid]);
+  }, [nodes, projects, activeProjectId, pushToHistory, getSelectedNodes]);
 
   // Alinear nodos a la izquierda
   const alignNodesLeft = useCallback(() => {

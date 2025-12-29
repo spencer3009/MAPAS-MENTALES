@@ -1001,7 +1001,8 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
             onClearSelection={clearSelection}
           />
 
-          {/* Sidebar derecho de estilos */}
+          {/* Sidebar derecho de estilos - oculto en fullscreen */}
+          {!isFullscreen && (
           <RightStyleSidebar
             isOpen={showStyleSidebar}
             selectedNode={selectedNode}
@@ -1013,6 +1014,17 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
             onIconChange={updateNodeIcon}
             onClose={handleCloseStyleSidebar}
             onReminderChange={loadReminders}
+          />
+          )}
+
+          {/* Controles de pantalla completa */}
+          <FullscreenControls
+            isFullscreen={isFullscreen}
+            showGrid={showGridInFullscreen}
+            showRulers={showRulersInFullscreen}
+            onToggleGrid={() => setShowGridInFullscreen(prev => !prev)}
+            onToggleRulers={() => setShowRulersInFullscreen(prev => !prev)}
+            onExitFullscreen={exitFullscreen}
           />
         </div>
       </div>

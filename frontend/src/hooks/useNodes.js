@@ -847,14 +847,17 @@ export const useNodes = () => {
       return sum + h + (i < childrenBlockHeights.length - 1 ? BLOCK_MARGIN : 0);
     }, 0);
 
-    // Posicionar cada hijo y su subárbol
-    const childrenX = node.x + HORIZONTAL_OFFSET;
+    // Calcular X de los hijos basado en el ancho REAL del nodo padre
+    // Si el nodo tiene manualWidth, usar ese ancho
+    const nodeWidth = node.manualWidth || node.width || 160;
+    const GAP_BETWEEN_PARENT_CHILD = 120;
+    const childrenX = node.x + nodeWidth + GAP_BETWEEN_PARENT_CHILD;
     let currentY = startY;
 
     for (let i = 0; i < sortedChildren.length; i++) {
       const child = sortedChildren[i];
       
-      // Actualizar posición X del hijo
+      // Actualizar posición X del hijo basada en el ancho real del padre
       updatedNodes = updatedNodes.map(n => 
         n.id === child.id ? { ...n, x: childrenX } : n
       );
@@ -879,12 +882,13 @@ export const useNodes = () => {
     const parentHeight = getNodeHeight(node);
     const newParentY = blockCenterY - parentHeight / 2;
 
+    // Solo actualizar posición Y, NO el tamaño (respetar tamaño manual)
     updatedNodes = updatedNodes.map(n => 
       n.id === nodeId ? { ...n, y: newParentY } : n
     );
 
     return { nodes: updatedNodes, blockHeight: totalChildrenHeight };
-  }, [getNodeHeight, calculateBlockHeight, BLOCK_MARGIN, HORIZONTAL_OFFSET]);
+  }, [getNodeHeight, calculateBlockHeight, BLOCK_MARGIN]);
 
   // Función principal: alinear toda la jerarquía desde un nodo raíz
   const autoAlignHierarchy = useCallback((rootId, currentNodes) => {

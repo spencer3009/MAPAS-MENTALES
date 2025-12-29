@@ -737,39 +737,87 @@ const NodeItem = memo(({
             />
           )}
 
-          {/* Resize Handle - solo visible cuando está seleccionado individualmente y no es dashed */}
+          {/* Resize Handles - 4 círculos blancos en los lados (visible cuando está seleccionado) */}
           {isSelected && !isMultiSelected && !isEditing && !isLineShape && (
-            <div
-              onMouseDown={handleResizeStart}
-              className="
-                absolute bottom-0 right-0
-                w-4 h-4
-                cursor-se-resize
-                bg-blue-500 hover:bg-blue-600
-                rounded-tl-md rounded-br-md
-                opacity-80 hover:opacity-100
-                transition-all duration-150
-                flex items-center justify-center
-                shadow-md
-              "
-              style={{ zIndex: 30 }}
-              title="Arrastrar para redimensionar"
-            >
-              <svg 
-                width="8" 
-                height="8" 
-                viewBox="0 0 8 8" 
-                fill="none"
-                className="text-white"
-              >
-                <path 
-                  d="M7 1L1 7M7 4L4 7M7 7L7 7" 
-                  stroke="currentColor" 
-                  strokeWidth="1.5" 
-                  strokeLinecap="round"
-                />
-              </svg>
-            </div>
+            <>
+              {/* Borde de selección */}
+              <div 
+                className="absolute -inset-1 pointer-events-none rounded-xl border-2 border-blue-500/50"
+                style={{ zIndex: 25 }}
+              />
+              
+              {/* Handler Superior */}
+              <div
+                onMouseDown={handleResizeTop}
+                className="
+                  absolute left-1/2 -translate-x-1/2 -top-2
+                  w-4 h-4
+                  cursor-ns-resize
+                  bg-white hover:bg-blue-50
+                  border-2 border-blue-500 hover:border-blue-600
+                  rounded-full
+                  opacity-90 hover:opacity-100
+                  transition-all duration-150
+                  shadow-md hover:shadow-lg hover:scale-110
+                "
+                style={{ zIndex: 30 }}
+                title="Arrastrar para ajustar altura"
+              />
+              
+              {/* Handler Inferior */}
+              <div
+                onMouseDown={handleResizeBottom}
+                className="
+                  absolute left-1/2 -translate-x-1/2 -bottom-2
+                  w-4 h-4
+                  cursor-ns-resize
+                  bg-white hover:bg-blue-50
+                  border-2 border-blue-500 hover:border-blue-600
+                  rounded-full
+                  opacity-90 hover:opacity-100
+                  transition-all duration-150
+                  shadow-md hover:shadow-lg hover:scale-110
+                "
+                style={{ zIndex: 30 }}
+                title="Arrastrar para ajustar altura"
+              />
+              
+              {/* Handler Izquierdo */}
+              <div
+                onMouseDown={handleResizeLeft}
+                className="
+                  absolute top-1/2 -translate-y-1/2 -left-2
+                  w-4 h-4
+                  cursor-ew-resize
+                  bg-white hover:bg-blue-50
+                  border-2 border-blue-500 hover:border-blue-600
+                  rounded-full
+                  opacity-90 hover:opacity-100
+                  transition-all duration-150
+                  shadow-md hover:shadow-lg hover:scale-110
+                "
+                style={{ zIndex: 30 }}
+                title="Arrastrar para ajustar ancho"
+              />
+              
+              {/* Handler Derecho */}
+              <div
+                onMouseDown={handleResizeRight}
+                className="
+                  absolute top-1/2 -translate-y-1/2 -right-2
+                  w-4 h-4
+                  cursor-ew-resize
+                  bg-white hover:bg-blue-50
+                  border-2 border-blue-500 hover:border-blue-600
+                  rounded-full
+                  opacity-90 hover:opacity-100
+                  transition-all duration-150
+                  shadow-md hover:shadow-lg hover:scale-110
+                "
+                style={{ zIndex: 30 }}
+                title="Arrastrar para ajustar ancho"
+              />
+            </>
           )}
         </>
       )}

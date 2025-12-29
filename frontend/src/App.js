@@ -51,8 +51,14 @@ const AppContent = () => {
     if (authView === 'admin' && isAdmin) {
       return <AdminPanel onBack={() => setAuthView(null)} />;
     }
-    // Mostrar la app principal
-    return <MindMapApp onAdminClick={isAdmin ? () => setAuthView('admin') : null} />;
+    // Mostrar la app principal - pasar el plan seleccionado si existe
+    return (
+      <MindMapApp 
+        onAdminClick={isAdmin ? () => setAuthView('admin') : null}
+        pendingPlanId={selectedPlanId}
+        onClearPendingPlan={() => setSelectedPlanId(null)}
+      />
+    );
   }
 
   // Si estamos procesando el callback de Google OAuth

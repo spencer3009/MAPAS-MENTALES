@@ -1,10 +1,13 @@
 import "./App.css";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { CookieProvider, useCookies } from "./contexts/CookieContext";
 import { MindMapApp } from "./components/mindmap";
 import { LoginPage, RegisterPage, AuthCallback } from "./components/auth";
 import { LandingPage } from "./components/landing";
 import { AdminPanel } from "./components/admin";
 import { DemoMindMapApp } from "./components/demo";
+import { CookieBanner, CookieSettingsPanel } from "./components/cookies";
+import { TermsPage, PrivacyPage, CookiesPage } from "./components/legal";
 import { Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 

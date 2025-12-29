@@ -848,6 +848,80 @@ const NodeItem = memo(({
                 style={{ zIndex: 30 }}
                 title="Arrastrar para ajustar ancho"
               />
+              
+              {/* === HANDLERS DE ESQUINAS - Redimensionado proporcional === */}
+              
+              {/* Handler Esquina Superior Izquierda */}
+              <div
+                onMouseDown={handleResizeTopLeft}
+                className="
+                  absolute -top-2 -left-2
+                  w-4 h-4
+                  cursor-nwse-resize
+                  bg-white hover:bg-blue-50
+                  border-2 border-blue-500 hover:border-blue-600
+                  rounded-full
+                  opacity-90 hover:opacity-100
+                  transition-all duration-150
+                  shadow-md hover:shadow-lg hover:scale-110
+                "
+                style={{ zIndex: 31 }}
+                title="Arrastrar para redimensionar proporcional"
+              />
+              
+              {/* Handler Esquina Superior Derecha */}
+              <div
+                onMouseDown={handleResizeTopRight}
+                className="
+                  absolute -top-2 -right-2
+                  w-4 h-4
+                  cursor-nesw-resize
+                  bg-white hover:bg-blue-50
+                  border-2 border-blue-500 hover:border-blue-600
+                  rounded-full
+                  opacity-90 hover:opacity-100
+                  transition-all duration-150
+                  shadow-md hover:shadow-lg hover:scale-110
+                "
+                style={{ zIndex: 31 }}
+                title="Arrastrar para redimensionar proporcional"
+              />
+              
+              {/* Handler Esquina Inferior Izquierda */}
+              <div
+                onMouseDown={handleResizeBottomLeft}
+                className="
+                  absolute -bottom-2 -left-2
+                  w-4 h-4
+                  cursor-nesw-resize
+                  bg-white hover:bg-blue-50
+                  border-2 border-blue-500 hover:border-blue-600
+                  rounded-full
+                  opacity-90 hover:opacity-100
+                  transition-all duration-150
+                  shadow-md hover:shadow-lg hover:scale-110
+                "
+                style={{ zIndex: 31 }}
+                title="Arrastrar para redimensionar proporcional"
+              />
+              
+              {/* Handler Esquina Inferior Derecha */}
+              <div
+                onMouseDown={handleResizeBottomRight}
+                className="
+                  absolute -bottom-2 -right-2
+                  w-4 h-4
+                  cursor-nwse-resize
+                  bg-white hover:bg-blue-50
+                  border-2 border-blue-500 hover:border-blue-600
+                  rounded-full
+                  opacity-90 hover:opacity-100
+                  transition-all duration-150
+                  shadow-md hover:shadow-lg hover:scale-110
+                "
+                style={{ zIndex: 31 }}
+                title="Arrastrar para redimensionar proporcional"
+              />
             </>
           )}
         </>

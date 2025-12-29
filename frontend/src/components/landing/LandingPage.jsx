@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useCookies } from '../../contexts/CookieContext';
 import { 
   Brain, 
   Zap, 

@@ -48,6 +48,7 @@ const MINDMAP_IMAGES = {
 };
 
 const LandingPage = ({ onLogin, onRegister, onDemo, onTerms, onPrivacy, onCookies }) => {
+  const { openSettings: openCookieSettings } = useCookies();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
   const [content, setContent] = useState(null);

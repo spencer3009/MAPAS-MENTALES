@@ -977,8 +977,10 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
             layoutType={currentLayoutType}
             isFullscreen={isFullscreen}
             onEnterFullscreen={enterFullscreen}
-            showGrid={isFullscreen ? showGridInFullscreen : true}
-            showRulers={isFullscreen ? showRulersInFullscreen : true}
+            showGrid={showGrid}
+            showRulers={showRulers}
+            onToggleGrid={() => setShowGrid(prev => !prev)}
+            onToggleRulers={() => setShowRulers(prev => !prev)}
             />
 
           {/* Toolbar de selección múltiple */}

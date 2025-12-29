@@ -7,6 +7,7 @@ import CommentPopover from './CommentPopover';
 import LinkPopover from './LinkPopover';
 import NodeTypeSelector from './NodeTypeSelector';
 import SelectionBox from './SelectionBox';
+import CanvasModePanel from './CanvasModePanel';
 
 const Canvas = ({
   nodes,

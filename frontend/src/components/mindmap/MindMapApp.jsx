@@ -1157,11 +1157,16 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
       {/* Modal de Upgrade a Pro */}
       <UpgradeModal
         isOpen={showUpgradeModal}
-        onClose={() => setShowUpgradeModal(false)}
+        onClose={() => {
+          setShowUpgradeModal(false);
+          setPendingPlanForPayment(null);
+        }}
         limitType={upgradeLimitType}
         token={token}
+        initialPlan={pendingPlanForPayment}
         onUpgrade={() => {
           setShowUpgradeModal(false);
+          setPendingPlanForPayment(null);
         }}
       />
     </div>

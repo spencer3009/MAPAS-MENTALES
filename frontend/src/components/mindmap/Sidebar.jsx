@@ -427,9 +427,9 @@ const Sidebar = ({
                     <MoreHorizontal size={16} />
                   </button>
                   
-                  {/* Menú desplegable */}
+                  {/* Menú desplegable - posicionado hacia la derecha del sidebar */}
                   {openMenuId === project.id && (
-                    <div className="absolute top-full right-0 mt-1 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-1.5 z-50">
+                    <div className="absolute top-0 left-full ml-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-1.5 z-50">
                       {/* Anclar arriba */}
                       <button
                         onClick={(e) => {

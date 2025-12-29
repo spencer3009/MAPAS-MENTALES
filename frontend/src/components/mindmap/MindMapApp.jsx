@@ -1141,10 +1141,9 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
         isOpen={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
         limitType={upgradeLimitType}
+        token={token}
         onUpgrade={() => {
           setShowUpgradeModal(false);
-          // TODO: Aquí iría la lógica de pago con Stripe
-          window.open('/upgrade', '_blank');
         }}
       />
     </div>

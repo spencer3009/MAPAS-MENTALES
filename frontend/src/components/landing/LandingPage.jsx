@@ -401,8 +401,8 @@ const LandingPage = ({ onLogin, onRegister, onDemo }) => {
                   <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                 </button>
                 <button
-                  onClick={onLogin}
-                  className="w-full sm:w-auto px-8 py-4 bg-white hover:bg-gray-50 text-gray-700 font-semibold text-lg rounded-2xl border-2 border-gray-200 hover:border-blue-300 flex items-center justify-center gap-2 transition-all"
+                  onClick={onDemo}
+                  className="w-full sm:w-auto px-8 py-4 bg-white hover:bg-gray-50 text-gray-700 font-semibold text-lg rounded-2xl border-2 border-gray-200 hover:border-blue-300 flex items-center justify-center gap-2 transition-all hover:scale-105"
                 >
                   <Play size={18} className="text-blue-600" />
                   {content?.hero?.btn_secondary || 'Ver demo'}

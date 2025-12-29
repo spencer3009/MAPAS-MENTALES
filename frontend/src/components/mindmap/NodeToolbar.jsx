@@ -16,70 +16,44 @@ import {
   Hand
 } from 'lucide-react';
 
-// Botón compacto con solo ícono y tooltip
-const IconButton = ({ icon: Icon, label, onClick, danger = false, active = false, hasIndicator = false, badge = null }) => (
+const ToolbarButton = ({ icon: Icon, label, onClick, danger = false, active = false, hasIndicator = false, badge = null }) => (
   <button
     onClick={onClick}
     onMouseDown={(e) => e.stopPropagation()}
     className={`
-      relative p-2 rounded-lg transition-all duration-150
+      relative p-2.5 rounded-lg transition-all duration-150
       flex items-center justify-center
       ${danger 
         ? 'text-red-500 hover:bg-red-50 hover:text-red-600' 
         : active
           ? 'bg-blue-100 text-blue-600'
-          : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800'
       }
     `}
     title={label}
   >
-    <Icon size={17} />
+    <Icon size={18} />
     {hasIndicator && !badge && (
-      <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-blue-500 rounded-full" />
+      <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-blue-500 rounded-full" />
     )}
     {badge !== null && badge > 0 && (
-      <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-0.5 bg-blue-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+      <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-blue-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
         {badge}
       </span>
     )}
   </button>
 );
 
-// Botón con texto corto
-const LabelButton = ({ icon: Icon, label, onClick, danger = false, active = false, hasIndicator = false }) => (
-  <button
-    onClick={onClick}
-    onMouseDown={(e) => e.stopPropagation()}
-    className={`
-      relative w-full p-2 rounded-lg transition-all duration-150
-      flex items-center gap-2
-      ${danger 
-        ? 'text-red-500 hover:bg-red-50 hover:text-red-600' 
-        : active
-          ? 'bg-blue-100 text-blue-600'
-          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-700'
-      }
-    `}
-    title={label}
-  >
-    <Icon size={16} className="shrink-0" />
-    <span className="text-xs font-medium truncate">{label}</span>
-    {hasIndicator && (
-      <span className="ml-auto w-1.5 h-1.5 bg-blue-500 rounded-full" />
-    )}
-  </button>
-);
-
-// Separador de sección compacto
-const Section = ({ label }) => (
-  <div className="px-1 pt-2 pb-1">
-    <span className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">{label}</span>
-  </div>
+const Divider = () => (
+  <div className="w-px h-7 bg-gray-200 mx-1" />
 );
 
 const NodeToolbar = ({
+  position,
   visible,
+  zoom = 1,
   nodeType = 'default',
+  currentColor,
   currentTextAlign = 'center',
   isCompleted = false,
   hasComment = false,
@@ -105,121 +79,154 @@ const NodeToolbar = ({
 }) => {
   if (!visible) return null;
 
+  // Determinar si es un nodo de tipo "solo línea" (sin fondo)
   const isDashedNode = nodeType === 'dashed' || nodeType === 'dashed_text';
+
+  const handleStyleClick = (e) => {
+    e.stopPropagation();
+    if (onStyle) onStyle();
+  };
+
+  const handleIconClick = (e) => {
+    e.stopPropagation();
+    if (onAddIcon) onAddIcon();
+  };
 
   return (
     <div
       data-toolbar="node-toolbar"
       className="
-        absolute left-0 top-0 bottom-0 z-40
-        w-44 bg-white/95 backdrop-blur-sm
-        border-r border-gray-200
-        flex flex-col
-        shadow-lg
-        animate-in slide-in-from-left-2 duration-200
+        absolute z-40
+        bg-white rounded-xl shadow-xl
+        border border-gray-200
+        flex items-center gap-1 p-2
+        animate-in fade-in slide-in-from-bottom-2 duration-200
       "
+      style={{
+        left: position.x,
+        top: position.y - 4,
+        transform: 'translateX(-50%)'
+      }}
       onMouseDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
     >
-      {/* Header compacto */}
-      <div className="px-3 py-2 border-b border-gray-100 bg-gray-50/80">
-        <h3 className="text-xs font-semibold text-gray-700">Herramientas</h3>
-      </div>
+      {/* Herramientas de selección */}
+      <ToolbarButton 
+        icon={MousePointer2} 
+        label="Seleccionar"
+        onClick={() => {}}
+      />
+      <ToolbarButton 
+        icon={Hand} 
+        label="Mover"
+        onClick={() => {}}
+      />
+      
+      <Divider />
 
-      {/* Contenedor de herramientas */}
-      <div className="flex-1 p-1.5 space-y-0.5">
-        
-        {/* Fila de herramientas: Selección */}
-        <Section label="Modo" />
-        <div className="flex gap-0.5">
-          <IconButton icon={MousePointer2} label="Seleccionar" onClick={() => {}} />
-          <IconButton icon={Hand} label="Mover" onClick={() => {}} />
-        </div>
+      {/* Marcar como completado */}
+      <ToolbarButton 
+        icon={CheckCircle2} 
+        label={isCompleted ? "Desmarcar tarea" : "Marcar como completada"}
+        onClick={onToggleCompleted}
+        active={isCompleted}
+      />
+      
+      <Divider />
 
-        {/* Estado */}
-        <Section label="Estado" />
-        <LabelButton 
-          icon={CheckCircle2} 
-          label={isCompleted ? "Completada" : "Completar"}
-          onClick={onToggleCompleted}
-          active={isCompleted}
+      {/* Editar texto */}
+      <ToolbarButton 
+        icon={Type} 
+        label="Editar texto" 
+        onClick={onEdit}
+      />
+      
+      {/* Panel de estilos */}
+      {!isDashedNode && (
+        <ToolbarButton 
+          icon={Palette} 
+          label="Personalizar estilo" 
+          onClick={handleStyleClick}
+          active={stylePanelOpen}
         />
+      )}
 
-        {/* Edición */}
-        <Section label="Editar" />
-        <div className="flex gap-0.5">
-          <IconButton icon={Type} label="Editar texto" onClick={onEdit} />
-          {!isDashedNode && (
-            <IconButton 
-              icon={Palette} 
-              label="Estilos" 
-              onClick={(e) => { e.stopPropagation(); onStyle?.(); }}
-              active={stylePanelOpen}
-            />
-          )}
-          <IconButton 
-            icon={Laugh} 
-            label="Ícono" 
-            onClick={(e) => { e.stopPropagation(); onAddIcon?.(); }}
-            active={iconPanelOpen}
-            hasIndicator={hasIcon}
-          />
-        </div>
+      {/* Comentario */}
+      <ToolbarButton 
+        icon={MessageSquare} 
+        label={hasComment ? "Ver comentario" : "Agregar comentario"}
+        onClick={onComment}
+        hasIndicator={hasComment}
+      />
 
-        {/* Alineación */}
-        <Section label="Alinear" />
-        <div className="flex gap-0.5">
-          <IconButton 
-            icon={AlignLeft} 
-            label="Izquierda" 
-            onClick={onAlignTextLeft}
-            active={currentTextAlign === 'left'}
-          />
-          <IconButton 
-            icon={AlignCenter} 
-            label="Centro" 
-            onClick={onAlignTextCenter}
-            active={currentTextAlign === 'center'}
-          />
-          <IconButton 
-            icon={AlignRight} 
-            label="Derecha" 
-            onClick={onAlignTextRight}
-            active={currentTextAlign === 'right'}
-          />
-        </div>
+      <Divider />
 
-        {/* Extras */}
-        <Section label="Extras" />
-        <div className="flex gap-0.5">
-          <IconButton 
-            icon={MessageSquare} 
-            label={hasComment ? "Ver comentario" : "Comentario"}
-            onClick={onComment}
-            hasIndicator={hasComment}
-          />
-          <IconButton 
-            icon={Link2} 
-            label={hasLinks ? `Enlaces (${linksCount})` : "Enlace"}
-            onClick={onAddLink}
-            badge={linksCount > 0 ? linksCount : null}
-          />
-          <IconButton 
-            icon={Bell} 
-            label={hasReminder ? "Ver recordatorio" : "Recordatorio"}
-            onClick={onAddReminder}
-            active={reminderPanelOpen}
-            hasIndicator={hasReminder}
-          />
-        </div>
+      {/* Icono */}
+      <ToolbarButton 
+        icon={Laugh} 
+        label="Agregar icono" 
+        onClick={handleIconClick}
+        active={iconPanelOpen}
+        hasIndicator={hasIcon}
+      />
+      
+      <Divider />
 
-        {/* Acciones */}
-        <Section label="Acciones" />
-        <div className="flex gap-0.5">
-          <IconButton icon={Copy} label="Duplicar" onClick={onDuplicate} />
-          <IconButton icon={Trash2} label="Eliminar" onClick={onDelete} danger />
-        </div>
-      </div>
+      {/* Alineación de texto */}
+      <ToolbarButton 
+        icon={AlignLeft} 
+        label="Alinear texto a la izquierda" 
+        onClick={onAlignTextLeft}
+        active={currentTextAlign === 'left'}
+      />
+      <ToolbarButton 
+        icon={AlignCenter} 
+        label="Alinear texto al centro" 
+        onClick={onAlignTextCenter}
+        active={currentTextAlign === 'center'}
+      />
+      <ToolbarButton 
+        icon={AlignRight} 
+        label="Alinear texto a la derecha" 
+        onClick={onAlignTextRight}
+        active={currentTextAlign === 'right'}
+      />
+      
+      <Divider />
+      
+      {/* Enlace */}
+      <ToolbarButton 
+        icon={Link2} 
+        label={hasLinks ? `Ver enlaces (${linksCount})` : "Agregar enlace"}
+        onClick={onAddLink}
+        badge={linksCount > 0 ? linksCount : null}
+      />
+
+      {/* Recordatorio */}
+      <ToolbarButton 
+        icon={Bell} 
+        label={hasReminder ? "Ver recordatorio" : "Agregar recordatorio"}
+        onClick={onAddReminder}
+        active={reminderPanelOpen}
+        hasIndicator={hasReminder}
+      />
+      
+      <Divider />
+      
+      {/* Duplicar */}
+      <ToolbarButton 
+        icon={Copy} 
+        label="Duplicar nodo" 
+        onClick={onDuplicate}
+      />
+      
+      {/* Eliminar */}
+      <ToolbarButton 
+        icon={Trash2} 
+        label="Eliminar nodo" 
+        onClick={onDelete}
+        danger
+      />
     </div>
   );
 };

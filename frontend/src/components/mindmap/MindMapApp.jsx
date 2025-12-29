@@ -196,6 +196,12 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
   // Estado para alineación automática (ON por defecto)
   const [autoAlignEnabled, setAutoAlignEnabled] = useState(true);
 
+  // Estado para modo pantalla completa
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showGridInFullscreen, setShowGridInFullscreen] = useState(true);
+  const [showRulersInFullscreen, setShowRulersInFullscreen] = useState(true);
+  const fullscreenContainerRef = useRef(null);
+
   // Obtener el layoutType del proyecto activo
   const currentLayoutType = activeProject?.layoutType || 'mindflow';
 

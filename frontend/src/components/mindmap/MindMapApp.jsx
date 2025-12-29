@@ -927,7 +927,7 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
             onAlignNodesBottom={alignNodesBottom}
             // Acciones
             onDeleteSelected={deleteSelectedNodes}
-            onDuplicateSelected={duplicateSelectedNodes}
+            onDuplicateSelected={() => duplicateSelectedNodes(autoAlignEnabled)}
             onClearSelection={clearSelection}
           />
 

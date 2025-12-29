@@ -3,7 +3,7 @@ import { MousePointer2, Hand } from 'lucide-react';
 
 const CanvasModePanel = ({ interactionMode, onSetInteractionMode }) => {
   return (
-    <div className="absolute left-2 top-1/2 -translate-y-1/2 z-50">
+    <div className="absolute left-6 top-1/2 -translate-y-1/2 z-30" style={{ marginTop: 10 }}>
       <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-1.5 flex flex-col gap-1">
         {/* Modo Puntero */}
         <button

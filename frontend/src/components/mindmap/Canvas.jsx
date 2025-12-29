@@ -101,8 +101,8 @@ const Canvas = ({
     const nodeH = selectedNode.height || NODE_HEIGHT;
     
     // Ajustar por el offset de las reglas
-    const adjustedPanX = pan.x + RULER_SIZE;
-    const adjustedPanY = pan.y + RULER_SIZE;
+    const adjustedPanX = pan.x + rulerOffset;
+    const adjustedPanY = pan.y + rulerOffset;
     
     let addButtonX, addButtonY;
     let addButtonRightX, addButtonRightY;
@@ -146,8 +146,8 @@ const Canvas = ({
     if (!node) return { x: 0, y: 0 };
     
     // Ajustar por el offset de las reglas
-    const adjustedPanX = pan.x + RULER_SIZE;
-    const adjustedPanY = pan.y + RULER_SIZE;
+    const adjustedPanX = pan.x + rulerOffset;
+    const adjustedPanY = pan.y + rulerOffset;
     
     const x = (node.x + NODE_WIDTH / 2) * zoom + adjustedPanX;
     const y = (node.y + NODE_HEIGHT + 10) * zoom + adjustedPanY;
@@ -409,8 +409,8 @@ const Canvas = ({
     
     const rect = containerRef.current.getBoundingClientRect();
     // Ajustar por el offset de las reglas
-    const adjustedPanX = pan.x + RULER_SIZE;
-    const adjustedPanY = pan.y + RULER_SIZE;
+    const adjustedPanX = pan.x + rulerOffset;
+    const adjustedPanY = pan.y + rulerOffset;
     setDragging({
       nodeId: node.id,
       offsetX: (e.clientX - rect.left - adjustedPanX) / zoom - node.x,
@@ -423,8 +423,8 @@ const Canvas = ({
     if (!containerRef.current) return;
 
     // Ajustar por el offset de las reglas
-    const adjustedPanX = pan.x + RULER_SIZE;
-    const adjustedPanY = pan.y + RULER_SIZE;
+    const adjustedPanX = pan.x + rulerOffset;
+    const adjustedPanY = pan.y + rulerOffset;
 
     // Selección por área
     if (isSelectingArea && selectionBox) {
@@ -467,8 +467,8 @@ const Canvas = ({
     // Finalizar selección por área
     if (isSelectingArea && selectionBox) {
       // Ajustar por el offset de las reglas
-      const adjustedPanX = pan.x + RULER_SIZE;
-      const adjustedPanY = pan.y + RULER_SIZE;
+      const adjustedPanX = pan.x + rulerOffset;
+      const adjustedPanY = pan.y + rulerOffset;
       
       // Convertir coordenadas de pantalla a coordenadas del canvas
       const startX = (selectionBox.startX - adjustedPanX) / zoom;

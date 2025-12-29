@@ -684,10 +684,12 @@ const Canvas = ({
         parentNode={selectedNode}
       />
 
-      {/* Sidebar de herramientas - aparece cuando hay nodo seleccionado */}
-      {shouldShowToolbar && (
+      {/* Toolbar flotante - centrada sobre el nodo seleccionado */}
+      {shouldShowToolbar && controlPositions.toolbar && (
         <NodeToolbar
+          position={controlPositions.toolbar}
           visible={true}
+          zoom={1}
           nodeType={selectedNode?.nodeType || 'default'}
           currentColor={selectedNode?.color}
           currentTextAlign={selectedNode?.textAlign || 'center'}

@@ -557,19 +557,80 @@ export const useNodes = () => {
   }, [nodes, selectedNodeId, selectedNodeIds, activeProjectId, pushToHistory, clearSelection]);
 
   // Duplicar nodos seleccionados
-  const duplicateSelectedNodes = useCallback(() => {
+  const duplicateSelectedNodes = useCallback((autoAlignAfter = false) => {
     const nodesToDuplicate = getSelectedNodes();
     if (nodesToDuplicate.length === 0) return;
 
-    const offset = 50;
-    const newDuplicatedNodes = nodesToDuplicate.map(node => ({
-      ...node,
-      id: crypto.randomUUID(),
-      x: node.x + offset,
-      y: node.y + offset,
-    }));
+    const currentProject = projects.find(p => p.id === activeProjectId);
+    const layoutType = currentProject?.layoutType || 'mindflow';
 
-    const updatedNodes = [...nodes, ...newDuplicatedNodes];
+    // Para cada nodo a duplicar, calcular su posición correcta
+    const newDuplicatedNodes = nodesToDuplicate.map(node => {
+      let newX = node.x + 50;
+      let newY = node.y + 50;
+      
+      if (node.parentId) {
+        const parent = nodes.find(n => n.id === node.parentId);
+        if (parent) {
+          // Obtener hermanos actuales + los nodos ya duplicados con el mismo padre
+          const existingSiblings = nodes.filter(n => n.parentId === node.parentId);
+          
+          if (layoutType === 'mindtree') {
+            // MindTree: distribuidos horizontalmente
+            const rightmostSibling = existingSiblings.reduce((max, s) => 
+              (s.x + (s.width || 160)) > (max.x + (max.width || 160)) ? s : max, existingSiblings[0]);
+            newX = rightmostSibling.x + (rightmostSibling.width || 160) + 40;
+            newY = rightmostSibling.y;
+          } else {
+            // MindFlow/MindHybrid: distribuidos verticalmente
+            const bottommostSibling = existingSiblings.reduce((max, s) => 
+              (s.y + (s.height || 64)) > (max.y + (max.height || 64)) ? s : max, existingSiblings[0]);
+            newX = bottommostSibling.x;
+            newY = bottommostSibling.y + (bottommostSibling.height || 64) + 30;
+          }
+        }
+      }
+      
+      return {
+        ...node,
+        id: crypto.randomUUID(),
+        x: newX,
+        y: newY,
+      };
+    });
+
+    let updatedNodes = [...nodes, ...newDuplicatedNodes];
+    
+    // Si autoAlign está activo, aplicar alineación
+    if (autoAlignAfter) {
+      // Encontrar todos los nodos raíz afectados
+      const affectedParentIds = new Set(nodesToDuplicate.map(n => n.parentId).filter(Boolean));
+      
+      for (const parentId of affectedParentIds) {
+        // Encontrar el nodo raíz de esta jerarquía
+        let currentParentId = parentId;
+        let rootId = parentId;
+        while (currentParentId) {
+          const parent = updatedNodes.find(n => n.id === currentParentId);
+          if (parent && parent.parentId) {
+            currentParentId = parent.parentId;
+            rootId = parent.parentId;
+          } else {
+            break;
+          }
+        }
+        
+        // Aplicar alineación según el tipo de layout
+        if (layoutType === 'mindtree') {
+          updatedNodes = autoAlignMindTree(rootId, updatedNodes);
+        } else if (layoutType === 'mindhybrid') {
+          updatedNodes = autoAlignMindHybrid(rootId, updatedNodes);
+        } else {
+          updatedNodes = autoAlignHierarchy(rootId, updatedNodes);
+        }
+      }
+    }
+    
     pushToHistory(activeProjectId, updatedNodes);
     setProjects(prev => prev.map(p => 
       p.id === activeProjectId 
@@ -580,7 +641,7 @@ export const useNodes = () => {
     // Seleccionar los nuevos nodos
     setSelectedNodeIds(new Set(newDuplicatedNodes.map(n => n.id)));
     setSelectedNodeId(null);
-  }, [nodes, activeProjectId, pushToHistory, getSelectedNodes]);
+  }, [nodes, projects, activeProjectId, pushToHistory, getSelectedNodes, autoAlignHierarchy, autoAlignMindTree, autoAlignMindHybrid]);
 
   // Alinear nodos a la izquierda
   const alignNodesLeft = useCallback(() => {

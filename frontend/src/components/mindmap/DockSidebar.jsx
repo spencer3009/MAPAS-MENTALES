@@ -42,7 +42,7 @@ const DockSidebar = ({
     {
       id: 'projects',
       icon: FolderKanban,
-      label: 'Proyectos',
+      label: 'Mis Mapas',
       onClick: onToggleProjectsSidebar,
     },
     {

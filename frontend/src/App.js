@@ -24,16 +24,23 @@ const LoadingScreen = () => (
 
 // Componente principal con lógica de autenticación
 const AppContent = () => {
-  const { isAuthenticated, isAdmin, loading } = useAuth();
+  const { isAuthenticated, isAdmin, loading, refreshUser } = useAuth();
   const [authView, setAuthView] = useState(null); // null = landing, 'login', 'register', 'callback', 'admin', 'demo', 'terms', 'privacy', 'cookies'
   const [authError, setAuthError] = useState(null);
   const [selectedPlanId, setSelectedPlanId] = useState(null); // Plan seleccionado desde la landing
+  const [paypalCallback, setPaypalCallback] = useState(null); // 'success' o 'cancel'
 
   // Detectar session_id en la URL (Google OAuth callback)
   useEffect(() => {
     const hash = window.location.hash;
     if (hash && hash.includes('session_id=')) {
       setAuthView('callback');
+    }
+    // Detectar callback de PayPal
+    if (hash && hash.includes('subscription-success')) {
+      setPaypalCallback('success');
+    } else if (hash && hash.includes('subscription-cancel')) {
+      setPaypalCallback('cancel');
     }
   }, []);
 

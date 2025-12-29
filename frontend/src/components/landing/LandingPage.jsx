@@ -779,7 +779,7 @@ const LandingPage = ({ onLogin, onRegister, onDemo, onTerms, onPrivacy, onCookie
                 </ul>
 
                 <button
-                  onClick={plan.coming_soon ? undefined : onRegister}
+                  onClick={() => handlePlanSelect(plan)}
                   disabled={plan.coming_soon}
                   className={`w-full py-3.5 px-6 rounded-xl font-bold transition-all text-sm ${
                     plan.coming_soon

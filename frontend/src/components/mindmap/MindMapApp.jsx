@@ -889,6 +889,10 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
           onPinProject={pinProject}
           onReorderProjects={reorderProjects}
           onOpenAllProjects={() => setShowAllProjectsModal(true)}
+          onShowUpgrade={() => {
+            setUpgradeLimitType('active');
+            setShowUpgradeModal(true);
+          }}
           token={token}
         />
       )}

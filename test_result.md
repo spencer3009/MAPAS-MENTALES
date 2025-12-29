@@ -875,7 +875,7 @@ The **NEW Node Type Selection Feature** is **completely functional** and exceeds
 ### Test Credentials:
 - Username: spencer3009
 - Password: Socios3009
-- URL: https://mapdemo-draft.preview.emergentagent.com
+- URL: https://paypal-subsys.preview.emergentagent.com
 
 ### ✅ TESTING RESULTS:
 
@@ -932,7 +932,7 @@ Verify the user's reported critical bug where MindHybrid nodes shift/move to the
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- URL: https://mapdemo-draft.preview.emergentagent.com
+- URL: https://paypal-subsys.preview.emergentagent.com
 
 ### ✅ TESTING RESULTS - BUG NOT REPRODUCED:
 
@@ -1282,7 +1282,7 @@ Test the Admin Panel functionality for MindoraMap including:
 #### Test Credentials:
 - Admin: username: spencer3009, password: Socios3009
 - Non-admin: username: carlos3009, password: Socios3009
-- URL: https://mapdemo-draft.preview.emergentagent.com
+- URL: https://paypal-subsys.preview.emergentagent.com
 
 ### ✅ TESTING RESULTS - ADMIN PANEL FUNCTIONALITY WORKING:
 
@@ -1583,7 +1583,7 @@ Test the Calendar Interactivity feature in the Reminders system including Year, 
 #### Test Credentials:
 - **Username**: spencer3009
 - **Password**: Socios3009
-- **URL**: https://mapdemo-draft.preview.emergentagent.com
+- **URL**: https://paypal-subsys.preview.emergentagent.com
 
 ### ✅ TESTING RESULTS - CORE FEATURES WORKING SUCCESSFULLY:
 
@@ -2763,7 +2763,7 @@ Test the new Admin User Management features including Block, Unblock, and Delete
 #### Test Credentials:
 - **Admin**: username: spencer3009, password: Socios3009
 - **Non-Admin**: username: carlos3009, password: Socios3009
-- **Backend URL**: https://mapdemo-draft.preview.emergentagent.com/api
+- **Backend URL**: https://paypal-subsys.preview.emergentagent.com/api
 
 ### ✅ TESTING RESULTS - ALL FEATURES WORKING PERFECTLY:
 
@@ -3402,7 +3402,7 @@ Verify the user's reported critical bug where MindHybrid parent nodes should exp
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- URL: https://mapdemo-draft.preview.emergentagent.com
+- URL: https://paypal-subsys.preview.emergentagent.com
 
 ### ❌ TESTING RESULTS - CRITICAL SESSION MANAGEMENT ISSUES PREVENT VERIFICATION:
 
@@ -3695,7 +3695,7 @@ Verify the user's reported critical bug where MindHybrid parent nodes should exp
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- URL: https://mapdemo-draft.preview.emergentagent.com
+- URL: https://paypal-subsys.preview.emergentagent.com
 
 ### ❌ TESTING RESULTS - CRITICAL SESSION MANAGEMENT ISSUES PREVENT VERIFICATION:
 
@@ -4163,7 +4163,7 @@ The MindHybrid Layout Complete Feature Set is **PRODUCTION-READY** and **EXCEEDS
 ### Testing Credentials:
 - Username: spencer3009
 - Password: Socios3009
-- URL: https://mapdemo-draft.preview.emergentagent.com
+- URL: https://paypal-subsys.preview.emergentagent.com
 
 ### ✅ TESTING RESULTS - COMPREHENSIVE SUCCESS:
 
@@ -4315,7 +4315,7 @@ Verify the new "Mark as Completed" (Strikethrough) feature in the Node Toolbar:
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- URL: https://mapdemo-draft.preview.emergentagent.com
+- URL: https://paypal-subsys.preview.emergentagent.com
 
 ### ✅ CODE IMPLEMENTATION ANALYSIS - EXCELLENT:
 
@@ -4460,7 +4460,7 @@ Verify the new Dock Sidebar feature for the MindoraMap application including:
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- URL: https://mapdemo-draft.preview.emergentagent.com
+- URL: https://paypal-subsys.preview.emergentagent.com
 
 ### ✅ TESTING RESULTS - COMPREHENSIVE SUCCESS:
 
@@ -4626,7 +4626,7 @@ Verify the complete Recycle Bin (Papelera) system for the MindoraMap application
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- Base URL: https://mapdemo-draft.preview.emergentagent.com/api
+- Base URL: https://paypal-subsys.preview.emergentagent.com/api
 
 ### ✅ TESTING RESULTS - 100% SUCCESS RATE:
 
@@ -4770,7 +4770,7 @@ Verify the complete Recycle Bin (Papelera) frontend UI for the MindoraMap applic
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- URL: https://mapdemo-draft.preview.emergentagent.com
+- URL: https://paypal-subsys.preview.emergentagent.com
 
 ### ✅ TESTING RESULTS - 100% SUCCESS RATE:
 
@@ -5857,7 +5857,7 @@ Verify the new layout template system works correctly:
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- URL: https://mapdemo-draft.preview.emergentagent.com
+- URL: https://paypal-subsys.preview.emergentagent.com
 
 ### ✅ TESTING RESULTS - COMPREHENSIVE SUCCESS:
 
@@ -6024,7 +6024,7 @@ Verify the complete Recycle Bin (Papelera) feature implementation:
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- URL: https://mapdemo-draft.preview.emergentagent.com
+- URL: https://paypal-subsys.preview.emergentagent.com
 
 ### 📋 TEST SCENARIOS:
 
@@ -6064,7 +6064,7 @@ Test the collision detection feature when adding vertical nodes in MindHybrid pr
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- Base URL: https://mapdemo-draft.preview.emergentagent.com/api
+- Base URL: https://paypal-subsys.preview.emergentagent.com/api
 
 ### ✅ BACKEND TESTING RESULTS - COMPREHENSIVE SUCCESS:
 
@@ -6297,7 +6297,7 @@ Verify the complete Registration and Google OAuth Authentication system for the 
 #### Test Credentials:
 - Username: `spencer3009`
 - Password: `Socios3009`
-- Base URL: https://mapdemo-draft.preview.emergentagent.com/api
+- Base URL: https://paypal-subsys.preview.emergentagent.com/api
 
 ### ✅ AUTHENTICATION TESTING RESULTS - COMPREHENSIVE SUCCESS:
 
@@ -6499,7 +6499,7 @@ The **Registration & Google OAuth Authentication System** is **COMPLETELY FUNCTI
 
 ### Test Credentials:
 - Admin: username: spencer3009, password: Socios3009
-- URL: http://localhost:3000 or https://mapdemo-draft.preview.emergentagent.com
+- URL: http://localhost:3000 or https://paypal-subsys.preview.emergentagent.com
 
 ### Backend Endpoints:
 - GET /api/landing-content - Get public landing content
@@ -6550,7 +6550,7 @@ Test the new pricing/plans system implementation including:
 #### Test Credentials:
 - **Admin**: username: spencer3009, password: Socios3009
 - **Free User**: username: freetest2025, password: Test1234!
-- **Backend URL**: https://mapdemo-draft.preview.emergentagent.com/api
+- **Backend URL**: https://paypal-subsys.preview.emergentagent.com/api
 
 ### ✅ TESTING RESULTS - ALL FEATURES WORKING PERFECTLY:
 

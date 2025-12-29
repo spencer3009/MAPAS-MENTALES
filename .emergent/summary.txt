@@ -1,59 +1,51 @@
 <analysis>**original_problem_statement:**
-The user's primary goal for this session was to iteratively enhance the mind-mapping editor with a series of professional-grade features. This included implementing group node movement, adding a visual grid and rulers, fixing duplication alignment, adding comprehensive node resizing controls, ensuring manually resized nodes maintain their size, improving drag performance, implementing a fullscreen mode, improving the center map functionality, and consolidating export options. The final request was to implement a Ver demo (See Demo) mode for unregistered users.
+The user's initial request was to add a Ver demo (See Demo) mode to the application to allow users to try the editor without registering. Following that, the user requested a complete cookie consent system, including a banner, settings panel, and dedicated legal pages for Terms, Privacy, and Cookies. Subsequently, the user asked to integrate PayPal for handling recurring plan subscriptions. The final request was to update the PayPal  key for security, restart the backend, and re-test the entire payment flow to ensure it remains functional.
 
 **PRODUCT REQUIREMENTS:**
-*   **Group Node Movement:** Allow users to drag a group of selected nodes together.
-*   **Canvas Grid & Rulers:** Add a background grid and coordinate rulers to the canvas for better alignment.
-*   **Auto-Alignment on Duplicate:** Ensure that duplicating a node respects the auto-alignment rules and places the new node correctly.
-*   **Node Resize Handlers:** Implement 8 resize handlers (4 on the sides, 4 on the corners) for a selected node, allowing for both directional and proportional resizing.
-*   **Fixed Manual Sizing:** Prevent nodes that have been manually resized from automatically shrinking when their children are deleted.
-*   **Performance Optimization:** Improve the smoothness and responsiveness of dragging nodes.
-*   **Fullscreen Mode:** Add a distraction-free fullscreen mode that hides all UI except for the canvas and essential controls.
-*   **Permanent Centering:** Enhance the Center button to calculate the bounding box of all nodes, move them to the center of the canvas, and permanently save this new position.
-*   **Consolidated Export Menu:** Replace individual export buttons with a single Export dropdown menu containing options for JPG, PDF, and Word (DOCX).
-*   **Demo Mode:** Create a Ver demo flow from the landing page that lets users try the editor without an account, with an option to register and save their work.
+*   **Demo Mode:** A non-registered user can click Ver demo on the landing page to access a fully interactive but unsaved mind-map editor. If the user decides to register from the demo, their work is automatically saved as their first map.
+*   **Cookie Consent System:** A GDPR-compliant cookie banner must appear on first visit. It should include options to Aceptar todas (Accept all) or Configurar cookies (Configure cookies). A detailed settings panel must allow users to toggle different cookie categories (Analytical, Functional). Legal pages for Terms, Privacy, and Cookies must be created and linked in the footer, along with a Gestionar cookies link to reopen the settings panel.
+*   **PayPal Integration:** Implement PayPal for recurring subscriptions (Personal, Team plans).
+    *   Connect the pricing table on the landing page and the Actualizar (Upgrade) button in the user dashboard to the payment flow.
+    *   If a user is not logged in, clicking a paid plan should redirect them to register with a banner indicating the selected plan.
+    *   After logging in or registering with a pending plan, a payment modal should open automatically.
+    *   The payment flow should redirect the user to PayPal Sandbox to complete the payment.
+    *   Upon successful payment, the user is redirected back to the application, and their account is upgraded to the new plan.
+    *   A webhook endpoint should be available to handle subscription events from PayPal.
+*   **Security Update:** Update the PayPal  key in the environment configuration and verify the integration continues to work.
 
 **User's preferred language**: Spanish. The next agent MUST respond in Spanish.
 
 **what currently exists?**
-The application is a feature-rich mind-mapping tool. The core editor canvas now includes a toggleable background grid and dynamic rulers. Node interaction is highly advanced, supporting multi-node selection via marquee, group movement, and fine-grained resizing with 8 distinct handlers (sides and corners). A key logic change ensures that any node manually resized by the user will maintain its custom dimensions, preventing unwanted automatic adjustments. Drag-and-drop performance has been optimized for a smoother user experience. The UI includes a distraction-free fullscreen mode and a consolidated Export menu (JPG, PDF, DOCX), decluttering the main toolbar. The Center button now intelligently repositions the entire map to the center of the viewport and saves this layout permanently.
+The application is a full-featured mind-mapping tool. It now includes a complete Demo Mode accessible from the landing page, allowing new users to try the editor before signing up. A comprehensive, professional cookie consent system has been implemented with a banner, a detailed settings panel, and three new legal pages (Terms, Privacy, Cookies). The application is integrated with PayPal's sandbox environment for recurring subscriptions. The payment flow is connected to both the landing page's pricing table and the in-app Upgrade buttons. The system correctly handles redirecting users to PayPal and processing the callback upon their return to activate the subscription.
 
 **Last working item**:
-*   **Last item agent was working:** Implementing a Ver demo (See Demo) mode. This feature allows new users to try the editor without registering. The agent had begun investigating the  file to add the entry point for this demo flow.
-*   **Status:** NOT STARTED
-*   **Agent Testing Done:** N
-*   **Which testing method agent to use?** Frontend testing agent. The test should cover the full user journey:
-    1.  Click Ver demo on the landing page.
-    2.  Assert navigation to a demo editor view ().
-    3.  Verify the presence of a Demo Mode banner.
-    4.  Interact with the demo map (create, edit, move nodes).
-    5.  Attempt an action that requires an account (e.g., Save).
-    6.  Assert that a registration prompt appears.
-    7.  Complete the registration process.
-    8.  Verify that the user is logged in and the map they created in demo mode is now saved as their first project.
+*   **Last item agent was working:** The user regenerated their PayPal  key for security and asked the agent to update it in the application's environment, restart the backend, and perform a full end-to-end test of the subscription flow to confirm it still works.
+*   **Status:** IN PROGRESS
+*   **Agent Testing Done:** N (for the new secret key)
+*   **Which testing method agent to use?** Manual testing using the  tool to follow the entire user journey: Log in as a free user -> click upgrade -> get redirected to the payment modal -> click Pagar con PayPal -> verify redirection to PayPal Sandbox -> (user will complete sandbox payment) -> verify redirection back to the app -> verify the user's plan is upgraded. The agent should also check backend logs for webhook activity.
 *   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-*   **Issue 1: Implement Ver demo mode (P0)**
+*   **Issue 1: Update PayPal Secret Key & Re-test Subscription Flow (P0)**
 *   **Issue 2: MindHybrid Layout Instability (P1)**
 *   **Issue 3: 'X' button in MultiSelectToolbar is not working (P2)**
 *   **Issue 4: Mobile Layout Overlap (P2)**
 
 **Issues Detail:**
-*   **Issue 1: Implement Ver demo mode**
-    *   **Attempted fixes:** None. The agent was in the initial analysis phase, having located .
+*   **Issue 1: Update PayPal Secret Key & Re-test Subscription Flow**
+    *   **Attempted fixes:** None yet. The agent just received the new secret key from the user. The previous work involved a major refactor of the PayPal service to use direct REST API calls instead of an outdated SDK.
     *   **Next debug checklist:**
-        1.  Create a new route (e.g., ) in the application's router that renders the  component.
-        2.  Pass a prop (e.g., ) to  on the  route.
-        3.  In , change the Ver demo button to navigate to .
-        4.  In  and , use the  prop to conditionally disable API calls for saving/loading data and load a default template map instead.
-        5.  Implement a banner or header indicating that the user is in demo mode.
-        6.  Create a modal that triggers on actions like Save or Export, prompting the user to create an account to save their work.
-        7.  Implement logic to transfer the state of the demo map into a new user's account upon successful registration.
-    *   **Why fix this issue and what will be achieved with the fix?** This will create a frictionless onboarding experience, allowing potential users to experience the product's value before committing to registration.
-    *   **Status:** NOT STARTED
+        1.  Use the  tool to update the  value in  with the new key: .
+        2.  Execute backend: stopped
+backend: started to apply the new environment variable.
+        3.  Log in as the free user ( / ).
+        4.  Click an Actualizar (Upgrade) button to trigger the payment modal.
+        5.  Click Pagar con PayPal and confirm redirection to the PayPal sandbox environment.
+        6.  After the user completes the payment, verify the application handles the  route correctly, updates the user's subscription status, and displays a success message.
+    *   **Why fix this issue and what will be achieved with the fix?** To ensure the payment system remains fully functional and secure after the user rotated their API credentials.
+    *   **Status:** IN PROGRESS
     *   **Is recurring issue?** N
-    *   **Should Test frontend/backend/both after fix?** Both (Frontend for UI flow, Backend for the user creation and first map saving).
+    *   **Should Test frontend/backend/both after fix?** Both
     *   **Blocked on other issue:** None
 
 *   **Issue 2: MindHybrid Layout Instability**
@@ -66,12 +58,8 @@ The application is a feature-rich mind-mapping tool. The core editor canvas now 
     *   **Blocked on other issue:** None
 
 *   **Issue 3: 'X' button in MultiSelectToolbar is not working**
-    *   **Attempted fixes:** Agent briefly reviewed the code in  and  ( function). The code appeared correct, but no functional test was performed.
-    *   **Next debug checklist:**
-        1.  In the mind map editor, select multiple nodes to make the  appear.
-        2.  Click the 'X' (close) button on the toolbar.
-        3.  Verify if the selection is cleared (nodes are deselected, and the toolbar disappears).
-        4.  If it fails, debug the  prop passed to the  and the  function in .
+    *   **Attempted fixes:** None in this session.
+    *   **Next debug checklist:** Select multiple nodes, click the 'X' button on the toolbar, and verify that the selection is cleared. If it fails, debug the  prop and the  function in .
     *   **Why fix this issue and what will be achieved with the fix?** To restore basic UI functionality for deselecting multiple nodes.
     *   **Status:** NOT STARTED
     *   **Is recurring issue?** Y
@@ -79,7 +67,7 @@ The application is a feature-rich mind-mapping tool. The core editor canvas now 
     *   **Blocked on other issue:** None
 
 *   **Issue 4: Mobile Layout Overlap**
-    *   **Attempted fixes:** None in this session. This is a carry-over issue.
+    *   **Attempted fixes:** None in this session.
     *   **Next debug checklist:** Use browser developer tools to inspect the CSS for the sidebar and user dropdown menu on small screen sizes and apply appropriate z-index or layout fixes.
     *   **Why fix this issue and what will be achieved with the fix?** To ensure the application is usable on mobile devices.
     *   **Status:** NOT STARTED
@@ -88,10 +76,10 @@ The application is a feature-rich mind-mapping tool. The core editor canvas now 
     *   **Blocked on other issue:** None
 
 **In progress Task List**:
-*   **Task 1: Implement Ver demo mode**
-    *   **Where to resume:** Modify  to have the Ver demo button navigate to a new  route.
-    *   **What will be achieved with this?** The first step towards creating the demo mode experience.
-    *   **Status:** NOT STARTED
+*   **Task 1: Complete PayPal Integration & Testing**
+    *   **Where to resume:**  to update the .
+    *   **What will be achieved with this?** A secure and fully functional PayPal subscription system, validated end-to-end with the user's new credentials.
+    *   **Status:** IN PROGRESS
     *   **Should Test frontend/backend/both after fix?** Both
     *   **Blocked on something:** None
 
@@ -99,7 +87,6 @@ The application is a feature-rich mind-mapping tool. The core editor canvas now 
 *   **Upcoming Tasks:**
     *   **Implement Context Menu Actions (P0):** Implement the Compartir mapa, Duplicar, Mover a Mis mapas, and Publicar en Universo actions in the dashboard's project context menu.
     *   **Data Migration for Existing Users (P1):** Create and run a one-time script to initialize the  counter for all existing users.
-    *   **Stripe Integration for Payments (P1):** Integrate Stripe to make the Actualizar button functional for plan upgrades.
 *   **Future Tasks:**
     *   **Admin Role Management (P1):** Implement a UI for admins to manage user roles.
     *   **Dashboard Enhancements (P2):** Add visual graphs for the admin dashboard.
@@ -108,16 +95,14 @@ The application is a feature-rich mind-mapping tool. The core editor canvas now 
     *   **Notification Sound (P2):** Add a subtle sound effect to the toast notifications.
 
 **Completed work in this session**
-- **Group Node Movement:** Implemented and verified the ability to move multiple selected nodes as a single group.
-- **Canvas Grid & Rulers:** Added a dynamic background grid and coordinate rulers, with UI toggles to show/hide them.
-- **Duplicate with Auto-Align:** Fixed the node duplication logic to correctly position the new node according to auto-alignment rules.
-- **Node Resize Handlers:** Implemented a full set of 8 resize handlers on selected nodes for both directional (width/height) and proportional (corner) resizing.
-- **Fixed Sizing for Manual Resizes:** Nodes that are manually resized now have their dimensions locked and are no longer automatically shrunk when child nodes are removed.
-- **Drag Performance Optimization:** Improved the smoothness of node dragging by optimizing CSS and removing unnecessary state updates during movement.
-- **Fullscreen Mode:** Implemented a distraction-free fullscreen view with dedicated floating controls to exit and toggle grid/rulers.
-- **Permanent Centering:** The Center toolbar button now calculates the true center of all map nodes, repositions them, and saves this new layout permanently.
-- **Consolidated Export Menu:** Replaced separate export buttons with a single Exportar dropdown menu offering JPG, PDF, and DOCX formats.
-- **Toolbar Position Adjustment:** Fine-tuned the vertical position of the floating node toolbar based on user feedback.
+- **Ver demo Mode:** A full demo experience was implemented, allowing users to try the editor without an account. The flow correctly transfers the demo map to a new user's account upon registration.
+- **Cookie Consent System:** A comprehensive cookie system was built from scratch, including a banner, a settings panel with granular controls, and three new legal pages (, , ).
+- **PayPal Subscription Integration:**
+    - Integrated PayPal (Sandbox) for recurring subscriptions.
+    - Fixed a critical bug by rewriting the backend service to use direct REST API calls () instead of an outdated SDK.
+    - Connected the pricing table on the landing page and the in-app Upgrade buttons to the payment flow.
+    - Implemented logic to automatically open the payment modal after a user logs in or registers with a pending plan selection.
+    - Implemented the  route to handle the user's return from PayPal and activate their subscription.
 
 **Earlier issues found/mentioned but not fixed**
 *   **Issue 1: MindHybrid Layout Instability:** A critical, recurring issue with the core mind map layout logic in .
@@ -131,82 +116,92 @@ The application is a feature-rich mind-mapping tool. The core editor canvas now 
 
 
 **Key Technical Concepts**
-*   **Performance Optimization:** Improved drag-and-drop smoothness by removing CSS transitions during drag ( state) and applying .
-*   **Stateful Sizing Logic:** Introduced  and  properties to node objects to prevent automatic layout algorithms from overriding user-defined sizes.
-*   **Complex Event Handling:** The  component now manages mousedown events for 8 different resize handlers, calculating new dimensions and positions based on the handler's direction.
-*   **Dynamic SVG Generation:** Used for rendering the  and  components, which update based on canvas pan and zoom.
-*   **Browser Fullscreen API:** Leveraged to implement the fullscreen mode, with React state () to conditionally render UI elements.
-*   **Client-Side File Generation:** Integrated , , and  libraries to create and download JPG, PDF, and Word files directly in the browser via the  component.
-*   **Global Bounding Box Calculation:** Implemented a  function that iterates through all nodes to find their collective bounding box (, , , ) and calculates the necessary offset to move the entire group to the center of the canvas.
+*   **Local Storage for State Transfer:** Used  to pass transient data (demo map state, pending plan selection) from unauthenticated to authenticated sessions.
+*   **Direct REST API Integration:** Refactored the PayPal integration to use direct  calls to PayPal's REST API. This fixed a critical  from an outdated SDK and involved manual implementation of OAuth token fetching and API request signing.
+*   **Modern PayPal Subscription Flow:** Implemented the full flow: creating products/plans and a subscription to get an , redirecting the user, and handling their return to a callback URL to confirm and activate the subscription on the backend.
+*   **React Context for Global State:** Implemented  to manage cookie preferences. Added a  function to  to fetch updated user data after a successful payment.
+*   **Conditional Routing:**  was heavily modified to handle multiple new routes (, , , , ) and render components conditionally based on URL path and authentication state.
 
 **key DB schema**
-*   No changes in this session.
+*   **users:** The schema was extended to include fields for managing PayPal subscriptions.
+    *   : 
+    *   :  (e.g., ACTIVE, CANCELLED)
+    *   :  (e.g., personal, team)
+    *   : 
 
 **changes in tech stack**
-*   **Added Frontend Libraries:** , , , .
+*   **Backend:** Installed . The  was installed but its use was deprecated in favor of direct API calls.
+*   **Frontend:** Installed , though a custom modal component was ultimately built to handle the flow.
 
 **All files of reference**
-*   **/app/frontend/src/hooks/useNodes.js**: Core data logic for nodes. Heavily modified for duplication, resizing, manual size persistence, and centering logic.
-*   **/app/frontend/src/components/mindmap/NodeItem.jsx**: Visual representation of a node. Heavily modified to include 8 resize handlers and performance optimizations for dragging.
-*   **/app/frontend/src/components/mindmap/Canvas.jsx**: The main editor canvas. Heavily modified to integrate the new grid, rulers, and fullscreen state.
-*   **/app/frontend/src/components/mindmap/MindMapApp.jsx**: The top-level component for the editor. Heavily modified to manage global state for fullscreen, grid/ruler visibility, and handle new centering/export logic.
-*   **/app/frontend/src/components/mindmap/ExportMenu.jsx**: New component for the consolidated export dropdown.
-*   **/app/frontend/src/components/mindmap/CanvasGrid.jsx**: New component for rendering the background grid.
-*   **/app/frontend/src/components/mindmap/CanvasRulers.jsx**: New component for rendering the top and left rulers.
-*   **/app/frontend/src/components/mindmap/FullscreenMode.jsx**: New component for the floating controls in fullscreen mode.
-*   **/app/frontend/src/components/landing/LandingPage.jsx**: Analyzed as the starting point for the next task (Ver demo).
+*   **/app/backend/server.py**: Heavily modified to add endpoints for PayPal (, , ), user refresh, and to handle demo map data during registration.
+*   **/app/backend/paypal_service.py**: New file containing the core logic for interacting with the PayPal REST API. It was completely rewritten to fix an SDK issue.
+*   **/app/backend/.env**: Modified to add PayPal credentials.
+*   **/app/frontend/src/App.js**: Heavily modified to add routing for all new features (Demo, Legal Pages, PayPal Callback) and manage state for pending plan selections.
+*   **/app/frontend/src/contexts/AuthContext.js**: Modified to add a  function.
+*   **/app/frontend/src/contexts/CookieContext.jsx**: New context to manage cookie consent state.
+*   **/app/frontend/src/components/landing/LandingPage.jsx**: Modified to connect the Ver demo and pricing table buttons to their respective flows.
+*   **/app/frontend/src/components/auth/RegisterPage.jsx**: Modified to handle incoming demo maps and display a banner for pending plan selections.
+*   **/app/frontend/src/components/mindmap/MindMapApp.jsx**: Modified to automatically trigger the upgrade modal if a pending plan is detected after login.
+*   **/app/frontend/src/components/mindmap/UpgradeModal.jsx**: Modified to orchestrate the multi-step upgrade process, including showing the new PayPal modal.
+*   **/app/frontend/src/components/payment/PayPalSubscriptionModal.jsx**: New component that contains the UI for selecting a plan and initiating the PayPal payment.
+*   **/app/frontend/src/components/payment/PayPalCallback.jsx**: New component to handle the user's return from PayPal, call the backend to confirm the subscription, and show a success/failure message.
 
 **Areas that need refactoring**:
-*   **/app/frontend/src/hooks/useNodes.js**: This file has grown significantly and now contains complex logic for layout, data manipulation, and state updates. It should be broken down into smaller, more focused hooks (e.g., , , ).
-*   **/app/frontend/src/components/mindmap/Canvas.jsx**: This component continues to accumulate logic for various interaction modes and UI elements. The mouse event handlers (, ) are particularly complex and could be refactored into separate state machines or hooks for clarity.
+*   **/app/backend/server.py**: This file is now extremely large. The PayPal routes and potentially other feature-specific endpoints should be moved into separate  files under a  directory to improve modularity.
+*   **/app/frontend/src/App.js**: The routing and global state logic has become complex. This could be simplified by extracting routes into a dedicated file and using more focused custom hooks.
+*   **/app/frontend/src/hooks/useNodes.js**: This pre-existing large file remains a candidate for being broken down into smaller, more focused hooks.
 
 **key api endpoints**
-*   No new API endpoints were added.
+*   : Modified to accept optional  data to save upon registration.
+*   : Creates a PayPal subscription and returns an .
+*   : Called by the frontend after the user returns from PayPal. Captures the subscription, activates it, and updates the user's record in the database.
+*   : Endpoint to receive asynchronous events from PayPal (e.g., , ).
+*   : New endpoint to allow the frontend to fetch the latest user data (e.g., after a plan upgrade).
 
 **Critical Info for New Agent**
-*   **The User is Highly Iterative:** The user provides a continuous stream of feature requests and fine-tuning adjustments. Be prepared to implement, get feedback, and adjust quickly. The priority is to follow the user's latest request.
-*   **Unfixed Critical Bugs:** Be aware of the long-standing  issue. While the user hasn't prioritized it, it poses a risk to the application's core functionality.
-*   **Demo Mode Implementation:** The next task involves creating a demo mode. This will require careful state management to isolate demo data from the production database, only triggering a save operation after a user successfully completes registration. The logic should be designed to hand off the in-memory demo state to the account creation process.
+*   **Immediate Task:** The top priority is to update the  in  with the new key provided by the user, restart the backend, and conduct a full end-to-end test of the subscription flow.
+*   **PayPal Implementation:** The integration uses direct  calls to the PayPal REST API (logic is in ). Do not attempt to use the old  as it is incompatible with the required subscription APIs.
+*   **Security:** The user is security-conscious. Avoid logging sensitive information like API keys.
+*   **Testing Flow:** The user will complete the payment steps within the PayPal sandbox. The agent's role is to verify the successful redirection to PayPal, the subsequent callback to the application after payment, and the correct update of the user's subscription status in the UI.
 
 **documents and test reports created in this job**
-*    was updated multiple times by the testing agent.
+*    was updated by the testing agent to validate the Demo Mode and Cookie Consent features.
 
 **Last 10 User Messages and any pending HUMAN messages**
-10. **Request:** Implement a demo mode for unregistered users. (Current task)
-9.  **Request:** Create a consolidated Export menu for JPG, PDF, and DOCX. (Completed)
-8.  **Request:** Improve the Center button to permanently re-center the entire map. (Completed)
-7.  **Request:** Add toggles for the grid and rulers to the main mode panel. (Completed)
-6.  **Request:** Implement a fullscreen mode. (Completed)
-5.  **Request:** Improve the smoothness of node dragging. (Completed)
-4.  **Request:** Adjust the vertical position of the floating toolbar. (Completed)
-3.  **Request:** Ensure manually resized nodes don't auto-shrink when children are deleted. (Completed)
-2.  **Request:** Add 4 corner resize handlers for proportional resizing. (Completed)
-1.  **Request:** Add 4 side resize handlers to nodes. (Completed)
+1.  **Request (Current):** User provided a new PayPal  key and asked the agent to update it in the  file, restart the backend, and re-test the entire subscription flow for confirmation.
+2.  **Issue Report (Resolved):** User reported an Error de conexión when trying to pay with PayPal. The agent diagnosed the issue as an outdated SDK, rewrote the service using direct API calls, and resolved the problem.
+3.  **Confirmation (Completed):** User confirmed the automatic payment modal flow works correctly and asked what to do next.
+4.  **Issue Report (Resolved):** User reported that clicking a paid plan on the landing page and then registering did not automatically open the PayPal modal. The agent implemented this flow.
+5.  **Request (Completed):** User asked to connect the pricing table on the landing page to the new PayPal payment flow.
+6.  **Confirmation & Credentials (Completed):** User confirmed they want to use PayPal Sandbox for recurring subscriptions and provided their Client ID and Secret.
+7.  **Agent Question (Answered):** The agent asked for PayPal configuration details (mode, payment type, credentials).
+8.  **Request (Completed):** User initiated the request to integrate PayPal for payments.
+9.  **Request (Completed):** User asked to implement the cookie consent system and create the legal pages (Terms, Privacy, Cookies).
+10. **Request (Completed):** User initiated the request to implement the Ver demo mode.
 
 **Project Health Check:**
 *   **Broken:**
-    *    layout functionality remains unstable (recurring critical bug).
-    *   The 'X' button in the  is reported as non-functional.
+    *    layout functionality is still reported as unstable.
+    *   The 'X' (close) button in the  is reportedly non-functional.
     *   The user dropdown menu overlaps the sidebar on mobile devices.
 *   **Mocked:**
-    *   **Payment Flow:** The Actualizar button is a UI-only feature; Stripe is not integrated.
-    *   **Context Menu Actions:** Compartir mapa, Duplicar, etc., in the project sidebar are non-functional placeholders.
+    *   The  endpoint's logic has been created, but it has not been tested with a variety of real-world events from PayPal (e.g., subscription cancellation, failed payment). Only the successful activation flow has been validated.
+    *   Context Menu Actions (Compartir mapa, etc.) in the dashboard remain UI placeholders.
 
 **3rd Party Integrations**
+*   **PayPal:** For recurring subscriptions (Sandbox mode). Uses direct REST API calls. Libraries: , .
 *   **Lucide React:** For UI icons.
 *   **Twilio WhatsApp API:** For receiving incoming messages.
 *   **react-beautiful-dnd:** For drag-and-drop functionality.
 *   **Emergent-managed Google Auth:** For social login and registration.
-*   **html2canvas:** Used for generating map images for export.
-*   **jspdf:** Used for PDF export.
-*   **docx:** Used for Word (DOCX) export.
-*   **file-saver:** Helper for saving generated files.
+*   **html2canvas, jspdf, docx, file-saver:** For client-side file exports.
 
 **Testing status**
-*   **Testing agent used after significant changes:** YES, multiple times for different features.
+*   **Testing agent used after significant changes:** YES (for Demo Mode and Cookie System).
 *   **Troubleshoot agent used after agent stuck in loop:** NO.
 *   **Test files created:** None.
-*   **Known regressions:** The  layout has known, recurring regressions that have not been addressed.
+*   **Known regressions:** The  layout instability is a known, recurring issue.
 
 **Credentials to test flow:**
 *   **Admin User:**
@@ -217,4 +212,4 @@ The application is a feature-rich mind-mapping tool. The core editor canvas now 
     *   Password: 
 
 **What agent forgot to execute**
-The agent successfully executed all user requests provided during this session. The pre-existing issues from the last fork (MindHybrid layout bug, MultiSelectToolbar 'X' button, mobile layout overlap) and the previously defined Upcoming Tasks were not addressed, as the user continuously provided new, higher-priority feature requests that took precedence.</analysis>
+The agent successfully implemented all features requested by the user during the session. The pre-existing issues from the previous fork (MindHybrid layout, MultiSelectToolbar button, mobile layout) and the previously defined Upcoming Tasks were not addressed, as the user continuously provided new, higher-priority feature requests that took precedence.</analysis>

@@ -76,7 +76,9 @@ const NodeToolbar = ({
   onDelete,
   onAddIcon,
   onAddReminder,
-  onComment
+  onComment,
+  interactionMode = 'hand',
+  onSetInteractionMode
 }) => {
   // Estado para el arrastre
   const [isDragging, setIsDragging] = useState(false);

@@ -122,13 +122,16 @@ const RegisterPage = ({ onBackToLanding, onSwitchToLogin }) => {
       return;
     }
     
+    // Obtener mapa demo si existe
+    const demoMap = hasDemoMapToSave ? getDemoMapForTransfer() : null;
+    
     const result = await register({
       nombre: formData.nombre.trim(),
       apellidos: formData.apellidos.trim(),
       email: formData.email.trim(),
       username: formData.username.trim(),
       password: formData.password
-    });
+    }, demoMap);
     
     if (!result.success) {
       setLocalError(result.error || 'Error al crear la cuenta');

@@ -107,8 +107,9 @@ const AppContent = () => {
   if (authView === 'register') {
     return (
       <RegisterPage 
-        onBackToLanding={() => { setAuthView(null); setAuthError(null); }} 
+        onBackToLanding={() => { setAuthView(null); setAuthError(null); setSelectedPlanId(null); }} 
         onSwitchToLogin={() => { setAuthView('login'); setAuthError(null); }}
+        selectedPlan={selectedPlanId}
       />
     );
   }
@@ -122,6 +123,10 @@ const AppContent = () => {
       onTerms={() => setAuthView('terms')}
       onPrivacy={() => setAuthView('privacy')}
       onCookies={() => setAuthView('cookies')}
+      onSelectPlan={(planId) => {
+        setSelectedPlanId(planId);
+        setAuthView('register');
+      }}
     />
   );
 };

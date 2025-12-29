@@ -15,6 +15,7 @@ import uuid
 from datetime import datetime, timezone, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+import paypal_service
 
 
 ROOT_DIR = Path(__file__).parent

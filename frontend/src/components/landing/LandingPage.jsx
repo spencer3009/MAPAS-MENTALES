@@ -47,13 +47,32 @@ const MINDMAP_IMAGES = {
   howItWorks: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80'
 };
 
-const LandingPage = ({ onLogin, onRegister, onDemo, onTerms, onPrivacy, onCookies }) => {
+const LandingPage = ({ onLogin, onRegister, onDemo, onTerms, onPrivacy, onCookies, onSelectPlan }) => {
   const { openSettings: openCookieSettings } = useCookies();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
   const [content, setContent] = useState(null);
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Handler para seleccionar un plan
+  const handlePlanSelect = (plan) => {
+    if (plan.name === 'free' || plan.price === 0 || plan.price === '$0') {
+      // Plan gratuito -> ir a registro
+      onRegister();
+    } else if (plan.coming_soon) {
+      // Plan próximamente -> no hacer nada
+      return;
+    } else {
+      // Plan de pago -> notificar con el plan seleccionado
+      if (onSelectPlan) {
+        onSelectPlan(plan.name || plan.id);
+      } else {
+        // Fallback: ir a registro
+        onRegister();
+      }
+    }
+  };
 
   // Cargar contenido y planes desde la BD
   useEffect(() => {

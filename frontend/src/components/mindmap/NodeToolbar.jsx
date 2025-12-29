@@ -105,7 +105,7 @@ const NodeToolbar = ({
       style={{
         left: position.x,
         top: position.y - 4,
-        transform: 'translate(-60%, 0)'
+        transform: 'translateX(-50%)'
       }}
       onMouseDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}

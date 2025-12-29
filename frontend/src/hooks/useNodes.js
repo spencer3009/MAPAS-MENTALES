@@ -2447,8 +2447,17 @@ export const useNodes = () => {
   }, [nodes, activeProjectId, pushToHistory]);
 
   // Actualizar tamaño del nodo
-  const updateNodeSize = useCallback((id, width, height, saveHistory = false) => {
-    const newNodes = nodes.map(n => n.id === id ? { ...n, width, height } : n);
+  const updateNodeSize = useCallback((id, width, height, saveHistory = false, position = null) => {
+    const newNodes = nodes.map(n => {
+      if (n.id !== id) return n;
+      // Actualizar dimensiones y opcionalmente la posición
+      const updates = { width, height };
+      if (position) {
+        updates.x = position.x;
+        updates.y = position.y;
+      }
+      return { ...n, ...updates };
+    });
     if (saveHistory) {
       pushToHistory(activeProjectId, newNodes);
     }

@@ -5,8 +5,6 @@ import {
   Undo2,
   Redo2,
   Target,
-  FileJson,
-  Image,
   ZoomIn,
   ZoomOut,
   RotateCcw,
@@ -14,6 +12,7 @@ import {
 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import UserDropdown from './UserDropdown';
+import ExportMenu from './ExportMenu';
 
 // Componente Switch para toggle
 const ToggleSwitch = ({ enabled, onChange, label }) => (

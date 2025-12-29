@@ -226,6 +226,21 @@ const Canvas = ({
     onDeleteNode(nodeId, autoAlignEnabled);
   }, [onDeleteNode, autoAlignEnabled]);
 
+  // Wrapper para duplicar nodo con auto-alineación
+  const handleDuplicateWithAutoAlign = useCallback((nodeId) => {
+    if (!nodeId) {
+      console.error('[Canvas] handleDuplicateWithAutoAlign: nodeId es undefined');
+      return;
+    }
+    if (!onDuplicateNode) {
+      console.error('[Canvas] handleDuplicateWithAutoAlign: onDuplicateNode es undefined');
+      return;
+    }
+    console.log('[Canvas] Duplicando nodo:', nodeId, 'autoAlign:', autoAlignEnabled);
+    // Pasar el flag de autoAlign para posicionar correctamente el duplicado
+    onDuplicateNode(nodeId, autoAlignEnabled);
+  }, [onDuplicateNode, autoAlignEnabled]);
+
   // Handlers de la toolbar
   const handleToolbarEdit = useCallback(() => {
     if (selectedNodeId) {

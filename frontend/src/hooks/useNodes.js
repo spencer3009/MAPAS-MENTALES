@@ -2606,19 +2606,102 @@ export const useNodes = () => {
     setSelectedNodeId(null);
   }, [nodes, projects, activeProjectId, pushToHistory, autoAlignHierarchy, autoAlignMindTree]);
 
-  const duplicateNode = useCallback((id) => {
+  const duplicateNode = useCallback((id, autoAlignAfter = false) => {
     const original = nodes.find(n => n.id === id);
     if (!original) return;
     
     const newId = crypto.randomUUID();
+    const currentProject = projects.find(p => p.id === activeProjectId);
+    const layoutType = currentProject?.layoutType || 'mindflow';
+    
+    // Calcular posición correcta basada en los hermanos (si tiene padre)
+    let newX = original.x + 30;
+    let newY = original.y + 30;
+    
+    if (original.parentId) {
+      const parent = nodes.find(n => n.id === original.parentId);
+      if (parent) {
+        // Obtener hermanos (incluyendo el nodo original)
+        const siblings = nodes.filter(n => n.parentId === original.parentId);
+        
+        if (layoutType === 'mindtree') {
+          // MindTree: hijos distribuidos HORIZONTALMENTE
+          // Nuevo nodo se coloca a la derecha de los hermanos existentes
+          const rightmostSibling = siblings.reduce((max, s) => 
+            (s.x + (s.width || 160)) > (max.x + (max.width || 160)) ? s : max, siblings[0]);
+          const horizontalGap = 40;
+          newX = rightmostSibling.x + (rightmostSibling.width || 160) + horizontalGap;
+          newY = rightmostSibling.y; // Misma altura que los hermanos
+        } else if (layoutType === 'mindhybrid') {
+          // MindHybrid: determinar si los hijos son horizontales o verticales
+          // Basado en la posición relativa de los hijos existentes
+          if (siblings.length >= 2) {
+            const yVariance = Math.abs(siblings[0].y - siblings[1].y);
+            const xVariance = Math.abs(siblings[0].x - siblings[1].x);
+            
+            if (xVariance > yVariance) {
+              // Hijos distribuidos horizontalmente
+              const rightmostSibling = siblings.reduce((max, s) => 
+                (s.x + (s.width || 160)) > (max.x + (max.width || 160)) ? s : max, siblings[0]);
+              newX = rightmostSibling.x + (rightmostSibling.width || 160) + 40;
+              newY = rightmostSibling.y;
+            } else {
+              // Hijos distribuidos verticalmente
+              const bottommostSibling = siblings.reduce((max, s) => 
+                (s.y + (s.height || 64)) > (max.y + (max.height || 64)) ? s : max, siblings[0]);
+              newX = bottommostSibling.x;
+              newY = bottommostSibling.y + (bottommostSibling.height || 64) + 30;
+            }
+          } else {
+            // Solo un hermano, colocar debajo
+            const sibling = siblings[0];
+            newX = sibling.x;
+            newY = sibling.y + (sibling.height || 64) + 30;
+          }
+        } else {
+          // MindFlow: hijos distribuidos VERTICALMENTE a la derecha del padre
+          const bottommostSibling = siblings.reduce((max, s) => 
+            (s.y + (s.height || 64)) > (max.y + (max.height || 64)) ? s : max, siblings[0]);
+          newX = bottommostSibling.x;
+          newY = bottommostSibling.y + (bottommostSibling.height || 64) + 30;
+        }
+      }
+    }
+    
     const duplicate = {
       ...original,
       id: newId,
-      x: original.x + 30,
-      y: original.y + 30
+      x: newX,
+      y: newY
     };
     
-    const newNodes = [...nodes, duplicate];
+    let newNodes = [...nodes, duplicate];
+    
+    // Si autoAlign está activo y el nodo tiene padre, aplicar alineación
+    if (autoAlignAfter && original.parentId) {
+      // Encontrar el nodo raíz de esta jerarquía
+      let currentParentId = original.parentId;
+      let rootId = original.parentId;
+      while (currentParentId) {
+        const parent = newNodes.find(n => n.id === currentParentId);
+        if (parent && parent.parentId) {
+          currentParentId = parent.parentId;
+          rootId = parent.parentId;
+        } else {
+          break;
+        }
+      }
+      
+      // Aplicar alineación según el tipo de layout
+      if (layoutType === 'mindtree') {
+        newNodes = autoAlignMindTree(rootId, newNodes);
+      } else if (layoutType === 'mindhybrid') {
+        newNodes = autoAlignMindHybrid(rootId, newNodes);
+      } else {
+        newNodes = autoAlignHierarchy(rootId, newNodes);
+      }
+    }
+    
     pushToHistory(activeProjectId, newNodes);
 
     setProjects(prev => prev.map(p => 
@@ -2627,7 +2710,7 @@ export const useNodes = () => {
         : p
     ));
     setSelectedNodeId(newId);
-  }, [nodes, activeProjectId, pushToHistory]);
+  }, [nodes, projects, activeProjectId, pushToHistory, autoAlignHierarchy, autoAlignMindTree, autoAlignMindHybrid]);
 
   // ==========================================
   // GESTIÓN DE PROYECTOS

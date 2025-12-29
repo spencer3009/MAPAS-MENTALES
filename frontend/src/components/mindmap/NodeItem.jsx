@@ -480,7 +480,7 @@ const NodeItem = memo(({
         data-node-id={node.id}
         className={`
           absolute
-          transition-all duration-200 select-none
+          select-none
           ${isEditing ? 'cursor-text' : 'cursor-grab active:cursor-grabbing'}
           ${isDashedNode ? 'flex flex-col items-center justify-center' : 'flex items-center justify-center p-3'}
           ${!isCloudShape && !isDashedNode ? getShapeStyles(shape) : ''}
@@ -510,6 +510,9 @@ const NodeItem = memo(({
         // Cambiar borde cuando está multi-seleccionado para mayor énfasis
         outline: isMultiSelected ? '2px solid #2563eb' : 'none',
         outlineOffset: isMultiSelected ? '3px' : 0,
+        // Optimización para movimiento suave
+        willChange: 'transform, left, top',
+        transform: 'translateZ(0)', // Forzar aceleración por GPU
       }}
       onMouseDown={handleMouseDown}
       onClick={handleNodeClick}

@@ -8,6 +8,8 @@ import LinkPopover from './LinkPopover';
 import NodeTypeSelector from './NodeTypeSelector';
 import SelectionBox from './SelectionBox';
 import CanvasModePanel from './CanvasModePanel';
+import CanvasGrid from './CanvasGrid';
+import CanvasRulers, { RULER_SIZE } from './CanvasRulers';
 
 const Canvas = ({
   nodes,

@@ -2663,29 +2663,40 @@ async def create_paypal_subscription(
             detail="Ya tienes una suscripción activa. Cancélala primero para cambiar de plan."
         )
     
-    # URLs de retorno
-    frontend_url = os.environ.get("FRONTEND_URL", "http://localhost:3000")
+    # URLs de retorno - usar la URL externa del frontend
+    frontend_url = os.environ.get("FRONTEND_URL", "")
+    if not frontend_url:
+        # Intentar obtener de CORS_ORIGINS o usar un fallback
+        cors_origins = os.environ.get("CORS_ORIGINS", "")
+        if cors_origins and cors_origins != "*":
+            frontend_url = cors_origins.split(",")[0].strip()
+        else:
+            frontend_url = "http://localhost:3000"
+    
     return_url = f"{frontend_url}/#subscription-success"
     cancel_url = f"{frontend_url}/#subscription-cancel"
+    
+    logger.info(f"Creating PayPal subscription for plan: {request.plan_id}")
+    logger.info(f"Return URL: {return_url}")
     
     # Buscar o crear plan en PayPal
     plan_mapping = await db.paypal_plans.find_one({"mindora_plan_id": request.plan_id})
     
     if not plan_mapping:
         # Crear producto y plan en PayPal
+        logger.info(f"Creating new PayPal product for plan: {request.plan_id}")
         product_id = await paypal_service.create_paypal_product(request.plan_id)
         if not product_id:
-            raise HTTPException(status_code=500, detail="Error creando producto en PayPal")
+            raise HTTPException(status_code=500, detail="Error creando producto en PayPal. Verifica las credenciales.")
         
+        logger.info(f"Product created: {product_id}, now creating billing plan...")
         plan_result = await paypal_service.create_paypal_plan(
             request.plan_id, 
-            product_id, 
-            return_url, 
-            cancel_url
+            product_id
         )
         
         if not plan_result:
-            raise HTTPException(status_code=500, detail="Error creando plan en PayPal")
+            raise HTTPException(status_code=500, detail="Error creando plan de suscripción en PayPal")
         
         # Guardar mapeo de plan
         plan_mapping = {
@@ -2695,12 +2706,12 @@ async def create_paypal_subscription(
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         await db.paypal_plans.insert_one(plan_mapping)
+        logger.info(f"Plan mapping saved: {plan_mapping}")
     
     # Crear suscripción
-    user_email = user.get("email", "") if user else ""
+    logger.info(f"Creating subscription with PayPal plan: {plan_mapping['paypal_plan_id']}")
     subscription_result = await paypal_service.create_subscription(
         plan_mapping["paypal_plan_id"],
-        user_email,
         return_url,
         cancel_url
     )
@@ -2712,10 +2723,12 @@ async def create_paypal_subscription(
     await db.subscription_attempts.insert_one({
         "username": current_user["username"],
         "plan_id": request.plan_id,
-        "paypal_token": subscription_result.get("token"),
+        "paypal_subscription_id": subscription_result.get("subscription_id"),
         "status": "PENDING",
         "created_at": datetime.now(timezone.utc).isoformat()
     })
+    
+    logger.info(f"Subscription created successfully, approval URL: {subscription_result.get('approval_url')}")
     
     return {
         "approval_url": subscription_result["approval_url"],

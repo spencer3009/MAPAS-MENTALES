@@ -2803,6 +2803,134 @@ async def execute_paypal_subscription(
         "status": result.get("state", "ACTIVE")
     }
 
+class ConfirmSubscriptionRequest(BaseModel):
+    subscription_id: Optional[str] = None
+
+@api_router.post("/paypal/confirm-subscription")
+async def confirm_paypal_subscription(
+    request: ConfirmSubscriptionRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Confirmar una suscripción cuando el usuario regresa de PayPal"""
+    
+    logger.info(f"Confirming subscription for user: {current_user['username']}")
+    
+    # Buscar el intento de suscripción pendiente más reciente del usuario
+    attempt = await db.subscription_attempts.find_one(
+        {
+            "username": current_user["username"],
+            "status": "PENDING"
+        },
+        sort=[("created_at", -1)]  # El más reciente
+    )
+    
+    if not attempt:
+        # Verificar si ya tiene una suscripción activa
+        user = await db.users.find_one({"username": current_user["username"]})
+        if user and user.get("subscription_status") == "ACTIVE":
+            plan_name = PLANS_CONFIG.get(user.get("plan", ""), {}).get("display_name", user.get("plan", "Premium"))
+            return {
+                "success": True,
+                "plan_id": user.get("plan"),
+                "plan_name": plan_name,
+                "subscription_id": user.get("paypal_subscription_id"),
+                "status": "ACTIVE",
+                "message": "Ya tienes una suscripción activa"
+            }
+        raise HTTPException(status_code=404, detail="No se encontró suscripción pendiente")
+    
+    # Obtener detalles de la suscripción de PayPal
+    subscription_id = request.subscription_id or attempt.get("paypal_subscription_id")
+    
+    if subscription_id:
+        # Verificar estado en PayPal
+        subscription_details = await paypal_service.get_subscription_details(subscription_id)
+        logger.info(f"PayPal subscription details: {subscription_details}")
+        
+        if subscription_details:
+            paypal_status = subscription_details.get("status", "")
+            
+            # Si la suscripción está activa o aprobada en PayPal
+            if paypal_status in ["ACTIVE", "APPROVED"]:
+                plan_id = attempt["plan_id"]
+                now = datetime.now(timezone.utc).isoformat()
+                plan_name = PLANS_CONFIG.get(plan_id, {}).get("display_name", plan_id.capitalize())
+                
+                # Actualizar el usuario
+                await db.users.update_one(
+                    {"username": current_user["username"]},
+                    {
+                        "$set": {
+                            "plan": plan_id,
+                            "is_pro": plan_id in ["personal", "team", "enterprise"],
+                            "paypal_subscription_id": subscription_id,
+                            "subscription_status": "ACTIVE",
+                            "subscription_start_date": subscription_details.get("start_time"),
+                            "subscription_updated_at": now,
+                            "updated_at": now
+                        }
+                    }
+                )
+                
+                # Marcar el intento como completado
+                await db.subscription_attempts.update_one(
+                    {"_id": attempt["_id"]},
+                    {
+                        "$set": {
+                            "status": "COMPLETED",
+                            "paypal_subscription_id": subscription_id,
+                            "updated_at": now
+                        }
+                    }
+                )
+                
+                logger.info(f"Subscription confirmed for {current_user['username']}, plan: {plan_id}")
+                
+                return {
+                    "success": True,
+                    "plan_id": plan_id,
+                    "plan_name": plan_name,
+                    "subscription_id": subscription_id,
+                    "status": "ACTIVE"
+                }
+    
+    # Si no pudimos confirmar con PayPal, verificar si el usuario simplemente regresó
+    # y la suscripción puede estar pendiente de aprobación
+    plan_id = attempt["plan_id"]
+    plan_name = PLANS_CONFIG.get(plan_id, {}).get("display_name", plan_id.capitalize())
+    
+    # Asumir que si el usuario regresó con success, la suscripción está activa
+    # PayPal enviará webhook para confirmar
+    now = datetime.now(timezone.utc).isoformat()
+    
+    await db.users.update_one(
+        {"username": current_user["username"]},
+        {
+            "$set": {
+                "plan": plan_id,
+                "is_pro": plan_id in ["personal", "team", "enterprise"],
+                "paypal_subscription_id": attempt.get("paypal_subscription_id"),
+                "subscription_status": "APPROVAL_PENDING",
+                "subscription_updated_at": now,
+                "updated_at": now
+            }
+        }
+    )
+    
+    await db.subscription_attempts.update_one(
+        {"_id": attempt["_id"]},
+        {"$set": {"status": "APPROVAL_PENDING", "updated_at": now}}
+    )
+    
+    return {
+        "success": True,
+        "plan_id": plan_id,
+        "plan_name": plan_name,
+        "subscription_id": attempt.get("paypal_subscription_id"),
+        "status": "APPROVAL_PENDING",
+        "message": "Suscripción pendiente de confirmación. Se activará en breve."
+    }
+
 @api_router.post("/paypal/cancel-subscription")
 async def cancel_paypal_subscription(
     request: CancelSubscriptionRequest,

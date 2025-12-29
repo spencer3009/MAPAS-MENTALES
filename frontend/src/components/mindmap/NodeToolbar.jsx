@@ -100,12 +100,11 @@ const NodeToolbar = ({
         bg-white rounded-xl shadow-xl
         border border-gray-200
         flex items-center gap-1 p-2
-        animate-in fade-in slide-in-from-bottom-2 duration-200
+        -translate-x-1/2
       "
       style={{
         left: position.x,
-        top: position.y - 4,
-        transform: 'translateX(-50%)'
+        top: position.y - 4
       }}
       onMouseDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}

@@ -58,6 +58,12 @@ const RegisterPage = ({ onBackToLanding, onSwitchToLogin }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [localError, setLocalError] = useState('');
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [hasDemoMapToSave, setHasDemoMapToSave] = useState(false);
+
+  // Verificar si hay un mapa demo guardado
+  useEffect(() => {
+    setHasDemoMapToSave(hasDemoMap());
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

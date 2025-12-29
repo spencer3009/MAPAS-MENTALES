@@ -302,6 +302,31 @@ const NodeItem = memo(({
           // Arrastrar desde la derecha: solo ajustar ancho
           newWidth = Math.max(MIN_WIDTH, resizeStartRef.current.startWidth + deltaX);
           break;
+        // === ESQUINAS - Redimensionado proporcional ===
+        case 'top-left':
+          // Esquina superior izquierda: ajustar ancho, altura, X e Y
+          newWidth = Math.max(MIN_WIDTH, resizeStartRef.current.startWidth - deltaX);
+          newHeight = Math.max(MIN_HEIGHT, resizeStartRef.current.startHeight - deltaY);
+          newX = resizeStartRef.current.startNodeX + (resizeStartRef.current.startWidth - newWidth);
+          newY = resizeStartRef.current.startNodeY + (resizeStartRef.current.startHeight - newHeight);
+          break;
+        case 'top-right':
+          // Esquina superior derecha: ajustar ancho, altura e Y
+          newWidth = Math.max(MIN_WIDTH, resizeStartRef.current.startWidth + deltaX);
+          newHeight = Math.max(MIN_HEIGHT, resizeStartRef.current.startHeight - deltaY);
+          newY = resizeStartRef.current.startNodeY + (resizeStartRef.current.startHeight - newHeight);
+          break;
+        case 'bottom-left':
+          // Esquina inferior izquierda: ajustar ancho, altura y X
+          newWidth = Math.max(MIN_WIDTH, resizeStartRef.current.startWidth - deltaX);
+          newHeight = Math.max(MIN_HEIGHT, resizeStartRef.current.startHeight + deltaY);
+          newX = resizeStartRef.current.startNodeX + (resizeStartRef.current.startWidth - newWidth);
+          break;
+        case 'bottom-right':
+          // Esquina inferior derecha: solo ajustar ancho y altura
+          newWidth = Math.max(MIN_WIDTH, resizeStartRef.current.startWidth + deltaX);
+          newHeight = Math.max(MIN_HEIGHT, resizeStartRef.current.startHeight + deltaY);
+          break;
         default:
           break;
       }
@@ -343,11 +368,17 @@ const NodeItem = memo(({
     document.addEventListener('mouseup', handleResizeEnd);
   }, [node.id, node.x, node.y, nodeWidth, nodeHeight, onUpdateSize]);
 
-  // Handlers individuales para cada dirección
+  // Handlers individuales para cada dirección (lados)
   const handleResizeTop = createResizeHandler('top');
   const handleResizeBottom = createResizeHandler('bottom');
   const handleResizeLeft = createResizeHandler('left');
   const handleResizeRight = createResizeHandler('right');
+  
+  // Handlers para las esquinas (redimensionado proporcional)
+  const handleResizeTopLeft = createResizeHandler('top-left');
+  const handleResizeTopRight = createResizeHandler('top-right');
+  const handleResizeBottomLeft = createResizeHandler('bottom-left');
+  const handleResizeBottomRight = createResizeHandler('bottom-right');
 
   // Exponer método para iniciar edición
   const startEdit = useCallback(() => {

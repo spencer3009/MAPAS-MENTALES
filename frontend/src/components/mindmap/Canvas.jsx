@@ -68,11 +68,13 @@ const Canvas = ({
   onToggleNodeCompleted,
   // Tipo de layout del proyecto
   layoutType = 'mindflow',
-  // Pantalla completa
+  // Pantalla completa y visualización
   isFullscreen = false,
   onEnterFullscreen,
   showGrid = true,
-  showRulers = true
+  showRulers = true,
+  onToggleGrid,
+  onToggleRulers
 }) => {
   const containerRef = useRef(null);
   const [dragging, setDragging] = useState(null);

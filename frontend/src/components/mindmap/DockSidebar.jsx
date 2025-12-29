@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, 
-  FolderKanban, 
+  Network, 
   Star, 
   Bell, 
   Trash2, 

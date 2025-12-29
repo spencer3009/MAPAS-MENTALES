@@ -541,7 +541,7 @@ const Canvas = ({
     <div
       ref={containerRef}
       className={`
-        flex-1 bg-gradient-to-br from-slate-50 to-slate-100
+        flex-1 bg-slate-50
         overflow-hidden relative
         ${interactionMode === 'hand' && isPanning && !dragging ? 'cursor-grabbing' : ''}
         ${interactionMode === 'hand' && !isPanning && !dragging ? 'cursor-grab' : ''}
@@ -555,27 +555,35 @@ const Canvas = ({
       onMouseLeave={handleMouseUp}
       onContextMenu={handleContextMenu}
     >
+      {/* Reglas horizontales y verticales */}
+      <CanvasRulers
+        pan={pan}
+        zoom={zoom}
+        containerRef={containerRef}
+      />
+
       {/* Panel de modos del lienzo - siempre visible */}
       <CanvasModePanel
         interactionMode={interactionMode}
         onSetInteractionMode={onSetInteractionMode}
       />
 
-      {/* Patrón de fondo */}
+      {/* Cuadrícula del lienzo */}
       <div 
-        className="absolute inset-0 opacity-30"
-        style={{
-          backgroundImage: `radial-gradient(circle, #cbd5e1 1px, transparent 1px)`,
-          backgroundSize: '24px 24px',
-          transform: `translate(${pan.x % 24}px, ${pan.y % 24}px)`
+        className="absolute inset-0 pointer-events-none"
+        style={{ 
+          marginTop: RULER_SIZE, 
+          marginLeft: RULER_SIZE 
         }}
-      />
+      >
+        <CanvasGrid pan={pan} zoom={zoom} />
+      </div>
 
       {/* Contenedor transformable para nodos y conexiones */}
       <div
-        className="absolute top-0 left-0 origin-top-left will-change-transform"
+        className="absolute origin-top-left will-change-transform"
         style={{
-          transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+          transform: `translate(${pan.x + RULER_SIZE}px, ${pan.y + RULER_SIZE}px) scale(${zoom})`,
           width: '5000px',
           height: '5000px'
         }}

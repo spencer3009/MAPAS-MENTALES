@@ -122,7 +122,7 @@ const Canvas = ({
     }
     
     const toolbarX = (selectedNode.x + nodeW / 2) * zoom + adjustedPanX;
-    const toolbarY = (selectedNode.y - 54) * zoom + adjustedPanY;
+    const toolbarY = (selectedNode.y - 60) * zoom + adjustedPanY;
     
     return {
       addButton: addButtonX !== null ? { x: addButtonX, y: addButtonY } : null,

@@ -216,6 +216,24 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // Valor del contexto
+  // Refresh user data
+  const refreshUser = useCallback(async () => {
+    if (!token) return;
+    
+    try {
+      const response = await fetch(`${API_URL}/api/auth/me`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const fullUserData = await response.json();
+        setUser(fullUserData);
+        localStorage.setItem('mm_auth_user', JSON.stringify(fullUserData));
+      }
+    } catch (e) {
+      console.error('Error refreshing user:', e);
+    }
+  }, [token]);
+
   const value = {
     user,
     token,
@@ -229,6 +247,7 @@ export const AuthProvider = ({ children }) => {
     loginWithGoogle,
     processGoogleSession,
     logout,
+    refreshUser,
     clearError: () => setError(null)
   };
 

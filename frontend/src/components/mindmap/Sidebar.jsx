@@ -43,23 +43,28 @@ const Sidebar = ({
   const [draggedProject, setDraggedProject] = useState(null);
   const [planInfo, setPlanInfo] = useState(null);
   const [openMenuId, setOpenMenuId] = useState(null); // Estado para el menú desplegable
-  const menuRef = useRef(null);
+  const menuContainerRef = useRef(null);
 
   // Cerrar menú al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
+      // Verificar si el clic fue dentro del contenedor del menú
+      if (menuContainerRef.current && !menuContainerRef.current.contains(event.target)) {
         setOpenMenuId(null);
       }
     };
     
     if (openMenuId) {
-      document.addEventListener('mousedown', handleClickOutside);
+      // Usar setTimeout para evitar que el evento se dispare inmediatamente
+      const timeoutId = setTimeout(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+      }, 0);
+      
+      return () => {
+        clearTimeout(timeoutId);
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
     }
-    
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
   }, [openMenuId]);
 
   // Cargar información del plan

@@ -259,10 +259,16 @@ const Canvas = ({
       // SHIFT + clic = agregar a selección
       onAddToSelection(nodeId);
     } else {
-      // Clic normal = seleccionar solo este nodo
+      // Clic normal: verificar si el nodo ya está en una selección múltiple
+      // Si está, NO limpiar la selección para permitir arrastre de grupo
+      if (selectedNodeIds.size > 1 && selectedNodeIds.has(nodeId)) {
+        // El nodo ya está en selección múltiple - no hacer nada para permitir drag de grupo
+        return;
+      }
+      // Si no está en selección múltiple, seleccionar solo este nodo
       onSelectNode(nodeId);
     }
-  }, [onSelectNode, onAddToSelection]);
+  }, [onSelectNode, onAddToSelection, selectedNodeIds]);
 
   // Handlers del popover de enlaces
   const handleToolbarLink = useCallback(() => {

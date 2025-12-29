@@ -465,15 +465,20 @@ const Canvas = ({
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
-    // SHIFT + clic = iniciar selección por área
-    if (e.shiftKey) {
+    // MODO PUNTERO: selección por área
+    if (interactionMode === 'pointer') {
+      // Shift + clic agrega a la selección, clic normal limpia
+      if (!e.shiftKey && !e.ctrlKey && !e.metaKey) {
+        if (onClearSelection) onClearSelection();
+      }
+      // Iniciar selección por área
       setSelectionBox({ startX: x, startY: y, endX: x, endY: y });
       setIsSelectingArea(true);
       setShowControls(false);
       return;
     }
     
-    // Clic normal en canvas = panning (mover el lienzo)
+    // MODO MANO: panning (mover el lienzo)
     // Limpiar selección si no hay modificador
     if (!e.ctrlKey && !e.metaKey) {
       if (onClearSelection) onClearSelection();
@@ -483,7 +488,7 @@ const Canvas = ({
     setCommentPopover({ isOpen: false, nodeId: null });
     setLinkPopover({ isOpen: false, nodeId: null });
     onStartPanning(e);
-  }, [onCloseContextMenu, onClearSelection, onStartPanning]);
+  }, [onCloseContextMenu, onClearSelection, onStartPanning, interactionMode]);
 
   // Manejar click derecho en nodo
   const handleNodeContextMenu = useCallback((e, nodeId) => {

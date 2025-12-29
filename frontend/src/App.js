@@ -21,7 +21,7 @@ const LoadingScreen = () => (
 // Componente principal con lógica de autenticación
 const AppContent = () => {
   const { isAuthenticated, isAdmin, loading } = useAuth();
-  const [authView, setAuthView] = useState(null); // null = landing, 'login', 'register', 'callback', 'admin'
+  const [authView, setAuthView] = useState(null); // null = landing, 'login', 'register', 'callback', 'admin', 'demo'
   const [authError, setAuthError] = useState(null);
 
   // Detectar session_id en la URL (Google OAuth callback)
@@ -37,7 +37,7 @@ const AppContent = () => {
     setAuthView('callback');
   }
 
-  if (loading && authView !== 'callback') {
+  if (loading && authView !== 'callback' && authView !== 'demo') {
     return <LoadingScreen />;
   }
 
@@ -60,6 +60,17 @@ const AppContent = () => {
           setAuthError(error);
           setAuthView('login');
         }}
+      />
+    );
+  }
+
+  // Si el usuario eligió el modo demo
+  if (authView === 'demo') {
+    return (
+      <DemoMindMapApp
+        onRegister={() => setAuthView('register')}
+        onLogin={() => setAuthView('login')}
+        onBackToLanding={() => setAuthView(null)}
       />
     );
   }
@@ -89,7 +100,8 @@ const AppContent = () => {
   return (
     <LandingPage 
       onLogin={() => setAuthView('login')} 
-      onRegister={() => setAuthView('register')} 
+      onRegister={() => setAuthView('register')}
+      onDemo={() => setAuthView('demo')}
     />
   );
 };

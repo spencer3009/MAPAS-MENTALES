@@ -46,7 +46,7 @@ const MINDMAP_IMAGES = {
   howItWorks: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80'
 };
 
-const LandingPage = ({ onLogin, onRegister, onDemo }) => {
+const LandingPage = ({ onLogin, onRegister, onDemo, onTerms, onPrivacy, onCookies }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
   const [content, setContent] = useState(null);

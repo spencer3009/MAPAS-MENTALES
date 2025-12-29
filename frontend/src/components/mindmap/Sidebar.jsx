@@ -420,6 +420,7 @@ const Sidebar = ({
                 >
                   <button
                     onClick={(e) => {
+                      e.preventDefault();
                       e.stopPropagation();
                       setOpenMenuId(openMenuId === project.id ? null : project.id);
                     }}

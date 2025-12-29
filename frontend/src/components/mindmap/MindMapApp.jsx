@@ -199,8 +199,8 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
 
   // Estado para modo pantalla completa
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showGridInFullscreen, setShowGridInFullscreen] = useState(true);
-  const [showRulersInFullscreen, setShowRulersInFullscreen] = useState(true);
+  const [showGrid, setShowGrid] = useState(true);
+  const [showRulers, setShowRulers] = useState(true);
   const fullscreenContainerRef = useRef(null);
 
   // Obtener el layoutType del proyecto activo

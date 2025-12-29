@@ -2447,11 +2447,19 @@ export const useNodes = () => {
   }, [nodes, activeProjectId, pushToHistory]);
 
   // Actualizar tamaño del nodo
+  // Cuando el usuario redimensiona manualmente, guardamos manualWidth/manualHeight
+  // para que el sistema no sobrescriba el tamaño definido por el usuario
   const updateNodeSize = useCallback((id, width, height, saveHistory = false, position = null) => {
     const newNodes = nodes.map(n => {
       if (n.id !== id) return n;
-      // Actualizar dimensiones y opcionalmente la posición
-      const updates = { width, height };
+      // Actualizar dimensiones y marcar como tamaño manual
+      const updates = { 
+        width, 
+        height,
+        // Marcar que este tamaño fue definido manualmente por el usuario
+        manualWidth: width,
+        manualHeight: height
+      };
       if (position) {
         updates.x = position.x;
         updates.y = position.y;

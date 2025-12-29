@@ -227,6 +227,7 @@ const Sidebar = ({
   };
 
   return (
+    <>
     <div className="
       w-72 bg-white border-r border-gray-200
       flex flex-col p-5 shadow-sm z-20 shrink-0 h-full

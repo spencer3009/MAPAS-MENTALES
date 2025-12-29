@@ -1,24 +1,59 @@
 """
 PayPal Subscription Service for MindoraMap
-Handles recurring subscription payments via PayPal
+Handles recurring subscription payments via PayPal REST API v2
 """
 
 import os
-import paypalrestsdk
-from datetime import datetime, timezone
+import httpx
+import base64
+from datetime import datetime, timezone, timedelta
 from typing import Optional
 import logging
 
 logger = logging.getLogger(__name__)
 
-# Configuración de PayPal
-def configure_paypal():
-    """Configura el SDK de PayPal con las credenciales del entorno"""
-    paypalrestsdk.configure({
-        "mode": os.environ.get("PAYPAL_MODE", "sandbox"),  # "sandbox" o "live"
-        "client_id": os.environ.get("PAYPAL_CLIENT_ID", ""),
-        "client_secret": os.environ.get("PAYPAL_SECRET", "")
-    })
+# PayPal API endpoints
+PAYPAL_SANDBOX_API = "https://api-m.sandbox.paypal.com"
+PAYPAL_LIVE_API = "https://api-m.paypal.com"
+
+def get_paypal_api_base():
+    """Obtiene la URL base de la API según el modo"""
+    mode = os.environ.get("PAYPAL_MODE", "sandbox")
+    return PAYPAL_SANDBOX_API if mode == "sandbox" else PAYPAL_LIVE_API
+
+def get_auth_header():
+    """Genera el header de autenticación Basic para obtener access token"""
+    client_id = os.environ.get("PAYPAL_CLIENT_ID", "")
+    client_secret = os.environ.get("PAYPAL_SECRET", "")
+    credentials = f"{client_id}:{client_secret}"
+    encoded = base64.b64encode(credentials.encode()).decode()
+    return f"Basic {encoded}"
+
+async def get_access_token() -> Optional[str]:
+    """Obtiene un access token de PayPal"""
+    api_base = get_paypal_api_base()
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{api_base}/v1/oauth2/token",
+                headers={
+                    "Authorization": get_auth_header(),
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                data={"grant_type": "client_credentials"}
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                return data.get("access_token")
+            else:
+                logger.error(f"Error obteniendo token PayPal: {response.status_code} - {response.text}")
+                return None
+    except Exception as e:
+        logger.error(f"Excepción obteniendo token PayPal: {e}")
+        return None
+
 
 # Configuración de planes de MindoraMap para PayPal
 PAYPAL_PLANS = {
@@ -26,208 +61,295 @@ PAYPAL_PLANS = {
         "name": "MindoraMap Personal",
         "description": "Plan Personal - Mapas mentales ilimitados para creadores",
         "amount": "3.00",
-        "currency": "USD",
-        "interval": "MONTH",
-        "interval_count": 1
+        "currency": "USD"
     },
     "team": {
         "name": "MindoraMap Team",
         "description": "Plan Team - Colaboración en equipo de hasta 5 personas",
         "amount": "8.00",
-        "currency": "USD",
-        "interval": "MONTH",
-        "interval_count": 1
+        "currency": "USD"
     },
     "enterprise": {
         "name": "MindoraMap Enterprise",
         "description": "Plan Enterprise - Para equipos grandes con todas las funciones",
         "amount": "24.00",
-        "currency": "USD",
-        "interval": "MONTH",
-        "interval_count": 1
+        "currency": "USD"
     }
 }
 
 
 async def create_paypal_product(plan_id: str) -> Optional[str]:
     """Crea un producto en PayPal para un plan específico"""
-    configure_paypal()
-    
     if plan_id not in PAYPAL_PLANS:
         logger.error(f"Plan {plan_id} no existe en PAYPAL_PLANS")
         return None
     
     plan_config = PAYPAL_PLANS[plan_id]
+    access_token = await get_access_token()
     
-    product = paypalrestsdk.Product({
-        "name": plan_config["name"],
-        "description": plan_config["description"],
-        "type": "SERVICE",
-        "category": "SOFTWARE"
-    })
+    if not access_token:
+        logger.error("No se pudo obtener access token")
+        return None
     
-    if product.create():
-        logger.info(f"Producto PayPal creado: {product.id}")
-        return product.id
-    else:
-        logger.error(f"Error creando producto PayPal: {product.error}")
+    api_base = get_paypal_api_base()
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{api_base}/v1/catalogs/products",
+                headers={
+                    "Authorization": f"Bearer {access_token}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "name": plan_config["name"],
+                    "description": plan_config["description"],
+                    "type": "SERVICE",
+                    "category": "SOFTWARE"
+                }
+            )
+            
+            if response.status_code in [200, 201]:
+                data = response.json()
+                product_id = data.get("id")
+                logger.info(f"Producto PayPal creado: {product_id}")
+                return product_id
+            else:
+                logger.error(f"Error creando producto PayPal: {response.status_code} - {response.text}")
+                return None
+    except Exception as e:
+        logger.error(f"Excepción creando producto PayPal: {e}")
         return None
 
 
-async def create_paypal_plan(plan_id: str, product_id: str, return_url: str, cancel_url: str) -> Optional[dict]:
+async def create_paypal_plan(plan_id: str, product_id: str) -> Optional[dict]:
     """Crea un plan de suscripción en PayPal"""
-    configure_paypal()
-    
     if plan_id not in PAYPAL_PLANS:
         logger.error(f"Plan {plan_id} no existe")
         return None
     
     plan_config = PAYPAL_PLANS[plan_id]
+    access_token = await get_access_token()
     
-    billing_plan = paypalrestsdk.BillingPlan({
-        "name": plan_config["name"],
-        "description": plan_config["description"],
-        "type": "INFINITE",
-        "payment_definitions": [{
-            "name": f"Pago mensual {plan_config['name']}",
-            "type": "REGULAR",
-            "frequency": plan_config["interval"],
-            "frequency_interval": str(plan_config["interval_count"]),
-            "amount": {
-                "value": plan_config["amount"],
-                "currency": plan_config["currency"]
-            },
-            "cycles": "0"  # Infinito
-        }],
-        "merchant_preferences": {
-            "setup_fee": {
-                "value": "0",
-                "currency": plan_config["currency"]
-            },
-            "return_url": return_url,
-            "cancel_url": cancel_url,
-            "auto_bill_amount": "YES",
-            "initial_fail_amount_action": "CONTINUE",
-            "max_fail_attempts": "3"
-        }
-    })
+    if not access_token:
+        return None
     
-    if billing_plan.create():
-        # Activar el plan
-        if billing_plan.activate():
-            logger.info(f"Plan PayPal creado y activado: {billing_plan.id}")
-            return {
-                "id": billing_plan.id,
-                "name": plan_config["name"],
-                "state": billing_plan.state
-            }
-        else:
-            logger.error(f"Error activando plan: {billing_plan.error}")
-            return None
-    else:
-        logger.error(f"Error creando plan PayPal: {billing_plan.error}")
+    api_base = get_paypal_api_base()
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{api_base}/v1/billing/plans",
+                headers={
+                    "Authorization": f"Bearer {access_token}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "product_id": product_id,
+                    "name": plan_config["name"],
+                    "description": plan_config["description"],
+                    "status": "ACTIVE",
+                    "billing_cycles": [
+                        {
+                            "frequency": {
+                                "interval_unit": "MONTH",
+                                "interval_count": 1
+                            },
+                            "tenure_type": "REGULAR",
+                            "sequence": 1,
+                            "total_cycles": 0,  # Infinito
+                            "pricing_scheme": {
+                                "fixed_price": {
+                                    "value": plan_config["amount"],
+                                    "currency_code": plan_config["currency"]
+                                }
+                            }
+                        }
+                    ],
+                    "payment_preferences": {
+                        "auto_bill_outstanding": True,
+                        "setup_fee_failure_action": "CONTINUE",
+                        "payment_failure_threshold": 3
+                    }
+                }
+            )
+            
+            if response.status_code in [200, 201]:
+                data = response.json()
+                logger.info(f"Plan PayPal creado: {data.get('id')}")
+                return {
+                    "id": data.get("id"),
+                    "name": plan_config["name"],
+                    "status": data.get("status")
+                }
+            else:
+                logger.error(f"Error creando plan PayPal: {response.status_code} - {response.text}")
+                return None
+    except Exception as e:
+        logger.error(f"Excepción creando plan PayPal: {e}")
         return None
 
 
 async def create_subscription(
     paypal_plan_id: str,
-    user_email: str,
     return_url: str,
     cancel_url: str
 ) -> Optional[dict]:
     """Crea una suscripción para un usuario"""
-    configure_paypal()
+    access_token = await get_access_token()
     
-    billing_agreement = paypalrestsdk.BillingAgreement({
-        "name": "Suscripción MindoraMap",
-        "description": "Suscripción mensual a MindoraMap",
-        "start_date": (datetime.now(timezone.utc).replace(microsecond=0) + 
-                      __import__('datetime').timedelta(minutes=5)).isoformat() + "Z",
-        "plan": {
-            "id": paypal_plan_id
-        },
-        "payer": {
-            "payment_method": "paypal",
-            "payer_info": {
-                "email": user_email
-            }
-        }
-    })
-    
-    if billing_agreement.create():
-        # Encontrar el link de aprobación
-        for link in billing_agreement.links:
-            if link.rel == "approval_url":
-                logger.info(f"Suscripción creada, URL de aprobación: {link.href}")
-                return {
-                    "agreement_id": billing_agreement.id,
-                    "approval_url": link.href,
-                    "token": link.href.split("token=")[-1] if "token=" in link.href else None
-                }
+    if not access_token:
         return None
-    else:
-        logger.error(f"Error creando suscripción: {billing_agreement.error}")
-        return None
-
-
-async def execute_subscription(payment_token: str) -> Optional[dict]:
-    """Ejecuta/confirma una suscripción después de la aprobación del usuario"""
-    configure_paypal()
     
-    billing_agreement = paypalrestsdk.BillingAgreement.execute(payment_token)
+    api_base = get_paypal_api_base()
     
-    if billing_agreement:
-        logger.info(f"Suscripción ejecutada: {billing_agreement.id}")
-        return {
-            "agreement_id": billing_agreement.id,
-            "state": billing_agreement.state,
-            "payer_email": billing_agreement.payer.payer_info.email if hasattr(billing_agreement, 'payer') else None,
-            "start_date": billing_agreement.start_date if hasattr(billing_agreement, 'start_date') else None
-        }
-    else:
-        logger.error("Error ejecutando suscripción")
-        return None
-
-
-async def cancel_subscription(agreement_id: str, reason: str = "Usuario canceló la suscripción") -> bool:
-    """Cancela una suscripción activa"""
-    configure_paypal()
+    # La suscripción debe comenzar en el futuro (al menos 1 minuto)
+    start_time = (datetime.now(timezone.utc) + timedelta(minutes=5)).strftime("%Y-%m-%dT%H:%M:%SZ")
     
     try:
-        billing_agreement = paypalrestsdk.BillingAgreement.find(agreement_id)
-        
-        if billing_agreement.cancel({"note": reason}):
-            logger.info(f"Suscripción cancelada: {agreement_id}")
-            return True
-        else:
-            logger.error(f"Error cancelando suscripción: {billing_agreement.error}")
-            return False
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{api_base}/v1/billing/subscriptions",
+                headers={
+                    "Authorization": f"Bearer {access_token}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "plan_id": paypal_plan_id,
+                    "start_time": start_time,
+                    "application_context": {
+                        "brand_name": "MindoraMap",
+                        "locale": "es-ES",
+                        "shipping_preference": "NO_SHIPPING",
+                        "user_action": "SUBSCRIBE_NOW",
+                        "return_url": return_url,
+                        "cancel_url": cancel_url
+                    }
+                }
+            )
+            
+            if response.status_code in [200, 201]:
+                data = response.json()
+                
+                # Encontrar el link de aprobación
+                approval_url = None
+                for link in data.get("links", []):
+                    if link.get("rel") == "approve":
+                        approval_url = link.get("href")
+                        break
+                
+                if approval_url:
+                    logger.info(f"Suscripción creada, ID: {data.get('id')}")
+                    return {
+                        "subscription_id": data.get("id"),
+                        "approval_url": approval_url,
+                        "status": data.get("status")
+                    }
+                else:
+                    logger.error("No se encontró URL de aprobación")
+                    return None
+            else:
+                logger.error(f"Error creando suscripción: {response.status_code} - {response.text}")
+                return None
+    except Exception as e:
+        logger.error(f"Excepción creando suscripción: {e}")
+        return None
+
+
+async def get_subscription_details(subscription_id: str) -> Optional[dict]:
+    """Obtiene los detalles de una suscripción"""
+    access_token = await get_access_token()
+    
+    if not access_token:
+        return None
+    
+    api_base = get_paypal_api_base()
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"{api_base}/v1/billing/subscriptions/{subscription_id}",
+                headers={
+                    "Authorization": f"Bearer {access_token}",
+                    "Content-Type": "application/json"
+                }
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                return {
+                    "subscription_id": data.get("id"),
+                    "status": data.get("status"),
+                    "plan_id": data.get("plan_id"),
+                    "start_time": data.get("start_time"),
+                    "subscriber": data.get("subscriber", {})
+                }
+            else:
+                logger.error(f"Error obteniendo suscripción: {response.status_code}")
+                return None
+    except Exception as e:
+        logger.error(f"Excepción obteniendo suscripción: {e}")
+        return None
+
+
+async def activate_subscription(subscription_id: str) -> bool:
+    """Activa una suscripción (después de la aprobación del usuario)"""
+    access_token = await get_access_token()
+    
+    if not access_token:
+        return False
+    
+    api_base = get_paypal_api_base()
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{api_base}/v1/billing/subscriptions/{subscription_id}/activate",
+                headers={
+                    "Authorization": f"Bearer {access_token}",
+                    "Content-Type": "application/json"
+                },
+                json={"reason": "Reactivating subscription"}
+            )
+            
+            return response.status_code in [200, 204]
+    except Exception as e:
+        logger.error(f"Excepción activando suscripción: {e}")
+        return False
+
+
+async def cancel_subscription(subscription_id: str, reason: str = "Usuario canceló la suscripción") -> bool:
+    """Cancela una suscripción activa"""
+    access_token = await get_access_token()
+    
+    if not access_token:
+        return False
+    
+    api_base = get_paypal_api_base()
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{api_base}/v1/billing/subscriptions/{subscription_id}/cancel",
+                headers={
+                    "Authorization": f"Bearer {access_token}",
+                    "Content-Type": "application/json"
+                },
+                json={"reason": reason}
+            )
+            
+            if response.status_code in [200, 204]:
+                logger.info(f"Suscripción cancelada: {subscription_id}")
+                return True
+            else:
+                logger.error(f"Error cancelando suscripción: {response.status_code}")
+                return False
     except Exception as e:
         logger.error(f"Excepción cancelando suscripción: {e}")
         return False
 
 
-async def get_subscription_details(agreement_id: str) -> Optional[dict]:
-    """Obtiene los detalles de una suscripción"""
-    configure_paypal()
-    
-    try:
-        billing_agreement = paypalrestsdk.BillingAgreement.find(agreement_id)
-        
-        return {
-            "agreement_id": billing_agreement.id,
-            "state": billing_agreement.state,
-            "name": billing_agreement.name,
-            "description": billing_agreement.description,
-            "start_date": billing_agreement.start_date,
-            "payer_email": billing_agreement.payer.payer_info.email if hasattr(billing_agreement, 'payer') else None
-        }
-    except Exception as e:
-        logger.error(f"Error obteniendo detalles de suscripción: {e}")
-        return None
-
-
-def verify_webhook_signature(
+async def verify_webhook_signature(
     transmission_id: str,
     timestamp: str,
     webhook_id: str,
@@ -237,19 +359,36 @@ def verify_webhook_signature(
     auth_algo: str
 ) -> bool:
     """Verifica la firma de un webhook de PayPal"""
-    configure_paypal()
+    access_token = await get_access_token()
+    
+    if not access_token:
+        return False
+    
+    api_base = get_paypal_api_base()
     
     try:
-        response = paypalrestsdk.WebhookEvent.verify(
-            transmission_id=transmission_id,
-            timestamp=timestamp,
-            webhook_id=webhook_id,
-            event_body=event_body,
-            cert_url=cert_url,
-            actual_sig=actual_signature,
-            auth_algo=auth_algo
-        )
-        return response.get("verification_status") == "SUCCESS"
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{api_base}/v1/notifications/verify-webhook-signature",
+                headers={
+                    "Authorization": f"Bearer {access_token}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "transmission_id": transmission_id,
+                    "transmission_time": timestamp,
+                    "cert_url": cert_url,
+                    "auth_algo": auth_algo,
+                    "transmission_sig": actual_signature,
+                    "webhook_id": webhook_id,
+                    "webhook_event": event_body
+                }
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                return data.get("verification_status") == "SUCCESS"
+            return False
     except Exception as e:
         logger.error(f"Error verificando webhook: {e}")
         return False

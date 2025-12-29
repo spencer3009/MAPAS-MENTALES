@@ -179,7 +179,7 @@ const NodeToolbar = ({
         absolute z-40
         bg-white rounded-xl shadow-xl
         border border-gray-200
-        flex flex-col items-center
+        flex items-center
         ${!customPosition ? '-translate-x-1/2' : ''}
         ${isDragging ? 'cursor-grabbing shadow-2xl' : ''}
       `}
@@ -187,25 +187,25 @@ const NodeToolbar = ({
       onMouseDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
     >
-      {/* Handle de arrastre */}
+      {/* Handle lateral izquierdo */}
       <div
         onMouseDown={handleDragStart}
         className={`
-          w-16 h-2.5 -mt-1 mb-0.5
-          bg-gray-200 hover:bg-gray-300
-          rounded-t-lg rounded-b-sm
+          w-3 h-full min-h-[52px]
+          bg-gray-100 hover:bg-gray-200
+          rounded-l-xl
           flex items-center justify-center
           cursor-grab active:cursor-grabbing
           transition-colors duration-150
-          ${isDragging ? 'bg-blue-400' : ''}
+          ${isDragging ? 'bg-blue-200' : ''}
         `}
         title="Arrastrar para mover"
       >
-        <GripHorizontal size={12} className="text-gray-400" />
+        <div className="w-1 h-8 bg-gray-300 rounded-full" />
       </div>
 
       {/* Contenedor de botones */}
-      <div className="flex items-center gap-1 p-2 pt-0.5">
+      <div className="flex items-center gap-1 px-1.5 py-2">
         {/* Herramientas de selección */}
         <ToolbarButton 
           icon={MousePointer2} 
@@ -323,6 +323,23 @@ const NodeToolbar = ({
           onClick={onDelete}
           danger
         />
+      </div>
+
+      {/* Handle lateral derecho */}
+      <div
+        onMouseDown={handleDragStart}
+        className={`
+          w-3 h-full min-h-[52px]
+          bg-gray-100 hover:bg-gray-200
+          rounded-r-xl
+          flex items-center justify-center
+          cursor-grab active:cursor-grabbing
+          transition-colors duration-150
+          ${isDragging ? 'bg-blue-200' : ''}
+        `}
+        title="Arrastrar para mover"
+      >
+        <div className="w-1 h-8 bg-gray-300 rounded-full" />
       </div>
     </div>
   );

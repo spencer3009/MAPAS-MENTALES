@@ -2621,6 +2621,313 @@ async def get_public_landing_content():
     content = await db.landing_content.find_one({"id": "main"}, {"_id": 0})
     return content or {}
 
+
+# ==========================================
+# PAYPAL SUBSCRIPTION ENDPOINTS
+# ==========================================
+
+class CreateSubscriptionRequest(BaseModel):
+    plan_id: str  # "personal", "team", "enterprise"
+
+class ExecuteSubscriptionRequest(BaseModel):
+    token: str
+
+class CancelSubscriptionRequest(BaseModel):
+    reason: Optional[str] = "Usuario canceló la suscripción"
+
+@api_router.get("/paypal/client-id")
+async def get_paypal_client_id():
+    """Obtener el Client ID de PayPal para el frontend"""
+    client_id = os.environ.get("PAYPAL_CLIENT_ID", "")
+    if not client_id:
+        raise HTTPException(status_code=500, detail="PayPal no está configurado")
+    return {"client_id": client_id}
+
+@api_router.post("/paypal/create-subscription")
+async def create_paypal_subscription(
+    request: CreateSubscriptionRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Crear una suscripción de PayPal para el usuario"""
+    
+    # Verificar que el plan es válido
+    valid_plans = ["personal", "team", "enterprise"]
+    if request.plan_id not in valid_plans:
+        raise HTTPException(status_code=400, detail=f"Plan inválido. Opciones: {', '.join(valid_plans)}")
+    
+    # Verificar que el usuario no tenga ya una suscripción activa
+    user = await db.users.find_one({"username": current_user["username"]})
+    if user and user.get("paypal_subscription_id") and user.get("subscription_status") == "ACTIVE":
+        raise HTTPException(
+            status_code=400, 
+            detail="Ya tienes una suscripción activa. Cancélala primero para cambiar de plan."
+        )
+    
+    # URLs de retorno
+    frontend_url = os.environ.get("FRONTEND_URL", "http://localhost:3000")
+    return_url = f"{frontend_url}/#subscription-success"
+    cancel_url = f"{frontend_url}/#subscription-cancel"
+    
+    # Buscar o crear plan en PayPal
+    plan_mapping = await db.paypal_plans.find_one({"mindora_plan_id": request.plan_id})
+    
+    if not plan_mapping:
+        # Crear producto y plan en PayPal
+        product_id = await paypal_service.create_paypal_product(request.plan_id)
+        if not product_id:
+            raise HTTPException(status_code=500, detail="Error creando producto en PayPal")
+        
+        plan_result = await paypal_service.create_paypal_plan(
+            request.plan_id, 
+            product_id, 
+            return_url, 
+            cancel_url
+        )
+        
+        if not plan_result:
+            raise HTTPException(status_code=500, detail="Error creando plan en PayPal")
+        
+        # Guardar mapeo de plan
+        plan_mapping = {
+            "mindora_plan_id": request.plan_id,
+            "paypal_plan_id": plan_result["id"],
+            "paypal_product_id": product_id,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.paypal_plans.insert_one(plan_mapping)
+    
+    # Crear suscripción
+    user_email = user.get("email", "") if user else ""
+    subscription_result = await paypal_service.create_subscription(
+        plan_mapping["paypal_plan_id"],
+        user_email,
+        return_url,
+        cancel_url
+    )
+    
+    if not subscription_result:
+        raise HTTPException(status_code=500, detail="Error creando suscripción en PayPal")
+    
+    # Guardar intento de suscripción pendiente
+    await db.subscription_attempts.insert_one({
+        "username": current_user["username"],
+        "plan_id": request.plan_id,
+        "paypal_token": subscription_result.get("token"),
+        "status": "PENDING",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return {
+        "approval_url": subscription_result["approval_url"],
+        "token": subscription_result.get("token")
+    }
+
+@api_router.post("/paypal/execute-subscription")
+async def execute_paypal_subscription(
+    request: ExecuteSubscriptionRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Ejecutar/confirmar una suscripción después de la aprobación del usuario"""
+    
+    # Buscar el intento de suscripción
+    attempt = await db.subscription_attempts.find_one({
+        "username": current_user["username"],
+        "paypal_token": request.token,
+        "status": "PENDING"
+    })
+    
+    if not attempt:
+        raise HTTPException(status_code=404, detail="Suscripción no encontrada o ya procesada")
+    
+    # Ejecutar la suscripción en PayPal
+    result = await paypal_service.execute_subscription(request.token)
+    
+    if not result:
+        # Marcar como fallido
+        await db.subscription_attempts.update_one(
+            {"_id": attempt["_id"]},
+            {"$set": {"status": "FAILED", "updated_at": datetime.now(timezone.utc).isoformat()}}
+        )
+        raise HTTPException(status_code=500, detail="Error ejecutando suscripción en PayPal")
+    
+    # Actualizar el usuario con la suscripción
+    plan_id = attempt["plan_id"]
+    now = datetime.now(timezone.utc).isoformat()
+    
+    await db.users.update_one(
+        {"username": current_user["username"]},
+        {
+            "$set": {
+                "plan": plan_id,
+                "is_pro": plan_id in ["personal", "team", "enterprise"],
+                "paypal_subscription_id": result["agreement_id"],
+                "subscription_status": result.get("state", "ACTIVE"),
+                "subscription_start_date": result.get("start_date"),
+                "subscription_updated_at": now,
+                "updated_at": now
+            }
+        }
+    )
+    
+    # Actualizar intento como completado
+    await db.subscription_attempts.update_one(
+        {"_id": attempt["_id"]},
+        {
+            "$set": {
+                "status": "COMPLETED",
+                "paypal_agreement_id": result["agreement_id"],
+                "updated_at": now
+            }
+        }
+    )
+    
+    logger.info(f"Usuario {current_user['username']} suscrito al plan {plan_id}")
+    
+    return {
+        "success": True,
+        "plan_id": plan_id,
+        "subscription_id": result["agreement_id"],
+        "status": result.get("state", "ACTIVE")
+    }
+
+@api_router.post("/paypal/cancel-subscription")
+async def cancel_paypal_subscription(
+    request: CancelSubscriptionRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Cancelar la suscripción activa del usuario"""
+    
+    user = await db.users.find_one({"username": current_user["username"]})
+    
+    if not user or not user.get("paypal_subscription_id"):
+        raise HTTPException(status_code=404, detail="No tienes una suscripción activa")
+    
+    # Cancelar en PayPal
+    success = await paypal_service.cancel_subscription(
+        user["paypal_subscription_id"],
+        request.reason
+    )
+    
+    if not success:
+        raise HTTPException(status_code=500, detail="Error cancelando suscripción en PayPal")
+    
+    # Actualizar usuario
+    now = datetime.now(timezone.utc).isoformat()
+    await db.users.update_one(
+        {"username": current_user["username"]},
+        {
+            "$set": {
+                "plan": "free",
+                "is_pro": False,
+                "subscription_status": "CANCELLED",
+                "subscription_cancelled_at": now,
+                "subscription_updated_at": now,
+                "updated_at": now
+            }
+        }
+    )
+    
+    logger.info(f"Usuario {current_user['username']} canceló su suscripción")
+    
+    return {"success": True, "message": "Suscripción cancelada correctamente"}
+
+@api_router.get("/paypal/subscription-status")
+async def get_subscription_status(current_user: dict = Depends(get_current_user)):
+    """Obtener el estado de la suscripción del usuario"""
+    
+    user = await db.users.find_one({"username": current_user["username"]}, {"_id": 0})
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    return {
+        "plan": user.get("plan", "free"),
+        "is_pro": user.get("is_pro", False),
+        "subscription_id": user.get("paypal_subscription_id"),
+        "subscription_status": user.get("subscription_status"),
+        "subscription_start_date": user.get("subscription_start_date"),
+        "subscription_cancelled_at": user.get("subscription_cancelled_at")
+    }
+
+@api_router.post("/paypal/webhook")
+async def paypal_webhook(request: Request):
+    """Endpoint para recibir webhooks de PayPal"""
+    
+    try:
+        body = await request.json()
+        event_type = body.get("event_type", "")
+        
+        logger.info(f"PayPal webhook recibido: {event_type}")
+        
+        # Manejar diferentes tipos de eventos
+        if event_type == "BILLING.SUBSCRIPTION.ACTIVATED":
+            # Suscripción activada
+            resource = body.get("resource", {})
+            agreement_id = resource.get("id")
+            
+            if agreement_id:
+                await db.users.update_one(
+                    {"paypal_subscription_id": agreement_id},
+                    {"$set": {
+                        "subscription_status": "ACTIVE",
+                        "subscription_updated_at": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+        
+        elif event_type == "BILLING.SUBSCRIPTION.CANCELLED":
+            # Suscripción cancelada
+            resource = body.get("resource", {})
+            agreement_id = resource.get("id")
+            
+            if agreement_id:
+                await db.users.update_one(
+                    {"paypal_subscription_id": agreement_id},
+                    {"$set": {
+                        "plan": "free",
+                        "is_pro": False,
+                        "subscription_status": "CANCELLED",
+                        "subscription_cancelled_at": datetime.now(timezone.utc).isoformat(),
+                        "subscription_updated_at": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+        
+        elif event_type == "BILLING.SUBSCRIPTION.SUSPENDED":
+            # Suscripción suspendida (fallo de pago)
+            resource = body.get("resource", {})
+            agreement_id = resource.get("id")
+            
+            if agreement_id:
+                await db.users.update_one(
+                    {"paypal_subscription_id": agreement_id},
+                    {"$set": {
+                        "subscription_status": "SUSPENDED",
+                        "subscription_updated_at": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+        
+        elif event_type == "PAYMENT.SALE.COMPLETED":
+            # Pago completado
+            resource = body.get("resource", {})
+            billing_agreement_id = resource.get("billing_agreement_id")
+            
+            if billing_agreement_id:
+                # Registrar el pago
+                await db.payments.insert_one({
+                    "paypal_subscription_id": billing_agreement_id,
+                    "paypal_payment_id": resource.get("id"),
+                    "amount": resource.get("amount", {}).get("total"),
+                    "currency": resource.get("amount", {}).get("currency"),
+                    "status": "COMPLETED",
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                })
+        
+        return {"status": "received"}
+    
+    except Exception as e:
+        logger.error(f"Error procesando webhook de PayPal: {e}")
+        return {"status": "error", "message": str(e)}
+
+
 # Include the router in the main app
 app.include_router(api_router)
 

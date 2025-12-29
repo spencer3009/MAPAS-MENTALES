@@ -305,6 +305,23 @@ const RegisterPage = ({ onBackToLanding, onSwitchToLogin, selectedPlan }) => {
               </div>
             )}
 
+            {/* Banner de plan seleccionado */}
+            {selectedPlan && PLAN_DISPLAY_NAMES[selectedPlan] && !hasDemoMapToSave && (
+              <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl animate-in fade-in duration-300">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                  <Sparkles size={20} className="text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-blue-800">
+                    Plan {PLAN_DISPLAY_NAMES[selectedPlan].name} seleccionado
+                  </p>
+                  <p className="text-xs text-blue-600 mt-0.5">
+                    Crea tu cuenta gratis y luego activa tu plan {PLAN_DISPLAY_NAMES[selectedPlan].name} ({PLAN_DISPLAY_NAMES[selectedPlan].price}) con PayPal.
+                  </p>
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Nombre y Apellidos */}
               <div className="grid grid-cols-2 gap-3">

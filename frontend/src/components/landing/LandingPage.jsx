@@ -923,6 +923,7 @@ const LandingPage = ({ onLogin, onRegister, onDemo, onTerms, onPrivacy, onCookie
               <button onClick={onTerms} className="text-gray-500 hover:text-white transition-colors">Términos</button>
               <button onClick={onPrivacy} className="text-gray-500 hover:text-white transition-colors">Privacidad</button>
               <button onClick={onCookies} className="text-gray-500 hover:text-white transition-colors">Cookies</button>
+              <button onClick={openCookieSettings} className="text-gray-500 hover:text-white transition-colors">Gestionar cookies</button>
             </div>
           </div>
         </div>

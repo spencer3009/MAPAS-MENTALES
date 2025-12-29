@@ -605,7 +605,10 @@ const Sidebar = ({
               ) : null}
 
               {/* Botón de upgrade - más compacto */}
-              <button className="w-full py-1.5 px-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-[10px] font-semibold rounded flex items-center justify-center gap-1 transition-all shadow-sm hover:shadow-md">
+              <button 
+                onClick={() => onShowUpgrade?.()}
+                className="w-full py-1.5 px-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-[10px] font-semibold rounded flex items-center justify-center gap-1 transition-all shadow-sm hover:shadow-md"
+              >
                 <Zap className="w-3 h-3" />
                 Actualizar a Personal - $3/mes
               </button>

@@ -191,17 +191,21 @@ const NodeToolbar = ({
       <div
         onMouseDown={handleDragStart}
         className={`
-          w-3 h-full min-h-[52px]
-          bg-gray-100 hover:bg-gray-200
+          w-5 h-full min-h-[52px]
+          bg-blue-500 hover:bg-blue-600
           rounded-l-xl
           flex items-center justify-center
           cursor-grab active:cursor-grabbing
           transition-colors duration-150
-          ${isDragging ? 'bg-blue-200' : ''}
+          ${isDragging ? 'bg-blue-700' : ''}
         `}
         title="Arrastrar para mover"
       >
-        <div className="w-1 h-8 bg-gray-300 rounded-full" />
+        <div className="flex flex-col gap-1">
+          <div className="w-1.5 h-1.5 bg-white/60 rounded-full" />
+          <div className="w-1.5 h-1.5 bg-white/60 rounded-full" />
+          <div className="w-1.5 h-1.5 bg-white/60 rounded-full" />
+        </div>
       </div>
 
       {/* Contenedor de botones */}

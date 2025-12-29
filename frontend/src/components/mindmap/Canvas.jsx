@@ -377,16 +377,23 @@ const Canvas = ({
     setLinkPopover({ isOpen: false, nodeId: null });
     
     const rect = containerRef.current.getBoundingClientRect();
+    // Ajustar por el offset de las reglas
+    const adjustedPanX = pan.x + RULER_SIZE;
+    const adjustedPanY = pan.y + RULER_SIZE;
     setDragging({
       nodeId: node.id,
-      offsetX: (e.clientX - rect.left - pan.x) / zoom - node.x,
-      offsetY: (e.clientY - rect.top - pan.y) / zoom - node.y
+      offsetX: (e.clientX - rect.left - adjustedPanX) / zoom - node.x,
+      offsetY: (e.clientY - rect.top - adjustedPanY) / zoom - node.y
     });
   }, [pan, zoom]);
 
   // Manejar movimiento del mouse
   const handleMouseMove = useCallback((e) => {
     if (!containerRef.current) return;
+
+    // Ajustar por el offset de las reglas
+    const adjustedPanX = pan.x + RULER_SIZE;
+    const adjustedPanY = pan.y + RULER_SIZE;
 
     // Selección por área
     if (isSelectingArea && selectionBox) {
@@ -399,8 +406,8 @@ const Canvas = ({
 
     if (dragging) {
       const rect = containerRef.current.getBoundingClientRect();
-      const newX = (e.clientX - rect.left - pan.x) / zoom - dragging.offsetX;
-      const newY = (e.clientY - rect.top - pan.y) / zoom - dragging.offsetY;
+      const newX = (e.clientX - rect.left - adjustedPanX) / zoom - dragging.offsetX;
+      const newY = (e.clientY - rect.top - adjustedPanY) / zoom - dragging.offsetY;
       
       // Si hay múltiples nodos seleccionados, mover todos
       if (selectedNodeIds.size > 1 && selectedNodeIds.has(dragging.nodeId)) {

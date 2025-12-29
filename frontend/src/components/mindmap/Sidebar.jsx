@@ -709,6 +709,7 @@ const Sidebar = ({
       </div>,
       document.body
     )}
+    </>
   );
 };
 

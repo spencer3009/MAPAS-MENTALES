@@ -621,6 +621,94 @@ const Sidebar = ({
         </div>
       )}
     </div>
+
+    {/* Portal para el menú desplegable */}
+    {openMenuId && !isReorderMode && createPortal(
+      <div 
+        className="fixed w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-1.5 z-[100]"
+        style={{
+          top: menuPosition.top,
+          left: menuPosition.left
+        }}
+        ref={menuContainerRef}
+      >
+        {(() => {
+          const project = projects.find(p => p.id === openMenuId);
+          if (!project) return null;
+          
+          const isPinned = project.isPinned;
+          const canPin = pinnedCount < MAX_PINNED || isPinned;
+          
+          return (
+            <>
+              {/* Anclar arriba */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePinProject(project.id, !isPinned, e);
+                  setOpenMenuId(null);
+                }}
+                disabled={!canPin && !isPinned}
+                className={`
+                  w-full px-3 py-2 text-left text-sm flex items-center gap-2.5
+                  ${!canPin && !isPinned 
+                    ? 'text-gray-300 cursor-not-allowed' 
+                    : 'text-gray-700 hover:bg-gray-50'
+                  }
+                  transition-colors duration-150
+                `}
+              >
+                {isPinned ? <PinOff size={16} className="text-gray-400" /> : <Pin size={16} className="text-gray-400" />}
+                {isPinned ? 'Desanclar' : 'Anclar arriba'}
+              </button>
+              
+              {/* Editar nombre */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleStartEdit(project, e);
+                  setOpenMenuId(null);
+                }}
+                className="w-full px-3 py-2 text-left text-sm flex items-center gap-2.5 text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+              >
+                <Pencil size={16} className="text-gray-400" />
+                Editar nombre
+              </button>
+              
+              {/* Recordatorio */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onProjectReminder) onProjectReminder(project);
+                  setOpenMenuId(null);
+                }}
+                className="w-full px-3 py-2 text-left text-sm flex items-center gap-2.5 text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+              >
+                <Bell size={16} className="text-gray-400" />
+                Recordatorio
+              </button>
+              
+              {/* Separador */}
+              <div className="h-px bg-gray-100 my-1.5" />
+              
+              {/* Eliminar */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteProject(project.id);
+                  setOpenMenuId(null);
+                }}
+                className="w-full px-3 py-2 text-left text-sm flex items-center gap-2.5 text-red-500 hover:bg-red-50 transition-colors duration-150"
+              >
+                <Trash2 size={16} />
+                Eliminar
+              </button>
+            </>
+          );
+        })()}
+      </div>,
+      document.body
+    )}
   );
 };
 

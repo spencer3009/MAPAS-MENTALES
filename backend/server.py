@@ -56,12 +56,34 @@ class LoginRequest(BaseModel):
     username: str
     password: str
 
+class DemoMapNode(BaseModel):
+    id: str
+    text: str
+    x: float
+    y: float
+    color: Optional[str] = "blue"
+    parentId: Optional[str] = None
+    width: Optional[float] = 160
+    height: Optional[float] = 64
+    nodeType: Optional[str] = "default"
+    manualWidth: Optional[float] = None
+    manualHeight: Optional[float] = None
+
+class DemoMapData(BaseModel):
+    id: str
+    name: str
+    layoutType: Optional[str] = "mindflow"
+    nodes: List[DemoMapNode]
+    createdAt: Optional[str] = None
+    updatedAt: Optional[str] = None
+
 class RegisterRequest(BaseModel):
     nombre: str
     apellidos: Optional[str] = ""
     email: str
     username: str
     password: str
+    demo_map: Optional[DemoMapData] = None
 
 class Token(BaseModel):
     access_token: str

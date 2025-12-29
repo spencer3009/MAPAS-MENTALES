@@ -918,9 +918,9 @@ const LandingPage = ({ onLogin, onRegister, onDemo, onTerms, onPrivacy, onCookie
               © {new Date().getFullYear()} MindoraMap. Todos los derechos reservados.
             </p>
             <div className="flex items-center gap-6 text-sm">
-              <a href="#" className="text-gray-500 hover:text-white transition-colors">Términos</a>
-              <a href="#" className="text-gray-500 hover:text-white transition-colors">Privacidad</a>
-              <a href="#" className="text-gray-500 hover:text-white transition-colors">Cookies</a>
+              <button onClick={onTerms} className="text-gray-500 hover:text-white transition-colors">Términos</button>
+              <button onClick={onPrivacy} className="text-gray-500 hover:text-white transition-colors">Privacidad</button>
+              <button onClick={onCookies} className="text-gray-500 hover:text-white transition-colors">Cookies</button>
             </div>
           </div>
         </div>

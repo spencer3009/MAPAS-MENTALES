@@ -15,6 +15,8 @@ const Canvas = ({
   pan,
   zoom,
   isPanning,
+  interactionMode = 'hand',
+  onSetInteractionMode,
   contextMenu,
   onSelectNode,
   onAddToSelection,

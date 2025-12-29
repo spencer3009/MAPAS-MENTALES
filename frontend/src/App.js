@@ -26,6 +26,7 @@ const AppContent = () => {
   const { isAuthenticated, isAdmin, loading } = useAuth();
   const [authView, setAuthView] = useState(null); // null = landing, 'login', 'register', 'callback', 'admin', 'demo', 'terms', 'privacy', 'cookies'
   const [authError, setAuthError] = useState(null);
+  const [selectedPlanId, setSelectedPlanId] = useState(null); // Plan seleccionado desde la landing
 
   // Detectar session_id en la URL (Google OAuth callback)
   useEffect(() => {

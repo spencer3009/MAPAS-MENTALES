@@ -469,9 +469,17 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
   }, [selectedNodeId, deleteNode]);
 
   const handleCenter = useCallback(() => {
+    // Centrar todos los nodos en el canvas y guardar posición
+    // El tamaño del canvas se obtiene aproximadamente del viewport
+    const canvasWidth = window.innerWidth - 300; // Restar sidebar
+    const canvasHeight = window.innerHeight - 100; // Restar toolbar
+    
+    centerAllNodes(canvasWidth, canvasHeight);
+    
+    // Resetear pan y zoom para asegurar vista centrada
     resetPan();
     resetZoom();
-  }, [resetPan, resetZoom]);
+  }, [centerAllNodes, resetPan, resetZoom]);
 
   // Función de alineación automática
   // Usa el layout correcto según el tipo de proyecto (MindFlow o MindTree)

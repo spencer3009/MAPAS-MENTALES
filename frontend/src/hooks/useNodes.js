@@ -921,13 +921,16 @@ export const useNodes = () => {
 
     let updatedNodes = [...currentNodes];
 
-    // Posicionar cada hijo y su subárbol
-    const childrenX = root.x + HORIZONTAL_OFFSET;
+    // Calcular X de los hijos basado en el ancho REAL del padre
+    // Si el padre tiene manualWidth, usar ese ancho; sino usar el ancho actual o el default
+    const rootWidth = root.manualWidth || root.width || 160;
+    const GAP_BETWEEN_PARENT_CHILD = 120; // Espacio entre el borde derecho del padre y el borde izquierdo de los hijos
+    const childrenX = root.x + rootWidth + GAP_BETWEEN_PARENT_CHILD;
 
     for (let i = 0; i < sortedChildren.length; i++) {
       const child = sortedChildren[i];
 
-      // Actualizar posición X del hijo
+      // Actualizar posición X del hijo basada en el ancho real del padre
       updatedNodes = updatedNodes.map(n => 
         n.id === child.id ? { ...n, x: childrenX } : n
       );
@@ -968,6 +971,8 @@ export const useNodes = () => {
         const blockCenterY = (blockTop + blockBottom) / 2;
         const newRootY = blockCenterY - rootHeight / 2;
         
+        // Solo actualizar la posición Y del root, NO el tamaño
+        // Si el root tiene tamaño manual, respetarlo
         updatedNodes = updatedNodes.map(n => 
           n.id === rootId ? { ...n, y: newRootY } : n
         );
@@ -975,7 +980,7 @@ export const useNodes = () => {
     }
 
     return updatedNodes;
-  }, [getNodeHeight, calculateBlockHeight, alignSubtree, BLOCK_MARGIN, HORIZONTAL_OFFSET]);
+  }, [getNodeHeight, calculateBlockHeight, alignSubtree, BLOCK_MARGIN]);
 
   // Aplicar alineación automática a toda la jerarquía desde la raíz
   const applyFullAutoAlignment = useCallback(() => {

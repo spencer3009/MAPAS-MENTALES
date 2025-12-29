@@ -547,6 +547,12 @@ const Canvas = ({
       onMouseLeave={handleMouseUp}
       onContextMenu={handleContextMenu}
     >
+      {/* Panel de modos del lienzo - siempre visible */}
+      <CanvasModePanel
+        interactionMode={interactionMode}
+        onSetInteractionMode={onSetInteractionMode}
+      />
+
       {/* Patrón de fondo */}
       <div 
         className="absolute inset-0 opacity-30"

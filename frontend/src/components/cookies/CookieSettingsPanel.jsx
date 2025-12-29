@@ -149,7 +149,7 @@ const CookieSettingsPanel = () => {
             <Info size={20} className="text-blue-600 flex-shrink-0 mt-0.5" />
             <p className="text-sm text-blue-800">
               Puedes cambiar tus preferencias en cualquier momento desde el enlace 
-              "Gestionar cookies" en el pie de página. Las cookies necesarias no se pueden 
+              &quot;Gestionar cookies&quot; en el pie de página. Las cookies necesarias no se pueden 
               desactivar ya que son esenciales para el funcionamiento del sitio.
             </p>
           </div>

@@ -395,6 +395,62 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectAllNodes, clearSelection, closeContextMenu, selectedNodeId, selectedNodeIds, deleteSelectedNodes, duplicateSelectedNodes]);
 
+  // ==========================================
+  // FUNCIONES DE PANTALLA COMPLETA
+  // ==========================================
+  
+  const enterFullscreen = useCallback(async () => {
+    try {
+      const element = fullscreenContainerRef.current || document.documentElement;
+      
+      if (element.requestFullscreen) {
+        await element.requestFullscreen();
+      } else if (element.webkitRequestFullscreen) {
+        await element.webkitRequestFullscreen();
+      } else if (element.msRequestFullscreen) {
+        await element.msRequestFullscreen();
+      }
+    } catch (error) {
+      console.error('Error entering fullscreen:', error);
+    }
+  }, []);
+
+  const exitFullscreen = useCallback(async () => {
+    try {
+      if (document.exitFullscreen) {
+        await document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        await document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) {
+        await document.msExitFullscreen();
+      }
+    } catch (error) {
+      console.error('Error exiting fullscreen:', error);
+    }
+  }, []);
+
+  // Escuchar cambios en el estado de fullscreen
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isNowFullscreen = 
+        !!document.fullscreenElement ||
+        !!document.webkitFullscreenElement ||
+        !!document.msFullscreenElement;
+      
+      setIsFullscreen(isNowFullscreen);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('msfullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
   // Handlers para toolbar
   const handleAddNode = useCallback(() => {
     if (selectedNodeId) {

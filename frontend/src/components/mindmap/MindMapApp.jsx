@@ -1022,10 +1022,10 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
           {/* Controles de pantalla completa */}
           <FullscreenControls
             isFullscreen={isFullscreen}
-            showGrid={showGridInFullscreen}
-            showRulers={showRulersInFullscreen}
-            onToggleGrid={() => setShowGridInFullscreen(prev => !prev)}
-            onToggleRulers={() => setShowRulersInFullscreen(prev => !prev)}
+            showGrid={showGrid}
+            showRulers={showRulers}
+            onToggleGrid={() => setShowGrid(prev => !prev)}
+            onToggleRulers={() => setShowRulers(prev => !prev)}
             onExitFullscreen={exitFullscreen}
           />
         </div>

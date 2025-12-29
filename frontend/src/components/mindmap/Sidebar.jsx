@@ -422,7 +422,12 @@ const Sidebar = ({
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      setOpenMenuId(openMenuId === project.id ? null : project.id);
+                      console.log('Menu button clicked for project:', project.id, 'Current openMenuId:', openMenuId);
+                      setOpenMenuId(prev => {
+                        const newValue = prev === project.id ? null : project.id;
+                        console.log('Setting openMenuId to:', newValue);
+                        return newValue;
+                      });
                     }}
                     className={`
                       p-1.5 rounded-lg transition-all duration-200

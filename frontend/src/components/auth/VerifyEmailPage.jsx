@@ -1,18 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle2, XCircle, Loader2, Mail, ArrowRight } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
 const VerifyEmailPage = () => {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const [status, setStatus] = useState('verifying'); // verifying, success, error, expired
   const [message, setMessage] = useState('');
   const [username, setUsername] = useState('');
 
   useEffect(() => {
-    const token = searchParams.get('token');
+    // Obtener token de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
     
     if (!token) {
       setStatus('error');
@@ -21,7 +20,7 @@ const VerifyEmailPage = () => {
     }
 
     verifyEmail(token);
-  }, [searchParams]);
+  }, []);
 
   const verifyEmail = async (token) => {
     try {
@@ -54,11 +53,11 @@ const VerifyEmailPage = () => {
   };
 
   const goToLogin = () => {
-    navigate('/login');
+    window.location.href = '/';
   };
 
   const goToApp = () => {
-    navigate('/');
+    window.location.href = '/';
   };
 
   return (

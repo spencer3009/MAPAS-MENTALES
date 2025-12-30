@@ -351,7 +351,7 @@ class EmailVerificationTester:
     def cleanup_test_users(self):
         """Clean up test users from database"""
         try:
-            if self.users_collection and self.test_user_data:
+            if self.users_collection is None and self.test_user_data:
                 # Remove test users
                 self.users_collection.delete_many({
                     "$or": [

@@ -2992,37 +2992,66 @@ async def get_subscription_status(current_user: dict = Depends(get_current_user)
 
 @api_router.post("/paypal/webhook")
 async def paypal_webhook(request: Request):
-    """Endpoint para recibir webhooks de PayPal"""
+    """
+    Endpoint para recibir webhooks de PayPal
+    Eventos manejados:
+    - BILLING.SUBSCRIPTION.ACTIVATED
+    - BILLING.SUBSCRIPTION.CANCELLED
+    - BILLING.SUBSCRIPTION.SUSPENDED
+    - PAYMENT.SALE.COMPLETED
+    - PAYMENT.SALE.DENIED
+    """
     
     try:
         body = await request.json()
         event_type = body.get("event_type", "")
+        event_id = body.get("id", "")
+        resource = body.get("resource", {})
         
-        logger.info(f"PayPal webhook recibido: {event_type}")
+        logger.info(f"📨 PayPal Webhook recibido - Evento: {event_type}, ID: {event_id}")
+        logger.info(f"📋 Resource data: {resource}")
+        
+        # Registrar TODOS los eventos en la colección paypal_events para auditoría
+        await db.paypal_events.insert_one({
+            "event_id": event_id,
+            "event_type": event_type,
+            "resource": resource,
+            "raw_body": body,
+            "received_at": datetime.now(timezone.utc).isoformat(),
+            "processed": False
+        })
+        
+        # Obtener el ID de la suscripción según el tipo de evento
+        subscription_id = resource.get("id") or resource.get("billing_agreement_id")
         
         # Manejar diferentes tipos de eventos
         if event_type == "BILLING.SUBSCRIPTION.ACTIVATED":
-            # Suscripción activada
-            resource = body.get("resource", {})
-            agreement_id = resource.get("id")
+            # Suscripción activada exitosamente
+            logger.info(f"✅ Suscripción ACTIVADA: {subscription_id}")
             
-            if agreement_id:
-                await db.users.update_one(
-                    {"paypal_subscription_id": agreement_id},
+            if subscription_id:
+                result = await db.users.update_one(
+                    {"paypal_subscription_id": subscription_id},
                     {"$set": {
                         "subscription_status": "ACTIVE",
                         "subscription_updated_at": datetime.now(timezone.utc).isoformat()
                     }}
                 )
+                logger.info(f"📝 Usuario actualizado: {result.modified_count} documento(s)")
+                
+                # Marcar evento como procesado
+                await db.paypal_events.update_one(
+                    {"event_id": event_id},
+                    {"$set": {"processed": True, "processed_at": datetime.now(timezone.utc).isoformat()}}
+                )
         
         elif event_type == "BILLING.SUBSCRIPTION.CANCELLED":
-            # Suscripción cancelada
-            resource = body.get("resource", {})
-            agreement_id = resource.get("id")
+            # Suscripción cancelada por usuario o PayPal
+            logger.info(f"❌ Suscripción CANCELADA: {subscription_id}")
             
-            if agreement_id:
-                await db.users.update_one(
-                    {"paypal_subscription_id": agreement_id},
+            if subscription_id:
+                result = await db.users.update_one(
+                    {"paypal_subscription_id": subscription_id},
                     {"$set": {
                         "plan": "free",
                         "is_pro": False,
@@ -3031,41 +3060,112 @@ async def paypal_webhook(request: Request):
                         "subscription_updated_at": datetime.now(timezone.utc).isoformat()
                     }}
                 )
+                logger.info(f"📝 Usuario degradado a plan free: {result.modified_count} documento(s)")
+                
+                await db.paypal_events.update_one(
+                    {"event_id": event_id},
+                    {"$set": {"processed": True, "processed_at": datetime.now(timezone.utc).isoformat()}}
+                )
         
         elif event_type == "BILLING.SUBSCRIPTION.SUSPENDED":
-            # Suscripción suspendida (fallo de pago)
-            resource = body.get("resource", {})
-            agreement_id = resource.get("id")
+            # Suscripción suspendida (fallo de pago recurrente)
+            logger.info(f"⚠️ Suscripción SUSPENDIDA: {subscription_id}")
             
-            if agreement_id:
-                await db.users.update_one(
-                    {"paypal_subscription_id": agreement_id},
+            if subscription_id:
+                result = await db.users.update_one(
+                    {"paypal_subscription_id": subscription_id},
                     {"$set": {
                         "subscription_status": "SUSPENDED",
+                        "subscription_suspended_at": datetime.now(timezone.utc).isoformat(),
                         "subscription_updated_at": datetime.now(timezone.utc).isoformat()
                     }}
                 )
+                logger.info(f"📝 Suscripción suspendida: {result.modified_count} documento(s)")
+                
+                await db.paypal_events.update_one(
+                    {"event_id": event_id},
+                    {"$set": {"processed": True, "processed_at": datetime.now(timezone.utc).isoformat()}}
+                )
         
         elif event_type == "PAYMENT.SALE.COMPLETED":
-            # Pago completado
-            resource = body.get("resource", {})
+            # Pago mensual completado exitosamente
+            payment_id = resource.get("id")
             billing_agreement_id = resource.get("billing_agreement_id")
+            amount = resource.get("amount", {})
+            
+            logger.info(f"💰 Pago COMPLETADO: {payment_id}, Monto: {amount.get('total')} {amount.get('currency')}")
             
             if billing_agreement_id:
-                # Registrar el pago
+                # Registrar el pago en colección de pagos
                 await db.payments.insert_one({
+                    "id": str(uuid4()),
                     "paypal_subscription_id": billing_agreement_id,
-                    "paypal_payment_id": resource.get("id"),
-                    "amount": resource.get("amount", {}).get("total"),
-                    "currency": resource.get("amount", {}).get("currency"),
+                    "paypal_payment_id": payment_id,
+                    "amount": amount.get("total"),
+                    "currency": amount.get("currency"),
                     "status": "COMPLETED",
+                    "payer_email": resource.get("payer", {}).get("email_address"),
                     "created_at": datetime.now(timezone.utc).isoformat()
                 })
+                
+                # Asegurar que el usuario sigue activo
+                await db.users.update_one(
+                    {"paypal_subscription_id": billing_agreement_id},
+                    {"$set": {
+                        "subscription_status": "ACTIVE",
+                        "last_payment_at": datetime.now(timezone.utc).isoformat(),
+                        "subscription_updated_at": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+                
+                await db.paypal_events.update_one(
+                    {"event_id": event_id},
+                    {"$set": {"processed": True, "processed_at": datetime.now(timezone.utc).isoformat()}}
+                )
         
-        return {"status": "received"}
+        elif event_type == "PAYMENT.SALE.DENIED":
+            # Pago rechazado
+            payment_id = resource.get("id")
+            billing_agreement_id = resource.get("billing_agreement_id")
+            
+            logger.warning(f"🚫 Pago DENEGADO: {payment_id}")
+            
+            if billing_agreement_id:
+                # Registrar el pago fallido
+                await db.payments.insert_one({
+                    "id": str(uuid4()),
+                    "paypal_subscription_id": billing_agreement_id,
+                    "paypal_payment_id": payment_id,
+                    "amount": resource.get("amount", {}).get("total"),
+                    "currency": resource.get("amount", {}).get("currency"),
+                    "status": "DENIED",
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                })
+                
+                # Actualizar estado del usuario
+                await db.users.update_one(
+                    {"paypal_subscription_id": billing_agreement_id},
+                    {"$set": {
+                        "subscription_status": "PAYMENT_FAILED",
+                        "last_payment_failed_at": datetime.now(timezone.utc).isoformat(),
+                        "subscription_updated_at": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+                
+                await db.paypal_events.update_one(
+                    {"event_id": event_id},
+                    {"$set": {"processed": True, "processed_at": datetime.now(timezone.utc).isoformat()}}
+                )
+        
+        else:
+            logger.info(f"ℹ️ Evento no manejado: {event_type}")
+        
+        return {"status": "received", "event_type": event_type}
     
     except Exception as e:
-        logger.error(f"Error procesando webhook de PayPal: {e}")
+        logger.error(f"❌ Error procesando webhook de PayPal: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
         return {"status": "error", "message": str(e)}
 
 

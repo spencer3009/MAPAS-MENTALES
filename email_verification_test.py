@@ -147,7 +147,7 @@ class EmailVerificationTester:
     def get_verification_token_from_db(self) -> bool:
         """Get verification token from MongoDB for the test user"""
         try:
-            if not self.users_collection or not self.test_user_data:
+            if self.users_collection is None or not self.test_user_data:
                 self.log_test("Get Verification Token", False, "No database connection or test user data")
                 return False
             

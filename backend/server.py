@@ -502,12 +502,18 @@ async def get_me(current_user: dict = Depends(get_current_user)):
     user_role = user.get("role", "user") if user else "user"
     user_plan = "admin" if user_role == "admin" else user.get("plan", "free") if user else "free"
     
+    # Verificar estado de email (usuarios de Google OAuth siempre verificados)
+    auth_provider = user.get("auth_provider", "local") if user else "local"
+    email_verified = True if auth_provider == "google" else user.get("email_verified", False) if user else False
+    
     return {
         "username": current_user["username"],
         "full_name": current_user.get("full_name", ""),
         "role": user_role,
         "plan": user_plan,
-        "is_pro": user_plan in ["personal", "pro", "team", "admin"]
+        "is_pro": user_plan in ["personal", "pro", "team", "admin"],
+        "email_verified": email_verified,
+        "email": user.get("email", "") if user else ""
     }
 
 @api_router.post("/auth/logout")

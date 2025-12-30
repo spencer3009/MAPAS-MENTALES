@@ -730,6 +730,67 @@ async def resend_verification(request: ResendVerificationRequest, background_tas
     }
 
 
+class UpdateEmailRequest(BaseModel):
+    new_email: str
+
+@api_router.post("/auth/update-email")
+async def update_email(request: UpdateEmailRequest, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user)):
+    """
+    Actualizar el email del usuario y enviar verificación al nuevo email
+    """
+    new_email = request.new_email.lower().strip()
+    
+    # Validar formato de email básico
+    if "@" not in new_email or "." not in new_email:
+        raise HTTPException(status_code=400, detail="Formato de email inválido")
+    
+    # Verificar que el nuevo email no esté en uso por otro usuario
+    existing = await db.users.find_one({"email": new_email, "username": {"$ne": current_user["username"]}})
+    if existing:
+        raise HTTPException(status_code=400, detail="Este correo ya está registrado por otro usuario")
+    
+    # Generar nuevo token de verificación
+    new_token = email_service.generate_verification_token()
+    new_expiry = email_service.get_token_expiry()
+    now = datetime.now(timezone.utc).isoformat()
+    
+    # Actualizar email y token en users collection
+    await db.users.update_one(
+        {"username": current_user["username"]},
+        {
+            "$set": {
+                "email": new_email,
+                "email_verified": False,
+                "verification_token": new_token,
+                "verification_token_expiry": new_expiry,
+                "updated_at": now
+            }
+        }
+    )
+    
+    # También actualizar en user_profiles para mantener sincronizado
+    await db.user_profiles.update_one(
+        {"username": current_user["username"]},
+        {"$set": {"email": new_email, "updated_at": now}}
+    )
+    
+    # Enviar email de verificación al nuevo email
+    background_tasks.add_task(
+        email_service.send_verification_email,
+        new_email,
+        current_user.get("full_name", current_user["username"]),
+        new_token
+    )
+    
+    logger.info(f"📧 Email actualizado y verificación enviada para {current_user['username']}: {new_email}")
+    
+    return {
+        "success": True,
+        "message": f"Se ha enviado un enlace de verificación a {new_email}",
+        "new_email": new_email
+    }
+
+
 @api_router.get("/auth/verification-status")
 async def get_verification_status(current_user: dict = Depends(get_current_user)):
     """

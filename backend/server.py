@@ -390,7 +390,7 @@ async def login(login_data: LoginRequest):
     }
 
 @api_router.post("/auth/register", response_model=Token)
-async def register(register_data: RegisterRequest):
+async def register(register_data: RegisterRequest, background_tasks: BackgroundTasks):
     """Registrar un nuevo usuario"""
     # Verificar si el username ya existe en la base de datos
     existing_user = await db.users.find_one({"username": register_data.username})
@@ -413,6 +413,10 @@ async def register(register_data: RegisterRequest):
     full_name = f"{register_data.nombre} {register_data.apellidos}".strip()
     user_id = f"user_{uuid.uuid4().hex[:12]}"
     
+    # Generar token de verificación
+    verification_token = email_service.generate_verification_token()
+    verification_expiry = email_service.get_token_expiry()
+    
     new_user = {
         "user_id": user_id,
         "id": user_id,
@@ -422,6 +426,10 @@ async def register(register_data: RegisterRequest):
         "full_name": full_name,
         "auth_provider": "local",
         "disabled": False,
+        # Campos de verificación de email
+        "email_verified": False,
+        "verification_token": verification_token,
+        "verification_token_expiry": verification_expiry,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "updated_at": datetime.now(timezone.utc).isoformat()
     }
@@ -463,6 +471,15 @@ async def register(register_data: RegisterRequest):
         
         await db.projects.insert_one(new_project)
     
+    # Enviar email de verificación en background
+    background_tasks.add_task(
+        email_service.send_verification_email,
+        register_data.email,
+        full_name,
+        verification_token
+    )
+    logger.info(f"📧 Email de verificación programado para {register_data.email}")
+    
     # Crear token de acceso
     access_token = create_access_token(data={"sub": register_data.username})
     
@@ -471,7 +488,8 @@ async def register(register_data: RegisterRequest):
         "token_type": "bearer",
         "user": {
             "username": register_data.username,
-            "full_name": full_name
+            "full_name": full_name,
+            "email_verified": False
         }
     }
 

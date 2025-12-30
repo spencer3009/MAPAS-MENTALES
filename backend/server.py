@@ -523,6 +523,209 @@ async def logout(response: Response):
 
 
 # ==========================================
+# EMAIL VERIFICATION ENDPOINTS
+# ==========================================
+
+class VerifyEmailRequest(BaseModel):
+    token: str
+
+class ResendVerificationRequest(BaseModel):
+    email: str
+
+@api_router.post("/auth/verify-email")
+async def verify_email(request: VerifyEmailRequest, background_tasks: BackgroundTasks):
+    """
+    Verificar el email de un usuario usando el token enviado por correo
+    """
+    token = request.token
+    
+    # Buscar usuario con este token
+    user = await db.users.find_one({"verification_token": token})
+    
+    if not user:
+        raise HTTPException(
+            status_code=400,
+            detail="Token de verificación inválido o ya utilizado"
+        )
+    
+    # Verificar si el token ha expirado
+    token_expiry = user.get("verification_token_expiry", "")
+    if email_service.is_token_expired(token_expiry):
+        raise HTTPException(
+            status_code=400,
+            detail="El token de verificación ha expirado. Solicita uno nuevo."
+        )
+    
+    # Verificar si ya está verificado
+    if user.get("email_verified", False):
+        return {"success": True, "message": "Tu cuenta ya estaba verificada"}
+    
+    # Marcar como verificado y eliminar token
+    now = datetime.now(timezone.utc).isoformat()
+    await db.users.update_one(
+        {"verification_token": token},
+        {
+            "$set": {
+                "email_verified": True,
+                "email_verified_at": now,
+                "updated_at": now
+            },
+            "$unset": {
+                "verification_token": "",
+                "verification_token_expiry": ""
+            }
+        }
+    )
+    
+    logger.info(f"✅ Email verificado para usuario: {user.get('username')}")
+    
+    # Enviar email de bienvenida en background
+    background_tasks.add_task(
+        email_service.send_welcome_email,
+        user.get("email"),
+        user.get("full_name", user.get("username"))
+    )
+    
+    return {
+        "success": True,
+        "message": "¡Tu cuenta ha sido verificada exitosamente!",
+        "username": user.get("username")
+    }
+
+
+@api_router.get("/auth/verify-email")
+async def verify_email_get(token: str, background_tasks: BackgroundTasks):
+    """
+    Verificar email via GET (para links directos desde el correo)
+    """
+    # Buscar usuario con este token
+    user = await db.users.find_one({"verification_token": token})
+    
+    if not user:
+        raise HTTPException(
+            status_code=400,
+            detail="Token de verificación inválido o ya utilizado"
+        )
+    
+    # Verificar si el token ha expirado
+    token_expiry = user.get("verification_token_expiry", "")
+    if email_service.is_token_expired(token_expiry):
+        raise HTTPException(
+            status_code=400,
+            detail="El token de verificación ha expirado. Solicita uno nuevo."
+        )
+    
+    # Verificar si ya está verificado
+    if user.get("email_verified", False):
+        return {"success": True, "message": "Tu cuenta ya estaba verificada"}
+    
+    # Marcar como verificado
+    now = datetime.now(timezone.utc).isoformat()
+    await db.users.update_one(
+        {"verification_token": token},
+        {
+            "$set": {
+                "email_verified": True,
+                "email_verified_at": now,
+                "updated_at": now
+            },
+            "$unset": {
+                "verification_token": "",
+                "verification_token_expiry": ""
+            }
+        }
+    )
+    
+    logger.info(f"✅ Email verificado para usuario: {user.get('username')}")
+    
+    # Enviar email de bienvenida
+    background_tasks.add_task(
+        email_service.send_welcome_email,
+        user.get("email"),
+        user.get("full_name", user.get("username"))
+    )
+    
+    return {
+        "success": True,
+        "message": "¡Tu cuenta ha sido verificada exitosamente!",
+        "username": user.get("username")
+    }
+
+
+@api_router.post("/auth/resend-verification")
+async def resend_verification(request: ResendVerificationRequest, background_tasks: BackgroundTasks):
+    """
+    Reenviar el correo de verificación
+    """
+    email = request.email.lower().strip()
+    
+    # Buscar usuario por email
+    user = await db.users.find_one({"email": email})
+    
+    if not user:
+        # No revelar si el email existe o no por seguridad
+        return {
+            "success": True,
+            "message": "Si el correo existe en nuestro sistema, recibirás un nuevo enlace de verificación."
+        }
+    
+    # Verificar si ya está verificado
+    if user.get("email_verified", False):
+        return {
+            "success": True,
+            "message": "Tu cuenta ya está verificada. Puedes iniciar sesión normalmente."
+        }
+    
+    # Generar nuevo token
+    new_token = email_service.generate_verification_token()
+    new_expiry = email_service.get_token_expiry()
+    
+    # Actualizar token en la base de datos
+    await db.users.update_one(
+        {"email": email},
+        {
+            "$set": {
+                "verification_token": new_token,
+                "verification_token_expiry": new_expiry,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }
+        }
+    )
+    
+    # Enviar email en background
+    background_tasks.add_task(
+        email_service.send_verification_email,
+        email,
+        user.get("full_name", user.get("username")),
+        new_token
+    )
+    
+    logger.info(f"📧 Reenvío de verificación programado para {email}")
+    
+    return {
+        "success": True,
+        "message": "Si el correo existe en nuestro sistema, recibirás un nuevo enlace de verificación."
+    }
+
+
+@api_router.get("/auth/verification-status")
+async def get_verification_status(current_user: dict = Depends(get_current_user)):
+    """
+    Obtener el estado de verificación del usuario actual
+    """
+    user = await db.users.find_one({"username": current_user["username"]}, {"_id": 0})
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    return {
+        "email_verified": user.get("email_verified", False),
+        "email": user.get("email"),
+        "verified_at": user.get("email_verified_at")
+    }
+
+
+# ==========================================
 # GOOGLE OAUTH ENDPOINTS (Emergent Auth)
 # ==========================================
 

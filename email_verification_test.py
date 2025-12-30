@@ -63,9 +63,9 @@ class EmailVerificationTester:
             # Generate unique test user data
             unique_id = str(uuid.uuid4())[:8]
             self.test_user_data = {
-                "username": "emailtest123",
+                "username": f"emailtest{unique_id}",
                 "password": "test123456",
-                "email": "emailtest123@example.com",
+                "email": f"emailtest{unique_id}@example.com",
                 "nombre": "Test",
                 "apellidos": "User"
             }

@@ -285,6 +285,8 @@ class UserResponse(BaseModel):
     role: str = "user"
     plan: str = "free"
     is_pro: bool = False
+    email_verified: bool = True
+    email: str = ""
 
 class UserProfile(BaseModel):
     """Modelo completo del perfil de usuario"""

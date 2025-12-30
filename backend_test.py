@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
-Backend API Testing for MindoraMap Pricing/Plans System
-Testing pricing endpoints, plan limits, and user plan functionality
+Backend API Testing for MindoraMap Email Verification System
+Testing email verification endpoints and user registration flow
 """
 
 import requests
 import json
 import sys
 import uuid
+import pymongo
 from datetime import datetime
 from typing import Dict, List, Optional
 

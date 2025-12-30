@@ -115,11 +115,23 @@ const AppContent = () => {
     }
     // Mostrar la app principal - pasar el plan seleccionado si existe
     return (
-      <MindMapApp 
-        onAdminClick={isAdmin ? () => setAuthView('admin') : null}
-        pendingPlanId={selectedPlanId}
-        onClearPendingPlan={() => setSelectedPlanId(null)}
-      />
+      <>
+        {needsVerification && showVerificationBanner && (
+          <EmailVerificationBanner 
+            email={user.email}
+            onDismiss={() => setShowVerificationBanner(false)}
+            onVerified={() => {
+              setShowVerificationBanner(false);
+              if (refreshUser) refreshUser();
+            }}
+          />
+        )}
+        <MindMapApp 
+          onAdminClick={isAdmin ? () => setAuthView('admin') : null}
+          pendingPlanId={selectedPlanId}
+          onClearPendingPlan={() => setSelectedPlanId(null)}
+        />
+      </>
     );
   }
 

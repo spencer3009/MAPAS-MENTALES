@@ -667,8 +667,21 @@ async def resend_verification(request: ResendVerificationRequest, background_tas
     """
     email = request.email.lower().strip()
     
-    # Buscar usuario por email
+    # Buscar usuario por email en users collection
     user = await db.users.find_one({"email": email})
+    
+    # Si no se encuentra, buscar también en user_profiles (para usuarios antiguos)
+    if not user:
+        profile = await db.user_profiles.find_one({"email": email})
+        if profile:
+            user = await db.users.find_one({"username": profile.get("username")})
+            # Sincronizar el email del perfil a la colección de usuarios
+            if user and user.get("email") != email:
+                await db.users.update_one(
+                    {"username": user.get("username")},
+                    {"$set": {"email": email}}
+                )
+                logger.info(f"📧 Email sincronizado desde perfil para {user.get('username')}: {email}")
     
     if not user:
         # No revelar si el email existe o no por seguridad
@@ -690,9 +703,10 @@ async def resend_verification(request: ResendVerificationRequest, background_tas
     
     # Actualizar token en la base de datos
     await db.users.update_one(
-        {"email": email},
+        {"username": user.get("username")},
         {
             "$set": {
+                "email": email,  # Asegurar que el email esté actualizado
                 "verification_token": new_token,
                 "verification_token_expiry": new_expiry,
                 "updated_at": datetime.now(timezone.utc).isoformat()

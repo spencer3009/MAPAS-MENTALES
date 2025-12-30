@@ -26,11 +26,20 @@ const LoadingScreen = () => (
 
 // Componente principal con lógica de autenticación
 const AppContent = () => {
-  const { isAuthenticated, isAdmin, loading, refreshUser } = useAuth();
-  const [authView, setAuthView] = useState(null); // null = landing, 'login', 'register', 'callback', 'admin', 'demo', 'terms', 'privacy', 'cookies'
+  const { isAuthenticated, isAdmin, loading, refreshUser, user } = useAuth();
+  const [authView, setAuthView] = useState(null); // null = landing, 'login', 'register', 'callback', 'admin', 'demo', 'terms', 'privacy', 'cookies', 'verify'
   const [authError, setAuthError] = useState(null);
   const [selectedPlanId, setSelectedPlanId] = useState(null); // Plan seleccionado desde la landing
   const [paypalCallback, setPaypalCallback] = useState(null); // 'success' o 'cancel'
+  const [showVerificationBanner, setShowVerificationBanner] = useState(true);
+
+  // Detectar rutas especiales en pathname
+  useEffect(() => {
+    const pathname = window.location.pathname;
+    if (pathname === '/verify') {
+      setAuthView('verify');
+    }
+  }, []);
 
   // Detectar session_id en la URL (Google OAuth callback)
   useEffect(() => {
@@ -51,12 +60,25 @@ const AppContent = () => {
     setAuthView('callback');
   }
 
-  if (loading && authView !== 'callback' && authView !== 'demo') {
+  // Detectar ruta /verify
+  if (window.location.pathname === '/verify' && authView !== 'verify') {
+    setAuthView('verify');
+  }
+
+  if (loading && authView !== 'callback' && authView !== 'demo' && authView !== 'verify') {
     return <LoadingScreen />;
+  }
+
+  // Página de verificación de email (accesible sin autenticación)
+  if (authView === 'verify') {
+    return <VerifyEmailPage />;
   }
 
   // Si está autenticado
   if (isAuthenticated) {
+    // Verificar si necesita mostrar banner de verificación
+    const needsVerification = user && !user.email_verified && user.email;
+
     // Mostrar callback de PayPal si corresponde
     if (paypalCallback) {
       return (

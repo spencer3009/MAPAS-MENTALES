@@ -1398,6 +1398,11 @@ class EmailVerificationTester:
                 data = response.json()
                 
                 # After verification, email_verified should be true
+if __name__ == "__main__":
+    # Run email verification tests
+    print("Starting Email Verification System Tests...")
+    email_tester = EmailVerificationTester()
+    email_tester.run_comprehensive_test()
                 email_verified = data.get("email_verified", False)
                 username = data.get("username")
                 email = data.get("email")

@@ -3,6 +3,8 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { CookieProvider, useCookies } from "./contexts/CookieContext";
 import { MindMapApp } from "./components/mindmap";
 import { LoginPage, RegisterPage, AuthCallback } from "./components/auth";
+import VerifyEmailPage from "./components/auth/VerifyEmailPage";
+import EmailVerificationBanner from "./components/auth/EmailVerificationBanner";
 import { LandingPage } from "./components/landing";
 import { AdminPanel } from "./components/admin";
 import { DemoMindMapApp } from "./components/demo";

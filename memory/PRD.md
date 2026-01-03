@@ -2,40 +2,28 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-03: Fix Layout Dashboard - Templates Grid
+- **Fixed**: Cards de templates ocupan todo el ancho disponible
+- **Changed**: De `flex overflow-x-auto` a `grid grid-cols-6` responsivo
+- **Improved**: Cards más grandes y proporcionales (aspect-square)
+- **Fixed**: Hover ya no se recorta - usa z-index y padding correcto
+- **Improved**: Íconos más grandes (w-12 h-12)
+- **Improved**: Sombras y transiciones más pronunciadas
+
 ### 2026-01-03: Time Tracking Global y Persistente
 - **Added**: Sistema de Time Tracking que persiste aunque se cierre el popup
 - **Added**: Indicador global en esquina superior derecha (botón rojo pulsante con tiempo)
-- **Added**: Popup flotante accesible desde cualquier vista con:
-  - Tiempo total corriendo
-  - Nombre de la tarea actual
-  - Botones "Ver tarea" y "Detener"
+- **Added**: Popup flotante accesible desde cualquier vista
 - **Added**: Indicador visual en tarjetas del tablero (banner rojo + borde)
 - **Added**: `TimeTrackingContext` para estado global
 - **Added**: `GlobalTimeIndicator` componente flotante
-- **Updated**: `TimeTracker.jsx` usa contexto global
-- **Updated**: `BoardView.jsx` muestra indicadores en tarjetas activas
 
 ### 2026-01-03: Historial Completo de Registros de Tiempo
 - **Added**: Historial de eventos de tiempo integrado en la sección "Actividad" del TaskModal
-- **Features**:
-  - Eventos automáticos al iniciar/detener registro (íconos play/stop rojos)
-  - Timestamps relativos ("HACE X MINUTOS/HORAS")
-  - Duración mostrada en eventos de "stop"
-  - Orden cronológico descendente (más reciente primero)
-  - Actualización en tiempo real al iniciar/detener
-  - Combinación de eventos de tiempo + comentarios en una sola lista
 
 ### 2026-01-03: Módulo Time Tracking (Registro de Tiempo)
 - **Added**: Sistema completo de registro de tiempo por tarea
 - **Added**: Endpoints: `/api/time-tracking/start`, `/stop`, `/active`, `/task/{id}`, `/task/{id}/weekly`
-- **Added**: Componente `TimeTracker.jsx` integrado en TaskModal
-- **Features**:
-  - Botón Play/Pause para iniciar/detener contador en tiempo real
-  - Tiempo total acumulado por tarea
-  - Gráfica semanal de actividad (DO-SA)
-  - Historial por usuario con avatares y conteos
-  - Un usuario no puede tener dos contadores activos simultáneamente
-  - Persistencia en colección `time_entries` de MongoDB
 
 ### 2026-01-03: Contador Papelera Unificado
 - **Fixed**: Contador de Papelera ahora muestra total de mapas + tableros eliminados

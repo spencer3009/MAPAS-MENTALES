@@ -144,6 +144,20 @@ const Canvas = ({
           addButtonY = (selectedNode.y + nodeH / 2 - 14) * zoom + adjustedPanY;
         }
       }
+    } else if (layoutType === 'mindorbit') {
+      // MindOrbit: botón radial alrededor del nodo
+      // Para el nodo central, mostrar botón circular arriba
+      // Para otros nodos, mostrar botón alejándose del centro
+      const isRoot = !selectedNode.parentId;
+      if (isRoot) {
+        // Nodo central: botón arriba (dirección de primera órbita)
+        addButtonX = (selectedNode.x + nodeW / 2) * zoom + adjustedPanX;
+        addButtonY = (selectedNode.y - 35) * zoom + adjustedPanY;
+      } else {
+        // Nodos orbitales: botón en dirección radial hacia afuera
+        addButtonX = (selectedNode.x + nodeW + 15) * zoom + adjustedPanX;
+        addButtonY = (selectedNode.y + nodeH / 2 - 14) * zoom + adjustedPanY;
+      }
     } else if (layoutType === 'mindtree') {
       // MindTree (Organigrama): botón "+" DEBAJO del nodo
       addButtonX = (selectedNode.x + nodeW / 2) * zoom + adjustedPanX;

@@ -4105,6 +4105,250 @@ async def paypal_webhook(request: Request):
         return {"status": "error", "message": str(e)}
 
 
+# ==========================================
+# TIME TRACKING - REGISTRO DE TIEMPO
+# ==========================================
+
+class StartTimeTrackingRequest(BaseModel):
+    task_id: str
+    board_id: str
+    list_id: str
+
+class StopTimeTrackingRequest(BaseModel):
+    task_id: str
+
+class TimeEntryResponse(BaseModel):
+    id: str
+    user_id: str
+    username: str
+    task_id: str
+    board_id: str
+    start_time: str
+    end_time: Optional[str] = None
+    duration: Optional[int] = None  # Duración en segundos
+    date: str
+    created_at: str
+
+
+@api_router.post("/time-tracking/start")
+async def start_time_tracking(request: StartTimeTrackingRequest, current_user: dict = Depends(get_current_user)):
+    """Iniciar registro de tiempo para una tarea"""
+    username = current_user["username"]
+    
+    # Verificar si ya tiene un registro activo
+    active_entry = await db.time_entries.find_one({
+        "username": username,
+        "end_time": None
+    })
+    
+    if active_entry:
+        # Si hay uno activo, detenerlo primero
+        now = datetime.now(timezone.utc)
+        start = datetime.fromisoformat(active_entry["start_time"].replace("Z", "+00:00"))
+        duration = int((now - start).total_seconds())
+        
+        await db.time_entries.update_one(
+            {"id": active_entry["id"]},
+            {"$set": {
+                "end_time": now.isoformat(),
+                "duration": duration
+            }}
+        )
+    
+    # Crear nuevo registro
+    now = datetime.now(timezone.utc)
+    entry_id = f"time_{uuid.uuid4().hex[:12]}"
+    
+    new_entry = {
+        "id": entry_id,
+        "user_id": current_user.get("id", username),
+        "username": username,
+        "task_id": request.task_id,
+        "board_id": request.board_id,
+        "list_id": request.list_id,
+        "start_time": now.isoformat(),
+        "end_time": None,
+        "duration": None,
+        "date": now.strftime("%Y-%m-%d"),
+        "created_at": now.isoformat()
+    }
+    
+    await db.time_entries.insert_one(new_entry)
+    new_entry.pop("_id", None)
+    
+    logger.info(f"⏱️ Tiempo iniciado: {username} en tarea {request.task_id}")
+    return {"entry": new_entry, "message": "Registro de tiempo iniciado"}
+
+
+@api_router.post("/time-tracking/stop")
+async def stop_time_tracking(request: StopTimeTrackingRequest, current_user: dict = Depends(get_current_user)):
+    """Detener registro de tiempo activo"""
+    username = current_user["username"]
+    
+    # Buscar registro activo para esta tarea
+    active_entry = await db.time_entries.find_one({
+        "username": username,
+        "task_id": request.task_id,
+        "end_time": None
+    })
+    
+    if not active_entry:
+        raise HTTPException(status_code=404, detail="No hay registro activo para esta tarea")
+    
+    now = datetime.now(timezone.utc)
+    start = datetime.fromisoformat(active_entry["start_time"].replace("Z", "+00:00"))
+    duration = int((now - start).total_seconds())
+    
+    await db.time_entries.update_one(
+        {"id": active_entry["id"]},
+        {"$set": {
+            "end_time": now.isoformat(),
+            "duration": duration
+        }}
+    )
+    
+    logger.info(f"⏱️ Tiempo detenido: {username} en tarea {request.task_id} - {duration}s")
+    
+    return {
+        "entry_id": active_entry["id"],
+        "duration": duration,
+        "message": "Registro de tiempo detenido"
+    }
+
+
+@api_router.get("/time-tracking/active")
+async def get_active_time_entry(current_user: dict = Depends(get_current_user)):
+    """Obtener registro de tiempo activo del usuario"""
+    username = current_user["username"]
+    
+    active_entry = await db.time_entries.find_one(
+        {"username": username, "end_time": None},
+        {"_id": 0}
+    )
+    
+    if active_entry:
+        # Calcular tiempo transcurrido
+        start = datetime.fromisoformat(active_entry["start_time"].replace("Z", "+00:00"))
+        elapsed = int((datetime.now(timezone.utc) - start).total_seconds())
+        active_entry["elapsed_seconds"] = elapsed
+    
+    return {"active_entry": active_entry}
+
+
+@api_router.get("/time-tracking/task/{task_id}")
+async def get_task_time_entries(task_id: str, current_user: dict = Depends(get_current_user)):
+    """Obtener todos los registros de tiempo de una tarea"""
+    
+    # Obtener todas las entradas de esta tarea
+    cursor = db.time_entries.find(
+        {"task_id": task_id},
+        {"_id": 0}
+    ).sort("created_at", -1)
+    
+    entries = await cursor.to_list(100)
+    
+    # Calcular tiempo total
+    total_seconds = sum(e.get("duration", 0) or 0 for e in entries if e.get("end_time"))
+    
+    # Verificar si hay entrada activa del usuario actual
+    active_entry = None
+    for entry in entries:
+        if entry.get("username") == current_user["username"] and not entry.get("end_time"):
+            start = datetime.fromisoformat(entry["start_time"].replace("Z", "+00:00"))
+            elapsed = int((datetime.now(timezone.utc) - start).total_seconds())
+            entry["elapsed_seconds"] = elapsed
+            active_entry = entry
+            break
+    
+    # Agrupar por usuario
+    user_totals = {}
+    for entry in entries:
+        user = entry.get("username", "Desconocido")
+        duration = entry.get("duration", 0) or 0
+        if user not in user_totals:
+            user_totals[user] = {"username": user, "total_seconds": 0, "entries_count": 0}
+        user_totals[user]["total_seconds"] += duration
+        user_totals[user]["entries_count"] += 1
+    
+    return {
+        "entries": entries,
+        "total_seconds": total_seconds,
+        "active_entry": active_entry,
+        "user_totals": list(user_totals.values())
+    }
+
+
+@api_router.get("/time-tracking/task/{task_id}/weekly")
+async def get_task_weekly_stats(task_id: str, current_user: dict = Depends(get_current_user)):
+    """Obtener estadísticas semanales de tiempo para una tarea"""
+    
+    # Calcular fechas de la semana actual (domingo a sábado)
+    today = datetime.now(timezone.utc).date()
+    start_of_week = today - timedelta(days=today.weekday() + 1)  # Domingo
+    if start_of_week > today:
+        start_of_week = start_of_week - timedelta(days=7)
+    
+    # Generar lista de días de la semana
+    week_days = []
+    for i in range(7):
+        day = start_of_week + timedelta(days=i)
+        week_days.append(day.strftime("%Y-%m-%d"))
+    
+    # Obtener entradas de esta semana
+    cursor = db.time_entries.find({
+        "task_id": task_id,
+        "date": {"$gte": week_days[0], "$lte": week_days[6]},
+        "duration": {"$ne": None}
+    }, {"_id": 0})
+    
+    entries = await cursor.to_list(500)
+    
+    # Agrupar por día y usuario
+    current_username = current_user["username"]
+    daily_data = {day: {"my_time": 0, "others_time": 0} for day in week_days}
+    
+    for entry in entries:
+        day = entry.get("date")
+        duration = entry.get("duration", 0) or 0
+        if day in daily_data:
+            if entry.get("username") == current_username:
+                daily_data[day]["my_time"] += duration
+            else:
+                daily_data[day]["others_time"] += duration
+    
+    # Formatear para gráfica
+    chart_data = []
+    day_labels = ["DO", "LU", "MA", "MI", "JU", "VI", "SA"]
+    for i, day in enumerate(week_days):
+        chart_data.append({
+            "day": day_labels[i],
+            "date": day,
+            "my_time": daily_data[day]["my_time"],
+            "others_time": daily_data[day]["others_time"]
+        })
+    
+    return {
+        "chart_data": chart_data,
+        "week_start": week_days[0],
+        "week_end": week_days[6]
+    }
+
+
+@api_router.delete("/time-tracking/{entry_id}")
+async def delete_time_entry(entry_id: str, current_user: dict = Depends(get_current_user)):
+    """Eliminar un registro de tiempo (solo el propietario)"""
+    
+    result = await db.time_entries.delete_one({
+        "id": entry_id,
+        "username": current_user["username"]
+    })
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Registro no encontrado o sin permisos")
+    
+    return {"message": "Registro eliminado"}
+
+
 # Include the router in the main app
 app.include_router(api_router)
 

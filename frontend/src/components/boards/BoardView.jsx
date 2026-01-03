@@ -382,8 +382,11 @@ const SortableList = ({ list, listIndex, boardId, onUpdateList, onDeleteList, on
                     key={card.id}
                     card={card}
                     listId={list.id}
+                    listTitle={list.title}
+                    boardId={boardId}
                     onUpdate={(cardId, data) => onUpdateCard(list.id, cardId, data)}
                     onDelete={(cardId) => onDeleteCard(list.id, cardId)}
+                    onOpenModal={onOpenModal}
                   />
                 ))
               )}

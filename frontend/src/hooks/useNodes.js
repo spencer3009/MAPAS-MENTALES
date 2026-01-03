@@ -1589,12 +1589,59 @@ export const useNodes = () => {
       let newX = 400;
       let newY = layoutType === 'mindtree' ? 100 : 300;
       
+      // Para MindAxis: propiedades adicionales
+      let axisSide = null;
+      
       if (parentId) {
         const parent = currentNodes.find(n => n.id === parentId);
         if (parent) {
           const siblings = currentNodes.filter(n => n.parentId === parentId);
           
-          if (layoutType === 'mindtree') {
+          if (layoutType === 'mindaxis') {
+            // MindAxis: distribución balanceada izquierda/derecha
+            const isRoot = !parent.parentId;
+            
+            if (isRoot) {
+              // Nodos de primer nivel: alternar entre izquierda y derecha
+              const leftSiblings = siblings.filter(s => s.axisSide === 'left');
+              const rightSiblings = siblings.filter(s => s.axisSide === 'right');
+              
+              // Alternar lado para balance
+              if (leftSiblings.length <= rightSiblings.length) {
+                axisSide = 'left';
+                newX = parent.x - 280;
+                newY = parent.y + (leftSiblings.length * 90) - ((leftSiblings.length - 1) * 45);
+              } else {
+                axisSide = 'right';
+                newX = parent.x + (parent.width || 160) + 120;
+                newY = parent.y + (rightSiblings.length * 90) - ((rightSiblings.length - 1) * 45);
+              }
+            } else {
+              // Subnodos: heredan el lado del padre y se extienden
+              axisSide = parent.axisSide || 'right';
+              const verticalGap = 70;
+              
+              if (axisSide === 'left') {
+                newX = parent.x - 200;
+                if (siblings.length === 0) {
+                  newY = parent.y;
+                } else {
+                  const bottommostSibling = siblings.reduce((max, s) => 
+                    (s.y + (s.height || 64)) > (max.y + (max.height || 64)) ? s : max, siblings[0]);
+                  newY = bottommostSibling.y + (bottommostSibling.height || 64) + verticalGap;
+                }
+              } else {
+                newX = parent.x + (parent.width || 160) + 120;
+                if (siblings.length === 0) {
+                  newY = parent.y;
+                } else {
+                  const bottommostSibling = siblings.reduce((max, s) => 
+                    (s.y + (s.height || 64)) > (max.y + (max.height || 64)) ? s : max, siblings[0]);
+                  newY = bottommostSibling.y + (bottommostSibling.height || 64) + verticalGap;
+                }
+              }
+            }
+          } else if (layoutType === 'mindtree') {
             // MindTree (Organigrama): hijos distribuidos HORIZONTALMENTE debajo del padre
             // Nuevo hijo se coloca a la derecha de los hermanos existentes
             const parentHeight = parent.height || 64;
@@ -1632,7 +1679,9 @@ export const useNodes = () => {
         width: (options?.nodeType === 'dashed' || options?.nodeType === 'dashed_text') ? 260 : 160,
         height: (options?.nodeType === 'dashed' || options?.nodeType === 'dashed_text') ? 40 : 64,
         // Normalizar 'dashed' a 'dashed_text' para nuevos nodos
-        nodeType: options?.nodeType === 'dashed' ? 'dashed_text' : (options?.nodeType || 'default') // 'default' | 'dashed_text'
+        nodeType: options?.nodeType === 'dashed' ? 'dashed_text' : (options?.nodeType || 'default'), // 'default' | 'dashed_text'
+        // MindAxis: guardar el lado del eje
+        ...(axisSide && { axisSide })
       };
 
       console.log('Creating new node:', newNode, 'Layout:', layoutType);

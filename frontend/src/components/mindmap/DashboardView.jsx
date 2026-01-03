@@ -252,6 +252,14 @@ const TEMPLATES = [
     icon: MindAxisIcon,
     color: 'bg-gradient-to-br from-teal-500 to-cyan-500',
     description: 'Mapa centrado balanceado'
+  },
+  {
+    id: 'mindorbit',
+    name: 'MindOrbit',
+    subtitle: '(Mapa Radial)',
+    icon: MindOrbitIcon,
+    color: 'bg-gradient-to-br from-orange-500 to-amber-500',
+    description: 'Distribución radial en 360°'
   }
 ];
 

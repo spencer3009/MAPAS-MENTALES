@@ -903,6 +903,11 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
         onOpenReminders={handleOpenRemindersPanel}
         onOpenTrash={handleOpenTrash}
         onOpenSettings={handleOpenSettings}
+        onOpenBoards={() => {
+          setActiveView('boards');
+          setIsProjectsSidebarOpen(false);
+          setSelectedBoard(null);
+        }}
         onLogout={logout}
         isProjectsSidebarOpen={isProjectsSidebarOpen}
         activeView={activeView}

@@ -141,6 +141,7 @@ const TrashView = ({ isOpen, onClose, onProjectRestored, token }) => {
       
       setTrashProjects(prev => prev.filter(p => p.project_id !== projectId));
       setConfirmDelete(null);
+      if (onProjectRestored) onProjectRestored(); // Actualizar contador
     } catch (err) {
       console.error('Error deleting project:', err);
       setError('No se pudo eliminar el mapa');

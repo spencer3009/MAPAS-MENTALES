@@ -494,7 +494,8 @@ const NodeItem = memo(({
           select-none
           ${isEditing ? 'cursor-text' : 'cursor-grab active:cursor-grabbing'}
           ${isDashedNode ? 'flex flex-col items-center justify-center' : 'flex items-center justify-center p-3'}
-          ${!isCloudShape && !isDashedNode ? getShapeStyles(shape) : ''}
+          ${!isCloudShape && !isDashedNode && !isOrbitLayout ? getShapeStyles(shape) : ''}
+          ${isOrbitLayout ? 'rounded-full' : ''}
           ${isMultiSelected && !isLineShape && !isCloudShape && !isDashedNode ? 'ring-[3px] ring-offset-2 ring-blue-600' : ''}
           ${isSelected && !isMultiSelected && !isLineShape && !isCloudShape && !isDashedNode ? 'ring-2 ring-offset-2 ring-blue-500' : ''}
         ${isLineShape || isCloudShape || isDashedNode ? '' : 'shadow-md'}
@@ -504,20 +505,24 @@ const NodeItem = memo(({
         left: node.x,
         top: node.y,
         width: isDashedNode ? 260 : dimensions.width,
-        minHeight: isDashedNode ? 'auto' : dimensions.height,
+        height: isOrbitLayout ? dimensions.height : undefined,
+        minHeight: isDashedNode ? 'auto' : (isOrbitLayout ? undefined : dimensions.height),
         backgroundColor: isDashedNode || isLineShape || isCloudShape ? 'transparent' : bgColor,
         borderWidth: isDashedNode ? 0 : (isLineShape || isCloudShape ? 0 : `${borderWidth}px`),
         borderStyle: isDashedNode ? 'none' : (isLineShape || isCloudShape ? 'none' : borderStyle),
         borderColor: isDashedNode ? 'transparent' : (isLineShape || isCloudShape ? 'transparent' : borderColor),
+        borderRadius: isOrbitLayout ? '50%' : undefined,
         color: isDashedNode ? '#374151' : textColor,
         zIndex: isInSelection ? 20 : 10,
-        padding: isDashedNode ? '8px 4px' : undefined,
+        padding: isDashedNode ? '8px 4px' : (isOrbitLayout ? '8px' : undefined),
         // Opacidad reducida cuando está completado (41%)
         opacity: node.isCompleted ? 0.41 : 1,
         // Agregar box-shadow extra para selección múltiple (más visible)
         boxShadow: isMultiSelected 
           ? '0 0 0 4px rgba(37, 99, 235, 0.6), 0 10px 25px -5px rgba(0, 0, 0, 0.2)' 
-          : undefined,
+          : isOrbitLayout 
+            ? '0 4px 12px rgba(0, 0, 0, 0.15)' 
+            : undefined,
         // Cambiar borde cuando está multi-seleccionado para mayor énfasis
         outline: isMultiSelected ? '2px solid #2563eb' : 'none',
         outlineOffset: isMultiSelected ? '3px' : 0,

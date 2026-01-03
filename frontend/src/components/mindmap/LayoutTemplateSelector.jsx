@@ -270,8 +270,13 @@ const LayoutTemplateSelector = ({ isOpen, onSelect, onClose, initialLayout = nul
                   </div>
 
                   {/* Title */}
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
                     {layout.name}
+                    {layout.subtitle && (
+                      <span className="text-sm font-normal text-gray-500 ml-1">
+                        {layout.subtitle}
+                      </span>
+                    )}
                   </h3>
 
                   {/* Description */}
@@ -298,8 +303,23 @@ const LayoutTemplateSelector = ({ isOpen, onSelect, onClose, initialLayout = nul
                             <div className={`w-1.5 h-1.5 rounded bg-${layout.color}-200`}></div>
                           </div>
                         </div>
+                      ) : layout.id === 'mindaxis' ? (
+                        // MindAxis visual - balanced left/right expansion
+                        <div className="flex items-center gap-1">
+                          <div className="flex flex-col gap-1">
+                            <div className={`w-2 h-2 rounded bg-${layout.color}-300`}></div>
+                            <div className={`w-2 h-2 rounded bg-${layout.color}-300`}></div>
+                          </div>
+                          <div className="w-3 h-0.5 bg-gray-300"></div>
+                          <div className={`w-4 h-4 rounded bg-${layout.color}-400`}></div>
+                          <div className="w-3 h-0.5 bg-gray-300"></div>
+                          <div className="flex flex-col gap-1">
+                            <div className={`w-2 h-2 rounded bg-${layout.color}-300`}></div>
+                            <div className={`w-2 h-2 rounded bg-${layout.color}-300`}></div>
+                          </div>
+                        </div>
                       ) : (
-                        // MindTree visual - vertical structure
+                        // MindTree/MindHybrid visual - vertical structure
                         <div className="flex flex-col items-center gap-1">
                           <div className={`w-3 h-3 rounded bg-${layout.color}-400`}></div>
                           <div className="h-2 w-0.5 bg-gray-300"></div>

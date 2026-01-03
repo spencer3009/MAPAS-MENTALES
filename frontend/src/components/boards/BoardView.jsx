@@ -951,6 +951,9 @@ const BoardView = ({ board: initialBoard, onBack }) => {
                   onUpdateCard={updateCard}
                   onDeleteCard={deleteCard}
                   onOpenModal={handleOpenModal}
+                  activeTimeEntry={activeEntry}
+                  formattedTime={formattedTime}
+                  isTaskTracking={isTaskTracking}
                 />
               ))}
               

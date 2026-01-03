@@ -123,6 +123,37 @@ const ConnectionsLayer = memo(({
                    `L ${endX} ${endY}`;            // 3️⃣ Horizontal hasta el hijo
           }
         }
+      } else if (layoutType === 'mindorbit') {
+        // MindOrbit: conectores curvos radiales desde el centro hacia afuera
+        const parentCenterX = parent.x + parentWidth / 2;
+        const parentCenterY = parent.y + parentHeight / 2;
+        const nodeCenterX = node.x + nodeWidth / 2;
+        const nodeCenterY = node.y + nodeHeight / 2;
+        
+        // Calcular el ángulo del nodo respecto al padre
+        const angle = Math.atan2(nodeCenterY - parentCenterY, nodeCenterX - parentCenterX);
+        
+        // Punto de inicio: borde del padre en dirección al hijo
+        const startX = parentCenterX + Math.cos(angle) * (parentWidth / 2);
+        const startY = parentCenterY + Math.sin(angle) * (parentHeight / 2);
+        
+        // Punto final: borde del hijo en dirección al padre
+        const endX = nodeCenterX - Math.cos(angle) * (nodeWidth / 2);
+        const endY = nodeCenterY - Math.sin(angle) * (nodeHeight / 2);
+        
+        start = { x: startX, y: startY };
+        end = { x: endX, y: endY };
+        
+        // Curva bezier suave para conectores radiales
+        const distance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+        const curvature = distance * 0.2; // Curvatura proporcional a la distancia
+        
+        // Calcular puntos de control perpendiculares al eje
+        const perpAngle = angle + Math.PI / 2;
+        const ctrlX = (startX + endX) / 2 + Math.cos(perpAngle) * curvature;
+        const ctrlY = (startY + endY) / 2 + Math.sin(perpAngle) * curvature;
+        
+        path = `M ${startX} ${startY} Q ${ctrlX} ${ctrlY} ${endX} ${endY}`;
       } else if (layoutType === 'mindaxis') {
         // MindAxis: conectores horizontales desde el centro hacia izquierda/derecha
         const side = node.axisSide || 'right';

@@ -2,6 +2,19 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-03: Time Tracking Global y Persistente
+- **Added**: Sistema de Time Tracking que persiste aunque se cierre el popup
+- **Added**: Indicador global en esquina superior derecha (botón rojo pulsante con tiempo)
+- **Added**: Popup flotante accesible desde cualquier vista con:
+  - Tiempo total corriendo
+  - Nombre de la tarea actual
+  - Botones "Ver tarea" y "Detener"
+- **Added**: Indicador visual en tarjetas del tablero (banner rojo + borde)
+- **Added**: `TimeTrackingContext` para estado global
+- **Added**: `GlobalTimeIndicator` componente flotante
+- **Updated**: `TimeTracker.jsx` usa contexto global
+- **Updated**: `BoardView.jsx` muestra indicadores en tarjetas activas
+
 ### 2026-01-03: Historial Completo de Registros de Tiempo
 - **Added**: Historial de eventos de tiempo integrado en la sección "Actividad" del TaskModal
 - **Features**:
@@ -27,12 +40,6 @@
 ### 2026-01-03: Contador Papelera Unificado
 - **Fixed**: Contador de Papelera ahora muestra total de mapas + tableros eliminados
 - **Added**: Endpoint `GET /api/trash/count` que retorna `{total, maps_count, boards_count}`
-- **Updated**: `loadTrashCount()` usa endpoint unificado
-- **Updated**: TrashView y BoardsPage actualizan el contador en tiempo real
-
-### 2026-01-03: Fix Restauración en Papelera
-- **Fixed**: Campos incorrectos en TrashView (`project.id` vs `project.project_id`)
-- **Fixed**: Formato de fecha (`deletedAt` vs `deleted_at`)
 
 ---
 

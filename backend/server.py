@@ -2166,6 +2166,32 @@ class TrashProjectResponse(BaseModel):
     layoutType: str = "mindflow"
 
 
+@api_router.get("/trash/count")
+async def get_trash_count(current_user: dict = Depends(get_current_user)):
+    """Obtener conteo total de elementos en la papelera (mapas + tableros)"""
+    username = current_user["username"]
+    
+    # Contar mapas eliminados
+    maps_count = await db.projects.count_documents({
+        "username": username,
+        "isDeleted": True
+    })
+    
+    # Contar tableros eliminados
+    boards_count = await db.boards.count_documents({
+        "owner_username": username,
+        "is_deleted": True
+    })
+    
+    total = maps_count + boards_count
+    
+    return {
+        "total": total,
+        "maps_count": maps_count,
+        "boards_count": boards_count
+    }
+
+
 @api_router.get("/projects/trash", response_model=List[TrashProjectResponse])
 async def get_trash_projects(current_user: dict = Depends(get_current_user)):
     """Obtener proyectos en la papelera"""

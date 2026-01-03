@@ -91,6 +91,7 @@ const NodeItem = memo(({
   node,
   isSelected,
   isMultiSelected = false,
+  layoutType = 'mindflow',
   onSelect,
   onDragStart,
   onDragEnd,

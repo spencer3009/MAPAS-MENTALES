@@ -1880,6 +1880,8 @@ export const useNodes = () => {
           newNodes = autoAlignMindTree(rootId, newNodes);
         } else if (layoutType === 'mindaxis') {
           newNodes = autoAlignMindAxis(rootId, newNodes);
+        } else if (layoutType === 'mindorbit') {
+          newNodes = autoAlignMindOrbit(rootId, newNodes);
         } else {
           newNodes = autoAlignHierarchy(rootId, newNodes);
         }

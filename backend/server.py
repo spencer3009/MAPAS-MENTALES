@@ -3111,6 +3111,44 @@ async def create_board(request: CreateBoardRequest, current_user: dict = Depends
     return {"board": board, "message": "Tablero creado exitosamente"}
 
 
+# ==========================================
+# PAPELERA DE TABLEROS (DEBE IR ANTES DE {board_id})
+# ==========================================
+
+@api_router.get("/boards/trash")
+async def get_trash_boards(current_user: dict = Depends(get_current_user)):
+    """Obtener tableros en la papelera"""
+    cursor = db.boards.find(
+        {"owner_username": current_user["username"], "is_deleted": True},
+        {"_id": 0}
+    )
+    
+    trash_boards = []
+    async for board in cursor:
+        trash_boards.append({
+            "id": board.get("id"),
+            "title": board.get("title"),
+            "background_color": board.get("background_color"),
+            "deleted_at": board.get("deleted_at"),
+            "created_at": board.get("created_at"),
+            "lists_count": len(board.get("lists", [])),
+            "is_onboarding": board.get("is_onboarding", False)
+        })
+    
+    return trash_boards
+
+
+@api_router.delete("/boards/trash/empty")
+async def empty_boards_trash(current_user: dict = Depends(get_current_user)):
+    """Vaciar la papelera de tableros"""
+    result = await db.boards.delete_many(
+        {"owner_username": current_user["username"], "is_deleted": True}
+    )
+    
+    logger.info(f"🗑️ Papelera de tableros vaciada por {current_user['username']}: {result.deleted_count} tableros eliminados")
+    return {"message": f"{result.deleted_count} tableros eliminados permanentemente"}
+
+
 @api_router.get("/boards/{board_id}")
 async def get_board(board_id: str, current_user: dict = Depends(get_current_user)):
     """Obtener un tablero específico con sus listas y tarjetas"""

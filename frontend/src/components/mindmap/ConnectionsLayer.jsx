@@ -123,6 +123,51 @@ const ConnectionsLayer = memo(({
                    `L ${endX} ${endY}`;            // 3️⃣ Horizontal hasta el hijo
           }
         }
+      } else if (layoutType === 'mindaxis') {
+        // MindAxis: conectores horizontales desde el centro hacia izquierda/derecha
+        const side = node.axisSide || 'right';
+        
+        if (side === 'left') {
+          // Nodo a la izquierda: conector sale del centro izquierdo del padre
+          const startX = parent.x;
+          const startY = parent.y + parentHeight / 2;
+          const endX = node.x + nodeWidth;
+          const endY = node.y + nodeHeight / 2;
+          
+          start = { x: startX, y: startY };
+          end = { x: endX, y: endY };
+          
+          // Conector ortogonal hacia la izquierda
+          if (Math.abs(startY - endY) < 5) {
+            path = `M ${startX} ${startY} L ${endX} ${endY}`;
+          } else {
+            const midX = startX - (startX - endX) / 2;
+            path = `M ${startX} ${startY} ` +
+                   `L ${midX} ${startY} ` +
+                   `L ${midX} ${endY} ` +
+                   `L ${endX} ${endY}`;
+          }
+        } else {
+          // Nodo a la derecha: conector sale del centro derecho del padre
+          const startX = parent.x + parentWidth;
+          const startY = parent.y + parentHeight / 2;
+          const endX = node.x;
+          const endY = node.y + nodeHeight / 2;
+          
+          start = { x: startX, y: startY };
+          end = { x: endX, y: endY };
+          
+          // Conector ortogonal hacia la derecha
+          if (Math.abs(startY - endY) < 5) {
+            path = `M ${startX} ${startY} L ${endX} ${endY}`;
+          } else {
+            const midX = startX + (endX - startX) / 2;
+            path = `M ${startX} ${startY} ` +
+                   `L ${midX} ${startY} ` +
+                   `L ${midX} ${endY} ` +
+                   `L ${endX} ${endY}`;
+          }
+        }
       } else if (layoutType === 'mindtree') {
         // MindTree (Organigrama): conectores verticales tipo org chart
         // Padre: centro inferior, Hijo: centro superior

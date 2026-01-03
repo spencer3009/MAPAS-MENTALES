@@ -643,8 +643,8 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
             })()}
           </div>
 
-          {/* Grid de plantillas */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {/* Grid de plantillas - Una sola fila horizontal */}
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
             {TEMPLATES.map((template) => {
               const Icon = template.icon;
               
@@ -654,21 +654,26 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
                   onClick={() => handleTemplateClick(template)}
                   className={`
                     relative flex flex-col items-center justify-center
-                    rounded-xl p-4 h-32
-                    transition-all duration-200
+                    rounded-xl p-3 min-w-[120px] w-[120px] h-28
+                    transition-all duration-200 flex-shrink-0
                     ${template.color}
                     hover:scale-105 hover:shadow-lg shadow-sm
                   `}
                 >
                   {/* Icono */}
                   <div className="mb-2">
-                    <Icon className="w-10 h-10 text-white" />
+                    <Icon className="w-9 h-9 text-white" />
                   </div>
                   
                   {/* Nombre */}
-                  <span className="text-sm font-medium text-center leading-tight text-white">
+                  <span className="text-xs font-medium text-center leading-tight text-white whitespace-nowrap">
                     {template.name}
                   </span>
+                  {template.subtitle && (
+                    <span className="text-[10px] text-white/80 text-center leading-tight">
+                      {template.subtitle}
+                    </span>
+                  )}
                 </button>
               );
             })}

@@ -719,6 +719,7 @@ const Canvas = ({
             node={node}
             isSelected={isNodeSelected ? isNodeSelected(node.id) : selectedNodeId === node.id}
             isMultiSelected={selectedNodeIds.has(node.id)}
+            layoutType={layoutType}
             onSelect={handleNodeSelect}
             onDragStart={handleNodeDragStart}
             onDragEnd={onSaveNodePositionToHistory}

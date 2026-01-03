@@ -331,18 +331,13 @@ const LayoutTemplateSelector = ({ isOpen, onSelect, onClose, initialLayout = nul
               );
             })}
           </div>
-
-          {/* Info text */}
-          <p className="text-xs text-gray-400 text-center mt-4">
-            La plantilla define cómo se organizará tu mapa y no podrá cambiarse después.
-          </p>
         </div>
 
-        {/* Footer */}
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+        {/* Footer - Fixed */}
+        <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3 flex-shrink-0">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
           >
             Cancelar
           </button>
@@ -350,10 +345,10 @@ const LayoutTemplateSelector = ({ isOpen, onSelect, onClose, initialLayout = nul
             onClick={handleContinue}
             disabled={!selectedLayout}
             className={`
-              px-5 py-2 text-sm font-medium rounded-lg transition-all duration-200
+              px-6 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200
               flex items-center gap-2
               ${selectedLayout
-                ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'
+                ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md hover:shadow-lg'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }
             `}

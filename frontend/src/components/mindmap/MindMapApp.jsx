@@ -895,6 +895,17 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
 
   return (
     <div className={`flex h-screen w-full bg-gray-50 ${activeView === 'boards' ? 'overflow-x-auto' : 'overflow-hidden'}`}>
+      {/* Global Time Tracking Indicator */}
+      <div className="fixed top-3 right-4 z-[9999]">
+        <GlobalTimeIndicator 
+          onOpenTask={(boardId, taskId) => {
+            // Navegar a la tarea
+            setActiveView('boards');
+            // Podríamos implementar un callback para abrir el modal de tarea específico
+          }}
+        />
+      </div>
+      
       {/* Dock Sidebar - Barra lateral izquierda compacta */}
       <DockSidebar
         onToggleProjectsSidebar={handleToggleProjectsSidebar}

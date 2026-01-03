@@ -448,25 +448,26 @@ const BoardView = ({ board: initialBoard, onBack }) => {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  // Fetch fresh board data
-  const fetchBoard = useCallback(async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/api/boards/${initialBoard.id}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setBoard(data.board);
-      }
-    } catch (error) {
-      console.error('Error fetching board:', error);
-    }
-  }, [initialBoard.id]);
-
+  // Fetch fresh board data on mount
   useEffect(() => {
-    fetchBoard();
-  }, [fetchBoard]);
+    let isMounted = true;
+    const loadBoard = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/api/boards/${initialBoard.id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok && isMounted) {
+          const data = await response.json();
+          setBoard(data.board);
+        }
+      } catch (error) {
+        console.error('Error fetching board:', error);
+      }
+    };
+    loadBoard();
+    return () => { isMounted = false; };
+  }, [initialBoard.id]);
 
   // API Calls
   const addList = async () => {

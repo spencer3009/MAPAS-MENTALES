@@ -443,6 +443,7 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
               taskId={card.id}
               boardId={boardId}
               listId={listId}
+              onTimeUpdate={loadTimeEntries}
             />
 
             {/* Comments / Activity */}

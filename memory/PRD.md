@@ -34,13 +34,17 @@ MindoraMap es una plataforma de mapas mentales para empresarios. Permite organiz
 
 ### 4. Tableros Kanban (MVP) - **COMPLETADO ✅**
 - Crear/editar/eliminar tableros
-- Listas (columnas) con colores distintivos (gris/turquesa/verde)
+- **3 columnas por defecto al crear tablero:**
+  - Abiertas (Cyan #06B6D4)
+  - En Progreso (Azul #3B82F6)
+  - Listo (Morado #8B5CF6)
 - Tarjetas (tareas) con etiquetas de color
 - **UX mejorado:**
   - Tarjeta completa draggable (cursor grab)
   - Drag & drop entre columnas con feedback visual
-  - Estados vacíos siempre visibles
-  - Scroll horizontal para muchas columnas
+  - Estados vacíos siempre visibles ("No hay tareas")
+  - **Scroll horizontal funcional** para muchas columnas
+- Layout de página de tableros unificado (ancho completo)
 - Guardado automático
 - Diseño inspirado en Trello
 

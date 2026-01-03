@@ -1013,6 +1013,19 @@ const BoardView = ({ board: initialBoard, onBack }) => {
         </DndContext>
         </div>
       </div>
+
+      {/* Modal de Tarea - SOLO se abre al hacer clic en una tarea existente */}
+      {selectedCard && (
+        <TaskModal
+          card={selectedCard}
+          listId={selectedListId}
+          listTitle={selectedListTitle}
+          boardId={board.id}
+          onClose={handleCloseModal}
+          onUpdate={handleUpdateCardFromModal}
+          onDelete={handleDeleteCardFromModal}
+        />
+      )}
     </div>
   );
 };

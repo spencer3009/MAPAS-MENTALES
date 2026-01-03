@@ -992,11 +992,7 @@ const BoardView = ({ board: initialBoard, onBack }) => {
             )}
           </DragOverlay>
         </DndContext>
-      </div>
-      
-      {/* Indicador de scroll horizontal */}
-      <div className="h-1 bg-gray-100">
-        <div className="h-full bg-cyan-400/50 w-20 rounded-full" />
+        </div>
       </div>
     </div>
   );

@@ -214,6 +214,14 @@ const TEMPLATES = [
     icon: MindHybridIcon,
     color: 'bg-gradient-to-br from-purple-500 to-purple-600',
     description: 'Combinación flexible'
+  },
+  {
+    id: 'mindaxis',
+    name: 'MindAxis',
+    subtitle: '(Eje Central)',
+    icon: MindAxisIcon,
+    color: 'bg-gradient-to-br from-teal-500 to-cyan-500',
+    description: 'Mapa centrado balanceado'
   }
 ];
 

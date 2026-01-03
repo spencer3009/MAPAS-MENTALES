@@ -287,7 +287,7 @@ const LayoutTemplateSelector = ({ isOpen, onSelect, onClose, initialLayout = nul
                   key={layout.id}
                   onClick={() => setSelectedLayout(layout.id)}
                   className={`
-                    relative p-6 rounded-xl border-2 transition-all duration-200
+                    relative p-5 rounded-xl border-2 transition-all duration-200
                     text-left group
                     ${isSelected 
                       ? `${layout.borderColor} ${layout.selectedBg} ring-2 ring-offset-2 ring-${layout.color}-500` 
@@ -306,97 +306,27 @@ const LayoutTemplateSelector = ({ isOpen, onSelect, onClose, initialLayout = nul
 
                   {/* Icon */}
                   <div className={`
-                    w-16 h-16 rounded-xl ${layout.iconBg} ${layout.iconColor}
-                    flex items-center justify-center mb-4
+                    w-14 h-14 rounded-xl ${layout.iconBg} ${layout.iconColor}
+                    flex items-center justify-center mb-3
                     group-hover:scale-105 transition-transform duration-200
                   `}>
-                    <Icon className="w-10 h-10" />
+                    <Icon className="w-8 h-8" />
                   </div>
 
                   {/* Title */}
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                  <h3 className="text-base font-semibold text-gray-900 mb-1">
                     {layout.name}
                     {layout.subtitle && (
-                      <span className="text-sm font-normal text-gray-500 ml-1">
+                      <span className="text-xs font-normal text-gray-500 ml-1">
                         {layout.subtitle}
                       </span>
                     )}
                   </h3>
 
                   {/* Description */}
-                  <p className="text-sm text-gray-500 leading-relaxed">
+                  <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">
                     {layout.description}
                   </p>
-
-                  {/* Visual preview hint */}
-                  <div className={`mt-4 pt-4 border-t border-gray-100`}>
-                    <div className="flex items-center gap-2">
-                      {layout.id === 'mindflow' ? (
-                        // MindFlow visual - horizontal expansion
-                        <div className="flex items-center gap-1">
-                          <div className={`w-3 h-3 rounded bg-${layout.color}-400`}></div>
-                          <div className="w-4 h-0.5 bg-gray-300"></div>
-                          <div className="flex flex-col gap-1">
-                            <div className={`w-2 h-2 rounded bg-${layout.color}-300`}></div>
-                            <div className={`w-2 h-2 rounded bg-${layout.color}-300`}></div>
-                          </div>
-                          <div className="w-3 h-0.5 bg-gray-300"></div>
-                          <div className="flex flex-col gap-0.5">
-                            <div className={`w-1.5 h-1.5 rounded bg-${layout.color}-200`}></div>
-                            <div className={`w-1.5 h-1.5 rounded bg-${layout.color}-200`}></div>
-                            <div className={`w-1.5 h-1.5 rounded bg-${layout.color}-200`}></div>
-                          </div>
-                        </div>
-                      ) : layout.id === 'mindaxis' ? (
-                        // MindAxis visual - balanced left/right expansion
-                        <div className="flex items-center gap-1">
-                          <div className="flex flex-col gap-1">
-                            <div className={`w-2 h-2 rounded bg-${layout.color}-300`}></div>
-                            <div className={`w-2 h-2 rounded bg-${layout.color}-300`}></div>
-                          </div>
-                          <div className="w-3 h-0.5 bg-gray-300"></div>
-                          <div className={`w-4 h-4 rounded bg-${layout.color}-400`}></div>
-                          <div className="w-3 h-0.5 bg-gray-300"></div>
-                          <div className="flex flex-col gap-1">
-                            <div className={`w-2 h-2 rounded bg-${layout.color}-300`}></div>
-                            <div className={`w-2 h-2 rounded bg-${layout.color}-300`}></div>
-                          </div>
-                        </div>
-                      ) : layout.id === 'mindorbit' ? (
-                        // MindOrbit visual - radial distribution
-                        <div className="relative w-14 h-10 flex items-center justify-center">
-                          <div className={`w-3 h-3 rounded-full bg-${layout.color}-400 z-10`}></div>
-                          <div className={`absolute w-1.5 h-1.5 rounded-full bg-${layout.color}-300`} style={{top: '0', left: '50%', transform: 'translateX(-50%)'}}></div>
-                          <div className={`absolute w-1.5 h-1.5 rounded-full bg-${layout.color}-300`} style={{top: '15%', right: '10%'}}></div>
-                          <div className={`absolute w-1.5 h-1.5 rounded-full bg-${layout.color}-300`} style={{bottom: '15%', right: '10%'}}></div>
-                          <div className={`absolute w-1.5 h-1.5 rounded-full bg-${layout.color}-300`} style={{bottom: '0', left: '50%', transform: 'translateX(-50%)'}}></div>
-                          <div className={`absolute w-1.5 h-1.5 rounded-full bg-${layout.color}-300`} style={{bottom: '15%', left: '10%'}}></div>
-                          <div className={`absolute w-1.5 h-1.5 rounded-full bg-${layout.color}-300`} style={{top: '15%', left: '10%'}}></div>
-                        </div>
-                      ) : (
-                        // MindTree/MindHybrid visual - vertical structure
-                        <div className="flex flex-col items-center gap-1">
-                          <div className={`w-3 h-3 rounded bg-${layout.color}-400`}></div>
-                          <div className="h-2 w-0.5 bg-gray-300"></div>
-                          <div className="flex gap-3">
-                            <div className="flex flex-col items-center">
-                              <div className={`w-2 h-2 rounded bg-${layout.color}-300`}></div>
-                              <div className="h-1.5 w-0.5 bg-gray-300"></div>
-                              <div className={`w-1.5 h-1.5 rounded bg-${layout.color}-200`}></div>
-                            </div>
-                            <div className="flex flex-col items-center">
-                              <div className={`w-2 h-2 rounded bg-${layout.color}-300`}></div>
-                              <div className="h-1.5 w-0.5 bg-gray-300"></div>
-                              <div className={`w-1.5 h-1.5 rounded bg-${layout.color}-200`}></div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      <span className="text-xs text-gray-400 ml-2">
-                        Vista previa
-                      </span>
-                    </div>
-                  </div>
                 </button>
               );
             })}

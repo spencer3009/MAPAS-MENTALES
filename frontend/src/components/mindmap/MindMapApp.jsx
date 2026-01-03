@@ -891,7 +891,7 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
   };
 
   return (
-    <div className="flex h-screen w-full bg-gray-50 overflow-hidden">
+    <div className={`flex h-screen w-full bg-gray-50 ${activeView === 'boards' ? 'overflow-x-auto' : 'overflow-hidden'}`}>
       {/* Dock Sidebar - Barra lateral izquierda compacta */}
       <DockSidebar
         onToggleProjectsSidebar={handleToggleProjectsSidebar}

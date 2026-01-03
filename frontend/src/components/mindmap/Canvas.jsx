@@ -109,6 +109,7 @@ const Canvas = ({
     let addButtonX, addButtonY;
     let addButtonRightX, addButtonRightY;
     let addButtonBottomX, addButtonBottomY;
+    let addButtonLeftX, addButtonLeftY;
     
     if (layoutType === 'mindhybrid') {
       // MindHybrid: DOS botones - derecha (horizontal) e inferior (vertical)
@@ -121,6 +122,28 @@ const Canvas = ({
       // No mostrar botón único
       addButtonX = null;
       addButtonY = null;
+    } else if (layoutType === 'mindaxis') {
+      // MindAxis: DOS botones - izquierda y derecha para nodo central
+      const isRoot = !selectedNode.parentId;
+      if (isRoot) {
+        // Nodo central: botones a ambos lados
+        addButtonLeftX = (selectedNode.x - 40) * zoom + adjustedPanX;
+        addButtonLeftY = (selectedNode.y + nodeH / 2) * zoom + adjustedPanY;
+        addButtonRightX = (selectedNode.x + nodeW + 15) * zoom + adjustedPanX;
+        addButtonRightY = (selectedNode.y + nodeH / 2) * zoom + adjustedPanY;
+        addButtonX = null;
+        addButtonY = null;
+      } else {
+        // Nodos hijos: botón en el lado correspondiente
+        const side = selectedNode.axisSide || 'right';
+        if (side === 'left') {
+          addButtonX = (selectedNode.x - 40) * zoom + adjustedPanX;
+          addButtonY = (selectedNode.y + nodeH / 2) * zoom + adjustedPanY;
+        } else {
+          addButtonX = (selectedNode.x + nodeW + 15) * zoom + adjustedPanX;
+          addButtonY = (selectedNode.y + nodeH / 2 - 14) * zoom + adjustedPanY;
+        }
+      }
     } else if (layoutType === 'mindtree') {
       // MindTree (Organigrama): botón "+" DEBAJO del nodo
       addButtonX = (selectedNode.x + nodeW / 2) * zoom + adjustedPanX;
@@ -138,6 +161,7 @@ const Canvas = ({
       addButton: addButtonX !== null ? { x: addButtonX, y: addButtonY } : null,
       addButtonRight: addButtonRightX ? { x: addButtonRightX, y: addButtonRightY } : null,
       addButtonBottom: addButtonBottomX ? { x: addButtonBottomX, y: addButtonBottomY } : null,
+      addButtonLeft: addButtonLeftX ? { x: addButtonLeftX, y: addButtonLeftY } : null,
       toolbar: { x: toolbarX, y: toolbarY }
     };
   }, [selectedNode, zoom, pan, layoutType]);

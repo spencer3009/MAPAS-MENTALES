@@ -3598,6 +3598,10 @@ export const useNodes = () => {
     autoAlignMindAxis,
     applyFullMindAxisAlignment,
     
+    // Alineación MindOrbit (radial)
+    autoAlignMindOrbit,
+    applyFullMindOrbitAlignment,
+    
     // Compatibilidad
     resetToDefault,
     clearAll,

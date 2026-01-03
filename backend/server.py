@@ -2958,17 +2958,46 @@ async def get_boards(current_user: dict = Depends(get_current_user)):
 
 @api_router.post("/boards")
 async def create_board(request: CreateBoardRequest, current_user: dict = Depends(get_current_user)):
-    """Crear un nuevo tablero"""
+    """Crear un nuevo tablero con 3 columnas por defecto"""
     now = datetime.now(timezone.utc).isoformat()
+    board_id = f"board_{uuid.uuid4().hex[:12]}"
+    
+    # Crear las 3 listas por defecto con colores distintivos
+    default_lists = [
+        {
+            "id": f"list_{uuid.uuid4().hex[:12]}",
+            "title": "Abiertas",
+            "color": "#06B6D4",  # Cyan/Teal
+            "position": 0,
+            "cards": [],
+            "created_at": now
+        },
+        {
+            "id": f"list_{uuid.uuid4().hex[:12]}",
+            "title": "En Progreso",
+            "color": "#3B82F6",  # Azul
+            "position": 1,
+            "cards": [],
+            "created_at": now
+        },
+        {
+            "id": f"list_{uuid.uuid4().hex[:12]}",
+            "title": "Listo",
+            "color": "#8B5CF6",  # Morado/Violeta
+            "position": 2,
+            "cards": [],
+            "created_at": now
+        }
+    ]
     
     board = {
-        "id": f"board_{uuid.uuid4().hex[:12]}",
+        "id": board_id,
         "title": request.title,
         "description": request.description or "",
         "background_color": request.background_color or "#3B82F6",
         "background_image": None,
         "owner_username": current_user["username"],
-        "lists": [],
+        "lists": default_lists,
         "collaborators": [],
         "is_archived": False,
         "created_at": now,

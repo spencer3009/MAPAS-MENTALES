@@ -1,5 +1,15 @@
 # MindoraMap - Product Requirements Document
 
+## Changelog (Latest First)
+
+### 2026-01-03: Contador Papelera Unificado
+- **Fixed**: Contador de Papelera ahora muestra total de mapas + tableros eliminados
+- **Added**: Endpoint `GET /api/trash/count` que retorna `{total, maps_count, boards_count}`
+- **Updated**: `loadTrashCount()` usa endpoint unificado
+- **Updated**: TrashView y BoardsPage actualizan el contador en tiempo real
+
+---
+
 ## Descripción del Producto
 MindoraMap es una plataforma de mapas mentales para empresarios. Permite organizar ideas, planificar estrategias y tomar decisiones de forma visual y colaborativa.
 

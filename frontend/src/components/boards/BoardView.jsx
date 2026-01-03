@@ -83,7 +83,7 @@ const SortableCard = ({ card, listId, onUpdate, onDelete }) => {
     if (hasLabel) {
       newLabels = currentLabels.filter(l => l.color !== colorId);
     } else {
-      newLabels = [...currentLabels, { id: `label_${Date.now()}`, color: colorId }];
+      newLabels = [...currentLabels, { id: `label_${crypto.randomUUID()}`, color: colorId }];
     }
     
     onUpdate(card.id, { labels: newLabels });

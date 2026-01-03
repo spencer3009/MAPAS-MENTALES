@@ -199,8 +199,11 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
   const [interactionMode, setInteractionMode] = useState('hand');
 
   // Estado para el Dock y vistas principales
-  const [activeView, setActiveView] = useState('dashboard'); // 'projects' | 'dashboard' | 'templates' | 'integrations'
+  const [activeView, setActiveView] = useState('dashboard'); // 'projects' | 'dashboard' | 'templates' | 'integrations' | 'boards'
   const [isProjectsSidebarOpen, setIsProjectsSidebarOpen] = useState(false); // Inicialmente cerrado cuando está en dashboard
+  
+  // Estado para Tableros
+  const [selectedBoard, setSelectedBoard] = useState(null);
 
   // Efecto para navegar desde notificaciones
   useEffect(() => {

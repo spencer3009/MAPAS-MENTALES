@@ -139,7 +139,7 @@ const TrashView = ({ isOpen, onClose, onProjectRestored, token }) => {
         throw new Error('Error al eliminar');
       }
       
-      setTrashProjects(prev => prev.filter(p => p.project_id !== projectId));
+      setTrashProjects(prev => prev.filter(p => p.id !== projectId));
       setConfirmDelete(null);
       if (onProjectRestored) onProjectRestored(); // Actualizar contador
     } catch (err) {

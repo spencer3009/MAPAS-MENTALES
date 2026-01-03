@@ -191,6 +191,20 @@ const LayoutTemplateSelector = ({ isOpen, onSelect, onClose, initialLayout = nul
       selectedBg: 'bg-purple-50',
       iconBg: 'bg-purple-100',
       iconColor: 'text-purple-600'
+    },
+    {
+      id: 'mindaxis',
+      name: 'MindAxis',
+      subtitle: '(Eje Central)',
+      description: 'Mapa centrado. Las ideas se expanden equilibradamente hacia ambos lados.',
+      icon: MindAxisIcon,
+      color: 'teal',
+      bgGradient: 'from-teal-500 to-cyan-500',
+      borderColor: 'border-teal-500',
+      hoverBg: 'hover:bg-teal-50',
+      selectedBg: 'bg-teal-50',
+      iconBg: 'bg-teal-100',
+      iconColor: 'text-teal-600'
     }
   ];
 

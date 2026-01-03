@@ -1,21 +1,31 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Play, Pause, Clock, Users, TrendingUp, Timer } from 'lucide-react';
+import { useTimeTracking } from '../../contexts/TimeTrackingContext';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
-const TimeTracker = ({ taskId, boardId, listId, onTimeUpdate }) => {
-  const [isTracking, setIsTracking] = useState(false);
-  const [elapsedTime, setElapsedTime] = useState(0);
+const TimeTracker = ({ taskId, boardId, listId, taskTitle, onTimeUpdate }) => {
+  const { 
+    activeEntry, 
+    elapsedTime, 
+    isTracking, 
+    formattedTime, 
+    startTracking, 
+    stopTracking, 
+    isTaskTracking,
+    refreshActiveEntry
+  } = useTimeTracking();
+  
   const [totalTime, setTotalTime] = useState(0);
-  const [activeEntry, setActiveEntry] = useState(null);
   const [weeklyData, setWeeklyData] = useState([]);
   const [userTotals, setUserTotals] = useState([]);
   const [loading, setLoading] = useState(true);
-  const intervalRef = useRef(null);
   const token = localStorage.getItem('mm_auth_token');
+  
+  const isThisTaskTracking = isTaskTracking(taskId);
 
-  // Formatear tiempo
-  const formatTime = (seconds) => {
+  // Formatear tiempo local
+  const formatTimeLocal = (seconds) => {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
@@ -36,12 +46,6 @@ const TimeTracker = ({ taskId, boardId, listId, onTimeUpdate }) => {
         const data = await entriesRes.json();
         setTotalTime(data.total_seconds || 0);
         setUserTotals(data.user_totals || []);
-        
-        if (data.active_entry) {
-          setIsTracking(true);
-          setActiveEntry(data.active_entry);
-          setElapsedTime(data.active_entry.elapsed_seconds || 0);
-        }
       }
       
       // Cargar datos semanales
@@ -65,87 +69,38 @@ const TimeTracker = ({ taskId, boardId, listId, onTimeUpdate }) => {
     loadTaskData();
   }, [loadTaskData]);
 
-  // Contador en tiempo real
-  useEffect(() => {
-    if (isTracking) {
-      intervalRef.current = setInterval(() => {
-        setElapsedTime(prev => prev + 1);
-      }, 1000);
-    } else {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    }
-    
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [isTracking]);
-
   // Iniciar tracking
   const handleStart = async () => {
-    try {
-      const response = await fetch(`${API_URL}/api/time-tracking/start`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          task_id: taskId,
-          board_id: boardId,
-          list_id: listId
-        })
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setIsTracking(true);
-        setActiveEntry(data.entry);
-        setElapsedTime(0);
-        if (onTimeUpdate) onTimeUpdate(); // Notificar al padre
-      }
-    } catch (error) {
-      console.error('Error starting time tracking:', error);
+    const entry = await startTracking(taskId, boardId, listId, taskTitle);
+    if (entry && onTimeUpdate) {
+      onTimeUpdate();
     }
   };
 
   // Detener tracking
   const handleStop = async () => {
-    try {
-      const response = await fetch(`${API_URL}/api/time-tracking/stop`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ task_id: taskId })
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setIsTracking(false);
-        setActiveEntry(null);
-        setTotalTime(prev => prev + (data.duration || elapsedTime));
-        setElapsedTime(0);
-        loadTaskData(); // Recargar datos
-        if (onTimeUpdate) onTimeUpdate(); // Notificar al padre
+    const result = await stopTracking();
+    if (result) {
+      setTotalTime(prev => prev + elapsedTime);
+      loadTaskData();
+      if (onTimeUpdate) {
+        onTimeUpdate();
       }
-    } catch (error) {
-      console.error('Error stopping time tracking:', error);
     }
   };
 
   // Calcular máximo para la gráfica
   const maxChartValue = Math.max(
     ...weeklyData.map(d => Math.max(d.my_time, d.others_time)),
-    3600 // Mínimo 1 hora para escala
+    3600
   );
 
-  // Convertir segundos a horas para visualización
+  // Convertir segundos a horas
   const secondsToHours = (s) => (s / 3600).toFixed(1);
+
+  // Tiempo actual mostrado
+  const displayTime = isThisTaskTracking ? elapsedTime : 0;
+  const totalDisplayTime = totalTime + displayTime;
 
   if (loading) {
     return (
@@ -161,31 +116,34 @@ const TimeTracker = ({ taskId, boardId, listId, onTimeUpdate }) => {
       {/* Header con tiempo total */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-cyan-100 rounded-lg flex items-center justify-center">
-            <Clock className="w-4 h-4 text-cyan-600" />
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isThisTaskTracking ? 'bg-red-100' : 'bg-cyan-100'}`}>
+            <Clock className={`w-4 h-4 ${isThisTaskTracking ? 'text-red-600' : 'text-cyan-600'}`} />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-gray-800">Registro de Tiempo</h3>
-            <p className="text-xs text-gray-500">Tiempo total: {formatTime(totalTime + (isTracking ? elapsedTime : 0))}</p>
+            <p className="text-xs text-gray-500">Tiempo total: {formatTimeLocal(totalDisplayTime)}</p>
           </div>
         </div>
       </div>
 
       {/* Contador principal y botón */}
-      <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-100">
+      <div className={`rounded-xl p-4 shadow-sm border ${isThisTaskTracking ? 'bg-red-50 border-red-200' : 'bg-white border-slate-100'}`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             {/* Botón Play/Pause */}
             <button
-              onClick={isTracking ? handleStop : handleStart}
-              className={`w-14 h-14 rounded-full flex items-center justify-center transition-all transform hover:scale-105 active:scale-95 shadow-lg ${
-                isTracking 
-                  ? 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600' 
-                  : 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700'
+              onClick={isThisTaskTracking ? handleStop : handleStart}
+              disabled={isTracking && !isThisTaskTracking}
+              className={`w-14 h-14 rounded-full flex items-center justify-center transition-all transform hover:scale-105 active:scale-95 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed ${
+                isThisTaskTracking 
+                  ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700' 
+                  : isTracking 
+                    ? 'bg-gray-300'
+                    : 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700'
               }`}
               data-testid="time-toggle-btn"
             >
-              {isTracking ? (
+              {isThisTaskTracking ? (
                 <Pause className="w-6 h-6 text-white" />
               ) : (
                 <Play className="w-6 h-6 text-white ml-1" />
@@ -194,23 +152,28 @@ const TimeTracker = ({ taskId, boardId, listId, onTimeUpdate }) => {
             
             {/* Tiempo actual */}
             <div>
-              <div className={`text-3xl font-mono font-bold ${isTracking ? 'text-cyan-600' : 'text-gray-400'}`}>
-                {formatTime(elapsedTime)}
+              <div className={`text-3xl font-mono font-bold ${isThisTaskTracking ? 'text-red-600' : 'text-gray-400'}`}>
+                {formatTimeLocal(displayTime)}
               </div>
               <p className="text-xs text-gray-500">
-                {isTracking ? 'Registrando...' : 'Presiona play para iniciar'}
+                {isThisTaskTracking 
+                  ? 'Registrando...' 
+                  : isTracking 
+                    ? 'Hay otro registro activo'
+                    : 'Presiona play para iniciar'
+                }
               </p>
             </div>
           </div>
           
           {/* Indicador de estado */}
-          {isTracking && (
+          {isThisTaskTracking && (
             <div className="flex items-center gap-2">
               <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
               </span>
-              <span className="text-xs text-green-600 font-medium">Activo</span>
+              <span className="text-xs text-red-600 font-medium">Activo</span>
             </div>
           )}
         </div>
@@ -240,21 +203,19 @@ const TimeTracker = ({ taskId, boardId, listId, onTimeUpdate }) => {
           {weeklyData.map((day, idx) => (
             <div key={idx} className="flex-1 flex flex-col items-center">
               <div className="w-full flex flex-col items-center h-24 justify-end gap-0.5">
-                {/* Barra de otros */}
                 <div 
                   className="w-full bg-slate-200 rounded-t transition-all duration-300"
                   style={{ 
                     height: `${Math.max((day.others_time / maxChartValue) * 100, day.others_time > 0 ? 4 : 0)}%`
                   }}
-                  title={`Otros: ${formatTime(day.others_time)}`}
+                  title={`Otros: ${formatTimeLocal(day.others_time)}`}
                 />
-                {/* Barra mía */}
                 <div 
                   className="w-full bg-gradient-to-t from-cyan-500 to-cyan-400 rounded-t transition-all duration-300"
                   style={{ 
                     height: `${Math.max((day.my_time / maxChartValue) * 100, day.my_time > 0 ? 4 : 0)}%`
                   }}
-                  title={`Yo: ${formatTime(day.my_time)}`}
+                  title={`Yo: ${formatTimeLocal(day.my_time)}`}
                 />
               </div>
               <span className="text-[10px] text-gray-500 mt-1 font-medium">{day.day}</span>
@@ -262,7 +223,6 @@ const TimeTracker = ({ taskId, boardId, listId, onTimeUpdate }) => {
           ))}
         </div>
         
-        {/* Escala */}
         <div className="flex justify-between text-[10px] text-gray-400 mt-2 px-1">
           <span>0h</span>
           <span>{secondsToHours(maxChartValue / 2)}h</span>
@@ -296,7 +256,7 @@ const TimeTracker = ({ taskId, boardId, listId, onTimeUpdate }) => {
                 <div className="flex items-center gap-2">
                   <Timer className="w-4 h-4 text-gray-400" />
                   <span className="text-sm font-mono font-semibold text-cyan-600">
-                    {formatTime(user.total_seconds)}
+                    {formatTimeLocal(user.total_seconds)}
                   </span>
                 </div>
               </div>

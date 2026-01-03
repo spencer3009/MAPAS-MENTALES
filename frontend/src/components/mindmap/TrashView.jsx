@@ -116,6 +116,7 @@ const TrashView = ({ isOpen, onClose, onProjectRestored, token }) => {
       }
       
       setTrashBoards(prev => prev.filter(b => b.id !== boardId));
+      if (onProjectRestored) onProjectRestored(); // Actualizar contador
     } catch (err) {
       console.error('Error restoring board:', err);
       setError('No se pudo restaurar el tablero');

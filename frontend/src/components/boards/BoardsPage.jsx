@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, LayoutGrid, Search, Trash2, ArrowLeft, MoreHorizontal, Star, Clock } from 'lucide-react';
+import { Plus, LayoutGrid, Search, Trash2, ArrowLeft, MoreHorizontal, Star, Clock, AlertTriangle, X } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 

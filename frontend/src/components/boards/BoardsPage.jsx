@@ -94,6 +94,7 @@ const BoardsPage = ({ onBack, onSelectBoard, onTrashUpdate }) => {
       if (response.ok) {
         setBoards(boards.filter(b => b.id !== boardId));
         setConfirmDeleteBoard(null);
+        if (onTrashUpdate) onTrashUpdate(); // Actualizar contador de papelera
       }
     } catch (error) {
       console.error('Error deleting board:', error);

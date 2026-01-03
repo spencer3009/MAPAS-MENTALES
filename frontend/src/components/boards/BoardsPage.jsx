@@ -230,7 +230,10 @@ const BoardsPage = ({ onBack, onSelectBoard }) => {
                         <span>{new Date(board.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</span>
                       </div>
                       <button
-                        onClick={(e) => deleteBoard(board.id, e)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setConfirmDeleteBoard(board);
+                        }}
                         className="p-1.5 bg-white/10 hover:bg-red-500/80 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                         data-testid={`delete-board-${board.id}`}
                       >

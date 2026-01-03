@@ -481,6 +481,105 @@ async def register(register_data: RegisterRequest, background_tasks: BackgroundT
         
         await db.projects.insert_one(new_project)
     
+    # === CREAR TABLERO DE PRUEBA PARA ONBOARDING ===
+    now = datetime.now(timezone.utc).isoformat()
+    board_id = f"board_{uuid.uuid4().hex[:12]}"
+    
+    # Crear tareas de ejemplo para demostración
+    example_tasks = [
+        {
+            "id": f"card_{uuid.uuid4().hex[:12]}",
+            "title": "👋 ¡Bienvenido! Haz clic aquí para ver los detalles",
+            "description": "Este es un ejemplo de tarea. Puedes editar el título, añadir descripción, checklists y más.",
+            "labels": [{"id": "label_1", "color": "cyan"}],
+            "checklist": [
+                {"id": "check_1", "text": "Explorar el tablero", "completed": False},
+                {"id": "check_2", "text": "Crear mi primera tarea", "completed": False},
+                {"id": "check_3", "text": "Arrastrar una tarea a otra columna", "completed": False}
+            ],
+            "position": 0,
+            "created_at": now
+        },
+        {
+            "id": f"card_{uuid.uuid4().hex[:12]}",
+            "title": "📝 Arrastra esta tarea a 'En Progreso'",
+            "description": "Prueba el drag & drop arrastrando esta tarea a otra columna.",
+            "labels": [{"id": "label_2", "color": "yellow"}],
+            "position": 1,
+            "created_at": now
+        }
+    ]
+    
+    example_tasks_progress = [
+        {
+            "id": f"card_{uuid.uuid4().hex[:12]}",
+            "title": "🎯 Tarea en progreso de ejemplo",
+            "description": "Las tareas en progreso aparecen aquí.",
+            "labels": [{"id": "label_3", "color": "blue"}],
+            "priority": "medium",
+            "position": 0,
+            "created_at": now
+        }
+    ]
+    
+    example_tasks_done = [
+        {
+            "id": f"card_{uuid.uuid4().hex[:12]}",
+            "title": "✅ Tarea completada de ejemplo",
+            "description": "¡Felicidades! Mueve tus tareas aquí cuando estén listas.",
+            "labels": [{"id": "label_4", "color": "green"}],
+            "position": 0,
+            "created_at": now
+        }
+    ]
+    
+    # Crear las 3 listas por defecto con tareas de ejemplo
+    default_lists = [
+        {
+            "id": f"list_{uuid.uuid4().hex[:12]}",
+            "title": "Abiertas",
+            "color": "#06B6D4",
+            "position": 0,
+            "cards": example_tasks,
+            "created_at": now
+        },
+        {
+            "id": f"list_{uuid.uuid4().hex[:12]}",
+            "title": "En Progreso",
+            "color": "#3B82F6",
+            "position": 1,
+            "cards": example_tasks_progress,
+            "created_at": now
+        },
+        {
+            "id": f"list_{uuid.uuid4().hex[:12]}",
+            "title": "Listo",
+            "color": "#8B5CF6",
+            "position": 2,
+            "cards": example_tasks_done,
+            "created_at": now
+        }
+    ]
+    
+    onboarding_board = {
+        "id": board_id,
+        "title": "📋 Tablero de Ejemplo",
+        "description": "Este es tu tablero de prueba. Explora las funcionalidades y elimínalo cuando quieras.",
+        "background_color": "#06B6D4",
+        "owner_username": register_data.username,
+        "lists": default_lists,
+        "collaborators": [],
+        "is_archived": False,
+        "is_deleted": False,
+        "is_onboarding": True,  # Marcar como tablero de onboarding
+        "created_at": now,
+        "updated_at": now
+    }
+    
+    await db.boards.insert_one(onboarding_board)
+    logger.info(f"📋 Tablero de prueba creado para nuevo usuario: {register_data.username}")
+    # === FIN TABLERO DE PRUEBA ===
+    
     # Enviar email de verificación en background
     background_tasks.add_task(
         email_service.send_verification_email,

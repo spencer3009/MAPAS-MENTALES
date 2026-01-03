@@ -131,6 +131,36 @@ const MindAxisIcon = ({ className }) => (
   </svg>
 );
 
+// Ícono personalizado para MindOrbit (mapa radial)
+const MindOrbitIcon = ({ className }) => (
+  <svg 
+    viewBox="0 0 48 48" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    {/* Nodo central (círculo) */}
+    <circle cx="24" cy="24" r="6" />
+    {/* Nodos orbitales */}
+    <circle cx="24" cy="6" r="4" />
+    <circle cx="40" cy="16" r="4" />
+    <circle cx="40" cy="32" r="4" />
+    <circle cx="24" cy="42" r="4" />
+    <circle cx="8" cy="32" r="4" />
+    <circle cx="8" cy="16" r="4" />
+    {/* Conectores radiales */}
+    <path d="M24 18 L24 10" />
+    <path d="M29 20 L36 14" />
+    <path d="M29 28 L36 34" />
+    <path d="M24 30 L24 38" />
+    <path d="M19 28 L12 34" />
+    <path d="M19 20 L12 14" />
+  </svg>
+);
+
 const LayoutTemplateSelector = ({ isOpen, onSelect, onClose, initialLayout = null }) => {
   const [selectedLayout, setSelectedLayout] = useState(null);
 

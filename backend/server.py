@@ -4113,6 +4113,7 @@ class StartTimeTrackingRequest(BaseModel):
     task_id: str
     board_id: str
     list_id: str
+    task_title: Optional[str] = None
 
 class StopTimeTrackingRequest(BaseModel):
     task_id: str

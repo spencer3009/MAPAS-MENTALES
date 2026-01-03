@@ -579,6 +579,8 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
       'mindflow': 'mindflow',
       'mindtree': 'mindtree',
       'mindhybrid': 'mindhybrid',
+      'mindaxis': 'mindaxis',
+      'mindorbit': 'mindorbit',
       'blank': null // blank no tiene pre-selección
     };
     setPreselectedLayout(layoutMap[templateId] || null);

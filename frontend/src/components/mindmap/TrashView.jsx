@@ -294,7 +294,7 @@ const TrashView = ({ isOpen, onClose, onProjectRestored, token }) => {
                     <div className="space-y-3">
                       {trashProjects.map((project) => (
                         <div
-                          key={project.project_id}
+                          key={project.id}
                           className="bg-gray-50 rounded-xl p-4 flex items-center justify-between group hover:bg-gray-100 transition-colors"
                         >
                           <div className="flex items-center gap-3 min-w-0">
@@ -305,26 +305,26 @@ const TrashView = ({ isOpen, onClose, onProjectRestored, token }) => {
                               <h3 className="font-medium text-gray-900 truncate">{project.name}</h3>
                               <p className="text-xs text-gray-500 flex items-center gap-1">
                                 <Clock size={10} />
-                                Eliminado: {formatDate(project.deleted_at)}
+                                Eliminado: {formatDate(project.deletedAt)}
                               </p>
                             </div>
                           </div>
                           
                           <div className="flex items-center gap-2 flex-shrink-0">
                             <button
-                              onClick={() => handleRestoreProject(project.project_id)}
-                              disabled={actionLoading === project.project_id}
+                              onClick={() => handleRestoreProject(project.id)}
+                              disabled={actionLoading === project.id}
                               className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors disabled:opacity-50"
                               title="Restaurar"
                             >
-                              {actionLoading === project.project_id ? (
+                              {actionLoading === project.id ? (
                                 <Loader2 size={16} className="animate-spin" />
                               ) : (
                                 <RotateCcw size={16} />
                               )}
                             </button>
                             <button
-                              onClick={() => setConfirmDelete({ type: 'project', id: project.project_id, name: project.name })}
+                              onClick={() => setConfirmDelete({ type: 'project', id: project.id, name: project.name })}
                               className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
                               title="Eliminar permanentemente"
                             >

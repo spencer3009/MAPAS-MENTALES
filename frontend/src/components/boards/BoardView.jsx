@@ -453,7 +453,7 @@ const BoardView = ({ board: initialBoard, onBack }) => {
     let isMounted = true;
     const loadBoard = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('mm_auth_token');
         const response = await fetch(`${API_URL}/api/boards/${initialBoard.id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -474,7 +474,7 @@ const BoardView = ({ board: initialBoard, onBack }) => {
     if (!newListTitle.trim()) return;
     
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('mm_auth_token');
       const response = await fetch(`${API_URL}/api/boards/${board.id}/lists`, {
         method: 'POST',
         headers: {
@@ -500,7 +500,7 @@ const BoardView = ({ board: initialBoard, onBack }) => {
 
   const updateList = async (listId, title) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('mm_auth_token');
       await fetch(`${API_URL}/api/boards/${board.id}/lists/${listId}`, {
         method: 'PUT',
         headers: {
@@ -523,7 +523,7 @@ const BoardView = ({ board: initialBoard, onBack }) => {
     if (!window.confirm('¿Eliminar esta lista y todas sus tarjetas?')) return;
     
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('mm_auth_token');
       await fetch(`${API_URL}/api/boards/${board.id}/lists/${listId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
@@ -540,7 +540,7 @@ const BoardView = ({ board: initialBoard, onBack }) => {
 
   const addCard = async (listId, title) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('mm_auth_token');
       const response = await fetch(`${API_URL}/api/boards/${board.id}/lists/${listId}/cards`, {
         method: 'POST',
         headers: {
@@ -568,7 +568,7 @@ const BoardView = ({ board: initialBoard, onBack }) => {
 
   const updateCard = async (listId, cardId, updates) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('mm_auth_token');
       await fetch(`${API_URL}/api/boards/${board.id}/lists/${listId}/cards/${cardId}`, {
         method: 'PUT',
         headers: {
@@ -593,7 +593,7 @@ const BoardView = ({ board: initialBoard, onBack }) => {
 
   const deleteCard = async (listId, cardId) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('mm_auth_token');
       await fetch(`${API_URL}/api/boards/${board.id}/lists/${listId}/cards/${cardId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
@@ -640,7 +640,7 @@ const BoardView = ({ board: initialBoard, onBack }) => {
         setBoard(prev => ({ ...prev, lists: newLists }));
         
         // Save to backend
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('mm_auth_token');
         await fetch(`${API_URL}/api/boards/${board.id}/lists/reorder`, {
           method: 'PUT',
           headers: {
@@ -699,7 +699,7 @@ const BoardView = ({ board: initialBoard, onBack }) => {
         });
         
         // Save to backend
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('mm_auth_token');
         await fetch(`${API_URL}/api/boards/${board.id}/cards/move`, {
           method: 'POST',
           headers: {

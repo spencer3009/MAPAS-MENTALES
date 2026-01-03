@@ -58,7 +58,7 @@ const LIST_THEMES = {
 // Toda la tarjeta es draggable (UX mejorado)
 // Click abre el modal de tarea
 // ==========================================
-const SortableCard = ({ card, listId, listTitle, boardId, onUpdate, onDelete, onOpenModal }) => {
+const SortableCard = ({ card, listId, listTitle, boardId, onUpdate, onDelete, onOpenModal, isTimeTracking, trackingTime }) => {
   const [showActions, setShowActions] = useState(false);
   const wasDraggingRef = React.useRef(false);
   
@@ -113,9 +113,26 @@ const SortableCard = ({ card, listId, listTitle, boardId, onUpdate, onDelete, on
       className={`group bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 select-none ${
         isDragging 
           ? 'shadow-2xl ring-2 ring-cyan-400 rotate-2 scale-105' 
-          : 'border border-gray-100 hover:border-cyan-200'
+          : isTimeTracking
+            ? 'border-2 border-red-400 ring-2 ring-red-100'
+            : 'border border-gray-100 hover:border-cyan-200'
       }`}
     >
+      {/* Time tracking indicator */}
+      {isTimeTracking && (
+        <div className="bg-red-500 text-white px-3 py-1.5 flex items-center justify-between rounded-t-lg">
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+            </span>
+            <Clock size={12} />
+            <span className="text-xs font-medium">Registrando tiempo</span>
+          </div>
+          <span className="font-mono text-sm font-bold">{trackingTime}</span>
+        </div>
+      )}
+      
       {/* Labels */}
       {card.labels && card.labels.length > 0 && (
         <div className="flex flex-wrap gap-1.5 px-3 pt-3">

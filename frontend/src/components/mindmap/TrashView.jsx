@@ -1,40 +1,49 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Trash2, RotateCcw, AlertTriangle, X, Clock, 
-  FileText, Loader2, ArrowLeft, Layers, Trash
+  FileText, Loader2, ArrowLeft, Layers, Trash, LayoutGrid
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 const TrashView = ({ isOpen, onClose, onProjectRestored, token }) => {
   const [trashProjects, setTrashProjects] = useState([]);
+  const [trashBoards, setTrashBoards] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [confirmEmptyTrash, setConfirmEmptyTrash] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
   const [emptyingTrash, setEmptyingTrash] = useState(false);
+  const [activeTab, setActiveTab] = useState('maps'); // 'maps' or 'boards'
 
-  // Cargar proyectos de la papelera
-  const fetchTrashProjects = useCallback(async () => {
+  // Cargar proyectos y tableros de la papelera
+  const fetchTrashItems = useCallback(async () => {
     if (!token) return;
     
     setLoading(true);
     setError(null);
     
     try {
-      const response = await fetch(`${API_URL}/api/projects/trash`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      // Cargar mapas
+      const projectsRes = await fetch(`${API_URL}/api/projects/trash`, {
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       
-      if (!response.ok) {
-        throw new Error('Error al cargar la papelera');
+      if (projectsRes.ok) {
+        const projectsData = await projectsRes.json();
+        setTrashProjects(projectsData);
       }
       
-      const data = await response.json();
-      setTrashProjects(data);
+      // Cargar tableros
+      const boardsRes = await fetch(`${API_URL}/api/boards/trash`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (boardsRes.ok) {
+        const boardsData = await boardsRes.json();
+        setTrashBoards(boardsData);
+      }
     } catch (err) {
       console.error('Error fetching trash:', err);
       setError('No se pudo cargar la papelera');
@@ -46,9 +55,9 @@ const TrashView = ({ isOpen, onClose, onProjectRestored, token }) => {
   // Cargar cuando se abre
   useEffect(() => {
     if (isOpen) {
-      fetchTrashProjects();
+      fetchTrashItems();
     }
-  }, [isOpen, fetchTrashProjects]);
+  }, [isOpen, fetchTrashItems]);
 
   // Handle ESC key to close modal
   useEffect(() => {
@@ -68,98 +77,121 @@ const TrashView = ({ isOpen, onClose, onProjectRestored, token }) => {
     }
   }, [isOpen, onClose, confirmDelete]);
 
-  // Restaurar proyecto
-  const handleRestore = async (projectId) => {
+  // Restaurar proyecto (mapa)
+  const handleRestoreProject = async (projectId) => {
     setActionLoading(projectId);
     
     try {
       const response = await fetch(`${API_URL}/api/projects/${projectId}/restore`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       
       if (!response.ok) {
         throw new Error('Error al restaurar');
       }
       
-      // Actualizar lista local
-      setTrashProjects(prev => prev.filter(p => p.id !== projectId));
-      
-      // Notificar al componente padre
-      if (onProjectRestored) {
-        onProjectRestored();
-      }
+      setTrashProjects(prev => prev.filter(p => p.project_id !== projectId));
+      if (onProjectRestored) onProjectRestored();
     } catch (err) {
       console.error('Error restoring project:', err);
-      setError('No se pudo restaurar el proyecto');
+      setError('No se pudo restaurar el mapa');
     } finally {
       setActionLoading(null);
     }
   };
 
-  // Eliminar permanentemente
-  const handlePermanentDelete = async (projectId) => {
+  // Restaurar tablero
+  const handleRestoreBoard = async (boardId) => {
+    setActionLoading(boardId);
+    
+    try {
+      const response = await fetch(`${API_URL}/api/boards/${boardId}/restore`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Error al restaurar');
+      }
+      
+      setTrashBoards(prev => prev.filter(b => b.id !== boardId));
+    } catch (err) {
+      console.error('Error restoring board:', err);
+      setError('No se pudo restaurar el tablero');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  // Eliminar permanentemente proyecto (mapa)
+  const handleDeletePermanentProject = async (projectId) => {
     setActionLoading(projectId);
     
     try {
       const response = await fetch(`${API_URL}/api/projects/${projectId}/permanent`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       
       if (!response.ok) {
         throw new Error('Error al eliminar');
       }
       
-      // Actualizar lista local
-      setTrashProjects(prev => prev.filter(p => p.id !== projectId));
+      setTrashProjects(prev => prev.filter(p => p.project_id !== projectId));
       setConfirmDelete(null);
-      
-      // Notificar al componente padre para actualizar el contador del sidebar
-      if (onProjectRestored) {
-        onProjectRestored();
-      }
     } catch (err) {
-      console.error('Error deleting permanently:', err);
-      setError('No se pudo eliminar el proyecto');
+      console.error('Error deleting project:', err);
+      setError('No se pudo eliminar el mapa');
     } finally {
       setActionLoading(null);
     }
   };
 
-  // Vaciar toda la papelera
+  // Eliminar permanentemente tablero
+  const handleDeletePermanentBoard = async (boardId) => {
+    setActionLoading(boardId);
+    
+    try {
+      const response = await fetch(`${API_URL}/api/boards/${boardId}/permanent`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Error al eliminar');
+      }
+      
+      setTrashBoards(prev => prev.filter(b => b.id !== boardId));
+      setConfirmDelete(null);
+    } catch (err) {
+      console.error('Error deleting board:', err);
+      setError('No se pudo eliminar el tablero');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  // Vaciar papelera completa
   const handleEmptyTrash = async () => {
     setEmptyingTrash(true);
     
     try {
-      const response = await fetch(`${API_URL}/api/projects/trash/empty`, {
+      // Vaciar mapas
+      await fetch(`${API_URL}/api/projects/trash/empty`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       
-      if (!response.ok) {
-        throw new Error('Error al vaciar la papelera');
-      }
+      // Vaciar tableros
+      await fetch(`${API_URL}/api/boards/trash/empty`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       
-      // Limpiar lista local
       setTrashProjects([]);
+      setTrashBoards([]);
       setConfirmEmptyTrash(false);
-      
-      // Notificar al componente padre PRIMERO para actualizar el contador
-      if (onProjectRestored) {
-        onProjectRestored();
-      }
-      
-      // Cerrar la papelera después de vaciarla
-      if (onClose) {
-        onClose();
-      }
     } catch (err) {
       console.error('Error emptying trash:', err);
       setError('No se pudo vaciar la papelera');
@@ -170,312 +202,296 @@ const TrashView = ({ isOpen, onClose, onProjectRestored, token }) => {
 
   // Formatear fecha
   const formatDate = (dateString) => {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('es-ES', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    } catch {
-      return 'Fecha desconocida';
-    }
-  };
-
-  // Obtener icono de layout
-  const getLayoutIcon = (layoutType) => {
-    switch (layoutType) {
-      case 'mindtree':
-        return '🌳';
-      case 'mindhybrid':
-        return '🔀';
-      default:
-        return '🗺️';
-    }
+    if (!dateString) return 'Fecha desconocida';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   if (!isOpen) return null;
 
+  const totalItems = trashProjects.length + trashBoards.length;
+
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden shadow-2xl flex flex-col">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-red-50 to-orange-50">
+        <div className="bg-gradient-to-r from-red-500 to-orange-500 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
-              <Trash2 className="text-red-500" size={20} />
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+              <Trash2 className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">Papelera</h2>
-              <p className="text-sm text-gray-500">
-                {trashProjects.length} proyecto{trashProjects.length !== 1 ? 's' : ''} eliminado{trashProjects.length !== 1 ? 's' : ''}
-              </p>
+              <h2 className="text-lg font-bold text-white">Papelera</h2>
+              <p className="text-white/70 text-sm">{totalItems} elementos</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            {/* Botón Vaciar Papelera */}
-            {trashProjects.length > 0 && (
-              <button
-                onClick={() => setConfirmEmptyTrash(true)}
-                disabled={emptyingTrash}
-                className="
-                  px-3 py-2 rounded-lg
-                  bg-red-500 hover:bg-red-600
-                  text-white text-sm font-medium
-                  flex items-center gap-2
-                  transition-all duration-200
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                "
-                title="Vaciar toda la papelera"
-              >
-                <Trash size={16} />
-                Vaciar papelera
-              </button>
-            )}
-            <button
-              onClick={onClose}
-              className="p-2 rounded-lg hover:bg-red-100 text-gray-500 hover:text-red-600 transition-colors"
-            >
-              <X size={20} />
-            </button>
-          </div>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-white/20 rounded-lg transition-colors text-white"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex border-b border-gray-200">
+          <button
+            onClick={() => setActiveTab('maps')}
+            className={`flex-1 px-4 py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${
+              activeTab === 'maps'
+                ? 'text-cyan-600 border-b-2 border-cyan-500 bg-cyan-50/50'
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <Layers size={16} />
+            Mapas ({trashProjects.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('boards')}
+            className={`flex-1 px-4 py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${
+              activeTab === 'boards'
+                ? 'text-cyan-600 border-b-2 border-cyan-500 bg-cyan-50/50'
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <LayoutGrid size={16} />
+            Tableros ({trashBoards.length})
+          </button>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4">
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-12">
-              <Loader2 className="animate-spin text-gray-400 mb-3" size={32} />
-              <p className="text-gray-500">Cargando papelera...</p>
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
             </div>
           ) : error ? (
-            <div className="flex flex-col items-center justify-center py-12">
-              <AlertTriangle className="text-red-400 mb-3" size={32} />
-              <p className="text-red-500">{error}</p>
-              <button
-                onClick={fetchTrashProjects}
-                className="mt-3 px-4 py-2 text-sm bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
-              >
-                Reintentar
-              </button>
-            </div>
-          ) : trashProjects.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12">
-              <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-                <Trash2 className="text-gray-400" size={28} />
-              </div>
-              <h3 className="text-lg font-medium text-gray-700 mb-1">Papelera vacía</h3>
-              <p className="text-sm text-gray-500 text-center max-w-sm">
-                Los proyectos que elimines aparecerán aquí. Podrás restaurarlos o eliminarlos permanentemente.
-              </p>
+            <div className="text-center py-12">
+              <AlertTriangle className="w-12 h-12 text-red-400 mx-auto mb-3" />
+              <p className="text-gray-600">{error}</p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {trashProjects.map((project) => (
-                <div
-                  key={project.id}
-                  className="bg-white border border-gray-200 rounded-xl p-4 hover:border-gray-300 transition-all"
-                >
-                  <div className="flex items-start gap-4">
-                    {/* Icon */}
-                    <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center shrink-0">
-                      <span className="text-lg">{getLayoutIcon(project.layoutType)}</span>
+            <>
+              {/* Mapas */}
+              {activeTab === 'maps' && (
+                <>
+                  {trashProjects.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Layers className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                      <p className="text-gray-500">No hay mapas en la papelera</p>
                     </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {trashProjects.map((project) => (
+                        <div
+                          key={project.project_id}
+                          className="bg-gray-50 rounded-xl p-4 flex items-center justify-between group hover:bg-gray-100 transition-colors"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <FileText className="w-5 h-5 text-white" />
+                            </div>
+                            <div className="min-w-0">
+                              <h3 className="font-medium text-gray-900 truncate">{project.name}</h3>
+                              <p className="text-xs text-gray-500 flex items-center gap-1">
+                                <Clock size={10} />
+                                Eliminado: {formatDate(project.deleted_at)}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <button
+                              onClick={() => handleRestoreProject(project.project_id)}
+                              disabled={actionLoading === project.project_id}
+                              className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors disabled:opacity-50"
+                              title="Restaurar"
+                            >
+                              {actionLoading === project.project_id ? (
+                                <Loader2 size={16} className="animate-spin" />
+                              ) : (
+                                <RotateCcw size={16} />
+                              )}
+                            </button>
+                            <button
+                              onClick={() => setConfirmDelete({ type: 'project', id: project.project_id, name: project.name })}
+                              className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+                              title="Eliminar permanentemente"
+                            >
+                              <Trash size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
 
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-medium text-gray-900 truncate">{project.name}</h3>
-                        <span className="px-2 py-0.5 text-xs font-medium bg-red-100 text-red-600 rounded-full shrink-0">
-                          Eliminado
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Clock size={14} />
-                          {formatDate(project.deletedAt)}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Layers size={14} />
-                          {project.nodeCount} nodos
-                        </span>
-                      </div>
+              {/* Tableros */}
+              {activeTab === 'boards' && (
+                <>
+                  {trashBoards.length === 0 ? (
+                    <div className="text-center py-12">
+                      <LayoutGrid className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                      <p className="text-gray-500">No hay tableros en la papelera</p>
                     </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-2 shrink-0">
-                      <button
-                        onClick={() => handleRestore(project.id)}
-                        disabled={actionLoading === project.id}
-                        className="
-                          px-3 py-2 rounded-lg
-                          bg-green-50 hover:bg-green-100
-                          text-green-600 hover:text-green-700
-                          text-sm font-medium
-                          flex items-center gap-1.5
-                          transition-all duration-200
-                          disabled:opacity-50 disabled:cursor-not-allowed
-                        "
-                        title="Restaurar proyecto"
-                      >
-                        {actionLoading === project.id ? (
-                          <Loader2 className="animate-spin" size={16} />
-                        ) : (
-                          <RotateCcw size={16} />
-                        )}
-                        Restaurar
-                      </button>
-                      <button
-                        onClick={() => setConfirmDelete(project.id)}
-                        disabled={actionLoading === project.id}
-                        className="
-                          px-3 py-2 rounded-lg
-                          bg-red-50 hover:bg-red-100
-                          text-red-600 hover:text-red-700
-                          text-sm font-medium
-                          flex items-center gap-1.5
-                          transition-all duration-200
-                          disabled:opacity-50 disabled:cursor-not-allowed
-                        "
-                        title="Eliminar permanentemente"
-                      >
-                        <Trash2 size={16} />
-                        Eliminar
-                      </button>
+                  ) : (
+                    <div className="space-y-3">
+                      {trashBoards.map((board) => (
+                        <div
+                          key={board.id}
+                          className="bg-gray-50 rounded-xl p-4 flex items-center justify-between group hover:bg-gray-100 transition-colors"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div 
+                              className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                              style={{ backgroundColor: board.background_color || '#3B82F6' }}
+                            >
+                              <LayoutGrid className="w-5 h-5 text-white" />
+                            </div>
+                            <div className="min-w-0">
+                              <h3 className="font-medium text-gray-900 truncate">
+                                {board.title}
+                                {board.is_onboarding && (
+                                  <span className="ml-2 text-xs bg-cyan-100 text-cyan-700 px-2 py-0.5 rounded-full">
+                                    Ejemplo
+                                  </span>
+                                )}
+                              </h3>
+                              <p className="text-xs text-gray-500 flex items-center gap-1">
+                                <Clock size={10} />
+                                Eliminado: {formatDate(board.deleted_at)}
+                                <span className="mx-1">•</span>
+                                {board.lists_count || 0} listas
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <button
+                              onClick={() => handleRestoreBoard(board.id)}
+                              disabled={actionLoading === board.id}
+                              className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors disabled:opacity-50"
+                              title="Restaurar"
+                            >
+                              {actionLoading === board.id ? (
+                                <Loader2 size={16} className="animate-spin" />
+                              ) : (
+                                <RotateCcw size={16} />
+                              )}
+                            </button>
+                            <button
+                              onClick={() => setConfirmDelete({ type: 'board', id: board.id, name: board.title })}
+                              className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+                              title="Eliminar permanentemente"
+                            >
+                              <Trash size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  )}
+                </>
+              )}
+            </>
           )}
         </div>
 
-        {/* Footer info */}
-        <div className="px-6 py-3 border-t border-gray-200 bg-amber-50">
-          <p className="text-xs text-amber-700 flex items-center gap-2">
-            <AlertTriangle size={14} />
-            Los proyectos eliminados permanentemente no se pueden recuperar.
-          </p>
-        </div>
+        {/* Footer */}
+        {totalItems > 0 && (
+          <div className="border-t border-gray-200 p-4 bg-gray-50">
+            <button
+              onClick={() => setConfirmEmptyTrash(true)}
+              className="w-full py-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2"
+            >
+              <Trash2 size={16} />
+              Vaciar papelera completa
+            </button>
+          </div>
+        )}
+
+        {/* Modal de confirmación - Eliminar item */}
+        {confirmDelete && (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center p-4 z-10">
+            <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-2xl">
+              <div className="text-center mb-4">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <AlertTriangle className="w-6 h-6 text-red-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">¿Eliminar permanentemente?</h3>
+                <p className="text-sm text-gray-600">
+                  Esta acción no se puede deshacer. Se eliminará "{confirmDelete.name}" de forma permanente.
+                </p>
+              </div>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setConfirmDelete(null)}
+                  className="flex-1 py-2.5 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => {
+                    if (confirmDelete.type === 'project') {
+                      handleDeletePermanentProject(confirmDelete.id);
+                    } else {
+                      handleDeletePermanentBoard(confirmDelete.id);
+                    }
+                  }}
+                  disabled={actionLoading === confirmDelete.id}
+                  className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {actionLoading === confirmDelete.id && <Loader2 size={14} className="animate-spin" />}
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de confirmación - Vaciar papelera */}
+        {confirmEmptyTrash && (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center p-4 z-10">
+            <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-2xl">
+              <div className="text-center mb-4">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Trash2 className="w-6 h-6 text-red-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">¿Vaciar toda la papelera?</h3>
+                <p className="text-sm text-gray-600">
+                  Se eliminarán permanentemente {totalItems} elementos. Esta acción no se puede deshacer.
+                </p>
+              </div>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setConfirmEmptyTrash(false)}
+                  className="flex-1 py-2.5 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleEmptyTrash}
+                  disabled={emptyingTrash}
+                  className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {emptyingTrash && <Loader2 size={14} className="animate-spin" />}
+                  Vaciar todo
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-
-      {/* Confirm Delete Modal */}
-      {confirmDelete && (
-        <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                <AlertTriangle className="text-red-500" size={24} />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">¿Eliminar permanentemente?</h3>
-                <p className="text-sm text-gray-500">Esta acción no se puede deshacer</p>
-              </div>
-            </div>
-            
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
-              <p className="text-sm text-red-700">
-                <strong>Este proyecto será eliminado definitivamente.</strong>
-                <br />
-                No podrás recuperarlo después de confirmar.
-              </p>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setConfirmDelete(null)}
-                className="
-                  flex-1 px-4 py-3 rounded-xl
-                  bg-gray-100 hover:bg-gray-200
-                  text-gray-700 font-medium
-                  transition-colors
-                "
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={() => handlePermanentDelete(confirmDelete)}
-                disabled={actionLoading === confirmDelete}
-                className="
-                  flex-1 px-4 py-3 rounded-xl
-                  bg-red-500 hover:bg-red-600
-                  text-white font-medium
-                  flex items-center justify-center gap-2
-                  transition-colors
-                  disabled:opacity-50
-                "
-              >
-                {actionLoading === confirmDelete ? (
-                  <Loader2 className="animate-spin" size={18} />
-                ) : (
-                  <Trash2 size={18} />
-                )}
-                Eliminar definitivamente
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Confirm Empty Trash Modal */}
-      {confirmEmptyTrash && (
-        <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                <Trash className="text-red-500" size={24} />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">¿Vaciar papelera?</h3>
-                <p className="text-sm text-gray-500">Esta acción no se puede deshacer</p>
-              </div>
-            </div>
-            
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
-              <p className="text-sm text-red-700">
-                <strong>Se eliminarán {trashProjects.length} proyecto{trashProjects.length !== 1 ? 's' : ''} permanentemente.</strong>
-                <br /><br />
-                Todos los proyectos en la papelera serán eliminados de forma definitiva y no podrás recuperarlos.
-              </p>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setConfirmEmptyTrash(false)}
-                className="
-                  flex-1 px-4 py-3 rounded-xl
-                  bg-gray-100 hover:bg-gray-200
-                  text-gray-700 font-medium
-                  transition-colors
-                "
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleEmptyTrash}
-                disabled={emptyingTrash}
-                className="
-                  flex-1 px-4 py-3 rounded-xl
-                  bg-red-500 hover:bg-red-600
-                  text-white font-medium
-                  flex items-center justify-center gap-2
-                  transition-colors
-                  disabled:opacity-50
-                "
-              >
-                {emptyingTrash ? (
-                  <Loader2 className="animate-spin" size={18} />
-                ) : (
-                  <Trash size={18} />
-                )}
-                Vaciar papelera ({trashProjects.length})
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

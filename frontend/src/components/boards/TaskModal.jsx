@@ -4,6 +4,7 @@ import {
   MessageSquare, Clock, Flag, Link2, Eye, MoreHorizontal,
   Plus, Trash2, Check, Edit2, ChevronRight, AlertCircle
 } from 'lucide-react';
+import TimeTracker from './TimeTracker';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 

@@ -150,13 +150,6 @@ const ConnectionsLayer = memo(({
         
         // LÍNEA RECTA para MindOrbit (no curvas)
         path = `M ${startX} ${startY} L ${endX} ${endY}`;
-        
-        // Calcular puntos de control perpendiculares al eje
-        const perpAngle = angle + Math.PI / 2;
-        const ctrlX = (startX + endX) / 2 + Math.cos(perpAngle) * curvature;
-        const ctrlY = (startY + endY) / 2 + Math.sin(perpAngle) * curvature;
-        
-        path = `M ${startX} ${startY} Q ${ctrlX} ${ctrlY} ${endX} ${endY}`;
       } else if (layoutType === 'mindaxis') {
         // MindAxis: conectores horizontales desde el centro hacia izquierda/derecha
         const side = node.axisSide || 'right';

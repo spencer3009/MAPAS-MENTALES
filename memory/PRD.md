@@ -44,7 +44,8 @@ MindoraMap es una plataforma de mapas mentales para empresarios. Permite organiz
   - Drag & drop entre columnas con feedback visual
   - Estados vacíos siempre visibles ("No hay tareas")
   - **Scroll horizontal funcional** para muchas columnas
-- Layout de página de tableros unificado (ancho completo)
+- **Layout de página ancho completo** (1712px de 1920px viewport)
+- Grid responsive: 1-2-3-4 columnas según breakpoint
 - Guardado automático
 - Diseño inspirado en Trello
 

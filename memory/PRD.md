@@ -2,11 +2,27 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-03: Módulo Time Tracking (Registro de Tiempo)
+- **Added**: Sistema completo de registro de tiempo por tarea
+- **Added**: Endpoints: `/api/time-tracking/start`, `/stop`, `/active`, `/task/{id}`, `/task/{id}/weekly`
+- **Added**: Componente `TimeTracker.jsx` integrado en TaskModal
+- **Features**:
+  - Botón Play/Pause para iniciar/detener contador en tiempo real
+  - Tiempo total acumulado por tarea
+  - Gráfica semanal de actividad (DO-SA)
+  - Historial por usuario con avatares y conteos
+  - Un usuario no puede tener dos contadores activos simultáneamente
+  - Persistencia en colección `time_entries` de MongoDB
+
 ### 2026-01-03: Contador Papelera Unificado
 - **Fixed**: Contador de Papelera ahora muestra total de mapas + tableros eliminados
 - **Added**: Endpoint `GET /api/trash/count` que retorna `{total, maps_count, boards_count}`
 - **Updated**: `loadTrashCount()` usa endpoint unificado
 - **Updated**: TrashView y BoardsPage actualizan el contador en tiempo real
+
+### 2026-01-03: Fix Restauración en Papelera
+- **Fixed**: Campos incorrectos en TrashView (`project.id` vs `project.project_id`)
+- **Fixed**: Formato de fecha (`deletedAt` vs `deleted_at`)
 
 ---
 

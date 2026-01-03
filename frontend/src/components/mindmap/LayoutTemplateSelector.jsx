@@ -254,9 +254,9 @@ const LayoutTemplateSelector = ({ isOpen, onSelect, onClose, initialLayout = nul
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        {/* Header */}
-        <div className="px-6 py-5 border-b border-gray-100">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        {/* Header - Fixed */}
+        <div className="px-6 py-4 border-b border-gray-100 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-semibold text-gray-900">
@@ -275,9 +275,9 @@ const LayoutTemplateSelector = ({ isOpen, onSelect, onClose, initialLayout = nul
           </div>
         </div>
 
-        {/* Content - Layout Cards */}
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Content - Scrollable */}
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {layouts.map((layout) => {
               const Icon = layout.icon;
               const isSelected = selectedLayout === layout.id;

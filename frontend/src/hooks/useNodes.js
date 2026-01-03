@@ -1340,7 +1340,7 @@ export const useNodes = () => {
   // MINDORBIT LAYOUT - DISTRIBUCIÓN RADIAL
   // ==========================================
   
-  // Función de alineación automática para MindOrbit
+  // Función de alineación automática para MindOrbit (nodos circulares en órbita)
   const autoAlignMindOrbit = useCallback((rootId, currentNodes) => {
     const root = currentNodes.find(n => n.id === rootId);
     if (!root) return currentNodes;
@@ -1349,17 +1349,23 @@ export const useNodes = () => {
     
     let updatedNodes = [...currentNodes];
     
+    // Tamaño base para nodos circulares
+    const CIRCLE_SIZE = 100;
+    
     // Función recursiva para alinear subárbol radial
     const alignRadialSubtree = (nodeId, centerX, centerY, radius, startAngle = 0) => {
       const children = updatedNodes.filter(n => n.parentId === nodeId);
       if (children.length === 0) return;
       
+      // Distribuir uniformemente en 360°
       const angleStep = (2 * Math.PI) / children.length;
+      // Offset para empezar desde arriba (-PI/2)
+      const angleOffset = -Math.PI / 2;
       
       children.forEach((child, index) => {
-        const angle = startAngle + (index * angleStep);
-        const childX = centerX + Math.cos(angle) * radius - (child.width || 160) / 2;
-        const childY = centerY + Math.sin(angle) * radius - (child.height || 64) / 2;
+        const angle = angleOffset + startAngle + (index * angleStep);
+        const childX = centerX + Math.cos(angle) * radius - CIRCLE_SIZE / 2;
+        const childY = centerY + Math.sin(angle) * radius - CIRCLE_SIZE / 2;
         
         // Actualizar posición del hijo
         const childIndex = updatedNodes.findIndex(n => n.id === child.id);
@@ -1367,14 +1373,16 @@ export const useNodes = () => {
           updatedNodes[childIndex] = {
             ...updatedNodes[childIndex],
             x: childX,
-            y: childY
+            y: childY,
+            width: CIRCLE_SIZE,
+            height: CIRCLE_SIZE
           };
         }
         
         // Alinear recursivamente los hijos del hijo con radio menor
-        const subRadius = radius * 0.6; // Radio reducido para subniveles
-        const childCenterX = childX + (child.width || 160) / 2;
-        const childCenterY = childY + (child.height || 64) / 2;
+        const subRadius = radius * 0.7; // Radio reducido para subniveles
+        const childCenterX = childX + CIRCLE_SIZE / 2;
+        const childCenterY = childY + CIRCLE_SIZE / 2;
         alignRadialSubtree(child.id, childCenterX, childCenterY, subRadius, angle);
       });
     };
@@ -1383,9 +1391,20 @@ export const useNodes = () => {
     const directChildren = updatedNodes.filter(n => n.parentId === rootId);
     
     if (directChildren.length > 0) {
-      const rootCenterX = root.x + (root.width || 160) / 2;
-      const rootCenterY = root.y + (root.height || 64) / 2;
-      const orbitRadius = 200; // Radio principal de la órbita
+      // Actualizar tamaño del nodo raíz (más grande)
+      const rootIndex = updatedNodes.findIndex(n => n.id === rootId);
+      const ROOT_SIZE = CIRCLE_SIZE * 1.3;
+      if (rootIndex !== -1) {
+        updatedNodes[rootIndex] = {
+          ...updatedNodes[rootIndex],
+          width: ROOT_SIZE,
+          height: ROOT_SIZE
+        };
+      }
+      
+      const rootCenterX = root.x + ROOT_SIZE / 2;
+      const rootCenterY = root.y + ROOT_SIZE / 2;
+      const orbitRadius = 150; // Radio compacto de la órbita
       
       alignRadialSubtree(rootId, rootCenterX, rootCenterY, orbitRadius);
     }

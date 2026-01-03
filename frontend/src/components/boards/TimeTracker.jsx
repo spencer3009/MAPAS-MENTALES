@@ -131,6 +131,7 @@ const TimeTracker = ({ taskId, boardId, listId, onTimeUpdate }) => {
         setTotalTime(prev => prev + (data.duration || elapsedTime));
         setElapsedTime(0);
         loadTaskData(); // Recargar datos
+        if (onTimeUpdate) onTimeUpdate(); // Notificar al padre
       }
     } catch (error) {
       console.error('Error stopping time tracking:', error);

@@ -405,6 +405,8 @@ const SortableList = ({ list, listIndex, boardId, onUpdateList, onDeleteList, on
                     onUpdate={(cardId, data) => onUpdateCard(list.id, cardId, data)}
                     onDelete={(cardId) => onDeleteCard(list.id, cardId)}
                     onOpenModal={onOpenModal}
+                    isTimeTracking={isTaskTracking && isTaskTracking(card.id)}
+                    trackingTime={activeTimeEntry?.task_id === card.id ? formattedTime : null}
                   />
                 ))
               )}

@@ -367,7 +367,7 @@ const BoardsPage = ({ onBack, onSelectBoard }) => {
                 </div>
                 <h2 className="text-xl font-bold text-gray-900 mb-2">¿Eliminar tablero?</h2>
                 <p className="text-gray-600">
-                  ¿Estás seguro de que deseas eliminar <span className="font-semibold">"{confirmDeleteBoard.title}"</span>?
+                  ¿Estás seguro de que deseas eliminar <span className="font-semibold">&ldquo;{confirmDeleteBoard.title}&rdquo;</span>?
                 </p>
                 <p className="text-sm text-gray-500 mt-2">
                   Puedes recuperarlo luego desde la <span className="font-medium text-cyan-600">Papelera</span>.

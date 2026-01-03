@@ -428,7 +428,7 @@ const TrashView = ({ isOpen, onClose, onProjectRestored, token }) => {
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">¿Eliminar permanentemente?</h3>
                 <p className="text-sm text-gray-600">
-                  Esta acción no se puede deshacer. Se eliminará "{confirmDelete.name}" de forma permanente.
+                  Esta acción no se puede deshacer. Se eliminará &ldquo;{confirmDelete.name}&rdquo; de forma permanente.
                 </p>
               </div>
               

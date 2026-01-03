@@ -33,7 +33,7 @@ const BoardsPage = ({ onBack, onSelectBoard }) => {
 
   const fetchBoards = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('mm_auth_token');
       const response = await fetch(`${API_URL}/api/boards`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -54,7 +54,7 @@ const BoardsPage = ({ onBack, onSelectBoard }) => {
     
     setCreating(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('mm_auth_token');
       const response = await fetch(`${API_URL}/api/boards`, {
         method: 'POST',
         headers: {
@@ -86,7 +86,7 @@ const BoardsPage = ({ onBack, onSelectBoard }) => {
     if (!window.confirm('¿Estás seguro de eliminar este tablero?')) return;
     
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('mm_auth_token');
       const response = await fetch(`${API_URL}/api/boards/${boardId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }

@@ -506,6 +506,9 @@ const BoardView = ({ board: initialBoard, onBack }) => {
   const [selectedListId, setSelectedListId] = useState(null);
   const [selectedListTitle, setSelectedListTitle] = useState('');
   
+  // Time tracking global
+  const { activeEntry, formattedTime, isTaskTracking } = useTimeTracking();
+  
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })

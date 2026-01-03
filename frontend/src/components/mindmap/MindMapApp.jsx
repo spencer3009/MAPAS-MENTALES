@@ -827,6 +827,7 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
           <BoardsPage
             onBack={() => setActiveView('dashboard')}
             onSelectBoard={(board) => setSelectedBoard(board)}
+            onTrashUpdate={loadTrashCount}
           />
         );
       case 'templates':

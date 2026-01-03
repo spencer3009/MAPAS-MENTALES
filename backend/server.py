@@ -4165,6 +4165,7 @@ async def start_time_tracking(request: StartTimeTrackingRequest, current_user: d
         "user_id": current_user.get("id", username),
         "username": username,
         "task_id": request.task_id,
+        "task_title": request.task_title,
         "board_id": request.board_id,
         "list_id": request.list_id,
         "start_time": now.isoformat(),

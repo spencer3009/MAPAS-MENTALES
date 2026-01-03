@@ -211,6 +211,34 @@ const Canvas = ({
     }
   }, [selectedNodeId, onAddNodeVertical, autoAlignEnabled]);
 
+  // Handler para agregar nodo a la IZQUIERDA (MindAxis)
+  const handleAddChildLeft = useCallback(() => {
+    if (selectedNodeId && onAddChildNode) {
+      const selectedNode = nodes.find(n => n.id === selectedNodeId);
+      if (selectedNode) {
+        // Forzar lado izquierdo
+        onAddChildNode(selectedNodeId, null, { 
+          autoAlign: autoAlignEnabled,
+          axisSide: 'left'
+        });
+      }
+    }
+  }, [selectedNodeId, onAddChildNode, autoAlignEnabled, nodes]);
+
+  // Handler para agregar nodo a la DERECHA (MindAxis)
+  const handleAddChildRight = useCallback(() => {
+    if (selectedNodeId && onAddChildNode) {
+      const selectedNode = nodes.find(n => n.id === selectedNodeId);
+      if (selectedNode) {
+        // Forzar lado derecho
+        onAddChildNode(selectedNodeId, null, { 
+          autoAlign: autoAlignEnabled,
+          axisSide: 'right'
+        });
+      }
+    }
+  }, [selectedNodeId, onAddChildNode, autoAlignEnabled, nodes]);
+
   // Handler para cuando se selecciona un tipo de nodo
   const handleNodeTypeSelect = useCallback((nodeType) => {
     if (nodeTypeSelector.parentId) {

@@ -38,12 +38,17 @@ const LABEL_COLORS = [
   { id: 'blue', value: '#3B82F6' },
 ];
 
-// Colores predefinidos para listas (estilo de la imagen de referencia)
+// Colores predefinidos para listas según referencia visual
+// Abiertas: Cyan/Teal, En Progreso: Azul, Listo: Morado
 const LIST_THEMES = {
-  default: { bg: '#E5E7EB', header: '#D1D5DB', text: '#374151', icon: Lightbulb },
-  progress: { bg: '#CFFAFE', header: '#06B6D4', text: '#FFFFFF', icon: TrendingUp },
-  done: { bg: '#D1FAE5', header: '#10B981', text: '#FFFFFF', icon: CheckCircle2 },
-  gray: { bg: '#F3F4F6', header: '#9CA3AF', text: '#FFFFFF', icon: LayoutGrid },
+  // Columna por defecto (primera o "Abiertas")
+  abiertas: { bg: '#CFFAFE', header: '#06B6D4', text: '#FFFFFF', icon: Lightbulb },
+  // Columna de progreso
+  progreso: { bg: '#DBEAFE', header: '#3B82F6', text: '#FFFFFF', icon: TrendingUp },
+  // Columna completado
+  listo: { bg: '#EDE9FE', header: '#8B5CF6', text: '#FFFFFF', icon: CheckCircle2 },
+  // Fallback gris
+  default: { bg: '#F3F4F6', header: '#9CA3AF', text: '#FFFFFF', icon: LayoutGrid },
 };
 
 // ==========================================

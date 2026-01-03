@@ -1783,6 +1783,35 @@ export const useNodes = () => {
                 }
               }
             }
+          } else if (layoutType === 'mindorbit') {
+            // MindOrbit: distribución radial alrededor del nodo central
+            const isRoot = !parent.parentId;
+            
+            if (isRoot) {
+              // Nodos de primer nivel: distribución radial alrededor del centro
+              const radius = 200; // Radio de la órbita
+              const centerX = parent.x + (parent.width || 160) / 2;
+              const centerY = parent.y + (parent.height || 64) / 2;
+              
+              // Calcular ángulo para el nuevo nodo
+              const angleStep = (2 * Math.PI) / Math.max(6, siblings.length + 1); // Mínimo 6 posiciones
+              const angle = siblings.length * angleStep;
+              
+              newX = centerX + Math.cos(angle) * radius - (160 / 2); // Centrar el nodo
+              newY = centerY + Math.sin(angle) * radius - (64 / 2);
+            } else {
+              // Subnodos: se extienden radialmente desde su padre
+              const subRadius = 120;
+              const parentCenterX = parent.x + (parent.width || 160) / 2;
+              const parentCenterY = parent.y + (parent.height || 64) / 2;
+              
+              // Para subnodos, usar un radio menor y distribuir alrededor del padre
+              const angleStep = (2 * Math.PI) / Math.max(4, siblings.length + 1);
+              const angle = siblings.length * angleStep;
+              
+              newX = parentCenterX + Math.cos(angle) * subRadius - (160 / 2);
+              newY = parentCenterY + Math.sin(angle) * subRadius - (64 / 2);
+            }
           } else if (layoutType === 'mindtree') {
             // MindTree (Organigrama): hijos distribuidos HORIZONTALMENTE debajo del padre
             // Nuevo hijo se coloca a la derecha de los hermanos existentes

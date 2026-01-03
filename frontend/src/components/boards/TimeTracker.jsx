@@ -3,7 +3,7 @@ import { Play, Pause, Clock, Users, TrendingUp, Timer } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
-const TimeTracker = ({ taskId, boardId, listId }) => {
+const TimeTracker = ({ taskId, boardId, listId, onTimeUpdate }) => {
   const [isTracking, setIsTracking] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [totalTime, setTotalTime] = useState(0);

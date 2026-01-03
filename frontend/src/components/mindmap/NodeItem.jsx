@@ -392,21 +392,31 @@ const NodeItem = memo(({
     }
   }, [startEdit]);
 
-  // Calcular dimensiones según la forma
+  // Calcular dimensiones según la forma y layout
   const getNodeDimensions = () => {
     const baseWidth = nodeWidth;
     const baseHeight = nodeHeight;
     
+    // MindOrbit: nodos circulares
+    if (layoutType === 'mindorbit') {
+      // Usar el mayor de ancho/alto para crear un círculo perfecto
+      const circleSize = Math.max(baseWidth, baseHeight);
+      // Nodo raíz más grande
+      const size = !node.parentId ? circleSize * 1.2 : circleSize;
+      return { width: size, height: size, isCircle: true };
+    }
+    
     if (shape === 'pill') {
-      return { width: baseWidth + 20, height: baseHeight };
+      return { width: baseWidth + 20, height: baseHeight, isCircle: false };
     }
     if (shape === 'cloud') {
-      return { width: baseWidth + 30, height: baseHeight + 10 };
+      return { width: baseWidth + 30, height: baseHeight + 10, isCircle: false };
     }
-    return { width: baseWidth, height: baseHeight };
+    return { width: baseWidth, height: baseHeight, isCircle: false };
   };
 
   const dimensions = getNodeDimensions();
+  const isOrbitLayout = layoutType === 'mindorbit';
 
   // Estilo especial para forma de nube usando SVG filter
   const isCloudShape = shape === 'cloud';

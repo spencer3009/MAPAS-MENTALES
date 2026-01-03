@@ -26,6 +26,7 @@ import {
   MoreHorizontal, Calendar, CheckSquare
 } from 'lucide-react';
 import TaskModal from './TaskModal';
+import { useTimeTracking } from '../../contexts/TimeTrackingContext';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 

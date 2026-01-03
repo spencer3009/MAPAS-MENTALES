@@ -95,7 +95,8 @@ export const TimeTrackingProvider = ({ children }) => {
         body: JSON.stringify({
           task_id: taskId,
           board_id: boardId,
-          list_id: listId
+          list_id: listId,
+          task_title: taskTitle
         })
       });
       
@@ -103,7 +104,6 @@ export const TimeTrackingProvider = ({ children }) => {
         const data = await response.json();
         const newEntry = {
           ...data.entry,
-          task_title: taskTitle,
           elapsed_seconds: 0
         };
         setActiveEntry(newEntry);

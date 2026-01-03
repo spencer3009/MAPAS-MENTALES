@@ -2,6 +2,16 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-03: Historial Completo de Registros de Tiempo
+- **Added**: Historial de eventos de tiempo integrado en la sección "Actividad" del TaskModal
+- **Features**:
+  - Eventos automáticos al iniciar/detener registro (íconos play/stop rojos)
+  - Timestamps relativos ("HACE X MINUTOS/HORAS")
+  - Duración mostrada en eventos de "stop"
+  - Orden cronológico descendente (más reciente primero)
+  - Actualización en tiempo real al iniciar/detener
+  - Combinación de eventos de tiempo + comentarios en una sola lista
+
 ### 2026-01-03: Módulo Time Tracking (Registro de Tiempo)
 - **Added**: Sistema completo de registro de tiempo por tarea
 - **Added**: Endpoints: `/api/time-tracking/start`, `/stop`, `/active`, `/task/{id}`, `/task/{id}/weekly`

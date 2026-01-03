@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   DndContext,
   DragOverlay,
@@ -449,11 +449,7 @@ const BoardView = ({ board: initialBoard, onBack }) => {
   );
 
   // Fetch fresh board data
-  useEffect(() => {
-    fetchBoard();
-  }, [initialBoard.id]);
-
-  const fetchBoard = async () => {
+  const fetchBoard = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`${API_URL}/api/boards/${initialBoard.id}`, {
@@ -466,7 +462,11 @@ const BoardView = ({ board: initialBoard, onBack }) => {
     } catch (error) {
       console.error('Error fetching board:', error);
     }
-  };
+  }, [initialBoard.id]);
+
+  useEffect(() => {
+    fetchBoard();
+  }, [fetchBoard]);
 
   // API Calls
   const addList = async () => {

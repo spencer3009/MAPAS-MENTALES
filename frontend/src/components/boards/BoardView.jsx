@@ -7,6 +7,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  useDroppable,
 } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -19,7 +20,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { 
   Plus, X, ArrowLeft, Trash2, 
-  GripVertical, Tag, Edit2, Check,
+  Tag, Edit2, Check,
   Lightbulb, TrendingUp, CheckCircle2, 
   Users, Share2, LayoutGrid, Clock, Bell,
   MoreHorizontal
@@ -47,11 +48,13 @@ const LIST_THEMES = {
 
 // ==========================================
 // SORTABLE CARD COMPONENT
+// Toda la tarjeta es draggable (UX mejorado)
 // ==========================================
 const SortableCard = ({ card, listId, onUpdate, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(card.title);
   const [showLabelPicker, setShowLabelPicker] = useState(false);
+  const [showActions, setShowActions] = useState(false);
   
   const {
     attributes,
@@ -65,7 +68,8 @@ const SortableCard = ({ card, listId, onUpdate, onDelete }) => {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.4 : 1,
+    cursor: isDragging ? 'grabbing' : 'grab',
   };
 
   const handleSaveTitle = () => {
@@ -89,13 +93,59 @@ const SortableCard = ({ card, listId, onUpdate, onDelete }) => {
     onUpdate(card.id, { labels: newLabels });
   };
 
+  // Si está editando, no hacer draggable
+  if (isEditing) {
+    return (
+      <div
+        ref={setNodeRef}
+        data-testid={`card-${card.id}`}
+        className="bg-white rounded-lg shadow-sm border border-cyan-300 ring-2 ring-cyan-200"
+      >
+        <div className="p-3">
+          <input
+            type="text"
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleSaveTitle();
+              if (e.key === 'Escape') { setIsEditing(false); setEditTitle(card.title); }
+            }}
+            onBlur={handleSaveTitle}
+            className="w-full px-2 py-1.5 text-sm border border-cyan-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
+            autoFocus
+          />
+          <div className="flex justify-end gap-1 mt-2">
+            <button
+              onClick={() => { setIsEditing(false); setEditTitle(card.title); }}
+              className="px-2 py-1 text-xs text-gray-500 hover:bg-gray-100 rounded"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleSaveTitle}
+              className="px-2 py-1 text-xs bg-cyan-500 text-white rounded hover:bg-cyan-600"
+            >
+              Guardar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       ref={setNodeRef}
       style={style}
+      {...attributes}
+      {...listeners}
       data-testid={`card-${card.id}`}
-      className={`group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 ${
-        isDragging ? 'shadow-xl ring-2 ring-blue-400' : 'border border-gray-100'
+      onMouseEnter={() => setShowActions(true)}
+      onMouseLeave={() => { setShowActions(false); setShowLabelPicker(false); }}
+      className={`group bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 select-none ${
+        isDragging 
+          ? 'shadow-2xl ring-2 ring-cyan-400 rotate-2 scale-105' 
+          : 'border border-gray-100 hover:border-cyan-200'
       }`}
     >
       {/* Labels */}
@@ -116,77 +166,51 @@ const SortableCard = ({ card, listId, onUpdate, onDelete }) => {
       
       {/* Content */}
       <div className="p-3">
-        {isEditing ? (
-          <div className="flex gap-1">
-            <input
-              type="text"
-              value={editTitle}
-              onChange={(e) => setEditTitle(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSaveTitle()}
-              onBlur={handleSaveTitle}
-              className="flex-1 px-2 py-1.5 text-sm border border-cyan-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
-              autoFocus
-            />
+        <p className="text-sm text-gray-700 leading-relaxed break-words pr-6">{card.title}</p>
+        
+        {/* Actions - visible on hover */}
+        {showActions && (
+          <div className="flex items-center gap-1 mt-2 animate-fadeIn">
             <button
-              onClick={handleSaveTitle}
-              className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg"
+              onClick={(e) => { e.stopPropagation(); setIsEditing(true); }}
+              onPointerDown={(e) => e.stopPropagation()}
+              className="p-1.5 text-gray-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-colors"
+              title="Editar"
             >
-              <Check size={14} />
+              <Edit2 size={14} />
             </button>
-          </div>
-        ) : (
-          <div className="flex items-start gap-2">
             <button
-              {...attributes}
-              {...listeners}
-              className="opacity-0 group-hover:opacity-100 p-0.5 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing transition-opacity"
+              onClick={(e) => { e.stopPropagation(); setShowLabelPicker(!showLabelPicker); }}
+              onPointerDown={(e) => e.stopPropagation()}
+              className="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+              title="Etiquetas"
             >
-              <GripVertical size={14} />
+              <Tag size={14} />
             </button>
-            <p className="flex-1 text-sm text-gray-700 leading-relaxed break-words">{card.title}</p>
             <button
-              className="opacity-0 group-hover:opacity-100 p-1 text-gray-300 hover:text-gray-500 rounded transition-opacity"
+              onClick={(e) => { e.stopPropagation(); onDelete(card.id); }}
+              onPointerDown={(e) => e.stopPropagation()}
+              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              title="Eliminar"
             >
-              <MoreHorizontal size={14} />
+              <Trash2 size={14} />
             </button>
           </div>
         )}
         
-        {/* Actions */}
-        <div className="flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
-            onClick={() => setIsEditing(true)}
-            className="p-1.5 text-gray-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-colors"
-            title="Editar"
-          >
-            <Edit2 size={12} />
-          </button>
-          <button
-            onClick={() => setShowLabelPicker(!showLabelPicker)}
-            className="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-            title="Etiquetas"
-          >
-            <Tag size={12} />
-          </button>
-          <button
-            onClick={() => onDelete(card.id)}
-            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-            title="Eliminar"
-          >
-            <Trash2 size={12} />
-          </button>
-        </div>
-        
         {/* Label Picker */}
         {showLabelPicker && (
-          <div className="mt-3 p-2 bg-gray-50 rounded-lg border border-gray-100">
+          <div 
+            className="mt-3 p-2 bg-gray-50 rounded-lg border border-gray-100"
+            onPointerDown={(e) => e.stopPropagation()}
+          >
             <div className="flex flex-wrap gap-1.5">
               {LABEL_COLORS.map(color => {
                 const isSelected = card.labels?.some(l => l.color === color.id);
                 return (
                   <button
                     key={color.id}
-                    onClick={() => toggleLabel(color.id)}
+                    onClick={(e) => { e.stopPropagation(); toggleLabel(color.id); }}
                     className={`w-7 h-7 rounded-md transition-all ${
                       isSelected ? 'ring-2 ring-offset-1 ring-gray-400 scale-110' : 'hover:scale-105'
                     }`}
@@ -198,6 +222,27 @@ const SortableCard = ({ card, listId, onUpdate, onDelete }) => {
           </div>
         )}
       </div>
+    </div>
+  );
+};
+
+// ==========================================
+// DROPPABLE LIST AREA (para drop en listas vacías)
+// ==========================================
+const DroppableListArea = ({ listId, children }) => {
+  const { setNodeRef, isOver } = useDroppable({
+    id: `droppable-${listId}`,
+    data: { type: 'list', listId }
+  });
+
+  return (
+    <div 
+      ref={setNodeRef}
+      className={`min-h-[120px] rounded-lg transition-colors ${
+        isOver ? 'bg-cyan-100/50 ring-2 ring-cyan-300 ring-dashed' : ''
+      }`}
+    >
+      {children}
     </div>
   );
 };
@@ -259,21 +304,17 @@ const SortableList = ({ list, listIndex, boardId, onUpdateList, onDeleteList, on
       ref={setNodeRef}
       style={style}
       data-testid={`list-${list.id}`}
-      className={`flex-shrink-0 w-72 rounded-xl overflow-hidden ${isDragging ? 'ring-2 ring-blue-400 shadow-xl' : 'shadow-sm'}`}
+      className={`flex-shrink-0 w-72 rounded-xl overflow-hidden flex flex-col ${
+        isDragging ? 'ring-2 ring-cyan-400 shadow-xl' : 'shadow-sm'
+      }`}
     >
-      {/* Header con color distintivo */}
+      {/* Header con color distintivo - draggable para mover columna */}
       <div 
-        className="px-4 py-3 flex items-center gap-2"
+        {...attributes}
+        {...listeners}
+        className="px-4 py-3 flex items-center gap-2 cursor-grab active:cursor-grabbing"
         style={{ backgroundColor: theme.header }}
       >
-        <button
-          {...attributes}
-          {...listeners}
-          className="p-1 text-white/70 hover:text-white cursor-grab active:cursor-grabbing rounded"
-        >
-          <GripVertical size={16} />
-        </button>
-        
         <IconComponent size={18} className="text-white/90" />
         
         {isEditing ? (
@@ -281,15 +322,21 @@ const SortableList = ({ list, listIndex, boardId, onUpdateList, onDeleteList, on
             type="text"
             value={editTitle}
             onChange={(e) => setEditTitle(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSaveTitle()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleSaveTitle();
+              if (e.key === 'Escape') { setIsEditing(false); setEditTitle(list.title); }
+            }}
             onBlur={handleSaveTitle}
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
             className="flex-1 px-2 py-1 text-sm font-semibold bg-white/20 text-white placeholder-white/50 border border-white/30 rounded focus:outline-none focus:ring-1 focus:ring-white/50"
             autoFocus
           />
         ) : (
           <h3
-            onClick={() => setIsEditing(true)}
-            className="flex-1 font-semibold cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={(e) => { e.stopPropagation(); setIsEditing(true); }}
+            onPointerDown={(e) => e.stopPropagation()}
+            className="flex-1 font-semibold cursor-text hover:opacity-80 transition-opacity"
             style={{ color: theme.text }}
           >
             {list.title}
@@ -305,17 +352,18 @@ const SortableList = ({ list, listIndex, boardId, onUpdateList, onDeleteList, on
         </span>
         
         <button
-          onClick={() => onDeleteList(list.id)}
+          onClick={(e) => { e.stopPropagation(); onDeleteList(list.id); }}
+          onPointerDown={(e) => e.stopPropagation()}
           className="p-1.5 text-white/70 hover:text-white hover:bg-white/20 rounded-lg transition-colors"
         >
           <MoreHorizontal size={16} />
         </button>
       </div>
       
-      {/* Cards Container */}
+      {/* Cards Container - SIEMPRE visible con altura mínima */}
       <div 
-        className="px-3 py-3 min-h-[200px] max-h-[65vh] overflow-y-auto"
-        style={{ backgroundColor: theme.bg }}
+        className="px-3 py-3 flex-1 overflow-y-auto"
+        style={{ backgroundColor: theme.bg, minHeight: '200px', maxHeight: '65vh' }}
       >
         {/* Botón añadir tarea superior */}
         <button
@@ -327,32 +375,36 @@ const SortableList = ({ list, listIndex, boardId, onUpdateList, onDeleteList, on
           Añadir Tarea
         </button>
         
-        <SortableContext
-          items={list.cards.map(c => c.id)}
-          strategy={verticalListSortingStrategy}
-        >
-          <div className="space-y-2">
-            {list.cards.length === 0 && !showAddCard ? (
-              /* Estado vacío */
-              <div className="py-8 flex flex-col items-center text-center">
-                <div className="w-16 h-16 rounded-full bg-white/80 flex items-center justify-center mb-3">
-                  <CheckCircle2 size={32} className="text-gray-300" />
+        {/* Área droppable para las tarjetas */}
+        <DroppableListArea listId={list.id}>
+          <SortableContext
+            items={list.cards.map(c => c.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-2">
+              {list.cards.length === 0 && !showAddCard ? (
+                /* Estado vacío - SIEMPRE visible */
+                <div className="py-6 flex flex-col items-center text-center">
+                  <div className="w-14 h-14 rounded-full bg-white/80 flex items-center justify-center mb-3 shadow-sm">
+                    <CheckCircle2 size={28} className="text-gray-300" />
+                  </div>
+                  <p className="text-gray-400 text-sm font-medium">No hay tareas</p>
+                  <p className="text-gray-300 text-xs mt-1">Arrastra aquí o crea una nueva</p>
                 </div>
-                <p className="text-gray-400 text-sm font-medium">No Hay Tareas</p>
-              </div>
-            ) : (
-              list.cards.map(card => (
-                <SortableCard
-                  key={card.id}
-                  card={card}
-                  listId={list.id}
-                  onUpdate={(cardId, data) => onUpdateCard(list.id, cardId, data)}
-                  onDelete={(cardId) => onDeleteCard(list.id, cardId)}
-                />
-              ))
-            )}
-          </div>
-        </SortableContext>
+              ) : (
+                list.cards.map(card => (
+                  <SortableCard
+                    key={card.id}
+                    card={card}
+                    listId={list.id}
+                    onUpdate={(cardId, data) => onUpdateCard(list.id, cardId, data)}
+                    onDelete={(cardId) => onDeleteCard(list.id, cardId)}
+                  />
+                ))
+              )}
+            </div>
+          </SortableContext>
+        </DroppableListArea>
         
         {/* Add Card Form */}
         {showAddCard && (
@@ -360,7 +412,7 @@ const SortableList = ({ list, listIndex, boardId, onUpdateList, onDeleteList, on
             <textarea
               value={newCardTitle}
               onChange={(e) => setNewCardTitle(e.target.value)}
-              placeholder="Título de la tarjeta..."
+              placeholder="¿Qué necesitas hacer?"
               className="w-full p-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-400 resize-none"
               rows={2}
               autoFocus
@@ -444,7 +496,7 @@ const BoardView = ({ board: initialBoard, onBack }) => {
   const [newListTitle, setNewListTitle] = useState('');
   
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
@@ -619,14 +671,59 @@ const BoardView = ({ board: initialBoard, onBack }) => {
     setActiveItem(active.data.current);
   };
 
+  const handleDragOver = (event) => {
+    const { active, over } = event;
+    
+    if (!over) return;
+    
+    const activeType = active.data.current?.type;
+    
+    // Solo manejar cards durante dragOver para permitir drop en listas vacías
+    if (activeType === 'card') {
+      const activeCard = active.data.current.card;
+      const sourceListId = active.data.current.listId;
+      
+      // Determinar destino
+      let destListId = null;
+      
+      if (over.data.current?.type === 'card') {
+        destListId = over.data.current.listId;
+      } else if (over.data.current?.type === 'list') {
+        destListId = over.data.current.listId || over.id;
+      } else if (over.id.toString().startsWith('droppable-')) {
+        destListId = over.data.current?.listId;
+      }
+      
+      // Si cambiamos de lista, mover la tarjeta
+      if (destListId && sourceListId !== destListId) {
+        setBoard(prev => {
+          const newLists = prev.lists.map(l => {
+            if (l.id === sourceListId) {
+              return { ...l, cards: l.cards.filter(c => c.id !== active.id) };
+            }
+            if (l.id === destListId) {
+              // Evitar duplicados
+              if (l.cards.some(c => c.id === activeCard.id)) return l;
+              return { ...l, cards: [...l.cards, activeCard] };
+            }
+            return l;
+          });
+          return { ...prev, lists: newLists };
+        });
+        
+        // Actualizar la referencia del listId activo
+        active.data.current.listId = destListId;
+      }
+    }
+  };
+
   const handleDragEnd = async (event) => {
     const { active, over } = event;
     
-    if (!over) {
-      setActiveId(null);
-      setActiveItem(null);
-      return;
-    }
+    setActiveId(null);
+    setActiveItem(null);
+    
+    if (!over) return;
 
     const activeType = active.data.current?.type;
     
@@ -634,7 +731,9 @@ const BoardView = ({ board: initialBoard, onBack }) => {
       // Reorder lists
       if (active.id !== over.id) {
         const oldIndex = board.lists.findIndex(l => l.id === active.id);
-        const newIndex = board.lists.findIndex(l => l.id === over.id);
+        let newIndex = board.lists.findIndex(l => l.id === over.id);
+        
+        if (newIndex === -1) newIndex = board.lists.length - 1;
         
         const newLists = arrayMove(board.lists, oldIndex, newIndex);
         setBoard(prev => ({ ...prev, lists: newLists }));
@@ -651,54 +750,38 @@ const BoardView = ({ board: initialBoard, onBack }) => {
         });
       }
     } else if (activeType === 'card') {
-      // Move card
       const activeCard = active.data.current.card;
       const sourceListId = active.data.current.listId;
       
-      // Find destination
+      // Determinar destino final
       let destListId = sourceListId;
       let newPosition = 0;
       
       if (over.data.current?.type === 'card') {
         destListId = over.data.current.listId;
         const destList = board.lists.find(l => l.id === destListId);
-        newPosition = destList.cards.findIndex(c => c.id === over.id);
-      } else if (over.data.current?.type === 'list') {
-        destListId = over.id;
+        newPosition = destList?.cards.findIndex(c => c.id === over.id) ?? 0;
+      } else if (over.data.current?.type === 'list' || over.id.toString().startsWith('droppable-')) {
+        destListId = over.data.current?.listId || over.id;
         const destList = board.lists.find(l => l.id === destListId);
-        newPosition = destList.cards.length;
+        newPosition = destList?.cards.length ?? 0;
       }
       
-      if (sourceListId === destListId) {
-        // Reorder within same list
+      // Reordenar dentro de la misma lista
+      if (sourceListId === destListId && over.data.current?.type === 'card') {
         const list = board.lists.find(l => l.id === sourceListId);
         const oldIndex = list.cards.findIndex(c => c.id === active.id);
-        const newCards = arrayMove(list.cards, oldIndex, newPosition);
-        
-        setBoard(prev => ({
-          ...prev,
-          lists: prev.lists.map(l => 
-            l.id === sourceListId ? { ...l, cards: newCards } : l
-          )
-        }));
-      } else {
-        // Move to different list
-        setBoard(prev => {
-          const newLists = prev.lists.map(l => {
-            if (l.id === sourceListId) {
-              return { ...l, cards: l.cards.filter(c => c.id !== active.id) };
-            }
-            if (l.id === destListId) {
-              const newCards = [...l.cards];
-              newCards.splice(newPosition, 0, activeCard);
-              return { ...l, cards: newCards };
-            }
-            return l;
-          });
-          return { ...prev, lists: newLists };
-        });
-        
-        // Save to backend
+        if (oldIndex !== newPosition) {
+          const newCards = arrayMove(list.cards, oldIndex, newPosition);
+          setBoard(prev => ({
+            ...prev,
+            lists: prev.lists.map(l => 
+              l.id === sourceListId ? { ...l, cards: newCards } : l
+            )
+          }));
+        }
+      } else if (sourceListId !== destListId) {
+        // Guardar en backend el movimiento entre listas
         const token = localStorage.getItem('mm_auth_token');
         await fetch(`${API_URL}/api/boards/${board.id}/cards/move`, {
           method: 'POST',
@@ -715,9 +798,6 @@ const BoardView = ({ board: initialBoard, onBack }) => {
         });
       }
     }
-    
-    setActiveId(null);
-    setActiveItem(null);
   };
 
   return (
@@ -774,19 +854,20 @@ const BoardView = ({ board: initialBoard, onBack }) => {
         </div>
       </div>
 
-      {/* Board Content */}
-      <div className="flex-1 overflow-x-auto p-6">
+      {/* Board Content - CON SCROLL HORIZONTAL */}
+      <div className="flex-1 overflow-x-auto overflow-y-hidden p-6">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCorners}
           onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
         >
           <SortableContext
             items={board.lists.map(l => l.id)}
             strategy={horizontalListSortingStrategy}
           >
-            <div className="flex gap-5 items-start min-h-full">
+            <div className="flex gap-5 items-start h-full" style={{ minWidth: 'max-content' }}>
               {board.lists.map((list, index) => (
                 <SortableList
                   key={list.id}
@@ -850,20 +931,40 @@ const BoardView = ({ board: initialBoard, onBack }) => {
             </div>
           </SortableContext>
 
-          {/* Drag Overlay */}
+          {/* Drag Overlay - Visual feedback mejorado */}
           <DragOverlay>
             {activeItem?.type === 'card' && (
-              <div className="bg-white rounded-lg shadow-xl border border-gray-200 p-3 w-64 rotate-3">
-                <p className="text-sm text-gray-800">{activeItem.card.title}</p>
+              <div className="bg-white rounded-lg shadow-2xl border-2 border-cyan-400 p-3 w-64 rotate-3 scale-105">
+                {activeItem.card.labels && activeItem.card.labels.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {activeItem.card.labels.map((label, idx) => {
+                      const color = LABEL_COLORS.find(c => c.id === label.color);
+                      return (
+                        <div
+                          key={idx}
+                          className="h-2 w-12 rounded-full"
+                          style={{ backgroundColor: color?.value || '#3B82F6' }}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
+                <p className="text-sm text-gray-800 font-medium">{activeItem.card.title}</p>
               </div>
             )}
             {activeItem?.type === 'list' && (
-              <div className="bg-gray-100 rounded-xl w-72 p-3 shadow-xl rotate-2">
+              <div className="bg-gray-100 rounded-xl w-72 p-3 shadow-2xl rotate-2 border-2 border-cyan-400">
                 <h3 className="font-semibold text-gray-800">{activeItem.list.title}</h3>
+                <p className="text-xs text-gray-500 mt-1">{activeItem.list.cards?.length || 0} tarjetas</p>
               </div>
             )}
           </DragOverlay>
         </DndContext>
+      </div>
+      
+      {/* Indicador de scroll horizontal */}
+      <div className="h-1 bg-gray-100">
+        <div className="h-full bg-cyan-400/50 w-20 rounded-full" />
       </div>
     </div>
   );

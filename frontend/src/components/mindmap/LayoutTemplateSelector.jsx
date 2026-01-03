@@ -233,7 +233,7 @@ const LayoutTemplateSelector = ({ isOpen, onSelect, onClose, initialLayout = nul
 
         {/* Content - Layout Cards */}
         <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {layouts.map((layout) => {
               const Icon = layout.icon;
               const isSelected = selectedLayout === layout.id;

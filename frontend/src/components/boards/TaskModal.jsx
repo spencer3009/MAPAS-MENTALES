@@ -476,26 +476,70 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
                 </div>
               </div>
               
-              {/* Comments list */}
-              <div className="space-y-4">
-                {comments.map(comment => (
-                  <div key={comment.id} className="flex gap-3">
-                    <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 text-sm font-bold flex-shrink-0">
-                      {comment.author?.charAt(0) || 'U'}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium text-sm text-gray-900">{comment.author || 'Usuario'}</span>
-                        <span className="text-xs text-gray-400">
-                          {new Date(comment.created_at).toLocaleDateString('es-ES', { 
-                            day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
-                          })}
-                        </span>
+              {/* Activity list - Combined comments and time events */}
+              <div className="space-y-3">
+                {getAllActivities().map(activity => (
+                  <div key={activity.id} className="flex gap-3">
+                    {/* Icon based on activity type */}
+                    {activity.type === 'time_start' && (
+                      <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
+                        <Play size={14} className="text-white ml-0.5" fill="white" />
                       </div>
-                      <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg">{comment.text}</p>
+                    )}
+                    {activity.type === 'time_stop' && (
+                      <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center flex-shrink-0">
+                        <Square size={12} className="text-white" fill="white" />
+                      </div>
+                    )}
+                    {activity.type === 'comment' && (
+                      <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 text-sm font-bold flex-shrink-0">
+                        {activity.author?.charAt(0) || 'U'}
+                      </div>
+                    )}
+                    
+                    <div className="flex-1">
+                      {/* Time event */}
+                      {(activity.type === 'time_start' || activity.type === 'time_stop') && (
+                        <div>
+                          <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-0.5">
+                            {formatRelativeTime(activity.created_at)}
+                          </p>
+                          <p className="text-sm text-gray-700">
+                            <span className="font-medium">{activity.author}</span>
+                            {activity.type === 'time_start' 
+                              ? ' comenzó a hacer un registro del tiempo.'
+                              : ' dejó de hacer un registro del tiempo.'
+                            }
+                          </p>
+                          {activity.type === 'time_stop' && activity.duration && (
+                            <p className="text-xs text-gray-500 mt-0.5">
+                              Duración: {formatDuration(activity.duration)}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                      
+                      {/* Comment */}
+                      {activity.type === 'comment' && (
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-medium text-sm text-gray-900">{activity.author}</span>
+                            <span className="text-xs text-gray-400">
+                              {new Date(activity.created_at).toLocaleDateString('es-ES', { 
+                                day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                              })}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg">{activity.text}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
+                
+                {getAllActivities().length === 0 && (
+                  <p className="text-sm text-gray-400 text-center py-4">No hay actividad aún</p>
+                )}
               </div>
             </div>
           </div>

@@ -55,12 +55,11 @@ const LIST_THEMES = {
 // ==========================================
 // SORTABLE CARD COMPONENT
 // Toda la tarjeta es draggable (UX mejorado)
+// Click abre el modal de tarea
 // ==========================================
-const SortableCard = ({ card, listId, onUpdate, onDelete }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState(card.title);
-  const [showLabelPicker, setShowLabelPicker] = useState(false);
+const SortableCard = ({ card, listId, listTitle, boardId, onUpdate, onDelete, onOpenModal }) => {
   const [showActions, setShowActions] = useState(false);
+  const [wasDragging, setWasDragging] = useState(false);
   
   const {
     attributes,
@@ -78,66 +77,27 @@ const SortableCard = ({ card, listId, onUpdate, onDelete }) => {
     cursor: isDragging ? 'grabbing' : 'grab',
   };
 
-  const handleSaveTitle = () => {
-    if (editTitle.trim() && editTitle !== card.title) {
-      onUpdate(card.id, { title: editTitle.trim() });
+  // Track if we were dragging to prevent modal open on drag end
+  useEffect(() => {
+    if (isDragging) {
+      setWasDragging(true);
     }
-    setIsEditing(false);
+    const timeout = setTimeout(() => setWasDragging(false), 100);
+    return () => clearTimeout(timeout);
+  }, [isDragging]);
+
+  // Handle click - open modal only if not dragging
+  const handleCardClick = (e) => {
+    if (wasDragging || isDragging) return;
+    // Don't open modal if clicking on action buttons
+    if (e.target.closest('button')) return;
+    onOpenModal(card, listId, listTitle);
   };
 
-  const toggleLabel = (colorId) => {
-    const currentLabels = card.labels || [];
-    const hasLabel = currentLabels.some(l => l.color === colorId);
-    
-    let newLabels;
-    if (hasLabel) {
-      newLabels = currentLabels.filter(l => l.color !== colorId);
-    } else {
-      newLabels = [...currentLabels, { id: `label_${crypto.randomUUID()}`, color: colorId }];
-    }
-    
-    onUpdate(card.id, { labels: newLabels });
-  };
-
-  // Si está editando, no hacer draggable
-  if (isEditing) {
-    return (
-      <div
-        ref={setNodeRef}
-        data-testid={`card-${card.id}`}
-        className="bg-white rounded-lg shadow-sm border border-cyan-300 ring-2 ring-cyan-200"
-      >
-        <div className="p-3">
-          <input
-            type="text"
-            value={editTitle}
-            onChange={(e) => setEditTitle(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleSaveTitle();
-              if (e.key === 'Escape') { setIsEditing(false); setEditTitle(card.title); }
-            }}
-            onBlur={handleSaveTitle}
-            className="w-full px-2 py-1.5 text-sm border border-cyan-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
-            autoFocus
-          />
-          <div className="flex justify-end gap-1 mt-2">
-            <button
-              onClick={() => { setIsEditing(false); setEditTitle(card.title); }}
-              className="px-2 py-1 text-xs text-gray-500 hover:bg-gray-100 rounded"
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={handleSaveTitle}
-              className="px-2 py-1 text-xs bg-cyan-500 text-white rounded hover:bg-cyan-600"
-            >
-              Guardar
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Calcular progreso del checklist
+  const checklistProgress = card.checklist?.length > 0
+    ? Math.round((card.checklist.filter(i => i.completed).length / card.checklist.length) * 100)
+    : null;
 
   return (
     <div
@@ -146,8 +106,9 @@ const SortableCard = ({ card, listId, onUpdate, onDelete }) => {
       {...attributes}
       {...listeners}
       data-testid={`card-${card.id}`}
+      onClick={handleCardClick}
       onMouseEnter={() => setShowActions(true)}
-      onMouseLeave={() => { setShowActions(false); setShowLabelPicker(false); }}
+      onMouseLeave={() => setShowActions(false)}
       className={`group bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 select-none ${
         isDragging 
           ? 'shadow-2xl ring-2 ring-cyan-400 rotate-2 scale-105' 
@@ -174,24 +135,46 @@ const SortableCard = ({ card, listId, onUpdate, onDelete }) => {
       <div className="p-3">
         <p className="text-sm text-gray-700 leading-relaxed break-words pr-6">{card.title}</p>
         
-        {/* Actions - visible on hover */}
+        {/* Card metadata badges */}
+        <div className="flex items-center gap-2 mt-2 flex-wrap">
+          {/* Due date badge */}
+          {card.due_date && (
+            <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded ${
+              new Date(card.due_date) < new Date() ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'
+            }`}>
+              <Calendar size={10} />
+              {new Date(card.due_date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+            </span>
+          )}
+          
+          {/* Checklist progress badge */}
+          {checklistProgress !== null && (
+            <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded ${
+              checklistProgress === 100 ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'
+            }`}>
+              <CheckSquare size={10} />
+              {checklistProgress}%
+            </span>
+          )}
+          
+          {/* Description indicator */}
+          {card.description && (
+            <span className="w-4 h-4 flex items-center justify-center text-gray-400">
+              <MoreHorizontal size={12} />
+            </span>
+          )}
+        </div>
+        
+        {/* Quick actions - visible on hover */}
         {showActions && (
           <div className="flex items-center gap-1 mt-2 animate-fadeIn">
             <button
-              onClick={(e) => { e.stopPropagation(); setIsEditing(true); }}
+              onClick={(e) => { e.stopPropagation(); onOpenModal(card, listId, listTitle); }}
               onPointerDown={(e) => e.stopPropagation()}
               className="p-1.5 text-gray-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-colors"
               title="Editar"
             >
               <Edit2 size={14} />
-            </button>
-            <button
-              onClick={(e) => { e.stopPropagation(); setShowLabelPicker(!showLabelPicker); }}
-              onPointerDown={(e) => e.stopPropagation()}
-              className="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-              title="Etiquetas"
-            >
-              <Tag size={14} />
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); onDelete(card.id); }}
@@ -201,30 +184,6 @@ const SortableCard = ({ card, listId, onUpdate, onDelete }) => {
             >
               <Trash2 size={14} />
             </button>
-          </div>
-        )}
-        
-        {/* Label Picker */}
-        {showLabelPicker && (
-          <div 
-            className="mt-3 p-2 bg-gray-50 rounded-lg border border-gray-100"
-            onPointerDown={(e) => e.stopPropagation()}
-          >
-            <div className="flex flex-wrap gap-1.5">
-              {LABEL_COLORS.map(color => {
-                const isSelected = card.labels?.some(l => l.color === color.id);
-                return (
-                  <button
-                    key={color.id}
-                    onClick={(e) => { e.stopPropagation(); toggleLabel(color.id); }}
-                    className={`w-7 h-7 rounded-md transition-all ${
-                      isSelected ? 'ring-2 ring-offset-1 ring-gray-400 scale-110' : 'hover:scale-105'
-                    }`}
-                    style={{ backgroundColor: color.value }}
-                  />
-                );
-              })}
-            </div>
           </div>
         )}
       </div>

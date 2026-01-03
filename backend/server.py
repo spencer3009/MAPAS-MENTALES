@@ -3217,33 +3217,6 @@ async def delete_board(board_id: str, current_user: dict = Depends(get_current_u
     return {"message": "Tablero enviado a la papelera", "deleted_at": now}
 
 
-# ==========================================
-# PAPELERA DE TABLEROS
-# ==========================================
-
-@api_router.get("/boards/trash")
-async def get_trash_boards(current_user: dict = Depends(get_current_user)):
-    """Obtener tableros en la papelera"""
-    cursor = db.boards.find(
-        {"owner_username": current_user["username"], "is_deleted": True},
-        {"_id": 0}
-    )
-    
-    trash_boards = []
-    async for board in cursor:
-        trash_boards.append({
-            "id": board.get("id"),
-            "title": board.get("title"),
-            "background_color": board.get("background_color"),
-            "deleted_at": board.get("deleted_at"),
-            "created_at": board.get("created_at"),
-            "lists_count": len(board.get("lists", [])),
-            "is_onboarding": board.get("is_onboarding", False)
-        })
-    
-    return trash_boards
-
-
 @api_router.post("/boards/{board_id}/restore")
 async def restore_board(board_id: str, current_user: dict = Depends(get_current_user)):
     """Restaurar un tablero desde la papelera"""
@@ -3274,17 +3247,6 @@ async def delete_board_permanent(board_id: str, current_user: dict = Depends(get
     
     logger.info(f"🗑️ Tablero {board_id} eliminado permanentemente por {current_user['username']}")
     return {"message": "Tablero eliminado permanentemente"}
-
-
-@api_router.delete("/boards/trash/empty")
-async def empty_boards_trash(current_user: dict = Depends(get_current_user)):
-    """Vaciar la papelera de tableros"""
-    result = await db.boards.delete_many(
-        {"owner_username": current_user["username"], "is_deleted": True}
-    )
-    
-    logger.info(f"🗑️ Papelera de tableros vaciada por {current_user['username']}: {result.deleted_count} tableros eliminados")
-    return {"message": f"{result.deleted_count} tableros eliminados permanentemente"}
 
 
 # ==========================================

@@ -879,21 +879,28 @@ const BoardView = ({ board: initialBoard, onBack }) => {
         </div>
       </div>
 
-      {/* Board Content - CON SCROLL HORIZONTAL */}
-      <div className="flex-1 overflow-x-auto overflow-y-hidden p-6">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCorners}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={board.lists.map(l => l.id)}
-            strategy={horizontalListSortingStrategy}
+      {/* Board Content - SCROLL HORIZONTAL MEJORADO */}
+      <div 
+        className="flex-1 overflow-x-auto overflow-y-hidden"
+        style={{ 
+          scrollbarWidth: 'thin',
+          scrollbarColor: '#06B6D4 #E5E7EB'
+        }}
+      >
+        <div className="p-6 min-w-max">
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
           >
-            <div className="flex gap-5 items-start h-full" style={{ minWidth: 'max-content' }}>
-              {board.lists.map((list, index) => (
+            <SortableContext
+              items={board.lists.map(l => l.id)}
+              strategy={horizontalListSortingStrategy}
+            >
+              <div className="flex gap-5 items-start pb-4">
+                {board.lists.map((list, index) => (
                 <SortableList
                   key={list.id}
                   list={list}

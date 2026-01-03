@@ -52,6 +52,14 @@ MindoraMap es una plataforma de mapas mentales para empresarios. Permite organiz
   - Sistema de comentarios/actividad
   - Panel lateral: Etiquetas, Fecha límite, Prioridad, Miembros, Adjuntos
   - Acciones: Mover, Copiar, Seguir, Eliminar
+- **Onboarding automático:**
+  - Tablero de ejemplo creado al registrar cuenta nueva
+  - Incluye tareas de demostración con checklist
+- **Soft delete con confirmación:**
+  - Modal de confirmación antes de eliminar
+  - Tableros van a papelera (no se borran directo)
+  - Papelera unificada para mapas y tableros
+  - Restaurar o eliminar permanentemente
 - Guardado automático
 - Diseño inspirado en Trello/ClickUp
 

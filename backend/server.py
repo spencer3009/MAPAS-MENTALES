@@ -3040,14 +3040,15 @@ async def get_public_landing_content():
 
 @api_router.get("/boards")
 async def get_boards(current_user: dict = Depends(get_current_user)):
-    """Obtener todos los tableros del usuario"""
+    """Obtener todos los tableros del usuario (excluyendo eliminados)"""
     boards = await db.boards.find(
         {
             "$or": [
                 {"owner_username": current_user["username"]},
                 {"collaborators": current_user["username"]}
             ],
-            "is_archived": False
+            "is_archived": False,
+            "is_deleted": {"$ne": True}  # Excluir tableros en papelera
         },
         {"_id": 0}
     ).to_list(100)

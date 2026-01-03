@@ -1707,6 +1707,8 @@ export const useNodes = () => {
         // Aplicar alineación según el tipo de layout
         if (layoutType === 'mindtree') {
           newNodes = autoAlignMindTree(rootId, newNodes);
+        } else if (layoutType === 'mindaxis') {
+          newNodes = autoAlignMindAxis(rootId, newNodes);
         } else {
           newNodes = autoAlignHierarchy(rootId, newNodes);
         }

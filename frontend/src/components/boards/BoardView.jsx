@@ -483,10 +483,65 @@ const BoardView = ({ board: initialBoard, onBack }) => {
   const [showAddList, setShowAddList] = useState(false);
   const [newListTitle, setNewListTitle] = useState('');
   
+  // Estado para el modal de tarea
+  const [selectedCard, setSelectedCard] = useState(null);
+  const [selectedListId, setSelectedListId] = useState(null);
+  const [selectedListTitle, setSelectedListTitle] = useState('');
+  
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
+
+  // Abrir modal de tarea
+  const handleOpenModal = (card, listId, listTitle) => {
+    setSelectedCard(card);
+    setSelectedListId(listId);
+    setSelectedListTitle(listTitle);
+  };
+
+  // Cerrar modal de tarea
+  const handleCloseModal = () => {
+    setSelectedCard(null);
+    setSelectedListId(null);
+    setSelectedListTitle('');
+  };
+
+  // Actualizar tarjeta desde el modal
+  const handleUpdateCardFromModal = (cardId, updates) => {
+    setBoard(prev => ({
+      ...prev,
+      lists: prev.lists.map(l => 
+        l.id === selectedListId 
+          ? { ...l, cards: l.cards.map(c => c.id === cardId ? { ...c, ...updates } : c) }
+          : l
+      )
+    }));
+    // Actualizar la tarjeta seleccionada para reflejar los cambios
+    setSelectedCard(prev => prev ? { ...prev, ...updates } : null);
+  };
+
+  // Eliminar tarjeta desde el modal
+  const handleDeleteCardFromModal = async (cardId) => {
+    try {
+      const token = localStorage.getItem('mm_auth_token');
+      await fetch(`${API_URL}/api/boards/${board.id}/lists/${selectedListId}/cards/${cardId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      setBoard(prev => ({
+        ...prev,
+        lists: prev.lists.map(l => 
+          l.id === selectedListId 
+            ? { ...l, cards: l.cards.filter(c => c.id !== cardId) }
+            : l
+        )
+      }));
+    } catch (error) {
+      console.error('Error deleting card:', error);
+    }
+  };
 
   // Fetch fresh board data on mount
   useEffect(() => {

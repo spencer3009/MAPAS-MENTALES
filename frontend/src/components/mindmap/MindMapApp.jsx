@@ -257,19 +257,19 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
     loadReminders();
   }, [loadReminders, activeProjectId]);
 
-  // Cargar conteo de proyectos en la papelera
+  // Cargar conteo total de elementos en la papelera (mapas + tableros)
   const loadTrashCount = useCallback(async () => {
     if (!token) return;
     
     try {
-      const response = await fetch(`${API_URL}/api/projects/trash`, {
+      const response = await fetch(`${API_URL}/api/trash/count`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
       if (response.ok) {
-        const trashProjects = await response.json();
-        console.log('[MindMapApp] Actualizando trashCount:', trashProjects.length);
-        setTrashCount(trashProjects.length);
+        const data = await response.json();
+        console.log('[MindMapApp] Actualizando trashCount total:', data.total, '(mapas:', data.maps_count, ', tableros:', data.boards_count, ')');
+        setTrashCount(data.total);
       }
     } catch (error) {
       console.error('Error loading trash count:', error);

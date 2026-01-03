@@ -3079,6 +3079,41 @@ async def create_list(board_id: str, request: CreateListRequest, current_user: d
     return {"list": new_list, "message": "Lista creada"}
 
 
+@api_router.put("/boards/{board_id}/lists/reorder")
+async def reorder_lists(board_id: str, request: ReorderListsRequest, current_user: dict = Depends(get_current_user)):
+    """Reordenar las listas del tablero"""
+    board = await db.boards.find_one(
+        {"id": board_id, "owner_username": current_user["username"]},
+        {"_id": 0}
+    )
+    
+    if not board:
+        raise HTTPException(status_code=404, detail="Tablero no encontrado")
+    
+    # Crear un diccionario de listas por ID
+    lists_dict = {lst["id"]: lst for lst in board.get("lists", [])}
+    
+    # Reordenar según el nuevo orden
+    reordered_lists = []
+    for i, list_id in enumerate(request.list_ids):
+        if list_id in lists_dict:
+            lst = lists_dict[list_id]
+            lst["position"] = i
+            reordered_lists.append(lst)
+    
+    await db.boards.update_one(
+        {"id": board_id},
+        {
+            "$set": {
+                "lists": reordered_lists,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }
+        }
+    )
+    
+    return {"message": "Listas reordenadas", "lists": reordered_lists}
+
+
 @api_router.put("/boards/{board_id}/lists/{list_id}")
 async def update_list(board_id: str, list_id: str, request: UpdateListRequest, current_user: dict = Depends(get_current_user)):
     """Actualizar una lista"""

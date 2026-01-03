@@ -17,7 +17,7 @@ const BOARD_COLORS = [
   { id: 'gray', value: '#6B7280', name: 'Gris' },
 ];
 
-const BoardsPage = ({ onBack, onSelectBoard }) => {
+const BoardsPage = ({ onBack, onSelectBoard, onTrashUpdate }) => {
   const [boards, setBoards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');

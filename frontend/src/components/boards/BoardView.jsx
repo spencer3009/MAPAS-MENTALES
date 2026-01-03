@@ -929,6 +929,7 @@ const BoardView = ({ board: initialBoard, onBack }) => {
                   onAddCard={addCard}
                   onUpdateCard={updateCard}
                   onDeleteCard={deleteCard}
+                  onOpenModal={handleOpenModal}
                 />
               ))}
               

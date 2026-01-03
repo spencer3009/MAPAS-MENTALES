@@ -59,7 +59,7 @@ const LIST_THEMES = {
 // ==========================================
 const SortableCard = ({ card, listId, listTitle, boardId, onUpdate, onDelete, onOpenModal }) => {
   const [showActions, setShowActions] = useState(false);
-  const [wasDragging, setWasDragging] = useState(false);
+  const wasDraggingRef = React.useRef(false);
   
   const {
     attributes,
@@ -80,15 +80,15 @@ const SortableCard = ({ card, listId, listTitle, boardId, onUpdate, onDelete, on
   // Track if we were dragging to prevent modal open on drag end
   useEffect(() => {
     if (isDragging) {
-      setWasDragging(true);
+      wasDraggingRef.current = true;
     }
-    const timeout = setTimeout(() => setWasDragging(false), 100);
+    const timeout = setTimeout(() => { wasDraggingRef.current = false; }, 100);
     return () => clearTimeout(timeout);
   }, [isDragging]);
 
   // Handle click - open modal only if not dragging
   const handleCardClick = (e) => {
-    if (wasDragging || isDragging) return;
+    if (wasDraggingRef.current || isDragging) return;
     // Don't open modal if clicking on action buttons
     if (e.target.closest('button')) return;
     onOpenModal(card, listId, listTitle);

@@ -3481,6 +3481,10 @@ export const useNodes = () => {
     autoAlignMindHybrid,
     applyFullMindHybridAlignment,
     
+    // Alineación MindAxis (eje central)
+    autoAlignMindAxis,
+    applyFullMindAxisAlignment,
+    
     // Compatibilidad
     resetToDefault,
     clearAll,

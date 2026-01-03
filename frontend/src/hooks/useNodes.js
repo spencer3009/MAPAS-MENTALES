@@ -1336,6 +1336,88 @@ export const useNodes = () => {
     console.log('[MindAxis] Alineación completada');
   }, [nodes, activeProjectId, autoAlignMindAxis, pushToHistory]);
 
+  // ==========================================
+  // MINDORBIT LAYOUT - DISTRIBUCIÓN RADIAL
+  // ==========================================
+  
+  // Función de alineación automática para MindOrbit
+  const autoAlignMindOrbit = useCallback((rootId, currentNodes) => {
+    const root = currentNodes.find(n => n.id === rootId);
+    if (!root) return currentNodes;
+    
+    console.log('[MindOrbit] Alineando desde nodo central:', root.text?.substring(0, 20));
+    
+    let updatedNodes = [...currentNodes];
+    
+    // Función recursiva para alinear subárbol radial
+    const alignRadialSubtree = (nodeId, centerX, centerY, radius, startAngle = 0) => {
+      const children = updatedNodes.filter(n => n.parentId === nodeId);
+      if (children.length === 0) return;
+      
+      const angleStep = (2 * Math.PI) / children.length;
+      
+      children.forEach((child, index) => {
+        const angle = startAngle + (index * angleStep);
+        const childX = centerX + Math.cos(angle) * radius - (child.width || 160) / 2;
+        const childY = centerY + Math.sin(angle) * radius - (child.height || 64) / 2;
+        
+        // Actualizar posición del hijo
+        const childIndex = updatedNodes.findIndex(n => n.id === child.id);
+        if (childIndex !== -1) {
+          updatedNodes[childIndex] = {
+            ...updatedNodes[childIndex],
+            x: childX,
+            y: childY
+          };
+        }
+        
+        // Alinear recursivamente los hijos del hijo con radio menor
+        const subRadius = radius * 0.6; // Radio reducido para subniveles
+        const childCenterX = childX + (child.width || 160) / 2;
+        const childCenterY = childY + (child.height || 64) / 2;
+        alignRadialSubtree(child.id, childCenterX, childCenterY, subRadius, angle);
+      });
+    };
+    
+    // Obtener hijos directos del nodo central
+    const directChildren = updatedNodes.filter(n => n.parentId === rootId);
+    
+    if (directChildren.length > 0) {
+      const rootCenterX = root.x + (root.width || 160) / 2;
+      const rootCenterY = root.y + (root.height || 64) / 2;
+      const orbitRadius = 200; // Radio principal de la órbita
+      
+      alignRadialSubtree(rootId, rootCenterX, rootCenterY, orbitRadius);
+    }
+    
+    return updatedNodes;
+  }, []);
+  
+  // Aplicar alineación completa MindOrbit
+  const applyFullMindOrbitAlignment = useCallback(() => {
+    console.log('[MindOrbit] Aplicando alineación radial');
+    const rootNodes = nodes.filter(n => !n.parentId);
+    
+    if (rootNodes.length === 0) {
+      console.log('[MindOrbit] No hay nodos raíz');
+      return;
+    }
+    
+    let updatedNodes = [...nodes];
+    rootNodes.forEach(root => {
+      updatedNodes = autoAlignMindOrbit(root.id, updatedNodes);
+    });
+    
+    pushToHistory(activeProjectId, updatedNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: updatedNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+    
+    console.log('[MindOrbit] Alineación completada');
+  }, [nodes, activeProjectId, autoAlignMindOrbit, pushToHistory]);
+
   // Alinear nodos abajo
   const alignNodesBottom = useCallback(() => {
     const selectedNodes = getSelectedNodes();

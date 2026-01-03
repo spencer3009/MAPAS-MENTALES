@@ -23,8 +23,9 @@ import {
   Tag, Edit2, Check,
   Lightbulb, TrendingUp, CheckCircle2, 
   Users, Share2, LayoutGrid, Clock, Bell,
-  MoreHorizontal
+  MoreHorizontal, Calendar, CheckSquare
 } from 'lucide-react';
+import TaskModal from './TaskModal';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 

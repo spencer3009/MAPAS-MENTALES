@@ -609,7 +609,7 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-8 pb-24">
+      <div className="w-full px-6 py-8 pb-24">
         {/* Sección: Crear un mapa */}
         <div className="mb-10">
           <div className="flex items-center justify-between mb-5">
@@ -643,8 +643,8 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
             })()}
           </div>
 
-          {/* Grid de plantillas - Una sola fila horizontal */}
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+          {/* Grid de plantillas - Responsivo que ocupa todo el ancho */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 p-2">
             {TEMPLATES.map((template) => {
               const Icon = template.icon;
               
@@ -654,26 +654,32 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
                   onClick={() => handleTemplateClick(template)}
                   className={`
                     relative flex flex-col items-center justify-center
-                    rounded-xl p-3 min-w-[120px] w-[120px] h-28
-                    transition-all duration-200 flex-shrink-0
+                    rounded-2xl p-5 aspect-square
+                    transition-all duration-300 ease-out
                     ${template.color}
-                    hover:scale-105 hover:shadow-lg shadow-sm
+                    hover:scale-110 hover:shadow-2xl hover:z-10 shadow-md
+                    transform-gpu
                   `}
                 >
                   {/* Icono */}
-                  <div className="mb-2">
-                    <Icon className="w-9 h-9 text-white" />
+                  <div className="mb-3">
+                    <Icon className="w-12 h-12 text-white drop-shadow-sm" />
                   </div>
                   
                   {/* Nombre */}
-                  <span className="text-xs font-medium text-center leading-tight text-white whitespace-nowrap">
+                  <span className="text-sm font-semibold text-center leading-tight text-white">
                     {template.name}
                   </span>
                   {template.subtitle && (
-                    <span className="text-[10px] text-white/80 text-center leading-tight">
+                    <span className="text-xs text-white/80 text-center leading-tight mt-0.5">
                       {template.subtitle}
                     </span>
                   )}
+                  
+                  {/* Descripción al hover */}
+                  <span className="absolute bottom-2 left-2 right-2 text-[10px] text-white/0 group-hover:text-white/70 transition-opacity text-center">
+                    {template.description}
+                  </span>
                 </button>
               );
             })}

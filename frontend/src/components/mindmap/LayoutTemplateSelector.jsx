@@ -95,6 +95,42 @@ const MindHybridIcon = ({ className }) => (
   </svg>
 );
 
+// Ícono personalizado para MindAxis (eje central balanceado)
+const MindAxisIcon = ({ className }) => (
+  <svg 
+    viewBox="0 0 48 48" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    {/* Nodo central */}
+    <rect x="18" y="18" width="12" height="12" rx="2" />
+    
+    {/* Ramas izquierda */}
+    <rect x="2" y="10" width="8" height="6" rx="1.5" />
+    <rect x="2" y="32" width="8" height="6" rx="1.5" />
+    
+    {/* Ramas derecha */}
+    <rect x="38" y="10" width="8" height="6" rx="1.5" />
+    <rect x="38" y="32" width="8" height="6" rx="1.5" />
+    
+    {/* Conectores izquierda */}
+    <path d="M18 24 H14" />
+    <path d="M14 13 V35" />
+    <path d="M10 13 H14" />
+    <path d="M10 35 H14" />
+    
+    {/* Conectores derecha */}
+    <path d="M30 24 H34" />
+    <path d="M34 13 V35" />
+    <path d="M34 13 H38" />
+    <path d="M34 35 H38" />
+  </svg>
+);
+
 const LayoutTemplateSelector = ({ isOpen, onSelect, onClose, initialLayout = null }) => {
   const [selectedLayout, setSelectedLayout] = useState(null);
 

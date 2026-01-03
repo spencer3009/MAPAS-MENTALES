@@ -165,6 +165,7 @@ const TrashView = ({ isOpen, onClose, onProjectRestored, token }) => {
       
       setTrashBoards(prev => prev.filter(b => b.id !== boardId));
       setConfirmDelete(null);
+      if (onProjectRestored) onProjectRestored(); // Actualizar contador
     } catch (err) {
       console.error('Error deleting board:', err);
       setError('No se pudo eliminar el tablero');
@@ -193,6 +194,7 @@ const TrashView = ({ isOpen, onClose, onProjectRestored, token }) => {
       setTrashProjects([]);
       setTrashBoards([]);
       setConfirmEmptyTrash(false);
+      if (onProjectRestored) onProjectRestored(); // Actualizar contador
     } catch (err) {
       console.error('Error emptying trash:', err);
       setError('No se pudo vaciar la papelera');

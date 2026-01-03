@@ -813,6 +813,22 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
             }}
           />
         );
+      case 'boards':
+        // Vista de Tableros
+        if (selectedBoard) {
+          return (
+            <BoardView 
+              board={selectedBoard}
+              onBack={() => setSelectedBoard(null)}
+            />
+          );
+        }
+        return (
+          <BoardsPage
+            onBack={() => setActiveView('dashboard')}
+            onSelectBoard={(board) => setSelectedBoard(board)}
+          />
+        );
       case 'templates':
         return <TemplatesView onSelectTemplate={(type) => {
           setActiveView('projects');

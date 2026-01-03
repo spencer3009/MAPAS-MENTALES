@@ -22,6 +22,7 @@ import UpgradeModal from './UpgradeModal';
 import RemindersView from './RemindersView';
 import { FullscreenControls } from './FullscreenMode';
 import { NotificationProvider } from './ToastProvider';
+import { BoardsPage, BoardView } from '../boards';
 import { useNodes } from '../../hooks/useNodes';
 import { usePanning } from '../../hooks/usePanning';
 import { useZoom } from '../../hooks/useZoom';

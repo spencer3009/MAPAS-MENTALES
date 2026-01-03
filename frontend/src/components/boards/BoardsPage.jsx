@@ -81,10 +81,9 @@ const BoardsPage = ({ onBack, onSelectBoard }) => {
     }
   };
 
-  const deleteBoard = async (boardId, e) => {
-    e.stopPropagation();
-    if (!window.confirm('¿Estás seguro de eliminar este tablero?')) return;
-    
+  const [confirmDeleteBoard, setConfirmDeleteBoard] = useState(null);
+  
+  const deleteBoard = async (boardId) => {
     try {
       const token = localStorage.getItem('mm_auth_token');
       const response = await fetch(`${API_URL}/api/boards/${boardId}`, {
@@ -94,6 +93,7 @@ const BoardsPage = ({ onBack, onSelectBoard }) => {
       
       if (response.ok) {
         setBoards(boards.filter(b => b.id !== boardId));
+        setConfirmDeleteBoard(null);
       }
     } catch (error) {
       console.error('Error deleting board:', error);

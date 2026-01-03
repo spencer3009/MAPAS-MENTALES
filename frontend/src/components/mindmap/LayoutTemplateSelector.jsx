@@ -235,6 +235,20 @@ const LayoutTemplateSelector = ({ isOpen, onSelect, onClose, initialLayout = nul
       selectedBg: 'bg-teal-50',
       iconBg: 'bg-teal-100',
       iconColor: 'text-teal-600'
+    },
+    {
+      id: 'mindorbit',
+      name: 'MindOrbit',
+      subtitle: '(Mapa Radial)',
+      description: 'Distribución radial. Las ideas orbitan alrededor del concepto central.',
+      icon: MindOrbitIcon,
+      color: 'orange',
+      bgGradient: 'from-orange-500 to-red-500',
+      borderColor: 'border-orange-500',
+      hoverBg: 'hover:bg-orange-50',
+      selectedBg: 'bg-orange-50',
+      iconBg: 'bg-orange-100',
+      iconColor: 'text-orange-600'
     }
   ];
 

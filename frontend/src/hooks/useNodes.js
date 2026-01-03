@@ -1194,6 +1194,148 @@ export const useNodes = () => {
     console.log('[MindTree] Alineación completada');
   }, [nodes, activeProjectId, calculateSubtreeWidth, alignSubtreeOrgChart, MINDTREE_VERTICAL_GAP]);
 
+  // ==========================================
+  // MINDAXIS LAYOUT - EJE CENTRAL BALANCEADO
+  // ==========================================
+  
+  // Constantes para MindAxis
+  const MINDAXIS_H_GAP = 120; // Espacio horizontal entre nodo central y ramas
+  const MINDAXIS_V_GAP = 70;  // Espacio vertical entre nodos del mismo lado
+  const MINDAXIS_LEVEL_GAP = 200; // Espacio horizontal entre niveles
+  
+  // Función de alineación automática para MindAxis
+  const autoAlignMindAxis = useCallback((rootId, currentNodes) => {
+    const root = currentNodes.find(n => n.id === rootId);
+    if (!root) return currentNodes;
+    
+    console.log('[MindAxis] Alineando desde nodo central:', root.text?.substring(0, 20));
+    
+    let updatedNodes = [...currentNodes];
+    
+    // Obtener hijos directos del nodo central
+    const directChildren = updatedNodes.filter(n => n.parentId === rootId);
+    
+    // Separar por lado
+    const leftChildren = directChildren.filter(n => n.axisSide === 'left');
+    const rightChildren = directChildren.filter(n => n.axisSide === 'right');
+    
+    // Función recursiva para calcular altura total de un subárbol
+    const calculateSubtreeHeight = (nodeId) => {
+      const node = updatedNodes.find(n => n.id === nodeId);
+      if (!node) return 0;
+      
+      const children = updatedNodes.filter(n => n.parentId === nodeId);
+      if (children.length === 0) return node.height || 64;
+      
+      const childrenHeight = children.reduce((sum, child) => 
+        sum + calculateSubtreeHeight(child.id) + MINDAXIS_V_GAP, 0) - MINDAXIS_V_GAP;
+      
+      return Math.max(node.height || 64, childrenHeight);
+    };
+    
+    // Función recursiva para posicionar subárbol
+    const positionSubtree = (nodeId, startX, startY, side) => {
+      const node = updatedNodes.find(n => n.id === nodeId);
+      if (!node) return startY;
+      
+      const children = updatedNodes.filter(n => n.parentId === nodeId);
+      
+      // Calcular altura del subárbol para centrar el nodo
+      const subtreeHeight = calculateSubtreeHeight(nodeId);
+      const nodeHeight = node.height || 64;
+      
+      // Posicionar el nodo actual
+      const nodeIdx = updatedNodes.findIndex(n => n.id === nodeId);
+      if (nodeIdx !== -1) {
+        updatedNodes[nodeIdx] = {
+          ...updatedNodes[nodeIdx],
+          x: startX,
+          y: children.length > 0 ? startY + (subtreeHeight - nodeHeight) / 2 : startY,
+          axisSide: side
+        };
+      }
+      
+      if (children.length === 0) return startY + nodeHeight;
+      
+      // Posicionar hijos
+      let currentY = startY;
+      const childX = side === 'left' 
+        ? startX - MINDAXIS_LEVEL_GAP 
+        : startX + (node.width || 160) + MINDAXIS_H_GAP;
+      
+      children.forEach(child => {
+        const childHeight = calculateSubtreeHeight(child.id);
+        positionSubtree(child.id, childX, currentY, side);
+        currentY += childHeight + MINDAXIS_V_GAP;
+      });
+      
+      return startY + subtreeHeight;
+    };
+    
+    // Calcular altura total de cada lado
+    const leftTotalHeight = leftChildren.reduce((sum, child) => 
+      sum + calculateSubtreeHeight(child.id) + MINDAXIS_V_GAP, 0) - (leftChildren.length > 0 ? MINDAXIS_V_GAP : 0);
+    const rightTotalHeight = rightChildren.reduce((sum, child) => 
+      sum + calculateSubtreeHeight(child.id) + MINDAXIS_V_GAP, 0) - (rightChildren.length > 0 ? MINDAXIS_V_GAP : 0);
+    
+    // Posición Y del nodo central (centrado entre ambos lados)
+    const maxHeight = Math.max(leftTotalHeight, rightTotalHeight, root.height || 64);
+    const rootY = root.y; // Mantener Y del root o usar la existente
+    
+    // Posicionar lado izquierdo
+    let leftStartY = rootY - (leftTotalHeight / 2) + ((root.height || 64) / 2);
+    leftChildren.forEach(child => {
+      const childHeight = calculateSubtreeHeight(child.id);
+      positionSubtree(
+        child.id, 
+        root.x - MINDAXIS_H_GAP - (child.width || 160), 
+        leftStartY, 
+        'left'
+      );
+      leftStartY += childHeight + MINDAXIS_V_GAP;
+    });
+    
+    // Posicionar lado derecho
+    let rightStartY = rootY - (rightTotalHeight / 2) + ((root.height || 64) / 2);
+    rightChildren.forEach(child => {
+      const childHeight = calculateSubtreeHeight(child.id);
+      positionSubtree(
+        child.id, 
+        root.x + (root.width || 160) + MINDAXIS_H_GAP, 
+        rightStartY, 
+        'right'
+      );
+      rightStartY += childHeight + MINDAXIS_V_GAP;
+    });
+    
+    return updatedNodes;
+  }, []);
+  
+  // Aplicar alineación completa MindAxis
+  const applyFullMindAxisAlignment = useCallback(() => {
+    console.log('[MindAxis] Aplicando alineación de eje central');
+    const rootNodes = nodes.filter(n => !n.parentId);
+    
+    if (rootNodes.length === 0) {
+      console.log('[MindAxis] No hay nodos raíz');
+      return;
+    }
+    
+    let updatedNodes = [...nodes];
+    rootNodes.forEach(root => {
+      updatedNodes = autoAlignMindAxis(root.id, updatedNodes);
+    });
+    
+    pushToHistory(activeProjectId, updatedNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: updatedNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+    
+    console.log('[MindAxis] Alineación completada');
+  }, [nodes, activeProjectId, autoAlignMindAxis, pushToHistory]);
+
   // Alinear nodos abajo
   const alignNodesBottom = useCallback(() => {
     const selectedNodes = getSelectedNodes();

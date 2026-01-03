@@ -364,12 +364,14 @@ const LayoutTemplateSelector = ({ isOpen, onSelect, onClose, initialLayout = nul
                         </div>
                       ) : layout.id === 'mindorbit' ? (
                         // MindOrbit visual - radial distribution
-                        <div className="relative flex items-center justify-center w-12 h-8">
-                          <div className={`w-3 h-3 rounded-full bg-${layout.color}-400 absolute`}></div>
-                          <div className={`w-1.5 h-1.5 rounded-full bg-${layout.color}-300 absolute -top-1 left-1/2 transform -translate-x-1/2`}></div>
-                          <div className={`w-1.5 h-1.5 rounded-full bg-${layout.color}-300 absolute top-1/2 -right-1 transform -translate-y-1/2`}></div>
-                          <div className={`w-1.5 h-1.5 rounded-full bg-${layout.color}-300 absolute -bottom-1 left-1/2 transform -translate-x-1/2`}></div>
-                          <div className={`w-1.5 h-1.5 rounded-full bg-${layout.color}-300 absolute top-1/2 -left-1 transform -translate-y-1/2`}></div>
+                        <div className="relative w-14 h-10 flex items-center justify-center">
+                          <div className={`w-3 h-3 rounded-full bg-${layout.color}-400 z-10`}></div>
+                          <div className={`absolute w-1.5 h-1.5 rounded-full bg-${layout.color}-300`} style={{top: '0', left: '50%', transform: 'translateX(-50%)'}}></div>
+                          <div className={`absolute w-1.5 h-1.5 rounded-full bg-${layout.color}-300`} style={{top: '15%', right: '10%'}}></div>
+                          <div className={`absolute w-1.5 h-1.5 rounded-full bg-${layout.color}-300`} style={{bottom: '15%', right: '10%'}}></div>
+                          <div className={`absolute w-1.5 h-1.5 rounded-full bg-${layout.color}-300`} style={{bottom: '0', left: '50%', transform: 'translateX(-50%)'}}></div>
+                          <div className={`absolute w-1.5 h-1.5 rounded-full bg-${layout.color}-300`} style={{bottom: '15%', left: '10%'}}></div>
+                          <div className={`absolute w-1.5 h-1.5 rounded-full bg-${layout.color}-300`} style={{top: '15%', left: '10%'}}></div>
                         </div>
                       ) : (
                         // MindTree/MindHybrid visual - vertical structure

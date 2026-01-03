@@ -124,7 +124,7 @@ const ConnectionsLayer = memo(({
           }
         }
       } else if (layoutType === 'mindorbit') {
-        // MindOrbit: conectores curvos radiales desde el centro hacia afuera
+        // MindOrbit: conectores RECTOS radiales desde el borde del círculo hacia el borde del otro
         const parentCenterX = parent.x + parentWidth / 2;
         const parentCenterY = parent.y + parentHeight / 2;
         const nodeCenterX = node.x + nodeWidth / 2;
@@ -133,20 +133,23 @@ const ConnectionsLayer = memo(({
         // Calcular el ángulo del nodo respecto al padre
         const angle = Math.atan2(nodeCenterY - parentCenterY, nodeCenterX - parentCenterX);
         
-        // Punto de inicio: borde del padre en dirección al hijo
-        const startX = parentCenterX + Math.cos(angle) * (parentWidth / 2);
-        const startY = parentCenterY + Math.sin(angle) * (parentHeight / 2);
+        // Para MindOrbit los nodos son círculos, usar radio = width/2 (ya que width === height)
+        const parentRadius = parentWidth / 2;
+        const nodeRadius = nodeWidth / 2;
         
-        // Punto final: borde del hijo en dirección al padre
-        const endX = nodeCenterX - Math.cos(angle) * (nodeWidth / 2);
-        const endY = nodeCenterY - Math.sin(angle) * (nodeHeight / 2);
+        // Punto de inicio: borde del círculo padre en dirección al hijo
+        const startX = parentCenterX + Math.cos(angle) * parentRadius;
+        const startY = parentCenterY + Math.sin(angle) * parentRadius;
+        
+        // Punto final: borde del círculo hijo en dirección al padre
+        const endX = nodeCenterX - Math.cos(angle) * nodeRadius;
+        const endY = nodeCenterY - Math.sin(angle) * nodeRadius;
         
         start = { x: startX, y: startY };
         end = { x: endX, y: endY };
         
-        // Curva bezier suave para conectores radiales
-        const distance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
-        const curvature = distance * 0.2; // Curvatura proporcional a la distancia
+        // LÍNEA RECTA para MindOrbit (no curvas)
+        path = `M ${startX} ${startY} L ${endX} ${endY}`;
         
         // Calcular puntos de control perpendiculares al eje
         const perpAngle = angle + Math.PI / 2;

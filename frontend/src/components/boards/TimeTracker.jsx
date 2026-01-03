@@ -105,6 +105,7 @@ const TimeTracker = ({ taskId, boardId, listId, onTimeUpdate }) => {
         setIsTracking(true);
         setActiveEntry(data.entry);
         setElapsedTime(0);
+        if (onTimeUpdate) onTimeUpdate(); // Notificar al padre
       }
     } catch (error) {
       console.error('Error starting time tracking:', error);

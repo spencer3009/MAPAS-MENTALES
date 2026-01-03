@@ -399,8 +399,8 @@ const NodeItem = memo(({
     
     // MindOrbit: nodos circulares
     if (layoutType === 'mindorbit') {
-      // Usar el mayor de ancho/alto para crear un círculo perfecto
-      const circleSize = Math.max(baseWidth, baseHeight);
+      // Tamaño fijo circular más pequeño
+      const circleSize = 90;
       // Nodo raíz más grande
       const size = !node.parentId ? circleSize * 1.2 : circleSize;
       return { width: size, height: size, isCircle: true };

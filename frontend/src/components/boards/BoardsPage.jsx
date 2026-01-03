@@ -194,12 +194,12 @@ const BoardsPage = ({ onBack, onSelectBoard }) => {
               <span className="text-xs text-gray-400">({filteredBoards.length})</span>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredBoards.map(board => (
                 <div
                   key={board.id}
                   onClick={() => onSelectBoard(board)}
-                  className="group relative rounded-xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 h-36 transform hover:-translate-y-1"
+                  className="group relative rounded-xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 h-40 transform hover:-translate-y-1"
                   style={{ backgroundColor: board.background_color }}
                   data-testid={`board-card-${board.id}`}
                 >

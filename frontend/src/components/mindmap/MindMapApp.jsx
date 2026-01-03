@@ -938,7 +938,9 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
 
       {/* Área principal - Cambia según la vista activa */}
       {activeView !== 'projects' ? (
-        renderMainContent()
+        <div className="flex-1 w-full h-full overflow-auto">
+          {renderMainContent()}
+        </div>
       ) : (
         <div className="flex-1 flex flex-col h-full overflow-hidden">
         {/* Toolbar superior */}

@@ -215,7 +215,7 @@ const DroppableListArea = ({ listId, children }) => {
 // ==========================================
 // SORTABLE LIST COMPONENT (Columna tipo Trello)
 // ==========================================
-const SortableList = ({ list, listIndex, boardId, onUpdateList, onDeleteList, onAddCard, onUpdateCard, onDeleteCard }) => {
+const SortableList = ({ list, listIndex, boardId, onUpdateList, onDeleteList, onAddCard, onUpdateCard, onDeleteCard, onOpenModal }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(list.title);
   const [showAddCard, setShowAddCard] = useState(false);

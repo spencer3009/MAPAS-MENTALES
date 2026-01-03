@@ -1214,7 +1214,7 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
   );
 };
 
-// Componente wrapper con NotificationProvider
+// Componente wrapper con NotificationProvider y TimeTrackingProvider
 const MindMapApp = (props) => {
   const { token } = useAuth();
   const [activeViewForNav, setActiveViewForNav] = useState(null);
@@ -1227,19 +1227,21 @@ const MindMapApp = (props) => {
   }, []);
   
   return (
-    <NotificationProvider 
-      token={token}
-      onNavigateToReminders={handleNavigateToReminders}
-    >
-      <MindMapAppInner 
-        {...props} 
+    <TimeTrackingProvider>
+      <NotificationProvider 
+        token={token}
         onNavigateToReminders={handleNavigateToReminders}
-        forceView={activeViewForNav}
-        clearForceView={() => setActiveViewForNav(null)}
-        pendingPlanId={props.pendingPlanId}
-        onClearPendingPlan={props.onClearPendingPlan}
-      />
-    </NotificationProvider>
+      >
+        <MindMapAppInner 
+          {...props} 
+          onNavigateToReminders={handleNavigateToReminders}
+          forceView={activeViewForNav}
+          clearForceView={() => setActiveViewForNav(null)}
+          pendingPlanId={props.pendingPlanId}
+          onClearPendingPlan={props.onClearPendingPlan}
+        />
+      </NotificationProvider>
+    </TimeTrackingProvider>
   );
 };
 

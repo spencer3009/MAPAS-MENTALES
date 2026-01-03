@@ -45,6 +45,97 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
   const [showLabelPicker, setShowLabelPicker] = useState(false);
   const [showPriorityPicker, setShowPriorityPicker] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [timeEntries, setTimeEntries] = useState([]);
+  const token = localStorage.getItem('mm_auth_token');
+
+  // Cargar historial de tiempos
+  const loadTimeEntries = useCallback(async () => {
+    if (!token || !card.id) return;
+    try {
+      const response = await fetch(`${API_URL}/api/time-tracking/task/${card.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setTimeEntries(data.entries || []);
+      }
+    } catch (error) {
+      console.error('Error loading time entries:', error);
+    }
+  }, [token, card.id]);
+
+  // Cargar entradas de tiempo al montar
+  useEffect(() => {
+    loadTimeEntries();
+  }, [loadTimeEntries]);
+
+  // Formatear tiempo relativo
+  const formatRelativeTime = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffSecs = Math.floor(diffMs / 1000);
+    const diffMins = Math.floor(diffSecs / 60);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+    
+    if (diffSecs < 60) return 'HACE UNOS SEGUNDOS';
+    if (diffMins < 60) return `HACE ${diffMins} MINUTO${diffMins > 1 ? 'S' : ''}`;
+    if (diffHours < 24) return `HACE ${diffHours} HORA${diffHours > 1 ? 'S' : ''}`;
+    return `HACE ${diffDays} DÍA${diffDays > 1 ? 'S' : ''}`;
+  };
+
+  // Formatear duración
+  const formatDuration = (seconds) => {
+    if (!seconds) return '00:00:00';
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Combinar actividades (comentarios + eventos de tiempo)
+  const getAllActivities = () => {
+    const activities = [];
+    
+    // Agregar comentarios
+    comments.forEach(comment => {
+      activities.push({
+        type: 'comment',
+        id: comment.id,
+        author: comment.author || 'Usuario',
+        text: comment.text,
+        created_at: comment.created_at
+      });
+    });
+    
+    // Agregar eventos de tiempo
+    timeEntries.forEach(entry => {
+      // Evento de inicio
+      activities.push({
+        type: 'time_start',
+        id: `${entry.id}_start`,
+        author: entry.username,
+        created_at: entry.start_time,
+        duration: entry.duration
+      });
+      
+      // Evento de fin (si existe)
+      if (entry.end_time) {
+        activities.push({
+          type: 'time_stop',
+          id: `${entry.id}_stop`,
+          author: entry.username,
+          created_at: entry.end_time,
+          duration: entry.duration
+        });
+      }
+    });
+    
+    // Ordenar por fecha descendente (más reciente primero)
+    return activities.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  };
 
   // Guardar cambios automáticamente
   const saveChanges = async (updates) => {

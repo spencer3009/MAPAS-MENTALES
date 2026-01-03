@@ -261,13 +261,33 @@ const SortableList = ({ list, listIndex, boardId, onUpdateList, onDeleteList, on
   const [showAddCard, setShowAddCard] = useState(false);
   const [newCardTitle, setNewCardTitle] = useState('');
   
-  // Determinar tema de la lista basado en el índice o título
+  // Determinar tema de la lista basado en el color guardado, título o índice
   const getListTheme = () => {
     const titleLower = list.title.toLowerCase();
-    if (titleLower.includes('progreso') || titleLower.includes('progress')) return LIST_THEMES.progress;
-    if (titleLower.includes('listo') || titleLower.includes('done') || titleLower.includes('completado')) return LIST_THEMES.done;
-    if (listIndex === 1) return LIST_THEMES.progress;
-    if (listIndex === 2) return LIST_THEMES.done;
+    
+    // Usar el color de la lista si existe (desde backend)
+    if (list.color) {
+      if (list.color === '#06B6D4') return LIST_THEMES.abiertas;
+      if (list.color === '#3B82F6') return LIST_THEMES.progreso;
+      if (list.color === '#8B5CF6') return LIST_THEMES.listo;
+    }
+    
+    // Fallback por título
+    if (titleLower.includes('abierta') || titleLower.includes('open') || titleLower.includes('to do') || titleLower.includes('todo')) {
+      return LIST_THEMES.abiertas;
+    }
+    if (titleLower.includes('progreso') || titleLower.includes('progress') || titleLower.includes('doing')) {
+      return LIST_THEMES.progreso;
+    }
+    if (titleLower.includes('listo') || titleLower.includes('done') || titleLower.includes('completado') || titleLower.includes('complete')) {
+      return LIST_THEMES.listo;
+    }
+    
+    // Fallback por posición (primeras 3 columnas)
+    if (listIndex === 0) return LIST_THEMES.abiertas;
+    if (listIndex === 1) return LIST_THEMES.progreso;
+    if (listIndex === 2) return LIST_THEMES.listo;
+    
     return LIST_THEMES.default;
   };
   

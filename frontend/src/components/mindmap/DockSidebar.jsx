@@ -7,7 +7,8 @@ import {
   Trash2, 
   Settings,
   ChevronRight,
-  LogOut
+  LogOut,
+  LayoutGrid
 } from 'lucide-react';
 
 const DockSidebar = ({ 
@@ -17,6 +18,7 @@ const DockSidebar = ({
   onOpenReminders,
   onOpenTrash,
   onOpenSettings,
+  onOpenBoards,
   onLogout,
   isProjectsSidebarOpen = true,
   activeView = 'projects',
@@ -44,6 +46,13 @@ const DockSidebar = ({
       icon: Network,
       label: 'Mis Mapas',
       onClick: onToggleProjectsSidebar,
+    },
+    {
+      id: 'boards',
+      icon: LayoutGrid,
+      label: 'Tableros',
+      onClick: onOpenBoards,
+      highlight: true,
     },
     {
       id: 'favorites',

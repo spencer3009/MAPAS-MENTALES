@@ -32,7 +32,7 @@ MindoraMap es una plataforma de mapas mentales para empresarios. Permite organiz
 - Plan Business ($15/usuario/mes)
 - Integración PayPal para pagos
 
-### 4. Tableros Kanban (MVP) - **COMPLETADO ✅**
+### 4. Tableros Kanban (MVP) - **FASE 1 COMPLETADA ✅**
 - Crear/editar/eliminar tableros
 - **3 columnas por defecto al crear tablero:**
   - Abiertas (Cyan #06B6D4)
@@ -46,8 +46,14 @@ MindoraMap es una plataforma de mapas mentales para empresarios. Permite organiz
   - **Scroll horizontal funcional** para muchas columnas
 - **Layout de página ancho completo** (1712px de 1920px viewport)
 - Grid responsive: 1-2-3-4 columnas según breakpoint
+- **Pop-up/Modal de Tarea completo con:**
+  - Título y descripción editables
+  - Checklist con progreso
+  - Sistema de comentarios/actividad
+  - Panel lateral: Etiquetas, Fecha límite, Prioridad, Miembros, Adjuntos
+  - Acciones: Mover, Copiar, Seguir, Eliminar
 - Guardado automático
-- Diseño inspirado en Trello
+- Diseño inspirado en Trello/ClickUp
 
 ### 5. Otras Funcionalidades
 - Dashboard con proyectos recientes

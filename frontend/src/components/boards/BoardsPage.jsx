@@ -352,6 +352,59 @@ const BoardsPage = ({ onBack, onSelectBoard }) => {
           </div>
         </div>
       )}
+
+      {/* Modal de confirmación de eliminación */}
+      {confirmDeleteBoard && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div 
+            className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6">
+              <div className="text-center mb-6">
+                <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <AlertTriangle className="w-7 h-7 text-red-600" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-900 mb-2">¿Eliminar tablero?</h2>
+                <p className="text-gray-600">
+                  ¿Estás seguro de que deseas eliminar <span className="font-semibold">"{confirmDeleteBoard.title}"</span>?
+                </p>
+                <p className="text-sm text-gray-500 mt-2">
+                  Puedes recuperarlo luego desde la <span className="font-medium text-cyan-600">Papelera</span>.
+                </p>
+              </div>
+              
+              {/* Preview del tablero a eliminar */}
+              <div 
+                className="rounded-xl h-16 mb-6 p-3 flex items-end relative overflow-hidden"
+                style={{ backgroundColor: confirmDeleteBoard.background_color }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+                <span className="text-white font-semibold text-sm truncate drop-shadow relative z-10">
+                  {confirmDeleteBoard.title}
+                </span>
+              </div>
+              
+              {/* Actions */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setConfirmDeleteBoard(null)}
+                  className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => deleteBoard(confirmDeleteBoard.id)}
+                  className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors font-medium flex items-center justify-center gap-2"
+                >
+                  <Trash2 size={18} />
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

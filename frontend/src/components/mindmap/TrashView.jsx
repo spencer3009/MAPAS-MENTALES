@@ -91,7 +91,7 @@ const TrashView = ({ isOpen, onClose, onProjectRestored, token }) => {
         throw new Error('Error al restaurar');
       }
       
-      setTrashProjects(prev => prev.filter(p => p.project_id !== projectId));
+      setTrashProjects(prev => prev.filter(p => p.id !== projectId));
       if (onProjectRestored) onProjectRestored();
     } catch (err) {
       console.error('Error restoring project:', err);

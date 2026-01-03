@@ -244,7 +244,7 @@ const BoardsPage = ({ onBack, onSelectBoard }) => {
               {/* Create new board card */}
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="h-36 rounded-xl border-2 border-dashed border-gray-300 hover:border-cyan-400 bg-white/50 hover:bg-white transition-all duration-200 flex flex-col items-center justify-center gap-2 group"
+                className="h-40 rounded-xl border-2 border-dashed border-gray-300 hover:border-cyan-400 bg-white/50 hover:bg-white transition-all duration-200 flex flex-col items-center justify-center gap-2 group"
                 data-testid="create-board-card"
               >
                 <div className="w-12 h-12 rounded-xl bg-gray-100 group-hover:bg-cyan-50 flex items-center justify-center transition-colors">

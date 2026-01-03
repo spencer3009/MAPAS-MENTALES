@@ -2936,6 +2936,395 @@ async def get_public_landing_content():
 
 
 # ==========================================
+# TABLEROS (BOARDS) - ESTILO TRELLO
+# ==========================================
+
+@api_router.get("/boards")
+async def get_boards(current_user: dict = Depends(get_current_user)):
+    """Obtener todos los tableros del usuario"""
+    boards = await db.boards.find(
+        {
+            "$or": [
+                {"owner_username": current_user["username"]},
+                {"collaborators": current_user["username"]}
+            ],
+            "is_archived": False
+        },
+        {"_id": 0}
+    ).to_list(100)
+    
+    return {"boards": boards}
+
+
+@api_router.post("/boards")
+async def create_board(request: CreateBoardRequest, current_user: dict = Depends(get_current_user)):
+    """Crear un nuevo tablero"""
+    now = datetime.now(timezone.utc).isoformat()
+    
+    board = {
+        "id": f"board_{uuid.uuid4().hex[:12]}",
+        "title": request.title,
+        "description": request.description or "",
+        "background_color": request.background_color or "#3B82F6",
+        "background_image": None,
+        "owner_username": current_user["username"],
+        "lists": [],
+        "collaborators": [],
+        "is_archived": False,
+        "created_at": now,
+        "updated_at": now
+    }
+    
+    await db.boards.insert_one(board)
+    
+    # Retornar sin _id
+    board.pop("_id", None)
+    return {"board": board, "message": "Tablero creado exitosamente"}
+
+
+@api_router.get("/boards/{board_id}")
+async def get_board(board_id: str, current_user: dict = Depends(get_current_user)):
+    """Obtener un tablero específico con sus listas y tarjetas"""
+    board = await db.boards.find_one(
+        {
+            "id": board_id,
+            "$or": [
+                {"owner_username": current_user["username"]},
+                {"collaborators": current_user["username"]}
+            ]
+        },
+        {"_id": 0}
+    )
+    
+    if not board:
+        raise HTTPException(status_code=404, detail="Tablero no encontrado")
+    
+    return {"board": board}
+
+
+@api_router.put("/boards/{board_id}")
+async def update_board(board_id: str, request: UpdateBoardRequest, current_user: dict = Depends(get_current_user)):
+    """Actualizar un tablero"""
+    board = await db.boards.find_one({"id": board_id, "owner_username": current_user["username"]})
+    
+    if not board:
+        raise HTTPException(status_code=404, detail="Tablero no encontrado o sin permisos")
+    
+    update_data = {"updated_at": datetime.now(timezone.utc).isoformat()}
+    
+    if request.title is not None:
+        update_data["title"] = request.title
+    if request.description is not None:
+        update_data["description"] = request.description
+    if request.background_color is not None:
+        update_data["background_color"] = request.background_color
+    if request.background_image is not None:
+        update_data["background_image"] = request.background_image
+    
+    await db.boards.update_one({"id": board_id}, {"$set": update_data})
+    
+    updated_board = await db.boards.find_one({"id": board_id}, {"_id": 0})
+    return {"board": updated_board, "message": "Tablero actualizado"}
+
+
+@api_router.delete("/boards/{board_id}")
+async def delete_board(board_id: str, current_user: dict = Depends(get_current_user)):
+    """Eliminar (archivar) un tablero"""
+    result = await db.boards.update_one(
+        {"id": board_id, "owner_username": current_user["username"]},
+        {"$set": {"is_archived": True, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Tablero no encontrado o sin permisos")
+    
+    return {"message": "Tablero eliminado"}
+
+
+# ==========================================
+# LISTAS (COLUMNS)
+# ==========================================
+
+@api_router.post("/boards/{board_id}/lists")
+async def create_list(board_id: str, request: CreateListRequest, current_user: dict = Depends(get_current_user)):
+    """Crear una nueva lista en el tablero"""
+    board = await db.boards.find_one(
+        {"id": board_id, "owner_username": current_user["username"]},
+        {"_id": 0}
+    )
+    
+    if not board:
+        raise HTTPException(status_code=404, detail="Tablero no encontrado")
+    
+    # Calcular posición
+    existing_lists = board.get("lists", [])
+    position = request.position if request.position is not None else len(existing_lists)
+    
+    new_list = {
+        "id": f"list_{uuid.uuid4().hex[:12]}",
+        "title": request.title,
+        "cards": [],
+        "position": position,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.boards.update_one(
+        {"id": board_id},
+        {
+            "$push": {"lists": new_list},
+            "$set": {"updated_at": datetime.now(timezone.utc).isoformat()}
+        }
+    )
+    
+    return {"list": new_list, "message": "Lista creada"}
+
+
+@api_router.put("/boards/{board_id}/lists/{list_id}")
+async def update_list(board_id: str, list_id: str, request: UpdateListRequest, current_user: dict = Depends(get_current_user)):
+    """Actualizar una lista"""
+    update_fields = {}
+    
+    if request.title is not None:
+        update_fields["lists.$.title"] = request.title
+    if request.position is not None:
+        update_fields["lists.$.position"] = request.position
+    
+    if not update_fields:
+        raise HTTPException(status_code=400, detail="No hay campos para actualizar")
+    
+    update_fields["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    result = await db.boards.update_one(
+        {"id": board_id, "owner_username": current_user["username"], "lists.id": list_id},
+        {"$set": update_fields}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Lista no encontrada")
+    
+    return {"message": "Lista actualizada"}
+
+
+@api_router.delete("/boards/{board_id}/lists/{list_id}")
+async def delete_list(board_id: str, list_id: str, current_user: dict = Depends(get_current_user)):
+    """Eliminar una lista"""
+    result = await db.boards.update_one(
+        {"id": board_id, "owner_username": current_user["username"]},
+        {
+            "$pull": {"lists": {"id": list_id}},
+            "$set": {"updated_at": datetime.now(timezone.utc).isoformat()}
+        }
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Lista no encontrada")
+    
+    return {"message": "Lista eliminada"}
+
+
+@api_router.put("/boards/{board_id}/lists/reorder")
+async def reorder_lists(board_id: str, request: ReorderListsRequest, current_user: dict = Depends(get_current_user)):
+    """Reordenar las listas del tablero"""
+    board = await db.boards.find_one(
+        {"id": board_id, "owner_username": current_user["username"]},
+        {"_id": 0}
+    )
+    
+    if not board:
+        raise HTTPException(status_code=404, detail="Tablero no encontrado")
+    
+    # Crear un diccionario de listas por ID
+    lists_dict = {lst["id"]: lst for lst in board.get("lists", [])}
+    
+    # Reordenar según el nuevo orden
+    reordered_lists = []
+    for i, list_id in enumerate(request.list_ids):
+        if list_id in lists_dict:
+            lst = lists_dict[list_id]
+            lst["position"] = i
+            reordered_lists.append(lst)
+    
+    await db.boards.update_one(
+        {"id": board_id},
+        {
+            "$set": {
+                "lists": reordered_lists,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }
+        }
+    )
+    
+    return {"message": "Listas reordenadas", "lists": reordered_lists}
+
+
+# ==========================================
+# TARJETAS (CARDS)
+# ==========================================
+
+@api_router.post("/boards/{board_id}/lists/{list_id}/cards")
+async def create_card(board_id: str, list_id: str, request: CreateCardRequest, current_user: dict = Depends(get_current_user)):
+    """Crear una nueva tarjeta en una lista"""
+    board = await db.boards.find_one(
+        {"id": board_id, "owner_username": current_user["username"]},
+        {"_id": 0}
+    )
+    
+    if not board:
+        raise HTTPException(status_code=404, detail="Tablero no encontrado")
+    
+    # Encontrar la lista
+    target_list = None
+    for lst in board.get("lists", []):
+        if lst["id"] == list_id:
+            target_list = lst
+            break
+    
+    if not target_list:
+        raise HTTPException(status_code=404, detail="Lista no encontrada")
+    
+    now = datetime.now(timezone.utc).isoformat()
+    new_card = {
+        "id": f"card_{uuid.uuid4().hex[:12]}",
+        "title": request.title,
+        "description": request.description or "",
+        "labels": request.labels or [],
+        "position": len(target_list.get("cards", [])),
+        "created_at": now,
+        "updated_at": now
+    }
+    
+    await db.boards.update_one(
+        {"id": board_id, "lists.id": list_id},
+        {
+            "$push": {"lists.$.cards": new_card},
+            "$set": {"updated_at": now}
+        }
+    )
+    
+    return {"card": new_card, "message": "Tarjeta creada"}
+
+
+@api_router.put("/boards/{board_id}/lists/{list_id}/cards/{card_id}")
+async def update_card(board_id: str, list_id: str, card_id: str, request: UpdateCardRequest, current_user: dict = Depends(get_current_user)):
+    """Actualizar una tarjeta"""
+    board = await db.boards.find_one(
+        {"id": board_id, "owner_username": current_user["username"]},
+        {"_id": 0}
+    )
+    
+    if not board:
+        raise HTTPException(status_code=404, detail="Tablero no encontrado")
+    
+    # Actualizar la tarjeta dentro de la lista
+    now = datetime.now(timezone.utc).isoformat()
+    updated = False
+    
+    for lst in board.get("lists", []):
+        if lst["id"] == list_id:
+            for card in lst.get("cards", []):
+                if card["id"] == card_id:
+                    if request.title is not None:
+                        card["title"] = request.title
+                    if request.description is not None:
+                        card["description"] = request.description
+                    if request.labels is not None:
+                        card["labels"] = request.labels
+                    if request.position is not None:
+                        card["position"] = request.position
+                    card["updated_at"] = now
+                    updated = True
+                    break
+            break
+    
+    if not updated:
+        raise HTTPException(status_code=404, detail="Tarjeta no encontrada")
+    
+    await db.boards.update_one(
+        {"id": board_id},
+        {"$set": {"lists": board["lists"], "updated_at": now}}
+    )
+    
+    return {"message": "Tarjeta actualizada"}
+
+
+@api_router.delete("/boards/{board_id}/lists/{list_id}/cards/{card_id}")
+async def delete_card(board_id: str, list_id: str, card_id: str, current_user: dict = Depends(get_current_user)):
+    """Eliminar una tarjeta"""
+    result = await db.boards.update_one(
+        {"id": board_id, "owner_username": current_user["username"], "lists.id": list_id},
+        {
+            "$pull": {"lists.$.cards": {"id": card_id}},
+            "$set": {"updated_at": datetime.now(timezone.utc).isoformat()}
+        }
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Tarjeta no encontrada")
+    
+    return {"message": "Tarjeta eliminada"}
+
+
+@api_router.post("/boards/{board_id}/cards/move")
+async def move_card(board_id: str, request: MoveCardRequest, current_user: dict = Depends(get_current_user)):
+    """Mover una tarjeta entre listas o reordenar dentro de la misma lista"""
+    board = await db.boards.find_one(
+        {"id": board_id, "owner_username": current_user["username"]},
+        {"_id": 0}
+    )
+    
+    if not board:
+        raise HTTPException(status_code=404, detail="Tablero no encontrado")
+    
+    lists = board.get("lists", [])
+    source_list = None
+    dest_list = None
+    card_to_move = None
+    
+    # Encontrar las listas y la tarjeta
+    for lst in lists:
+        if lst["id"] == request.source_list_id:
+            source_list = lst
+            for card in lst.get("cards", []):
+                if card["id"] == request.card_id:
+                    card_to_move = card
+                    break
+        if lst["id"] == request.destination_list_id:
+            dest_list = lst
+    
+    if not source_list or not dest_list or not card_to_move:
+        raise HTTPException(status_code=404, detail="Lista o tarjeta no encontrada")
+    
+    # Remover de la lista origen
+    source_list["cards"] = [c for c in source_list["cards"] if c["id"] != request.card_id]
+    
+    # Actualizar posiciones en lista origen
+    for i, card in enumerate(source_list["cards"]):
+        card["position"] = i
+    
+    # Insertar en la lista destino
+    card_to_move["position"] = request.new_position
+    card_to_move["updated_at"] = datetime.now(timezone.utc).isoformat()
+    dest_list["cards"].insert(request.new_position, card_to_move)
+    
+    # Actualizar posiciones en lista destino
+    for i, card in enumerate(dest_list["cards"]):
+        card["position"] = i
+    
+    await db.boards.update_one(
+        {"id": board_id},
+        {"$set": {"lists": lists, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"message": "Tarjeta movida", "lists": lists}
+
+
+@api_router.get("/boards/colors")
+async def get_board_colors():
+    """Obtener colores disponibles para tableros"""
+    return {"colors": BOARD_COLORS, "label_colors": CARD_LABEL_COLORS}
+
+
+# ==========================================
 # PAYPAL SUBSCRIPTION ENDPOINTS
 # ==========================================
 

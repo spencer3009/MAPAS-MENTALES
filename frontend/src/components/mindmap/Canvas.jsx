@@ -811,6 +811,69 @@ const Canvas = ({
         </>
       )}
 
+      {/* Botones MindAxis: Izquierda y Derecha para nodo central */}
+      {shouldShowAddButton && layoutType === 'mindaxis' && !selectedNode?.parentId && (
+        <>
+          {/* Botón IZQUIERDO ← crear rama izquierda */}
+          {controlPositions.addButtonLeft && (
+            <button
+              onClick={handleAddChildLeft}
+              onMouseDown={(e) => e.stopPropagation()}
+              className="
+                absolute z-50
+                w-7 h-7 rounded-full
+                bg-teal-500 hover:bg-teal-600
+                text-white shadow-lg
+                flex items-center justify-center
+                transition-all duration-200
+                hover:scale-110 active:scale-95
+                border-2 border-white
+              "
+              style={{
+                left: controlPositions.addButtonLeft.x,
+                top: controlPositions.addButtonLeft.y,
+                transform: 'translate(-50%, -50%)'
+              }}
+              title="Agregar rama izquierda (←)"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+          )}
+          
+          {/* Botón DERECHO → crear rama derecha */}
+          {controlPositions.addButtonRight && (
+            <button
+              onClick={handleAddChildRight}
+              onMouseDown={(e) => e.stopPropagation()}
+              className="
+                absolute z-50
+                w-7 h-7 rounded-full
+                bg-cyan-500 hover:bg-cyan-600
+                text-white shadow-lg
+                flex items-center justify-center
+                transition-all duration-200
+                hover:scale-110 active:scale-95
+                border-2 border-white
+              "
+              style={{
+                left: controlPositions.addButtonRight.x,
+                top: controlPositions.addButtonRight.y,
+                transform: 'translate(-50%, -50%)'
+              }}
+              title="Agregar rama derecha (→)"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+          )}
+        </>
+      )}
+
       {/* Selector de tipo de nodo */}
       <NodeTypeSelector
         isOpen={nodeTypeSelector.isOpen}

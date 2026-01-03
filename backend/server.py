@@ -17,6 +17,14 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 import paypal_service
 import email_service
+import board_service
+from board_service import (
+    CreateBoardRequest, UpdateBoardRequest, 
+    CreateListRequest, UpdateListRequest,
+    CreateCardRequest, UpdateCardRequest,
+    MoveCardRequest, ReorderListsRequest, ReorderCardsRequest,
+    BOARD_COLORS, CARD_LABEL_COLORS
+)
 
 
 ROOT_DIR = Path(__file__).parent

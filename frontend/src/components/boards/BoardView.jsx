@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   DndContext,
   DragOverlay,
@@ -18,13 +18,16 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { 
-  Plus, X, MoreHorizontal, ArrowLeft, Trash2, 
-  GripVertical, Tag, Edit2, Check 
+  Plus, X, ArrowLeft, Trash2, 
+  GripVertical, Tag, Edit2, Check,
+  Lightbulb, TrendingUp, CheckCircle2, 
+  Users, Share2, LayoutGrid, Clock, Bell,
+  MoreHorizontal
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
-// Colores de etiquetas
+// Colores de etiquetas para tarjetas
 const LABEL_COLORS = [
   { id: 'green', value: '#22C55E' },
   { id: 'yellow', value: '#EAB308' },
@@ -33,6 +36,14 @@ const LABEL_COLORS = [
   { id: 'purple', value: '#A855F7' },
   { id: 'blue', value: '#3B82F6' },
 ];
+
+// Colores predefinidos para listas (estilo de la imagen de referencia)
+const LIST_THEMES = {
+  default: { bg: '#E5E7EB', header: '#D1D5DB', text: '#374151', icon: Lightbulb },
+  progress: { bg: '#CFFAFE', header: '#06B6D4', text: '#FFFFFF', icon: TrendingUp },
+  done: { bg: '#D1FAE5', header: '#10B981', text: '#FFFFFF', icon: CheckCircle2 },
+  gray: { bg: '#F3F4F6', header: '#9CA3AF', text: '#FFFFFF', icon: LayoutGrid },
+};
 
 // ==========================================
 // SORTABLE CARD COMPONENT
@@ -82,19 +93,20 @@ const SortableCard = ({ card, listId, onUpdate, onDelete }) => {
     <div
       ref={setNodeRef}
       style={style}
-      className={`group bg-white rounded-lg shadow-sm border border-gray-200 hover:border-gray-300 transition-all ${
-        isDragging ? 'shadow-lg ring-2 ring-blue-400' : ''
+      data-testid={`card-${card.id}`}
+      className={`group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 ${
+        isDragging ? 'shadow-xl ring-2 ring-blue-400' : 'border border-gray-100'
       }`}
     >
       {/* Labels */}
       {card.labels && card.labels.length > 0 && (
-        <div className="flex flex-wrap gap-1 px-3 pt-2">
+        <div className="flex flex-wrap gap-1.5 px-3 pt-3">
           {card.labels.map((label, idx) => {
             const color = LABEL_COLORS.find(c => c.id === label.color);
             return (
               <div
                 key={idx}
-                className="h-2 w-10 rounded-full"
+                className="h-2 w-12 rounded-full"
                 style={{ backgroundColor: color?.value || '#3B82F6' }}
               />
             );
@@ -112,12 +124,12 @@ const SortableCard = ({ card, listId, onUpdate, onDelete }) => {
               onChange={(e) => setEditTitle(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSaveTitle()}
               onBlur={handleSaveTitle}
-              className="flex-1 px-2 py-1 text-sm border border-blue-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="flex-1 px-2 py-1.5 text-sm border border-cyan-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
               autoFocus
             />
             <button
               onClick={handleSaveTitle}
-              className="p-1 text-green-600 hover:bg-green-50 rounded"
+              className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg"
             >
               <Check size={14} />
             </button>
@@ -127,11 +139,16 @@ const SortableCard = ({ card, listId, onUpdate, onDelete }) => {
             <button
               {...attributes}
               {...listeners}
-              className="opacity-0 group-hover:opacity-100 p-0.5 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing transition-opacity"
+              className="opacity-0 group-hover:opacity-100 p-0.5 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing transition-opacity"
             >
               <GripVertical size={14} />
             </button>
-            <p className="flex-1 text-sm text-gray-800 break-words">{card.title}</p>
+            <p className="flex-1 text-sm text-gray-700 leading-relaxed break-words">{card.title}</p>
+            <button
+              className="opacity-0 group-hover:opacity-100 p-1 text-gray-300 hover:text-gray-500 rounded transition-opacity"
+            >
+              <MoreHorizontal size={14} />
+            </button>
           </div>
         )}
         
@@ -139,21 +156,21 @@ const SortableCard = ({ card, listId, onUpdate, onDelete }) => {
         <div className="flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={() => setIsEditing(true)}
-            className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+            className="p-1.5 text-gray-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-colors"
             title="Editar"
           >
             <Edit2 size={12} />
           </button>
           <button
             onClick={() => setShowLabelPicker(!showLabelPicker)}
-            className="p-1 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded transition-colors"
+            className="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
             title="Etiquetas"
           >
             <Tag size={12} />
           </button>
           <button
             onClick={() => onDelete(card.id)}
-            className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
             title="Eliminar"
           >
             <Trash2 size={12} />
@@ -162,15 +179,15 @@ const SortableCard = ({ card, listId, onUpdate, onDelete }) => {
         
         {/* Label Picker */}
         {showLabelPicker && (
-          <div className="mt-2 p-2 bg-gray-50 rounded-lg">
-            <div className="flex flex-wrap gap-1">
+          <div className="mt-3 p-2 bg-gray-50 rounded-lg border border-gray-100">
+            <div className="flex flex-wrap gap-1.5">
               {LABEL_COLORS.map(color => {
                 const isSelected = card.labels?.some(l => l.color === color.id);
                 return (
                   <button
                     key={color.id}
                     onClick={() => toggleLabel(color.id)}
-                    className={`w-6 h-6 rounded transition-all ${
+                    className={`w-7 h-7 rounded-md transition-all ${
                       isSelected ? 'ring-2 ring-offset-1 ring-gray-400 scale-110' : 'hover:scale-105'
                     }`}
                     style={{ backgroundColor: color.value }}
@@ -186,13 +203,26 @@ const SortableCard = ({ card, listId, onUpdate, onDelete }) => {
 };
 
 // ==========================================
-// SORTABLE LIST COMPONENT
+// SORTABLE LIST COMPONENT (Columna tipo Trello)
 // ==========================================
-const SortableList = ({ list, boardId, onUpdateList, onDeleteList, onAddCard, onUpdateCard, onDeleteCard }) => {
+const SortableList = ({ list, listIndex, boardId, onUpdateList, onDeleteList, onAddCard, onUpdateCard, onDeleteCard }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(list.title);
   const [showAddCard, setShowAddCard] = useState(false);
   const [newCardTitle, setNewCardTitle] = useState('');
+  
+  // Determinar tema de la lista basado en el índice o título
+  const getListTheme = () => {
+    const titleLower = list.title.toLowerCase();
+    if (titleLower.includes('progreso') || titleLower.includes('progress')) return LIST_THEMES.progress;
+    if (titleLower.includes('listo') || titleLower.includes('done') || titleLower.includes('completado')) return LIST_THEMES.done;
+    if (listIndex === 1) return LIST_THEMES.progress;
+    if (listIndex === 2) return LIST_THEMES.done;
+    return LIST_THEMES.default;
+  };
+  
+  const theme = getListTheme();
+  const IconComponent = theme.icon;
   
   const {
     attributes,
@@ -206,7 +236,7 @@ const SortableList = ({ list, boardId, onUpdateList, onDeleteList, onAddCard, on
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.7 : 1,
   };
 
   const handleSaveTitle = () => {
@@ -228,17 +258,23 @@ const SortableList = ({ list, boardId, onUpdateList, onDeleteList, onAddCard, on
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex-shrink-0 w-72 bg-gray-100 rounded-xl ${isDragging ? 'ring-2 ring-blue-400' : ''}`}
+      data-testid={`list-${list.id}`}
+      className={`flex-shrink-0 w-72 rounded-xl overflow-hidden ${isDragging ? 'ring-2 ring-blue-400 shadow-xl' : 'shadow-sm'}`}
     >
-      {/* Header */}
-      <div className="p-3 flex items-center gap-2">
+      {/* Header con color distintivo */}
+      <div 
+        className="px-4 py-3 flex items-center gap-2"
+        style={{ backgroundColor: theme.header }}
+      >
         <button
           {...attributes}
           {...listeners}
-          className="p-1 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing"
+          className="p-1 text-white/70 hover:text-white cursor-grab active:cursor-grabbing rounded"
         >
           <GripVertical size={16} />
         </button>
+        
+        <IconComponent size={18} className="text-white/90" />
         
         {isEditing ? (
           <input
@@ -247,53 +283,85 @@ const SortableList = ({ list, boardId, onUpdateList, onDeleteList, onAddCard, on
             onChange={(e) => setEditTitle(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSaveTitle()}
             onBlur={handleSaveTitle}
-            className="flex-1 px-2 py-1 text-sm font-medium border border-blue-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="flex-1 px-2 py-1 text-sm font-semibold bg-white/20 text-white placeholder-white/50 border border-white/30 rounded focus:outline-none focus:ring-1 focus:ring-white/50"
             autoFocus
           />
         ) : (
           <h3
             onClick={() => setIsEditing(true)}
-            className="flex-1 font-medium text-gray-800 cursor-pointer hover:text-blue-600 transition-colors"
+            className="flex-1 font-semibold cursor-pointer hover:opacity-80 transition-opacity"
+            style={{ color: theme.text }}
           >
             {list.title}
           </h3>
         )}
         
+        {/* Contador de tarjetas */}
+        <span 
+          className="px-2 py-0.5 text-xs font-medium rounded-full bg-white/20"
+          style={{ color: theme.text }}
+        >
+          {list.cards.length}
+        </span>
+        
         <button
           onClick={() => onDeleteList(list.id)}
-          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+          className="p-1.5 text-white/70 hover:text-white hover:bg-white/20 rounded-lg transition-colors"
         >
-          <X size={16} />
+          <MoreHorizontal size={16} />
         </button>
       </div>
       
       {/* Cards Container */}
-      <div className="px-2 pb-2 max-h-[60vh] overflow-y-auto">
+      <div 
+        className="px-3 py-3 min-h-[200px] max-h-[65vh] overflow-y-auto"
+        style={{ backgroundColor: theme.bg }}
+      >
+        {/* Botón añadir tarea superior */}
+        <button
+          onClick={() => setShowAddCard(true)}
+          className="w-full mb-3 flex items-center justify-center gap-2 px-3 py-2 text-gray-500 hover:text-gray-700 bg-white/60 hover:bg-white rounded-lg transition-all text-sm font-medium border border-dashed border-gray-300 hover:border-gray-400"
+          data-testid={`add-card-btn-${list.id}`}
+        >
+          <Plus size={16} />
+          Añadir Tarea
+        </button>
+        
         <SortableContext
           items={list.cards.map(c => c.id)}
           strategy={verticalListSortingStrategy}
         >
           <div className="space-y-2">
-            {list.cards.map(card => (
-              <SortableCard
-                key={card.id}
-                card={card}
-                listId={list.id}
-                onUpdate={(cardId, data) => onUpdateCard(list.id, cardId, data)}
-                onDelete={(cardId) => onDeleteCard(list.id, cardId)}
-              />
-            ))}
+            {list.cards.length === 0 && !showAddCard ? (
+              /* Estado vacío */
+              <div className="py-8 flex flex-col items-center text-center">
+                <div className="w-16 h-16 rounded-full bg-white/80 flex items-center justify-center mb-3">
+                  <CheckCircle2 size={32} className="text-gray-300" />
+                </div>
+                <p className="text-gray-400 text-sm font-medium">No Hay Tareas</p>
+              </div>
+            ) : (
+              list.cards.map(card => (
+                <SortableCard
+                  key={card.id}
+                  card={card}
+                  listId={list.id}
+                  onUpdate={(cardId, data) => onUpdateCard(list.id, cardId, data)}
+                  onDelete={(cardId) => onDeleteCard(list.id, cardId)}
+                />
+              ))
+            )}
           </div>
         </SortableContext>
         
-        {/* Add Card */}
-        {showAddCard ? (
-          <div className="mt-2">
+        {/* Add Card Form */}
+        {showAddCard && (
+          <div className="mt-2 bg-white rounded-lg shadow-sm border border-gray-200 p-3">
             <textarea
               value={newCardTitle}
               onChange={(e) => setNewCardTitle(e.target.value)}
               placeholder="Título de la tarjeta..."
-              className="w-full p-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none"
+              className="w-full p-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-400 resize-none"
               rows={2}
               autoFocus
               onKeyDown={(e) => {
@@ -301,32 +369,65 @@ const SortableList = ({ list, boardId, onUpdateList, onDeleteList, onAddCard, on
                   e.preventDefault();
                   handleAddCard();
                 }
+                if (e.key === 'Escape') {
+                  setShowAddCard(false);
+                  setNewCardTitle('');
+                }
               }}
             />
             <div className="flex gap-2 mt-2">
               <button
                 onClick={handleAddCard}
-                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors"
+                disabled={!newCardTitle.trim()}
+                className="px-4 py-1.5 bg-cyan-500 hover:bg-cyan-600 disabled:bg-gray-300 text-white text-sm rounded-lg transition-colors font-medium"
               >
                 Añadir
               </button>
               <button
                 onClick={() => { setShowAddCard(false); setNewCardTitle(''); }}
-                className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
+                className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <X size={18} />
               </button>
             </div>
           </div>
-        ) : (
-          <button
-            onClick={() => setShowAddCard(true)}
-            className="w-full mt-2 flex items-center gap-2 px-3 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-lg transition-colors text-sm"
-          >
-            <Plus size={16} />
-            Añadir tarjeta
-          </button>
         )}
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// COLLABORATION SECTION (Sección de invitar)
+// ==========================================
+const CollaborationSection = () => {
+  return (
+    <div className="flex-shrink-0 w-72 bg-white rounded-xl shadow-sm overflow-hidden">
+      <div className="p-4">
+        <div className="flex items-center gap-2 mb-4">
+          <Users size={20} className="text-gray-400" />
+          <h3 className="font-semibold text-gray-700">Añadir miembros</h3>
+        </div>
+        
+        <p className="text-sm text-gray-500 mb-4 leading-relaxed">
+          Lleva tu productividad a otras alturas y colabora con colegas y amigos.
+        </p>
+        
+        <button 
+          className="w-full py-2.5 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg transition-colors font-medium text-sm"
+          data-testid="invite-members-btn"
+        >
+          Invitar
+        </button>
+      </div>
+      
+      {/* Avatar placeholders */}
+      <div className="px-4 pb-4">
+        <div className="flex -space-x-2">
+          <div className="w-8 h-8 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center">
+            <span className="text-xs text-gray-400">+</span>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -368,22 +469,6 @@ const BoardView = ({ board: initialBoard, onBack }) => {
   };
 
   // API Calls
-  const updateBoardInDB = async (updates) => {
-    try {
-      const token = localStorage.getItem('token');
-      await fetch(`${API_URL}/api/boards/${board.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(updates)
-      });
-    } catch (error) {
-      console.error('Error updating board:', error);
-    }
-  };
-
   const addList = async () => {
     if (!newListTitle.trim()) return;
     
@@ -635,26 +720,61 @@ const BoardView = ({ board: initialBoard, onBack }) => {
   };
 
   return (
-    <div 
-      className="min-h-screen flex flex-col"
-      style={{ backgroundColor: board.background_color }}
-    >
-      {/* Header */}
-      <div className="bg-black/20 backdrop-blur-sm sticky top-0 z-10">
-        <div className="px-4 py-3 flex items-center gap-4">
-          <button
-            onClick={onBack}
-            className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-          >
-            <ArrowLeft size={20} className="text-white" />
-          </button>
+    <div className="min-h-screen flex flex-col bg-[#F5F7FA]" data-testid="board-view">
+      {/* Header - Barra superior estilo referencia */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-20">
+        <div className="px-4 py-3 flex items-center justify-between">
+          {/* Left section */}
+          <div className="flex items-center gap-4">
+            <button
+              onClick={onBack}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              data-testid="back-btn"
+            >
+              <ArrowLeft size={20} className="text-gray-600" />
+            </button>
+            
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: board.background_color }}>
+                <LayoutGrid size={16} className="text-white" />
+              </div>
+              <h1 className="text-lg font-semibold text-gray-800">{board.title}</h1>
+            </div>
+          </div>
           
-          <h1 className="text-xl font-semibold text-white">{board.title}</h1>
+          {/* Right section - Actions */}
+          <div className="flex items-center gap-2">
+            <button 
+              className="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg transition-colors font-medium text-sm flex items-center gap-2"
+              data-testid="share-board-btn"
+            >
+              <Share2 size={16} />
+              Compartir
+            </button>
+            
+            <div className="flex items-center gap-1 ml-2">
+              <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Vista tabla">
+                <LayoutGrid size={18} className="text-gray-500" />
+              </button>
+              <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Miembros">
+                <Users size={18} className="text-gray-500" />
+              </button>
+              <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Tiempo">
+                <Clock size={18} className="text-gray-500" />
+              </button>
+              <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Completadas">
+                <CheckCircle2 size={18} className="text-gray-500" />
+              </button>
+              <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Notificaciones">
+                <Bell size={18} className="text-gray-500" />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Board Content */}
-      <div className="flex-1 overflow-x-auto p-4">
+      <div className="flex-1 overflow-x-auto p-6">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCorners}
@@ -665,11 +785,12 @@ const BoardView = ({ board: initialBoard, onBack }) => {
             items={board.lists.map(l => l.id)}
             strategy={horizontalListSortingStrategy}
           >
-            <div className="flex gap-4 items-start min-h-full">
-              {board.lists.map(list => (
+            <div className="flex gap-5 items-start min-h-full">
+              {board.lists.map((list, index) => (
                 <SortableList
                   key={list.id}
                   list={list}
+                  listIndex={index}
                   boardId={board.id}
                   onUpdateList={updateList}
                   onDeleteList={deleteList}
@@ -679,29 +800,33 @@ const BoardView = ({ board: initialBoard, onBack }) => {
                 />
               ))}
               
-              {/* Add List */}
+              {/* Add List Button / Form */}
               <div className="flex-shrink-0 w-72">
                 {showAddList ? (
-                  <div className="bg-gray-100 rounded-xl p-3">
+                  <div className="bg-white rounded-xl p-4 shadow-sm">
                     <input
                       type="text"
                       value={newListTitle}
                       onChange={(e) => setNewListTitle(e.target.value)}
-                      placeholder="Nombre de la lista..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                      placeholder="Nombre de la sección..."
+                      className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-400 text-sm"
                       autoFocus
-                      onKeyDown={(e) => e.key === 'Enter' && addList()}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') addList();
+                        if (e.key === 'Escape') { setShowAddList(false); setNewListTitle(''); }
+                      }}
                     />
-                    <div className="flex gap-2 mt-2">
+                    <div className="flex gap-2 mt-3">
                       <button
                         onClick={addList}
-                        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors"
+                        disabled={!newListTitle.trim()}
+                        className="flex-1 px-3 py-2 bg-cyan-500 hover:bg-cyan-600 disabled:bg-gray-300 text-white text-sm rounded-lg transition-colors font-medium"
                       >
-                        Añadir lista
+                        Añadir sección
                       </button>
                       <button
                         onClick={() => { setShowAddList(false); setNewListTitle(''); }}
-                        className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
+                        className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                       >
                         <X size={18} />
                       </button>
@@ -710,26 +835,30 @@ const BoardView = ({ board: initialBoard, onBack }) => {
                 ) : (
                   <button
                     onClick={() => setShowAddList(true)}
-                    className="w-full flex items-center gap-2 px-4 py-3 bg-white/30 hover:bg-white/40 text-white rounded-xl transition-colors font-medium"
+                    className="w-full flex items-center gap-2 px-4 py-3 text-cyan-600 hover:text-cyan-700 bg-white/80 hover:bg-white rounded-xl transition-all font-medium text-sm border border-dashed border-cyan-300 hover:border-cyan-400"
+                    data-testid="add-section-btn"
                   >
                     <Plus size={20} />
-                    Añadir lista
+                    Añadir Sección
                   </button>
                 )}
               </div>
+              
+              {/* Collaboration Section */}
+              <CollaborationSection />
             </div>
           </SortableContext>
 
           {/* Drag Overlay */}
           <DragOverlay>
             {activeItem?.type === 'card' && (
-              <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-3 w-64">
+              <div className="bg-white rounded-lg shadow-xl border border-gray-200 p-3 w-64 rotate-3">
                 <p className="text-sm text-gray-800">{activeItem.card.title}</p>
               </div>
             )}
             {activeItem?.type === 'list' && (
-              <div className="bg-gray-100 rounded-xl w-72 p-3">
-                <h3 className="font-medium text-gray-800">{activeItem.list.title}</h3>
+              <div className="bg-gray-100 rounded-xl w-72 p-3 shadow-xl rotate-2">
+                <h3 className="font-semibold text-gray-800">{activeItem.list.title}</h3>
               </div>
             )}
           </DragOverlay>

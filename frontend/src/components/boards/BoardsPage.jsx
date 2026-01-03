@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, LayoutGrid, Search, Trash2, MoreHorizontal, ArrowLeft } from 'lucide-react';
+import { Plus, LayoutGrid, Search, Trash2, ArrowLeft, MoreHorizontal, Star, Clock } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
-// Colores disponibles para tableros
+// Colores disponibles para tableros (paleta profesional)
 const BOARD_COLORS = [
   { id: 'blue', value: '#3B82F6', name: 'Azul' },
+  { id: 'cyan', value: '#06B6D4', name: 'Cyan' },
   { id: 'green', value: '#10B981', name: 'Verde' },
   { id: 'purple', value: '#8B5CF6', name: 'Morado' },
   { id: 'pink', value: '#EC4899', name: 'Rosa' },
@@ -13,6 +14,7 @@ const BOARD_COLORS = [
   { id: 'red', value: '#EF4444', name: 'Rojo' },
   { id: 'teal', value: '#14B8A6', name: 'Teal' },
   { id: 'indigo', value: '#6366F1', name: 'Índigo' },
+  { id: 'gray', value: '#6B7280', name: 'Gris' },
 ];
 
 const BoardsPage = ({ onBack, onSelectBoard }) => {
@@ -103,7 +105,7 @@ const BoardsPage = ({ onBack, onSelectBoard }) => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#F5F7FA]" data-testid="boards-page">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -112,18 +114,25 @@ const BoardsPage = ({ onBack, onSelectBoard }) => {
               <button
                 onClick={onBack}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                data-testid="back-btn"
               >
                 <ArrowLeft size={20} className="text-gray-600" />
               </button>
-              <div className="flex items-center gap-2">
-                <LayoutGrid className="w-6 h-6 text-blue-600" />
-                <h1 className="text-xl font-semibold text-gray-900">Tableros</h1>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                  <LayoutGrid className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold text-gray-900">Tableros</h1>
+                  <p className="text-xs text-gray-500">Organiza tus proyectos</p>
+                </div>
               </div>
             </div>
 
             <button
               onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm"
+              className="flex items-center gap-2 px-5 py-2.5 bg-cyan-500 hover:bg-cyan-600 text-white rounded-xl transition-colors font-medium text-sm shadow-sm"
+              data-testid="create-board-btn"
             >
               <Plus size={18} />
               Crear tablero
@@ -135,115 +144,165 @@ const BoardsPage = ({ onBack, onSelectBoard }) => {
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Search */}
-        <div className="mb-6">
+        <div className="mb-8">
           <div className="relative max-w-md">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               placeholder="Buscar tableros..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-400 shadow-sm"
+              data-testid="search-boards-input"
             />
           </div>
         </div>
 
         {/* Boards Grid */}
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full" />
+          <div className="flex items-center justify-center py-16">
+            <div className="animate-spin w-10 h-10 border-4 border-cyan-500 border-t-transparent rounded-full" />
           </div>
         ) : filteredBoards.length === 0 ? (
-          <div className="text-center py-12">
-            <LayoutGrid className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <div className="text-center py-16">
+            <div className="w-20 h-20 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-5">
+              <LayoutGrid className="w-10 h-10 text-gray-300" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
               {searchTerm ? 'No se encontraron tableros' : 'No tienes tableros aún'}
             </h3>
-            <p className="text-gray-500 mb-6">
-              {searchTerm ? 'Intenta con otro término de búsqueda' : 'Crea tu primer tablero para organizar tus proyectos'}
+            <p className="text-gray-500 mb-8 max-w-sm mx-auto">
+              {searchTerm ? 'Intenta con otro término de búsqueda' : 'Crea tu primer tablero para organizar tus proyectos con estilo Kanban'}
             </p>
             {!searchTerm && (
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-cyan-500 hover:bg-cyan-600 text-white rounded-xl transition-colors font-medium shadow-sm"
+                data-testid="create-first-board-btn"
               >
-                <Plus size={18} />
-                Crear tablero
+                <Plus size={20} />
+                Crear mi primer tablero
               </button>
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filteredBoards.map(board => (
-              <div
-                key={board.id}
-                onClick={() => onSelectBoard(board)}
-                className="group relative rounded-xl overflow-hidden cursor-pointer shadow-sm hover:shadow-lg transition-all duration-200 h-32"
-                style={{ backgroundColor: board.background_color }}
-              >
-                {/* Content */}
-                <div className="absolute inset-0 p-4 flex flex-col justify-between">
-                  <h3 className="text-white font-semibold text-lg truncate drop-shadow-sm">
-                    {board.title}
-                  </h3>
+          <>
+            {/* Section Header */}
+            <div className="flex items-center gap-2 mb-4">
+              <Star size={16} className="text-yellow-500" />
+              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Mis Tableros</h2>
+              <span className="text-xs text-gray-400">({filteredBoards.length})</span>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+              {filteredBoards.map(board => (
+                <div
+                  key={board.id}
+                  onClick={() => onSelectBoard(board)}
+                  className="group relative rounded-xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 h-36 transform hover:-translate-y-1"
+                  style={{ backgroundColor: board.background_color }}
+                  data-testid={`board-card-${board.id}`}
+                >
+                  {/* Gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                   
-                  {/* Actions */}
-                  <div className="flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span className="text-white/70 text-xs">
-                      {new Date(board.created_at).toLocaleDateString('es-ES')}
-                    </span>
-                    <button
-                      onClick={(e) => deleteBoard(board.id, e)}
-                      className="p-1.5 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
-                    >
-                      <Trash2 size={14} className="text-white" />
-                    </button>
+                  {/* Content */}
+                  <div className="absolute inset-0 p-4 flex flex-col justify-between">
+                    <div className="flex items-start justify-between">
+                      <h3 className="text-white font-bold text-lg drop-shadow-sm pr-6 line-clamp-2">
+                        {board.title}
+                      </h3>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Future: show dropdown menu
+                        }}
+                        className="p-1.5 bg-white/10 hover:bg-white/20 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        <MoreHorizontal size={16} className="text-white" />
+                      </button>
+                    </div>
+                    
+                    {/* Bottom info */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 text-white/70 text-xs">
+                        <Clock size={12} />
+                        <span>{new Date(board.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</span>
+                      </div>
+                      <button
+                        onClick={(e) => deleteBoard(board.id, e)}
+                        className="p-1.5 bg-white/10 hover:bg-red-500/80 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                        data-testid={`delete-board-${board.id}`}
+                      >
+                        <Trash2 size={14} className="text-white" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-                
-                {/* Hover overlay */}
-                <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-            ))}
-          </div>
+              ))}
+              
+              {/* Create new board card */}
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="h-36 rounded-xl border-2 border-dashed border-gray-300 hover:border-cyan-400 bg-white/50 hover:bg-white transition-all duration-200 flex flex-col items-center justify-center gap-2 group"
+                data-testid="create-board-card"
+              >
+                <div className="w-12 h-12 rounded-xl bg-gray-100 group-hover:bg-cyan-50 flex items-center justify-center transition-colors">
+                  <Plus size={24} className="text-gray-400 group-hover:text-cyan-500 transition-colors" />
+                </div>
+                <span className="text-sm font-medium text-gray-500 group-hover:text-cyan-600 transition-colors">
+                  Nuevo tablero
+                </span>
+              </button>
+            </div>
+          </>
         )}
       </div>
 
       {/* Create Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div 
+            className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Crear tablero</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Crear tablero</h2>
               
               {/* Preview */}
               <div
-                className="rounded-lg h-24 mb-6 p-4 flex items-end"
+                className="rounded-xl h-28 mb-6 p-4 flex items-end relative overflow-hidden"
                 style={{ backgroundColor: newBoardColor }}
               >
-                <span className="text-white font-medium truncate drop-shadow">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+                <span className="text-white font-semibold text-lg truncate drop-shadow relative z-10">
                   {newBoardTitle || 'Nombre del tablero'}
                 </span>
               </div>
               
               {/* Title input */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="mb-5">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Título del tablero
                 </label>
                 <input
                   type="text"
                   value={newBoardTitle}
                   onChange={(e) => setNewBoardTitle(e.target.value)}
-                  placeholder="Mi nuevo tablero"
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  placeholder="Ej: Proyecto Web, Marketing Q1..."
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-400 text-sm"
                   autoFocus
+                  data-testid="new-board-title-input"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && newBoardTitle.trim()) createBoard();
+                    if (e.key === 'Escape') setShowCreateModal(false);
+                  }}
                 />
               </div>
               
               {/* Color picker */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
                   Color de fondo
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -251,11 +310,14 @@ const BoardsPage = ({ onBack, onSelectBoard }) => {
                     <button
                       key={color.id}
                       onClick={() => setNewBoardColor(color.value)}
-                      className={`w-10 h-10 rounded-lg transition-all ${
-                        newBoardColor === color.value ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : 'hover:scale-105'
+                      className={`w-10 h-10 rounded-xl transition-all duration-200 ${
+                        newBoardColor === color.value 
+                          ? 'ring-2 ring-offset-2 ring-gray-400 scale-110 shadow-lg' 
+                          : 'hover:scale-105 hover:shadow-md'
                       }`}
                       style={{ backgroundColor: color.value }}
                       title={color.name}
+                      data-testid={`color-${color.id}`}
                     />
                   ))}
                 </div>
@@ -265,16 +327,22 @@ const BoardsPage = ({ onBack, onSelectBoard }) => {
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowCreateModal(false)}
-                  className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+                  className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={createBoard}
                   disabled={!newBoardTitle.trim() || creating}
-                  className="flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-xl transition-colors font-medium"
+                  className="flex-1 px-4 py-3 bg-cyan-500 hover:bg-cyan-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl transition-colors font-medium"
+                  data-testid="confirm-create-board-btn"
                 >
-                  {creating ? 'Creando...' : 'Crear'}
+                  {creating ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Creando...
+                    </span>
+                  ) : 'Crear tablero'}
                 </button>
               </div>
             </div>

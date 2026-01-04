@@ -629,6 +629,22 @@ const BoardView = ({ board: initialBoard, onBack }) => {
     }
   };
 
+  // Function to refresh board data from backend
+  const refreshBoard = async () => {
+    try {
+      const token = localStorage.getItem('mm_auth_token');
+      const response = await fetch(`${API_URL}/api/boards/${board?.id || initialBoard.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setBoard(data.board);
+      }
+    } catch (error) {
+      console.error('Error refreshing board:', error);
+    }
+  };
+
   // Fetch fresh board data on mount
   useEffect(() => {
     let isMounted = true;

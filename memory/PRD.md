@@ -2,6 +2,15 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-04: Sistema de Adjuntos Mejorado (Estilo Trello) ✅
+- **Added**: Generación automática de 2 versiones de imagen:
+  - Preview: 280px ancho máximo (para tarjetas y modal)
+  - Grande: 500px ancho máximo (para vista ampliada)
+- **Added**: Ícono de ojo (👁️) en hover para abrir vista ampliada
+- **Added**: Lightbox profesional con fondo oscuro, info del archivo y botón cerrar
+- **Changed**: Íconos en hover ahora son círculos blancos con sombra (mejor visibilidad)
+- **Optimized**: Imágenes comprimidas a WebP con calidad 85% (grande) y 75% (preview)
+
 ### 2026-01-04: Sistema de Adjuntos de Imágenes ✅
 - **Added**: Upload de imágenes con conversión automática a WebP
 - **Added**: Redimensionado proporcional (máx 800x600) con optimización de peso

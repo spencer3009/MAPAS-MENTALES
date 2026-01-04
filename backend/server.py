@@ -3217,6 +3217,8 @@ async def update_board(board_id: str, request: UpdateBoardRequest, current_user:
         update_data["background_color"] = request.background_color
     if request.background_image is not None:
         update_data["background_image"] = request.background_image
+    if request.board_labels is not None:
+        update_data["board_labels"] = request.board_labels
     
     await db.boards.update_one({"id": board_id}, {"$set": update_data})
     

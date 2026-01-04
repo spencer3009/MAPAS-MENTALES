@@ -118,9 +118,23 @@ const SortableCard = ({ card, listId, listTitle, boardId, onUpdate, onDelete, on
             : 'border border-gray-100 hover:border-cyan-200'
       }`}
     >
+      {/* Cover Image - First attachment as cover */}
+      {card.attachments && card.attachments.length > 0 && card.attachments[0].data && (
+        <div className="relative w-full">
+          <img
+            src={`data:image/webp;base64,${card.attachments[0].data}`}
+            alt="Cover"
+            className="w-full h-32 object-cover rounded-t-lg"
+          />
+          <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-black/30 to-transparent" />
+        </div>
+      )}
+      
       {/* Time tracking indicator */}
       {isTimeTracking && (
-        <div className="bg-red-500 text-white px-3 py-1.5 flex items-center justify-between rounded-t-lg">
+        <div className={`bg-red-500 text-white px-3 py-1.5 flex items-center justify-between ${
+          card.attachments && card.attachments.length > 0 ? '' : 'rounded-t-lg'
+        }`}>
           <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>

@@ -190,6 +190,7 @@ MindoraMap es una plataforma de mapas mentales para empresarios. Permite organiz
 
 | Issue | Prioridad | Estado |
 |-------|-----------|--------|
+| ~~Drag & Drop no persiste~~ | P0 | ✅ CORREGIDO |
 | MindHybrid layout inestable | P1 | PENDIENTE |
 | Botón 'X' MultiSelectToolbar no funciona | P2 | PENDIENTE |
 | Superposición móvil sidebar/menú | P2 | PENDIENTE |

@@ -621,7 +621,7 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
                 </div>
               </div>
               
-              {/* Activity list - Combined comments and time events */}
+              {/* Activity list - Combined comments and time events and due date events */}
               <div className="space-y-3">
                 {getAllActivities().map(activity => (
                   <div key={activity.id} className="flex gap-3">
@@ -634,6 +634,11 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
                     {activity.type === 'time_stop' && (
                       <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center flex-shrink-0">
                         <Square size={12} className="text-white" fill="white" />
+                      </div>
+                    )}
+                    {activity.type === 'due_date' && (
+                      <div className="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0">
+                        <Calendar size={14} className="text-white" />
                       </div>
                     )}
                     {activity.type === 'comment' && (
@@ -661,6 +666,18 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
                               Duración: {formatDuration(activity.duration)}
                             </p>
                           )}
+                        </div>
+                      )}
+                      
+                      {/* Due date event */}
+                      {activity.type === 'due_date' && (
+                        <div>
+                          <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-0.5">
+                            {formatRelativeTime(activity.created_at)}
+                          </p>
+                          <p className="text-sm text-gray-700">
+                            {activity.text}
+                          </p>
                         </div>
                       )}
                       

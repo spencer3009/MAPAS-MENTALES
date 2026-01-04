@@ -780,7 +780,10 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center gap-2">
                         {/* Ícono Ver (ojo) */}
                         <button
-                          onClick={() => openLightbox(attachment)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openLightbox(attachment);
+                          }}
                           className="p-2.5 bg-white text-gray-700 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-cyan-50 hover:text-cyan-600 shadow-lg"
                           title="Ver imagen"
                         >
@@ -788,7 +791,11 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
                         </button>
                         {/* Ícono Eliminar (tachito) */}
                         <button
-                          onClick={() => handleDeleteAttachment(attachment.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            handleDeleteAttachment(attachment.id);
+                          }}
                           className="p-2.5 bg-white text-gray-700 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 hover:text-red-600 shadow-lg"
                           title="Eliminar adjunto"
                         >

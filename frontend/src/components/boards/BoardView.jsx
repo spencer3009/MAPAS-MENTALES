@@ -155,15 +155,49 @@ const SortableCard = ({ card, listId, listTitle, boardId, onUpdate, onDelete, on
         
         {/* Card metadata badges */}
         <div className="flex items-center gap-2 mt-2 flex-wrap">
-          {/* Due date badge */}
-          {card.due_date && (
-            <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded ${
-              new Date(card.due_date) < new Date() ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'
-            }`}>
-              <Calendar size={10} />
-              {new Date(card.due_date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
-            </span>
-          )}
+          {/* Due date badge with smart coloring */}
+          {card.due_date && (() => {
+            const now = new Date();
+            const due = new Date(card.due_date);
+            if (card.due_time) {
+              const [hours, minutes] = card.due_time.split(':');
+              due.setHours(parseInt(hours), parseInt(minutes));
+            }
+            const diffMs = due - now;
+            const diffDays = diffMs / (1000 * 60 * 60 * 24);
+            
+            let bgColor = 'bg-gray-100';
+            let textColor = 'text-gray-600';
+            
+            if (diffMs < 0) {
+              // Vencido
+              bgColor = 'bg-red-100';
+              textColor = 'text-red-600';
+            } else if (diffDays <= 1) {
+              // Hoy o mañana - urgente
+              bgColor = 'bg-amber-100';
+              textColor = 'text-amber-700';
+            } else if (diffDays <= 3) {
+              // Próximos 3 días
+              bgColor = 'bg-yellow-100';
+              textColor = 'text-yellow-700';
+            }
+            
+            const displayDate = new Date(card.due_date).toLocaleDateString('es-ES', { 
+              day: 'numeric', 
+              month: 'short',
+              year: due.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+            });
+            
+            const displayTime = card.due_time ? ` ${card.due_time}` : '';
+            
+            return (
+              <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded font-medium ${bgColor} ${textColor}`}>
+                <Calendar size={10} />
+                {displayDate}{displayTime}
+              </span>
+            );
+          })()}
           
           {/* Checklist progress badge */}
           {checklistProgress !== null && (

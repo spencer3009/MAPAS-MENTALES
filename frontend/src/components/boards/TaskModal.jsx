@@ -777,14 +777,14 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
                         className="w-full h-32 object-cover"
                       />
                       {/* Hover overlay con íconos */}
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center gap-2">
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center gap-3 z-10">
                         {/* Ícono Ver (ojo) */}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             openLightbox(attachment);
                           }}
-                          className="p-2.5 bg-white text-gray-700 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-cyan-50 hover:text-cyan-600 shadow-lg"
+                          className="p-2.5 bg-white text-gray-700 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-cyan-50 hover:text-cyan-600 shadow-lg hover:scale-110 pointer-events-auto"
                           title="Ver imagen"
                         >
                           <Eye size={16} />
@@ -796,7 +796,7 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
                             e.preventDefault();
                             handleDeleteAttachment(attachment.id);
                           }}
-                          className="p-2.5 bg-white text-gray-700 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 hover:text-red-600 shadow-lg"
+                          className="p-2.5 bg-white text-gray-700 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-red-50 hover:text-red-600 shadow-lg hover:scale-110 pointer-events-auto"
                           title="Eliminar adjunto"
                         >
                           <Trash2 size={16} />

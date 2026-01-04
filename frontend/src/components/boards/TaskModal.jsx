@@ -303,8 +303,11 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
 
   const handleSelectDay = (day) => {
     if (!day) return;
-    const newDate = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), day);
-    const dateStr = newDate.toISOString().split('T')[0];
+    // Crear fecha en formato YYYY-MM-DD sin conversión de zona horaria
+    const year = selectedMonth.getFullYear();
+    const month = String(selectedMonth.getMonth() + 1).padStart(2, '0');
+    const dayStr = String(day).padStart(2, '0');
+    const dateStr = `${year}-${month}-${dayStr}`;
     handleSetDueDate(dateStr, dueTime);
   };
 

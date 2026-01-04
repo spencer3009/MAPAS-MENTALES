@@ -74,6 +74,7 @@ class UpdateBoardRequest(BaseModel):
     description: Optional[str] = None
     background_color: Optional[str] = None
     background_image: Optional[str] = None
+    board_labels: Optional[List[dict]] = None  # Etiquetas reutilizables
 
 
 class CreateListRequest(BaseModel):

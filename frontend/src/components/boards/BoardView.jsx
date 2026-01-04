@@ -23,7 +23,7 @@ import {
   Tag, Edit2, Check,
   Lightbulb, TrendingUp, CheckCircle2, 
   Users, Share2, LayoutGrid, Clock, Bell,
-  MoreHorizontal, Calendar, CheckSquare
+  MoreHorizontal, Calendar, CheckSquare, Paperclip
 } from 'lucide-react';
 import TaskModal from './TaskModal';
 import { useTimeTracking } from '../../contexts/TimeTrackingContext';

@@ -815,6 +815,11 @@ const BoardView = ({ board: initialBoard, onBack }) => {
     const { active } = event;
     setActiveId(active.id);
     setActiveItem(active.data.current);
+    // IMPORTANTE: Guardar el listId original al inicio del drag
+    // porque handleDragOver puede mutar active.data.current.listId
+    if (active.data.current?.type === 'card') {
+      setOriginalListId(active.data.current.listId);
+    }
   };
 
   const handleDragOver = (event) => {

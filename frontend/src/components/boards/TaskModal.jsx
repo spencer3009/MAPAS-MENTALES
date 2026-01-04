@@ -1292,6 +1292,38 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
           </div>
         </div>
       </div>
+      
+      {/* Lightbox para vista ampliada de imagen */}
+      {lightboxImage && (
+        <div 
+          className="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center p-4"
+          onClick={() => setLightboxImage(null)}
+        >
+          {/* Botón cerrar */}
+          <button
+            onClick={() => setLightboxImage(null)}
+            className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+          >
+            <X size={24} className="text-white" />
+          </button>
+          
+          {/* Info de la imagen */}
+          <div className="absolute top-4 left-4 text-white">
+            <p className="font-medium">{lightboxImage.filename}</p>
+            <p className="text-sm text-white/70">
+              {lightboxImage.width} × {lightboxImage.height} px
+            </p>
+          </div>
+          
+          {/* Imagen ampliada */}
+          <img
+            src={lightboxImage.url}
+            alt={lightboxImage.filename}
+            className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 };

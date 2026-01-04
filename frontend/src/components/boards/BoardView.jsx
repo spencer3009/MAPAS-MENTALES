@@ -563,6 +563,7 @@ const BoardView = ({ board: initialBoard, onBack }) => {
   const [board, setBoard] = useState(initialBoard);
   const [activeId, setActiveId] = useState(null);
   const [activeItem, setActiveItem] = useState(null);
+  const [originalListId, setOriginalListId] = useState(null); // Guardar lista original del drag
   const [showAddList, setShowAddList] = useState(false);
   const [newListTitle, setNewListTitle] = useState('');
   

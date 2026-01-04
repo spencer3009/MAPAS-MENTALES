@@ -501,11 +501,29 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
     }
   };
   
-  // Obtener URL de imagen de adjunto
+  // Obtener URL de imagen preview (versión chica)
   const getAttachmentUrl = (attachment) => {
     if (attachment.data_url) return attachment.data_url;
     if (attachment.data) return `data:image/webp;base64,${attachment.data}`;
     return null;
+  };
+  
+  // Obtener URL de imagen grande (vista ampliada)
+  const getAttachmentUrlLarge = (attachment) => {
+    if (attachment.data_url_large) return attachment.data_url_large;
+    if (attachment.data_large) return `data:image/webp;base64,${attachment.data_large}`;
+    // Fallback a preview si no hay versión grande
+    return getAttachmentUrl(attachment);
+  };
+  
+  // Abrir lightbox con imagen grande
+  const openLightbox = (attachment) => {
+    setLightboxImage({
+      url: getAttachmentUrlLarge(attachment),
+      filename: attachment.filename,
+      width: attachment.width_large || attachment.width,
+      height: attachment.height_large || attachment.height
+    });
   };
 
   // Calcular progreso del checklist

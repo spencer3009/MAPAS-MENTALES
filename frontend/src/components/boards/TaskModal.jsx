@@ -674,17 +674,20 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
         {/* Header */}
         <div className="bg-gradient-to-r from-cyan-500 to-blue-600 px-6 py-4 flex items-start justify-between">
           <div className="flex-1 min-w-0">
-            {/* Labels */}
-            {labels.length > 0 && (
+            {/* Labels - Mostrar etiquetas con texto + color */}
+            {labels.length > 0 && boardLabels.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mb-2">
-                {labels.map((label, idx) => {
-                  const color = LABEL_COLORS.find(c => c.id === label.color);
+                {labels.map((labelId) => {
+                  const label = boardLabels.find(bl => bl.id === labelId);
+                  if (!label) return null;
                   return (
                     <span
-                      key={idx}
-                      className="h-2 w-10 rounded-full"
-                      style={{ backgroundColor: color?.value || '#3B82F6' }}
-                    />
+                      key={labelId}
+                      className="px-2 py-0.5 rounded text-xs font-medium text-white drop-shadow-sm"
+                      style={{ backgroundColor: label.color }}
+                    >
+                      {label.name}
+                    </span>
                   );
                 })}
               </div>

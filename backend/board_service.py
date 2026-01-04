@@ -53,6 +53,7 @@ class Board(BaseModel):
     owner_username: str
     lists: List[BoardList] = []
     collaborators: List[str] = []
+    board_labels: List[dict] = []  # Etiquetas reutilizables del tablero
     is_archived: bool = False
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     updated_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())

@@ -32,6 +32,19 @@ const BoardsPage = ({ onBack, onSelectBoard, onTrashUpdate }) => {
   const [newBoardTitle, setNewBoardTitle] = useState('');
   const [newBoardColor, setNewBoardColor] = useState('#3B82F6');
   const [creating, setCreating] = useState(false);
+  
+  // Estados para edición inline
+  const [editingBoardId, setEditingBoardId] = useState(null);
+  const [editingTitle, setEditingTitle] = useState('');
+  const [savingTitle, setSavingTitle] = useState(false);
+  const [titleError, setTitleError] = useState('');
+  const editInputRef = useRef(null);
+  
+  // Estado para duplicación
+  const [duplicatingBoardId, setDuplicatingBoardId] = useState(null);
+  
+  // Estado para mensajes de éxito/error
+  const [toast, setToast] = useState(null);
 
   // Cargar tableros
   useEffect(() => {

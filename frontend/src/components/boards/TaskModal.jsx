@@ -776,19 +776,30 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
                         alt={attachment.filename}
                         className="w-full h-32 object-cover"
                       />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                      {/* Hover overlay con íconos */}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center gap-2">
+                        {/* Ícono Ver (ojo) */}
+                        <button
+                          onClick={() => openLightbox(attachment)}
+                          className="p-2.5 bg-white text-gray-700 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-cyan-50 hover:text-cyan-600 shadow-lg"
+                          title="Ver imagen"
+                        >
+                          <Eye size={16} />
+                        </button>
+                        {/* Ícono Eliminar (tachito) */}
                         <button
                           onClick={() => handleDeleteAttachment(attachment.id)}
-                          className="p-2 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                          className="p-2.5 bg-white text-gray-700 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 hover:text-red-600 shadow-lg"
                           title="Eliminar adjunto"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={16} />
                         </button>
                       </div>
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
-                        <p className="text-xs text-white truncate">{attachment.filename}</p>
+                      {/* Info del archivo */}
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                        <p className="text-xs text-white truncate font-medium">{attachment.filename}</p>
                         {attachment.size_kb && (
-                          <p className="text-[10px] text-white/70">{attachment.size_kb} KB</p>
+                          <p className="text-[10px] text-white/80">{attachment.size_kb} KB</p>
                         )}
                       </div>
                     </div>

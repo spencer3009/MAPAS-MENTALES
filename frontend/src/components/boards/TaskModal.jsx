@@ -9,7 +9,7 @@ import TimeTracker from './TimeTracker';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
-// Colores de etiquetas
+// Colores disponibles para etiquetas (estilo Trello)
 const LABEL_COLORS = [
   { id: 'green', value: '#22C55E', name: 'Verde' },
   { id: 'yellow', value: '#EAB308', name: 'Amarillo' },
@@ -29,14 +29,14 @@ const PRIORITIES = [
   { id: 'urgent', label: 'Urgente', color: '#EF4444', icon: '🔴' },
 ];
 
-const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDelete }) => {
+const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDelete, boardLabels = [], onBoardLabelsUpdate }) => {
   const [editingTitle, setEditingTitle] = useState(false);
   const [title, setTitle] = useState(card.title || '');
   const [description, setDescription] = useState(card.description || '');
   const [editingDescription, setEditingDescription] = useState(false);
   const [dueDate, setDueDate] = useState(card.due_date || '');
   const [priority, setPriority] = useState(card.priority || '');
-  const [labels, setLabels] = useState(card.labels || []);
+  const [labels, setLabels] = useState(card.labels || []); // IDs de etiquetas asignadas a esta tarjeta
   const [checklist, setChecklist] = useState(card.checklist || []);
   const [newChecklistItem, setNewChecklistItem] = useState('');
   const [comments, setComments] = useState(card.comments || []);
@@ -46,6 +46,12 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
   const [showPriorityPicker, setShowPriorityPicker] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [timeEntries, setTimeEntries] = useState([]);
+  
+  // Estados para el sistema de etiquetas (estilo Trello)
+  const [labelMode, setLabelMode] = useState('select'); // 'select', 'create', 'edit'
+  const [editingLabel, setEditingLabel] = useState(null);
+  const [newLabelName, setNewLabelName] = useState('');
+  const [newLabelColor, setNewLabelColor] = useState('#3B82F6');
   
   // Estados para el selector de fecha límite
   const [showDatePicker, setShowDatePicker] = useState(false);

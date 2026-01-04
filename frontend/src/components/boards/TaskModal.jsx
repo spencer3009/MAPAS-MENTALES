@@ -327,7 +327,17 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
       month: 'short', 
       year: 'numeric' 
     });
-    return dueTime ? `${formattedDate} ${dueTime}` : formattedDate;
+    
+    if (!dueTime) return formattedDate;
+    
+    // Convertir hora a formato 12h con AM/PM
+    const [h, m] = dueTime.split(':');
+    const hour = parseInt(h);
+    const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const formattedTime = `${displayHour}:${m} ${ampm}`;
+    
+    return `${formattedDate} ${formattedTime}`;
   };
 
   // Determinar color de fecha límite

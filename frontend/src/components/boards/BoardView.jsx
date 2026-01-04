@@ -1215,6 +1215,8 @@ const BoardView = ({ board: initialBoard, onBack }) => {
           listId={selectedListId}
           listTitle={selectedListTitle}
           boardId={board.id}
+          boardLabels={boardLabels}
+          onBoardLabelsUpdate={handleBoardLabelsUpdate}
           onClose={handleCloseModal}
           onUpdate={handleUpdateCardFromModal}
           onDelete={handleDeleteCardFromModal}

@@ -89,6 +89,13 @@ class UpdateCardRequest(BaseModel):
     description: Optional[str] = None
     labels: Optional[List[dict]] = None
     position: Optional[int] = None
+    due_date: Optional[str] = None
+    due_time: Optional[str] = None
+    due_date_activities: Optional[List[dict]] = None
+    checklist: Optional[List[dict]] = None
+    comments: Optional[List[dict]] = None
+    priority: Optional[str] = None
+    attachments: Optional[List[dict]] = None
 
 
 class MoveCardRequest(BaseModel):

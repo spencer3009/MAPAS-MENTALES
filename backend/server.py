@@ -3220,6 +3220,58 @@ async def update_board(board_id: str, request: UpdateBoardRequest, current_user:
     return {"board": updated_board, "message": "Tablero actualizado"}
 
 
+@api_router.post("/boards/{board_id}/duplicate")
+async def duplicate_board(board_id: str, current_user: dict = Depends(get_current_user)):
+    """Duplicar un tablero con todo su contenido"""
+    # Buscar el tablero original
+    original_board = await db.boards.find_one({
+        "id": board_id, 
+        "owner_username": current_user["username"],
+        "is_deleted": {"$ne": True}
+    })
+    
+    if not original_board:
+        raise HTTPException(status_code=404, detail="Tablero no encontrado o sin permisos")
+    
+    # Crear nuevo ID para el tablero duplicado
+    new_board_id = f"board_{uuid.uuid4().hex[:12]}"
+    now = datetime.now(timezone.utc).isoformat()
+    
+    # Duplicar listas con nuevos IDs para cada lista y tarea
+    new_lists = []
+    for lst in original_board.get("lists", []):
+        new_list_id = f"list_{uuid.uuid4().hex[:8]}"
+        new_tasks = []
+        for task in lst.get("tasks", []):
+            new_task_id = f"task_{uuid.uuid4().hex[:8]}"
+            new_task = {**task, "id": new_task_id, "created_at": now}
+            new_tasks.append(new_task)
+        new_list = {**lst, "id": new_list_id, "tasks": new_tasks}
+        new_lists.append(new_list)
+    
+    # Crear el tablero duplicado
+    new_board = {
+        "id": new_board_id,
+        "title": f"{original_board.get('title', 'Sin título')} (Copia)",
+        "description": original_board.get("description", ""),
+        "background_color": original_board.get("background_color", "#3B82F6"),
+        "background_image": original_board.get("background_image"),
+        "owner_username": current_user["username"],
+        "lists": new_lists,
+        "collaborators": [],
+        "is_archived": False,
+        "is_deleted": False,
+        "created_at": now,
+        "updated_at": now
+    }
+    
+    await db.boards.insert_one(new_board)
+    new_board.pop("_id", None)
+    
+    logger.info(f"📋 Tablero {board_id} duplicado como {new_board_id} por {current_user['username']}")
+    return {"board": new_board, "message": "Tablero duplicado exitosamente"}
+
+
 @api_router.delete("/boards/{board_id}")
 async def delete_board(board_id: str, current_user: dict = Depends(get_current_user)):
     """Soft delete - Mover tablero a la papelera"""

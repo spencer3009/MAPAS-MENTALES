@@ -2,6 +2,13 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-04: Fix Crítico - Persistencia de Drag & Drop en Tableros ✅
+- **Fixed**: Bug crítico donde mover tarjetas entre columnas NO se guardaba en la base de datos
+- **Root Cause**: `handleDragOver` mutaba `active.data.current.listId`, causando que `handleDragEnd` viera source y destination como iguales
+- **Solution**: Guardar `originalListId` en `handleDragStart` y usarlo en `handleDragEnd` en lugar del valor mutado
+- **Files Changed**: `/app/frontend/src/components/boards/BoardView.jsx`
+- **Testing**: Backend API tests 100% passed (10/10), code review verified
+
 ### 2026-01-04: Sistema de Adjuntos Mejorado (Estilo Trello) ✅
 - **Added**: Generación automática de 2 versiones de imagen:
   - Preview: 280px ancho máximo (para tarjetas y modal)

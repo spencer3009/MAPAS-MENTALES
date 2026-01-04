@@ -34,6 +34,20 @@
   - `/app/frontend/src/components/boards/BoardView.jsx` - Visualización en tarjetas
 - **Testing**: 11/11 backend tests passed, visual verification passed
 
+### 2026-01-04: Reubicación de Registro de Tiempo al Sidebar ✅
+- **Moved**: Módulo de Registro de Tiempo de la columna izquierda al sidebar (columna derecha)
+- **Position**: Primer elemento visible después de "Añadir a la tarjeta"
+- **Added**: Contador 00:00:00 siempre visible desde el inicio
+- **Added**: Al presionar Play:
+  - El tiempo comienza a contarse en tiempo real
+  - Botón cambia de Play (▶) a Stop (⬛)
+  - Se expanden automáticamente las estadísticas (gráfica semanal, tiempo por usuario)
+  - Indicador pulsante rojo de "Activo"
+- **Added**: Botón "Ocultar/Ver estadísticas" para controlar la vista expandida
+- **Added**: Muestra "Tiempo total" acumulado
+- **File Created**: `/app/frontend/src/components/boards/TimeTrackerSidebar.jsx`
+- **UX**: El registro de tiempo ahora es función principal, no secundaria
+
 ### 2026-01-04: Sistema de Adjuntos Mejorado (Estilo Trello) ✅
 - **Added**: Generación automática de 2 versiones de imagen:
   - Preview: 280px ancho máximo (para tarjetas y modal)

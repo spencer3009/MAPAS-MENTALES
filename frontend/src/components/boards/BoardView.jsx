@@ -66,7 +66,7 @@ const LIST_THEMES = {
 // Toda la tarjeta es draggable (UX mejorado)
 // Click abre el modal de tarea
 // ==========================================
-const SortableCard = ({ card, listId, listTitle, boardId, onUpdate, onDelete, onOpenModal, isTimeTracking, trackingTime }) => {
+const SortableCard = ({ card, listId, listTitle, boardId, onUpdate, onDelete, onOpenModal, isTimeTracking, trackingTime, boardLabels = [] }) => {
   const [showActions, setShowActions] = useState(false);
   const wasDraggingRef = React.useRef(false);
   

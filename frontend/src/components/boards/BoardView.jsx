@@ -991,11 +991,11 @@ const BoardView = ({ board: initialBoard, onBack }) => {
           if (!response.ok) {
             console.error('Error moving card:', await response.text());
             // Recargar tablero en caso de error para sincronizar
-            loadBoard();
+            refreshBoard();
           }
         } catch (error) {
           console.error('Error moving card:', error);
-          loadBoard();
+          refreshBoard();
         }
       }
     }

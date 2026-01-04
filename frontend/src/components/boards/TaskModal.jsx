@@ -202,10 +202,134 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
     setShowPriorityPicker(false);
   };
 
-  // Set due date
-  const handleSetDueDate = (date) => {
+  // Funciones del calendario
+  const getDaysInMonth = (date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1; // Lunes = 0
+    
+    const days = [];
+    // Días vacíos al inicio
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push(null);
+    }
+    // Días del mes
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push(i);
+    }
+    return days;
+  };
+
+  const formatMonthYear = (date) => {
+    return date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+  };
+
+  const prevMonth = () => {
+    setSelectedMonth(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() - 1, 1));
+  };
+
+  const nextMonth = () => {
+    setSelectedMonth(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 1));
+  };
+
+  const isToday = (day) => {
+    if (!day) return false;
+    const today = new Date();
+    return day === today.getDate() && 
+           selectedMonth.getMonth() === today.getMonth() && 
+           selectedMonth.getFullYear() === today.getFullYear();
+  };
+
+  const isSelectedDate = (day) => {
+    if (!day || !dueDate) return false;
+    const selected = new Date(dueDate);
+    return day === selected.getDate() && 
+           selectedMonth.getMonth() === selected.getMonth() && 
+           selectedMonth.getFullYear() === selected.getFullYear();
+  };
+
+  // Set due date con registro de actividad
+  const handleSetDueDate = (date, time = dueTime) => {
+    const previousDate = dueDate;
+    const username = currentUser.username || currentUser.name || 'Usuario';
+    
+    // Crear registro de actividad
+    let activityText = '';
+    if (!previousDate && date) {
+      activityText = `${username} estableció una fecha límite`;
+    } else if (previousDate && date) {
+      activityText = `${username} cambió el plazo`;
+    } else if (previousDate && !date) {
+      activityText = `${username} eliminó la fecha límite`;
+    }
+    
+    const newActivity = activityText ? {
+      id: `due_${Date.now()}`,
+      type: 'due_date',
+      text: activityText,
+      author: username,
+      created_at: new Date().toISOString(),
+      old_date: previousDate,
+      new_date: date
+    } : null;
+    
+    const updatedActivities = newActivity 
+      ? [newActivity, ...dueDateActivities]
+      : dueDateActivities;
+    
     setDueDate(date);
-    saveChanges({ due_date: date });
+    setDueTime(time);
+    setDueDateActivities(updatedActivities);
+    saveChanges({ 
+      due_date: date, 
+      due_time: time,
+      due_date_activities: updatedActivities 
+    });
+  };
+
+  const handleSelectDay = (day) => {
+    if (!day) return;
+    const newDate = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), day);
+    const dateStr = newDate.toISOString().split('T')[0];
+    handleSetDueDate(dateStr, dueTime);
+  };
+
+  const clearDueDate = () => {
+    handleSetDueDate('', '');
+    setShowDatePicker(false);
+  };
+
+  const formatDueDateDisplay = () => {
+    if (!dueDate) return null;
+    const date = new Date(dueDate);
+    const formattedDate = date.toLocaleDateString('es-ES', { 
+      day: 'numeric', 
+      month: 'short', 
+      year: 'numeric' 
+    });
+    return dueTime ? `${formattedDate} ${dueTime}` : formattedDate;
+  };
+
+  // Determinar color de fecha límite
+  const getDueDateStatus = () => {
+    if (!dueDate) return null;
+    const now = new Date();
+    const due = new Date(dueDate);
+    if (dueTime) {
+      const [hours, minutes] = dueTime.split(':');
+      due.setHours(parseInt(hours), parseInt(minutes));
+    }
+    
+    const diffMs = due - now;
+    const diffDays = diffMs / (1000 * 60 * 60 * 24);
+    
+    if (diffMs < 0) return 'overdue'; // Vencido
+    if (diffDays <= 1) return 'urgent'; // Hoy o mañana
+    if (diffDays <= 3) return 'soon'; // Próximos 3 días
+    return 'normal';
   };
 
   // Checklist functions

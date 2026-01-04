@@ -46,7 +46,15 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
   const [showPriorityPicker, setShowPriorityPicker] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [timeEntries, setTimeEntries] = useState([]);
+  
+  // Estados para el selector de fecha límite
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
+  const [dueTime, setDueTime] = useState(card.due_time || '12:00');
+  const [dueDateActivities, setDueDateActivities] = useState(card.due_date_activities || []);
+  
   const token = localStorage.getItem('mm_auth_token');
+  const currentUser = JSON.parse(localStorage.getItem('mm_user') || '{}');
 
   // Cargar historial de tiempos
   const loadTimeEntries = useCallback(async () => {

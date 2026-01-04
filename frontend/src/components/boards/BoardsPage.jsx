@@ -326,29 +326,168 @@ const BoardsPage = ({ onBack, onSelectBoard, onTrashUpdate }) => {
               {filteredBoards.map(board => (
                 <div
                   key={board.id}
-                  onClick={() => onSelectBoard(board)}
-                  className="group relative rounded-xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 h-40 transform hover:-translate-y-1"
+                  onClick={() => {
+                    if (editingBoardId !== board.id) {
+                      onSelectBoard(board);
+                    }
+                  }}
+                  className={`group relative rounded-xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 h-40 transform hover:-translate-y-1 ${
+                    duplicatingBoardId === board.id ? 'opacity-70 pointer-events-none' : ''
+                  }`}
                   style={{ backgroundColor: board.background_color }}
                   data-testid={`board-card-${board.id}`}
                 >
                   {/* Gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                   
+                  {/* Indicador de duplicando */}
+                  {duplicatingBoardId === board.id && (
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center z-20">
+                      <div className="flex items-center gap-2 bg-white/90 px-4 py-2 rounded-lg">
+                        <Loader2 className="w-4 h-4 animate-spin text-cyan-600" />
+                        <span className="text-sm font-medium text-gray-700">Duplicando...</span>
+                      </div>
+                    </div>
+                  )}
+                  
                   {/* Content */}
                   <div className="absolute inset-0 p-4 flex flex-col justify-between">
-                    <div className="flex items-start justify-between">
-                      <h3 className="text-white font-bold text-lg drop-shadow-sm pr-6 line-clamp-2">
-                        {board.title}
-                      </h3>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          // Future: show dropdown menu
-                        }}
-                        className="p-1.5 bg-white/10 hover:bg-white/20 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-                      >
-                        <MoreHorizontal size={16} className="text-white" />
-                      </button>
+                    <div className="flex items-start justify-between gap-2">
+                      {/* Título editable */}
+                      {editingBoardId === board.id ? (
+                        <div className="flex-1 pr-2" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            ref={editInputRef}
+                            type="text"
+                            value={editingTitle}
+                            onChange={(e) => {
+                              setEditingTitle(e.target.value);
+                              if (titleError) setTitleError('');
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                saveTitle(board.id);
+                              }
+                              if (e.key === 'Escape') {
+                                cancelEditing();
+                              }
+                            }}
+                            onBlur={() => {
+                              if (!savingTitle) {
+                                saveTitle(board.id);
+                              }
+                            }}
+                            maxLength={60}
+                            className={`w-full bg-white/95 text-gray-900 font-bold text-base rounded-lg px-3 py-1.5 outline-none ring-2 ${
+                              titleError ? 'ring-red-500' : 'ring-cyan-500'
+                            }`}
+                            data-testid={`edit-board-title-input-${board.id}`}
+                          />
+                          {titleError && (
+                            <div className="mt-1 text-xs text-red-200 bg-red-500/80 px-2 py-0.5 rounded">
+                              {titleError}
+                            </div>
+                          )}
+                          <div className="mt-1 flex gap-1">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                saveTitle(board.id);
+                              }}
+                              disabled={savingTitle}
+                              className="p-1 bg-green-500 hover:bg-green-600 rounded text-white"
+                              data-testid={`save-board-title-${board.id}`}
+                            >
+                              {savingTitle ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                cancelEditing();
+                              }}
+                              className="p-1 bg-gray-500 hover:bg-gray-600 rounded text-white"
+                              data-testid={`cancel-edit-board-${board.id}`}
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <h3 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            startEditing(board);
+                          }}
+                          className="text-white font-bold text-lg drop-shadow-sm pr-2 line-clamp-2 cursor-text hover:bg-white/10 rounded px-1 -ml-1 transition-colors"
+                          title="Clic para editar nombre"
+                          data-testid={`board-title-${board.id}`}
+                        >
+                          {board.title}
+                        </h3>
+                      )}
+                      
+                      {/* Menú de tres puntos */}
+                      {editingBoardId !== board.id && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button
+                              onClick={(e) => e.stopPropagation()}
+                              className="p-1.5 bg-white/10 hover:bg-white/30 rounded-lg transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0"
+                              data-testid={`board-menu-${board.id}`}
+                            >
+                              <MoreHorizontal size={16} className="text-white" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                startEditing(board);
+                              }}
+                              className="cursor-pointer"
+                              data-testid={`rename-board-${board.id}`}
+                            >
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Renombrar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                duplicateBoard(board);
+                              }}
+                              className="cursor-pointer"
+                              data-testid={`duplicate-board-${board.id}`}
+                            >
+                              <Copy className="mr-2 h-4 w-4" />
+                              Duplicar tablero
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                moveToFolder(board);
+                              }}
+                              className="cursor-pointer text-gray-400"
+                              data-testid={`move-board-${board.id}`}
+                            >
+                              <FolderInput className="mr-2 h-4 w-4" />
+                              Mover a carpeta
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setConfirmDeleteBoard(board);
+                              }}
+                              className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
+                              data-testid={`delete-menu-board-${board.id}`}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Eliminar tablero
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
                     </div>
                     
                     {/* Bottom info */}
@@ -357,16 +496,7 @@ const BoardsPage = ({ onBack, onSelectBoard, onTrashUpdate }) => {
                         <Clock size={12} />
                         <span>{new Date(board.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</span>
                       </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setConfirmDeleteBoard(board);
-                        }}
-                        className="p-1.5 bg-white/10 hover:bg-red-500/80 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-                        data-testid={`delete-board-${board.id}`}
-                      >
-                        <Trash2 size={14} className="text-white" />
-                      </button>
+                      {/* Eliminé el botón de basura duplicado porque ya está en el menú */}
                     </div>
                   </div>
                 </div>

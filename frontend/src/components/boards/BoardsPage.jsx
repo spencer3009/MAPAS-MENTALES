@@ -663,6 +663,28 @@ const BoardsPage = ({ onBack, onSelectBoard, onTrashUpdate }) => {
           </div>
         </div>
       )}
+
+      {/* Toast de notificación */}
+      {toast && (
+        <div 
+          className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-in slide-in-from-bottom-4 ${
+            toast.type === 'error' ? 'bg-red-600 text-white' :
+            toast.type === 'info' ? 'bg-gray-800 text-white' :
+            'bg-green-600 text-white'
+          }`}
+          data-testid="toast-notification"
+        >
+          {toast.type === 'success' && <Check size={18} />}
+          {toast.type === 'error' && <AlertTriangle size={18} />}
+          <span className="text-sm font-medium">{toast.message}</span>
+          <button 
+            onClick={() => setToast(null)}
+            className="ml-2 p-1 hover:bg-white/20 rounded"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
     </div>
   );
 };

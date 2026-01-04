@@ -319,7 +319,9 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
 
   const formatDueDateDisplay = () => {
     if (!dueDate) return null;
-    const date = new Date(dueDate);
+    // Parsear fecha directamente del string para evitar problemas de zona horaria
+    const [year, month, day] = dueDate.split('-').map(Number);
+    const date = new Date(year, month - 1, day, 12, 0, 0); // Usar mediodía para evitar problemas
     const formattedDate = date.toLocaleDateString('es-ES', { 
       day: 'numeric', 
       month: 'short', 
@@ -332,7 +334,9 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
   const getDueDateStatus = () => {
     if (!dueDate) return null;
     const now = new Date();
-    const due = new Date(dueDate);
+    // Parsear fecha directamente del string para evitar problemas de zona horaria
+    const [year, month, day] = dueDate.split('-').map(Number);
+    const due = new Date(year, month - 1, day, 12, 0, 0);
     if (dueTime) {
       const [hours, minutes] = dueTime.split(':');
       due.setHours(parseInt(hours), parseInt(minutes));

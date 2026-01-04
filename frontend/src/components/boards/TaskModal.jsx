@@ -730,32 +730,120 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
               )}
             </div>
 
-            {/* Due Date */}
-            <div>
+            {/* Due Date con Calendario */}
+            <div className="relative">
               <button
-                onClick={() => document.getElementById('due-date-input').showPicker()}
-                className="w-full flex items-center gap-3 px-3 py-2.5 bg-white hover:bg-gray-100 rounded-lg transition-colors text-left border border-gray-200"
+                onClick={() => setShowDatePicker(!showDatePicker)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left border ${
+                  dueDate 
+                    ? getDueDateStatus() === 'overdue'
+                      ? 'bg-red-50 border-red-200 hover:bg-red-100'
+                      : getDueDateStatus() === 'urgent'
+                        ? 'bg-amber-50 border-amber-200 hover:bg-amber-100'
+                        : 'bg-white border-gray-200 hover:bg-gray-100'
+                    : 'bg-white border-gray-200 hover:bg-gray-100'
+                }`}
               >
-                <Calendar size={16} className="text-gray-500" />
-                <span className="text-sm text-gray-700">
-                  {dueDate ? new Date(dueDate).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : 'Fecha límite'}
+                <Calendar size={16} className={`${
+                  getDueDateStatus() === 'overdue' ? 'text-red-500' :
+                  getDueDateStatus() === 'urgent' ? 'text-amber-500' : 'text-gray-500'
+                }`} />
+                <span className={`text-sm ${
+                  getDueDateStatus() === 'overdue' ? 'text-red-600 font-medium' :
+                  getDueDateStatus() === 'urgent' ? 'text-amber-600 font-medium' : 'text-gray-700'
+                }`}>
+                  {dueDate ? formatDueDateDisplay() : 'Fecha límite'}
                 </span>
-                {dueDate && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleSetDueDate(''); }}
-                    className="ml-auto p-1 hover:bg-gray-200 rounded"
-                  >
-                    <X size={14} className="text-gray-400" />
-                  </button>
-                )}
               </button>
-              <input
-                id="due-date-input"
-                type="date"
-                value={dueDate}
-                onChange={(e) => handleSetDueDate(e.target.value)}
-                className="sr-only"
-              />
+              
+              {/* Popup del calendario */}
+              {showDatePicker && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 p-4 z-20">
+                  {/* Header del calendario */}
+                  <div className="flex items-center justify-between mb-4">
+                    <button
+                      onClick={prevMonth}
+                      className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      <ChevronLeft size={18} className="text-gray-600" />
+                    </button>
+                    <span className="text-sm font-semibold text-gray-700 capitalize">
+                      {formatMonthYear(selectedMonth)}
+                    </span>
+                    <button
+                      onClick={nextMonth}
+                      className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      <ChevronRight size={18} className="text-gray-600" />
+                    </button>
+                  </div>
+                  
+                  {/* Días de la semana */}
+                  <div className="grid grid-cols-7 gap-1 mb-2">
+                    {['LU', 'MA', 'MI', 'JU', 'VI', 'SÁ', 'DO'].map(day => (
+                      <div key={day} className="text-center text-xs font-medium text-gray-400 py-1">
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Grid de días */}
+                  <div className="grid grid-cols-7 gap-1 mb-4">
+                    {getDaysInMonth(selectedMonth).map((day, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSelectDay(day)}
+                        disabled={!day}
+                        className={`h-8 w-8 rounded-full text-sm transition-colors ${
+                          !day 
+                            ? 'cursor-default' 
+                            : isSelectedDate(day)
+                              ? 'bg-cyan-500 text-white font-semibold'
+                              : isToday(day)
+                                ? 'bg-cyan-100 text-cyan-700 font-medium'
+                                : 'hover:bg-gray-100 text-gray-700'
+                        }`}
+                      >
+                        {day}
+                      </button>
+                    ))}
+                  </div>
+                  
+                  {/* Selector de hora */}
+                  <div className="border-t border-gray-200 pt-3 mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-600">Vence a las</span>
+                      <input
+                        type="time"
+                        value={dueTime}
+                        onChange={(e) => {
+                          setDueTime(e.target.value);
+                          if (dueDate) {
+                            handleSetDueDate(dueDate, e.target.value);
+                          }
+                        }}
+                        className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-400"
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Fecha seleccionada y botón borrar */}
+                  {dueDate && (
+                    <div className="border-t border-gray-200 pt-3">
+                      <div className="flex items-center justify-between text-sm mb-2">
+                        <span className="text-gray-600">Fecha límite:</span>
+                        <span className="font-medium text-gray-900">{formatDueDateDisplay()}</span>
+                      </div>
+                      <button
+                        onClick={clearDueDate}
+                        className="w-full py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm font-medium border border-red-200"
+                      >
+                        Borrar Fecha Límite
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Priority */}

@@ -3572,9 +3572,36 @@ async def delete_card(board_id: str, list_id: str, card_id: str, current_user: d
 # UPLOAD DE IMÁGENES PARA TARJETAS
 # ==========================================
 
-MAX_IMAGE_WIDTH = 800  # Ancho máximo en píxeles
-MAX_IMAGE_HEIGHT = 600  # Alto máximo en píxeles
-WEBP_QUALITY = 85  # Calidad de compresión WebP (0-100)
+# Configuración de tamaños de imagen
+LARGE_IMAGE_MAX_WIDTH = 500   # Ancho máximo para vista ampliada
+PREVIEW_IMAGE_MAX_WIDTH = 280  # Ancho máximo para preview en tarjetas
+WEBP_QUALITY_LARGE = 85       # Calidad para imagen grande
+WEBP_QUALITY_PREVIEW = 75     # Calidad para preview (más ligero)
+
+def process_image_to_webp(img, max_width, quality):
+    """Procesa una imagen: redimensiona manteniendo proporción y convierte a WebP"""
+    original_width, original_height = img.size
+    
+    # Solo redimensionar si es más ancha que el máximo
+    if original_width > max_width:
+        ratio = max_width / original_width
+        new_width = max_width
+        new_height = int(original_height * ratio)
+        img_resized = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+    else:
+        img_resized = img.copy()
+    
+    # Convertir a WebP
+    buffer = io.BytesIO()
+    img_resized.save(buffer, format='WEBP', quality=quality, optimize=True)
+    webp_data = buffer.getvalue()
+    
+    return {
+        "data": base64.b64encode(webp_data).decode('utf-8'),
+        "width": img_resized.size[0],
+        "height": img_resized.size[1],
+        "size_kb": round(len(webp_data) / 1024, 2)
+    }
 
 @api_router.post("/boards/{board_id}/lists/{list_id}/cards/{card_id}/attachments")
 async def upload_card_attachment(
@@ -3584,7 +3611,7 @@ async def upload_card_attachment(
     file: UploadFile = File(...),
     current_user: dict = Depends(get_current_user)
 ):
-    """Subir imagen adjunta a una tarjeta con conversión automática a WebP"""
+    """Subir imagen adjunta a una tarjeta - genera versión grande (500px) y preview"""
     
     # Verificar que es una imagen
     allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg']
@@ -3607,7 +3634,6 @@ async def upload_card_attachment(
         
         # Convertir a RGB si es necesario (para PNG con transparencia)
         if img.mode in ('RGBA', 'LA', 'P'):
-            # Crear fondo blanco
             background = Image.new('RGB', img.size, (255, 255, 255))
             if img.mode == 'P':
                 img = img.convert('RGBA')
@@ -3616,24 +3642,13 @@ async def upload_card_attachment(
         elif img.mode != 'RGB':
             img = img.convert('RGB')
         
-        # Redimensionar manteniendo proporción
-        original_width, original_height = img.size
-        ratio = min(MAX_IMAGE_WIDTH / original_width, MAX_IMAGE_HEIGHT / original_height)
+        # Generar versión GRANDE (500px ancho máximo) para vista ampliada
+        large_image = process_image_to_webp(img, LARGE_IMAGE_MAX_WIDTH, WEBP_QUALITY_LARGE)
         
-        if ratio < 1:  # Solo redimensionar si es más grande
-            new_width = int(original_width * ratio)
-            new_height = int(original_height * ratio)
-            img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+        # Generar versión PREVIEW (280px ancho máximo) para tarjetas y modal
+        preview_image = process_image_to_webp(img, PREVIEW_IMAGE_MAX_WIDTH, WEBP_QUALITY_PREVIEW)
         
-        # Convertir a WebP
-        buffer = io.BytesIO()
-        img.save(buffer, format='WEBP', quality=WEBP_QUALITY, optimize=True)
-        webp_data = buffer.getvalue()
-        
-        # Convertir a base64 para guardar en MongoDB
-        base64_image = base64.b64encode(webp_data).decode('utf-8')
-        
-        # Crear registro de adjunto
+        # Crear registro de adjunto con ambas versiones
         attachment_id = f"attach_{uuid.uuid4().hex[:12]}"
         now = datetime.now(timezone.utc).isoformat()
         
@@ -3641,10 +3656,19 @@ async def upload_card_attachment(
             "id": attachment_id,
             "filename": file.filename,
             "content_type": "image/webp",
-            "data": base64_image,
-            "width": img.size[0],
-            "height": img.size[1],
-            "size_kb": round(len(webp_data) / 1024, 2),
+            # Versión preview (para tarjetas y modal)
+            "data": preview_image["data"],
+            "width": preview_image["width"],
+            "height": preview_image["height"],
+            "size_kb": preview_image["size_kb"],
+            # Versión grande (para vista ampliada)
+            "data_large": large_image["data"],
+            "width_large": large_image["width"],
+            "height_large": large_image["height"],
+            "size_kb_large": large_image["size_kb"],
+            # Metadata
+            "original_width": img.size[0],
+            "original_height": img.size[1],
             "uploaded_at": now,
             "uploaded_by": current_user["username"]
         }

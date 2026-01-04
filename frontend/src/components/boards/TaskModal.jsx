@@ -205,17 +205,137 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
     setEditingDescription(false);
   };
 
-  // Toggle label
-  const toggleLabel = (colorId) => {
-    const hasLabel = labels.some(l => l.color === colorId);
+  // ==========================================
+  // SISTEMA DE ETIQUETAS (Estilo Trello)
+  // ==========================================
+  
+  // Toggle label assignment to this card
+  const toggleLabelAssignment = (labelId) => {
+    const isAssigned = labels.includes(labelId);
     let newLabels;
-    if (hasLabel) {
-      newLabels = labels.filter(l => l.color !== colorId);
+    if (isAssigned) {
+      newLabels = labels.filter(id => id !== labelId);
     } else {
-      newLabels = [...labels, { id: `label_${crypto.randomUUID()}`, color: colorId }];
+      newLabels = [...labels, labelId];
     }
     setLabels(newLabels);
     saveChanges({ labels: newLabels });
+  };
+
+  // Create new board label
+  const handleCreateLabel = async () => {
+    if (!newLabelName.trim()) return;
+    
+    const newLabel = {
+      id: `blabel_${crypto.randomUUID().slice(0,8)}`,
+      name: newLabelName.trim(),
+      color: newLabelColor
+    };
+    
+    const updatedBoardLabels = [...boardLabels, newLabel];
+    
+    // Guardar en backend
+    try {
+      const response = await fetch(`${API_URL}/api/boards/${boardId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ board_labels: updatedBoardLabels })
+      });
+      
+      if (response.ok) {
+        // Actualizar estado del tablero
+        if (onBoardLabelsUpdate) {
+          onBoardLabelsUpdate(updatedBoardLabels);
+        }
+        // Auto-asignar la nueva etiqueta a esta tarjeta
+        const newLabelsAssigned = [...labels, newLabel.id];
+        setLabels(newLabelsAssigned);
+        saveChanges({ labels: newLabelsAssigned });
+        
+        // Reset form
+        setNewLabelName('');
+        setNewLabelColor('#3B82F6');
+        setLabelMode('select');
+      }
+    } catch (error) {
+      console.error('Error creating label:', error);
+    }
+  };
+
+  // Edit existing board label
+  const handleEditLabel = async () => {
+    if (!editingLabel || !newLabelName.trim()) return;
+    
+    const updatedBoardLabels = boardLabels.map(label => 
+      label.id === editingLabel.id 
+        ? { ...label, name: newLabelName.trim(), color: newLabelColor }
+        : label
+    );
+    
+    try {
+      const response = await fetch(`${API_URL}/api/boards/${boardId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ board_labels: updatedBoardLabels })
+      });
+      
+      if (response.ok) {
+        if (onBoardLabelsUpdate) {
+          onBoardLabelsUpdate(updatedBoardLabels);
+        }
+        setEditingLabel(null);
+        setNewLabelName('');
+        setNewLabelColor('#3B82F6');
+        setLabelMode('select');
+      }
+    } catch (error) {
+      console.error('Error editing label:', error);
+    }
+  };
+
+  // Delete board label
+  const handleDeleteLabel = async (labelId) => {
+    const updatedBoardLabels = boardLabels.filter(l => l.id !== labelId);
+    
+    try {
+      const response = await fetch(`${API_URL}/api/boards/${boardId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ board_labels: updatedBoardLabels })
+      });
+      
+      if (response.ok) {
+        if (onBoardLabelsUpdate) {
+          onBoardLabelsUpdate(updatedBoardLabels);
+        }
+        // Remove from this card if assigned
+        if (labels.includes(labelId)) {
+          const newLabelsAssigned = labels.filter(id => id !== labelId);
+          setLabels(newLabelsAssigned);
+          saveChanges({ labels: newLabelsAssigned });
+        }
+        setLabelMode('select');
+      }
+    } catch (error) {
+      console.error('Error deleting label:', error);
+    }
+  };
+
+  // Start editing a label
+  const startEditLabel = (label) => {
+    setEditingLabel(label);
+    setNewLabelName(label.name);
+    setNewLabelColor(label.color);
+    setLabelMode('edit');
   };
 
   // Set priority

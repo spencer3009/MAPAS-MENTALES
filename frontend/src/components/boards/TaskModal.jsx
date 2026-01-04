@@ -834,21 +834,82 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
                     ))}
                   </div>
                   
-                  {/* Selector de hora */}
+                  {/* Selector de hora con AM/PM */}
                   <div className="border-t border-gray-200 pt-3 mb-3">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm text-gray-600">Vence a las</span>
-                      <input
-                        type="time"
-                        value={dueTime}
-                        onChange={(e) => {
-                          setDueTime(e.target.value);
-                          if (dueDate) {
-                            handleSetDueDate(dueDate, e.target.value);
-                          }
-                        }}
-                        className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-400"
-                      />
+                      <div className="flex items-center gap-1">
+                        {/* Selector de hora (1-12) */}
+                        <select
+                          value={(() => {
+                            const [h] = dueTime.split(':');
+                            const hour = parseInt(h);
+                            if (hour === 0) return '12';
+                            if (hour > 12) return String(hour - 12);
+                            return String(hour);
+                          })()}
+                          onChange={(e) => {
+                            const [, m] = dueTime.split(':');
+                            const [h] = dueTime.split(':');
+                            const currentHour = parseInt(h);
+                            const isPM = currentHour >= 12;
+                            let newHour = parseInt(e.target.value);
+                            if (isPM) {
+                              newHour = newHour === 12 ? 12 : newHour + 12;
+                            } else {
+                              newHour = newHour === 12 ? 0 : newHour;
+                            }
+                            const newTime = `${String(newHour).padStart(2, '0')}:${m}`;
+                            setDueTime(newTime);
+                            if (dueDate) handleSetDueDate(dueDate, newTime);
+                          }}
+                          className="px-2 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-400 bg-white"
+                        >
+                          {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(h => (
+                            <option key={h} value={h}>{h}</option>
+                          ))}
+                        </select>
+                        <span className="text-gray-400">:</span>
+                        {/* Selector de minutos */}
+                        <select
+                          value={dueTime.split(':')[1]}
+                          onChange={(e) => {
+                            const [h] = dueTime.split(':');
+                            const newTime = `${h}:${e.target.value}`;
+                            setDueTime(newTime);
+                            if (dueDate) handleSetDueDate(dueDate, newTime);
+                          }}
+                          className="px-2 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-400 bg-white"
+                        >
+                          {['00', '15', '30', '45'].map(m => (
+                            <option key={m} value={m}>{m}</option>
+                          ))}
+                        </select>
+                        {/* Selector AM/PM */}
+                        <select
+                          value={parseInt(dueTime.split(':')[0]) >= 12 ? 'PM' : 'AM'}
+                          onChange={(e) => {
+                            const [h, m] = dueTime.split(':');
+                            let hour = parseInt(h);
+                            const isPM = e.target.value === 'PM';
+                            
+                            // Convertir a formato 24h
+                            if (isPM && hour < 12) {
+                              hour += 12;
+                            } else if (!isPM && hour >= 12) {
+                              hour -= 12;
+                            }
+                            
+                            const newTime = `${String(hour).padStart(2, '0')}:${m}`;
+                            setDueTime(newTime);
+                            if (dueDate) handleSetDueDate(dueDate, newTime);
+                          }}
+                          className="px-2 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-400 bg-white font-medium"
+                        >
+                          <option value="AM">AM</option>
+                          <option value="PM">PM</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
                   

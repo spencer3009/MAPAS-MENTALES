@@ -871,11 +871,17 @@ const BoardView = ({ board: initialBoard, onBack }) => {
   const handleDragEnd = async (event) => {
     const { active, over } = event;
     
+    // Limpiar estados de drag
     setActiveId(null);
     setActiveItem(null);
     
+    // Capturar originalListId antes de limpiar
+    const sourceListIdFromState = originalListId;
+    setOriginalListId(null);
+    
     if (!over) {
-      console.log('[DragEnd] No over target');
+      console.log('[DragEnd] No over target - refreshing board');
+      refreshBoard();
       return;
     }
 
@@ -908,133 +914,89 @@ const BoardView = ({ board: initialBoard, onBack }) => {
       }
     } else if (activeType === 'card') {
       const activeCard = active.data.current.card;
-      const sourceListId = active.data.current.listId;
       
-      // Determinar destino final
-      let destListId = sourceListId;
+      // IMPORTANTE: Usar el sourceListId original guardado en handleDragStart
+      // porque handleDragOver puede haber mutado active.data.current.listId
+      const sourceListId = sourceListIdFromState || active.data.current.listId;
+      
+      console.log('[DragEnd] Using sourceListId:', sourceListId, '(from state:', sourceListIdFromState, ')');
+      
+      // Determinar destino final basado en dónde se soltó
+      let destListId = null;
       let newPosition = 0;
       
       // Si se suelta sobre otra tarjeta
       if (over.data.current?.type === 'card') {
         destListId = over.data.current.listId;
         const destList = board.lists.find(l => l.id === destListId);
-        newPosition = destList?.cards.findIndex(c => c.id === over.id) ?? 0;
+        if (destList) {
+          newPosition = destList.cards.findIndex(c => c.id === over.id);
+          if (newPosition === -1) newPosition = destList.cards.length;
+        }
       } 
       // Si se suelta sobre una lista/columna
       else if (over.data.current?.type === 'list') {
-        destListId = over.data.current.listId;
+        destListId = over.data.current.listId || over.id;
         const destList = board.lists.find(l => l.id === destListId);
         newPosition = destList?.cards?.length ?? 0;
       }
-      // Si se suelta sobre un droppable area
-      else if (over.id && typeof over.id === 'string') {
-        // Buscar la lista que coincida
-        const matchingList = board.lists.find(l => l.id === over.id || over.id.includes(l.id));
-        if (matchingList) {
-          destListId = matchingList.id;
-          newPosition = matchingList.cards?.length ?? 0;
+      // Si se suelta sobre un droppable area (para listas vacías)
+      else if (over.id && typeof over.id === 'string' && over.id.startsWith('droppable-')) {
+        destListId = over.data.current?.listId;
+        const destList = board.lists.find(l => l.id === destListId);
+        newPosition = destList?.cards?.length ?? 0;
+      }
+      
+      // Fallback: buscar lista donde está actualmente la tarjeta en el estado
+      if (!destListId) {
+        for (const list of board.lists) {
+          if (list.cards.some(c => c.id === active.id)) {
+            destListId = list.id;
+            newPosition = list.cards.findIndex(c => c.id === active.id);
+            break;
+          }
         }
+      }
+      
+      // Si todavía no hay destino, usar el source
+      if (!destListId) {
+        destListId = sourceListId;
       }
       
       console.log('[DragEnd] Card move - Source:', sourceListId, 'Dest:', destListId, 'Position:', newPosition);
       
-      // Solo proceder si hay un cambio
-      if (sourceListId === destListId) {
-        // Reordenar dentro de la misma lista
-        if (over.data.current?.type === 'card') {
-          const list = board.lists.find(l => l.id === sourceListId);
-          const oldIndex = list.cards.findIndex(c => c.id === active.id);
-          if (oldIndex !== newPosition && oldIndex !== -1) {
-            const newCards = arrayMove(list.cards, oldIndex, newPosition);
-            
-            // Actualizar estado local
-            setBoard(prev => ({
-              ...prev,
-              lists: prev.lists.map(l => 
-                l.id === sourceListId ? { ...l, cards: newCards } : l
-              )
-            }));
-            
-            // Guardar en backend
-            console.log('[DragEnd] Saving reorder within same list...');
-            try {
-              const response = await fetch(`${API_URL}/api/boards/${board.id}/cards/move`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                  source_list_id: sourceListId,
-                  destination_list_id: sourceListId,
-                  card_id: active.id,
-                  new_position: newPosition
-                })
-              });
-              console.log('[DragEnd] Reorder response:', response.status);
-            } catch (error) {
-              console.error('[DragEnd] Error saving card reorder:', error);
-            }
-          }
-        }
-      } else {
-        // Mover entre listas diferentes
-        console.log('[DragEnd] Moving card between lists...');
+      // SIEMPRE llamar al API para persistir el cambio
+      // Incluso si source === dest, el handleDragOver pudo haber movido la tarjeta visualmente
+      try {
+        console.log('[DragEnd] Calling API to persist card position...');
+        const response = await fetch(`${API_URL}/api/boards/${board.id}/cards/move`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            source_list_id: sourceListId,
+            destination_list_id: destListId,
+            card_id: active.id,
+            new_position: newPosition >= 0 ? newPosition : 0
+          })
+        });
         
-        // Primero actualizar estado local para UX instantánea
-        const sourceList = board.lists.find(l => l.id === sourceListId);
-        const destList = board.lists.find(l => l.id === destListId);
+        console.log('[DragEnd] API response status:', response.status);
         
-        if (sourceList && destList) {
-          const cardToMove = sourceList.cards.find(c => c.id === active.id);
-          if (cardToMove) {
-            // Crear nuevas listas con la tarjeta movida
-            const newSourceCards = sourceList.cards.filter(c => c.id !== active.id);
-            const newDestCards = [...(destList.cards || [])];
-            newDestCards.splice(newPosition, 0, cardToMove);
-            
-            // Actualizar estado local
-            setBoard(prev => ({
-              ...prev,
-              lists: prev.lists.map(l => {
-                if (l.id === sourceListId) return { ...l, cards: newSourceCards };
-                if (l.id === destListId) return { ...l, cards: newDestCards };
-                return l;
-              })
-            }));
-          }
-        }
-        
-        // Guardar en backend
-        try {
-          console.log('[DragEnd] Calling API to move card...');
-          const response = await fetch(`${API_URL}/api/boards/${board.id}/cards/move`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-              source_list_id: sourceListId,
-              destination_list_id: destListId,
-              card_id: active.id,
-              new_position: newPosition
-            })
-          });
-          
-          console.log('[DragEnd] API response status:', response.status);
-          
-          if (!response.ok) {
-            const errorText = await response.text();
-            console.error('[DragEnd] API error:', errorText);
-            refreshBoard();
-          } else {
-            console.log('[DragEnd] Card moved successfully!');
-          }
-        } catch (error) {
-          console.error('[DragEnd] Network error:', error);
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('[DragEnd] API error:', errorText);
+          // Refrescar para sincronizar con backend
           refreshBoard();
+        } else {
+          console.log('[DragEnd] Card position persisted successfully!');
         }
+      } catch (error) {
+        console.error('[DragEnd] Network error:', error);
+        // Refrescar para sincronizar con backend
+        refreshBoard();
       }
     }
   };

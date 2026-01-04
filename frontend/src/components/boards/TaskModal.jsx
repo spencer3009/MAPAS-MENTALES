@@ -1088,10 +1088,13 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
           <div className="w-full lg:w-72 bg-gray-50 p-6 space-y-4 border-t lg:border-t-0 lg:border-l border-gray-200">
             <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Añadir a la tarjeta</h4>
             
-            {/* Labels */}
+            {/* Labels - Sistema completo estilo Trello */}
             <div className="relative">
               <button
-                onClick={() => setShowLabelPicker(!showLabelPicker)}
+                onClick={() => {
+                  setShowLabelPicker(!showLabelPicker);
+                  setLabelMode('select');
+                }}
                 className="w-full flex items-center gap-3 px-3 py-2.5 bg-white hover:bg-gray-100 rounded-lg transition-colors text-left border border-gray-200"
               >
                 <Tag size={16} className="text-gray-500" />
@@ -1104,23 +1107,138 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
               </button>
               
               {showLabelPicker && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 p-3 z-10">
-                  <div className="grid grid-cols-4 gap-2">
-                    {LABEL_COLORS.map(color => {
-                      const isSelected = labels.some(l => l.color === color.id);
-                      return (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 p-4 z-20 min-w-[280px]">
+                  {labelMode === 'select' && (
+                    <>
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Etiquetas</p>
+                      
+                      {/* Lista de etiquetas del tablero */}
+                      <div className="space-y-2 mb-3 max-h-48 overflow-y-auto">
+                        {boardLabels.length === 0 ? (
+                          <p className="text-sm text-gray-400 text-center py-2">No hay etiquetas creadas</p>
+                        ) : (
+                          boardLabels.map(label => {
+                            const isAssigned = labels.includes(label.id);
+                            return (
+                              <div key={label.id} className="flex items-center gap-2">
+                                <button
+                                  onClick={() => toggleLabelAssignment(label.id)}
+                                  className={`flex-1 flex items-center gap-2 px-3 py-2 rounded-lg transition-all text-left ${
+                                    isAssigned ? 'ring-2 ring-offset-1 ring-gray-400' : 'hover:brightness-95'
+                                  }`}
+                                  style={{ backgroundColor: label.color }}
+                                >
+                                  {isAssigned && <Check size={14} className="text-white" />}
+                                  <span className="text-sm font-medium text-white drop-shadow-sm">
+                                    {label.name}
+                                  </span>
+                                </button>
+                                <button
+                                  onClick={() => startEditLabel(label)}
+                                  className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded"
+                                >
+                                  <Edit2 size={14} />
+                                </button>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                      
+                      {/* Botón crear nueva etiqueta */}
+                      <button
+                        onClick={() => {
+                          setLabelMode('create');
+                          setNewLabelName('');
+                          setNewLabelColor('#3B82F6');
+                        }}
+                        className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-sm text-gray-700"
+                      >
+                        <Plus size={16} />
+                        Crear nueva etiqueta
+                      </button>
+                    </>
+                  )}
+                  
+                  {/* Modo crear/editar etiqueta */}
+                  {(labelMode === 'create' || labelMode === 'edit') && (
+                    <>
+                      <div className="flex items-center gap-2 mb-3">
                         <button
-                          key={color.id}
-                          onClick={() => toggleLabel(color.id)}
-                          className={`h-8 rounded-lg transition-all ${
-                            isSelected ? 'ring-2 ring-offset-2 ring-gray-400 scale-105' : 'hover:scale-105'
-                          }`}
-                          style={{ backgroundColor: color.value }}
-                          title={color.name}
+                          onClick={() => {
+                            setLabelMode('select');
+                            setEditingLabel(null);
+                          }}
+                          className="p-1 text-gray-400 hover:text-gray-600"
+                        >
+                          <ChevronLeft size={18} />
+                        </button>
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                          {labelMode === 'create' ? 'Crear etiqueta' : 'Editar etiqueta'}
+                        </p>
+                      </div>
+                      
+                      {/* Vista previa */}
+                      <div 
+                        className="h-10 rounded-lg mb-4 flex items-center justify-center"
+                        style={{ backgroundColor: newLabelColor }}
+                      >
+                        <span className="text-sm font-medium text-white drop-shadow-sm">
+                          {newLabelName || 'Vista previa'}
+                        </span>
+                      </div>
+                      
+                      {/* Input nombre */}
+                      <div className="mb-3">
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Título</label>
+                        <input
+                          type="text"
+                          value={newLabelName}
+                          onChange={(e) => setNewLabelName(e.target.value)}
+                          placeholder="Nombre de la etiqueta"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                          autoFocus
                         />
-                      );
-                    })}
-                  </div>
+                      </div>
+                      
+                      {/* Selector de color */}
+                      <div className="mb-4">
+                        <label className="block text-xs font-medium text-gray-600 mb-2">Selecciona un color</label>
+                        <div className="grid grid-cols-4 gap-2">
+                          {LABEL_COLORS.map(color => (
+                            <button
+                              key={color.id}
+                              onClick={() => setNewLabelColor(color.value)}
+                              className={`h-8 rounded-lg transition-all ${
+                                newLabelColor === color.value ? 'ring-2 ring-offset-2 ring-gray-400 scale-105' : 'hover:scale-105'
+                              }`}
+                              style={{ backgroundColor: color.value }}
+                              title={color.name}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Botones de acción */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={labelMode === 'create' ? handleCreateLabel : handleEditLabel}
+                          disabled={!newLabelName.trim()}
+                          className="flex-1 px-3 py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-300 text-white rounded-lg text-sm font-medium transition-colors"
+                        >
+                          {labelMode === 'create' ? 'Crear' : 'Guardar'}
+                        </button>
+                        {labelMode === 'edit' && editingLabel && (
+                          <button
+                            onClick={() => handleDeleteLabel(editingLabel.id)}
+                            className="px-3 py-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg text-sm font-medium transition-colors"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>

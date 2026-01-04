@@ -3568,6 +3568,172 @@ async def delete_card(board_id: str, list_id: str, card_id: str, current_user: d
     return {"message": "Tarjeta eliminada"}
 
 
+# ==========================================
+# UPLOAD DE IMÁGENES PARA TARJETAS
+# ==========================================
+
+MAX_IMAGE_WIDTH = 800  # Ancho máximo en píxeles
+MAX_IMAGE_HEIGHT = 600  # Alto máximo en píxeles
+WEBP_QUALITY = 85  # Calidad de compresión WebP (0-100)
+
+@api_router.post("/boards/{board_id}/lists/{list_id}/cards/{card_id}/attachments")
+async def upload_card_attachment(
+    board_id: str, 
+    list_id: str, 
+    card_id: str, 
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """Subir imagen adjunta a una tarjeta con conversión automática a WebP"""
+    
+    # Verificar que es una imagen
+    allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg']
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Solo se permiten imágenes (jpg, png, gif, webp)")
+    
+    # Verificar que el tablero existe y pertenece al usuario
+    board = await db.boards.find_one(
+        {"id": board_id, "owner_username": current_user["username"]},
+        {"_id": 0}
+    )
+    
+    if not board:
+        raise HTTPException(status_code=404, detail="Tablero no encontrado")
+    
+    try:
+        # Leer la imagen
+        image_data = await file.read()
+        img = Image.open(io.BytesIO(image_data))
+        
+        # Convertir a RGB si es necesario (para PNG con transparencia)
+        if img.mode in ('RGBA', 'LA', 'P'):
+            # Crear fondo blanco
+            background = Image.new('RGB', img.size, (255, 255, 255))
+            if img.mode == 'P':
+                img = img.convert('RGBA')
+            background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+            img = background
+        elif img.mode != 'RGB':
+            img = img.convert('RGB')
+        
+        # Redimensionar manteniendo proporción
+        original_width, original_height = img.size
+        ratio = min(MAX_IMAGE_WIDTH / original_width, MAX_IMAGE_HEIGHT / original_height)
+        
+        if ratio < 1:  # Solo redimensionar si es más grande
+            new_width = int(original_width * ratio)
+            new_height = int(original_height * ratio)
+            img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+        
+        # Convertir a WebP
+        buffer = io.BytesIO()
+        img.save(buffer, format='WEBP', quality=WEBP_QUALITY, optimize=True)
+        webp_data = buffer.getvalue()
+        
+        # Convertir a base64 para guardar en MongoDB
+        base64_image = base64.b64encode(webp_data).decode('utf-8')
+        
+        # Crear registro de adjunto
+        attachment_id = f"attach_{uuid.uuid4().hex[:12]}"
+        now = datetime.now(timezone.utc).isoformat()
+        
+        attachment = {
+            "id": attachment_id,
+            "filename": file.filename,
+            "content_type": "image/webp",
+            "data": base64_image,
+            "width": img.size[0],
+            "height": img.size[1],
+            "size_kb": round(len(webp_data) / 1024, 2),
+            "uploaded_at": now,
+            "uploaded_by": current_user["username"]
+        }
+        
+        # Actualizar la tarjeta con el nuevo adjunto
+        updated = False
+        for lst in board.get("lists", []):
+            if lst["id"] == list_id:
+                for card in lst.get("cards", []):
+                    if card["id"] == card_id:
+                        if "attachments" not in card:
+                            card["attachments"] = []
+                        card["attachments"].append(attachment)
+                        card["updated_at"] = now
+                        updated = True
+                        break
+                break
+        
+        if not updated:
+            raise HTTPException(status_code=404, detail="Tarjeta no encontrada")
+        
+        await db.boards.update_one(
+            {"id": board_id},
+            {"$set": {"lists": board["lists"], "updated_at": now}}
+        )
+        
+        # Retornar adjunto sin la data base64 completa (solo URL)
+        attachment_response = {
+            "id": attachment_id,
+            "filename": file.filename,
+            "content_type": "image/webp",
+            "width": img.size[0],
+            "height": img.size[1],
+            "size_kb": round(len(webp_data) / 1024, 2),
+            "uploaded_at": now,
+            "data_url": f"data:image/webp;base64,{base64_image}"
+        }
+        
+        logger.info(f"📎 Imagen adjuntada: {file.filename} → WebP ({attachment_response['size_kb']}KB) en tarjeta {card_id}")
+        return {"attachment": attachment_response, "message": "Imagen adjuntada exitosamente"}
+        
+    except Exception as e:
+        logger.error(f"Error procesando imagen: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error procesando la imagen: {str(e)}")
+
+
+@api_router.delete("/boards/{board_id}/lists/{list_id}/cards/{card_id}/attachments/{attachment_id}")
+async def delete_card_attachment(
+    board_id: str, 
+    list_id: str, 
+    card_id: str,
+    attachment_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Eliminar un adjunto de una tarjeta"""
+    board = await db.boards.find_one(
+        {"id": board_id, "owner_username": current_user["username"]},
+        {"_id": 0}
+    )
+    
+    if not board:
+        raise HTTPException(status_code=404, detail="Tablero no encontrado")
+    
+    now = datetime.now(timezone.utc).isoformat()
+    deleted = False
+    
+    for lst in board.get("lists", []):
+        if lst["id"] == list_id:
+            for card in lst.get("cards", []):
+                if card["id"] == card_id:
+                    original_count = len(card.get("attachments", []))
+                    card["attachments"] = [a for a in card.get("attachments", []) if a["id"] != attachment_id]
+                    if len(card.get("attachments", [])) < original_count:
+                        deleted = True
+                        card["updated_at"] = now
+                    break
+            break
+    
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Adjunto no encontrado")
+    
+    await db.boards.update_one(
+        {"id": board_id},
+        {"$set": {"lists": board["lists"], "updated_at": now}}
+    )
+    
+    return {"message": "Adjunto eliminado"}
+
+
 @api_router.post("/boards/{board_id}/cards/move")
 async def move_card(board_id: str, request: MoveCardRequest, current_user: dict = Depends(get_current_user)):
     """Mover una tarjeta entre listas o reordenar dentro de la misma lista"""

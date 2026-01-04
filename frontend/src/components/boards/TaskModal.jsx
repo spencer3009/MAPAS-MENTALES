@@ -1082,6 +1082,15 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
           <div className="w-full lg:w-72 bg-gray-50 p-6 space-y-4 border-t lg:border-t-0 lg:border-l border-gray-200">
             <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Añadir a la tarjeta</h4>
             
+            {/* REGISTRO DE TIEMPO - Primer elemento, siempre visible */}
+            <TimeTrackerSidebar
+              taskId={card.id}
+              boardId={boardId}
+              listId={listId}
+              taskTitle={card.title}
+              onTimeUpdate={loadTimeEntries}
+            />
+            
             {/* Labels - Sistema completo estilo Trello */}
             <div className="relative">
               <button

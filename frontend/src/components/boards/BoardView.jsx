@@ -673,6 +673,7 @@ const BoardView = ({ board: initialBoard, onBack }) => {
       if (response.ok) {
         const data = await response.json();
         setBoard(data.board);
+        setBoardLabels(data.board.board_labels || []);
       }
     } catch (error) {
       console.error('Error refreshing board:', error);

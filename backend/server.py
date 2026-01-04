@@ -3695,19 +3695,26 @@ async def upload_card_attachment(
             {"$set": {"lists": board["lists"], "updated_at": now}}
         )
         
-        # Retornar adjunto sin la data base64 completa (solo URL)
+        # Retornar adjunto con ambas versiones
         attachment_response = {
             "id": attachment_id,
             "filename": file.filename,
             "content_type": "image/webp",
-            "width": img.size[0],
-            "height": img.size[1],
-            "size_kb": round(len(webp_data) / 1024, 2),
-            "uploaded_at": now,
-            "data_url": f"data:image/webp;base64,{base64_image}"
+            # Preview
+            "width": preview_image["width"],
+            "height": preview_image["height"],
+            "size_kb": preview_image["size_kb"],
+            "data_url": f"data:image/webp;base64,{preview_image['data']}",
+            # Large
+            "width_large": large_image["width"],
+            "height_large": large_image["height"],
+            "size_kb_large": large_image["size_kb"],
+            "data_url_large": f"data:image/webp;base64,{large_image['data']}",
+            "uploaded_at": now
         }
         
-        logger.info(f"📎 Imagen adjuntada: {file.filename} → WebP ({attachment_response['size_kb']}KB) en tarjeta {card_id}")
+        total_kb = preview_image["size_kb"] + large_image["size_kb"]
+        logger.info(f"📎 Imagen adjuntada: {file.filename} → Preview:{preview_image['width']}x{preview_image['height']} ({preview_image['size_kb']}KB) + Large:{large_image['width']}x{large_image['height']} ({large_image['size_kb']}KB) = {total_kb}KB total")
         return {"attachment": attachment_response, "message": "Imagen adjuntada exitosamente"}
         
     except Exception as e:

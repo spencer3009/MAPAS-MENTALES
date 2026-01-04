@@ -19,6 +19,13 @@ class CardLabel(BaseModel):
     text: Optional[str] = None
 
 
+# Etiqueta reutilizable a nivel de tablero (estilo Trello)
+class BoardLabel(BaseModel):
+    id: str = Field(default_factory=lambda: f"blabel_{uuid4().hex[:8]}")
+    name: str  # Texto de la etiqueta (obligatorio)
+    color: str = "#3B82F6"  # Color hex
+
+
 class Card(BaseModel):
     id: str = Field(default_factory=lambda: f"card_{uuid4().hex[:12]}")
     title: str

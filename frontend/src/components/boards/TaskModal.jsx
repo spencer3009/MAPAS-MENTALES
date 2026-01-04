@@ -56,6 +56,7 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
   // Estados para adjuntos
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
   const [attachmentError, setAttachmentError] = useState('');
+  const [lightboxImage, setLightboxImage] = useState(null); // Para vista ampliada
   const fileInputRef = useRef(null);
   
   const token = localStorage.getItem('mm_auth_token');

@@ -90,13 +90,13 @@ class UpdateListRequest(BaseModel):
 class CreateCardRequest(BaseModel):
     title: str
     description: Optional[str] = ""
-    labels: Optional[List[dict]] = []
+    labels: Optional[list] = []  # Lista de IDs de etiquetas (strings)
 
 
 class UpdateCardRequest(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
-    labels: Optional[List[dict]] = None
+    labels: Optional[list] = None  # Lista de IDs de etiquetas (strings)
     position: Optional[int] = None
     due_date: Optional[str] = None
     due_time: Optional[str] = None

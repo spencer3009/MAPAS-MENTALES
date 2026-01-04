@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   X, Calendar, Tag, Users, CheckSquare, Paperclip, 
   MessageSquare, Clock, Flag, Link2, Eye, MoreHorizontal,
   Plus, Trash2, Check, Edit2, ChevronRight, AlertCircle,
-  Play, Square, ChevronLeft
+  Play, Square, ChevronLeft, Upload, Image, Loader2
 } from 'lucide-react';
 import TimeTracker from './TimeTracker';
 

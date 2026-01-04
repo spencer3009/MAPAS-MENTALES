@@ -855,6 +855,7 @@ const BoardView = ({ board: initialBoard, onBack }) => {
     if (!over) return;
 
     const activeType = active.data.current?.type;
+    const token = localStorage.getItem('mm_auth_token');
     
     if (activeType === 'list') {
       // Reorder lists
@@ -868,7 +869,6 @@ const BoardView = ({ board: initialBoard, onBack }) => {
         setBoard(prev => ({ ...prev, lists: newLists }));
         
         // Save to backend
-        const token = localStorage.getItem('mm_auth_token');
         await fetch(`${API_URL}/api/boards/${board.id}/lists/reorder`, {
           method: 'PUT',
           headers: {
@@ -900,31 +900,87 @@ const BoardView = ({ board: initialBoard, onBack }) => {
       if (sourceListId === destListId && over.data.current?.type === 'card') {
         const list = board.lists.find(l => l.id === sourceListId);
         const oldIndex = list.cards.findIndex(c => c.id === active.id);
-        if (oldIndex !== newPosition) {
+        if (oldIndex !== newPosition && oldIndex !== -1) {
           const newCards = arrayMove(list.cards, oldIndex, newPosition);
+          
+          // Actualizar estado local
           setBoard(prev => ({
             ...prev,
             lists: prev.lists.map(l => 
               l.id === sourceListId ? { ...l, cards: newCards } : l
             )
           }));
+          
+          // Guardar en backend (reordenar dentro de la misma lista)
+          try {
+            await fetch(`${API_URL}/api/boards/${board.id}/cards/move`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                source_list_id: sourceListId,
+                destination_list_id: sourceListId,
+                card_id: active.id,
+                new_position: newPosition
+              })
+            });
+          } catch (error) {
+            console.error('Error saving card reorder:', error);
+          }
         }
       } else if (sourceListId !== destListId) {
-        // Guardar en backend el movimiento entre listas
-        const token = localStorage.getItem('mm_auth_token');
-        await fetch(`${API_URL}/api/boards/${board.id}/cards/move`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            source_list_id: sourceListId,
-            destination_list_id: destListId,
-            card_id: active.id,
-            new_position: newPosition
-          })
-        });
+        // Mover entre listas diferentes
+        // Primero actualizar estado local para UX instantánea
+        const sourceList = board.lists.find(l => l.id === sourceListId);
+        const destList = board.lists.find(l => l.id === destListId);
+        
+        if (sourceList && destList) {
+          const cardToMove = sourceList.cards.find(c => c.id === active.id);
+          if (cardToMove) {
+            // Crear nuevas listas con la tarjeta movida
+            const newSourceCards = sourceList.cards.filter(c => c.id !== active.id);
+            const newDestCards = [...destList.cards];
+            newDestCards.splice(newPosition, 0, cardToMove);
+            
+            // Actualizar estado local
+            setBoard(prev => ({
+              ...prev,
+              lists: prev.lists.map(l => {
+                if (l.id === sourceListId) return { ...l, cards: newSourceCards };
+                if (l.id === destListId) return { ...l, cards: newDestCards };
+                return l;
+              })
+            }));
+          }
+        }
+        
+        // Guardar en backend
+        try {
+          const response = await fetch(`${API_URL}/api/boards/${board.id}/cards/move`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              source_list_id: sourceListId,
+              destination_list_id: destListId,
+              card_id: active.id,
+              new_position: newPosition
+            })
+          });
+          
+          if (!response.ok) {
+            console.error('Error moving card:', await response.text());
+            // Recargar tablero en caso de error para sincronizar
+            fetchBoard();
+          }
+        } catch (error) {
+          console.error('Error moving card:', error);
+          fetchBoard();
+        }
       }
     }
   };

@@ -23,7 +23,7 @@ import {
   Tag, Edit2, Check,
   Lightbulb, TrendingUp, CheckCircle2, 
   Users, Share2, LayoutGrid, Clock, Bell,
-  MoreHorizontal, Calendar, CheckSquare, Paperclip
+  MoreHorizontal, Calendar, CheckSquare, Paperclip, Flag
 } from 'lucide-react';
 import TaskModal from './TaskModal';
 import { useTimeTracking } from '../../contexts/TimeTrackingContext';
@@ -39,6 +39,14 @@ const LABEL_COLORS = [
   { id: 'purple', value: '#A855F7' },
   { id: 'blue', value: '#3B82F6' },
 ];
+
+// Configuración de prioridades (estilo Asana)
+const PRIORITIES = {
+  low: { id: 'low', label: 'Baja', color: '#22C55E', bgColor: 'bg-green-100', textColor: 'text-green-700', icon: '🟢' },
+  medium: { id: 'medium', label: 'Media', color: '#EAB308', bgColor: 'bg-yellow-100', textColor: 'text-yellow-700', icon: '🟡' },
+  high: { id: 'high', label: 'Alta', color: '#F97316', bgColor: 'bg-orange-100', textColor: 'text-orange-700', icon: '🟠' },
+  urgent: { id: 'urgent', label: 'Urgente', color: '#EF4444', bgColor: 'bg-red-100', textColor: 'text-red-700', icon: '🔴' },
+};
 
 // Colores predefinidos para listas según referencia visual
 // Abiertas: Cyan/Teal, En Progreso: Azul, Listo: Morado

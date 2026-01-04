@@ -590,6 +590,9 @@ const BoardView = ({ board: initialBoard, onBack }) => {
   const [showAddList, setShowAddList] = useState(false);
   const [newListTitle, setNewListTitle] = useState('');
   
+  // Estado para etiquetas del tablero (reutilizables)
+  const [boardLabels, setBoardLabels] = useState(initialBoard.board_labels || []);
+  
   // Estado para el modal de tarea
   const [selectedCard, setSelectedCard] = useState(null);
   const [selectedListId, setSelectedListId] = useState(null);
@@ -602,6 +605,12 @@ const BoardView = ({ board: initialBoard, onBack }) => {
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
+
+  // Actualizar etiquetas del tablero
+  const handleBoardLabelsUpdate = (newLabels) => {
+    setBoardLabels(newLabels);
+    setBoard(prev => ({ ...prev, board_labels: newLabels }));
+  };
 
   // Abrir modal de tarea
   const handleOpenModal = (card, listId, listTitle) => {

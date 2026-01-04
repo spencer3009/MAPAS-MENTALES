@@ -4086,7 +4086,7 @@ async def paypal_webhook(request: Request):
             if billing_agreement_id:
                 # Registrar el pago en colección de pagos
                 await db.payments.insert_one({
-                    "id": str(uuid4()),
+                    "id": str(uuid.uuid4()),
                     "paypal_subscription_id": billing_agreement_id,
                     "paypal_payment_id": payment_id,
                     "amount": amount.get("total"),
@@ -4121,7 +4121,7 @@ async def paypal_webhook(request: Request):
             if billing_agreement_id:
                 # Registrar el pago fallido
                 await db.payments.insert_one({
-                    "id": str(uuid4()),
+                    "id": str(uuid.uuid4()),
                     "paypal_subscription_id": billing_agreement_id,
                     "paypal_payment_id": payment_id,
                     "amount": resource.get("amount", {}).get("total"),

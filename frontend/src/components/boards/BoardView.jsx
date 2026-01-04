@@ -188,7 +188,15 @@ const SortableCard = ({ card, listId, listTitle, boardId, onUpdate, onDelete, on
             // Formatear fecha con el día correcto
             const displayDate = `${day} ${['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'][month - 1]}${year !== now.getFullYear() ? ` ${year}` : ''}`;
             
-            const displayTime = card.due_time ? ` ${card.due_time}` : '';
+            // Formatear hora con AM/PM
+            let displayTime = '';
+            if (card.due_time) {
+              const [h, m] = card.due_time.split(':');
+              const hour = parseInt(h);
+              const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+              const ampm = hour >= 12 ? 'PM' : 'AM';
+              displayTime = ` ${displayHour}:${m} ${ampm}`;
+            }
             
             return (
               <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded font-medium ${bgColor} ${textColor}`}>

@@ -5,7 +5,7 @@ import {
   Plus, Trash2, Check, Edit2, ChevronRight, AlertCircle,
   Play, Square, ChevronLeft, Upload, Image, Loader2
 } from 'lucide-react';
-import TimeTracker from './TimeTracker';
+import TimeTrackerSidebar from './TimeTrackerSidebar';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 

@@ -2,6 +2,18 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-04: Sistema de Fecha Límite para Tareas ✅
+- **Added**: Selector de calendario personalizado con navegación por meses
+- **Added**: Selector de hora "Vence a las" para fechas límite
+- **Added**: Botón "Borrar Fecha Límite" para eliminar fechas
+- **Added**: Registro automático en Actividad: "estableció fecha límite", "cambió el plazo", "eliminó fecha límite"
+- **Added**: Badge de fecha en tarjetas del tablero con colores según urgencia:
+  - Gris: fecha normal (>3 días)
+  - Amarillo/Amber: próxima (<=3 días)  
+  - Rojo: vencida
+- **Added**: Campos `due_time` y `due_date_activities` en modelo de tarjeta
+- **Changed**: Endpoint PUT /api/boards/{id}/lists/{id}/cards/{id} ahora maneja todos los campos de tarjeta
+
 ### 2026-01-04: Edición Inline y Menú Contextual para Tableros ✅
 - **Added**: Edición inline del nombre del tablero haciendo clic en el título
 - **Added**: Menú contextual (⋮) con opciones: Renombrar, Duplicar, Mover a carpeta, Eliminar
@@ -81,6 +93,12 @@ MindoraMap es una plataforma de mapas mentales para empresarios. Permite organiz
   - Duplicar tablero (crea copia con "(Copia)")
   - Mover a carpeta (preparado para futuro)
   - Eliminar tablero (con confirmación)
+- **Sistema de Fecha Límite completo:**
+  - Calendario con navegación por meses
+  - Selector de hora "Vence a las"
+  - Badge visual en tarjetas con colores según urgencia
+  - Registro automático de cambios en Actividad
+  - Persistencia en base de datos
 - **3 columnas por defecto al crear tablero:**
   - Abiertas (Cyan #06B6D4)
   - En Progreso (Azul #3B82F6)
@@ -152,6 +170,7 @@ MindoraMap es una plataforma de mapas mentales para empresarios. Permite organiz
 - [x] Testing completo de Tableros MVP ✅
 - [x] Ajustes de UX (drag & drop mejorado) ✅
 - [x] Edición inline y menú contextual para tableros ✅
+- [x] Sistema de Fecha Límite para tareas ✅
 - [ ] Resolver issues de MindHybrid
 - [ ] Verificar MindOrbit: agregar nodos hijos via UI
 

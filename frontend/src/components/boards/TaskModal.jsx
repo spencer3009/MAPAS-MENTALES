@@ -53,6 +53,11 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
   const [dueTime, setDueTime] = useState(card.due_time || '12:00');
   const [dueDateActivities, setDueDateActivities] = useState(card.due_date_activities || []);
   
+  // Estados para adjuntos
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const [attachmentError, setAttachmentError] = useState('');
+  const fileInputRef = useRef(null);
+  
   const token = localStorage.getItem('mm_auth_token');
   const currentUser = JSON.parse(localStorage.getItem('mm_user') || '{}');
 

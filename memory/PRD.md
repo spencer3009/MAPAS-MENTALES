@@ -9,6 +9,17 @@
 - **Files Changed**: `/app/frontend/src/components/boards/BoardView.jsx`
 - **Testing**: Backend API tests 100% passed (10/10), code review verified
 
+### 2026-01-04: Sistema de Prioridad en Tareas (Estilo Asana) ✅
+- **Added**: Selector de prioridad en modal de tarea con 4 opciones:
+  - 🟢 Baja (low) - verde
+  - 🟡 Media (medium) - amarillo
+  - 🟠 Alta (high) - naranja
+  - 🔴 Urgente (urgent) - rojo
+- **Added**: Badge visual de prioridad en tarjetas con icono Flag + texto
+- **Added**: Persistencia completa en backend (PUT /api/boards/{id}/lists/{id}/cards/{id})
+- **Added**: Opción "Quitar prioridad" para remover la prioridad
+- **Testing**: 11/11 backend tests passed, visual verification passed
+
 ### 2026-01-04: Sistema de Adjuntos Mejorado (Estilo Trello) ✅
 - **Added**: Generación automática de 2 versiones de imagen:
   - Preview: 280px ancho máximo (para tarjetas y modal)

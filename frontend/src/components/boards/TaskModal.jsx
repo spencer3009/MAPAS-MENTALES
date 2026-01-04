@@ -103,7 +103,7 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Combinar actividades (comentarios + eventos de tiempo)
+  // Combinar actividades (comentarios + eventos de tiempo + eventos de fecha límite)
   const getAllActivities = () => {
     const activities = [];
     
@@ -139,6 +139,17 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
           duration: entry.duration
         });
       }
+    });
+    
+    // Agregar eventos de fecha límite
+    dueDateActivities.forEach(activity => {
+      activities.push({
+        type: 'due_date',
+        id: activity.id,
+        author: activity.author,
+        text: activity.text,
+        created_at: activity.created_at
+      });
     });
     
     // Ordenar por fecha descendente (más reciente primero)

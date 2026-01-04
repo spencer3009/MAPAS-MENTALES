@@ -230,6 +230,14 @@ const SortableCard = ({ card, listId, listTitle, boardId, onUpdate, onDelete, on
             </span>
           )}
           
+          {/* Attachments count badge (only if no cover image shown) */}
+          {card.attachments && card.attachments.length > 0 && !card.attachments[0].data && (
+            <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-600">
+              <Paperclip size={10} />
+              {card.attachments.length}
+            </span>
+          )}
+          
           {/* Description indicator */}
           {card.description && (
             <span className="w-4 h-4 flex items-center justify-center text-gray-400">

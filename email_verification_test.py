@@ -13,7 +13,7 @@ from datetime import datetime
 from typing import Dict, List, Optional
 
 # Test Configuration
-BASE_URL = "https://tableros-editor.preview.emergentagent.com/api"
+BASE_URL = "https://dndkanban.preview.emergentagent.com/api"
 
 class EmailVerificationTester:
     def __init__(self):

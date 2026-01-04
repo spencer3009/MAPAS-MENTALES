@@ -3517,6 +3517,20 @@ async def update_card(board_id: str, list_id: str, card_id: str, request: Update
                         card["labels"] = request.labels
                     if request.position is not None:
                         card["position"] = request.position
+                    if request.due_date is not None:
+                        card["due_date"] = request.due_date
+                    if request.due_time is not None:
+                        card["due_time"] = request.due_time
+                    if request.due_date_activities is not None:
+                        card["due_date_activities"] = request.due_date_activities
+                    if request.checklist is not None:
+                        card["checklist"] = request.checklist
+                    if request.comments is not None:
+                        card["comments"] = request.comments
+                    if request.priority is not None:
+                        card["priority"] = request.priority
+                    if request.attachments is not None:
+                        card["attachments"] = request.attachments
                     card["updated_at"] = now
                     updated = True
                     break

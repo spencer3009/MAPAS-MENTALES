@@ -158,7 +158,9 @@ const SortableCard = ({ card, listId, listTitle, boardId, onUpdate, onDelete, on
           {/* Due date badge with smart coloring */}
           {card.due_date && (() => {
             const now = new Date();
-            const due = new Date(card.due_date);
+            // Parsear fecha directamente del string para evitar problemas de zona horaria
+            const [year, month, day] = card.due_date.split('-').map(Number);
+            const due = new Date(year, month - 1, day, 12, 0, 0);
             if (card.due_time) {
               const [hours, minutes] = card.due_time.split(':');
               due.setHours(parseInt(hours), parseInt(minutes));
@@ -183,11 +185,8 @@ const SortableCard = ({ card, listId, listTitle, boardId, onUpdate, onDelete, on
               textColor = 'text-yellow-700';
             }
             
-            const displayDate = new Date(card.due_date).toLocaleDateString('es-ES', { 
-              day: 'numeric', 
-              month: 'short',
-              year: due.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
-            });
+            // Formatear fecha con el día correcto
+            const displayDate = `${day} ${['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'][month - 1]}${year !== now.getFullYear() ? ` ${year}` : ''}`;
             
             const displayTime = card.due_time ? ` ${card.due_time}` : '';
             

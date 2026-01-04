@@ -2,6 +2,16 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-04: Edición Inline y Menú Contextual para Tableros ✅
+- **Added**: Edición inline del nombre del tablero haciendo clic en el título
+- **Added**: Menú contextual (⋮) con opciones: Renombrar, Duplicar, Mover a carpeta, Eliminar
+- **Added**: Endpoint `POST /api/boards/{id}/duplicate` para duplicar tableros con todo su contenido
+- **Added**: Validaciones frontend: nombre vacío, máximo 60 caracteres
+- **Added**: Toast notifications para feedback de acciones
+- **Added**: "Mover a carpeta" preparado como hook para funcionalidad futura
+- **Changed**: Modal de eliminación mejorado con vista previa del tablero
+- **Fixed**: Botón ⋮ ahora funcional en cada tarjeta de tablero
+
 ### 2026-01-03: Fix Layout Dashboard - Templates Grid
 - **Fixed**: Cards de templates ocupan todo el ancho disponible
 - **Changed**: De `flex overflow-x-auto` a `grid grid-cols-6` responsivo
@@ -65,6 +75,12 @@ MindoraMap es una plataforma de mapas mentales para empresarios. Permite organiz
 
 ### 4. Tableros Kanban (MVP) - **FASE 1 COMPLETADA ✅**
 - Crear/editar/eliminar tableros
+- **Edición inline**: Clic en título para renombrar directamente
+- **Menú contextual (⋮)** con opciones:
+  - Renombrar (activa edición inline)
+  - Duplicar tablero (crea copia con "(Copia)")
+  - Mover a carpeta (preparado para futuro)
+  - Eliminar tablero (con confirmación)
 - **3 columnas por defecto al crear tablero:**
   - Abiertas (Cyan #06B6D4)
   - En Progreso (Azul #3B82F6)
@@ -135,17 +151,21 @@ MindoraMap es una plataforma de mapas mentales para empresarios. Permite organiz
 ### P0 (Alta Prioridad)
 - [x] Testing completo de Tableros MVP ✅
 - [x] Ajustes de UX (drag & drop mejorado) ✅
+- [x] Edición inline y menú contextual para tableros ✅
 - [ ] Resolver issues de MindHybrid
+- [ ] Verificar MindOrbit: agregar nodos hijos via UI
 
 ### P1 (Media Prioridad)
-- [ ] Tableros Fase 2: detalles de tarjetas (descripción, fechas, checklists)
-- [ ] Acciones del menú contextual (Compartir, Duplicar)
+- [ ] Tableros Fase 2: checklist interactivo, adjuntos, comentarios en tiempo real
+- [ ] Menú contextual Dashboard para mapas mentales
+- [ ] Sistema de carpetas para organizar tableros
 
 ### P2 (Backlog)
 - [ ] Tableros: Notificaciones y colaboración
 - [ ] Admin Role Management
 - [ ] Dashboard Enhancements
 - [ ] Email Notification Channel
+- [ ] Data Migration for `total_maps_created`
 
 ## Integraciones de Terceros
 - **PayPal**: Suscripciones (modo sandbox)
@@ -159,4 +179,4 @@ MindoraMap es una plataforma de mapas mentales para empresarios. Permite organiz
 - **Free User**: testtrash2025 / testtrash2025
 
 ---
-*Última actualización: 3 de Enero, 2026*
+*Última actualización: 4 de Enero, 2026*

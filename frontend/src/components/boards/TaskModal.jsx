@@ -409,6 +409,104 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
     saveChanges({ comments: newComments });
   };
 
+  // Attachments - Subir imagen
+  const handleAttachmentUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Validar que es una imagen
+    if (!file.type.startsWith('image/')) {
+      setAttachmentError('Solo se permiten archivos de imagen');
+      setTimeout(() => setAttachmentError(''), 3000);
+      return;
+    }
+    
+    // Validar tamaño máximo (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setAttachmentError('La imagen no puede superar 10MB');
+      setTimeout(() => setAttachmentError(''), 3000);
+      return;
+    }
+    
+    setUploadingAttachment(true);
+    setAttachmentError('');
+    
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch(
+        `${API_URL}/api/boards/${boardId}/lists/${listId}/cards/${card.id}/attachments`,
+        {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: formData
+        }
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        // Agregar el adjunto al estado local
+        const newAttachment = {
+          ...data.attachment,
+          data: data.attachment.data_url?.split(',')[1] // Extraer solo base64
+        };
+        setAttachments([...attachments, newAttachment]);
+        
+        // Notificar al padre para actualizar la tarjeta en el tablero
+        if (onUpdate) {
+          onUpdate({ ...card, attachments: [...attachments, newAttachment] });
+        }
+      } else {
+        const errorData = await response.json();
+        setAttachmentError(errorData.detail || 'Error al subir imagen');
+        setTimeout(() => setAttachmentError(''), 3000);
+      }
+    } catch (error) {
+      console.error('Error uploading attachment:', error);
+      setAttachmentError('Error de conexión al subir imagen');
+      setTimeout(() => setAttachmentError(''), 3000);
+    } finally {
+      setUploadingAttachment(false);
+      // Limpiar el input para permitir subir el mismo archivo de nuevo
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+  
+  // Attachments - Eliminar
+  const handleDeleteAttachment = async (attachmentId) => {
+    try {
+      const response = await fetch(
+        `${API_URL}/api/boards/${boardId}/lists/${listId}/cards/${card.id}/attachments/${attachmentId}`,
+        {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        }
+      );
+      
+      if (response.ok) {
+        const newAttachments = attachments.filter(a => a.id !== attachmentId);
+        setAttachments(newAttachments);
+        
+        // Notificar al padre
+        if (onUpdate) {
+          onUpdate({ ...card, attachments: newAttachments });
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting attachment:', error);
+    }
+  };
+  
+  // Obtener URL de imagen de adjunto
+  const getAttachmentUrl = (attachment) => {
+    if (attachment.data_url) return attachment.data_url;
+    if (attachment.data) return `data:image/webp;base64,${attachment.data}`;
+    return null;
+  };
+
   // Calcular progreso del checklist
   const checklistProgress = checklist.length > 0
     ? Math.round((checklist.filter(i => i.completed).length / checklist.length) * 100)

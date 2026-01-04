@@ -228,6 +228,17 @@ const SortableCard = ({ card, listId, listTitle, boardId, onUpdate, onDelete, on
             );
           })()}
           
+          {/* Priority badge - Estilo Asana con color + texto */}
+          {card.priority && PRIORITIES[card.priority] && (
+            <span 
+              className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded font-medium ${PRIORITIES[card.priority].bgColor} ${PRIORITIES[card.priority].textColor}`}
+              data-testid={`priority-badge-${card.id}`}
+            >
+              <Flag size={10} />
+              {PRIORITIES[card.priority].label}
+            </span>
+          )}
+          
           {/* Checklist progress badge */}
           {checklistProgress !== null && (
             <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded ${

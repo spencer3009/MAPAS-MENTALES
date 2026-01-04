@@ -155,17 +155,21 @@ const SortableCard = ({ card, listId, listTitle, boardId, onUpdate, onDelete, on
         </div>
       )}
       
-      {/* Labels */}
-      {card.labels && card.labels.length > 0 && (
+      {/* Labels - Mostrar etiquetas con texto + color estilo Trello */}
+      {card.labels && card.labels.length > 0 && boardLabels.length > 0 && (
         <div className="flex flex-wrap gap-1.5 px-3 pt-3">
-          {card.labels.map((label, idx) => {
-            const color = LABEL_COLORS.find(c => c.id === label.color);
+          {card.labels.map((labelId) => {
+            const label = boardLabels.find(bl => bl.id === labelId);
+            if (!label) return null;
             return (
-              <div
-                key={idx}
-                className="h-2 w-12 rounded-full"
-                style={{ backgroundColor: color?.value || '#3B82F6' }}
-              />
+              <span
+                key={labelId}
+                className="px-2 py-0.5 rounded text-xs font-medium text-white drop-shadow-sm"
+                style={{ backgroundColor: label.color }}
+                data-testid={`card-label-${labelId}`}
+              >
+                {label.name}
+              </span>
             );
           })}
         </div>

@@ -20,6 +20,20 @@
 - **Added**: Opción "Quitar prioridad" para remover la prioridad
 - **Testing**: 11/11 backend tests passed, visual verification passed
 
+### 2026-01-04: Sistema de Etiquetas Real (Estilo Trello) ✅
+- **Added**: Sistema completo de etiquetas a nivel de tablero con texto + color
+- **Added**: CRUD de etiquetas: crear, editar, eliminar etiquetas del tablero
+- **Added**: Asignar/desasignar etiquetas a tareas con checkbox
+- **Added**: Etiquetas reutilizables entre múltiples tareas del mismo tablero
+- **Added**: Visualización de etiquetas en tarjetas con TEXTO + COLOR (no solo barras de color)
+- **Added**: Persistencia completa en backend (board_labels en tablero, labels IDs en tarjetas)
+- **Files Changed**:
+  - `/app/backend/board_service.py` - BoardLabel model, board_labels field
+  - `/app/backend/server.py` - Endpoint update_board con board_labels
+  - `/app/frontend/src/components/boards/TaskModal.jsx` - UI completa de etiquetas
+  - `/app/frontend/src/components/boards/BoardView.jsx` - Visualización en tarjetas
+- **Testing**: 11/11 backend tests passed, visual verification passed
+
 ### 2026-01-04: Sistema de Adjuntos Mejorado (Estilo Trello) ✅
 - **Added**: Generación automática de 2 versiones de imagen:
   - Preview: 280px ancho máximo (para tarjetas y modal)

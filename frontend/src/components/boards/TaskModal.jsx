@@ -962,15 +962,6 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
               />
             </div>
 
-            {/* Time Tracking */}
-            <TimeTracker 
-              taskId={card.id}
-              boardId={boardId}
-              listId={listId}
-              taskTitle={card.title}
-              onTimeUpdate={loadTimeEntries}
-            />
-
             {/* Comments / Activity */}
             <div>
               <div className="flex items-center gap-2 mb-3 text-gray-700">

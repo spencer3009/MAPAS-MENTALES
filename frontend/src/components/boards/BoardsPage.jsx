@@ -69,6 +69,113 @@ const BoardsPage = ({ onBack, onSelectBoard, onTrashUpdate }) => {
     }
   };
 
+  // Mostrar toast temporal
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  // Iniciar edición inline
+  const startEditing = (board) => {
+    setEditingBoardId(board.id);
+    setEditingTitle(board.title);
+    setTitleError('');
+    // Focus en el input después de renderizar
+    setTimeout(() => editInputRef.current?.focus(), 50);
+  };
+
+  // Cancelar edición
+  const cancelEditing = () => {
+    setEditingBoardId(null);
+    setEditingTitle('');
+    setTitleError('');
+  };
+
+  // Guardar título editado
+  const saveTitle = async (boardId) => {
+    const trimmedTitle = editingTitle.trim();
+    
+    // Validaciones
+    if (!trimmedTitle) {
+      setTitleError('El nombre no puede estar vacío');
+      return;
+    }
+    if (trimmedTitle.length > 60) {
+      setTitleError('Máximo 60 caracteres');
+      return;
+    }
+    
+    // Verificar si cambió
+    const board = boards.find(b => b.id === boardId);
+    if (board && board.title === trimmedTitle) {
+      cancelEditing();
+      return;
+    }
+    
+    setSavingTitle(true);
+    setTitleError('');
+    
+    try {
+      const token = localStorage.getItem('mm_auth_token');
+      const response = await fetch(`${API_URL}/api/boards/${boardId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ title: trimmedTitle })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setBoards(boards.map(b => b.id === boardId ? data.board : b));
+        cancelEditing();
+        showToast('Nombre actualizado');
+      } else {
+        const errorData = await response.json();
+        setTitleError(errorData.detail || 'Error al guardar');
+      }
+    } catch (error) {
+      console.error('Error saving title:', error);
+      setTitleError('Error de conexión');
+    } finally {
+      setSavingTitle(false);
+    }
+  };
+
+  // Duplicar tablero
+  const duplicateBoard = async (board) => {
+    setDuplicatingBoardId(board.id);
+    
+    try {
+      const token = localStorage.getItem('mm_auth_token');
+      const response = await fetch(`${API_URL}/api/boards/${board.id}/duplicate`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setBoards([...boards, data.board]);
+        showToast(`Tablero "${data.board.title}" creado`);
+      } else {
+        const errorData = await response.json();
+        showToast(errorData.detail || 'Error al duplicar', 'error');
+      }
+    } catch (error) {
+      console.error('Error duplicating board:', error);
+      showToast('Error de conexión', 'error');
+    } finally {
+      setDuplicatingBoardId(null);
+    }
+  };
+
+  // Hook para mover a carpeta (preparado para futuro)
+  const moveToFolder = (board) => {
+    showToast('Función próximamente disponible', 'info');
+    // TODO: Implementar cuando exista la UI de carpetas
+  };
+
   const createBoard = async () => {
     if (!newBoardTitle.trim()) return;
     

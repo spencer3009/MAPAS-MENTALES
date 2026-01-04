@@ -692,6 +692,7 @@ const BoardView = ({ board: initialBoard, onBack }) => {
         if (response.ok && isMounted) {
           const data = await response.json();
           setBoard(data.board);
+          setBoardLabels(data.board.board_labels || []);
         }
       } catch (error) {
         console.error('Error fetching board:', error);

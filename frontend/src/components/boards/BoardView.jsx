@@ -1117,6 +1117,7 @@ const BoardView = ({ board: initialBoard, onBack }) => {
                   list={list}
                   listIndex={index}
                   boardId={board.id}
+                  boardLabels={boardLabels}
                   onUpdateList={updateList}
                   onDeleteList={deleteList}
                   onAddCard={addCard}

@@ -2,6 +2,20 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-04: Sistema de Adjuntos de Imágenes ✅
+- **Added**: Upload de imágenes con conversión automática a WebP
+- **Added**: Redimensionado proporcional (máx 800x600) con optimización de peso
+- **Added**: Imagen de portada visible en tarjetas del tablero (estilo Trello)
+- **Added**: Grid de adjuntos en modal de tarea con preview y tamaño
+- **Added**: Eliminación de adjuntos con hover
+- **Added**: Endpoint POST /api/boards/{id}/lists/{id}/cards/{id}/attachments
+- **Added**: Endpoint DELETE /api/boards/{id}/lists/{id}/cards/{id}/attachments/{id}
+- **Changed**: Sidebar muestra contador de adjuntos
+
+### 2026-01-04: Selector de Hora con AM/PM ✅
+- **Changed**: Selector de hora ahora muestra formato 12h con AM/PM
+- **Fixed**: Bug de zona horaria en fechas (día se mostraba -1)
+
 ### 2026-01-04: Sistema de Fecha Límite para Tareas ✅
 - **Added**: Selector de calendario personalizado con navegación por meses
 - **Added**: Selector de hora "Vence a las" para fechas límite

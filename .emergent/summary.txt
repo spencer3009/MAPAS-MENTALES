@@ -1,170 +1,167 @@
 <analysis>**original_problem_statement:**
-The user's initial request was to update the PayPal  key and test the subscription flow. This was followed by a request to configure PayPal webhooks for automatic subscription status updates. Subsequently, the user requested a full email verification system using Resend, which included fixing a bug where incorrect email addresses were being used. The user then pivoted to adding two new mind map layouts:  (a balanced, central-axis layout) and  (a radial layout). After adding the new layouts, the user requested a UI adjustment on the dashboard to display all map templates in a single row. The final and largest request was to build a new Trello-like Tableros (Boards) feature, starting with a Minimum Viable Product (MVP).
+The user's latest request is to enhance the Tableros (Boards) page by adding inline editing for board names and activating the three-dot context menu on each board card. The context menu should provide options for renaming, duplicating, and deleting (with confirmation) a board.
 
-**PRODUCT REQUIREMENTS:**
-*   **PayPal Webhook:** The system must listen for events from PayPal (, , etc.) via a webhook at  and update the user's subscription status in the database accordingly.
-*   **Email Verification:** New users must have their accounts created with . An email containing a unique, time-limited verification link must be sent via Resend. A backend endpoint must validate the token and update the user's status. Unverified users should be prompted to verify their email.
-*   **MindAxis Layout:** A new mind map format where the main node is centered, and child branches expand horizontally and symmetrically to the left and right. This new layout must be integrated into the dashboard and the new map template selector modal.
-*   **MindOrbit Layout:** A new mind map format where the main node is centered, and child nodes are arranged in a circle (radially) around it. This also needs full UI integration.
-*   **Dashboard Layout:** The Create a map section on the dashboard must display all templates (Blank, MindFlow, MindTree, MindHybrid, MindAxis, MindOrbit) in a single, horizontally scrollable row.
-*   **Tableros (Boards) MVP:**
-    *   A new Tableros section accessible from the main sidebar.
-    *   Ability to create, view, and name boards.
-    *   Inside a board, users can create, rename, and delete lists (columns).
-    *   Inside lists, users can create, rename, and delete cards (tasks).
-    *   Full drag-and-drop functionality (using ) to move cards between lists and reorder cards within a list.
-    *   All changes must be saved automatically.
+This follows a series of significant feature implementations and UX fixes, including:
+1.  **Global Time Tracking:** A persistent, globally-accessible time tracking system.
+2.  **Time Tracking History:** A detailed activity log for all time tracking events within a task.
+3.  **MindOrbit Layout:** A new mind map layout with circular nodes and straight connectors.
+4.  **Dashboard & Modal UX:** Major improvements to the dashboard layout and the map template selection modal.
+5.  **Trash Functionality:** Critical bug fixes for the trash counter and item restoration.
+
+**PRODUCT REQUIREMENTS (Last Request):**
+*   **Inline Editing:** Clicking a board's title on the  should convert it into an editable input field.
+*   **Context Menu:** The existing  button on each board card must be activated to show a dropdown menu.
+*   **Menu Options:**
+    *   **Renombrar:** Trigger the same inline editing flow.
+    *   **Duplicar tablero:** Create an exact copy of the board, appending  to its name.
+    *   **Eliminar tablero:** Show a confirmation modal before soft-deleting the board (moving to Papelera).
+*   **UX:** All operations must be asynchronous (no page reload), maintain consistent styling, and handle loading/error states.
 
 **User's preferred language**: Spanish. The next agent MUST respond in Spanish.
 
 **what currently exists?**
-The application now features a fully tested PayPal subscription flow. An email verification system using Resend has been implemented, tested, and a critical bug related to incorrect email usage was fixed. Two new mind map layouts,  and , have been fully integrated into the application, including the core layout logic and all necessary UI components. The dashboard UI has been updated to display all six map templates in a single, responsive row. Most recently, the MVP for a new Trello-like Tableros (Boards) feature has been built. This includes the backend API, frontend components, and functional drag-and-drop for cards and lists.
+The application features a robust Tableros (Kanban boards) module and a Mind Mapping tool. A comprehensive, globally persistent time tracking system is fully integrated into the tasks on the boards. This system includes a global timer in the header, visual indicators on task cards, and a detailed activity log. The UI/UX of the main dashboard and modals has been significantly improved. A unified trash system for maps and boards is functional, with its counter and restoration bugs now fixed. The  layout has been partially implemented with circular nodes, but requires further verification.
 
 **Last working item**:
-*   **Last item agent was working:** The agent completed the implementation of the Minimum Viable Product (MVP) for the new Tableros (Boards) feature. This involved creating backend endpoints, frontend components using  for drag-and-drop, and integrating the new section into the main UI. The agent performed a basic UI test by creating a board and viewing the initial empty state.
-*   **Status:** IN PROGRESS (The MVP is built, but requires thorough testing).
-*   **Agent Testing Done:** Y (Basic UI/creation flow was checked with screenshots).
-*   **Which testing method agent to use?** Frontend testing agent to conduct a comprehensive E2E test of the Tableros MVP. The test should cover creating boards, adding multiple lists and cards, and extensively testing the drag-and-drop functionality for reordering and moving cards/lists.
+*   **Last item agent was working:** Starting the implementation of inline editing and the context menu for boards as per the user's latest request. The agent was in the initial exploration phase, viewing the  file to understand its structure.
+*   **Status:** NOT STARTED
+*   **Agent Testing Done:** N
+*   **Which testing method agent to use?** Frontend testing agent to verify the new UI interactions (inline editing, context menu) and the full CRUD cycle (rename, duplicate, delete). Manual  commands can supplement backend endpoint verification.
 *   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-*   **Issue 1: MindHybrid Layout Instability (P1)**
-*   **Issue 2: 'X' button in MultiSelectToolbar is not working (P2)**
-*   **Issue 3: Mobile Layout Overlap (P2)**
+*   **Issue 1: MindOrbit radial layout and child node creation not fully verified (P1)**
+*   **Issue 2: MindHybrid Layout Instability (P1)**
+*   **Issue 3: 'X' button in MultiSelectToolbar is not working (P2)**
+*   **Issue 4: Mobile Layout Overlap (P2)**
 
 **Issues Detail:**
-*   **Issue 1: MindHybrid Layout Instability**
-    *   **Attempted fixes:** None in this session. This is a recurring issue from a previous fork.
-    *   **Next debug checklist:** Investigate the layout algorithms in , specifically focusing on how  calculates node positions during addition and alignment.
-    *   **Why fix this issue and what will be achieved with the fix?** To stabilize a core feature and prevent a poor user experience.
+*   **Issue 1: MindOrbit radial layout and child node creation not fully verified**
+    *   **Attempted fixes:** The agent successfully modified  for circular nodes and  for straight connectors. An initial test showed the parent node is circular. However, the agent was unable to add child nodes via the UI to verify the radial distribution and connector rendering. The contextual  button on the node's toolbar seemed unresponsive.
+    *   **Next debug checklist:**
+        1.  Investigate why the contextual add node () button isn't creating a child node for the MindOrbit layout.
+        2.  Check the browser console for errors during the add node action.
+        3.  Once a child node can be added, verify it is also circular and connected by a straight line.
+        4.  Add multiple child nodes to confirm they are distributed radially around the parent.
+    *   **Why fix this issue and what will be achieved with the fix?** To complete the  feature as per user specification, which requires a specific visual representation.
+    *   **Status:** IN PROGRESS
+    *   **Is recurring issue?** N
+    *   **Should Test frontend/backend/both after fix?** Frontend
+    *   **Blocked on other issue:** None
+
+*   **Issue 2: MindHybrid Layout Instability**
+    *   **Attempted fixes:** None in this session.
+    *   **Next debug checklist:** Investigate layout algorithms in .
     *   **Status:** NOT STARTED
     *   **Is recurring issue?** Y
     *   **Should Test frontend/backend/both after fix?** Frontend
     *   **Blocked on other issue:** None
 
-*   **Issue 2: 'X' button in MultiSelectToolbar is not working**
+*   **Issue 3: 'X' button in MultiSelectToolbar is not working**
     *   **Attempted fixes:** None in this session.
-    *   **Next debug checklist:** In the mind map editor, select multiple nodes to make the  appear. Click the 'X' button. Debug the  prop and the  function in .
-    *   **Why fix this issue and what will be achieved with the fix?** To restore basic UI functionality for deselecting multiple nodes.
+    *   **Next debug checklist:** Debug the  prop in  and the  function in .
     *   **Status:** NOT STARTED
     *   **Is recurring issue?** Y
     *   **Should Test frontend/backend/both after fix?** Frontend
     *   **Blocked on other issue:** None
 
-*   **Issue 3: Mobile Layout Overlap**
+*   **Issue 4: Mobile Layout Overlap**
     *   **Attempted fixes:** None in this session.
-    *   **Next debug checklist:** Use browser developer tools to inspect the CSS for the sidebar and user dropdown menu on small screen sizes. Apply appropriate  or layout fixes in the relevant components (, user menu component).
-    *   **Why fix this issue and what will be achieved with the fix?** To ensure the application is usable on mobile devices.
+    *   **Next debug checklist:** Inspect CSS  on the sidebar and user dropdown for mobile screen sizes.
     *   **Status:** NOT STARTED
     *   **Is recurring issue?** N
     *   **Should Test frontend/backend/both after fix?** Frontend
     *   **Blocked on other issue:** None
 
 **In progress Task List**:
-*   **Task 1: Complete and Test Tableros MVP (P0)**
-    *   **Where to resume:** The MVP is functionally built. The next step is to invoke the  to perform rigorous testing of the entire feature.
-    *   **What will be achieved with this?** A stable, user-ready MVP for the Boards feature, confirming that board/list/card creation and drag-and-drop functionality are working as expected.
-    *   **Status:** TESTING PENDING
-    *   **Should Test frontend/backend/both after fix?** Frontend
+*   **Task 1: Implement inline editing and context menu for boards (P0)**
+    *   **Where to resume:** Continue analyzing . Plan the implementation of state for inline editing, create the context menu component (using a library like Radix or a custom one), and add the necessary backend endpoints for renaming and duplicating boards.
+    *   **What will be achieved with this?** A more fluid and intuitive user experience for managing boards, directly addressing a user feature request.
+    *   **Status:** NOT STARTED
+    *   **Should Test frontend/backend/both after fix?** Both
     *   **Blocked on something:** None
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks:**
-    *   **Tableros - Phase 2 (P1):** Implement card details (description, labels, dates, checklists), collaboration (add users), and activity history.
-    *   **Implement Context Menu Actions (P1):** Add functionality to the Compartir mapa, Duplicar, etc. actions in the dashboard context menu.
+    *   **Tableros - Phase 2 (P1):** Fully enable functionalities within the task modal (checklist interaction, attachments, real-time comments) and implement board collaboration.
+    *   **Dashboard Context Menu (P1):** Implement actions for the context menu on mind maps in the dashboard (Compartir mapa, Duplicar, etc.).
 *   **Future Tasks:**
-    *   **Tableros - Future Phases (P2):** Implement notifications and integration with Mind Maps.
+    *   **Tableros - Notifications (P2)**
     *   **Admin Role Management (P1)**
-    *   **Dashboard Enhancements (P2)**
     *   **Data Migration for  (P2)**
-    *   **Email Notification Channel (P2)**
-    *   **Twilio Outgoing Messages (P2)**
 
 **Completed work in this session**
-- **PayPal Flow Hardening:** Updated  key and tested the full subscription flow.
-- **PayPal Webhook Implementation:** Created and configured the  endpoint to handle subscription events.
-- **Email Verification System (Resend):**
-    - Implemented a complete email verification flow for new user registrations.
-    - Created  to centralize email sending.
-    - Added new endpoints:  and .
-    - Created frontend components:  and .
-    - Fixed a critical bug where verification emails were sent to incorrect, auto-generated addresses.
-    - Guided the user to securely configure the  and tested the live email sending.
-- **New Layout: MindAxis (Eje Central):** Fully implemented the new layout, including backend logic and UI integration on the dashboard and template selector.
-- **New Layout: MindOrbit (Mapa Radial):** Fully implemented the new radial layout with complete UI integration.
-- **Dashboard UI Refactor:** Updated the dashboard to display all 6 map templates in a single, horizontally-scrollable row.
-- **Tableros (Boards) MVP:**
-    - Installed  for drag-and-drop.
-    - Created a new backend service () and API routes for boards, lists, and cards.
-    - Built the frontend structure with  and .
-    - Integrated the feature into the main navigation sidebar.
+- **Global & Persistent Time Tracking:** Implemented a full-featured time tracking system that persists globally. A timer runs in the header and on the task card, even if the modal is closed.
+- **Time Tracking Activity History:** Added an Activity feed to the task modal, showing a complete, real-time history of all start/stop time tracking events.
+- **MindOrbit Layout Implementation:** Implemented circular nodes and straight-line connectors for the  layout type by modifying  and .
+- **Dashboard Layout Rework:** Fixed the template selection grid on the dashboard to be fully responsive, use the entire available width, and correct hover effect clipping.
+- **Template Selector Modal Fix:** Redesigned the layout selector modal to have a controlled height (), internal scrolling, and a fixed footer, preventing it from overflowing the viewport.
+- **Template Pre-selection Fix:** Corrected a bug where the chosen template from the dashboard was not pre-selected in the creation modal.
+- **Trash Counter & Restore Fix:** Resolved a critical bug where the trash counter was incorrect and another bug that prevented items from being restored from the trash. Created a new endpoint .
+- **Backend Cleanup:** Removed duplicated API routes in .
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-*   **Third-Party API Integration (Resend):** Integrated the Resend API for transactional emails, handling API key management via environment variables.
-*   **Complex Layout Algorithms:** Implemented advanced geometric and trigonometric calculations in  to create the  (bilateral distribution) and  (radial distribution) layouts.
-*   **Modern Drag & Drop ():** Implemented a Trello-like board using , , and  for a high-performance, accessible drag-and-drop interface.
-*   **Data Model Expansion:** Extended the application's data model with new MongoDB collections for , , and  to support the new feature.
-*   **Modular Frontend Architecture:** Created a new  directory to encapsulate all components related to the new feature, keeping it separate from the existing mind map logic.
-*   **Responsive CSS with Tailwind:** Used Tailwind CSS flexbox, grid, and overflow utilities to create a responsive, horizontally-scrolling single-row layout for the dashboard templates.
+*   **Global State Management (React Context):** Introduced  to manage the active timer's state across the application, enabling persistent, global UI indicators.
+*   **Responsive CSS:** Used  to create a responsive, full-width grid. Fixed a major modal UX issue by constraining height () and enabling internal scroll.
+*   **Conditional Rendering for Dynamic Theming:** Modified  and  to render different styles (circular nodes, straight edges) based on the  prop, effectively theming a component based on data.
+*   **Lifting State Up:** Passed callbacks () from parent () to child () to allow child components to trigger state updates in the parent (updating the trash count).
+*   **FastAPI Backend Development:** Added new models (Pydantic) and a suite of endpoints for the time tracking feature () and a new aggregate endpoint for the trash count ().
 
 **key DB schema**
-*   **users:** Extended with , , .
-*   **boards:** , , , , .
-*   **lists:** , , , .
-*   **cards:** , , , , , .
+*   **time_tracking_entries:** (New Collection)
+    *   , , , , , , , , 
 
 **All files of reference**
-*   **/app/backend/server.py**: Heavily modified to add endpoints for email verification and the entire Tableros CRUD API.
-*   **/app/backend/email_service.py**: New service for sending emails via Resend.
-*   **/app/backend/board_service.py**: New service containing all backend logic for the Tableros feature.
-*   **/app/frontend/src/hooks/useNodes.js**: Heavily modified to add the layout logic for  and .
-*   **/app/frontend/src/components/mindmap/DashboardView.jsx**: Heavily modified to add the  and  templates and refactor the layout into a single row.
-*   **/app/frontend/src/components/mindmap/LayoutTemplateSelector.jsx**: Heavily modified to add  and  to the template selection modal.
-*   **/app/frontend/src/components/mindmap/MindMapApp.jsx**: Modified to handle navigation to the new Tableros view.
-*   **/app/frontend/src/components/mindmap/DockSidebar.jsx**: Modified to add the Tableros navigation link.
-*   **/app/frontend/src/components/boards/**: New directory containing all components for the Trello-like feature.
+*   **/app/frontend/src/components/boards/BoardsPage.jsx**: Target file for the next task (inline editing and context menu).
+*   **/app/frontend/src/contexts/TimeTrackingContext.jsx**: Contains the new global state for the time tracker.
+*   **/app/frontend/src/components/boards/GlobalTimeIndicator.jsx**: The new UI component for the global timer in the header.
+*   **/app/frontend/src/components/mindmap/NodeItem.jsx**: Modified to render circular nodes for the MindOrbit layout.
+*   **/app/frontend/src/components/mindmap/ConnectionsLayer.jsx**: Modified to render straight connectors for MindOrbit.
+*   **/app/frontend/src/hooks/useNodes.js**: Contains the layout algorithms, including the adjusted radial layout.
+*   **/app/backend/server.py**: Contains all API logic, including the new time tracking and trash count endpoints.
 
 **Critical Info for New Agent**
-*   **Top Priority:** The immediate task is to perform a thorough test of the newly implemented Tableros (Boards) MVP using the frontend testing agent. The user has approved this feature as a high priority.
-*   ** Implementation:** The drag-and-drop functionality is built with . Be familiar with its concepts (, , sensors) when debugging or extending the feature. The core logic is in .
-*   **User Priority Shifts:** The user has a history of rapidly shifting focus to new features. While the Tableros feature is the current priority, be prepared for new requests. The pre-existing bugs ( instability, etc.) remain backlogged.
+*   **Top Priority (P0):** The immediate task is to implement the **inline board name editing** and the **board context menu** on the , as per the latest user request.
+*   **MindOrbit Verification:** The  feature is visually incomplete. While parent nodes are circular, the agent was unable to add child nodes through the UI to verify the full radial layout and straight connectors. This needs to be debugged and completed.
+*   **Global State:** Be aware of the newly implemented , which manages a global state. The pattern can be reused for other global features if needed.
+
+**documents and test reports created in this job**
+*   /app/memory/PRD.md (Updated multiple times)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User Request:** Approved the plan to build the Tableros MVP using  and placing the navigation link in the sidebar. (Completed)
-2.  **Agent Question:** Asked for confirmation on the implementation plan for the large Tableros feature. (Answered)
-3.  **User Request:** Requested the implementation of a full Trello-like Tableros section. (In Progress)
-4.  **User Request:** Repeated the request to adjust the dashboard layout to a single row. (Completed)
-5.  **User Request:** Requested the dashboard layout be adjusted to a single, horizontally scrollable row. (Completed)
-6.  **User Request:** Requested a new  (Radial Map) layout. (Completed)
-7.  **User Request:** Requested a new  (Central Axis) layout. (Completed)
-8.  **Agent Question:** Asked the user if they received the test email sent via Resend. (Answered by user's next request)
-9.  **Agent Action:** Confirmed the  was configured and sent a test email. (Completed)
-10. **User Request:** Confirmed they had set the environment variable and asked the agent to restart the backend. (Completed)
+1.  **User (P0 Request):** Requests inline editing and a context menu for boards on the . **(Current Task)**
+2.  **User (P0 Bug/UX):** Reports that the  layout is incorrect and requests circular nodes, straight connectors, and a radial distribution.
+3.  **User (P0 Bug/UX):** Reports the map template selection popup is too tall, hiding the action buttons.
+4.  **User (P0 Bug/UX):** Reports that clicking a map template on the dashboard doesn't pre-select it in the popup.
+5.  **User (P0 Bug/UX):** Reports the dashboard layout is cramped and doesn't use the full width.
+6.  **User (P0 Feature):** Requests a persistent, global time tracker with indicators on the task card and in the app header.
+7.  **User (P0 Feature):** Requests a detailed activity history for time tracking events.
+8.  **User (P0 Feature):** Initial request for a time tracking module inside the task modal.
+9.  **User (P0 Bug):** Reports that restoring items from the trash is not working.
+10. **User (P0 Bug):** Reports the trash counter in the sidebar is incorrect.
 
 **Project Health Check:**
 *   **Broken:**
     *    layout functionality remains unstable.
     *   The 'X' button in  is non-functional.
     *   User dropdown menu overlaps the sidebar on mobile.
-*   **Mocked:**
-    *   The  endpoint logic is implemented, but the full end-to-end flow (user completing payment and webhook triggering a plan update) has not been tested since the user pivoted to other tasks.
+    *   Adding child nodes in the  layout via the UI is not working, preventing full verification of the feature.
 
 **3rd Party Integrations**
 *   **PayPal:** For recurring subscriptions (Sandbox mode).
-*   **Resend:** For sending transactional emails (e.g., email verification). Key is stored in  env var.
-*   **@dnd-kit:** For drag-and-drop functionality in the new Tableros feature.
+*   **Resend:** For transactional emails.
+*   **@dnd-kit:** For drag-and-drop functionality.
 *   **Emergent-managed Google Auth:** For social login.
 *   **Lucide React:** For UI icons.
 *   **Twilio WhatsApp API:** For receiving incoming messages.
-*   **react-beautiful-dnd:** Previously used, but  is preferred for new features.
+*   **recharts:** Used for the time tracking activity graph.
 
 **Testing status**
-*   **Testing agent used after significant changes:** YES (for the email verification backend endpoints).
-*   **Test files created:** The testing agent created temporary test files during its run.
-*   **Known regressions:**  layout instability is a known, recurring regression.
+*   **Testing agent used after significant changes:** NO (Agent used screenshots and curl commands extensively for self-testing).
+*   **Test files created:** None.
 
 **Credentials to test flow:**
 *   **Admin User:**  / 

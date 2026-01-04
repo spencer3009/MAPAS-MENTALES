@@ -1190,10 +1190,23 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
               <span className="text-sm text-gray-700">Miembros</span>
             </button>
 
-            {/* Attachments (placeholder) */}
-            <button className="w-full flex items-center gap-3 px-3 py-2.5 bg-white hover:bg-gray-100 rounded-lg transition-colors text-left border border-gray-200">
-              <Paperclip size={16} className="text-gray-500" />
-              <span className="text-sm text-gray-700">Adjuntos</span>
+            {/* Attachments */}
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingAttachment}
+              className="w-full flex items-center gap-3 px-3 py-2.5 bg-white hover:bg-gray-100 rounded-lg transition-colors text-left border border-gray-200 disabled:opacity-50"
+            >
+              {uploadingAttachment ? (
+                <Loader2 size={16} className="text-cyan-500 animate-spin" />
+              ) : (
+                <Paperclip size={16} className="text-gray-500" />
+              )}
+              <span className="text-sm text-gray-700">
+                {uploadingAttachment ? 'Subiendo...' : 'Adjuntos'}
+                {attachments.length > 0 && !uploadingAttachment && (
+                  <span className="ml-1 text-gray-400">({attachments.length})</span>
+                )}
+              </span>
             </button>
 
             {/* Divider */}

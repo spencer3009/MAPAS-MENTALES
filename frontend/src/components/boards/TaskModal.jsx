@@ -256,10 +256,11 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
 
   const isSelectedDate = (day) => {
     if (!day || !dueDate) return false;
-    const selected = new Date(dueDate);
-    return day === selected.getDate() && 
-           selectedMonth.getMonth() === selected.getMonth() && 
-           selectedMonth.getFullYear() === selected.getFullYear();
+    // Parsear fecha directamente del string YYYY-MM-DD para evitar problemas de zona horaria
+    const [year, month, dayOfMonth] = dueDate.split('-').map(Number);
+    return day === dayOfMonth && 
+           selectedMonth.getMonth() === (month - 1) && 
+           selectedMonth.getFullYear() === year;
   };
 
   // Set due date con registro de actividad

@@ -702,6 +702,100 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
               </div>
             </div>
 
+            {/* Attachments Section */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2 text-gray-700">
+                  <Paperclip size={18} />
+                  <h3 className="font-semibold">Adjuntos</h3>
+                  {attachments.length > 0 && (
+                    <span className="text-xs text-gray-400">({attachments.length})</span>
+                  )}
+                </div>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingAttachment}
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm text-cyan-600 hover:bg-cyan-50 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {uploadingAttachment ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <Plus size={14} />
+                  )}
+                  Añadir
+                </button>
+              </div>
+              
+              {/* Error message */}
+              {attachmentError && (
+                <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600 flex items-center gap-2">
+                  <AlertCircle size={14} />
+                  {attachmentError}
+                </div>
+              )}
+              
+              {/* Upload progress */}
+              {uploadingAttachment && (
+                <div className="mb-3 p-3 bg-cyan-50 border border-cyan-200 rounded-lg">
+                  <div className="flex items-center gap-2 text-cyan-700">
+                    <Loader2 size={16} className="animate-spin" />
+                    <span className="text-sm">Subiendo y optimizando imagen...</span>
+                  </div>
+                </div>
+              )}
+              
+              {/* Attachments grid */}
+              {attachments.length > 0 ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {attachments.map(attachment => (
+                    <div 
+                      key={attachment.id}
+                      className="group relative rounded-lg overflow-hidden border border-gray-200 bg-gray-50"
+                    >
+                      <img
+                        src={getAttachmentUrl(attachment)}
+                        alt={attachment.filename}
+                        className="w-full h-32 object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                        <button
+                          onClick={() => handleDeleteAttachment(attachment.id)}
+                          className="p-2 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                          title="Eliminar adjunto"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+                        <p className="text-xs text-white truncate">{attachment.filename}</p>
+                        {attachment.size_kb && (
+                          <p className="text-[10px] text-white/70">{attachment.size_kb} KB</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center cursor-pointer hover:border-cyan-400 hover:bg-cyan-50/50 transition-colors"
+                >
+                  <Image size={32} className="mx-auto text-gray-300 mb-2" />
+                  <p className="text-sm text-gray-500">Haz clic para adjuntar una imagen</p>
+                  <p className="text-xs text-gray-400 mt-1">JPG, PNG, GIF o WebP (máx. 10MB)</p>
+                </div>
+              )}
+              
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleAttachmentUpload}
+                className="hidden"
+              />
+            </div>
+
             {/* Time Tracking */}
             <TimeTracker 
               taskId={card.id}

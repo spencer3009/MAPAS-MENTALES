@@ -64,8 +64,17 @@ const ContactsPage = () => {
   // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showFieldsConfig, setShowFieldsConfig] = useState(false);
+  const [showColumnsConfig, setShowColumnsConfig] = useState(false);
   const [editingContact, setEditingContact] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
+  
+  // Column configuration state (per tab)
+  const [columnConfig, setColumnConfig] = useState({
+    client: { visible: [], order: [] },
+    prospect: { visible: [], order: [] },
+    supplier: { visible: [], order: [] }
+  });
+  const [draggedColumn, setDraggedColumn] = useState(null);
   
   // Form states
   const [formData, setFormData] = useState({

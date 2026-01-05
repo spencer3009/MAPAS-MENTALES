@@ -2288,6 +2288,106 @@ const ContactsPage = () => {
           </div>
         </div>
       )}
+
+      {/* Filter Dropdown Portal - Rendered outside table container to avoid overflow clipping */}
+      {openFilterDropdown && createPortal(
+        <div 
+          ref={filterDropdownRef}
+          className="fixed bg-white border border-gray-200 rounded-xl shadow-2xl min-w-[220px] max-h-[320px] overflow-hidden"
+          style={{
+            top: filterDropdownPosition.top,
+            left: filterDropdownPosition.left,
+            zIndex: 99999
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {(() => {
+            const col = getVisibleColumns().find(c => c.id === openFilterDropdown) || getAllColumns().find(c => c.id === openFilterDropdown);
+            if (!col) return null;
+            
+            const filterOptions = getFilterOptions(col);
+            const isMulti = isMultiSelectFilter(col);
+            const hasFilter = columnFilters[col.id]?.length > 0;
+            
+            return (
+              <>
+                <div className="p-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-gray-700">
+                      Filtrar por {col.label}
+                    </span>
+                    {hasFilter && (
+                      <button
+                        onClick={() => clearColumnFilter(col.id)}
+                        className="text-xs text-red-500 hover:text-red-700 font-medium px-2 py-1 rounded hover:bg-red-50 transition-colors"
+                      >
+                        Limpiar
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {isMulti ? 'Selecciona una o más opciones' : 'Selecciona una opción'}
+                  </p>
+                </div>
+                <div className="max-h-[240px] overflow-y-auto p-2">
+                  {filterOptions.length === 0 ? (
+                    <p className="text-sm text-gray-400 p-3 text-center">
+                      No hay opciones disponibles
+                    </p>
+                  ) : (
+                    <div className="space-y-1">
+                      {filterOptions.map(option => {
+                        const isSelected = (columnFilters[col.id] || []).includes(option.id);
+                        return (
+                          <button
+                            key={option.id}
+                            onClick={() => toggleFilterValue(col.id, option.id, isMulti)}
+                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left text-sm transition-all ${
+                              isSelected 
+                                ? 'bg-cyan-50 text-cyan-700 ring-1 ring-cyan-200' 
+                                : 'text-gray-700 hover:bg-gray-50'
+                            }`}
+                          >
+                            <div className={`w-5 h-5 rounded ${isMulti ? 'rounded' : 'rounded-full'} border-2 flex items-center justify-center transition-colors ${
+                              isSelected 
+                                ? 'bg-cyan-500 border-cyan-500' 
+                                : 'border-gray-300 bg-white'
+                            }`}>
+                              {isSelected && <Check size={12} className="text-white" />}
+                            </div>
+                            {option.color && col.id === 'labels' ? (
+                              <span 
+                                className="px-2.5 py-1 rounded-full text-xs font-medium"
+                                style={{
+                                  backgroundColor: option.color + '20',
+                                  color: option.color,
+                                  border: `1px solid ${option.color}40`
+                                }}
+                              >
+                                {option.name}
+                              </span>
+                            ) : (
+                              <span className="truncate font-medium">{option.name}</span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+                {hasFilter && (
+                  <div className="p-2 border-t border-gray-100 bg-gray-50">
+                    <div className="text-xs text-gray-500 text-center">
+                      {columnFilters[col.id]?.length || 0} seleccionado{(columnFilters[col.id]?.length || 0) !== 1 ? 's' : ''}
+                    </div>
+                  </div>
+                )}
+              </>
+            );
+          })()}
+        </div>,
+        document.body
+      )}
     </div>
   );
 };

@@ -41,6 +41,20 @@ const FIELD_TYPES = [
   { id: 'multiselect', label: 'Selector múltiple', description: 'Selección múltiple', icon: CheckSquare }
 ];
 
+// Colores predefinidos para etiquetas
+const LABEL_COLORS = [
+  { id: 'blue', name: 'Azul', value: '#3B82F6' },
+  { id: 'cyan', name: 'Cyan', value: '#06B6D4' },
+  { id: 'green', name: 'Verde', value: '#22C55E' },
+  { id: 'yellow', name: 'Amarillo', value: '#EAB308' },
+  { id: 'orange', name: 'Naranja', value: '#F97316' },
+  { id: 'red', name: 'Rojo', value: '#EF4444' },
+  { id: 'pink', name: 'Rosa', value: '#EC4899' },
+  { id: 'purple', name: 'Morado', value: '#A855F7' },
+  { id: 'indigo', name: 'Índigo', value: '#6366F1' },
+  { id: 'gray', name: 'Gris', value: '#6B7280' }
+];
+
 // Colores disponibles para campos
 const FIELD_COLORS = [
   { id: 'gray', value: '#6B7280' },

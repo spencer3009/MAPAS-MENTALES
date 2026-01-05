@@ -312,6 +312,39 @@ const ContactsPage = () => {
   // Check if any filters are active
   const hasActiveFilters = Object.keys(columnFilters).length > 0;
 
+  // Open filter dropdown and calculate position (for portal)
+  const openFilterDropdownWithPosition = (columnId, buttonElement) => {
+    if (openFilterDropdown === columnId) {
+      setOpenFilterDropdown(null);
+      return;
+    }
+    
+    if (buttonElement) {
+      const rect = buttonElement.getBoundingClientRect();
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+      
+      // Calculate position - align to left of button, below it
+      let left = rect.left + scrollLeft;
+      let top = rect.bottom + scrollTop + 4; // 4px gap
+      
+      // Ensure dropdown doesn't overflow right edge of viewport
+      const dropdownWidth = 220; // min-width of dropdown
+      if (left + dropdownWidth > window.innerWidth) {
+        left = window.innerWidth - dropdownWidth - 16; // 16px margin
+      }
+      
+      // Ensure dropdown doesn't overflow left edge
+      if (left < 16) {
+        left = 16;
+      }
+      
+      setFilterDropdownPosition({ top, left });
+    }
+    
+    setOpenFilterDropdown(columnId);
+  };
+
   // Obtener todas las columnas disponibles (fijas + personalizadas)
   const getAllColumns = useCallback(() => {
     const allColumns = [

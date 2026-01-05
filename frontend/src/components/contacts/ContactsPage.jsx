@@ -2,10 +2,15 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Users, UserPlus, Building2, UserCheck, 
   Search, Plus, X, Settings, Trash2, Edit2, 
-  Phone, Mail, Calendar, ChevronDown, Check,
+  Phone, Mail, Calendar as CalendarIcon, ChevronDown, Check,
   Loader2, MoreHorizontal, Save, AlertCircle,
-  Type, Hash, List, CheckSquare, AlignLeft
+  Type, Hash, List, CheckSquare, AlignLeft, Clock,
+  ChevronUp
 } from 'lucide-react';
+import { Calendar } from '../ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { format, parse } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
@@ -20,6 +25,8 @@ const CONTACT_TYPES = {
 const FIELD_TYPES = [
   { id: 'text', label: 'Texto', description: 'Texto libre', icon: Type },
   { id: 'number', label: 'Número', description: 'Solo valores numéricos', icon: Hash },
+  { id: 'date', label: 'Fecha', description: 'Selector de calendario', icon: CalendarIcon },
+  { id: 'time', label: 'Hora', description: 'Formato 12h (AM/PM)', icon: Clock },
   { id: 'textarea', label: 'Área de texto', description: 'Texto largo multilínea', icon: AlignLeft },
   { id: 'select', label: 'Selector', description: 'Lista desplegable', icon: List },
   { id: 'multiselect', label: 'Selector múltiple', description: 'Selección múltiple', icon: CheckSquare }

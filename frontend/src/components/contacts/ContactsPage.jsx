@@ -161,23 +161,32 @@ const ContactsPage = () => {
     const allColumns = getAllColumns();
     const tabConfig = columnConfig[activeTab];
     
-    // Si no hay configuración, mostrar todas
-    if (!tabConfig?.order || tabConfig.order.length === 0) {
+    // Si no hay configuración para esta pestaña, mostrar todas en orden original
+    if (!tabConfig || tabConfig.visible === undefined) {
       return allColumns;
     }
     
-    // Ordenar según configuración
+    // Obtener el orden (usar orden guardado o el original)
+    const orderList = tabConfig.order && tabConfig.order.length > 0 
+      ? tabConfig.order 
+      : allColumns.map(c => c.id);
+    
+    // Filtrar y ordenar columnas según configuración
     const orderedColumns = [];
-    tabConfig.order.forEach(colId => {
+    orderList.forEach(colId => {
       const col = allColumns.find(c => c.id === colId);
-      if (col && (tabConfig.visible.includes(colId) || col.required)) {
-        orderedColumns.push(col);
+      if (col) {
+        // Mostrar si es obligatoria O si está en el array visible
+        if (col.required || tabConfig.visible.includes(colId)) {
+          orderedColumns.push(col);
+        }
       }
     });
     
-    // Agregar columnas nuevas que no estén en la configuración
+    // Agregar columnas nuevas que no estén en la configuración de orden
     allColumns.forEach(col => {
-      if (!tabConfig.order.includes(col.id)) {
+      if (!orderList.includes(col.id)) {
+        // Columnas nuevas se muestran por defecto
         orderedColumns.push(col);
       }
     });

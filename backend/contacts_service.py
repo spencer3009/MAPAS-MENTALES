@@ -1,10 +1,14 @@
 """
 Contacts Service for MindoraMap - CRM básico con campos personalizados
 """
-from pydantic import BaseModel, Field
-from typing import List, Optional
+from pydantic import BaseModel, Field, field_validator
+from typing import List, Optional, Literal
 from datetime import datetime, timezone
 from uuid import uuid4
+
+
+# Tipos de campo válidos
+VALID_FIELD_TYPES = ['text', 'number', 'textarea', 'select', 'multiselect']
 
 
 # ==========================================
@@ -15,10 +19,18 @@ class CustomField(BaseModel):
     """Campo personalizado configurable por el usuario"""
     id: str = Field(default_factory=lambda: f"field_{uuid4().hex[:8]}")
     name: str
-    field_type: str  # 'text', 'select', 'multiselect'
+    field_type: str = 'text'  # 'text', 'number', 'textarea', 'select', 'multiselect'
     is_required: bool = False
     color: Optional[str] = None
     options: List[str] = []  # Para select y multiselect
+    
+    @field_validator('field_type')
+    @classmethod
+    def validate_field_type(cls, v):
+        # Si el tipo no es válido, default a 'text' para compatibilidad
+        if v not in VALID_FIELD_TYPES:
+            return 'text'
+        return v
 
 
 class CustomFieldConfig(BaseModel):

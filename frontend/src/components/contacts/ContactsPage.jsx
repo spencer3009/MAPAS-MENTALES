@@ -1370,6 +1370,18 @@ const ContactsPage = () => {
               <span className="hidden sm:inline">Campos</span>
             </button>
             <button
+              onClick={() => setShowReportsPanel(!showReportsPanel)}
+              className={`flex items-center gap-2 px-4 py-2.5 border rounded-xl text-sm font-medium transition-colors ${
+                showReportsPanel
+                  ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white border-transparent'
+                  : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+              }`}
+              data-testid="reports-button"
+            >
+              <BarChart3 size={16} />
+              <span className="hidden sm:inline">Reportes</span>
+            </button>
+            <button
               onClick={() => setShowCreateModal(true)}
               className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl text-sm font-medium text-white hover:from-cyan-600 hover:to-blue-700 transition-colors shadow-sm"
             >
@@ -1378,6 +1390,257 @@ const ContactsPage = () => {
             </button>
           </div>
         </div>
+
+        {/* Reports Dashboard Panel */}
+        {showReportsPanel && (
+          <div className="mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-6 shadow-xl border border-slate-700">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                    <BarChart3 className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-white">Dashboard de Reportes</h2>
+                    <p className="text-sm text-slate-400">
+                      {filteredContacts.length} contactos • {currentType.label}
+                      {hasActiveFilters && ' • Filtros aplicados'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowReportsPanel(false)}
+                  className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Charts Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Chart 1: Contactos creados en el tiempo */}
+                <div className="bg-slate-800/50 rounded-xl p-5 border border-slate-700">
+                  <div className="flex items-center gap-2 mb-4">
+                    <TrendingUp size={18} className="text-cyan-400" />
+                    <h3 className="text-sm font-semibold text-white">Contactos creados en el tiempo</h3>
+                  </div>
+                  {contactsOverTimeData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={200}>
+                      <AreaChart data={contactsOverTimeData}>
+                        <defs>
+                          <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#06B6D4" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#06B6D4" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                        <XAxis 
+                          dataKey="name" 
+                          tick={{ fill: '#94A3B8', fontSize: 11 }} 
+                          axisLine={{ stroke: '#475569' }}
+                          tickLine={{ stroke: '#475569' }}
+                        />
+                        <YAxis 
+                          tick={{ fill: '#94A3B8', fontSize: 11 }} 
+                          axisLine={{ stroke: '#475569' }}
+                          tickLine={{ stroke: '#475569' }}
+                          allowDecimals={false}
+                        />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: '#1E293B', 
+                            border: '1px solid #475569',
+                            borderRadius: '8px',
+                            color: '#F1F5F9'
+                          }}
+                          labelStyle={{ color: '#94A3B8' }}
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey="total" 
+                          stroke="#06B6D4" 
+                          strokeWidth={2}
+                          fillOpacity={1} 
+                          fill="url(#colorTotal)" 
+                          name="Contactos"
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-[200px] flex items-center justify-center text-slate-500 text-sm">
+                      No hay datos suficientes para mostrar el gráfico
+                    </div>
+                  )}
+                </div>
+
+                {/* Chart 2: Distribución por etiquetas */}
+                <div className="bg-slate-800/50 rounded-xl p-5 border border-slate-700">
+                  <div className="flex items-center gap-2 mb-4">
+                    <PieChart size={18} className="text-purple-400" />
+                    <h3 className="text-sm font-semibold text-white">Distribución por etiquetas</h3>
+                  </div>
+                  {labelDistributionData.length > 0 ? (
+                    <div className="flex items-center gap-4">
+                      <ResponsiveContainer width="50%" height={180}>
+                        <RechartsPieChart>
+                          <Pie
+                            data={labelDistributionData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={40}
+                            outerRadius={70}
+                            paddingAngle={2}
+                            dataKey="value"
+                          >
+                            {labelDistributionData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip 
+                            contentStyle={{ 
+                              backgroundColor: '#1E293B', 
+                              border: '1px solid #475569',
+                              borderRadius: '8px',
+                              color: '#F1F5F9'
+                            }}
+                            formatter={(value, name) => [`${value} contactos`, name]}
+                          />
+                        </RechartsPieChart>
+                      </ResponsiveContainer>
+                      <div className="flex-1 space-y-2">
+                        {labelDistributionData.slice(0, 5).map((label, idx) => (
+                          <div key={idx} className="flex items-center justify-between text-sm">
+                            <div className="flex items-center gap-2">
+                              <div 
+                                className="w-3 h-3 rounded-full" 
+                                style={{ backgroundColor: label.color }}
+                              />
+                              <span className="text-slate-300 truncate max-w-[100px]">{label.name}</span>
+                            </div>
+                            <span className="text-white font-medium">{label.percentage}%</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="h-[180px] flex items-center justify-center text-slate-500 text-sm text-center px-4">
+                      Aún no hay etiquetas suficientes para mostrar estadísticas
+                    </div>
+                  )}
+                </div>
+
+                {/* Chart 3: Contactos por tipo */}
+                <div className="bg-slate-800/50 rounded-xl p-5 border border-slate-700">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Users size={18} className="text-amber-400" />
+                    <h3 className="text-sm font-semibold text-white">Contactos por tipo</h3>
+                  </div>
+                  <ResponsiveContainer width="100%" height={180}>
+                    <BarChart data={contactsByTypeData} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" stroke="#334155" horizontal={false} />
+                      <XAxis 
+                        type="number" 
+                        tick={{ fill: '#94A3B8', fontSize: 11 }} 
+                        axisLine={{ stroke: '#475569' }}
+                        tickLine={{ stroke: '#475569' }}
+                        allowDecimals={false}
+                      />
+                      <YAxis 
+                        type="category" 
+                        dataKey="name" 
+                        tick={{ fill: '#94A3B8', fontSize: 12 }} 
+                        axisLine={{ stroke: '#475569' }}
+                        tickLine={{ stroke: '#475569' }}
+                        width={80}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: '#1E293B', 
+                          border: '1px solid #475569',
+                          borderRadius: '8px',
+                          color: '#F1F5F9'
+                        }}
+                        formatter={(value) => [`${value} contactos`, 'Total']}
+                      />
+                      <Bar dataKey="total" radius={[0, 4, 4, 0]}>
+                        {contactsByTypeData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Chart 4: Top 5 etiquetas más usadas */}
+                <div className="bg-slate-800/50 rounded-xl p-5 border border-slate-700">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Award size={18} className="text-emerald-400" />
+                    <h3 className="text-sm font-semibold text-white">Top 5 etiquetas más usadas</h3>
+                  </div>
+                  {topLabelsData.length > 0 ? (
+                    <div className="space-y-3">
+                      {topLabelsData.map((label, idx) => (
+                        <div key={idx} className="flex items-center gap-3">
+                          <span className="text-slate-500 text-sm w-4">{idx + 1}</span>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-1">
+                              <span 
+                                className="px-2 py-0.5 rounded-full text-xs font-medium"
+                                style={{
+                                  backgroundColor: label.color + '20',
+                                  color: label.color,
+                                  border: `1px solid ${label.color}40`
+                                }}
+                              >
+                                {label.name}
+                              </span>
+                              <span className="text-white text-sm font-medium">{label.value}</span>
+                            </div>
+                            <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full rounded-full transition-all duration-500"
+                                style={{ 
+                                  width: `${(label.value / topLabelsData[0].value) * 100}%`,
+                                  backgroundColor: label.color
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="h-[150px] flex items-center justify-center text-slate-500 text-sm text-center px-4">
+                      No hay etiquetas asignadas a los contactos
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Quick Stats */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
+                <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
+                  <div className="text-2xl font-bold text-white">{filteredContacts.length}</div>
+                  <div className="text-xs text-slate-400">Contactos mostrados</div>
+                </div>
+                <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
+                  <div className="text-2xl font-bold text-cyan-400">{contacts.length}</div>
+                  <div className="text-xs text-slate-400">Total {currentType.label.toLowerCase()}</div>
+                </div>
+                <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
+                  <div className="text-2xl font-bold text-purple-400">{contactLabels.length}</div>
+                  <div className="text-xs text-slate-400">Etiquetas creadas</div>
+                </div>
+                <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
+                  <div className="text-2xl font-bold text-amber-400">
+                    {allContactsCounts.client + allContactsCounts.prospect + allContactsCounts.supplier}
+                  </div>
+                  <div className="text-xs text-slate-400">Total general</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Contacts Table */}
         {loading ? (

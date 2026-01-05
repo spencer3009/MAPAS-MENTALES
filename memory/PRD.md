@@ -2,6 +2,18 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-05: Personalización de Columnas en Contactos ✅
+- **Added**: Botón "Personalizar columnas" en la barra de acciones del módulo Contactos
+- **Added**: Modal de configuración de columnas con:
+  - Lista de todas las columnas disponibles (predeterminadas + personalizadas)
+  - Checkboxes para mostrar/ocultar cada columna
+  - Drag & drop para reordenar columnas arrastrándolas
+  - Iconos de visibilidad (ojo abierto/cerrado)
+  - Columna "Nombre completo" protegida (obligatoria, no se puede ocultar)
+  - Botón "Restaurar por defecto"
+- **Added**: Persistencia de preferencias en localStorage por usuario y por pestaña
+- **Files Modified**: `/app/frontend/src/components/contacts/ContactsPage.jsx`
+
 ### 2026-01-05: Módulo de Contactos (CRM Básico) ✅
 - **Added**: Nuevo módulo de Contactos accesible desde el sidebar principal
 - **Added**: Tres pestañas independientes: Clientes, Prospectos, Proveedores

@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   Users, UserPlus, Building2, UserCheck, 
   Search, Plus, X, Settings, Trash2, Edit2, 
   Phone, Mail, Calendar as CalendarIcon, ChevronDown, Check,
   Loader2, MoreHorizontal, Save, AlertCircle,
   Type, Hash, List, CheckSquare, AlignLeft, Clock,
-  ChevronUp, Columns3, GripVertical, Eye, EyeOff, Tag
+  ChevronUp, Columns3, GripVertical, Eye, EyeOff, Tag,
+  Filter, FilterX
 } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';

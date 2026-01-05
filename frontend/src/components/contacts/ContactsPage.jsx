@@ -1090,9 +1090,6 @@ const ContactsPage = () => {
   // REPORTS / STATISTICS DATA
   // ==========================================
   
-  // Colors for charts
-  const CHART_COLORS = ['#06B6D4', '#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#EF4444', '#6366F1'];
-  
   // 1. Contactos creados en el tiempo (basado en filteredContacts)
   const contactsOverTimeData = useMemo(() => {
     if (!filteredContacts || filteredContacts.length === 0) return [];

@@ -165,7 +165,7 @@ const ContactsPage = () => {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      // Cargar contactos
+      // Cargar contactos del tipo actual
       const contactsRes = await fetch(`${API_URL}/api/contacts?contact_type=${activeTab}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -173,6 +173,23 @@ const ContactsPage = () => {
         const data = await contactsRes.json();
         setContacts(data.contacts || []);
       }
+      
+      // Cargar conteos de todos los tipos (para el gráfico por tipo)
+      const [clientRes, prospectRes, supplierRes] = await Promise.all([
+        fetch(`${API_URL}/api/contacts?contact_type=client`, { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch(`${API_URL}/api/contacts?contact_type=prospect`, { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch(`${API_URL}/api/contacts?contact_type=supplier`, { headers: { 'Authorization': `Bearer ${token}` } })
+      ]);
+      
+      const clientData = clientRes.ok ? await clientRes.json() : { contacts: [] };
+      const prospectData = prospectRes.ok ? await prospectRes.json() : { contacts: [] };
+      const supplierData = supplierRes.ok ? await supplierRes.json() : { contacts: [] };
+      
+      setAllContactsCounts({
+        client: clientData.contacts?.length || 0,
+        prospect: prospectData.contacts?.length || 0,
+        supplier: supplierData.contacts?.length || 0
+      });
       
       // Cargar campos personalizados
       const fieldsRes = await fetch(`${API_URL}/api/contacts/config/fields/${activeTab}`, {

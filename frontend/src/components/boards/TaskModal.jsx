@@ -42,6 +42,7 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
   const [comments, setComments] = useState(card.comments || []);
   const [newComment, setNewComment] = useState('');
   const [attachments, setAttachments] = useState(card.attachments || []);
+  const [isPinned, setIsPinned] = useState(card.is_pinned || false); // Estado de anclaje
   const [showLabelPicker, setShowLabelPicker] = useState(false);
   const [showPriorityPicker, setShowPriorityPicker] = useState(false);
   const [isSaving, setIsSaving] = useState(false);

@@ -8,6 +8,8 @@
 - **Added**: Campos base obligatorios: Nombre*, Apellidos*, WhatsApp* y Email (opcional)
 - **Added**: Sistema de campos personalizados por tipo de contacto:
   - Campo de texto (input simple)
+  - Campo numérico (solo valores numéricos, con validación)
+  - Área de texto (textarea multilínea)
   - Selector / combo (single select)
   - Selector múltiple (multi-select)
   - Cada campo configurable con: nombre, tipo, obligatorio/opcional, color opcional
@@ -15,6 +17,9 @@
 - **Added**: Búsqueda en tiempo real por nombre, apellidos, whatsapp, email
 - **Added**: CRUD completo de contactos con validación de campos obligatorios
 - **Added**: Modal de configuración de campos personalizados por pestaña
+- **Added**: UI mejorada del selector de tipos con iconos Lucide y descripciones
+- **Added**: Validación en tiempo real para campos numéricos con mensaje de error
+- **Added**: Compatibilidad hacia atrás: campos antiguos sin tipo se tratan como texto
 - **Files Created**:
   - `/app/backend/contacts_service.py` - Modelos Pydantic para contactos y campos
   - `/app/frontend/src/components/contacts/ContactsPage.jsx` - Componente principal

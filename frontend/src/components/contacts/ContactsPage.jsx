@@ -3,7 +3,8 @@ import {
   Users, UserPlus, Building2, UserCheck, 
   Search, Plus, X, Settings, Trash2, Edit2, 
   Phone, Mail, Calendar, ChevronDown, Check,
-  Loader2, MoreHorizontal, Save, AlertCircle
+  Loader2, MoreHorizontal, Save, AlertCircle,
+  Type, Hash, List, CheckSquare, AlignLeft
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
@@ -15,11 +16,13 @@ const CONTACT_TYPES = {
   supplier: { id: 'supplier', label: 'Proveedores', icon: Building2, color: 'purple', singular: 'proveedor' }
 };
 
-// Tipos de campos personalizados
+// Tipos de campos personalizados con iconos de Lucide
 const FIELD_TYPES = [
-  { id: 'text', label: 'Campo de texto', icon: '📝' },
-  { id: 'select', label: 'Selector (combo)', icon: '📋' },
-  { id: 'multiselect', label: 'Selector múltiple', icon: '☑️' }
+  { id: 'text', label: 'Texto', description: 'Texto libre', icon: Type },
+  { id: 'number', label: 'Número', description: 'Solo valores numéricos', icon: Hash },
+  { id: 'textarea', label: 'Área de texto', description: 'Texto largo multilínea', icon: AlignLeft },
+  { id: 'select', label: 'Selector', description: 'Lista desplegable', icon: List },
+  { id: 'multiselect', label: 'Selector múltiple', description: 'Selección múltiple', icon: CheckSquare }
 ];
 
 // Colores disponibles para campos

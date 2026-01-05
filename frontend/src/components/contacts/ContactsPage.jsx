@@ -704,6 +704,32 @@ const ContactsPage = () => {
             })}
           </div>
         );
+      case 'labels':
+        const contactLabelIds = contact.labels || [];
+        if (contactLabelIds.length === 0) {
+          return <span className="text-gray-400 text-sm">—</span>;
+        }
+        return (
+          <div className="flex flex-wrap gap-1">
+            {contactLabelIds.map(labelId => {
+              const label = getLabelById(labelId);
+              if (!label) return null;
+              return (
+                <span
+                  key={labelId}
+                  className="px-2 py-0.5 rounded-full text-xs font-medium"
+                  style={{
+                    backgroundColor: label.color + '20',
+                    color: label.color,
+                    border: `1px solid ${label.color}40`
+                  }}
+                >
+                  {label.name}
+                </span>
+              );
+            })}
+          </div>
+        );
       default:
         // Campos personalizados
         if (col.id.startsWith('custom_')) {

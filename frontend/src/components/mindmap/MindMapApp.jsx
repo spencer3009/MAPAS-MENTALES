@@ -927,6 +927,10 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
           setIsProjectsSidebarOpen(false);
           setSelectedBoard(null);
         }}
+        onOpenContacts={() => {
+          setActiveView('contacts');
+          setIsProjectsSidebarOpen(false);
+        }}
         onLogout={logout}
         isProjectsSidebarOpen={isProjectsSidebarOpen}
         activeView={activeView}

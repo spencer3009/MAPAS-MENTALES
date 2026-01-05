@@ -9,6 +9,8 @@
 - **Added**: Sistema de campos personalizados por tipo de contacto:
   - Campo de texto (input simple)
   - Campo numérico (solo valores numéricos, con validación)
+  - Campo de fecha (date-picker con calendario visual, formato YYYY-MM-DD)
+  - Campo de hora (time-picker 12h AM/PM con accesos rápidos)
   - Área de texto (textarea multilínea)
   - Selector / combo (single select)
   - Selector múltiple (multi-select)
@@ -20,6 +22,8 @@
 - **Added**: UI mejorada del selector de tipos con iconos Lucide y descripciones
 - **Added**: Validación en tiempo real para campos numéricos con mensaje de error
 - **Added**: Compatibilidad hacia atrás: campos antiguos sin tipo se tratan como texto
+- **Added**: Date picker con calendario en español (enero, febrero, etc.)
+- **Added**: Time picker con formato 12h, botones AM/PM y accesos rápidos (9AM, 12PM, etc.)
 - **Files Created**:
   - `/app/backend/contacts_service.py` - Modelos Pydantic para contactos y campos
   - `/app/frontend/src/components/contacts/ContactsPage.jsx` - Componente principal

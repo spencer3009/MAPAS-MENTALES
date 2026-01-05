@@ -182,7 +182,7 @@ const TimeTrackerSidebar = ({ taskId, boardId, listId, taskTitle, onTimeUpdate }
             {/* Tiempo actual - SIEMPRE VISIBLE */}
             <div className="flex-1">
               <div className={`text-2xl font-mono font-bold tracking-tight ${
-                isThisTaskTracking ? 'text-red-600' : 'text-gray-800'
+                isThisTaskTracking ? 'text-red-600' : lastSessionTime > 0 ? 'text-gray-800' : 'text-gray-400'
               }`}>
                 {formatTime(displayTime)}
               </div>
@@ -191,7 +191,9 @@ const TimeTrackerSidebar = ({ taskId, boardId, listId, taskTitle, onTimeUpdate }
                   ? '⏱️ Registrando tiempo...' 
                   : isTracking 
                     ? '⚠️ Hay otro registro activo'
-                    : '▶️ Presiona play para iniciar'
+                    : lastSessionTime > 0
+                      ? '✅ Último registro guardado'
+                      : '▶️ Presiona play para iniciar'
                 }
               </p>
             </div>

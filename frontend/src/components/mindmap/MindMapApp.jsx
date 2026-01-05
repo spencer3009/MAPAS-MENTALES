@@ -23,6 +23,7 @@ import RemindersView from './RemindersView';
 import { FullscreenControls } from './FullscreenMode';
 import { NotificationProvider } from './ToastProvider';
 import { BoardsPage, BoardView } from '../boards';
+import ContactsPage from '../contacts/ContactsPage';
 import GlobalTimeIndicator from '../boards/GlobalTimeIndicator';
 import { useNodes } from '../../hooks/useNodes';
 import { usePanning } from '../../hooks/usePanning';
@@ -201,7 +202,7 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
   const [interactionMode, setInteractionMode] = useState('hand');
 
   // Estado para el Dock y vistas principales
-  const [activeView, setActiveView] = useState('dashboard'); // 'projects' | 'dashboard' | 'templates' | 'integrations' | 'boards'
+  const [activeView, setActiveView] = useState('dashboard'); // 'projects' | 'dashboard' | 'templates' | 'integrations' | 'boards' | 'contacts'
   const [isProjectsSidebarOpen, setIsProjectsSidebarOpen] = useState(false); // Inicialmente cerrado cuando está en dashboard
   
   // Estado para Tableros

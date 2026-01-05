@@ -988,9 +988,14 @@ const renderFieldInput = (field, value, onChange, error, setError) => {
 
 // Helper: Renderizar valor de campo en tabla
 const renderFieldValue = (value, field) => {
-  if (!value) return <span className="text-gray-400">-</span>;
+  if (value === null || value === undefined || value === '') {
+    return <span className="text-gray-400">-</span>;
+  }
   
-  if (field.field_type === 'multiselect' && Array.isArray(value)) {
+  // Normalizar tipo de campo
+  const fieldType = field.field_type || 'text';
+  
+  if (fieldType === 'multiselect' && Array.isArray(value)) {
     return (
       <div className="flex flex-wrap gap-1">
         {value.map((v, idx) => (
@@ -1002,7 +1007,34 @@ const renderFieldValue = (value, field) => {
     );
   }
   
+  if (fieldType === 'number') {
+    // Formatear números con separador de miles si es grande
+    const num = Number(value);
+    if (!isNaN(num) && Math.abs(num) >= 1000) {
+      return <span className="font-mono">{num.toLocaleString('es-ES')}</span>;
+    }
+    return <span className="font-mono">{value}</span>;
+  }
+  
+  if (fieldType === 'textarea') {
+    // Mostrar texto truncado si es muy largo
+    const maxLength = 50;
+    if (String(value).length > maxLength) {
+      return (
+        <span title={value} className="cursor-help">
+          {String(value).substring(0, maxLength)}...
+        </span>
+      );
+    }
+  }
+  
   return value;
+};
+
+// Helper: Obtener tipo de campo con label legible
+const getFieldTypeLabel = (fieldType) => {
+  const type = FIELD_TYPES.find(t => t.id === fieldType);
+  return type ? type.label : 'Texto';
 };
 
 export default ContactsPage;

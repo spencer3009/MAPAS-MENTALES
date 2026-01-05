@@ -203,21 +203,30 @@ const ContactsPage = () => {
     if (column?.required) return;
     
     const tabConfig = columnConfig[activeTab];
-    const currentVisible = tabConfig?.visible || allColumns.map(c => c.id);
+    
+    // Si no hay configuración, inicializar con todas las columnas visibles
+    const currentVisible = tabConfig?.visible !== undefined 
+      ? tabConfig.visible 
+      : allColumns.map(c => c.id);
+    
+    const currentOrder = tabConfig?.order && tabConfig.order.length > 0 
+      ? tabConfig.order 
+      : allColumns.map(c => c.id);
     
     let newVisible;
     if (currentVisible.includes(columnId)) {
+      // Ocultar columna
       newVisible = currentVisible.filter(id => id !== columnId);
     } else {
+      // Mostrar columna
       newVisible = [...currentVisible, columnId];
     }
     
     const newConfig = {
       ...columnConfig,
       [activeTab]: {
-        ...tabConfig,
         visible: newVisible,
-        order: tabConfig?.order || allColumns.map(c => c.id)
+        order: currentOrder
       }
     };
     

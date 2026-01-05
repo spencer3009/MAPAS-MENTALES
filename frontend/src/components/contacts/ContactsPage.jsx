@@ -212,11 +212,21 @@ const ContactsPage = () => {
       if (filterDropdownRef.current && !filterDropdownRef.current.contains(event.target)) {
         setOpenFilterDropdown(null);
       }
+      // Close date filter dropdown when clicking outside
+      // But not if clicking inside a popover (calendar)
+      const isInsideDateFilter = event.target.closest('[data-testid="date-filter-button"]') || 
+                                  event.target.closest('[data-radix-popper-content-wrapper]');
+      if (!isInsideDateFilter && showDateFilter && dateFilterButtonRef.current && !dateFilterButtonRef.current.contains(event.target)) {
+        const dateFilterDropdown = document.querySelector('[style*="z-index: 99999"]');
+        if (dateFilterDropdown && !dateFilterDropdown.contains(event.target)) {
+          setShowDateFilter(false);
+        }
+      }
     };
     
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [showDateFilter]);
 
   // Reset filters when changing tabs
   useEffect(() => {

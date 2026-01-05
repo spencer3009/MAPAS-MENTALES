@@ -1150,12 +1150,11 @@ const ContactsPage = () => {
               <div className="space-y-2">
                 {getAllColumns().map((col) => {
                   const isVisible = isColumnVisible(col.id);
-                  const tabConfig = columnConfig[activeTab];
-                  const order = tabConfig?.order || getAllColumns().map(c => c.id);
                   
                   return (
                     <div
                       key={col.id}
+                      data-testid={`column-row-${col.id}`}
                       draggable={!col.required}
                       onDragStart={(e) => handleDragStart(e, col.id)}
                       onDragOver={(e) => handleDragOver(e, col.id)}
@@ -1173,7 +1172,13 @@ const ContactsPage = () => {
                       
                       {/* Checkbox */}
                       <button
-                        onClick={() => toggleColumnVisibility(col.id)}
+                        type="button"
+                        data-testid={`column-toggle-${col.id}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggleColumnVisibility(col.id);
+                        }}
                         disabled={col.required}
                         className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
                           isVisible 

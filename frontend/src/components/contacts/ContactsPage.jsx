@@ -95,7 +95,9 @@ const ContactsPage = () => {
     color: null,
     options: []
   });
+  const [editingField, setEditingField] = useState(null); // Campo en edición
   const [newOption, setNewOption] = useState('');
+  const [showTypeChangeWarning, setShowTypeChangeWarning] = useState(false);
   
   const token = localStorage.getItem('mm_auth_token');
 

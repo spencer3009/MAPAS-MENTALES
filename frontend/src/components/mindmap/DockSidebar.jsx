@@ -8,7 +8,8 @@ import {
   Settings,
   ChevronRight,
   LogOut,
-  LayoutGrid
+  LayoutGrid,
+  Users
 } from 'lucide-react';
 
 const DockSidebar = ({ 
@@ -19,6 +20,7 @@ const DockSidebar = ({
   onOpenTrash,
   onOpenSettings,
   onOpenBoards,
+  onOpenContacts,
   onLogout,
   isProjectsSidebarOpen = true,
   activeView = 'projects',
@@ -53,6 +55,12 @@ const DockSidebar = ({
       label: 'Tableros',
       onClick: onOpenBoards,
       highlight: true,
+    },
+    {
+      id: 'contacts',
+      icon: Users,
+      label: 'Contactos',
+      onClick: onOpenContacts,
     },
     {
       id: 'favorites',

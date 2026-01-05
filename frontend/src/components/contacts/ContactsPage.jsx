@@ -5,7 +5,7 @@ import {
   Phone, Mail, Calendar as CalendarIcon, ChevronDown, Check,
   Loader2, MoreHorizontal, Save, AlertCircle,
   Type, Hash, List, CheckSquare, AlignLeft, Clock,
-  ChevronUp, Columns3, GripVertical, Eye, EyeOff
+  ChevronUp, Columns3, GripVertical, Eye, EyeOff, Tag
 } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';

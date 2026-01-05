@@ -29,6 +29,11 @@ from board_service import (
     MoveCardRequest, ReorderListsRequest, ReorderCardsRequest,
     BOARD_COLORS, CARD_LABEL_COLORS
 )
+import contacts_service
+from contacts_service import (
+    CreateContactRequest, UpdateContactRequest,
+    CreateCustomFieldRequest, UpdateCustomFieldRequest
+)
 
 
 ROOT_DIR = Path(__file__).parent

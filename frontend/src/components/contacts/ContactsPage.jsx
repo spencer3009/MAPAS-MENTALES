@@ -788,15 +788,50 @@ const ContactsPage = () => {
     setShowCreateModal(true);
   };
 
-  // Filtrar contactos
+  // Filtrar contactos (búsqueda + filtros de columna)
   const filteredContacts = contacts.filter(contact => {
+    // Text search filter
     const searchLower = searchTerm.toLowerCase();
-    return (
+    const matchesSearch = (
       contact.nombre.toLowerCase().includes(searchLower) ||
       contact.apellidos.toLowerCase().includes(searchLower) ||
       contact.whatsapp.includes(searchLower) ||
       (contact.email && contact.email.toLowerCase().includes(searchLower))
     );
+    
+    if (!matchesSearch) return false;
+    
+    // Column filters
+    for (const [columnId, filterValues] of Object.entries(columnFilters)) {
+      if (!filterValues || filterValues.length === 0) continue;
+      
+      if (columnId === 'labels') {
+        // Filter by labels
+        const contactLabelIds = contact.labels || [];
+        // Check if contact has ANY of the selected labels
+        const hasMatchingLabel = filterValues.some(labelId => contactLabelIds.includes(labelId));
+        if (!hasMatchingLabel) return false;
+      } else if (columnId.startsWith('custom_')) {
+        // Filter by custom field
+        const fieldId = columnId.replace('custom_', '');
+        const fieldValue = contact.custom_fields?.[fieldId];
+        const field = customFields.find(f => f.id === fieldId);
+        
+        if (field) {
+          if (field.field_type === 'multiselect') {
+            // Multiselect: check if any selected value matches
+            const contactValues = Array.isArray(fieldValue) ? fieldValue : [];
+            const hasMatchingValue = filterValues.some(v => contactValues.includes(v));
+            if (!hasMatchingValue) return false;
+          } else {
+            // Single select: check if value matches
+            if (!filterValues.includes(fieldValue)) return false;
+          }
+        }
+      }
+    }
+    
+    return true;
   });
 
   const currentType = CONTACT_TYPES[activeTab];

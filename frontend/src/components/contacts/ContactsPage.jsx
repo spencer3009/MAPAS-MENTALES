@@ -626,40 +626,56 @@ const ContactsPage = () => {
               {/* Existing Fields */}
               {customFields.length > 0 && (
                 <div className="mb-6">
-                  <h3 className="text-sm font-semibold text-gray-700 mb-3">Campos existentes</h3>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-3">Campos existentes ({customFields.length})</h3>
                   <div className="space-y-2">
-                    {customFields.map(field => (
-                      <div 
-                        key={field.id} 
-                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
-                      >
-                        <div className="flex items-center gap-3">
-                          {field.color && (
-                            <div 
-                              className="w-3 h-3 rounded-full" 
-                              style={{ backgroundColor: field.color }}
-                            />
-                          )}
-                          <div>
-                            <span className="font-medium text-gray-800">{field.name}</span>
-                            <span className="ml-2 text-xs text-gray-500">
-                              ({FIELD_TYPES.find(t => t.id === field.field_type)?.label || field.field_type})
-                            </span>
-                            {field.is_required && (
-                              <span className="ml-2 text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded">
-                                Obligatorio
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => handleDeleteField(field.id)}
-                          className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                    {customFields.map(field => {
+                      const fieldTypeInfo = FIELD_TYPES.find(t => t.id === field.field_type) || FIELD_TYPES[0];
+                      const FieldIcon = fieldTypeInfo.icon;
+                      return (
+                        <div 
+                          key={field.id} 
+                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
                         >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    ))}
+                          <div className="flex items-center gap-3">
+                            {field.color ? (
+                              <div 
+                                className="w-8 h-8 rounded-lg flex items-center justify-center" 
+                                style={{ backgroundColor: field.color + '20' }}
+                              >
+                                <FieldIcon size={16} style={{ color: field.color }} />
+                              </div>
+                            ) : (
+                              <div className="w-8 h-8 rounded-lg bg-gray-200 flex items-center justify-center">
+                                <FieldIcon size={16} className="text-gray-500" />
+                              </div>
+                            )}
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-gray-800">{field.name}</span>
+                                {field.is_required && (
+                                  <span className="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-medium">
+                                    Obligatorio
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-xs text-gray-500">
+                                {fieldTypeInfo.label}
+                                {(field.field_type === 'select' || field.field_type === 'multiselect') && field.options?.length > 0 && (
+                                  <span className="ml-1">• {field.options.length} opciones</span>
+                                )}
+                              </span>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteField(field.id)}
+                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Eliminar campo"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}

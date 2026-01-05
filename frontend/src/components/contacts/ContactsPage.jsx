@@ -1143,20 +1143,20 @@ const ContactsPage = () => {
                       const hasFilter = columnFilters[col.id]?.length > 0;
                       const isOpen = openFilterDropdown === col.id;
                       const filterOptions = filterable ? getFilterOptions(col) : [];
-                      const isMulti = isMultiSelectFilter(col);
                       
                       return (
                         <th 
                           key={col.id} 
-                          className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider relative"
+                          className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
                         >
                           <div className="flex items-center gap-1">
                             <span>{col.label}</span>
                             {filterable && filterOptions.length > 0 && (
                               <button
+                                ref={el => filterButtonRefs.current[col.id] = el}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setOpenFilterDropdown(isOpen ? null : col.id);
+                                  openFilterDropdownWithPosition(col.id, e.currentTarget);
                                 }}
                                 className={`p-1 rounded transition-colors ${
                                   hasFilter 
@@ -1173,78 +1173,6 @@ const ContactsPage = () => {
                               </button>
                             )}
                           </div>
-                          
-                          {/* Filter Dropdown */}
-                          {isOpen && (
-                            <div 
-                              ref={filterDropdownRef}
-                              className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[200px] max-h-[300px] overflow-hidden"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <div className="p-2 border-b border-gray-100 bg-gray-50">
-                                <div className="flex items-center justify-between">
-                                  <span className="text-xs font-medium text-gray-600">
-                                    Filtrar por {col.label}
-                                  </span>
-                                  {hasFilter && (
-                                    <button
-                                      onClick={() => clearColumnFilter(col.id)}
-                                      className="text-xs text-red-500 hover:text-red-700 font-medium"
-                                    >
-                                      Limpiar
-                                    </button>
-                                  )}
-                                </div>
-                                <p className="text-[10px] text-gray-400 mt-0.5">
-                                  {isMulti ? 'Selecciona una o más opciones' : 'Selecciona una opción'}
-                                </p>
-                              </div>
-                              <div className="max-h-[220px] overflow-y-auto p-1">
-                                {filterOptions.length === 0 ? (
-                                  <p className="text-xs text-gray-400 p-2 text-center">
-                                    No hay opciones disponibles
-                                  </p>
-                                ) : (
-                                  filterOptions.map(option => {
-                                    const isSelected = (columnFilters[col.id] || []).includes(option.id);
-                                    return (
-                                      <button
-                                        key={option.id}
-                                        onClick={() => toggleFilterValue(col.id, option.id, isMulti)}
-                                        className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-left text-sm transition-colors ${
-                                          isSelected 
-                                            ? 'bg-cyan-50 text-cyan-700' 
-                                            : 'text-gray-700 hover:bg-gray-50'
-                                        }`}
-                                      >
-                                        <div className={`w-4 h-4 rounded ${isMulti ? 'rounded' : 'rounded-full'} border flex items-center justify-center ${
-                                          isSelected 
-                                            ? 'bg-cyan-500 border-cyan-500' 
-                                            : 'border-gray-300'
-                                        }`}>
-                                          {isSelected && <Check size={10} className="text-white" />}
-                                        </div>
-                                        {option.color && col.id === 'labels' ? (
-                                          <span 
-                                            className="px-2 py-0.5 rounded-full text-xs font-medium"
-                                            style={{
-                                              backgroundColor: option.color + '20',
-                                              color: option.color,
-                                              border: `1px solid ${option.color}40`
-                                            }}
-                                          >
-                                            {option.name}
-                                          </span>
-                                        ) : (
-                                          <span className="truncate">{option.name}</span>
-                                        )}
-                                      </button>
-                                    );
-                                  })
-                                )}
-                              </div>
-                            </div>
-                          )}
                         </th>
                       );
                     })}

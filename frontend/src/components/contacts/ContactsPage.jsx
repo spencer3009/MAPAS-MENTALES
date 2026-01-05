@@ -80,6 +80,9 @@ const FIELD_COLORS = [
   { id: 'purple', value: '#A855F7' }
 ];
 
+// Colors for charts
+const CHART_COLORS = ['#06B6D4', '#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#EF4444', '#6366F1'];
+
 const ContactsPage = () => {
   const [activeTab, setActiveTab] = useState('client');
   const [contacts, setContacts] = useState([]);

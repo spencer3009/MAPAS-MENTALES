@@ -87,10 +87,17 @@ class UpdateContactRequest(BaseModel):
 
 class CreateCustomFieldRequest(BaseModel):
     name: str
-    field_type: str  # 'text', 'select', 'multiselect'
+    field_type: str = 'text'  # 'text', 'number', 'textarea', 'select', 'multiselect'
     is_required: bool = False
     color: Optional[str] = None
     options: Optional[List[str]] = []
+    
+    @field_validator('field_type')
+    @classmethod
+    def validate_field_type(cls, v):
+        if v not in VALID_FIELD_TYPES:
+            return 'text'
+        return v
 
 
 class UpdateCustomFieldRequest(BaseModel):
@@ -99,3 +106,12 @@ class UpdateCustomFieldRequest(BaseModel):
     is_required: Optional[bool] = None
     color: Optional[str] = None
     options: Optional[List[str]] = None
+    
+    @field_validator('field_type')
+    @classmethod
+    def validate_field_type(cls, v):
+        if v is None:
+            return v
+        if v not in VALID_FIELD_TYPES:
+            return 'text'
+        return v

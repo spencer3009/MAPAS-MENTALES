@@ -26,6 +26,7 @@ const TimeTrackerSidebar = ({ taskId, boardId, listId, taskTitle, onTimeUpdate }
   const [userTotals, setUserTotals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showStats, setShowStats] = useState(false);
+  const [lastSessionTime, setLastSessionTime] = useState(0); // Tiempo de la última sesión (para mostrar después de Stop)
   const token = localStorage.getItem('mm_auth_token');
   
   const isThisTaskTracking = isTaskTracking(taskId);

@@ -3,7 +3,7 @@ import {
   X, Calendar, Tag, Users, CheckSquare, Paperclip, 
   MessageSquare, Clock, Flag, Eye, MoreHorizontal,
   Plus, Trash2, Check, Edit2, ChevronRight, AlertCircle,
-  Play, Square, ChevronLeft, Upload, Image, Loader2
+  Play, Square, ChevronLeft, Upload, Image, Loader2, Pin
 } from 'lucide-react';
 import TimeTrackerSidebar from './TimeTrackerSidebar';
 

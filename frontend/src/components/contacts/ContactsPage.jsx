@@ -1214,14 +1214,33 @@ const ContactsPage = () => {
                     </button>
                   </div>
                   
-                  {/* Create Button */}
-                  <button
-                    onClick={handleCreateField}
-                    disabled={!newField.name.trim()}
-                    className="w-full py-2.5 bg-cyan-500 hover:bg-cyan-600 disabled:bg-gray-300 text-white rounded-lg text-sm font-medium transition-colors"
-                  >
-                    Crear campo
-                  </button>
+                  {/* Create/Update Button */}
+                  {editingField ? (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={cancelEditField}
+                        className="flex-1 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        onClick={handleUpdateField}
+                        disabled={!newField.name.trim()}
+                        className="flex-1 py-2.5 bg-cyan-500 hover:bg-cyan-600 disabled:bg-gray-300 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Save size={16} />
+                        Guardar cambios
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleCreateField}
+                      disabled={!newField.name.trim()}
+                      className="w-full py-2.5 bg-cyan-500 hover:bg-cyan-600 disabled:bg-gray-300 text-white rounded-lg text-sm font-medium transition-colors"
+                    >
+                      Crear campo
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

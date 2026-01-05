@@ -398,6 +398,20 @@ const SortableList = ({ list, listIndex, boardId, boardLabels, onUpdateList, onD
     }
   };
 
+  // Ordenar tarjetas: ancladas primero, luego por fecha (más nuevas arriba)
+  const getSortedCards = (cards) => {
+    return [...cards].sort((a, b) => {
+      // 1. Primero las ancladas
+      if (a.is_pinned && !b.is_pinned) return -1;
+      if (!a.is_pinned && b.is_pinned) return 1;
+      
+      // 2. Dentro del mismo grupo, ordenar por fecha descendente (más nuevas primero)
+      const dateA = new Date(a.created_at || 0);
+      const dateB = new Date(b.created_at || 0);
+      return dateB - dateA; // Descendente
+    });
+  };
+
   return (
     <div
       ref={setNodeRef}

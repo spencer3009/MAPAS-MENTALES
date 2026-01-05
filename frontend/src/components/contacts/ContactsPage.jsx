@@ -207,6 +207,108 @@ const ContactsPage = () => {
     localStorage.setItem('contacts_column_config', JSON.stringify(newConfig));
   };
 
+  // Determinar si una columna es filtrable (select, multiselect, o labels)
+  const isColumnFilterable = useCallback((col) => {
+    // Labels column is always filterable
+    if (col.id === 'labels') return true;
+    
+    // Custom fields of type select or multiselect are filterable
+    if (col.id.startsWith('custom_')) {
+      const field = customFields.find(f => f.id === col.fieldId);
+      if (field && (field.field_type === 'select' || field.field_type === 'multiselect')) {
+        return true;
+      }
+    }
+    
+    return false;
+  }, [customFields]);
+
+  // Get filter options for a column
+  const getFilterOptions = useCallback((col) => {
+    if (col.id === 'labels') {
+      // Return all available labels
+      return contactLabels.map(label => ({
+        id: label.id,
+        name: label.name,
+        color: label.color
+      }));
+    }
+    
+    if (col.id.startsWith('custom_')) {
+      const field = customFields.find(f => f.id === col.fieldId);
+      if (field && field.options && field.options.length > 0) {
+        return field.options.map(opt => ({
+          id: opt,
+          name: opt,
+          color: field.color || null
+        }));
+      }
+    }
+    
+    return [];
+  }, [customFields, contactLabels]);
+
+  // Check if column allows multiple selection (multiselect or labels)
+  const isMultiSelectFilter = useCallback((col) => {
+    if (col.id === 'labels') return true;
+    
+    if (col.id.startsWith('custom_')) {
+      const field = customFields.find(f => f.id === col.fieldId);
+      if (field && field.field_type === 'multiselect') {
+        return true;
+      }
+    }
+    
+    return false;
+  }, [customFields]);
+
+  // Toggle filter value for a column
+  const toggleFilterValue = (columnId, value, isMultiSelect) => {
+    setColumnFilters(prev => {
+      const currentValues = prev[columnId] || [];
+      
+      if (isMultiSelect) {
+        // Multi-select: toggle the value
+        if (currentValues.includes(value)) {
+          const newValues = currentValues.filter(v => v !== value);
+          if (newValues.length === 0) {
+            const { [columnId]: _, ...rest } = prev;
+            return rest;
+          }
+          return { ...prev, [columnId]: newValues };
+        } else {
+          return { ...prev, [columnId]: [...currentValues, value] };
+        }
+      } else {
+        // Single select: replace or clear
+        if (currentValues.includes(value)) {
+          const { [columnId]: _, ...rest } = prev;
+          return rest;
+        } else {
+          return { ...prev, [columnId]: [value] };
+        }
+      }
+    });
+  };
+
+  // Clear filter for a column
+  const clearColumnFilter = (columnId) => {
+    setColumnFilters(prev => {
+      const { [columnId]: _, ...rest } = prev;
+      return rest;
+    });
+    setOpenFilterDropdown(null);
+  };
+
+  // Clear all filters
+  const clearAllFilters = () => {
+    setColumnFilters({});
+    setOpenFilterDropdown(null);
+  };
+
+  // Check if any filters are active
+  const hasActiveFilters = Object.keys(columnFilters).length > 0;
+
   // Obtener todas las columnas disponibles (fijas + personalizadas)
   const getAllColumns = useCallback(() => {
     const allColumns = [

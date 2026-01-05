@@ -2,6 +2,37 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-05: Módulo de Contactos (CRM Básico) ✅
+- **Added**: Nuevo módulo de Contactos accesible desde el sidebar principal
+- **Added**: Tres pestañas independientes: Clientes, Prospectos, Proveedores
+- **Added**: Campos base obligatorios: Nombre*, Apellidos*, WhatsApp* y Email (opcional)
+- **Added**: Sistema de campos personalizados por tipo de contacto:
+  - Campo de texto (input simple)
+  - Selector / combo (single select)
+  - Selector múltiple (multi-select)
+  - Cada campo configurable con: nombre, tipo, obligatorio/opcional, color opcional
+- **Added**: Tabla de contactos con ordenamiento por fecha de creación (más reciente arriba)
+- **Added**: Búsqueda en tiempo real por nombre, apellidos, whatsapp, email
+- **Added**: CRUD completo de contactos con validación de campos obligatorios
+- **Added**: Modal de configuración de campos personalizados por pestaña
+- **Files Created**:
+  - `/app/backend/contacts_service.py` - Modelos Pydantic para contactos y campos
+  - `/app/frontend/src/components/contacts/ContactsPage.jsx` - Componente principal
+- **Files Modified**:
+  - `/app/backend/server.py` - Rutas API para contactos (líneas 4634-4850)
+  - `/app/frontend/src/components/mindmap/DockSidebar.jsx` - Agregado enlace "Contactos"
+  - `/app/frontend/src/components/mindmap/MindMapApp.jsx` - Renderiza ContactsPage
+- **API Endpoints**:
+  - `GET /api/contacts` - Listar contactos (filtro opcional por tipo)
+  - `POST /api/contacts` - Crear contacto
+  - `GET /api/contacts/{id}` - Obtener contacto específico
+  - `PUT /api/contacts/{id}` - Actualizar contacto
+  - `DELETE /api/contacts/{id}` - Eliminar contacto
+  - `GET /api/contacts/config/fields/{type}` - Obtener campos personalizados
+  - `POST /api/contacts/config/fields/{type}` - Crear campo personalizado
+  - `DELETE /api/contacts/config/fields/{type}/{field_id}` - Eliminar campo
+- **Testing**: Backend 23/23 tests passed (100%), Frontend UI 100% verified
+
 ### 2026-01-04: Fix Crítico - Persistencia de Drag & Drop en Tableros ✅
 - **Fixed**: Bug crítico donde mover tarjetas entre columnas NO se guardaba en la base de datos
 - **Root Cause**: `handleDragOver` mutaba `active.data.current.listId`, causando que `handleDragEnd` viera source y destination como iguales

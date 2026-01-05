@@ -118,14 +118,24 @@ const SortableCard = ({ card, listId, listTitle, boardId, onUpdate, onDelete, on
       onClick={handleCardClick}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
-      className={`group bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 select-none ${
+      className={`group rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 select-none ${
         isDragging 
-          ? 'shadow-2xl ring-2 ring-cyan-400 rotate-2 scale-105' 
-          : isTimeTracking
-            ? 'border-2 border-red-400 ring-2 ring-red-100'
-            : 'border border-gray-100 hover:border-cyan-200'
+          ? 'bg-white shadow-2xl ring-2 ring-cyan-400 rotate-2 scale-105' 
+          : card.is_pinned
+            ? 'bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-300 hover:border-amber-400 ring-1 ring-amber-100'
+            : isTimeTracking
+              ? 'bg-white border-2 border-red-400 ring-2 ring-red-100'
+              : 'bg-white border border-gray-100 hover:border-cyan-200'
       }`}
     >
+      {/* Pin indicator for pinned cards */}
+      {card.is_pinned && (
+        <div className="bg-gradient-to-r from-amber-400 to-yellow-400 text-amber-900 px-3 py-1 flex items-center gap-2 rounded-t-lg">
+          <Pin size={12} fill="currentColor" />
+          <span className="text-xs font-semibold">Anclada</span>
+        </div>
+      )}
+      
       {/* Cover Image - First attachment as cover */}
       {card.attachments && card.attachments.length > 0 && card.attachments[0].data && (
         <div className="relative w-full">

@@ -19,6 +19,7 @@ const DEFAULT_COLUMNS = [
   { id: 'nombre', label: 'Nombre completo', required: true },
   { id: 'whatsapp', label: 'WhatsApp', required: false },
   { id: 'email', label: 'Email', required: false },
+  { id: 'labels', label: 'Etiquetas', required: false },
   { id: 'created_at', label: 'Fecha de creación', required: false }
 ];
 

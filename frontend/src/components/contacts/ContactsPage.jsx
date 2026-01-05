@@ -561,24 +561,63 @@ const ContactsPage = () => {
                   <div className="border-t border-gray-200 pt-4 mt-4">
                     <h3 className="text-sm font-semibold text-gray-700 mb-3">Campos personalizados</h3>
                     <div className="space-y-4">
-                      {customFields.map(field => (
-                        <div key={field.id}>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            {field.name} {field.is_required && <span className="text-red-500">*</span>}
-                          </label>
-                          {renderFieldInput(field, formData.custom_fields[field.id], (value) => {
-                            setFormData({
-                              ...formData,
-                              custom_fields: { ...formData.custom_fields, [field.id]: value }
-                            });
-                          })}
-                          {formErrors[`custom_${field.id}`] && (
-                            <p className="mt-1 text-xs text-red-500 flex items-center gap-1">
-                              <AlertCircle size={12} /> {formErrors[`custom_${field.id}`]}
-                            </p>
-                          )}
-                        </div>
-                      ))}
+                      {customFields.map(field => {
+                        const fieldType = field.field_type || 'text';
+                        const FieldTypeInfo = FIELD_TYPES.find(t => t.id === fieldType);
+                        const FieldIcon = FieldTypeInfo?.icon;
+                        
+                        return (
+                          <div key={field.id}>
+                            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
+                              {FieldIcon && (
+                                <span className="text-gray-400">
+                                  <FieldIcon size={14} />
+                                </span>
+                              )}
+                              {field.name} 
+                              {field.is_required && <span className="text-red-500">*</span>}
+                              {fieldType === 'number' && (
+                                <span className="text-xs text-gray-400 font-normal">(solo números)</span>
+                              )}
+                            </label>
+                            {renderFieldInput(
+                              field, 
+                              formData.custom_fields[field.id], 
+                              (value) => {
+                                setFormData({
+                                  ...formData,
+                                  custom_fields: { ...formData.custom_fields, [field.id]: value }
+                                });
+                                // Limpiar error al escribir
+                                if (formErrors[`custom_${field.id}`]) {
+                                  setFormErrors(prev => {
+                                    const newErrors = { ...prev };
+                                    delete newErrors[`custom_${field.id}`];
+                                    return newErrors;
+                                  });
+                                }
+                              },
+                              formErrors[`custom_${field.id}`],
+                              (error) => {
+                                if (error) {
+                                  setFormErrors(prev => ({ ...prev, [`custom_${field.id}`]: error }));
+                                } else {
+                                  setFormErrors(prev => {
+                                    const newErrors = { ...prev };
+                                    delete newErrors[`custom_${field.id}`];
+                                    return newErrors;
+                                  });
+                                }
+                              }
+                            )}
+                            {formErrors[`custom_${field.id}`] && fieldType !== 'number' && (
+                              <p className="mt-1 text-xs text-red-500 flex items-center gap-1">
+                                <AlertCircle size={12} /> {formErrors[`custom_${field.id}`]}
+                              </p>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}

@@ -112,6 +112,21 @@ const ContactsPage = () => {
   const filterDropdownRef = useRef(null);
   const filterButtonRefs = useRef({}); // Store refs for each filter button
   
+  // Date filter states
+  const [showDateFilter, setShowDateFilter] = useState(false);
+  const [dateFilterMode, setDateFilterMode] = useState('day'); // 'day', 'week', 'month', 'year'
+  const [dateFilterFrom, setDateFilterFrom] = useState(null);
+  const [dateFilterTo, setDateFilterTo] = useState(null);
+  const [dateFilterMonth, setDateFilterMonth] = useState(new Date().getMonth());
+  const [dateFilterYear, setDateFilterYear] = useState(new Date().getFullYear());
+  const [dateFilterMonthTo, setDateFilterMonthTo] = useState(new Date().getMonth());
+  const [dateFilterYearTo, setDateFilterYearTo] = useState(new Date().getFullYear());
+  const [dateFilterYears, setDateFilterYears] = useState([]); // For multi-year selection
+  const [weekSelectorDate, setWeekSelectorDate] = useState(new Date());
+  const [selectedWeeks, setSelectedWeeks] = useState([]); // Array of {start, end} for week ranges
+  const dateFilterButtonRef = useRef(null);
+  const [dateFilterDropdownPosition, setDateFilterDropdownPosition] = useState({ top: 0, left: 0 });
+  
   // Form states
   const [formData, setFormData] = useState({
     nombre: '',

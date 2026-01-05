@@ -891,6 +891,8 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
         return <RemindersView token={token} />;
       case 'integrations':
         return <IntegrationsView />;
+      case 'contacts':
+        return <ContactsPage />;
       default:
         return null;
     }

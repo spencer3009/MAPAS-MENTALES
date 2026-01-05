@@ -539,45 +539,6 @@ const SortableList = ({ list, listIndex, boardId, boardLabels, onUpdateList, onD
             </div>
           </SortableContext>
         </DroppableListArea>
-        
-        {/* Add Card Form */}
-        {showAddCard && (
-          <div className="mt-2 bg-white rounded-lg shadow-sm border border-gray-200 p-3">
-            <textarea
-              value={newCardTitle}
-              onChange={(e) => setNewCardTitle(e.target.value)}
-              placeholder="¿Qué necesitas hacer?"
-              className="w-full p-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-400 resize-none"
-              rows={2}
-              autoFocus
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleAddCard();
-                }
-                if (e.key === 'Escape') {
-                  setShowAddCard(false);
-                  setNewCardTitle('');
-                }
-              }}
-            />
-            <div className="flex gap-2 mt-2">
-              <button
-                onClick={handleAddCard}
-                disabled={!newCardTitle.trim()}
-                className="px-4 py-1.5 bg-cyan-500 hover:bg-cyan-600 disabled:bg-gray-300 text-white text-sm rounded-lg transition-colors font-medium"
-              >
-                Añadir
-              </button>
-              <button
-                onClick={() => { setShowAddCard(false); setNewCardTitle(''); }}
-                className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <X size={18} />
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

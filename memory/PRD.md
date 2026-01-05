@@ -2,6 +2,22 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-05: Módulo de Reportes Estadísticos para Contactos ✅
+- **Added**: Dashboard de reportes con diseño dark mode elegante (slate-900 gradient)
+- **Added**: Gráfico 1 "Contactos creados en el tiempo" - AreaChart con agrupación por día/semana/mes/año
+- **Added**: Gráfico 2 "Distribución por etiquetas" - Donut/PieChart con porcentajes y leyenda
+- **Added**: Gráfico 3 "Contactos por tipo" - BarChart horizontal (Clientes/Prospectos/Proveedores)
+- **Added**: Gráfico 4 "Top 5 etiquetas más usadas" - Barras horizontales con ranking
+- **Added**: Quick Stats - 4 tarjetas (Contactos mostrados, Total tipo, Etiquetas creadas, Total general)
+- **Added**: Actualización en tiempo real de gráficos al aplicar filtros (fecha, etiquetas)
+- **Added**: Mensajes de estado vacío cuando no hay datos
+- **Added**: Tooltips con estilo dark theme en todos los gráficos
+- **Tech**: Usando recharts library (AreaChart, PieChart, BarChart)
+- **Tech**: useMemo para cálculo eficiente de datos de gráficos
+- **Files Modified**: `/app/frontend/src/components/contacts/ContactsPage.jsx`
+- **Dependencies Added**: `recharts@3.6.0`
+- **Testing**: Frontend 100% verified (13/13 features)
+
 ### 2026-01-05: Sistema Avanzado de Filtros por Fecha ✅
 - **Added**: Selector "Tipo de muestra" con 4 modos: Día, Semana, Mes, Año
 - **Added**: Modo DÍA: Date pickers "Desde" y "Hasta" con calendario interactivo

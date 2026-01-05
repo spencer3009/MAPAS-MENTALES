@@ -1332,6 +1332,38 @@ const renderFieldValue = (value, field) => {
     return <span className="font-mono">{value}</span>;
   }
   
+  if (fieldType === 'date') {
+    // Formatear fecha legible
+    try {
+      const date = new Date(value);
+      return (
+        <span className="flex items-center gap-1 text-gray-700">
+          <CalendarIcon size={14} className="text-gray-400" />
+          {format(date, "d MMM yyyy", { locale: es })}
+        </span>
+      );
+    } catch {
+      return value;
+    }
+  }
+  
+  if (fieldType === 'time') {
+    // Formatear hora en 12h
+    try {
+      const [h, m] = value.split(':').map(Number);
+      const period = h >= 12 ? 'PM' : 'AM';
+      const hours12 = h % 12 || 12;
+      return (
+        <span className="flex items-center gap-1 text-gray-700 font-mono">
+          <Clock size={14} className="text-gray-400" />
+          {`${String(hours12).padStart(2, '0')}:${String(m).padStart(2, '0')} ${period}`}
+        </span>
+      );
+    } catch {
+      return value;
+    }
+  }
+  
   if (fieldType === 'textarea') {
     // Mostrar texto truncado si es muy largo
     const maxLength = 50;

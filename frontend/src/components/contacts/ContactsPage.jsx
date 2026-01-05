@@ -1083,6 +1083,96 @@ const ContactsPage = () => {
 
   const currentType = CONTACT_TYPES[activeTab];
 
+  // ==========================================
+  // REPORTS / STATISTICS DATA
+  // ==========================================
+  
+  // Colors for charts
+  const CHART_COLORS = ['#06B6D4', '#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#EF4444', '#6366F1'];
+  
+  // 1. Contactos creados en el tiempo (basado en filteredContacts)
+  const contactsOverTimeData = useMemo(() => {
+    if (!filteredContacts || filteredContacts.length === 0) return [];
+    
+    const grouped = {};
+    
+    filteredContacts.forEach(contact => {
+      if (!contact.created_at) return;
+      const date = parseISO(contact.created_at);
+      let key;
+      
+      switch (dateFilterMode) {
+        case 'week':
+          key = `Sem ${getWeek(date, { locale: es })} - ${format(date, 'MMM', { locale: es })}`;
+          break;
+        case 'month':
+          key = format(date, 'MMM yyyy', { locale: es });
+          break;
+        case 'year':
+          key = format(date, 'yyyy');
+          break;
+        case 'day':
+        default:
+          key = format(date, 'd MMM', { locale: es });
+          break;
+      }
+      
+      grouped[key] = (grouped[key] || 0) + 1;
+    });
+    
+    // Convert to array and sort by date
+    return Object.entries(grouped)
+      .map(([name, total]) => ({ name, total }))
+      .slice(-12); // Last 12 periods
+  }, [filteredContacts, dateFilterMode]);
+
+  // 2. Distribución por etiquetas (basado en filteredContacts)
+  const labelDistributionData = useMemo(() => {
+    if (!filteredContacts || filteredContacts.length === 0 || !contactLabels || contactLabels.length === 0) {
+      return [];
+    }
+    
+    const labelCounts = {};
+    let totalWithLabels = 0;
+    
+    filteredContacts.forEach(contact => {
+      const labels = contact.labels || [];
+      if (labels.length > 0) {
+        totalWithLabels++;
+        labels.forEach(labelId => {
+          labelCounts[labelId] = (labelCounts[labelId] || 0) + 1;
+        });
+      }
+    });
+    
+    if (totalWithLabels === 0) return [];
+    
+    return contactLabels
+      .filter(label => labelCounts[label.id])
+      .map((label, index) => ({
+        id: label.id,
+        name: label.name,
+        value: labelCounts[label.id] || 0,
+        color: label.color || CHART_COLORS[index % CHART_COLORS.length],
+        percentage: Math.round((labelCounts[label.id] / totalWithLabels) * 100)
+      }))
+      .sort((a, b) => b.value - a.value);
+  }, [filteredContacts, contactLabels]);
+
+  // 3. Contactos por tipo (usando allContactsCounts)
+  const contactsByTypeData = useMemo(() => {
+    return [
+      { name: 'Clientes', total: allContactsCounts.client, color: '#06B6D4' },
+      { name: 'Prospectos', total: allContactsCounts.prospect, color: '#8B5CF6' },
+      { name: 'Proveedores', total: allContactsCounts.supplier, color: '#F59E0B' }
+    ];
+  }, [allContactsCounts]);
+
+  // 4. Top 5 etiquetas más usadas
+  const topLabelsData = useMemo(() => {
+    return labelDistributionData.slice(0, 5);
+  }, [labelDistributionData]);
+
   // Función helper para renderizar celda de columna
   const renderColumnCell = (col, contact) => {
     switch (col.id) {

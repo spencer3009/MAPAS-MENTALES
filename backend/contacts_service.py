@@ -8,7 +8,7 @@ from uuid import uuid4
 
 
 # Tipos de campo válidos
-VALID_FIELD_TYPES = ['text', 'number', 'textarea', 'select', 'multiselect']
+VALID_FIELD_TYPES = ['text', 'number', 'textarea', 'date', 'time', 'select', 'multiselect']
 
 
 # ==========================================

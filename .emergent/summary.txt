@@ -1,33 +1,29 @@
 <analysis>**original_problem_statement:**
-The user's latest request is to enhance the Tableros (Boards) page by adding inline editing for board names and activating the three-dot context menu on each board card. The context menu should provide options for renaming, duplicating, and deleting (with confirmation) a board.
+The user initially requested to fix a drag-and-drop persistence bug. After that was resolved, the user requested a series of new features and improvements for the Kanban board application:
 
-This follows a series of significant feature implementations and UX fixes, including:
-1.  **Global Time Tracking:** A persistent, globally-accessible time tracking system.
-2.  **Time Tracking History:** A detailed activity log for all time tracking events within a task.
-3.  **MindOrbit Layout:** A new mind map layout with circular nodes and straight connectors.
-4.  **Dashboard & Modal UX:** Major improvements to the dashboard layout and the map template selection modal.
-5.  **Trash Functionality:** Critical bug fixes for the trash counter and item restoration.
-
-**PRODUCT REQUIREMENTS (Last Request):**
-*   **Inline Editing:** Clicking a board's title on the  should convert it into an editable input field.
-*   **Context Menu:** The existing  button on each board card must be activated to show a dropdown menu.
-*   **Menu Options:**
-    *   **Renombrar:** Trigger the same inline editing flow.
-    *   **Duplicar tablero:** Create an exact copy of the board, appending  to its name.
-    *   **Eliminar tablero:** Show a confirmation modal before soft-deleting the board (moving to Papelera).
-*   **UX:** All operations must be asynchronous (no page reload), maintain consistent styling, and handle loading/error states.
+1.  **Bug Fix**: Correct the drag-and-drop persistence issue where task movements were not saved after a page refresh.
+2.  **Task Priority System**: Implement a full priority system for tasks (Baja, Media, Alta, Urgente) inspired by Asana, including backend persistence and a visual badge (color + text) on the task card.
+3.  **Task Label System**: Implement a comprehensive, Trello-style label system where users can create, edit, and assign reusable labels (with custom text and color) to tasks. These labels must be visible on the task cards.
+4.  **Time Tracking UI/UX**: Reorganize the task modal to move the Time Tracking module to the top of the right-hand sidebar, make it always visible (starting at 00:00:00), and fix a bug where the main timer display reset to zero after being stopped.
+5.  **Add Task Form UI**: Reduce the excessive vertical spacing in the Add Task form to make it more compact and professional.
+6.  **Task Pinning & Sorting**: Implement a feature to pin tasks, which keeps them at the top of their respective columns and highlights them in yellow. Invert the default sorting order so that new tasks appear at the top of the list (below any pinned tasks).
+7.  **Boards Page Redesign**: Overhaul the main Boards overview page to replace the colorful, demo-like cards with a modern, professional, and clean SaaS-style design.
+8.  **Sidebar Reorganization**: Reorder the action items in the task modal's right-hand sidebar to a specific sequence requested by the user.
+9.  **New Contacts Module**: Build a brand-new Contacts module, a mini-CRM for managing Clients, Prospects, and Suppliers. This module must support custom, user-configurable fields for each contact type.
 
 **User's preferred language**: Spanish. The next agent MUST respond in Spanish.
 
 **what currently exists?**
-The application features a robust Tableros (Kanban boards) module and a Mind Mapping tool. A comprehensive, globally persistent time tracking system is fully integrated into the tasks on the boards. This system includes a global timer in the header, visual indicators on task cards, and a detailed activity log. The UI/UX of the main dashboard and modals has been significantly improved. A unified trash system for maps and boards is functional, with its counter and restoration bugs now fixed. The  layout has been partially implemented with circular nodes, but requires further verification.
+The application now has a fully functional Kanban board with drag-and-drop persistence. All user-facing features requested in this session have been implemented and are working: a complete priority system (like Asana), a full-fledged label management system (like Trello), a task pinning feature, and correct task sorting (pinned first, then newest). The UI/UX has been significantly improved with a redesigned Boards page, a more compact Add Task form, a reorganized task modal sidebar, and an enhanced Time Tracking module.
+
+The agent has just begun building the new Contacts module. The basic backend service file (), API routes in , and the main frontend component () have been created, but they are mostly placeholders and need to be implemented.
 
 **Last working item**:
-*   **Last item agent was working:** Starting the implementation of inline editing and the context menu for boards as per the user's latest request. The agent was in the initial exploration phase, viewing the  file to understand its structure.
-*   **Status:** NOT STARTED
-*   **Agent Testing Done:** N
-*   **Which testing method agent to use?** Frontend testing agent to verify the new UI interactions (inline editing, context menu) and the full CRUD cycle (rename, duplicate, delete). Manual  commands can supplement backend endpoint verification.
-*   **User Testing Done:** N
+- **Last item agent was working:** The agent was performing the initial setup for the new Contacts module as requested by the user. This involved creating the foundational files for both the backend and frontend.
+- **Status:** IN PROGRESS
+- **Agent Testing Done:** N
+- **Which testing method agent to use?** both. The backend testing agent should be used to verify the API for creating contacts and managing custom fields. The frontend testing agent should be used to test the entire user flow: navigating to the contacts page, switching tabs, creating a contact with custom fields, and verifying validation.
+- **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
 *   **Issue 1: MindOrbit radial layout and child node creation not fully verified (P1)**
@@ -36,133 +32,128 @@ The application features a robust Tableros (Kanban boards) module and a Mind Map
 *   **Issue 4: Mobile Layout Overlap (P2)**
 
 **Issues Detail:**
-*   **Issue 1: MindOrbit radial layout and child node creation not fully verified**
-    *   **Attempted fixes:** The agent successfully modified  for circular nodes and  for straight connectors. An initial test showed the parent node is circular. However, the agent was unable to add child nodes via the UI to verify the radial distribution and connector rendering. The contextual  button on the node's toolbar seemed unresponsive.
-    *   **Next debug checklist:**
-        1.  Investigate why the contextual add node () button isn't creating a child node for the MindOrbit layout.
-        2.  Check the browser console for errors during the add node action.
-        3.  Once a child node can be added, verify it is also circular and connected by a straight line.
-        4.  Add multiple child nodes to confirm they are distributed radially around the parent.
-    *   **Why fix this issue and what will be achieved with the fix?** To complete the  feature as per user specification, which requires a specific visual representation.
-    *   **Status:** IN PROGRESS
-    *   **Is recurring issue?** N
-    *   **Should Test frontend/backend/both after fix?** Frontend
-    *   **Blocked on other issue:** None
-
-*   **Issue 2: MindHybrid Layout Instability**
-    *   **Attempted fixes:** None in this session.
-    *   **Next debug checklist:** Investigate layout algorithms in .
-    *   **Status:** NOT STARTED
-    *   **Is recurring issue?** Y
-    *   **Should Test frontend/backend/both after fix?** Frontend
-    *   **Blocked on other issue:** None
-
-*   **Issue 3: 'X' button in MultiSelectToolbar is not working**
-    *   **Attempted fixes:** None in this session.
-    *   **Next debug checklist:** Debug the  prop in  and the  function in .
-    *   **Status:** NOT STARTED
-    *   **Is recurring issue?** Y
-    *   **Should Test frontend/backend/both after fix?** Frontend
-    *   **Blocked on other issue:** None
-
-*   **Issue 4: Mobile Layout Overlap**
-    *   **Attempted fixes:** None in this session.
-    *   **Next debug checklist:** Inspect CSS  on the sidebar and user dropdown for mobile screen sizes.
-    *   **Status:** NOT STARTED
-    *   **Is recurring issue?** N
-    *   **Should Test frontend/backend/both after fix?** Frontend
-    *   **Blocked on other issue:** None
+*   These issues were carried over from a previous session and were not addressed. They relate to a different part of the application (Mind Maps) and can be considered lower priority than the active development of the Contacts module. The status for all remains **NOT STARTED**.
 
 **In progress Task List**:
-*   **Task 1: Implement inline editing and context menu for boards (P0)**
-    *   **Where to resume:** Continue analyzing . Plan the implementation of state for inline editing, create the context menu component (using a library like Radix or a custom one), and add the necessary backend endpoints for renaming and duplicating boards.
-    *   **What will be achieved with this?** A more fluid and intuitive user experience for managing boards, directly addressing a user feature request.
-    *   **Status:** NOT STARTED
-    *   **Should Test frontend/backend/both after fix?** Both
-    *   **Blocked on something:** None
+*   **Task 1: Build the Contacts Module (P0)**
+
+**Task Detail:**
+*   **Task 1: Build the Contacts Module**
+    - **Where to resume:**
+        1.  **Backend ():** Define the Pydantic models for , , etc. The models must support different field types (text, combo, multi-select), a mandatory flag, and belong to a specific category (Client, Prospect, Supplier). Implement the service-layer logic for all CRUD operations.
+        2.  **Backend ():** Implement the API endpoint logic to connect the HTTP requests to the .
+        3.  **Frontend (Main Sidebar):** Add a new navigation link for Contactos to make the new module accessible.
+        4.  **Frontend ():** Build out the UI, including the three tabs (Clientes, Prospectos, Proveedores), the table to list contacts, the Create button, and the modal for the creation/editing form which dynamically includes custom fields.
+        5.  **Frontend (Custom Fields):** Implement the UI for configuring custom fields.
+    - **What will be achieved with this?** A new core feature will be added to the application, providing basic CRM functionality as per the user's detailed requirements.
+    - **Status:** IN PROGRESS
+    - **Should Test frontend/backend/both after fix?** Both
+    - **Blocked on something:** None
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks:**
-    *   **Tableros - Phase 2 (P1):** Fully enable functionalities within the task modal (checklist interaction, attachments, real-time comments) and implement board collaboration.
-    *   **Dashboard Context Menu (P1):** Implement actions for the context menu on mind maps in the dashboard (Compartir mapa, Duplicar, etc.).
-*   **Future Tasks:**
-    *   **Tableros - Notifications (P2)**
+    *   **Dashboard Context Menu (P1):** Implement actions for the context menu on mind maps.
+    *   **Tableros - Phase 2 (P1):** Fully enable functionalities within the task modal (checklist interaction, real-time comments).
     *   **Admin Role Management (P1)**
+*   **Future Tasks:**
+    *   **User-Suggested Enhancements:**
+        *   Filter tasks by label.
+        *   Sort/filter boards by priority.
+        *   Add more metadata to board cards (task count, progress %).
+        *   Global dashboard widget for time tracking.
+        *   Manual time entry editing.
+        *   Keyboard shortcut for adding tasks.
+    *   **Tableros - Notifications (P2)**
     *   **Data Migration for  (P2)**
 
 **Completed work in this session**
-- **Global & Persistent Time Tracking:** Implemented a full-featured time tracking system that persists globally. A timer runs in the header and on the task card, even if the modal is closed.
-- **Time Tracking Activity History:** Added an Activity feed to the task modal, showing a complete, real-time history of all start/stop time tracking events.
-- **MindOrbit Layout Implementation:** Implemented circular nodes and straight-line connectors for the  layout type by modifying  and .
-- **Dashboard Layout Rework:** Fixed the template selection grid on the dashboard to be fully responsive, use the entire available width, and correct hover effect clipping.
-- **Template Selector Modal Fix:** Redesigned the layout selector modal to have a controlled height (), internal scrolling, and a fixed footer, preventing it from overflowing the viewport.
-- **Template Pre-selection Fix:** Corrected a bug where the chosen template from the dashboard was not pre-selected in the creation modal.
-- **Trash Counter & Restore Fix:** Resolved a critical bug where the trash counter was incorrect and another bug that prevented items from being restored from the trash. Created a new endpoint .
-- **Backend Cleanup:** Removed duplicated API routes in .
+- **Bug Fix:** Resolved the critical drag-and-drop persistence bug where task moves were not saved.
+- **Feature:** Implemented a full task priority system (like Asana) with persistence and UI badges.
+- **Feature:** Implemented a Trello-style reusable label system with custom text and color.
+- **UX Improvement:** Redesigned the Time Tracking module, moved it to the sidebar, and fixed a bug where the timer reset on stop.
+- **Feature:** Implemented task pinning to keep important tasks at the top of lists.
+- **Feature:** Changed default task sorting to newest first.
+- **UI Redesign:** Modernized the Boards overview page with a professional SaaS aesthetic.
+- **UI Cleanup:** Compacted the Add Task form and reordered the task modal sidebar actions.
+
+**Earlier issues found/mentioned but not fixed**
+*   **Issue 1: MindOrbit radial layout and child node creation not fully verified.** This issue, related to the mind map feature, was not addressed in this session.
+*   **Issue 2: MindHybrid Layout Instability.** This issue, related to the mind map feature, was not addressed in this session.
+*   **Issue 3: 'X' button in MultiSelectToolbar is not working.** This issue was not addressed in this session.
+*   **Issue 4: Mobile Layout Overlap.** A user dropdown menu overlaps the sidebar on mobile. This was not addressed.
+
+**Known issue recurrence from previous fork**
+*   The **Drag & Drop persistence bug** was a recurring issue from the previous fork. It has now been **RESOLVED**.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-*   **Global State Management (React Context):** Introduced  to manage the active timer's state across the application, enabling persistent, global UI indicators.
-*   **Responsive CSS:** Used  to create a responsive, full-width grid. Fixed a major modal UX issue by constraining height () and enabling internal scroll.
-*   **Conditional Rendering for Dynamic Theming:** Modified  and  to render different styles (circular nodes, straight edges) based on the  prop, effectively theming a component based on data.
-*   **Lifting State Up:** Passed callbacks () from parent () to child () to allow child components to trigger state updates in the parent (updating the trash count).
-*   **FastAPI Backend Development:** Added new models (Pydantic) and a suite of endpoints for the time tracking feature () and a new aggregate endpoint for the trash count ().
+*   **dnd-kit Bug Fix:** Solved a mutation issue by caching the original source list ID on  instead of relying on the data available in .
+*   **Backend Model Extension:** Added new fields like  to the  model and a  array to the  model to support new features.
+*   **Client-Side Sorting:** Implemented multi-criteria sorting in JavaScript () to order tasks by  status first, then by  date.
+*   **Component Refactoring:** Extracted the time tracking logic into a new, dedicated  component for better modularity and to facilitate the UI redesign.
+*   **Modular Feature Scaffolding:** Began building the new Contacts module by creating placeholder files for the backend service, API routes, and main frontend page.
 
 **key DB schema**
-*   **time_tracking_entries:** (New Collection)
-    *   , , , , , , , , 
+*   **boards:**
+    *   : (New) An array of reusable label objects for the entire board, e.g., .
+    *   :
+        *   : (New) Boolean.
+        *   : (Now used) String ('low', 'medium', 'high', 'urgent').
+        *   : (Data type changed) Now an array of string IDs referencing .
 
 **All files of reference**
-*   **/app/frontend/src/components/boards/BoardsPage.jsx**: Target file for the next task (inline editing and context menu).
-*   **/app/frontend/src/contexts/TimeTrackingContext.jsx**: Contains the new global state for the time tracker.
-*   **/app/frontend/src/components/boards/GlobalTimeIndicator.jsx**: The new UI component for the global timer in the header.
-*   **/app/frontend/src/components/mindmap/NodeItem.jsx**: Modified to render circular nodes for the MindOrbit layout.
-*   **/app/frontend/src/components/mindmap/ConnectionsLayer.jsx**: Modified to render straight connectors for MindOrbit.
-*   **/app/frontend/src/hooks/useNodes.js**: Contains the layout algorithms, including the adjusted radial layout.
-*   **/app/backend/server.py**: Contains all API logic, including the new time tracking and trash count endpoints.
+*    (New file for the current task)
+*    (New file for the current task)
+*   
+*   
+*   
+*   
 
 **Critical Info for New Agent**
-*   **Top Priority (P0):** The immediate task is to implement the **inline board name editing** and the **board context menu** on the , as per the latest user request.
-*   **MindOrbit Verification:** The  feature is visually incomplete. While parent nodes are circular, the agent was unable to add child nodes through the UI to verify the full radial layout and straight connectors. This needs to be debugged and completed.
-*   **Global State:** Be aware of the newly implemented , which manages a global state. The pattern can be reused for other global features if needed.
+*   Your highest priority is to continue the implementation of the new **Contacts module**. The user has provided detailed requirements. You should start by implementing the backend models and services in  and then build out the frontend UI in .
+*   A crucial first step for the frontend work is to add a Contactos link to the main application sidebar so the page becomes accessible.
+*   All previously reported bugs and feature requests from this session have been completed and verified. Do not revisit them unless the user reports a new problem.
 
 **documents and test reports created in this job**
-*   /app/memory/PRD.md (Updated multiple times)
+*   /app/memory/PRD.md (Updated)
+*   /app/test_reports/iteration_7.json
+*   /app/test_reports/iteration_8.json
+*   /app/test_reports/iteration_9.json
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User (P0 Request):** Requests inline editing and a context menu for boards on the . **(Current Task)**
-2.  **User (P0 Bug/UX):** Reports that the  layout is incorrect and requests circular nodes, straight connectors, and a radial distribution.
-3.  **User (P0 Bug/UX):** Reports the map template selection popup is too tall, hiding the action buttons.
-4.  **User (P0 Bug/UX):** Reports that clicking a map template on the dashboard doesn't pre-select it in the popup.
-5.  **User (P0 Bug/UX):** Reports the dashboard layout is cramped and doesn't use the full width.
-6.  **User (P0 Feature):** Requests a persistent, global time tracker with indicators on the task card and in the app header.
-7.  **User (P0 Feature):** Requests a detailed activity history for time tracking events.
-8.  **User (P0 Feature):** Initial request for a time tracking module inside the task modal.
-9.  **User (P0 Bug):** Reports that restoring items from the trash is not working.
-10. **User (P0 Bug):** Reports the trash counter in the sidebar is incorrect.
+1.  **User:** Requested the new Contacts module with detailed specifications for tabs, custom fields, and behavior. (Current P0 Task)
+2.  **Agent:** Acknowledged the request and began scaffolding the feature.
+3.  **User:** Requested a specific reordering of the action items in the task modal's sidebar.
+4.  **Agent:** Completed the sidebar reordering.
+5.  **User:** Praised the new professional design of the Boards page and suggested an enhancement (more metadata).
+6.  **Agent:** Acknowledged the praise and suggestion.
+7.  **User:** Requested a complete redesign of the Boards page to look more like a professional SaaS dashboard.
+8.  **Agent:** Completed the redesign.
+9.  **User:** Praised the new task pinning feature and asked a follow-up question.
+10. **Agent:** Finished implementing the task pinning and sorting feature.
 
 **Project Health Check:**
 *   **Broken:**
-    *    layout functionality remains unstable.
-    *   The 'X' button in  is non-functional.
-    *   User dropdown menu overlaps the sidebar on mobile.
-    *   Adding child nodes in the  layout via the UI is not working, preventing full verification of the feature.
+    *   The new Contacts module is non-functional as it has just been scaffolded.
+*   **Mocked:**
+    *   None.
 
 **3rd Party Integrations**
-*   **PayPal:** For recurring subscriptions (Sandbox mode).
-*   **Resend:** For transactional emails.
-*   **@dnd-kit:** For drag-and-drop functionality.
-*   **Emergent-managed Google Auth:** For social login.
-*   **Lucide React:** For UI icons.
-*   **Twilio WhatsApp API:** For receiving incoming messages.
-*   **recharts:** Used for the time tracking activity graph.
+*   Pillow
+*   PayPal
+*   Resend
+*   @dnd-kit
+*   Emergent-managed Google Auth
+*   Lucide React
+*   Twilio WhatsApp API
+*   recharts
 
 **Testing status**
-*   **Testing agent used after significant changes:** NO (Agent used screenshots and curl commands extensively for self-testing).
-*   **Test files created:** None.
+*   **Testing agent used after significant changes:** YES (Used to verify the priority and label features).
+*   **Test files created:** None in this session, but existing tests were updated by the testing agent.
+*   **Known regressions:** None. The regression from the previous fork (drag-and-drop) was fixed.
 
-**Credentials to test flow:**
-*   **Admin User:**  / 
-*   **Free User:**  / </analysis>
+**What agent forgot to execute**
+*   The agent has not yet added the Contactos link to the main sidebar navigation menu, which is a necessary step to make the new page accessible through the UI.</analysis>

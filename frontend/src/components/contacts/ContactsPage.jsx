@@ -365,6 +365,142 @@ const ContactsPage = () => {
     setOpenFilterDropdown(columnId);
   };
 
+  // Date filter functions
+  const hasActiveDateFilter = dateFilterMode === 'day' 
+    ? (dateFilterFrom !== null || dateFilterTo !== null)
+    : dateFilterMode === 'week'
+    ? selectedWeeks.length > 0
+    : dateFilterMode === 'month'
+    ? true // Always has a month/year selected
+    : dateFilterMode === 'year'
+    ? dateFilterYears.length > 0
+    : false;
+
+  const openDateFilterDropdown = (buttonElement) => {
+    if (showDateFilter) {
+      setShowDateFilter(false);
+      return;
+    }
+    
+    if (buttonElement) {
+      const rect = buttonElement.getBoundingClientRect();
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+      
+      let left = rect.left + scrollLeft;
+      let top = rect.bottom + scrollTop + 4;
+      
+      // Ensure dropdown doesn't overflow
+      const dropdownWidth = 380;
+      if (left + dropdownWidth > window.innerWidth) {
+        left = window.innerWidth - dropdownWidth - 16;
+      }
+      if (left < 16) left = 16;
+      
+      setDateFilterDropdownPosition({ top, left });
+    }
+    
+    setShowDateFilter(true);
+  };
+
+  const clearDateFilter = () => {
+    setDateFilterFrom(null);
+    setDateFilterTo(null);
+    setSelectedWeeks([]);
+    setDateFilterYears([]);
+    setDateFilterMonth(new Date().getMonth());
+    setDateFilterYear(new Date().getFullYear());
+    setDateFilterMonthTo(new Date().getMonth());
+    setDateFilterYearTo(new Date().getFullYear());
+    setShowDateFilter(false);
+  };
+
+  const getDateFilterRange = () => {
+    switch (dateFilterMode) {
+      case 'day':
+        return {
+          from: dateFilterFrom,
+          to: dateFilterTo || dateFilterFrom
+        };
+      case 'week':
+        if (selectedWeeks.length === 0) return null;
+        const allStarts = selectedWeeks.map(w => w.start);
+        const allEnds = selectedWeeks.map(w => w.end);
+        return {
+          from: new Date(Math.min(...allStarts)),
+          to: new Date(Math.max(...allEnds))
+        };
+      case 'month':
+        const fromMonth = new Date(dateFilterYear, dateFilterMonth, 1);
+        const toMonth = new Date(dateFilterYearTo, dateFilterMonthTo + 1, 0); // Last day of month
+        return { from: fromMonth, to: toMonth };
+      case 'year':
+        if (dateFilterYears.length === 0) return null;
+        const minYear = Math.min(...dateFilterYears);
+        const maxYear = Math.max(...dateFilterYears);
+        return {
+          from: new Date(minYear, 0, 1),
+          to: new Date(maxYear, 11, 31)
+        };
+      default:
+        return null;
+    }
+  };
+
+  const getDateFilterLabel = () => {
+    const range = getDateFilterRange();
+    if (!range || (!range.from && !range.to)) return null;
+    
+    switch (dateFilterMode) {
+      case 'day':
+        if (range.from && range.to && range.from.getTime() === range.to.getTime()) {
+          return format(range.from, "d MMM yyyy", { locale: es });
+        }
+        return `${format(range.from, "d MMM", { locale: es })} - ${format(range.to, "d MMM yyyy", { locale: es })}`;
+      case 'week':
+        if (selectedWeeks.length === 1) {
+          return `Sem. ${getWeek(selectedWeeks[0].start, { locale: es })} de ${getYear(selectedWeeks[0].start)}`;
+        }
+        return `${selectedWeeks.length} semanas`;
+      case 'month':
+        const fromLabel = format(new Date(dateFilterYear, dateFilterMonth), "MMM yyyy", { locale: es });
+        const toLabel = format(new Date(dateFilterYearTo, dateFilterMonthTo), "MMM yyyy", { locale: es });
+        if (fromLabel === toLabel) return fromLabel;
+        return `${fromLabel} - ${toLabel}`;
+      case 'year':
+        if (dateFilterYears.length === 1) return dateFilterYears[0].toString();
+        return `${Math.min(...dateFilterYears)} - ${Math.max(...dateFilterYears)}`;
+      default:
+        return null;
+    }
+  };
+
+  const toggleWeekSelection = (weekStart) => {
+    const weekEnd = endOfWeek(weekStart, { locale: es });
+    const existingIndex = selectedWeeks.findIndex(w => 
+      w.start.getTime() === weekStart.getTime()
+    );
+    
+    if (existingIndex >= 0) {
+      setSelectedWeeks(prev => prev.filter((_, i) => i !== existingIndex));
+    } else {
+      setSelectedWeeks(prev => [...prev, { start: weekStart, end: weekEnd }]);
+    }
+  };
+
+  const isWeekSelected = (date) => {
+    const weekStart = startOfWeek(date, { locale: es });
+    return selectedWeeks.some(w => w.start.getTime() === weekStart.getTime());
+  };
+
+  const toggleYearSelection = (year) => {
+    if (dateFilterYears.includes(year)) {
+      setDateFilterYears(prev => prev.filter(y => y !== year));
+    } else {
+      setDateFilterYears(prev => [...prev, year].sort());
+    }
+  };
+
   // Obtener todas las columnas disponibles (fijas + personalizadas)
   const getAllColumns = useCallback(() => {
     const allColumns = [

@@ -346,6 +346,13 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
     setShowPriorityPicker(false);
   };
 
+  // Toggle pin/unpin task
+  const handleTogglePin = () => {
+    const newPinnedState = !isPinned;
+    setIsPinned(newPinnedState);
+    saveChanges({ is_pinned: newPinnedState });
+  };
+
   // Funciones del calendario
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();

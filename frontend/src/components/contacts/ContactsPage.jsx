@@ -225,11 +225,12 @@ const ContactsPage = () => {
     
     const tabConfig = columnConfig[activeTab];
     
-    // Si no hay configuración, todas visibles
-    if (!tabConfig?.visible || tabConfig.visible.length === 0) {
+    // Si no hay configuración para esta pestaña, todas visibles por defecto
+    if (!tabConfig || tabConfig.visible === undefined) {
       return true;
     }
     
+    // Si hay configuración, verificar si la columna está en el array visible
     return tabConfig.visible.includes(columnId);
   };
 

@@ -515,6 +515,116 @@ const ContactsPage = () => {
     return true;
   };
 
+  // ==========================================
+  // LABELS/TAGS MANAGEMENT
+  // ==========================================
+  
+  // Crear etiqueta
+  const handleCreateLabel = async () => {
+    if (!newLabel.name.trim()) {
+      setLabelError('El nombre es obligatorio');
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${API_URL}/api/contacts/labels/${activeTab}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(newLabel)
+      });
+      
+      if (response.ok) {
+        loadData();
+        setNewLabel({ name: '', color: '#3B82F6' });
+        setLabelError('');
+      } else {
+        const data = await response.json();
+        setLabelError(data.detail || 'Error al crear etiqueta');
+      }
+    } catch (error) {
+      console.error('Error creating label:', error);
+      setLabelError('Error de conexión');
+    }
+  };
+
+  // Actualizar etiqueta
+  const handleUpdateLabel = async () => {
+    if (!newLabel.name.trim()) {
+      setLabelError('El nombre es obligatorio');
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${API_URL}/api/contacts/labels/${activeTab}/${editingLabel.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(newLabel)
+      });
+      
+      if (response.ok) {
+        loadData();
+        cancelEditLabel();
+      } else {
+        const data = await response.json();
+        setLabelError(data.detail || 'Error al actualizar etiqueta');
+      }
+    } catch (error) {
+      console.error('Error updating label:', error);
+      setLabelError('Error de conexión');
+    }
+  };
+
+  // Eliminar etiqueta
+  const handleDeleteLabel = async (labelId) => {
+    try {
+      const response = await fetch(`${API_URL}/api/contacts/labels/${activeTab}/${labelId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        loadData();
+      }
+    } catch (error) {
+      console.error('Error deleting label:', error);
+    }
+  };
+
+  // Iniciar edición de etiqueta
+  const startEditLabel = (label) => {
+    setEditingLabel(label);
+    setNewLabel({ name: label.name, color: label.color });
+    setLabelError('');
+  };
+
+  // Cancelar edición de etiqueta
+  const cancelEditLabel = () => {
+    setEditingLabel(null);
+    setNewLabel({ name: '', color: '#3B82F6' });
+    setLabelError('');
+  };
+
+  // Toggle etiqueta en el formulario de contacto
+  const toggleContactLabel = (labelId) => {
+    const currentLabels = formData.labels || [];
+    if (currentLabels.includes(labelId)) {
+      setFormData({ ...formData, labels: currentLabels.filter(id => id !== labelId) });
+    } else {
+      setFormData({ ...formData, labels: [...currentLabels, labelId] });
+    }
+  };
+
+  // Obtener info de etiqueta por ID
+  const getLabelById = (labelId) => {
+    return contactLabels.find(l => l.id === labelId);
+  };
+
   // Cerrar modal y limpiar
   const closeModal = () => {
     setShowCreateModal(false);

@@ -516,7 +516,7 @@ const SortableList = ({ list, listIndex, boardId, boardLabels, onUpdateList, onD
         {/* Área droppable para las tarjetas */}
         <DroppableListArea listId={list.id}>
           <SortableContext
-            items={list.cards.map(c => c.id)}
+            items={getSortedCards(list.cards).map(c => c.id)}
             strategy={verticalListSortingStrategy}
           >
             <div className="space-y-2">
@@ -530,7 +530,7 @@ const SortableList = ({ list, listIndex, boardId, boardLabels, onUpdateList, onD
                   <p className="text-gray-300 text-xs mt-1">Arrastra aquí o crea una nueva</p>
                 </div>
               ) : (
-                list.cards.map(card => (
+                getSortedCards(list.cards).map(card => (
                   <SortableCard
                     key={card.id}
                     card={card}

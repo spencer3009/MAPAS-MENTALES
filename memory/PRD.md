@@ -2,6 +2,21 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-05: Sistema Avanzado de Filtros por Fecha ✅
+- **Added**: Selector "Tipo de muestra" con 4 modos: Día, Semana, Mes, Año
+- **Added**: Modo DÍA: Date pickers "Desde" y "Hasta" con calendario interactivo
+- **Added**: Modo SEMANA: Selector semanal con número de semana, navegación por meses
+- **Added**: Modo MES: Dropdowns de mes+año para rangos mensuales
+- **Added**: Modo AÑO: Grid de años (2022-2030) con multi-selección
+- **Added**: Botón "Fecha" en barra de acciones que muestra el filtro activo
+- **Added**: Botón X en "Fecha" para limpiar filtro rápidamente
+- **Added**: Integración con sistema de filtros existente (etiquetas, columnas)
+- **Logic**: Filtrado por campo `created_at` de los contactos
+- **UX**: Dropdown con React Portal para evitar problemas de z-index
+- **i18n**: Calendario en español usando locale `es` de date-fns
+- **Files Modified**: `/app/frontend/src/components/contacts/ContactsPage.jsx`
+- **Testing**: Frontend 100% verified (14/14 features)
+
 ### 2026-01-05: Fix Dropdown Filtros - Portal para evitar recorte (z-index/overflow) ✅
 - **Fixed**: Dropdown de filtros era cortado/recortado por contenedores con `overflow: hidden/auto`
 - **Solution**: Implementado React Portal (`createPortal`) para renderizar dropdown en `document.body`

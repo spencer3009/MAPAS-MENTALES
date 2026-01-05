@@ -1137,6 +1137,178 @@ const ContactsPage = () => {
         </div>
       )}
 
+      {/* View Contact Modal */}
+      {showViewModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-slate-700 to-slate-800 px-6 py-5">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-4">
+                  {/* Avatar */}
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-white text-xl font-bold shadow-lg">
+                    {showViewModal.nombre?.charAt(0)}{showViewModal.apellidos?.charAt(0)}
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-white">
+                      {showViewModal.nombre} {showViewModal.apellidos}
+                    </h2>
+                    <div className="flex items-center gap-3 mt-1">
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        showViewModal.contact_type === 'client' 
+                          ? 'bg-cyan-500/20 text-cyan-300' 
+                          : showViewModal.contact_type === 'prospect'
+                          ? 'bg-amber-500/20 text-amber-300'
+                          : 'bg-purple-500/20 text-purple-300'
+                      }`}>
+                        {CONTACT_TYPES[showViewModal.contact_type]?.label || 'Contacto'}
+                      </span>
+                      <span className="text-slate-400 text-sm flex items-center gap-1">
+                        <CalendarIcon size={14} />
+                        {new Date(showViewModal.created_at).toLocaleDateString('es-ES', { 
+                          day: '2-digit', 
+                          month: 'short', 
+                          year: 'numeric'
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setShowViewModal(null)} 
+                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-white" />
+                </button>
+              </div>
+            </div>
+            
+            {/* Modal Body */}
+            <div className="p-6 max-h-[60vh] overflow-y-auto">
+              {/* Datos Principales */}
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <Users size={16} />
+                  Datos principales
+                </h3>
+                <div className="bg-gray-50 rounded-xl p-4 grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-gray-500 uppercase tracking-wide">Nombre</label>
+                    <p className="text-gray-900 font-medium">{showViewModal.nombre || '—'}</p>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 uppercase tracking-wide">Apellidos</label>
+                    <p className="text-gray-900 font-medium">{showViewModal.apellidos || '—'}</p>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 uppercase tracking-wide flex items-center gap-1">
+                      <Phone size={12} /> WhatsApp
+                    </label>
+                    <p className="text-gray-900 font-medium">{showViewModal.whatsapp || '—'}</p>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 uppercase tracking-wide flex items-center gap-1">
+                      <Mail size={12} /> Email
+                    </label>
+                    <p className="text-gray-900 font-medium">{showViewModal.email || '— (sin dato)'}</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Campos Personalizados */}
+              {customFields.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <Settings size={16} />
+                    Información adicional
+                  </h3>
+                  <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+                    {customFields.map(field => {
+                      const value = showViewModal.custom_fields?.[field.id];
+                      const fieldType = field.field_type || 'text';
+                      
+                      // Formatear valor según tipo
+                      let displayValue = '— (sin dato)';
+                      if (value !== null && value !== undefined && value !== '') {
+                        if (fieldType === 'multiselect' && Array.isArray(value)) {
+                          displayValue = value.length > 0 ? value.join(', ') : '— (sin dato)';
+                        } else if (fieldType === 'date') {
+                          try {
+                            displayValue = format(new Date(value), "d 'de' MMMM, yyyy", { locale: es });
+                          } catch {
+                            displayValue = value;
+                          }
+                        } else if (fieldType === 'time') {
+                          try {
+                            const [h, m] = value.split(':').map(Number);
+                            const period = h >= 12 ? 'PM' : 'AM';
+                            const hours12 = h % 12 || 12;
+                            displayValue = `${String(hours12).padStart(2, '0')}:${String(m).padStart(2, '0')} ${period}`;
+                          } catch {
+                            displayValue = value;
+                          }
+                        } else if (fieldType === 'number') {
+                          const num = Number(value);
+                          displayValue = !isNaN(num) && Math.abs(num) >= 1000 
+                            ? num.toLocaleString('es-ES') 
+                            : value;
+                        } else {
+                          displayValue = value;
+                        }
+                      }
+                      
+                      return (
+                        <div key={field.id} className="flex items-start justify-between py-2 border-b border-gray-200 last:border-0">
+                          <div className="flex items-center gap-2">
+                            {field.color && (
+                              <div 
+                                className="w-2 h-2 rounded-full" 
+                                style={{ backgroundColor: field.color }}
+                              />
+                            )}
+                            <label className="text-sm text-gray-600">{field.name}</label>
+                          </div>
+                          <p className={`text-sm font-medium text-right max-w-[60%] ${
+                            displayValue === '— (sin dato)' ? 'text-gray-400 italic' : 'text-gray-900'
+                          }`}>
+                            {displayValue}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Modal Footer */}
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+              <p className="text-xs text-gray-400">
+                ID: {showViewModal.id?.slice(0, 8)}...
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowViewModal(null)}
+                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+                >
+                  Cerrar
+                </button>
+                <button
+                  onClick={() => {
+                    setShowViewModal(null);
+                    openEditModal(showViewModal);
+                  }}
+                  className="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                >
+                  <Edit2 size={16} />
+                  Editar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Columns Config Modal */}
       {showColumnsConfig && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">

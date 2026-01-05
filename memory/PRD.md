@@ -2,6 +2,27 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-05: Sistema de Etiquetas (Tags) para Contactos ✅
+- **Added**: Sistema completo de etiquetas para categorizar contactos
+- **Added**: Modal "Administrar etiquetas" accesible desde botón en la barra de acciones
+- **Added**: Crear etiquetas con nombre y color (10 colores predefinidos)
+- **Added**: Editar y eliminar etiquetas existentes
+- **Added**: Etiquetas independientes por tipo de contacto (Clientes, Prospectos, Proveedores)
+- **Added**: Asignar múltiples etiquetas a contactos al crear o editar
+- **Added**: Visualización de etiquetas como chips de colores en la tabla de contactos
+- **Added**: Visualización de etiquetas en el modal de "Ver contacto"
+- **Added**: Al eliminar una etiqueta, se remueve automáticamente de todos los contactos asociados
+- **Files Modified**:
+  - `/app/backend/contacts_service.py` - Añadido campo `labels` a modelos de contacto
+  - `/app/backend/server.py` - Añadidos endpoints CRUD para etiquetas (líneas 4853-4984)
+  - `/app/frontend/src/components/contacts/ContactsPage.jsx` - Modal de etiquetas, selector en formulario, render en tabla
+- **API Endpoints**:
+  - `GET /api/contacts/labels/{contact_type}` - Obtener etiquetas por tipo
+  - `POST /api/contacts/labels/{contact_type}` - Crear etiqueta
+  - `PUT /api/contacts/labels/{contact_type}/{label_id}` - Actualizar etiqueta
+  - `DELETE /api/contacts/labels/{contact_type}/{label_id}` - Eliminar etiqueta
+- **Testing**: Backend 19/19 tests passed (100%), Frontend UI 100% verified
+
 ### 2026-01-05: Personalización de Columnas en Contactos ✅
 - **Added**: Botón "Personalizar columnas" en la barra de acciones del módulo Contactos
 - **Added**: Modal de configuración de columnas con:

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ArrowLeft, Shield, Eye, Lock, Database, UserCheck, Globe, Mail, Calendar } from 'lucide-react';
 
-const LOGO_URL = 'https://customer-assets.emergentagent.com/job_c7c9b123-4484-446c-b0cd-4986b2bb2189/artifacts/qfk72gmx_LOGO%20MINDORA%20-%20300px.png';
+const LOGO_URL = 'https://customer-assets.emergentagent.com/job_c7c9b123-4484-446c-b0cd-4986b2bb2189/artifacts/hk2d8hgn_MINDORA%20TRANSPARENTE.png';
 
 const PrivacyPage = ({ onBack }) => {
   const lastUpdate = '29 de diciembre de 2025';

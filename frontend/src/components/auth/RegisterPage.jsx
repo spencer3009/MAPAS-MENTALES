@@ -18,7 +18,7 @@ import {
 import { getDemoMapForTransfer, hasDemoMap } from '../../hooks/useDemoNodes';
 
 // URL del logo MindoraMap
-const LOGO_URL = 'https://customer-assets.emergentagent.com/job_c7c9b123-4484-446c-b0cd-4986b2bb2189/artifacts/qfk72gmx_LOGO%20MINDORA%20-%20300px.png';
+const LOGO_URL = 'https://customer-assets.emergentagent.com/job_c7c9b123-4484-446c-b0cd-4986b2bb2189/artifacts/hk2d8hgn_MINDORA%20TRANSPARENTE.png';
 
 // Features destacados
 const FEATURES = [

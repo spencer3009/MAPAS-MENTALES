@@ -7,11 +7,16 @@ import {
   Loader2, MoreHorizontal, Save, AlertCircle,
   Type, Hash, List, CheckSquare, AlignLeft, Clock,
   ChevronUp, Columns3, GripVertical, Eye, EyeOff, Tag,
-  Filter, FilterX
+  Filter, FilterX, CalendarDays, CalendarRange, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { format, parse } from 'date-fns';
+import { 
+  format, parse, startOfWeek, endOfWeek, startOfMonth, endOfMonth, 
+  startOfYear, endOfYear, getWeek, getYear, addWeeks, subWeeks,
+  addMonths, subMonths, isSameWeek, isWithinInterval, parseISO,
+  eachWeekOfInterval, getMonth
+} from 'date-fns';
 import { es } from 'date-fns/locale';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';

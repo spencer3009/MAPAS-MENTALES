@@ -4627,6 +4627,228 @@ async def delete_time_entry(entry_id: str, current_user: dict = Depends(get_curr
     return {"message": "Registro eliminado"}
 
 
+# ==========================================
+# CONTACTS ENDPOINTS - CRM Básico
+# ==========================================
+
+@api_router.get("/contacts")
+async def get_contacts(contact_type: Optional[str] = None, current_user: dict = Depends(get_current_user)):
+    """Obtener todos los contactos del usuario, opcionalmente filtrados por tipo"""
+    query = {"owner_username": current_user["username"]}
+    if contact_type:
+        query["contact_type"] = contact_type
+    
+    contacts = await db.contacts.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    return {"contacts": contacts}
+
+
+@api_router.post("/contacts")
+async def create_contact(request: CreateContactRequest, current_user: dict = Depends(get_current_user)):
+    """Crear un nuevo contacto"""
+    now = datetime.now(timezone.utc).isoformat()
+    
+    contact = {
+        "id": f"contact_{uuid.uuid4().hex[:12]}",
+        "contact_type": request.contact_type,
+        "nombre": request.nombre,
+        "apellidos": request.apellidos,
+        "whatsapp": request.whatsapp,
+        "email": request.email or "",
+        "custom_fields": request.custom_fields or {},
+        "owner_username": current_user["username"],
+        "created_at": now,
+        "updated_at": now
+    }
+    
+    await db.contacts.insert_one(contact)
+    
+    # Retornar sin _id
+    del contact["_id"] if "_id" in contact else None
+    return {"contact": contact, "message": "Contacto creado"}
+
+
+@api_router.get("/contacts/{contact_id}")
+async def get_contact(contact_id: str, current_user: dict = Depends(get_current_user)):
+    """Obtener un contacto específico"""
+    contact = await db.contacts.find_one(
+        {"id": contact_id, "owner_username": current_user["username"]},
+        {"_id": 0}
+    )
+    
+    if not contact:
+        raise HTTPException(status_code=404, detail="Contacto no encontrado")
+    
+    return {"contact": contact}
+
+
+@api_router.put("/contacts/{contact_id}")
+async def update_contact(contact_id: str, request: UpdateContactRequest, current_user: dict = Depends(get_current_user)):
+    """Actualizar un contacto"""
+    contact = await db.contacts.find_one(
+        {"id": contact_id, "owner_username": current_user["username"]}
+    )
+    
+    if not contact:
+        raise HTTPException(status_code=404, detail="Contacto no encontrado")
+    
+    update_data = {"updated_at": datetime.now(timezone.utc).isoformat()}
+    
+    if request.nombre is not None:
+        update_data["nombre"] = request.nombre
+    if request.apellidos is not None:
+        update_data["apellidos"] = request.apellidos
+    if request.whatsapp is not None:
+        update_data["whatsapp"] = request.whatsapp
+    if request.email is not None:
+        update_data["email"] = request.email
+    if request.custom_fields is not None:
+        update_data["custom_fields"] = request.custom_fields
+    
+    await db.contacts.update_one({"id": contact_id}, {"$set": update_data})
+    
+    updated_contact = await db.contacts.find_one({"id": contact_id}, {"_id": 0})
+    return {"contact": updated_contact, "message": "Contacto actualizado"}
+
+
+@api_router.delete("/contacts/{contact_id}")
+async def delete_contact(contact_id: str, current_user: dict = Depends(get_current_user)):
+    """Eliminar un contacto"""
+    result = await db.contacts.delete_one({
+        "id": contact_id,
+        "owner_username": current_user["username"]
+    })
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Contacto no encontrado o sin permisos")
+    
+    return {"message": "Contacto eliminado"}
+
+
+# ==========================================
+# CUSTOM FIELDS ENDPOINTS
+# ==========================================
+
+@api_router.get("/contacts/config/fields/{contact_type}")
+async def get_custom_fields(contact_type: str, current_user: dict = Depends(get_current_user)):
+    """Obtener configuración de campos personalizados para un tipo de contacto"""
+    config = await db.contact_field_configs.find_one(
+        {"contact_type": contact_type, "owner_username": current_user["username"]},
+        {"_id": 0}
+    )
+    
+    if not config:
+        # Retornar configuración vacía si no existe
+        return {"config": {"contact_type": contact_type, "fields": []}}
+    
+    return {"config": config}
+
+
+@api_router.post("/contacts/config/fields/{contact_type}")
+async def create_custom_field(contact_type: str, request: CreateCustomFieldRequest, current_user: dict = Depends(get_current_user)):
+    """Crear un nuevo campo personalizado"""
+    now = datetime.now(timezone.utc).isoformat()
+    
+    # Buscar configuración existente
+    config = await db.contact_field_configs.find_one({
+        "contact_type": contact_type,
+        "owner_username": current_user["username"]
+    })
+    
+    new_field = {
+        "id": f"field_{uuid.uuid4().hex[:8]}",
+        "name": request.name,
+        "field_type": request.field_type,
+        "is_required": request.is_required,
+        "color": request.color,
+        "options": request.options or []
+    }
+    
+    if config:
+        # Agregar campo a configuración existente
+        await db.contact_field_configs.update_one(
+            {"contact_type": contact_type, "owner_username": current_user["username"]},
+            {
+                "$push": {"fields": new_field},
+                "$set": {"updated_at": now}
+            }
+        )
+    else:
+        # Crear nueva configuración
+        config = {
+            "contact_type": contact_type,
+            "owner_username": current_user["username"],
+            "fields": [new_field],
+            "created_at": now,
+            "updated_at": now
+        }
+        await db.contact_field_configs.insert_one(config)
+    
+    return {"field": new_field, "message": "Campo creado"}
+
+
+@api_router.put("/contacts/config/fields/{contact_type}/{field_id}")
+async def update_custom_field(contact_type: str, field_id: str, request: UpdateCustomFieldRequest, current_user: dict = Depends(get_current_user)):
+    """Actualizar un campo personalizado"""
+    config = await db.contact_field_configs.find_one({
+        "contact_type": contact_type,
+        "owner_username": current_user["username"]
+    })
+    
+    if not config:
+        raise HTTPException(status_code=404, detail="Configuración no encontrada")
+    
+    # Buscar y actualizar el campo
+    fields = config.get("fields", [])
+    field_found = False
+    
+    for field in fields:
+        if field["id"] == field_id:
+            if request.name is not None:
+                field["name"] = request.name
+            if request.field_type is not None:
+                field["field_type"] = request.field_type
+            if request.is_required is not None:
+                field["is_required"] = request.is_required
+            if request.color is not None:
+                field["color"] = request.color
+            if request.options is not None:
+                field["options"] = request.options
+            field_found = True
+            break
+    
+    if not field_found:
+        raise HTTPException(status_code=404, detail="Campo no encontrado")
+    
+    await db.contact_field_configs.update_one(
+        {"contact_type": contact_type, "owner_username": current_user["username"]},
+        {"$set": {"fields": fields, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"message": "Campo actualizado"}
+
+
+@api_router.delete("/contacts/config/fields/{contact_type}/{field_id}")
+async def delete_custom_field(contact_type: str, field_id: str, current_user: dict = Depends(get_current_user)):
+    """Eliminar un campo personalizado"""
+    config = await db.contact_field_configs.find_one({
+        "contact_type": contact_type,
+        "owner_username": current_user["username"]
+    })
+    
+    if not config:
+        raise HTTPException(status_code=404, detail="Configuración no encontrada")
+    
+    # Filtrar el campo a eliminar
+    fields = [f for f in config.get("fields", []) if f["id"] != field_id]
+    
+    await db.contact_field_configs.update_one(
+        {"contact_type": contact_type, "owner_username": current_user["username"]},
+        {"$set": {"fields": fields, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"message": "Campo eliminado"}
+
+
 # Include the router in the main app
 app.include_router(api_router)
 

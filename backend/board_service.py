@@ -106,6 +106,7 @@ class UpdateCardRequest(BaseModel):
     comments: Optional[List[dict]] = None
     priority: Optional[str] = None
     attachments: Optional[List[dict]] = None
+    is_pinned: Optional[bool] = None  # Para anclar tareas
 
 
 class MoveCardRequest(BaseModel):

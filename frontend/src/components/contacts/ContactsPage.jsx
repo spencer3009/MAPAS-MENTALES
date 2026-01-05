@@ -507,6 +507,13 @@ const ContactsPage = () => {
           {/* Buttons */}
           <div className="flex gap-2">
             <button
+              onClick={() => setShowColumnsConfig(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <Columns3 size={16} />
+              <span className="hidden sm:inline">Personalizar columnas</span>
+            </button>
+            <button
               onClick={() => setShowFieldsConfig(true)}
               className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             >

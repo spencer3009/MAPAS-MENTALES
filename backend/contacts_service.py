@@ -1,0 +1,89 @@
+"""
+Contacts Service for MindoraMap - CRM básico con campos personalizados
+"""
+from pydantic import BaseModel, Field
+from typing import List, Optional
+from datetime import datetime, timezone
+from uuid import uuid4
+
+
+# ==========================================
+# MODELOS DE DATOS
+# ==========================================
+
+class CustomField(BaseModel):
+    """Campo personalizado configurable por el usuario"""
+    id: str = Field(default_factory=lambda: f"field_{uuid4().hex[:8]}")
+    name: str
+    field_type: str  # 'text', 'select', 'multiselect'
+    is_required: bool = False
+    color: Optional[str] = None
+    options: List[str] = []  # Para select y multiselect
+
+
+class CustomFieldConfig(BaseModel):
+    """Configuración de campos personalizados por tipo de contacto"""
+    contact_type: str  # 'client', 'prospect', 'supplier'
+    fields: List[CustomField] = []
+    owner_username: str
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    updated_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+
+class Contact(BaseModel):
+    """Modelo base de contacto"""
+    id: str = Field(default_factory=lambda: f"contact_{uuid4().hex[:12]}")
+    contact_type: str  # 'client', 'prospect', 'supplier'
+    
+    # Campos obligatorios
+    nombre: str
+    apellidos: str
+    whatsapp: str
+    
+    # Campo opcional
+    email: Optional[str] = ""
+    
+    # Campos personalizados (diccionario dinámico)
+    custom_fields: dict = {}
+    
+    # Metadata
+    owner_username: str
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    updated_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+
+# ==========================================
+# REQUEST MODELS
+# ==========================================
+
+class CreateContactRequest(BaseModel):
+    contact_type: str
+    nombre: str
+    apellidos: str
+    whatsapp: str
+    email: Optional[str] = ""
+    custom_fields: Optional[dict] = {}
+
+
+class UpdateContactRequest(BaseModel):
+    nombre: Optional[str] = None
+    apellidos: Optional[str] = None
+    whatsapp: Optional[str] = None
+    email: Optional[str] = None
+    custom_fields: Optional[dict] = None
+
+
+class CreateCustomFieldRequest(BaseModel):
+    name: str
+    field_type: str  # 'text', 'select', 'multiselect'
+    is_required: bool = False
+    color: Optional[str] = None
+    options: Optional[List[str]] = []
+
+
+class UpdateCustomFieldRequest(BaseModel):
+    name: Optional[str] = None
+    field_type: Optional[str] = None
+    is_required: Optional[bool] = None
+    color: Optional[str] = None
+    options: Optional[List[str]] = None

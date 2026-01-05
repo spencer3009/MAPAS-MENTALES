@@ -1213,6 +1213,31 @@ const ContactsPage = () => {
               <span className="hidden sm:inline">Etiquetas</span>
             </button>
             <button
+              ref={dateFilterButtonRef}
+              onClick={(e) => openDateFilterDropdown(e.currentTarget)}
+              className={`flex items-center gap-2 px-4 py-2.5 border rounded-xl text-sm font-medium transition-colors ${
+                hasActiveDateFilter
+                  ? 'bg-cyan-50 border-cyan-300 text-cyan-700 hover:bg-cyan-100'
+                  : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+              }`}
+              data-testid="date-filter-button"
+            >
+              <CalendarRange size={16} />
+              <span className="hidden sm:inline">
+                {hasActiveDateFilter ? getDateFilterLabel() : 'Fecha'}
+              </span>
+              {hasActiveDateFilter && (
+                <X 
+                  size={14} 
+                  className="ml-1 hover:text-cyan-900"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    clearDateFilter();
+                  }}
+                />
+              )}
+            </button>
+            <button
               onClick={() => setShowFieldsConfig(true)}
               className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             >

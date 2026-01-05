@@ -22,8 +22,6 @@ const DEFAULT_COLUMNS = [
   { id: 'created_at', label: 'Fecha de creación', required: false }
 ];
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || '';
-
 // Tipos de contacto con sus etiquetas
 const CONTACT_TYPES = {
   client: { id: 'client', label: 'Clientes', icon: UserCheck, color: 'cyan', singular: 'cliente' },

@@ -4850,6 +4850,140 @@ async def delete_custom_field(contact_type: str, field_id: str, current_user: di
     return {"message": "Campo eliminado"}
 
 
+# ==========================================
+# CONTACT LABELS/TAGS ENDPOINTS
+# ==========================================
+
+@api_router.get("/contacts/labels/{contact_type}")
+async def get_contact_labels(contact_type: str, current_user: dict = Depends(get_current_user)):
+    """Obtener todas las etiquetas de un tipo de contacto"""
+    config = await db.contact_label_configs.find_one({
+        "contact_type": contact_type,
+        "owner_username": current_user["username"]
+    })
+    
+    if not config:
+        return {"labels": []}
+    
+    return {"labels": config.get("labels", [])}
+
+
+@api_router.post("/contacts/labels/{contact_type}")
+async def create_contact_label(contact_type: str, label_data: dict, current_user: dict = Depends(get_current_user)):
+    """Crear una nueva etiqueta"""
+    from uuid import uuid4
+    
+    name = label_data.get("name", "").strip()
+    color = label_data.get("color", "#3B82F6")
+    
+    if not name:
+        raise HTTPException(status_code=400, detail="El nombre es obligatorio")
+    
+    # Buscar o crear configuración
+    config = await db.contact_label_configs.find_one({
+        "contact_type": contact_type,
+        "owner_username": current_user["username"]
+    })
+    
+    labels = config.get("labels", []) if config else []
+    
+    # Verificar duplicados
+    if any(l["name"].lower() == name.lower() for l in labels):
+        raise HTTPException(status_code=400, detail="Ya existe una etiqueta con ese nombre")
+    
+    new_label = {
+        "id": f"label_{uuid4().hex[:8]}",
+        "name": name,
+        "color": color,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    labels.append(new_label)
+    
+    if config:
+        await db.contact_label_configs.update_one(
+            {"contact_type": contact_type, "owner_username": current_user["username"]},
+            {"$set": {"labels": labels, "updated_at": datetime.now(timezone.utc).isoformat()}}
+        )
+    else:
+        await db.contact_label_configs.insert_one({
+            "contact_type": contact_type,
+            "owner_username": current_user["username"],
+            "labels": labels,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        })
+    
+    return {"label": new_label, "message": "Etiqueta creada"}
+
+
+@api_router.put("/contacts/labels/{contact_type}/{label_id}")
+async def update_contact_label(contact_type: str, label_id: str, label_data: dict, current_user: dict = Depends(get_current_user)):
+    """Actualizar una etiqueta existente"""
+    config = await db.contact_label_configs.find_one({
+        "contact_type": contact_type,
+        "owner_username": current_user["username"]
+    })
+    
+    if not config:
+        raise HTTPException(status_code=404, detail="Configuración no encontrada")
+    
+    labels = config.get("labels", [])
+    label_idx = next((i for i, l in enumerate(labels) if l["id"] == label_id), None)
+    
+    if label_idx is None:
+        raise HTTPException(status_code=404, detail="Etiqueta no encontrada")
+    
+    name = label_data.get("name", "").strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="El nombre es obligatorio")
+    
+    # Verificar duplicados (excepto la misma etiqueta)
+    if any(l["name"].lower() == name.lower() and l["id"] != label_id for l in labels):
+        raise HTTPException(status_code=400, detail="Ya existe una etiqueta con ese nombre")
+    
+    labels[label_idx]["name"] = name
+    labels[label_idx]["color"] = label_data.get("color", labels[label_idx].get("color", "#3B82F6"))
+    labels[label_idx]["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.contact_label_configs.update_one(
+        {"contact_type": contact_type, "owner_username": current_user["username"]},
+        {"$set": {"labels": labels, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"label": labels[label_idx], "message": "Etiqueta actualizada"}
+
+
+@api_router.delete("/contacts/labels/{contact_type}/{label_id}")
+async def delete_contact_label(contact_type: str, label_id: str, current_user: dict = Depends(get_current_user)):
+    """Eliminar una etiqueta (no borra los contactos, solo quita la asociación)"""
+    config = await db.contact_label_configs.find_one({
+        "contact_type": contact_type,
+        "owner_username": current_user["username"]
+    })
+    
+    if not config:
+        raise HTTPException(status_code=404, detail="Configuración no encontrada")
+    
+    labels = [l for l in config.get("labels", []) if l["id"] != label_id]
+    
+    await db.contact_label_configs.update_one(
+        {"contact_type": contact_type, "owner_username": current_user["username"]},
+        {"$set": {"labels": labels, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    # Quitar la etiqueta de todos los contactos que la tengan
+    await db.contacts.update_many(
+        {
+            "contact_type": contact_type,
+            "owner_username": current_user["username"],
+            "labels": label_id
+        },
+        {"$pull": {"labels": label_id}}
+    )
+    
+    return {"message": "Etiqueta eliminada"}
+
+
 # Include the router in the main app
 app.include_router(api_router)
 

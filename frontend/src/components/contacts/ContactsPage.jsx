@@ -441,6 +441,65 @@ const ContactsPage = () => {
 
   const currentType = CONTACT_TYPES[activeTab];
 
+  // Función helper para renderizar celda de columna
+  const renderColumnCell = (col, contact) => {
+    switch (col.id) {
+      case 'nombre':
+        return (
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white text-sm font-bold">
+              {contact.nombre.charAt(0)}{contact.apellidos.charAt(0)}
+            </div>
+            <div>
+              <div className="font-medium text-gray-900">{contact.nombre} {contact.apellidos}</div>
+            </div>
+          </div>
+        );
+      case 'whatsapp':
+        return (
+          <div className="flex items-center gap-1.5 text-gray-600">
+            <Phone size={14} className="text-gray-400" />
+            {contact.whatsapp}
+          </div>
+        );
+      case 'email':
+        return contact.email ? (
+          <div className="flex items-center gap-1.5 text-gray-600">
+            <Mail size={14} className="text-gray-400" />
+            {contact.email}
+          </div>
+        ) : (
+          <span className="text-gray-400 text-sm">-</span>
+        );
+      case 'created_at':
+        return (
+          <div className="flex items-center gap-1.5 text-gray-500 text-sm">
+            <CalendarIcon size={14} className="text-gray-400" />
+            {new Date(contact.created_at).toLocaleDateString('es-ES', { 
+              day: '2-digit', 
+              month: 'short', 
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+          </div>
+        );
+      default:
+        // Campos personalizados
+        if (col.id.startsWith('custom_')) {
+          const field = customFields.find(f => f.id === col.fieldId);
+          if (field) {
+            return (
+              <span className="text-gray-600 text-sm">
+                {renderFieldValue(contact.custom_fields?.[col.fieldId], field)}
+              </span>
+            );
+          }
+        }
+        return <span className="text-gray-400">-</span>;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}

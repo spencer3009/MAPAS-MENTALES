@@ -103,7 +103,9 @@ const ContactsPage = () => {
   // Column filter states
   const [columnFilters, setColumnFilters] = useState({}); // { columnId: [selectedValues] }
   const [openFilterDropdown, setOpenFilterDropdown] = useState(null); // columnId of open dropdown
+  const [filterDropdownPosition, setFilterDropdownPosition] = useState({ top: 0, left: 0 }); // Position for portal dropdown
   const filterDropdownRef = useRef(null);
+  const filterButtonRefs = useRef({}); // Store refs for each filter button
   
   // Form states
   const [formData, setFormData] = useState({

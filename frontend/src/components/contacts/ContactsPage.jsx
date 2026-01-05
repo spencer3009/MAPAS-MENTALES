@@ -563,23 +563,11 @@ const ContactsPage = () => {
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                      Nombre completo
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                      WhatsApp
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                      Email
-                    </th>
-                    {customFields.map(field => (
-                      <th key={field.id} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        {field.name}
+                    {getVisibleColumns().map(col => (
+                      <th key={col.id} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        {col.label}
                       </th>
                     ))}
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                      Fecha de creación
-                    </th>
                     <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
                       Acciones
                     </th>
@@ -588,49 +576,11 @@ const ContactsPage = () => {
                 <tbody className="divide-y divide-gray-100">
                   {filteredContacts.map(contact => (
                     <tr key={contact.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white text-sm font-bold">
-                            {contact.nombre.charAt(0)}{contact.apellidos.charAt(0)}
-                          </div>
-                          <div>
-                            <div className="font-medium text-gray-900">{contact.nombre} {contact.apellidos}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-1.5 text-gray-600">
-                          <Phone size={14} className="text-gray-400" />
-                          {contact.whatsapp}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        {contact.email ? (
-                          <div className="flex items-center gap-1.5 text-gray-600">
-                            <Mail size={14} className="text-gray-400" />
-                            {contact.email}
-                          </div>
-                        ) : (
-                          <span className="text-gray-400 text-sm">-</span>
-                        )}
-                      </td>
-                      {customFields.map(field => (
-                        <td key={field.id} className="px-4 py-3 text-gray-600 text-sm">
-                          {renderFieldValue(contact.custom_fields?.[field.id], field)}
+                      {getVisibleColumns().map(col => (
+                        <td key={col.id} className="px-4 py-3">
+                          {renderColumnCell(col, contact)}
                         </td>
                       ))}
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-1.5 text-gray-500 text-sm">
-                          <CalendarIcon size={14} className="text-gray-400" />
-                          {new Date(contact.created_at).toLocaleDateString('es-ES', { 
-                            day: '2-digit', 
-                            month: 'short', 
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </div>
-                      </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1">
                           <button

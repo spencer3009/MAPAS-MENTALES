@@ -3537,6 +3537,8 @@ async def update_card(board_id: str, list_id: str, card_id: str, request: Update
                         card["priority"] = request.priority
                     if request.attachments is not None:
                         card["attachments"] = request.attachments
+                    if request.is_pinned is not None:
+                        card["is_pinned"] = request.is_pinned
                     card["updated_at"] = now
                     updated = True
                     break

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { 
   Users, UserPlus, Building2, UserCheck, 
@@ -7,7 +7,8 @@ import {
   Loader2, MoreHorizontal, Save, AlertCircle,
   Type, Hash, List, CheckSquare, AlignLeft, Clock,
   ChevronUp, Columns3, GripVertical, Eye, EyeOff, Tag,
-  Filter, FilterX, CalendarDays, CalendarRange, ChevronLeft, ChevronRight
+  Filter, FilterX, CalendarDays, CalendarRange, ChevronLeft, ChevronRight,
+  BarChart3, PieChart, TrendingUp, Award
 } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
@@ -15,9 +16,14 @@ import {
   format, parse, startOfWeek, endOfWeek, startOfMonth, endOfMonth, 
   startOfYear, endOfYear, getWeek, getYear, addWeeks, subWeeks,
   addMonths, subMonths, isSameWeek, isWithinInterval, parseISO,
-  eachWeekOfInterval, getMonth
+  eachWeekOfInterval, getMonth, eachDayOfInterval, eachMonthOfInterval,
+  startOfDay, endOfDay
 } from 'date-fns';
 import { es } from 'date-fns/locale';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  PieChart as RechartsPieChart, Pie, Cell, LineChart, Line, Area, AreaChart
+} from 'recharts';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 

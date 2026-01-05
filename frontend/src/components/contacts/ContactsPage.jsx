@@ -206,8 +206,8 @@ const ContactsPage = () => {
     const tabConfig = columnConfig[activeTab];
     
     // Si no hay configuración, inicializar con todas las columnas visibles
-    const currentVisible = tabConfig?.visible !== undefined 
-      ? tabConfig.visible 
+    const currentVisible = tabConfig?.visible 
+      ? [...tabConfig.visible]
       : allColumns.map(c => c.id);
     
     const currentOrder = tabConfig?.order && tabConfig.order.length > 0 

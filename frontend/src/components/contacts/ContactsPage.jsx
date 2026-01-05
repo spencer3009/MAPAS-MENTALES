@@ -629,7 +629,7 @@ const ContactsPage = () => {
   const closeModal = () => {
     setShowCreateModal(false);
     setEditingContact(null);
-    setFormData({ nombre: '', apellidos: '', whatsapp: '', email: '', custom_fields: {} });
+    setFormData({ nombre: '', apellidos: '', whatsapp: '', email: '', custom_fields: {}, labels: [] });
     setFormErrors({});
   };
 
@@ -641,7 +641,8 @@ const ContactsPage = () => {
       apellidos: contact.apellidos,
       whatsapp: contact.whatsapp,
       email: contact.email || '',
-      custom_fields: contact.custom_fields || {}
+      custom_fields: contact.custom_fields || {},
+      labels: contact.labels || []
     });
     setShowCreateModal(true);
   };

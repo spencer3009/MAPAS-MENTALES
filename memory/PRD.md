@@ -228,7 +228,32 @@ MindoraMap es una plataforma de mapas mentales para empresarios. Permite organiz
 - Guardado automático
 - Diseño inspirado en Trello/ClickUp
 
-### 5. Otras Funcionalidades
+### 5. Módulo de Contactos (CRM Básico) - **NUEVO ✅**
+- Accesible desde el sidebar lateral izquierdo
+- **Tres pestañas independientes:**
+  - Clientes (gestión de clientes)
+  - Prospectos (leads y potenciales)
+  - Proveedores (contactos de supply chain)
+- **Campos base:**
+  - Nombre (obligatorio)
+  - Apellidos (obligatorio)
+  - WhatsApp (obligatorio)
+  - Email (opcional)
+- **Campos personalizados configurables:**
+  - Campo de texto (input simple)
+  - Selector / combo (single select con opciones)
+  - Selector múltiple (multi-select)
+  - Cada campo tiene: nombre, tipo, obligatorio/no, color opcional
+- **Tabla de contactos:**
+  - Ordenados por fecha de creación (más reciente arriba)
+  - Columnas: Nombre completo, WhatsApp, Email, Fecha creación, Campos personalizados
+  - Búsqueda en tiempo real
+  - Acciones: Editar, Eliminar
+- Modal de creación/edición con validación
+- Configuración de campos personalizados por pestaña
+- CRUD completo con persistencia en MongoDB
+
+### 6. Otras Funcionalidades
 - Dashboard con proyectos recientes
 - Papelera con soft-delete
 - Recordatorios con WhatsApp (Twilio)

@@ -67,10 +67,11 @@ const ContactsPage = () => {
   const [confirmDelete, setConfirmDelete] = useState(null);
   
   // Column configuration state (per tab)
+  // null significa "sin configuración" = mostrar todas las columnas
   const [columnConfig, setColumnConfig] = useState({
-    client: { visible: [], order: [] },
-    prospect: { visible: [], order: [] },
-    supplier: { visible: [], order: [] }
+    client: null,
+    prospect: null,
+    supplier: null
   });
   const [draggedColumn, setDraggedColumn] = useState(null);
   

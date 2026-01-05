@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Users, UserPlus, Building2, UserCheck, 
   Search, Plus, X, Settings, Trash2, Edit2, 

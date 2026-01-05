@@ -83,6 +83,7 @@ const FIELD_COLORS = [
 const ContactsPage = () => {
   const [activeTab, setActiveTab] = useState('client');
   const [contacts, setContacts] = useState([]);
+  const [allContactsCounts, setAllContactsCounts] = useState({ client: 0, prospect: 0, supplier: 0 }); // Para gráfico por tipo
   const [customFields, setCustomFields] = useState([]);
   const [contactLabels, setContactLabels] = useState([]); // Etiquetas disponibles
   const [loading, setLoading] = useState(true);

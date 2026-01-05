@@ -997,6 +997,22 @@ const ContactsPage = () => {
     
     if (!matchesSearch) return false;
     
+    // Date filter
+    const dateRange = getDateFilterRange();
+    if (dateRange && dateRange.from) {
+      const contactDate = contact.created_at ? parseISO(contact.created_at) : null;
+      if (contactDate) {
+        const rangeStart = new Date(dateRange.from);
+        rangeStart.setHours(0, 0, 0, 0);
+        const rangeEnd = new Date(dateRange.to || dateRange.from);
+        rangeEnd.setHours(23, 59, 59, 999);
+        
+        if (contactDate < rangeStart || contactDate > rangeEnd) {
+          return false;
+        }
+      }
+    }
+    
     // Column filters
     for (const [columnId, filterValues] of Object.entries(columnFilters)) {
       if (!filterValues || filterValues.length === 0) continue;

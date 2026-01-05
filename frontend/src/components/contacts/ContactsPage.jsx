@@ -1011,13 +1011,22 @@ const ContactsPage = () => {
                               </span>
                             </div>
                           </div>
-                          <button
-                            onClick={() => handleDeleteField(field.id)}
-                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Eliminar campo"
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => startEditField(field)}
+                              className="p-2 text-gray-400 hover:text-cyan-500 hover:bg-cyan-50 rounded-lg transition-colors"
+                              title="Editar campo"
+                            >
+                              <Edit2 size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteField(field.id)}
+                              className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Eliminar campo"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
                         </div>
                       );
                     })}
@@ -1025,9 +1034,47 @@ const ContactsPage = () => {
                 </div>
               )}
               
-              {/* Create New Field */}
+              {/* Create/Edit Field Form */}
               <div className="border-t border-gray-200 pt-6">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">Crear nuevo campo</h3>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-gray-700">
+                    {editingField ? 'Editar campo' : 'Crear nuevo campo'}
+                  </h3>
+                  {editingField && (
+                    <button
+                      onClick={cancelEditField}
+                      className="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1"
+                    >
+                      <X size={14} />
+                      Cancelar edición
+                    </button>
+                  )}
+                </div>
+                
+                {/* Type Change Warning */}
+                {showTypeChangeWarning && (
+                  <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <AlertCircle size={18} className="text-amber-500 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-amber-800">Advertencia</p>
+                        <p className="text-xs text-amber-600 mt-1">
+                          Cambiar el tipo de campo puede afectar los datos existentes. 
+                          Los valores incompatibles se mantendrán pero podrían no mostrarse correctamente.
+                        </p>
+                        <div className="flex gap-2 mt-2">
+                          <button
+                            onClick={() => setShowTypeChangeWarning(false)}
+                            className="text-xs px-2 py-1 bg-amber-200 hover:bg-amber-300 text-amber-800 rounded transition-colors"
+                          >
+                            Entendido, continuar
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
                 <div className="space-y-4">
                   {/* Field Name */}
                   <div>
@@ -1051,7 +1098,12 @@ const ContactsPage = () => {
                         return (
                           <button
                             key={type.id}
-                            onClick={() => setNewField({ ...newField, field_type: type.id, options: type.id === 'select' || type.id === 'multiselect' ? newField.options : [] })}
+                            onClick={() => {
+                              if (editingField) {
+                                checkTypeChangeCompatibility(type.id);
+                              }
+                              setNewField({ ...newField, field_type: type.id, options: type.id === 'select' || type.id === 'multiselect' ? newField.options : [] });
+                            }}
                             className={`flex items-center gap-3 p-3 border rounded-lg text-left transition-all ${
                               isSelected 
                                 ? 'border-cyan-400 bg-cyan-50 ring-2 ring-cyan-200' 

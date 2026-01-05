@@ -292,7 +292,7 @@ const LandingPage = ({ onLogin, onRegister, onDemo, onTerms, onPrivacy, onCookie
           <div className="flex items-center justify-between h-20 lg:h-28">
             {/* Logo */}
             <a href="#inicio" className="flex items-center group">
-              <img src={LOGO_URL} alt="MindoraMap" className="h-10 lg:h-12 w-auto" />
+              <img src={LOGO_URL} alt="MindoraMap" className="h-12 lg:h-14 w-auto" />
             </a>
             
             {/* Desktop Navigation */}

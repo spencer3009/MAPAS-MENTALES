@@ -183,6 +183,24 @@ const ContactsPage = () => {
     }
   }, []);
 
+  // Close filter dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filterDropdownRef.current && !filterDropdownRef.current.contains(event.target)) {
+        setOpenFilterDropdown(null);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Reset filters when changing tabs
+  useEffect(() => {
+    setColumnFilters({});
+    setOpenFilterDropdown(null);
+  }, [activeTab]);
+
   // Guardar configuración de columnas en localStorage
   const saveColumnConfig = (newConfig) => {
     setColumnConfig(newConfig);

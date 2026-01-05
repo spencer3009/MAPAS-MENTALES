@@ -94,6 +94,7 @@ const ContactsPage = () => {
   const [showColumnsConfig, setShowColumnsConfig] = useState(false);
   const [showLabelsConfig, setShowLabelsConfig] = useState(false); // Modal de etiquetas
   const [showViewModal, setShowViewModal] = useState(null); // Contact to view
+  const [showReportsPanel, setShowReportsPanel] = useState(false); // Reports dashboard
   const [editingContact, setEditingContact] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
   

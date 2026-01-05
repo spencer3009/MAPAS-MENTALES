@@ -112,12 +112,23 @@ const ContactsPage = () => {
     if (!formData.apellidos.trim()) errors.apellidos = 'Los apellidos son obligatorios';
     if (!formData.whatsapp.trim()) errors.whatsapp = 'El WhatsApp es obligatorio';
     
-    // Validar campos personalizados obligatorios
+    // Validar campos personalizados
     customFields.forEach(field => {
+      const value = formData.custom_fields[field.id];
+      const fieldType = field.field_type || 'text';
+      
+      // Validar campos obligatorios
       if (field.is_required) {
-        const value = formData.custom_fields[field.id];
         if (!value || (Array.isArray(value) && value.length === 0) || (typeof value === 'string' && !value.trim())) {
           errors[`custom_${field.id}`] = `${field.name} es obligatorio`;
+          return; // continuar al siguiente campo
+        }
+      }
+      
+      // Validar campos numéricos (si tienen valor)
+      if (fieldType === 'number' && value && value.trim()) {
+        if (isNaN(Number(value))) {
+          errors[`custom_${field.id}`] = `${field.name} debe ser un número válido`;
         }
       }
     });

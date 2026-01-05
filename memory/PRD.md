@@ -267,6 +267,7 @@ MindoraMap es una plataforma de mapas mentales para empresarios. Permite organiz
 ├── backend/
 │   ├── server.py          # API FastAPI principal
 │   ├── board_service.py   # Modelos para Tableros
+│   ├── contacts_service.py # Modelos para Contactos (CRM)
 │   ├── email_service.py   # Servicio de emails Resend
 │   └── paypal_service.py  # Integración PayPal
 └── frontend/
@@ -275,6 +276,8 @@ MindoraMap es una plataforma de mapas mentales para empresarios. Permite organiz
         │   ├── boards/     # Módulo Tableros (MVP)
         │   │   ├── BoardsPage.jsx
         │   │   └── BoardView.jsx
+        │   ├── contacts/   # Módulo Contactos (CRM)
+        │   │   └── ContactsPage.jsx
         │   ├── mindmap/    # Editor de mapas mentales
         │   └── auth/       # Autenticación
         └── hooks/

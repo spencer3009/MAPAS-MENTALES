@@ -2589,6 +2589,306 @@ const ContactsPage = () => {
         </div>,
         document.body
       )}
+
+      {/* Date Filter Portal */}
+      {showDateFilter && createPortal(
+        <div 
+          className="fixed bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden"
+          style={{
+            top: dateFilterDropdownPosition.top,
+            left: dateFilterDropdownPosition.left,
+            zIndex: 99999,
+            width: dateFilterMode === 'week' ? '360px' : '320px'
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="p-3 border-b border-gray-100 bg-gradient-to-r from-cyan-50 to-blue-50">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <CalendarDays size={16} className="text-cyan-600" />
+                Filtrar por fecha
+              </span>
+              {hasActiveDateFilter && (
+                <button
+                  onClick={clearDateFilter}
+                  className="text-xs text-red-500 hover:text-red-700 font-medium px-2 py-1 rounded hover:bg-red-50 transition-colors"
+                >
+                  Limpiar
+                </button>
+              )}
+            </div>
+            
+            {/* Mode selector */}
+            <div className="flex gap-1 bg-gray-100 p-1 rounded-lg">
+              {[
+                { id: 'day', label: 'Día' },
+                { id: 'week', label: 'Semana' },
+                { id: 'month', label: 'Mes' },
+                { id: 'year', label: 'Año' }
+              ].map(mode => (
+                <button
+                  key={mode.id}
+                  onClick={() => setDateFilterMode(mode.id)}
+                  className={`flex-1 px-2 py-1.5 rounded text-xs font-medium transition-colors ${
+                    dateFilterMode === mode.id
+                      ? 'bg-white text-cyan-700 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-800'
+                  }`}
+                >
+                  {mode.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Content based on mode */}
+          <div className="p-3">
+            {dateFilterMode === 'day' && (
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Desde</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className="w-full px-3 py-2 text-left text-sm border border-gray-200 rounded-lg hover:border-cyan-300 transition-colors flex items-center justify-between">
+                        <span className={dateFilterFrom ? 'text-gray-900' : 'text-gray-400'}>
+                          {dateFilterFrom ? format(dateFilterFrom, "d 'de' MMMM, yyyy", { locale: es }) : 'Seleccionar fecha'}
+                        </span>
+                        <CalendarIcon size={14} className="text-gray-400" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start" style={{ zIndex: 999999 }}>
+                      <Calendar
+                        mode="single"
+                        selected={dateFilterFrom}
+                        onSelect={setDateFilterFrom}
+                        locale={es}
+                        className="rounded-md border"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Hasta</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className="w-full px-3 py-2 text-left text-sm border border-gray-200 rounded-lg hover:border-cyan-300 transition-colors flex items-center justify-between">
+                        <span className={dateFilterTo ? 'text-gray-900' : 'text-gray-400'}>
+                          {dateFilterTo ? format(dateFilterTo, "d 'de' MMMM, yyyy", { locale: es }) : 'Seleccionar fecha'}
+                        </span>
+                        <CalendarIcon size={14} className="text-gray-400" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start" style={{ zIndex: 999999 }}>
+                      <Calendar
+                        mode="single"
+                        selected={dateFilterTo}
+                        onSelect={setDateFilterTo}
+                        locale={es}
+                        disabled={(date) => dateFilterFrom && date < dateFilterFrom}
+                        className="rounded-md border"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                {dateFilterFrom && (
+                  <p className="text-xs text-gray-500 text-center">
+                    {dateFilterTo 
+                      ? `${format(dateFilterFrom, "d MMM", { locale: es })} → ${format(dateFilterTo, "d MMM yyyy", { locale: es })}`
+                      : `Solo ${format(dateFilterFrom, "d 'de' MMMM, yyyy", { locale: es })}`
+                    }
+                  </p>
+                )}
+              </div>
+            )}
+
+            {dateFilterMode === 'week' && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between mb-2">
+                  <button 
+                    onClick={() => setWeekSelectorDate(subMonths(weekSelectorDate, 1))}
+                    className="p-1 hover:bg-gray-100 rounded"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  <span className="text-sm font-medium text-gray-700">
+                    {format(weekSelectorDate, "MMMM yyyy", { locale: es })}
+                  </span>
+                  <button 
+                    onClick={() => setWeekSelectorDate(addMonths(weekSelectorDate, 1))}
+                    className="p-1 hover:bg-gray-100 rounded"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
+                
+                {/* Week headers */}
+                <div className="grid grid-cols-8 gap-1 text-center text-xs text-gray-500 mb-1">
+                  <div className="font-medium">Sem</div>
+                  <div>L</div>
+                  <div>M</div>
+                  <div>X</div>
+                  <div>J</div>
+                  <div>V</div>
+                  <div>S</div>
+                  <div>D</div>
+                </div>
+                
+                {/* Week rows */}
+                <div className="space-y-1 max-h-[200px] overflow-y-auto">
+                  {(() => {
+                    const monthStart = startOfMonth(weekSelectorDate);
+                    const monthEnd = endOfMonth(weekSelectorDate);
+                    const weeks = eachWeekOfInterval({ start: monthStart, end: monthEnd }, { locale: es });
+                    
+                    return weeks.map((weekStart, idx) => {
+                      const weekEnd = endOfWeek(weekStart, { locale: es });
+                      const isSelected = isWeekSelected(weekStart);
+                      const weekNum = getWeek(weekStart, { locale: es });
+                      
+                      return (
+                        <div
+                          key={idx}
+                          onClick={() => toggleWeekSelection(weekStart)}
+                          className={`grid grid-cols-8 gap-1 text-center text-xs py-1.5 px-1 rounded-lg cursor-pointer transition-colors ${
+                            isSelected 
+                              ? 'bg-cyan-100 text-cyan-800 ring-1 ring-cyan-300' 
+                              : 'hover:bg-gray-50'
+                          }`}
+                        >
+                          <div className={`font-medium ${isSelected ? 'text-cyan-700' : 'text-gray-600'}`}>
+                            {weekNum}
+                          </div>
+                          {[0, 1, 2, 3, 4, 5, 6].map(dayOffset => {
+                            const day = new Date(weekStart);
+                            day.setDate(day.getDate() + dayOffset);
+                            const isCurrentMonth = getMonth(day) === getMonth(weekSelectorDate);
+                            return (
+                              <div 
+                                key={dayOffset} 
+                                className={isCurrentMonth ? '' : 'text-gray-300'}
+                              >
+                                {day.getDate()}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+                
+                {selectedWeeks.length > 0 && (
+                  <p className="text-xs text-gray-500 text-center pt-2 border-t">
+                    {selectedWeeks.length} semana{selectedWeeks.length > 1 ? 's' : ''} seleccionada{selectedWeeks.length > 1 ? 's' : ''}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {dateFilterMode === 'month' && (
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Desde</label>
+                    <div className="space-y-2">
+                      <select
+                        value={dateFilterMonth}
+                        onChange={(e) => setDateFilterMonth(parseInt(e.target.value))}
+                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                      >
+                        {['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'].map((m, i) => (
+                          <option key={i} value={i}>{m}</option>
+                        ))}
+                      </select>
+                      <select
+                        value={dateFilterYear}
+                        onChange={(e) => setDateFilterYear(parseInt(e.target.value))}
+                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                      >
+                        {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 5 + i).map(year => (
+                          <option key={year} value={year}>{year}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Hasta</label>
+                    <div className="space-y-2">
+                      <select
+                        value={dateFilterMonthTo}
+                        onChange={(e) => setDateFilterMonthTo(parseInt(e.target.value))}
+                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                      >
+                        {['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'].map((m, i) => (
+                          <option key={i} value={i}>{m}</option>
+                        ))}
+                      </select>
+                      <select
+                        value={dateFilterYearTo}
+                        onChange={(e) => setDateFilterYearTo(parseInt(e.target.value))}
+                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                      >
+                        {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 5 + i).map(year => (
+                          <option key={year} value={year}>{year}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 text-center pt-2 border-t">
+                  {format(new Date(dateFilterYear, dateFilterMonth), "MMMM yyyy", { locale: es })} → {format(new Date(dateFilterYearTo, dateFilterMonthTo), "MMMM yyyy", { locale: es })}
+                </p>
+              </div>
+            )}
+
+            {dateFilterMode === 'year' && (
+              <div className="space-y-3">
+                <p className="text-xs text-gray-500 mb-2">Selecciona uno o varios años:</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {Array.from({ length: 9 }, (_, i) => new Date().getFullYear() - 4 + i).map(year => (
+                    <button
+                      key={year}
+                      onClick={() => toggleYearSelection(year)}
+                      className={`px-3 py-2 text-sm rounded-lg transition-colors ${
+                        dateFilterYears.includes(year)
+                          ? 'bg-cyan-500 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {year}
+                    </button>
+                  ))}
+                </div>
+                {dateFilterYears.length > 0 && (
+                  <p className="text-xs text-gray-500 text-center pt-2 border-t">
+                    {dateFilterYears.length === 1 
+                      ? `Año ${dateFilterYears[0]}`
+                      : `${dateFilterYears.length} años: ${Math.min(...dateFilterYears)} - ${Math.max(...dateFilterYears)}`
+                    }
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="p-3 border-t border-gray-100 bg-gray-50 flex justify-between items-center">
+            <button
+              onClick={() => setShowDateFilter(false)}
+              className="text-xs text-gray-500 hover:text-gray-700"
+            >
+              Cerrar
+            </button>
+            {getDateFilterLabel() && (
+              <span className="text-xs font-medium text-cyan-600">
+                {getDateFilterLabel()}
+              </span>
+            )}
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };

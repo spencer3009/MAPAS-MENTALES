@@ -162,8 +162,8 @@ const ContactsPage = () => {
     const allColumns = getAllColumns();
     const tabConfig = columnConfig[activeTab];
     
-    // Si no hay configuración para esta pestaña, mostrar todas en orden original
-    if (!tabConfig || tabConfig.visible === undefined) {
+    // Si no hay configuración para esta pestaña (null), mostrar todas en orden original
+    if (!tabConfig || !tabConfig.visible) {
       return allColumns;
     }
     

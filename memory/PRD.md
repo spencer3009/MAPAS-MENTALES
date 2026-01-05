@@ -301,6 +301,7 @@ MindoraMap es una plataforma de mapas mentales para empresarios. Permite organiz
 - [x] Edición inline y menú contextual para tableros ✅
 - [x] Sistema de Fecha Límite para tareas ✅
 - [x] **Fix Persistencia Drag & Drop** ✅ (Corregido 2026-01-04)
+- [x] **Módulo de Contactos (CRM Básico)** ✅ (Completado 2026-01-05)
 - [ ] Resolver issues de MindHybrid
 - [ ] Verificar MindOrbit: agregar nodos hijos via UI
 

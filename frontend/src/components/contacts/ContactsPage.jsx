@@ -852,15 +852,70 @@ const ContactsPage = () => {
 };
 
 // Helper: Renderizar input según tipo de campo
-const renderFieldInput = (field, value, onChange) => {
-  switch (field.field_type) {
+const renderFieldInput = (field, value, onChange, error, setError) => {
+  // Normalizar tipo de campo - si no tiene tipo, default a 'text'
+  const fieldType = field.field_type || 'text';
+  
+  switch (fieldType) {
     case 'text':
       return (
         <input
           type="text"
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+          className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/20 ${
+            error ? 'border-red-300 bg-red-50' : 'border-gray-200'
+          }`}
+          placeholder={`Ingresa ${field.name.toLowerCase()}`}
+        />
+      );
+    
+    case 'number':
+      return (
+        <div>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={value || ''}
+            onChange={(e) => {
+              const newValue = e.target.value;
+              // Permitir vacío, dígitos, punto decimal y signo negativo
+              if (newValue === '' || /^-?\d*\.?\d*$/.test(newValue)) {
+                onChange(newValue);
+                if (setError) setError(null);
+              } else {
+                if (setError) setError('Este campo solo acepta números');
+              }
+            }}
+            onBlur={(e) => {
+              // Validar al perder foco
+              const val = e.target.value;
+              if (val && isNaN(Number(val))) {
+                if (setError) setError('Este campo solo acepta números');
+              }
+            }}
+            className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/20 ${
+              error ? 'border-red-300 bg-red-50' : 'border-gray-200'
+            }`}
+            placeholder={`Ingresa ${field.name.toLowerCase()} (solo números)`}
+          />
+          {error && (
+            <p className="mt-1 text-xs text-red-500 flex items-center gap-1">
+              <AlertCircle size={12} /> {error}
+            </p>
+          )}
+        </div>
+      );
+    
+    case 'textarea':
+      return (
+        <textarea
+          value={value || ''}
+          onChange={(e) => onChange(e.target.value)}
+          rows={3}
+          className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/20 resize-none ${
+            error ? 'border-red-300 bg-red-50' : 'border-gray-200'
+          }`}
           placeholder={`Ingresa ${field.name.toLowerCase()}`}
         />
       );
@@ -870,7 +925,9 @@ const renderFieldInput = (field, value, onChange) => {
         <select
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+          className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/20 ${
+            error ? 'border-red-300 bg-red-50' : 'border-gray-200'
+          }`}
         >
           <option value="">Seleccionar...</option>
           {field.options?.map((opt, idx) => (
@@ -909,11 +966,23 @@ const renderFieldInput = (field, value, onChange) => {
               );
             })}
           </div>
+          {(!field.options || field.options.length === 0) && (
+            <p className="text-xs text-gray-400">No hay opciones configuradas</p>
+          )}
         </div>
       );
     
     default:
-      return null;
+      // Fallback para tipos desconocidos - tratar como texto
+      return (
+        <input
+          type="text"
+          value={value || ''}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+          placeholder={`Ingresa ${field.name.toLowerCase()}`}
+        />
+      );
   }
 };
 

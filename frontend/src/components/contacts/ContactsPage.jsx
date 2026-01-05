@@ -682,22 +682,38 @@ const ContactsPage = () => {
                   
                   {/* Field Type */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">Tipo de campo</label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {FIELD_TYPES.map(type => (
-                        <button
-                          key={type.id}
-                          onClick={() => setNewField({ ...newField, field_type: type.id })}
-                          className={`p-3 border rounded-lg text-center transition-colors ${
-                            newField.field_type === type.id 
-                              ? 'border-cyan-400 bg-cyan-50' 
-                              : 'border-gray-200 hover:border-gray-300'
-                          }`}
-                        >
-                          <span className="text-xl block mb-1">{type.icon}</span>
-                          <span className="text-xs text-gray-600">{type.label}</span>
-                        </button>
-                      ))}
+                    <label className="block text-sm font-medium text-gray-600 mb-2">Tipo de campo</label>
+                    <div className="grid grid-cols-1 gap-2">
+                      {FIELD_TYPES.map(type => {
+                        const IconComponent = type.icon;
+                        const isSelected = newField.field_type === type.id;
+                        return (
+                          <button
+                            key={type.id}
+                            onClick={() => setNewField({ ...newField, field_type: type.id, options: type.id === 'select' || type.id === 'multiselect' ? newField.options : [] })}
+                            className={`flex items-center gap-3 p-3 border rounded-lg text-left transition-all ${
+                              isSelected 
+                                ? 'border-cyan-400 bg-cyan-50 ring-2 ring-cyan-200' 
+                                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                            }`}
+                          >
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                              isSelected ? 'bg-cyan-500 text-white' : 'bg-gray-100 text-gray-500'
+                            }`}>
+                              <IconComponent size={20} />
+                            </div>
+                            <div className="flex-1">
+                              <span className={`block text-sm font-medium ${isSelected ? 'text-cyan-700' : 'text-gray-700'}`}>
+                                {type.label}
+                              </span>
+                              <span className="text-xs text-gray-500">{type.description}</span>
+                            </div>
+                            {isSelected && (
+                              <Check size={18} className="text-cyan-500" />
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                   

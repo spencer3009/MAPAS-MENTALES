@@ -428,6 +428,76 @@ const ContactsPage = () => {
     }
   };
 
+  // Iniciar edición de campo
+  const startEditField = (field) => {
+    setEditingField(field);
+    setNewField({
+      name: field.name,
+      field_type: field.field_type || 'text',
+      is_required: field.is_required || false,
+      color: field.color || null,
+      options: field.options || []
+    });
+  };
+
+  // Cancelar edición
+  const cancelEditField = () => {
+    setEditingField(null);
+    setNewField({ name: '', field_type: 'text', is_required: false, color: null, options: [] });
+    setShowTypeChangeWarning(false);
+  };
+
+  // Actualizar campo personalizado
+  const handleUpdateField = async () => {
+    if (!newField.name.trim()) return;
+    
+    try {
+      const response = await fetch(`${API_URL}/api/contacts/config/fields/${activeTab}/${editingField.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(newField)
+      });
+      
+      if (response.ok) {
+        loadData();
+        cancelEditField();
+      }
+    } catch (error) {
+      console.error('Error updating field:', error);
+    }
+  };
+
+  // Verificar si el cambio de tipo es compatible
+  const checkTypeChangeCompatibility = (newType) => {
+    if (!editingField) return true;
+    
+    const oldType = editingField.field_type || 'text';
+    
+    // Cambios que podrían causar problemas de datos
+    const incompatibleChanges = [
+      { from: 'number', to: 'date' },
+      { from: 'number', to: 'time' },
+      { from: 'date', to: 'number' },
+      { from: 'time', to: 'number' },
+      { from: 'select', to: 'multiselect' },
+      { from: 'multiselect', to: 'select' }
+    ];
+    
+    const isIncompatible = incompatibleChanges.some(
+      c => c.from === oldType && c.to === newType
+    );
+    
+    if (isIncompatible && oldType !== newType) {
+      setShowTypeChangeWarning(true);
+      return false;
+    }
+    
+    return true;
+  };
+
   // Cerrar modal y limpiar
   const closeModal = () => {
     setShowCreateModal(false);

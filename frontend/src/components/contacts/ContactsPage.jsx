@@ -443,9 +443,9 @@ const ContactsPage = () => {
                       ))}
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5 text-gray-500 text-sm">
-                          <Calendar size={14} className="text-gray-400" />
+                          <CalendarIcon size={14} className="text-gray-400" />
                           {new Date(contact.created_at).toLocaleDateString('es-ES', { 
-                            day: 'numeric', 
+                            day: '2-digit', 
                             month: 'short', 
                             year: 'numeric',
                             hour: '2-digit',

@@ -130,6 +130,15 @@ const ContactsPage = () => {
         const data = await fieldsRes.json();
         setCustomFields(data.config?.fields || []);
       }
+      
+      // Cargar etiquetas
+      const labelsRes = await fetch(`${API_URL}/api/contacts/labels/${activeTab}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (labelsRes.ok) {
+        const data = await labelsRes.json();
+        setContactLabels(data.labels || []);
+      }
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {

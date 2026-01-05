@@ -4663,7 +4663,8 @@ async def create_contact(request: CreateContactRequest, current_user: dict = Dep
     await db.contacts.insert_one(contact)
     
     # Retornar sin _id
-    del contact["_id"] if "_id" in contact else None
+    if "_id" in contact:
+        del contact["_id"]
     return {"contact": contact, "message": "Contacto creado"}
 
 

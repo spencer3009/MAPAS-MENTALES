@@ -816,14 +816,21 @@ const ContactsPage = () => {
               className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             >
               <Columns3 size={16} />
-              <span className="hidden sm:inline">Personalizar columnas</span>
+              <span className="hidden sm:inline">Columnas</span>
+            </button>
+            <button
+              onClick={() => setShowLabelsConfig(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <Tag size={16} />
+              <span className="hidden sm:inline">Etiquetas</span>
             </button>
             <button
               onClick={() => setShowFieldsConfig(true)}
               className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             >
               <Settings size={16} />
-              <span className="hidden sm:inline">Configurar campos</span>
+              <span className="hidden sm:inline">Campos</span>
             </button>
             <button
               onClick={() => setShowCreateModal(true)}

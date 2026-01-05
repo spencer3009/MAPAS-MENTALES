@@ -4655,6 +4655,7 @@ async def create_contact(request: CreateContactRequest, current_user: dict = Dep
         "whatsapp": request.whatsapp,
         "email": request.email or "",
         "custom_fields": request.custom_fields or {},
+        "labels": request.labels or [],
         "owner_username": current_user["username"],
         "created_at": now,
         "updated_at": now
@@ -4704,6 +4705,8 @@ async def update_contact(contact_id: str, request: UpdateContactRequest, current
         update_data["email"] = request.email
     if request.custom_fields is not None:
         update_data["custom_fields"] = request.custom_fields
+    if request.labels is not None:
+        update_data["labels"] = request.labels
     
     await db.contacts.update_one({"id": contact_id}, {"$set": update_data})
     

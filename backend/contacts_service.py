@@ -75,6 +75,7 @@ class CreateContactRequest(BaseModel):
     whatsapp: str
     email: Optional[str] = ""
     custom_fields: Optional[dict] = {}
+    labels: Optional[List[str]] = []  # Lista de IDs de etiquetas
 
 
 class UpdateContactRequest(BaseModel):
@@ -83,6 +84,7 @@ class UpdateContactRequest(BaseModel):
     whatsapp: Optional[str] = None
     email: Optional[str] = None
     custom_fields: Optional[dict] = None
+    labels: Optional[List[str]] = None  # Lista de IDs de etiquetas
 
 
 class CreateCustomFieldRequest(BaseModel):

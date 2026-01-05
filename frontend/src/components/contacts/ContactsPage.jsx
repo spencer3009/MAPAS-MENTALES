@@ -1089,6 +1089,43 @@ const ContactsPage = () => {
                     </div>
                   </div>
                 )}
+                
+                {/* Labels Selector */}
+                {contactLabels.length > 0 && (
+                  <div className="border-t border-gray-200 pt-4 mt-4">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                      <Tag size={16} className="text-gray-400" />
+                      Etiquetas
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {contactLabels.map(label => {
+                        const isSelected = (formData.labels || []).includes(label.id);
+                        return (
+                          <button
+                            key={label.id}
+                            type="button"
+                            onClick={() => toggleContactLabel(label.id)}
+                            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                              isSelected 
+                                ? 'ring-2 ring-offset-1' 
+                                : 'opacity-60 hover:opacity-100'
+                            }`}
+                            style={{
+                              backgroundColor: label.color + (isSelected ? '30' : '15'),
+                              color: label.color,
+                              borderColor: label.color,
+                              ringColor: label.color
+                            }}
+                          >
+                            {isSelected && <Check size={14} className="inline mr-1" />}
+                            {label.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="text-xs text-gray-400 mt-2">Selecciona una o más etiquetas para clasificar este contacto</p>
+                  </div>
+                )}
               </div>
             </div>
             

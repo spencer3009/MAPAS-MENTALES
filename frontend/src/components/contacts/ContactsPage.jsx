@@ -1026,15 +1026,31 @@ const ContactsPage = () => {
         ) : filteredContacts.length === 0 ? (
           <div className="bg-white rounded-xl border border-gray-200 p-12 flex flex-col items-center justify-center">
             <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-              <currentType.icon className="w-8 h-8 text-gray-400" />
+              {hasActiveFilters ? (
+                <FilterX className="w-8 h-8 text-gray-400" />
+              ) : (
+                <currentType.icon className="w-8 h-8 text-gray-400" />
+              )}
             </div>
             <h3 className="text-lg font-semibold text-gray-700 mb-1">
-              {searchTerm ? 'No se encontraron resultados' : `No hay ${currentType.label.toLowerCase()}`}
+              {searchTerm || hasActiveFilters ? 'No se encontraron resultados' : `No hay ${currentType.label.toLowerCase()}`}
             </h3>
             <p className="text-gray-500 text-sm mb-4">
-              {searchTerm ? 'Prueba con otros términos de búsqueda' : `Crea tu primer ${currentType.singular}`}
+              {hasActiveFilters 
+                ? 'Prueba ajustando los filtros o búsqueda' 
+                : searchTerm 
+                  ? 'Prueba con otros términos de búsqueda' 
+                  : `Crea tu primer ${currentType.singular}`}
             </p>
-            {!searchTerm && (
+            {hasActiveFilters ? (
+              <button
+                onClick={clearAllFilters}
+                className="flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg text-sm font-medium transition-colors"
+              >
+                <FilterX size={16} />
+                Limpiar filtros
+              </button>
+            ) : !searchTerm && (
               <button
                 onClick={() => setShowCreateModal(true)}
                 className="flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg text-sm font-medium transition-colors"

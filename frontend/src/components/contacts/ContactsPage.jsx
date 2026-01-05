@@ -5,12 +5,22 @@ import {
   Phone, Mail, Calendar as CalendarIcon, ChevronDown, Check,
   Loader2, MoreHorizontal, Save, AlertCircle,
   Type, Hash, List, CheckSquare, AlignLeft, Clock,
-  ChevronUp
+  ChevronUp, Columns3, GripVertical, Eye, EyeOff
 } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { format, parse } from 'date-fns';
 import { es } from 'date-fns/locale';
+
+const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+
+// Columnas predeterminadas (fijas del sistema)
+const DEFAULT_COLUMNS = [
+  { id: 'nombre', label: 'Nombre completo', required: true },
+  { id: 'whatsapp', label: 'WhatsApp', required: false },
+  { id: 'email', label: 'Email', required: false },
+  { id: 'created_at', label: 'Fecha de creación', required: false }
+];
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 

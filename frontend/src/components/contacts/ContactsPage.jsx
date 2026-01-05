@@ -961,7 +961,13 @@ const ContactsPage = () => {
                 <h2 className="text-lg font-bold text-white">Configurar campos</h2>
                 <p className="text-sm text-gray-300">Campos personalizados para {currentType.label.toLowerCase()}</p>
               </div>
-              <button onClick={() => setShowFieldsConfig(false)} className="p-1 hover:bg-white/20 rounded-lg transition-colors">
+              <button 
+                onClick={() => {
+                  setShowFieldsConfig(false);
+                  cancelEditField();
+                }} 
+                className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+              >
                 <X className="w-5 h-5 text-white" />
               </button>
             </div>

@@ -327,10 +327,14 @@ const ContactsPage = () => {
   const clearAllFilters = () => {
     setColumnFilters({});
     setOpenFilterDropdown(null);
+    clearDateFilter();
   };
 
   // Check if any filters are active
-  const hasActiveFilters = Object.keys(columnFilters).length > 0;
+  const hasActiveFilters = Object.keys(columnFilters).length > 0 || 
+    (dateFilterMode === 'day' && (dateFilterFrom !== null || dateFilterTo !== null)) ||
+    (dateFilterMode === 'week' && selectedWeeks.length > 0) ||
+    (dateFilterMode === 'year' && dateFilterYears.length > 0);
 
   // Open filter dropdown and calculate position (for portal)
   const openFilterDropdownWithPosition = (columnId, buttonElement) => {

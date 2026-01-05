@@ -131,6 +131,158 @@ const ContactsPage = () => {
     loadData();
   }, [loadData]);
 
+  // Cargar configuración de columnas desde localStorage
+  useEffect(() => {
+    const savedConfig = localStorage.getItem('contacts_column_config');
+    if (savedConfig) {
+      try {
+        setColumnConfig(JSON.parse(savedConfig));
+      } catch (e) {
+        console.error('Error loading column config:', e);
+      }
+    }
+  }, []);
+
+  // Guardar configuración de columnas en localStorage
+  const saveColumnConfig = (newConfig) => {
+    setColumnConfig(newConfig);
+    localStorage.setItem('contacts_column_config', JSON.stringify(newConfig));
+  };
+
+  // Obtener todas las columnas disponibles (fijas + personalizadas)
+  const getAllColumns = useCallback(() => {
+    const allColumns = [
+      ...DEFAULT_COLUMNS,
+      ...customFields.map(f => ({ id: `custom_${f.id}`, label: f.name, required: false, fieldId: f.id }))
+    ];
+    return allColumns;
+  }, [customFields]);
+
+  // Obtener columnas visibles y ordenadas para la pestaña actual
+  const getVisibleColumns = useCallback(() => {
+    const allColumns = getAllColumns();
+    const tabConfig = columnConfig[activeTab];
+    
+    // Si no hay configuración, mostrar todas
+    if (!tabConfig?.order || tabConfig.order.length === 0) {
+      return allColumns;
+    }
+    
+    // Ordenar según configuración
+    const orderedColumns = [];
+    tabConfig.order.forEach(colId => {
+      const col = allColumns.find(c => c.id === colId);
+      if (col && (tabConfig.visible.includes(colId) || col.required)) {
+        orderedColumns.push(col);
+      }
+    });
+    
+    // Agregar columnas nuevas que no estén en la configuración
+    allColumns.forEach(col => {
+      if (!tabConfig.order.includes(col.id)) {
+        orderedColumns.push(col);
+      }
+    });
+    
+    return orderedColumns;
+  }, [getAllColumns, columnConfig, activeTab]);
+
+  // Toggle visibilidad de columna
+  const toggleColumnVisibility = (columnId) => {
+    const allColumns = getAllColumns();
+    const column = allColumns.find(c => c.id === columnId);
+    
+    // No permitir ocultar columnas obligatorias
+    if (column?.required) return;
+    
+    const tabConfig = columnConfig[activeTab];
+    const currentVisible = tabConfig?.visible || allColumns.map(c => c.id);
+    
+    let newVisible;
+    if (currentVisible.includes(columnId)) {
+      newVisible = currentVisible.filter(id => id !== columnId);
+    } else {
+      newVisible = [...currentVisible, columnId];
+    }
+    
+    const newConfig = {
+      ...columnConfig,
+      [activeTab]: {
+        ...tabConfig,
+        visible: newVisible,
+        order: tabConfig?.order || allColumns.map(c => c.id)
+      }
+    };
+    
+    saveColumnConfig(newConfig);
+  };
+
+  // Verificar si una columna está visible
+  const isColumnVisible = (columnId) => {
+    const allColumns = getAllColumns();
+    const column = allColumns.find(c => c.id === columnId);
+    
+    // Columnas obligatorias siempre visibles
+    if (column?.required) return true;
+    
+    const tabConfig = columnConfig[activeTab];
+    
+    // Si no hay configuración, todas visibles
+    if (!tabConfig?.visible || tabConfig.visible.length === 0) {
+      return true;
+    }
+    
+    return tabConfig.visible.includes(columnId);
+  };
+
+  // Drag & Drop handlers
+  const handleDragStart = (e, columnId) => {
+    setDraggedColumn(columnId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e, columnId) => {
+    e.preventDefault();
+    if (draggedColumn === columnId) return;
+  };
+
+  const handleDrop = (e, targetColumnId) => {
+    e.preventDefault();
+    if (!draggedColumn || draggedColumn === targetColumnId) {
+      setDraggedColumn(null);
+      return;
+    }
+    
+    const allColumns = getAllColumns();
+    const tabConfig = columnConfig[activeTab];
+    let currentOrder = tabConfig?.order || allColumns.map(c => c.id);
+    
+    // Reordenar
+    const dragIndex = currentOrder.indexOf(draggedColumn);
+    const targetIndex = currentOrder.indexOf(targetColumnId);
+    
+    if (dragIndex === -1 || targetIndex === -1) {
+      setDraggedColumn(null);
+      return;
+    }
+    
+    const newOrder = [...currentOrder];
+    newOrder.splice(dragIndex, 1);
+    newOrder.splice(targetIndex, 0, draggedColumn);
+    
+    const newConfig = {
+      ...columnConfig,
+      [activeTab]: {
+        ...tabConfig,
+        visible: tabConfig?.visible || allColumns.map(c => c.id),
+        order: newOrder
+      }
+    };
+    
+    saveColumnConfig(newConfig);
+    setDraggedColumn(null);
+  };
+
   // Validar formulario
   const validateForm = () => {
     const errors = {};

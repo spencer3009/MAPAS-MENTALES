@@ -56,6 +56,7 @@ const ContactsPage = () => {
   const [activeTab, setActiveTab] = useState('client');
   const [contacts, setContacts] = useState([]);
   const [customFields, setCustomFields] = useState([]);
+  const [contactLabels, setContactLabels] = useState([]); // Etiquetas disponibles
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -63,9 +64,15 @@ const ContactsPage = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showFieldsConfig, setShowFieldsConfig] = useState(false);
   const [showColumnsConfig, setShowColumnsConfig] = useState(false);
+  const [showLabelsConfig, setShowLabelsConfig] = useState(false); // Modal de etiquetas
   const [showViewModal, setShowViewModal] = useState(null); // Contact to view
   const [editingContact, setEditingContact] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
+  
+  // Labels management states
+  const [editingLabel, setEditingLabel] = useState(null);
+  const [newLabel, setNewLabel] = useState({ name: '', color: '#3B82F6' });
+  const [labelError, setLabelError] = useState('');
   
   // Column configuration state (per tab)
   // null significa "sin configuración" = mostrar todas las columnas
@@ -82,7 +89,8 @@ const ContactsPage = () => {
     apellidos: '',
     whatsapp: '',
     email: '',
-    custom_fields: {}
+    custom_fields: {},
+    labels: [] // Etiquetas del contacto
   });
   const [formErrors, setFormErrors] = useState({});
   const [saving, setSaving] = useState(false);

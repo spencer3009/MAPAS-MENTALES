@@ -2,6 +2,16 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-05: Fix Dropdown Filtros - Portal para evitar recorte (z-index/overflow) ✅
+- **Fixed**: Dropdown de filtros era cortado/recortado por contenedores con `overflow: hidden/auto`
+- **Solution**: Implementado React Portal (`createPortal`) para renderizar dropdown en `document.body`
+- **Added**: Cálculo dinámico de posición del dropdown basado en coordenadas del botón
+- **Added**: Protección contra overflow horizontal (ajuste automático si sale del viewport)
+- **Added**: Diseño mejorado del dropdown: bordes redondeados, sombra más pronunciada, header con gradiente
+- **Added**: Footer en dropdown mostrando cantidad de opciones seleccionadas
+- **Result**: El dropdown ahora se muestra completamente visible, encima de todos los elementos
+- **Files Modified**: `/app/frontend/src/components/contacts/ContactsPage.jsx`
+
 ### 2026-01-05: Sistema de Filtros Inteligente para Contactos ✅
 - **Added**: Filtrado automático para columnas de tipo `select`, `multiselect` y `labels`
 - **Added**: Icono chevron (flecha) en headers de columnas filtrables

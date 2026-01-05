@@ -244,8 +244,8 @@ const ContactsPage = () => {
     
     const tabConfig = columnConfig[activeTab];
     
-    // Si no hay configuración para esta pestaña, todas visibles por defecto
-    if (!tabConfig || tabConfig.visible === undefined) {
+    // Si no hay configuración para esta pestaña (null), todas visibles por defecto
+    if (!tabConfig || !tabConfig.visible) {
       return true;
     }
     

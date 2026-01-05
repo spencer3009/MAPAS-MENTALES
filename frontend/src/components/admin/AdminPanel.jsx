@@ -34,7 +34,7 @@ import {
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
-const LOGO_URL = 'https://customer-assets.emergentagent.com/job_mindviz-app/artifacts/k1kioask_image.png';
+const LOGO_URL = 'https://customer-assets.emergentagent.com/job_c7c9b123-4484-446c-b0cd-4986b2bb2189/artifacts/qfk72gmx_LOGO%20MINDORA%20-%20300px.png';
 
 // Componente de Métrica con diseño mejorado
 const MetricCard = ({ icon: Icon, title, value, subtitle, gradient, iconBg, trend, trendValue }) => (

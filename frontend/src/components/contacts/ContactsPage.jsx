@@ -662,9 +662,18 @@ const ContactsPage = () => {
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1">
                           <button
+                            onClick={() => setShowViewModal(contact)}
+                            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="Ver"
+                            data-testid={`view-contact-${contact.id}`}
+                          >
+                            <Eye size={16} />
+                          </button>
+                          <button
                             onClick={() => openEditModal(contact)}
                             className="p-2 text-gray-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-colors"
                             title="Editar"
+                            data-testid={`edit-contact-${contact.id}`}
                           >
                             <Edit2 size={16} />
                           </button>
@@ -672,6 +681,7 @@ const ContactsPage = () => {
                             onClick={() => setConfirmDelete(contact)}
                             className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             title="Eliminar"
+                            data-testid={`delete-contact-${contact.id}`}
                           >
                             <Trash2 size={16} />
                           </button>

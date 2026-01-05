@@ -99,6 +99,11 @@ const ContactsPage = () => {
   });
   const [draggedColumn, setDraggedColumn] = useState(null);
   
+  // Column filter states
+  const [columnFilters, setColumnFilters] = useState({}); // { columnId: [selectedValues] }
+  const [openFilterDropdown, setOpenFilterDropdown] = useState(null); // columnId of open dropdown
+  const filterDropdownRef = useRef(null);
+  
   // Form states
   const [formData, setFormData] = useState({
     nombre: '',

@@ -1763,7 +1763,7 @@ const ContactsPage = () => {
               
               {/* Campos Personalizados */}
               {customFields.length > 0 && (
-                <div>
+                <div className="mb-6">
                   <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
                     <Settings size={16} />
                     Información adicional
@@ -1825,6 +1825,45 @@ const ContactsPage = () => {
                   </div>
                 </div>
               )}
+              
+              {/* Etiquetas */}
+              {(() => {
+                const viewLabels = showViewModal.labels || [];
+                if (viewLabels.length === 0 && contactLabels.length === 0) return null;
+                return (
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                      <Tag size={16} />
+                      Etiquetas
+                    </h3>
+                    <div className="bg-gray-50 rounded-xl p-4">
+                      {viewLabels.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {viewLabels.map(labelId => {
+                            const label = getLabelById(labelId);
+                            if (!label) return null;
+                            return (
+                              <span
+                                key={labelId}
+                                className="px-3 py-1 rounded-full text-sm font-medium"
+                                style={{
+                                  backgroundColor: label.color + '20',
+                                  color: label.color,
+                                  border: `1px solid ${label.color}40`
+                                }}
+                              >
+                                {label.name}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <p className="text-gray-400 text-sm italic">Sin etiquetas asignadas</p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
             
             {/* Modal Footer */}

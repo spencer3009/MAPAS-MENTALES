@@ -1099,6 +1099,25 @@ const TaskModal = ({ card, listId, listTitle, boardId, onClose, onUpdate, onDele
               onTimeUpdate={loadTimeEntries}
             />
             
+            {/* Botón Anclar/Desanclar */}
+            <button
+              onClick={handleTogglePin}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left border ${
+                isPinned 
+                  ? 'bg-amber-100 border-amber-300 text-amber-700 hover:bg-amber-200' 
+                  : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-100'
+              }`}
+              data-testid="pin-task-btn"
+            >
+              <Pin size={16} className={isPinned ? 'text-amber-600' : 'text-gray-500'} />
+              <span className="text-sm font-medium">{isPinned ? 'Anclada' : 'Anclar'}</span>
+              {isPinned && (
+                <span className="ml-auto text-xs bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full">
+                  📌
+                </span>
+              )}
+            </button>
+            
             {/* Labels - Sistema completo estilo Trello */}
             <div className="relative">
               <button

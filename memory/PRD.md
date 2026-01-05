@@ -2,6 +2,21 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-05: Sistema de Filtros Inteligente para Contactos ✅
+- **Added**: Filtrado automático para columnas de tipo `select`, `multiselect` y `labels`
+- **Added**: Icono chevron (flecha) en headers de columnas filtrables
+- **Added**: Dropdown desplegable con opciones de filtro al hacer clic
+- **Added**: Selección única para campos `select`, múltiple para `multiselect` y `labels`
+- **Added**: Lógica OR para filtros múltiples (muestra contactos con CUALQUIER valor seleccionado)
+- **Added**: Indicador de filtros activos arriba de la tabla con conteo
+- **Added**: Botón "Limpiar" en cada dropdown para quitar filtro individual
+- **Added**: Botón "Limpiar todos" para quitar todos los filtros activos
+- **Added**: Reset automático de filtros al cambiar de pestaña (Clientes/Prospectos/Proveedores)
+- **Added**: Mensaje especial cuando no hay resultados por filtros activos
+- **Logic**: La propiedad "filtrable" se determina automáticamente por tipo de campo, sin configuración manual
+- **Files Modified**: `/app/frontend/src/components/contacts/ContactsPage.jsx`
+- **Testing**: Frontend 100% verified (10/10 features)
+
 ### 2026-01-05: Sistema de Etiquetas (Tags) para Contactos ✅
 - **Added**: Sistema completo de etiquetas para categorizar contactos
 - **Added**: Modal "Administrar etiquetas" accesible desde botón en la barra de acciones

@@ -980,6 +980,12 @@ const renderFieldInput = (field, value, onChange, error, setError) => {
         </div>
       );
     
+    case 'date':
+      return <DatePickerField value={value} onChange={onChange} error={error} fieldName={field.name} />;
+    
+    case 'time':
+      return <TimePickerField value={value} onChange={onChange} error={error} fieldName={field.name} />;
+    
     case 'textarea':
       return (
         <textarea
@@ -1057,6 +1063,243 @@ const renderFieldInput = (field, value, onChange, error, setError) => {
         />
       );
   }
+};
+
+// Componente: Date Picker para campos de fecha
+const DatePickerField = ({ value, onChange, error, fieldName }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  // Parsear fecha si existe
+  const selectedDate = value ? new Date(value) : undefined;
+  
+  const handleSelect = (date) => {
+    if (date) {
+      // Guardar en formato ISO (YYYY-MM-DD)
+      onChange(format(date, 'yyyy-MM-dd'));
+    } else {
+      onChange('');
+    }
+    setIsOpen(false);
+  };
+  
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className={`w-full px-3 py-2.5 border rounded-lg text-sm text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-cyan-500/20 ${
+            error ? 'border-red-300 bg-red-50' : 'border-gray-200'
+          } ${value ? 'text-gray-900' : 'text-gray-400'}`}
+        >
+          <span className="flex items-center gap-2">
+            <CalendarIcon size={16} className="text-gray-400" />
+            {value ? format(selectedDate, "d 'de' MMMM, yyyy", { locale: es }) : `Seleccionar ${fieldName.toLowerCase()}`}
+          </span>
+          <ChevronDown size={16} className="text-gray-400" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0 bg-white" align="start">
+        <Calendar
+          mode="single"
+          selected={selectedDate}
+          onSelect={handleSelect}
+          initialFocus
+          locale={es}
+        />
+        {value && (
+          <div className="p-2 border-t">
+            <button
+              type="button"
+              onClick={() => {
+                onChange('');
+                setIsOpen(false);
+              }}
+              className="w-full py-1.5 text-xs text-red-500 hover:bg-red-50 rounded transition-colors"
+            >
+              Limpiar fecha
+            </button>
+          </div>
+        )}
+      </PopoverContent>
+    </Popover>
+  );
+};
+
+// Componente: Time Picker para campos de hora (formato 12h AM/PM)
+const TimePickerField = ({ value, onChange, error, fieldName }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  // Parsear hora si existe (formato interno: HH:mm)
+  const parseTime = (timeStr) => {
+    if (!timeStr) return { hours: 12, minutes: 0, period: 'AM' };
+    const [h, m] = timeStr.split(':').map(Number);
+    const period = h >= 12 ? 'PM' : 'AM';
+    const hours12 = h % 12 || 12;
+    return { hours: hours12, minutes: m || 0, period };
+  };
+  
+  const { hours, minutes, period } = parseTime(value);
+  
+  // Formatear para mostrar
+  const displayValue = value 
+    ? `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} ${period}`
+    : '';
+  
+  // Convertir a formato 24h para guardar
+  const updateTime = (newHours, newMinutes, newPeriod) => {
+    let hours24 = newHours;
+    if (newPeriod === 'PM' && newHours !== 12) {
+      hours24 = newHours + 12;
+    } else if (newPeriod === 'AM' && newHours === 12) {
+      hours24 = 0;
+    }
+    onChange(`${String(hours24).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`);
+  };
+  
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className={`w-full px-3 py-2.5 border rounded-lg text-sm text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-cyan-500/20 ${
+            error ? 'border-red-300 bg-red-50' : 'border-gray-200'
+          } ${value ? 'text-gray-900' : 'text-gray-400'}`}
+        >
+          <span className="flex items-center gap-2">
+            <Clock size={16} className="text-gray-400" />
+            {displayValue || `Seleccionar ${fieldName.toLowerCase()}`}
+          </span>
+          <ChevronDown size={16} className="text-gray-400" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-64 p-4 bg-white" align="start">
+        <div className="space-y-4">
+          <p className="text-sm font-medium text-gray-700 text-center">Seleccionar hora</p>
+          
+          {/* Time Selector */}
+          <div className="flex items-center justify-center gap-2">
+            {/* Hours */}
+            <div className="flex flex-col items-center">
+              <button
+                type="button"
+                onClick={() => {
+                  const newHours = hours === 12 ? 1 : hours + 1;
+                  updateTime(newHours, minutes, period);
+                }}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <ChevronUp size={18} className="text-gray-500" />
+              </button>
+              <span className="w-12 h-10 flex items-center justify-center text-2xl font-mono bg-gray-100 rounded">
+                {String(hours).padStart(2, '0')}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  const newHours = hours === 1 ? 12 : hours - 1;
+                  updateTime(newHours, minutes, period);
+                }}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <ChevronDown size={18} className="text-gray-500" />
+              </button>
+            </div>
+            
+            <span className="text-2xl font-mono text-gray-400">:</span>
+            
+            {/* Minutes */}
+            <div className="flex flex-col items-center">
+              <button
+                type="button"
+                onClick={() => {
+                  const newMinutes = (minutes + 5) % 60;
+                  updateTime(hours, newMinutes, period);
+                }}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <ChevronUp size={18} className="text-gray-500" />
+              </button>
+              <span className="w-12 h-10 flex items-center justify-center text-2xl font-mono bg-gray-100 rounded">
+                {String(minutes).padStart(2, '0')}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  const newMinutes = minutes < 5 ? 55 : minutes - 5;
+                  updateTime(hours, newMinutes, period);
+                }}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <ChevronDown size={18} className="text-gray-500" />
+              </button>
+            </div>
+            
+            {/* AM/PM */}
+            <div className="flex flex-col gap-1 ml-2">
+              <button
+                type="button"
+                onClick={() => updateTime(hours, minutes, 'AM')}
+                className={`px-3 py-1.5 text-sm font-medium rounded transition-colors ${
+                  period === 'AM' 
+                    ? 'bg-cyan-500 text-white' 
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                AM
+              </button>
+              <button
+                type="button"
+                onClick={() => updateTime(hours, minutes, 'PM')}
+                className={`px-3 py-1.5 text-sm font-medium rounded transition-colors ${
+                  period === 'PM' 
+                    ? 'bg-cyan-500 text-white' 
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                PM
+              </button>
+            </div>
+          </div>
+          
+          {/* Quick Select */}
+          <div className="grid grid-cols-4 gap-1 border-t pt-3">
+            {['09:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'].map(time => (
+              <button
+                key={time}
+                type="button"
+                onClick={() => {
+                  onChange(time);
+                  setIsOpen(false);
+                }}
+                className="px-2 py-1.5 text-xs text-gray-600 hover:bg-cyan-50 hover:text-cyan-600 rounded transition-colors"
+              >
+                {(() => {
+                  const [h] = time.split(':').map(Number);
+                  const p = h >= 12 ? 'PM' : 'AM';
+                  const h12 = h % 12 || 12;
+                  return `${h12}${p}`;
+                })()}
+              </button>
+            ))}
+          </div>
+          
+          {/* Clear */}
+          {value && (
+            <button
+              type="button"
+              onClick={() => {
+                onChange('');
+                setIsOpen(false);
+              }}
+              className="w-full py-1.5 text-xs text-red-500 hover:bg-red-50 rounded transition-colors border-t pt-2"
+            >
+              Limpiar hora
+            </button>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
 };
 
 // Helper: Renderizar valor de campo en tabla

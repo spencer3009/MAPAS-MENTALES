@@ -1107,6 +1107,114 @@ const ContactsPage = () => {
           </div>
         </div>
       )}
+
+      {/* Columns Config Modal */}
+      {showColumnsConfig && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-cyan-500 to-blue-600 px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Columns3 className="w-5 h-5 text-white" />
+                <h2 className="text-lg font-bold text-white">Personalizar columnas</h2>
+              </div>
+              <button onClick={() => setShowColumnsConfig(false)} className="p-1 hover:bg-white/20 rounded-lg transition-colors">
+                <X className="w-5 h-5 text-white" />
+              </button>
+            </div>
+            
+            {/* Modal Body */}
+            <div className="p-6 max-h-[60vh] overflow-y-auto">
+              <p className="text-sm text-gray-500 mb-4">
+                Arrastra para reordenar. Marca/desmarca para mostrar/ocultar columnas.
+              </p>
+              
+              <div className="space-y-2">
+                {getAllColumns().map((col) => {
+                  const isVisible = isColumnVisible(col.id);
+                  const tabConfig = columnConfig[activeTab];
+                  const order = tabConfig?.order || getAllColumns().map(c => c.id);
+                  
+                  return (
+                    <div
+                      key={col.id}
+                      draggable={!col.required}
+                      onDragStart={(e) => handleDragStart(e, col.id)}
+                      onDragOver={(e) => handleDragOver(e, col.id)}
+                      onDrop={(e) => handleDrop(e, col.id)}
+                      className={`flex items-center gap-3 p-3 border rounded-lg transition-all ${
+                        draggedColumn === col.id 
+                          ? 'border-cyan-400 bg-cyan-50 opacity-50' 
+                          : 'border-gray-200 hover:bg-gray-50'
+                      } ${!col.required ? 'cursor-grab active:cursor-grabbing' : ''}`}
+                    >
+                      {/* Drag Handle */}
+                      <div className={`${col.required ? 'opacity-30' : 'text-gray-400'}`}>
+                        <GripVertical size={18} />
+                      </div>
+                      
+                      {/* Checkbox */}
+                      <button
+                        onClick={() => toggleColumnVisibility(col.id)}
+                        disabled={col.required}
+                        className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                          isVisible 
+                            ? 'bg-cyan-500 border-cyan-500 text-white' 
+                            : 'border-gray-300 hover:border-gray-400'
+                        } ${col.required ? 'opacity-60 cursor-not-allowed' : ''}`}
+                      >
+                        {isVisible && <Check size={14} />}
+                      </button>
+                      
+                      {/* Column Name */}
+                      <div className="flex-1">
+                        <span className="text-sm font-medium text-gray-700">{col.label}</span>
+                        {col.required && (
+                          <span className="ml-2 text-xs text-gray-400">(obligatoria)</span>
+                        )}
+                      </div>
+                      
+                      {/* Visibility Icon */}
+                      <div className={`${isVisible ? 'text-cyan-500' : 'text-gray-300'}`}>
+                        {isVisible ? <Eye size={16} /> : <EyeOff size={16} />}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            
+            {/* Modal Footer */}
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={() => {
+                    // Restaurar valores por defecto
+                    const allColumns = getAllColumns();
+                    const newConfig = {
+                      ...columnConfig,
+                      [activeTab]: {
+                        visible: allColumns.map(c => c.id),
+                        order: allColumns.map(c => c.id)
+                      }
+                    };
+                    saveColumnConfig(newConfig);
+                  }}
+                  className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                >
+                  Restaurar por defecto
+                </button>
+                <button
+                  onClick={() => setShowColumnsConfig(false)}
+                  className="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg text-sm font-medium transition-colors"
+                >
+                  Listo
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

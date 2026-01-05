@@ -1046,15 +1046,156 @@ const ContactsPage = () => {
           </div>
         ) : (
           <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            {/* Active filters indicator */}
+            {hasActiveFilters && (
+              <div className="px-4 py-2 bg-cyan-50 border-b border-cyan-100 flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm text-cyan-700">
+                  <Filter size={14} />
+                  <span>Filtros activos:</span>
+                  <div className="flex flex-wrap gap-1">
+                    {Object.entries(columnFilters).map(([columnId, values]) => {
+                      const col = getVisibleColumns().find(c => c.id === columnId) || getAllColumns().find(c => c.id === columnId);
+                      const colLabel = col?.label || columnId;
+                      return (
+                        <span 
+                          key={columnId}
+                          className="px-2 py-0.5 bg-cyan-100 text-cyan-800 rounded-full text-xs font-medium flex items-center gap-1"
+                        >
+                          {colLabel}: {values.length} seleccionado{values.length > 1 ? 's' : ''}
+                          <button 
+                            onClick={() => clearColumnFilter(columnId)}
+                            className="hover:bg-cyan-200 rounded-full p-0.5"
+                          >
+                            <X size={10} />
+                          </button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+                <button 
+                  onClick={clearAllFilters}
+                  className="text-xs text-cyan-600 hover:text-cyan-800 font-medium flex items-center gap-1"
+                >
+                  <FilterX size={14} />
+                  Limpiar todos
+                </button>
+              </div>
+            )}
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    {getVisibleColumns().map(col => (
-                      <th key={col.id} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        {col.label}
-                      </th>
-                    ))}
+                    {getVisibleColumns().map(col => {
+                      const filterable = isColumnFilterable(col);
+                      const hasFilter = columnFilters[col.id]?.length > 0;
+                      const isOpen = openFilterDropdown === col.id;
+                      const filterOptions = filterable ? getFilterOptions(col) : [];
+                      const isMulti = isMultiSelectFilter(col);
+                      
+                      return (
+                        <th 
+                          key={col.id} 
+                          className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider relative"
+                        >
+                          <div className="flex items-center gap-1">
+                            <span>{col.label}</span>
+                            {filterable && filterOptions.length > 0 && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenFilterDropdown(isOpen ? null : col.id);
+                                }}
+                                className={`p-1 rounded transition-colors ${
+                                  hasFilter 
+                                    ? 'text-cyan-600 bg-cyan-50 hover:bg-cyan-100' 
+                                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                                }`}
+                                title="Filtrar columna"
+                                data-testid={`filter-${col.id}`}
+                              >
+                                <ChevronDown 
+                                  size={14} 
+                                  className={`transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                                />
+                              </button>
+                            )}
+                          </div>
+                          
+                          {/* Filter Dropdown */}
+                          {isOpen && (
+                            <div 
+                              ref={filterDropdownRef}
+                              className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[200px] max-h-[300px] overflow-hidden"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <div className="p-2 border-b border-gray-100 bg-gray-50">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs font-medium text-gray-600">
+                                    Filtrar por {col.label}
+                                  </span>
+                                  {hasFilter && (
+                                    <button
+                                      onClick={() => clearColumnFilter(col.id)}
+                                      className="text-xs text-red-500 hover:text-red-700 font-medium"
+                                    >
+                                      Limpiar
+                                    </button>
+                                  )}
+                                </div>
+                                <p className="text-[10px] text-gray-400 mt-0.5">
+                                  {isMulti ? 'Selecciona una o más opciones' : 'Selecciona una opción'}
+                                </p>
+                              </div>
+                              <div className="max-h-[220px] overflow-y-auto p-1">
+                                {filterOptions.length === 0 ? (
+                                  <p className="text-xs text-gray-400 p-2 text-center">
+                                    No hay opciones disponibles
+                                  </p>
+                                ) : (
+                                  filterOptions.map(option => {
+                                    const isSelected = (columnFilters[col.id] || []).includes(option.id);
+                                    return (
+                                      <button
+                                        key={option.id}
+                                        onClick={() => toggleFilterValue(col.id, option.id, isMulti)}
+                                        className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-left text-sm transition-colors ${
+                                          isSelected 
+                                            ? 'bg-cyan-50 text-cyan-700' 
+                                            : 'text-gray-700 hover:bg-gray-50'
+                                        }`}
+                                      >
+                                        <div className={`w-4 h-4 rounded ${isMulti ? 'rounded' : 'rounded-full'} border flex items-center justify-center ${
+                                          isSelected 
+                                            ? 'bg-cyan-500 border-cyan-500' 
+                                            : 'border-gray-300'
+                                        }`}>
+                                          {isSelected && <Check size={10} className="text-white" />}
+                                        </div>
+                                        {option.color && col.id === 'labels' ? (
+                                          <span 
+                                            className="px-2 py-0.5 rounded-full text-xs font-medium"
+                                            style={{
+                                              backgroundColor: option.color + '20',
+                                              color: option.color,
+                                              border: `1px solid ${option.color}40`
+                                            }}
+                                          >
+                                            {option.name}
+                                          </span>
+                                        ) : (
+                                          <span className="truncate">{option.name}</span>
+                                        )}
+                                      </button>
+                                    );
+                                  })
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </th>
+                      );
+                    })}
                     <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
                       Acciones
                     </th>

@@ -81,6 +81,8 @@ const TimeTrackerSidebar = ({ taskId, boardId, listId, taskTitle, onTimeUpdate }
   }, [isThisTaskTracking]);
 
   const handleStart = async () => {
+    // Al iniciar un NUEVO registro, reseteamos el contador de la sesión anterior
+    setLastSessionTime(0);
     const entry = await startTracking(taskId, boardId, listId, taskTitle);
     if (entry) {
       setShowStats(true);
@@ -89,16 +91,23 @@ const TimeTrackerSidebar = ({ taskId, boardId, listId, taskTitle, onTimeUpdate }
   };
 
   const handleStop = async () => {
+    // Guardar el tiempo de esta sesión ANTES de detener
+    const sessionTime = elapsedTime;
     const result = await stopTracking();
     if (result) {
-      setTotalTime(prev => prev + elapsedTime);
+      // Guardar el tiempo de la sesión que acabamos de detener
+      setLastSessionTime(sessionTime);
+      setTotalTime(prev => prev + sessionTime);
       loadTaskData();
       if (onTimeUpdate) onTimeUpdate();
     }
   };
 
-  const displayTime = isThisTaskTracking ? elapsedTime : 0;
-  const totalDisplayTime = totalTime + displayTime;
+  // El contador principal muestra:
+  // - Si está tracking: el tiempo en curso (elapsedTime)
+  // - Si no está tracking: el tiempo de la última sesión (lastSessionTime)
+  const displayTime = isThisTaskTracking ? elapsedTime : lastSessionTime;
+  const totalDisplayTime = totalTime + (isThisTaskTracking ? elapsedTime : 0);
 
   // Calcular máximo para gráfica
   const maxChartValue = Math.max(

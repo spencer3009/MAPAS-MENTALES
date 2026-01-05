@@ -63,6 +63,7 @@ const ContactsPage = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showFieldsConfig, setShowFieldsConfig] = useState(false);
   const [showColumnsConfig, setShowColumnsConfig] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(null); // Contact to view
   const [editingContact, setEditingContact] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
   

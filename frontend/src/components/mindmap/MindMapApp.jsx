@@ -1234,6 +1234,13 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
           setPendingPlanForPayment(null);
         }}
       />
+      
+      {/* Modal de verificación requerida */}
+      <VerificationRequiredModal
+        isOpen={showRestrictionModal}
+        onClose={closeRestrictionModal}
+        userEmail={userEmail}
+      />
     </div>
   );
 };

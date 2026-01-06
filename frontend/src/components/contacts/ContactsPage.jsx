@@ -2636,7 +2636,7 @@ const ContactsPage = () => {
                 <div className="space-y-4">
                   {/* Label Name */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">Nombre de la etiqueta</label>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">Nombre del estado</label>
                     <input
                       type="text"
                       value={newLabel.name}
@@ -2645,7 +2645,7 @@ const ContactsPage = () => {
                         setLabelError('');
                       }}
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20"
-                      placeholder="Ej: Interesado, VIP, No contactar..."
+                      placeholder="Ej: Interesado, Matriculado, No contactar..."
                     />
                   </div>
                   

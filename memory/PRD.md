@@ -2,6 +2,24 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-06: Renombrado "Etiquetas" → "Estado" en Módulo de Contactos ✅
+- **Changed**: Toda la terminología "Etiquetas" renombrada a "Estado" en el módulo de Contactos
+- **Changed**: Botón de la barra de herramientas ahora dice "Estado" con icono CircleDot
+- **Added**: Tooltip descriptivo al botón "Estado": "Gestiona los estados del proceso comercial para clasificar y dar seguimiento a tus contactos"
+- **Changed**: Modal "Administrar etiquetas" → "Administrar estados"
+- **Changed**: Sección "Estados existentes" y "Crear nuevo estado"
+- **Changed**: Dashboard Reportes: "Distribución por etiquetas" → "Distribución por estados"
+- **Changed**: Dashboard Reportes: "Top 5 etiquetas más usadas" → "Top 5 estados más usados"
+- **Changed**: Quick Stats: "Etiquetas creadas" → "Estados creados"
+- **Changed**: Vista de contacto: Sección "Etiquetas" → "Estado"
+- **Changed**: Mensaje vacío: "Sin etiquetas asignadas" → "Sin estado asignado"
+- **Changed**: Mensajes de error actualizados ("Error al crear estado", etc.)
+- **Changed**: Icono cambiado de `Tag` a `CircleDot` para la funcionalidad de Estado
+- **Tech**: Agregado componente Tooltip de shadcn/ui, renombrado Tooltip de recharts a RechartsTooltip
+- **Note**: Backend API sigue usando `/api/contacts/labels` - solo fue cambio de UI
+- **Files Modified**: `/app/frontend/src/components/contacts/ContactsPage.jsx`
+- **Testing**: Frontend 100% verified (7/7 features)
+
 ### 2026-01-06: Selector de País para WhatsApp en Contactos ✅
 - **Added**: Selector de país con bandera emoji + código internacional en campo WhatsApp
 - **Added**: Lista de 28 países (Latinoamérica, España, USA, Canadá, Europa)

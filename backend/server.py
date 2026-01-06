@@ -3116,6 +3116,62 @@ async def update_landing_section(
     
     return {"message": f"Sección {section} actualizada correctamente"}
 
+
+# ==========================================
+# ADMIN - VERIFICATION REMINDERS
+# ==========================================
+
+@api_router.post("/admin/run-verification-reminders")
+async def run_verification_reminders(current_user: dict = Depends(require_admin)):
+    """
+    Ejecutar manualmente el proceso de recordatorios de verificación.
+    Solo disponible para administradores.
+    """
+    try:
+        result = await reminder_scheduler.run_reminders_now(db)
+        logger.info(f"Admin {current_user['username']} ejecutó recordatorios de verificación manualmente")
+        return {
+            "success": True,
+            "message": "Proceso de recordatorios ejecutado",
+            "stats": result
+        }
+    except Exception as e:
+        logger.error(f"Error ejecutando recordatorios: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/admin/unverified-users")
+async def get_unverified_users(current_user: dict = Depends(require_admin)):
+    """
+    Obtener lista de usuarios no verificados con estado de recordatorios.
+    Solo disponible para administradores.
+    """
+    try:
+        users = await db.users.find(
+            {"email_verified": False, "auth_provider": {"$ne": "google"}},
+            {
+                "_id": 0,
+                "username": 1,
+                "email": 1,
+                "full_name": 1,
+                "created_at": 1,
+                "reminder_24h_sent": 1,
+                "reminder_72h_sent": 1,
+                "reminder_7d_sent": 1,
+                "reminder_24h_sent_at": 1,
+                "reminder_72h_sent_at": 1,
+                "reminder_7d_sent_at": 1
+            }
+        ).to_list(500)
+        
+        return {
+            "total": len(users),
+            "users": users
+        }
+    except Exception as e:
+        logger.error(f"Error obteniendo usuarios no verificados: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Endpoint público para obtener contenido de landing (sin autenticación)
 @api_router.get("/landing-content")
 async def get_public_landing_content():

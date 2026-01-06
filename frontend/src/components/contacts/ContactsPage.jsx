@@ -2172,10 +2172,11 @@ const ContactsPage = () => {
                 {/* Labels Selector */}
                 {contactLabels.length > 0 && (
                   <div className="border-t border-gray-200 pt-4 mt-4">
-                    <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                      <Tag size={16} className="text-gray-400" />
-                      Etiquetas
+                    <h3 className="text-sm font-semibold text-gray-700 mb-1 flex items-center gap-2">
+                      <CircleDot size={16} className="text-gray-400" />
+                      Estado del contacto
                     </h3>
+                    <p className="text-xs text-gray-400 mb-3">Situación actual en el proceso comercial</p>
                     <div className="flex flex-wrap gap-2">
                       {contactLabels.map(label => {
                         const isSelected = (formData.labels || []).includes(label.id);

@@ -13,7 +13,7 @@ from datetime import datetime
 from typing import Dict, List, Optional
 
 # Test Configuration
-BASE_URL = "https://contactpro-8.preview.emergentagent.com/api"
+BASE_URL = "https://estado-contacts.preview.emergentagent.com/api"
 ADMIN_CREDENTIALS = {
     "username": "spencer3009",
     "password": "Socios3009"

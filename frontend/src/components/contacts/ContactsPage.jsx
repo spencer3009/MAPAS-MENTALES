@@ -848,6 +848,12 @@ const ContactsPage = () => {
 
   // Guardar contacto
   const handleSaveContact = async () => {
+    // Verificar email antes de crear/editar
+    if (!isVerified) {
+      setShowVerificationAlert(true);
+      return;
+    }
+    
     if (!validateForm()) return;
     
     setSaving(true);
@@ -884,6 +890,13 @@ const ContactsPage = () => {
 
   // Eliminar contacto
   const handleDeleteContact = async (contactId) => {
+    // Verificar email antes de eliminar
+    if (!isVerified) {
+      setShowVerificationAlert(true);
+      setConfirmDelete(null);
+      return;
+    }
+    
     try {
       const response = await fetch(`${API_URL}/api/contacts/${contactId}`, {
         method: 'DELETE',

@@ -116,20 +116,35 @@ const EmailVerificationBanner = ({ email, onDismiss, onVerified, onEmailChange }
   };
 
   return (
-    <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg">
+    <div 
+      className="border-b shadow-sm"
+      style={{ 
+        backgroundColor: '#FEF3C7', // amber-100 - suave y amigable
+        borderColor: '#FCD34D' // amber-300 - borde sutil
+      }}
+    >
       <div className="max-w-7xl mx-auto px-4 py-3">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           {/* Main message */}
           <div className="flex items-center gap-3">
-            <div className="flex-shrink-0 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-              <Mail className="w-5 h-5" />
+            <div 
+              className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: '#FCD34D' }} // amber-300
+            >
+              <Mail className="w-5 h-5" style={{ color: '#92400E' }} /> {/* amber-800 */}
             </div>
             
             <div>
-              <p className="text-sm sm:text-base font-semibold">
+              <p 
+                className="text-sm sm:text-base font-semibold"
+                style={{ color: '#92400E' }} // amber-800 - excelente contraste
+              >
                 ✉️ Verifica tu correo para activar tu cuenta
               </p>
-              <p className="text-xs sm:text-sm text-white/90">
+              <p 
+                className="text-xs sm:text-sm"
+                style={{ color: '#B45309' }} // amber-700
+              >
                 Hemos enviado un enlace a: <span className="font-medium">{email}</span>
               </p>
             </div>
@@ -144,21 +159,23 @@ const EmailVerificationBanner = ({ email, onDismiss, onVerified, onEmailChange }
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
                   placeholder="nuevo@email.com"
-                  className="px-3 py-1.5 rounded-lg text-sm text-gray-900 w-44 sm:w-48 focus:outline-none focus:ring-2 focus:ring-white"
+                  className="px-3 py-1.5 rounded-lg text-sm text-gray-900 w-44 sm:w-48 border border-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white"
                   disabled={isResending}
                   autoFocus
                 />
                 <button
                   type="submit"
                   disabled={isResending || !newEmail.trim()}
-                  className="p-1.5 bg-white/20 hover:bg-white/30 rounded-lg transition-colors disabled:opacity-50"
+                  className="p-1.5 rounded-lg transition-colors disabled:opacity-50"
+                  style={{ backgroundColor: '#FCD34D', color: '#92400E' }}
                 >
                   {isResending ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle2 size={18} />}
                 </button>
                 <button
                   type="button"
                   onClick={() => { setShowChangeEmail(false); setNewEmail(''); setErrorMessage(''); }}
-                  className="p-1.5 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+                  className="p-1.5 rounded-lg transition-colors hover:bg-amber-200"
+                  style={{ color: '#92400E' }}
                 >
                   <X size={18} />
                 </button>
@@ -167,7 +184,10 @@ const EmailVerificationBanner = ({ email, onDismiss, onVerified, onEmailChange }
               <>
                 {/* Resend button */}
                 {resendStatus === 'success' ? (
-                  <span className="flex items-center gap-1 text-white text-sm bg-white/20 px-3 py-1.5 rounded-lg">
+                  <span 
+                    className="flex items-center gap-1 text-sm px-3 py-1.5 rounded-lg"
+                    style={{ backgroundColor: '#D1FAE5', color: '#065F46' }} // green tones
+                  >
                     <CheckCircle2 className="w-4 h-4" />
                     ¡Enviado!
                   </span>
@@ -175,7 +195,11 @@ const EmailVerificationBanner = ({ email, onDismiss, onVerified, onEmailChange }
                   <button
                     onClick={handleResendEmail}
                     disabled={isResending || cooldownSeconds > 0}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-amber-200"
+                    style={{ 
+                      backgroundColor: '#FCD34D', // amber-300
+                      color: '#92400E' // amber-800
+                    }}
                   >
                     {isResending ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -194,7 +218,11 @@ const EmailVerificationBanner = ({ email, onDismiss, onVerified, onEmailChange }
                 <button
                   onClick={() => setShowChangeEmail(true)}
                   disabled={isResending}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-white text-orange-600 hover:bg-white/90 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                  className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 hover:bg-gray-50 border"
+                  style={{ 
+                    color: '#B45309', // amber-700
+                    borderColor: '#FCD34D' // amber-300
+                  }}
                 >
                   <Edit3 className="w-4 h-4" />
                   <span className="hidden sm:inline">Cambiar correo</span>
@@ -206,7 +234,10 @@ const EmailVerificationBanner = ({ email, onDismiss, onVerified, onEmailChange }
 
         {/* Error/status messages */}
         {errorMessage && (
-          <div className="mt-2 flex items-center gap-2 text-sm text-red-100">
+          <div 
+            className="mt-2 flex items-center gap-2 text-sm"
+            style={{ color: '#991B1B' }} // red-800
+          >
             <AlertCircle size={14} />
             {errorMessage}
           </div>
@@ -214,7 +245,10 @@ const EmailVerificationBanner = ({ email, onDismiss, onVerified, onEmailChange }
 
         {/* Remaining resends */}
         {resendsRemaining < 5 && (
-          <p className="text-xs text-white/70 mt-1 text-center sm:text-left">
+          <p 
+            className="text-xs mt-1 text-center sm:text-left"
+            style={{ color: '#B45309' }} // amber-700
+          >
             Reenvíos restantes hoy: {resendsRemaining}
           </p>
         )}

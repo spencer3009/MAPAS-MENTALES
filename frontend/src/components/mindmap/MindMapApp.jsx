@@ -653,6 +653,12 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
 
   // Handler para confirmar "En Blanco" - DEPRECATED, usar handleConfirmProjectName
   const handleConfirmBlank = useCallback(async () => {
+    // Verificar email antes de crear
+    if (!checkVerification('crear proyecto')) {
+      setShowBlankModal(false);
+      return;
+    }
+    
     try {
       console.log('Creando nuevo proyecto en blanco...');
       const result = await createBlankMap();
@@ -669,7 +675,7 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
     } finally {
       setShowBlankModal(false);
     }
-  }, [createBlankMap, resetPan, resetZoom]);
+  }, [createBlankMap, resetPan, resetZoom, checkVerification]);
 
   // Handler para "Desde Template" - Abrir modal
   const handleNewFromTemplateClick = useCallback(() => {
@@ -678,6 +684,9 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
 
   // Handler para seleccionar template - CREA NUEVO PROYECTO
   const handleSelectTemplate = useCallback(async (templateNodes, templateName) => {
+    // Verificar email antes de crear
+    if (!checkVerification('crear proyecto desde template')) return;
+    
     try {
       console.log('Creando proyecto desde template:', templateName);
       const result = await loadFromTemplate(templateNodes, templateName);
@@ -692,7 +701,7 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
     } catch (error) {
       console.error('Error al cargar template:', error);
     }
-  }, [loadFromTemplate, resetPan, resetZoom]);
+  }, [loadFromTemplate, resetPan, resetZoom, checkVerification]);
 
   // Handler para eliminar proyecto - Abrir modal
   const handleDeleteProjectClick = useCallback((projectId) => {

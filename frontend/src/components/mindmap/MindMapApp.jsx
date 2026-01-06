@@ -25,10 +25,12 @@ import { NotificationProvider } from './ToastProvider';
 import { BoardsPage, BoardView } from '../boards';
 import ContactsPage from '../contacts/ContactsPage';
 import GlobalTimeIndicator from '../boards/GlobalTimeIndicator';
+import VerificationRequiredModal from '../auth/VerificationRequiredModal';
 import { useNodes } from '../../hooks/useNodes';
 import { usePanning } from '../../hooks/usePanning';
 import { useZoom } from '../../hooks/useZoom';
 import { useContextMenu } from '../../hooks/useContextMenu';
+import { useVerificationCheck } from '../../hooks/useVerificationCheck';
 import { useAuth } from '../../contexts/AuthContext';
 import { TimeTrackingProvider } from '../../contexts/TimeTrackingContext';
 

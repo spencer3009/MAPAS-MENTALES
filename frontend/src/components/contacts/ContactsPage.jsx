@@ -306,6 +306,10 @@ const ContactsPage = () => {
       if (filterDropdownRef.current && !filterDropdownRef.current.contains(event.target)) {
         setOpenFilterDropdown(null);
       }
+      // Close country dropdown when clicking outside
+      if (countryDropdownRef.current && !countryDropdownRef.current.contains(event.target)) {
+        setShowCountryDropdown(false);
+      }
       // Close date filter dropdown when clicking outside
       // But not if clicking inside a popover (calendar)
       const isInsideDateFilter = event.target.closest('[data-testid="date-filter-button"]') || 

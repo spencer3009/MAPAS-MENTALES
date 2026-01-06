@@ -1451,14 +1451,23 @@ const ContactsPage = () => {
               <Columns3 size={16} />
               <span className="hidden sm:inline">Columnas</span>
             </button>
-            <button
-              onClick={() => setShowLabelsConfig(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-              title="Gestiona los estados del proceso comercial"
-            >
-              <CircleDot size={16} />
-              <span className="hidden sm:inline">Estado</span>
-            </button>
+            <TooltipProvider delayDuration={300}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setShowLabelsConfig(true)}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                    data-testid="estado-button"
+                  >
+                    <CircleDot size={16} />
+                    <span className="hidden sm:inline">Estado</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-xs">
+                  <p className="text-sm">Gestiona los estados del proceso comercial para clasificar y dar seguimiento a tus contactos</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <button
               ref={dateFilterButtonRef}
               onClick={(e) => openDateFilterDropdown(e.currentTarget)}

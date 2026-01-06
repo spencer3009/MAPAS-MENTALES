@@ -1399,6 +1399,31 @@ const ContactsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Verification Alert */}
+      {showVerificationAlert && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
+            <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-6 text-center">
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-white/20 rounded-full mb-3">
+                <Lock size={28} className="text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-white">Verificación requerida</h3>
+            </div>
+            <div className="p-6">
+              <p className="text-gray-600 text-center mb-6">
+                Para crear o modificar contactos, primero debes verificar tu correo electrónico.
+              </p>
+              <button
+                onClick={() => setShowVerificationAlert(false)}
+                className="w-full px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-medium hover:from-amber-600 hover:to-orange-600 transition-colors"
+              >
+                Entendido
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -2,6 +2,17 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-06: Selector de País para WhatsApp en Contactos ✅
+- **Added**: Selector de país con bandera emoji + código internacional en campo WhatsApp
+- **Added**: Lista de 28 países (Latinoamérica, España, USA, Canadá, Europa)
+- **Added**: País por defecto se obtiene de la Configuración General del usuario
+- **Added**: Campo de búsqueda en el dropdown para encontrar países rápidamente
+- **Added**: Vista previa del formato: "Se guardará como: +51 987 654 321"
+- **Added**: Al editar contacto, se detecta automáticamente el país del número existente
+- **Logic**: Número se guarda en formato internacional normalizado (ej: +51 987 654 321)
+- **UX**: Dropdown con z-index alto para evitar problemas de capas
+- **Files Modified**: `/app/frontend/src/components/contacts/ContactsPage.jsx`
+
 ### 2026-01-05: Módulo de Reportes Estadísticos para Contactos ✅
 - **Added**: Dashboard de reportes con diseño dark mode elegante (slate-900 gradient)
 - **Added**: Gráfico 1 "Contactos creados en el tiempo" - AreaChart con agrupación por día/semana/mes/año

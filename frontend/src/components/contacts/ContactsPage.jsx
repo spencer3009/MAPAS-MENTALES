@@ -123,6 +123,13 @@ const ContactsPage = () => {
   const [contactLabels, setContactLabels] = useState([]); // Etiquetas disponibles
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [userCountry, setUserCountry] = useState('PE'); // País del usuario desde configuración
+  
+  // Phone input states
+  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES.find(c => c.code === 'PE') || COUNTRIES[0]);
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+  const countryDropdownRef = useRef(null);
   
   // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false);

@@ -1453,9 +1453,10 @@ const ContactsPage = () => {
             <button
               onClick={() => setShowLabelsConfig(true)}
               className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              title="Gestiona los estados del proceso comercial"
             >
-              <Tag size={16} />
-              <span className="hidden sm:inline">Etiquetas</span>
+              <CircleDot size={16} />
+              <span className="hidden sm:inline">Estado</span>
             </button>
             <button
               ref={dateFilterButtonRef}

@@ -444,6 +444,48 @@ const ContactsPage = () => {
     (dateFilterMode === 'week' && selectedWeeks.length > 0) ||
     (dateFilterMode === 'year' && dateFilterYears.length > 0);
 
+  // Phone number helper functions
+  const formatPhoneForDisplay = (phone) => {
+    if (!phone) return '';
+    // Remove the country code if present, just return the local number
+    const country = COUNTRIES.find(c => phone.startsWith(c.dialCode));
+    if (country) {
+      return phone.replace(country.dialCode, '').replace(/\s/g, '').trim();
+    }
+    return phone.replace(/^\+\d+\s*/, '').replace(/\s/g, '');
+  };
+
+  const formatPhoneForStorage = (localNumber, country) => {
+    if (!localNumber) return '';
+    // Clean the number - remove spaces and non-digits
+    const cleaned = localNumber.replace(/\D/g, '');
+    if (!cleaned) return '';
+    // Format as international: +51 992 021 294
+    const formatted = cleaned.replace(/(\d{3})(\d{3})(\d{3,4})/, '$1 $2 $3').trim();
+    return `${country.dialCode} ${formatted}`;
+  };
+
+  const parseExistingPhone = (phone) => {
+    if (!phone) return { country: selectedCountry, number: '' };
+    
+    // Try to find the country code
+    for (const country of COUNTRIES) {
+      if (phone.startsWith(country.dialCode)) {
+        const localNumber = phone.replace(country.dialCode, '').replace(/\s/g, '').trim();
+        return { country, number: localNumber };
+      }
+    }
+    
+    // If no country found, use default and return full number
+    return { country: selectedCountry, number: phone.replace(/\D/g, '') };
+  };
+
+  const resetPhoneInput = () => {
+    setPhoneNumber('');
+    const defaultCountry = COUNTRIES.find(c => c.code === userCountry) || COUNTRIES[0];
+    setSelectedCountry(defaultCountry);
+  };
+
   // Open filter dropdown and calculate position (for portal)
   const openFilterDropdownWithPosition = (columnId, buttonElement) => {
     if (openFilterDropdown === columnId) {

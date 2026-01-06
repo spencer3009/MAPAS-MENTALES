@@ -1678,8 +1678,13 @@ async def check_and_send_reminders():
 
 async def start_scheduler():
     """Iniciar el scheduler de recordatorios"""
+    # Scheduler de recordatorios WhatsApp (existente)
     asyncio.create_task(check_and_send_reminders())
-    logger.info("Scheduler de recordatorios iniciado")
+    logger.info("✅ Scheduler de recordatorios WhatsApp iniciado")
+    
+    # Scheduler de recordatorios de verificación de email
+    reminder_scheduler.start_reminder_scheduler(db)
+    logger.info("✅ Scheduler de recordatorios de verificación de email iniciado")
 
 
 # ==========================================

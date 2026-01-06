@@ -1,5 +1,5 @@
 """
-Email Service for MindoraMap
+Email Service for Mindora
 Handles email verification and transactional emails using Resend
 """
 
@@ -16,11 +16,20 @@ logger = logging.getLogger(__name__)
 # Configurar Resend
 resend.api_key = os.environ.get("RESEND_API_KEY", "")
 SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "onboarding@resend.dev")
-APP_URL = os.environ.get("APP_URL", "")  # Se configurará dinámicamente
+SENDER_NAME = "Mindora"  # Nombre visible del remitente
+APP_URL = os.environ.get("APP_URL", "")
+
+# Logo de Mindora (URL pública)
+LOGO_URL = "https://customer-assets.emergentagent.com/job_c7c9b123-4484-446c-b0cd-4986b2bb2189/artifacts/hk2d8hgn_MINDORA%20TRANSPARENTE.png"
 
 def get_app_url():
     """Obtiene la URL de la aplicación"""
     return os.environ.get("APP_URL", "http://localhost:3000")
+
+
+def get_sender():
+    """Retorna el remitente con nombre visible"""
+    return f"{SENDER_NAME} <{SENDER_EMAIL}>"
 
 
 def generate_verification_token() -> str:
@@ -66,20 +75,13 @@ async def send_verification_email(
             <tr>
                 <td align="center">
                     <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-                        <!-- Header -->
+                        <!-- Header con Logo -->
                         <tr>
                             <td style="background: linear-gradient(135deg, #3B82F6 0%, #6366F1 100%); padding: 40px 40px 30px; text-align: center;">
                                 <table width="100%" cellpadding="0" cellspacing="0">
                                     <tr>
                                         <td align="center">
-                                            <div style="width: 60px; height: 60px; background-color: rgba(255,255,255,0.2); border-radius: 12px; display: inline-block; line-height: 60px; font-size: 28px;">
-                                                🧠
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td align="center" style="padding-top: 15px;">
-                                            <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">MindoraMap</h1>
+                                            <img src="{LOGO_URL}" alt="Mindora" style="height: 50px; width: auto;" />
                                         </td>
                                     </tr>
                                 </table>
@@ -94,8 +96,8 @@ async def send_verification_email(
                                 </h2>
                                 
                                 <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 25px;">
-                                    Gracias por registrarte en <strong>MindoraMap</strong>. Para comenzar a crear tus mapas mentales, 
-                                    necesitamos verificar tu dirección de correo electrónico.
+                                    Gracias por registrarte en <strong>Mindora</strong>. Para comenzar a organizar tus ideas 
+                                    y potenciar tu creatividad, necesitamos verificar tu dirección de correo electrónico.
                                 </p>
                                 
                                 <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 30px;">
@@ -140,7 +142,7 @@ async def send_verification_email(
                                     Si no creaste esta cuenta, puedes ignorar este correo.
                                 </p>
                                 <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                                    © 2025 MindoraMap. Todos los derechos reservados.
+                                    © 2025 Mindora. Todos los derechos reservados.
                                 </p>
                             </td>
                         </tr>
@@ -153,14 +155,13 @@ async def send_verification_email(
     """
     
     params = {
-        "from": SENDER_EMAIL,
+        "from": get_sender(),
         "to": [recipient_email],
-        "subject": "✓ Verifica tu cuenta de MindoraMap",
+        "subject": "✓ Verifica tu cuenta de Mindora",
         "html": html_content
     }
     
     try:
-        # Ejecutar en thread para no bloquear
         email = await asyncio.to_thread(resend.Emails.send, params)
         logger.info(f"📧 Email de verificación enviado a {recipient_email}")
         return {
@@ -200,13 +201,10 @@ async def send_password_reset_email(
             <tr>
                 <td align="center">
                     <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-                        <!-- Header -->
+                        <!-- Header con Logo -->
                         <tr>
                             <td style="background: linear-gradient(135deg, #3B82F6 0%, #6366F1 100%); padding: 40px 40px 30px; text-align: center;">
-                                <div style="width: 60px; height: 60px; background-color: rgba(255,255,255,0.2); border-radius: 12px; display: inline-block; line-height: 60px; font-size: 28px;">
-                                    🔐
-                                </div>
-                                <h1 style="color: #ffffff; margin: 15px 0 0; font-size: 28px; font-weight: 700;">MindoraMap</h1>
+                                <img src="{LOGO_URL}" alt="Mindora" style="height: 50px; width: auto;" />
                             </td>
                         </tr>
                         
@@ -214,12 +212,12 @@ async def send_password_reset_email(
                         <tr>
                             <td style="padding: 40px;">
                                 <h2 style="color: #1f2937; margin: 0 0 20px; font-size: 24px;">
-                                    Restablecer contraseña
+                                    Restablecer contraseña 🔐
                                 </h2>
                                 
                                 <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 25px;">
                                     Hola <strong>{recipient_name}</strong>, recibimos una solicitud para restablecer 
-                                    la contraseña de tu cuenta.
+                                    la contraseña de tu cuenta en Mindora.
                                 </p>
                                 
                                 <table width="100%" cellpadding="0" cellspacing="0">
@@ -228,7 +226,8 @@ async def send_password_reset_email(
                                             <a href="{reset_link}" 
                                                style="display: inline-block; background: linear-gradient(135deg, #3B82F6 0%, #6366F1 100%); 
                                                       color: #ffffff; text-decoration: none; padding: 16px 40px; 
-                                                      border-radius: 10px; font-size: 16px; font-weight: 600;">
+                                                      border-radius: 10px; font-size: 16px; font-weight: 600;
+                                                      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);">
                                                 🔑 Restablecer contraseña
                                             </a>
                                         </td>
@@ -244,6 +243,16 @@ async def send_password_reset_email(
                                         ⚠️ Si no solicitaste este cambio, ignora este correo. Tu contraseña seguirá siendo la misma.
                                     </p>
                                 </div>
+                                
+                                <!-- Alternative Link -->
+                                <div style="background-color: #f9fafb; border-radius: 8px; padding: 20px; margin-top: 25px;">
+                                    <p style="color: #6b7280; font-size: 13px; margin: 0 0 10px;">
+                                        Si el botón no funciona, copia y pega este enlace:
+                                    </p>
+                                    <p style="color: #3B82F6; font-size: 12px; word-break: break-all; margin: 0;">
+                                        {reset_link}
+                                    </p>
+                                </div>
                             </td>
                         </tr>
                         
@@ -251,7 +260,7 @@ async def send_password_reset_email(
                         <tr>
                             <td style="background-color: #f9fafb; padding: 25px 40px; text-align: center; border-top: 1px solid #e5e7eb;">
                                 <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                                    © 2025 MindoraMap. Todos los derechos reservados.
+                                    © 2025 Mindora. Todos los derechos reservados.
                                 </p>
                             </td>
                         </tr>
@@ -264,9 +273,9 @@ async def send_password_reset_email(
     """
     
     params = {
-        "from": SENDER_EMAIL,
+        "from": get_sender(),
         "to": [recipient_email],
-        "subject": "🔐 Restablecer contraseña - MindoraMap",
+        "subject": "🔐 Restablecer contraseña - Mindora",
         "html": html_content
     }
     
@@ -293,34 +302,53 @@ async def send_welcome_email(
     <html>
     <head>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7fa;">
         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f7fa; padding: 40px 20px;">
             <tr>
                 <td align="center">
-                    <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden;">
+                    <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                        <!-- Header con Logo -->
                         <tr>
                             <td style="background: linear-gradient(135deg, #10B981 0%, #3B82F6 100%); padding: 40px; text-align: center;">
-                                <div style="font-size: 48px; margin-bottom: 15px;">🎉</div>
-                                <h1 style="color: #ffffff; margin: 0; font-size: 28px;">¡Cuenta verificada!</h1>
+                                <img src="{LOGO_URL}" alt="Mindora" style="height: 50px; width: auto; margin-bottom: 20px;" />
+                                <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">🎉 ¡Cuenta verificada!</h1>
                             </td>
                         </tr>
+                        
+                        <!-- Body -->
                         <tr>
                             <td style="padding: 40px;">
-                                <h2 style="color: #1f2937; margin: 0 0 20px;">
-                                    ¡Bienvenido/a a MindoraMap, {recipient_name}!
+                                <h2 style="color: #1f2937; margin: 0 0 20px; font-size: 24px;">
+                                    ¡Bienvenido/a a Mindora, {recipient_name}!
                                 </h2>
-                                <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">
+                                <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 25px;">
                                     Tu cuenta ha sido verificada exitosamente. Ahora puedes disfrutar de todas 
-                                    las funcionalidades de MindoraMap.
+                                    las funcionalidades de Mindora para organizar tus ideas y potenciar tu creatividad.
                                 </p>
-                                <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 30px;">
+                                
+                                <!-- Features -->
+                                <div style="background-color: #f0f9ff; border-radius: 12px; padding: 25px; margin-bottom: 25px;">
+                                    <p style="color: #0369a1; font-size: 14px; font-weight: 600; margin: 0 0 15px;">
+                                        🚀 ¿Qué puedes hacer en Mindora?
+                                    </p>
+                                    <ul style="color: #4b5563; font-size: 14px; line-height: 1.8; margin: 0; padding-left: 20px;">
+                                        <li>Crear mapas mentales intuitivos</li>
+                                        <li>Organizar tus proyectos con tableros</li>
+                                        <li>Gestionar tus contactos y clientes</li>
+                                        <li>Colaborar en tiempo real</li>
+                                    </ul>
+                                </div>
+                                
+                                <table width="100%" cellpadding="0" cellspacing="0">
                                     <tr>
                                         <td align="center">
                                             <a href="{app_url}" 
                                                style="display: inline-block; background: linear-gradient(135deg, #3B82F6 0%, #6366F1 100%); 
                                                       color: #ffffff; text-decoration: none; padding: 16px 40px; 
-                                                      border-radius: 10px; font-size: 16px; font-weight: 600;">
+                                                      border-radius: 10px; font-size: 16px; font-weight: 600;
+                                                      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);">
                                                 🚀 Comenzar a crear
                                             </a>
                                         </td>
@@ -328,10 +356,15 @@ async def send_welcome_email(
                                 </table>
                             </td>
                         </tr>
+                        
+                        <!-- Footer -->
                         <tr>
-                            <td style="background-color: #f9fafb; padding: 25px 40px; text-align: center;">
+                            <td style="background-color: #f9fafb; padding: 25px 40px; text-align: center; border-top: 1px solid #e5e7eb;">
+                                <p style="color: #9ca3af; font-size: 13px; margin: 0 0 10px;">
+                                    ¿Tienes preguntas? Responde a este correo y te ayudaremos.
+                                </p>
                                 <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                                    © 2025 MindoraMap
+                                    © 2025 Mindora. Todos los derechos reservados.
                                 </p>
                             </td>
                         </tr>
@@ -344,15 +377,16 @@ async def send_welcome_email(
     """
     
     params = {
-        "from": SENDER_EMAIL,
+        "from": get_sender(),
         "to": [recipient_email],
-        "subject": "🎉 ¡Bienvenido/a a MindoraMap!",
+        "subject": "🎉 ¡Bienvenido/a a Mindora!",
         "html": html_content
     }
     
     try:
         email = await asyncio.to_thread(resend.Emails.send, params)
+        logger.info(f"📧 Email de bienvenida enviado a {recipient_email}")
         return {"success": True, "email_id": email.get("id")}
     except Exception as e:
-        logger.error(f"Error enviando welcome email: {e}")
+        logger.error(f"❌ Error enviando welcome email: {e}")
         return {"success": False, "error": str(e)}

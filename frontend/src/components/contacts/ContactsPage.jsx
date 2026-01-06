@@ -22,7 +22,7 @@ import {
 } from 'date-fns';
 import { es } from 'date-fns/locale';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer,
   PieChart as RechartsPieChart, Pie, Cell, LineChart, Line, Area, AreaChart
 } from 'recharts';
 

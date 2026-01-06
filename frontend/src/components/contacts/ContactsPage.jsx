@@ -8,7 +8,7 @@ import {
   Type, Hash, List, CheckSquare, AlignLeft, Clock,
   ChevronUp, Columns3, GripVertical, Eye, EyeOff, Tag,
   Filter, FilterX, CalendarDays, CalendarRange, ChevronLeft, ChevronRight,
-  BarChart3, PieChart, TrendingUp, Award
+  BarChart3, PieChart, TrendingUp, Award, Globe
 } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';

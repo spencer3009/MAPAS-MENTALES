@@ -203,6 +203,33 @@ const ContactsPage = () => {
   
   const token = localStorage.getItem('mm_auth_token');
 
+  // Cargar el país del usuario desde su perfil (solo una vez)
+  useEffect(() => {
+    const loadUserCountry = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/profile`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.pais) {
+            setUserCountry(data.pais);
+            const country = COUNTRIES.find(c => c.code === data.pais);
+            if (country) {
+              setSelectedCountry(country);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Error loading user country:', err);
+      }
+    };
+    
+    if (token) {
+      loadUserCountry();
+    }
+  }, [token]);
+
   // Cargar contactos y campos personalizados
   const loadData = useCallback(async () => {
     setLoading(true);

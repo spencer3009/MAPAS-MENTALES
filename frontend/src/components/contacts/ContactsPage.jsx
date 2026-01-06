@@ -1118,11 +1118,19 @@ const ContactsPage = () => {
     setEditingContact(null);
     setFormData({ nombre: '', apellidos: '', whatsapp: '', email: '', custom_fields: {}, labels: [] });
     setFormErrors({});
+    resetPhoneInput();
+    setShowCountryDropdown(false);
   };
 
   // Abrir modal de edición
   const openEditModal = (contact) => {
     setEditingContact(contact);
+    
+    // Parse existing phone number to extract country and local number
+    const { country, number } = parseExistingPhone(contact.whatsapp);
+    setSelectedCountry(country);
+    setPhoneNumber(number);
+    
     setFormData({
       nombre: contact.nombre,
       apellidos: contact.apellidos,

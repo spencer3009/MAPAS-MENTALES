@@ -1577,7 +1577,7 @@ const ContactsPage = () => {
                           tickLine={{ stroke: '#475569' }}
                           allowDecimals={false}
                         />
-                        <Tooltip 
+                        <RechartsTooltip 
                           contentStyle={{ 
                             backgroundColor: '#1E293B', 
                             border: '1px solid #475569',
@@ -1627,7 +1627,7 @@ const ContactsPage = () => {
                               <Cell key={`cell-${index}`} fill={entry.color} />
                             ))}
                           </Pie>
-                          <Tooltip 
+                          <RechartsTooltip 
                             contentStyle={{ 
                               backgroundColor: '#1E293B', 
                               border: '1px solid #475569',
@@ -1684,7 +1684,7 @@ const ContactsPage = () => {
                         tickLine={{ stroke: '#475569' }}
                         width={80}
                       />
-                      <Tooltip 
+                      <RechartsTooltip 
                         contentStyle={{ 
                           backgroundColor: '#1E293B', 
                           border: '1px solid #475569',

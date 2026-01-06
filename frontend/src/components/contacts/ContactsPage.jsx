@@ -45,38 +45,35 @@ const CONTACT_TYPES = {
 
 // Lista de países con códigos de teléfono y banderas emoji
 const COUNTRIES = [
-  { code: 'PE', name: 'Perú', dialCode: '+51', flag: '🇵🇪' },
-  { code: 'MX', name: 'México', dialCode: '+52', flag: '🇲🇽' },
-  { code: 'AR', name: 'Argentina', dialCode: '+54', flag: '🇦🇷' },
-  { code: 'CL', name: 'Chile', dialCode: '+56', flag: '🇨🇱' },
-  { code: 'CO', name: 'Colombia', dialCode: '+57', flag: '🇨🇴' },
-  { code: 'EC', name: 'Ecuador', dialCode: '+593', flag: '🇪🇨' },
-  { code: 'VE', name: 'Venezuela', dialCode: '+58', flag: '🇻🇪' },
-  { code: 'BO', name: 'Bolivia', dialCode: '+591', flag: '🇧🇴' },
-  { code: 'PY', name: 'Paraguay', dialCode: '+595', flag: '🇵🇾' },
-  { code: 'UY', name: 'Uruguay', dialCode: '+598', flag: '🇺🇾' },
-  { code: 'BR', name: 'Brasil', dialCode: '+55', flag: '🇧🇷' },
-  { code: 'ES', name: 'España', dialCode: '+34', flag: '🇪🇸' },
-  { code: 'US', name: 'Estados Unidos', dialCode: '+1', flag: '🇺🇸' },
-  { code: 'CA', name: 'Canadá', dialCode: '+1', flag: '🇨🇦' },
-  { code: 'CR', name: 'Costa Rica', dialCode: '+506', flag: '🇨🇷' },
-  { code: 'PA', name: 'Panamá', dialCode: '+507', flag: '🇵🇦' },
-  { code: 'GT', name: 'Guatemala', dialCode: '+502', flag: '🇬🇹' },
-  { code: 'HN', name: 'Honduras', dialCode: '+504', flag: '🇭🇳' },
-  { code: 'SV', name: 'El Salvador', dialCode: '+503', flag: '🇸🇻' },
-  { code: 'NI', name: 'Nicaragua', dialCode: '+505', flag: '🇳🇮' },
-  { code: 'DO', name: 'Rep. Dominicana', dialCode: '+1', flag: '🇩🇴' },
-  { code: 'PR', name: 'Puerto Rico', dialCode: '+1', flag: '🇵🇷' },
-  { code: 'CU', name: 'Cuba', dialCode: '+53', flag: '🇨🇺' },
-  { code: 'FR', name: 'Francia', dialCode: '+33', flag: '🇫🇷' },
-  { code: 'DE', name: 'Alemania', dialCode: '+49', flag: '🇩🇪' },
-  { code: 'IT', name: 'Italia', dialCode: '+39', flag: '🇮🇹' },
-  { code: 'GB', name: 'Reino Unido', dialCode: '+44', flag: '🇬🇧' },
-  { code: 'PT', name: 'Portugal', dialCode: '+351', flag: '🇵🇹' }
+  { code: 'PE', name: 'Perú', dialCode: '+51', flag: '🇵🇪', phoneCode: '51' },
+  { code: 'MX', name: 'México', dialCode: '+52', flag: '🇲🇽', phoneCode: '52' },
+  { code: 'AR', name: 'Argentina', dialCode: '+54', flag: '🇦🇷', phoneCode: '54' },
+  { code: 'CL', name: 'Chile', dialCode: '+56', flag: '🇨🇱', phoneCode: '56' },
+  { code: 'CO', name: 'Colombia', dialCode: '+57', flag: '🇨🇴', phoneCode: '57' },
+  { code: 'EC', name: 'Ecuador', dialCode: '+593', flag: '🇪🇨', phoneCode: '593' },
+  { code: 'VE', name: 'Venezuela', dialCode: '+58', flag: '🇻🇪', phoneCode: '58' },
+  { code: 'BO', name: 'Bolivia', dialCode: '+591', flag: '🇧🇴', phoneCode: '591' },
+  { code: 'PY', name: 'Paraguay', dialCode: '+595', flag: '🇵🇾', phoneCode: '595' },
+  { code: 'UY', name: 'Uruguay', dialCode: '+598', flag: '🇺🇾', phoneCode: '598' },
+  { code: 'BR', name: 'Brasil', dialCode: '+55', flag: '🇧🇷', phoneCode: '55' },
+  { code: 'ES', name: 'España', dialCode: '+34', flag: '🇪🇸', phoneCode: '34' },
+  { code: 'US', name: 'Estados Unidos', dialCode: '+1', flag: '🇺🇸', phoneCode: '1' },
+  { code: 'CA', name: 'Canadá', dialCode: '+1', flag: '🇨🇦', phoneCode: '1' },
+  { code: 'CR', name: 'Costa Rica', dialCode: '+506', flag: '🇨🇷', phoneCode: '506' },
+  { code: 'PA', name: 'Panamá', dialCode: '+507', flag: '🇵🇦', phoneCode: '507' },
+  { code: 'GT', name: 'Guatemala', dialCode: '+502', flag: '🇬🇹', phoneCode: '502' },
+  { code: 'HN', name: 'Honduras', dialCode: '+504', flag: '🇭🇳', phoneCode: '504' },
+  { code: 'SV', name: 'El Salvador', dialCode: '+503', flag: '🇸🇻', phoneCode: '503' },
+  { code: 'NI', name: 'Nicaragua', dialCode: '+505', flag: '🇳🇮', phoneCode: '505' },
+  { code: 'DO', name: 'Rep. Dominicana', dialCode: '+1', flag: '🇩🇴', phoneCode: '1' },
+  { code: 'PR', name: 'Puerto Rico', dialCode: '+1', flag: '🇵🇷', phoneCode: '1' },
+  { code: 'CU', name: 'Cuba', dialCode: '+53', flag: '🇨🇺', phoneCode: '53' },
+  { code: 'FR', name: 'Francia', dialCode: '+33', flag: '🇫🇷', phoneCode: '33' },
+  { code: 'DE', name: 'Alemania', dialCode: '+49', flag: '🇩🇪', phoneCode: '49' },
+  { code: 'IT', name: 'Italia', dialCode: '+39', flag: '🇮🇹', phoneCode: '39' },
+  { code: 'GB', name: 'Reino Unido', dialCode: '+44', flag: '🇬🇧', phoneCode: '44' },
+  { code: 'PT', name: 'Portugal', dialCode: '+351', flag: '🇵🇹', phoneCode: '351' }
 ];
-
-// País por defecto (Perú)
-const DEFAULT_COUNTRY = COUNTRIES.find(c => c.code === 'PE') || COUNTRIES[0];
 
 // Tipos de campos personalizados con iconos de Lucide
 const FIELD_TYPES = [

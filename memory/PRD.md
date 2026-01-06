@@ -2,6 +2,29 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-06: Emails Automáticos de Recordatorio de Verificación ✅
+- **Added**: Sistema de recordatorios automáticos para usuarios no verificados:
+  - 📧 24h después: "¿Olvidaste verificar tu cuenta?" (tono amigable)
+  - 📧 72h después: "Tu cuenta sigue sin activarse" (urgencia media)
+  - 📧 7 días después: "Última oportunidad" (urgencia alta, último aviso)
+- **Added**: Scheduler usando APScheduler que corre cada hora
+- **Added**: Campos de tracking en MongoDB: `reminder_24h_sent`, `reminder_72h_sent`, `reminder_7d_sent`, `reminder_*_sent_at`
+- **Added**: Endpoint admin `POST /api/admin/run-verification-reminders` para ejecutar manualmente
+- **Added**: Endpoint admin `GET /api/admin/unverified-users` para monitorear usuarios no verificados
+- **Added**: 3 plantillas de email con diseño profesional y branding Mindora
+- **Rules Implemented**:
+  - ✅ NO envía si el usuario ya verificó
+  - ✅ NO duplica envíos (tracking por campo)
+  - ✅ NO envía a usuarios de Google OAuth
+  - ✅ Regenera token si expiró
+  - ✅ Registra logs detallados
+- **Files Created**:
+  - `/app/backend/reminder_service.py` - Plantillas de email y funciones de envío
+  - `/app/backend/reminder_scheduler.py` - Lógica del scheduler
+- **Files Modified**:
+  - `/app/backend/server.py` - Integración del scheduler y endpoints admin
+- **Testing**: Backend 100% (10/10 tests passed)
+
 ### 2026-01-06: Sistema de Verificación Obligatoria de Email ✅
 - **Added**: Banner permanente para usuarios no verificados con diseño amber/orange
 - **Added**: Botón "Reenviar verificación" con cooldown de 5 minutos entre reenvíos

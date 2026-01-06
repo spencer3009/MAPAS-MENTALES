@@ -2,6 +2,38 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-06: Sistema de Verificación Obligatoria de Email ✅
+- **Added**: Banner permanente para usuarios no verificados con diseño amber/orange
+- **Added**: Botón "Reenviar verificación" con cooldown de 5 minutos entre reenvíos
+- **Added**: Botón "Cambiar correo" con formulario inline para actualizar email
+- **Added**: Modal de restricción "Verificación requerida" al intentar crear/editar
+- **Added**: Rate limiting en reenvío: máximo 1 cada 5 min, máximo 5 por día (HTTP 429)
+- **Added**: Hook `useVerificationCheck` para verificar estado en componentes
+- **Added**: Restricciones para usuarios no verificados:
+  - 🚫 No puede crear/editar mapas mentales
+  - 🚫 No puede crear/editar contactos
+  - 🚫 No puede crear tableros
+  - ✅ Puede navegar y ver la interfaz
+- **Added**: Campos en MongoDB: `last_verification_sent`, `verification_count_today`, `verification_count_date`
+- **Note**: Usuarios de Google OAuth siempre están verificados automáticamente
+- **Files Created**:
+  - `/app/frontend/src/components/auth/VerificationRequiredModal.jsx`
+  - `/app/frontend/src/hooks/useVerificationCheck.js`
+- **Files Modified**:
+  - `/app/backend/server.py` - Rate limiting en endpoint resend-verification
+  - `/app/frontend/src/components/auth/EmailVerificationBanner.jsx` - Rediseño completo
+  - `/app/frontend/src/components/mindmap/MindMapApp.jsx` - Integración de verificación
+  - `/app/frontend/src/components/contacts/ContactsPage.jsx` - Integración de verificación
+- **Testing**: Backend 100% (9/9 tests), Frontend 100% (7/7 features)
+
+### 2026-01-06: Mejora de Branding en Emails de Mindora ✅
+- **Changed**: Remitente visible ahora es "Mindora" (antes mostraba texto de Resend)
+- **Added**: Logo de Mindora centrado en cabecera de todos los emails
+- **Changed**: Nombre de plataforma "MindoraMap" → "Mindora" en todos los textos
+- **Changed**: Asuntos de email actualizados con branding Mindora
+- **Changed**: Pie de página: "© 2025 Mindora"
+- **Files Modified**: `/app/backend/email_service.py`
+
 ### 2026-01-06: Renombrado "Etiquetas" → "Estado" en Módulo de Contactos ✅
 - **Changed**: Toda la terminología "Etiquetas" renombrada a "Estado" en el módulo de Contactos
 - **Changed**: Botón de la barra de herramientas ahora dice "Estado" con icono CircleDot

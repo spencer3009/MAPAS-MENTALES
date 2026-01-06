@@ -2539,8 +2539,11 @@ const ContactsPage = () => {
             {/* Modal Header */}
             <div className="bg-gradient-to-r from-violet-600 to-purple-600 px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Tag className="w-5 h-5 text-white" />
-                <h2 className="text-lg font-bold text-white">Administrar etiquetas</h2>
+                <CircleDot className="w-5 h-5 text-white" />
+                <div>
+                  <h2 className="text-lg font-bold text-white">Administrar estados</h2>
+                  <p className="text-xs text-white/70">Situación del contacto en el proceso comercial</p>
+                </div>
               </div>
               <button 
                 onClick={() => {
@@ -2558,7 +2561,7 @@ const ContactsPage = () => {
               {/* Existing Labels */}
               {contactLabels.length > 0 && (
                 <div className="mb-6">
-                  <h3 className="text-sm font-semibold text-gray-700 mb-3">Etiquetas existentes ({contactLabels.length})</h3>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-3">Estados existentes ({contactLabels.length})</h3>
                   <div className="space-y-2">
                     {contactLabels.map(label => (
                       <div 
@@ -2570,7 +2573,7 @@ const ContactsPage = () => {
                             className="w-8 h-8 rounded-lg flex items-center justify-center"
                             style={{ backgroundColor: label.color + '20' }}
                           >
-                            <Tag size={16} style={{ color: label.color }} />
+                            <CircleDot size={16} style={{ color: label.color }} />
                           </div>
                           <span 
                             className="font-medium px-2 py-0.5 rounded-full text-sm"

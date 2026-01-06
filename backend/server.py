@@ -779,9 +779,13 @@ async def verify_email_get(token: str, background_tasks: BackgroundTasks):
 @api_router.post("/auth/resend-verification")
 async def resend_verification(request: ResendVerificationRequest, background_tasks: BackgroundTasks):
     """
-    Reenviar el correo de verificación
+    Reenviar el correo de verificación con rate limiting:
+    - Máximo 1 reenvío cada 5 minutos
+    - Máximo 5 reenvíos por día
     """
     email = request.email.lower().strip()
+    now = datetime.now(timezone.utc)
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     
     # Buscar usuario por email en users collection
     user = await db.users.find_one({"email": email})
@@ -810,22 +814,65 @@ async def resend_verification(request: ResendVerificationRequest, background_tas
     if user.get("email_verified", False):
         return {
             "success": True,
+            "already_verified": True,
             "message": "Tu cuenta ya está verificada. Puedes iniciar sesión normalmente."
         }
     
-    # Generar nuevo token
+    # ========== RATE LIMITING ==========
+    last_sent = user.get("last_verification_sent")
+    daily_count = user.get("verification_count_today", 0)
+    daily_count_date = user.get("verification_count_date", "")
+    
+    # Resetear contador si es un nuevo día
+    if daily_count_date:
+        try:
+            count_date = datetime.fromisoformat(daily_count_date.replace('Z', '+00:00'))
+            if count_date.date() < now.date():
+                daily_count = 0
+        except:
+            daily_count = 0
+    
+    # Verificar límite de 5 por día
+    if daily_count >= 5:
+        raise HTTPException(
+            status_code=429,
+            detail="Has alcanzado el límite de 5 reenvíos por día. Intenta nuevamente mañana."
+        )
+    
+    # Verificar límite de 5 minutos entre reenvíos
+    if last_sent:
+        try:
+            last_sent_dt = datetime.fromisoformat(last_sent.replace('Z', '+00:00'))
+            time_diff = (now - last_sent_dt).total_seconds()
+            if time_diff < 300:  # 5 minutos = 300 segundos
+                wait_seconds = int(300 - time_diff)
+                wait_minutes = wait_seconds // 60
+                wait_secs = wait_seconds % 60
+                raise HTTPException(
+                    status_code=429,
+                    detail=f"Debes esperar {wait_minutes}:{wait_secs:02d} minutos antes de solicitar otro reenvío."
+                )
+        except HTTPException:
+            raise
+        except:
+            pass  # Si hay error parseando la fecha, permitir el reenvío
+    
+    # ========== GENERAR Y ENVIAR ==========
     new_token = email_service.generate_verification_token()
     new_expiry = email_service.get_token_expiry()
     
-    # Actualizar token en la base de datos
+    # Actualizar token y contadores en la base de datos
     await db.users.update_one(
         {"username": user.get("username")},
         {
             "$set": {
-                "email": email,  # Asegurar que el email esté actualizado
+                "email": email,
                 "verification_token": new_token,
                 "verification_token_expiry": new_expiry,
-                "updated_at": datetime.now(timezone.utc).isoformat()
+                "last_verification_sent": now.isoformat(),
+                "verification_count_today": daily_count + 1,
+                "verification_count_date": now.isoformat(),
+                "updated_at": now.isoformat()
             }
         }
     )
@@ -838,11 +885,12 @@ async def resend_verification(request: ResendVerificationRequest, background_tas
         new_token
     )
     
-    logger.info(f"📧 Reenvío de verificación programado para {email}")
+    logger.info(f"📧 Reenvío de verificación #{daily_count + 1} programado para {email}")
     
     return {
         "success": True,
-        "message": "Si el correo existe en nuestro sistema, recibirás un nuevo enlace de verificación."
+        "resends_remaining": 4 - daily_count,
+        "message": "Hemos enviado un nuevo enlace de verificación a tu correo."
     }
 
 

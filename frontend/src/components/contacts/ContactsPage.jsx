@@ -2709,7 +2709,7 @@ const ContactsPage = () => {
                       className="w-full py-2.5 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
                     >
                       <Plus size={16} />
-                      Crear etiqueta
+                      Crear estado
                     </button>
                   )}
                 </div>

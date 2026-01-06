@@ -118,6 +118,9 @@ const FIELD_COLORS = [
 const CHART_COLORS = ['#06B6D4', '#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#EF4444', '#6366F1'];
 
 const ContactsPage = () => {
+  const { user } = useAuth();
+  const isVerified = user?.email_verified ?? true;
+  
   const [activeTab, setActiveTab] = useState('client');
   const [contacts, setContacts] = useState([]);
   const [allContactsCounts, setAllContactsCounts] = useState({ client: 0, prospect: 0, supplier: 0 }); // Para gráfico por tipo
@@ -126,6 +129,7 @@ const ContactsPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [userCountry, setUserCountry] = useState('PE'); // País del usuario desde configuración
+  const [showVerificationAlert, setShowVerificationAlert] = useState(false);
   
   // Phone input states
   const [selectedCountry, setSelectedCountry] = useState(COUNTRIES.find(c => c.code === 'PE') || COUNTRIES[0]);

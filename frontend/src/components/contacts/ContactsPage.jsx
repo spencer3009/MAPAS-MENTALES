@@ -1991,20 +1991,93 @@ const ContactsPage = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     WhatsApp <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="tel"
-                    value={formData.whatsapp}
-                    onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
-                    className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/20 ${
+                  <div className="relative" ref={countryDropdownRef}>
+                    <div className={`flex border rounded-lg overflow-hidden ${
                       formErrors.whatsapp ? 'border-red-300 bg-red-50' : 'border-gray-200'
-                    }`}
-                    placeholder="+52 123 456 7890"
-                  />
+                    }`}>
+                      {/* Country Selector Button */}
+                      <button
+                        type="button"
+                        onClick={() => setShowCountryDropdown(!showCountryDropdown)}
+                        className="flex items-center gap-1.5 px-3 py-2.5 bg-gray-50 hover:bg-gray-100 border-r border-gray-200 transition-colors min-w-[100px]"
+                      >
+                        <span className="text-lg">{selectedCountry.flag}</span>
+                        <span className="text-sm text-gray-600 font-medium">{selectedCountry.dialCode}</span>
+                        <ChevronDown size={14} className={`text-gray-400 transition-transform ${showCountryDropdown ? 'rotate-180' : ''}`} />
+                      </button>
+                      
+                      {/* Phone Number Input */}
+                      <input
+                        type="tel"
+                        value={phoneNumber}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^\d\s]/g, '');
+                          setPhoneNumber(value);
+                          // Auto-format and update formData
+                          const fullNumber = formatPhoneForStorage(value, selectedCountry);
+                          setFormData({ ...formData, whatsapp: fullNumber });
+                        }}
+                        className="flex-1 px-3 py-2.5 text-sm focus:outline-none bg-transparent"
+                        placeholder="992 021 294"
+                      />
+                    </div>
+                    
+                    {/* Country Dropdown */}
+                    {showCountryDropdown && (
+                      <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-gray-200 rounded-xl shadow-xl z-[99999] max-h-[280px] overflow-hidden">
+                        <div className="p-2 border-b border-gray-100 bg-gray-50">
+                          <input
+                            type="text"
+                            placeholder="Buscar país..."
+                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                            onChange={(e) => {
+                              const search = e.target.value.toLowerCase();
+                              // Filter is handled inline below
+                            }}
+                            id="country-search"
+                          />
+                        </div>
+                        <div className="max-h-[220px] overflow-y-auto">
+                          {COUNTRIES.filter(country => {
+                            const searchInput = document.getElementById('country-search');
+                            const search = searchInput?.value?.toLowerCase() || '';
+                            return country.name.toLowerCase().includes(search) || 
+                                   country.dialCode.includes(search) ||
+                                   country.code.toLowerCase().includes(search);
+                          }).map((country) => (
+                            <button
+                              key={country.code}
+                              type="button"
+                              onClick={() => {
+                                setSelectedCountry(country);
+                                setShowCountryDropdown(false);
+                                // Update formData with new country code
+                                if (phoneNumber) {
+                                  const fullNumber = formatPhoneForStorage(phoneNumber, country);
+                                  setFormData({ ...formData, whatsapp: fullNumber });
+                                }
+                              }}
+                              className={`w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-gray-50 transition-colors ${
+                                selectedCountry.code === country.code ? 'bg-cyan-50' : ''
+                              }`}
+                            >
+                              <span className="text-xl">{country.flag}</span>
+                              <span className="flex-1 text-sm text-gray-700">{country.name}</span>
+                              <span className="text-sm text-gray-500 font-medium">{country.dialCode}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   {formErrors.whatsapp && (
                     <p className="mt-1 text-xs text-red-500 flex items-center gap-1">
                       <AlertCircle size={12} /> {formErrors.whatsapp}
                     </p>
                   )}
+                  <p className="mt-1 text-xs text-gray-400">
+                    Se guardará como: {formData.whatsapp || `${selectedCountry.dialCode} ...`}
+                  </p>
                 </div>
                 
                 {/* Email */}

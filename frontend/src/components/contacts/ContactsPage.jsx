@@ -1030,7 +1030,7 @@ const ContactsPage = () => {
         setLabelError('');
       } else {
         const data = await response.json();
-        setLabelError(data.detail || 'Error al crear etiqueta');
+        setLabelError(data.detail || 'Error al crear estado');
       }
     } catch (error) {
       console.error('Error creating label:', error);
@@ -1060,7 +1060,7 @@ const ContactsPage = () => {
         cancelEditLabel();
       } else {
         const data = await response.json();
-        setLabelError(data.detail || 'Error al actualizar etiqueta');
+        setLabelError(data.detail || 'Error al actualizar estado');
       }
     } catch (error) {
       console.error('Error updating label:', error);

@@ -2611,7 +2611,7 @@ const ContactsPage = () => {
               <div className="border-t border-gray-200 pt-6">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-semibold text-gray-700">
-                    {editingLabel ? 'Editar etiqueta' : 'Crear nueva etiqueta'}
+                    {editingLabel ? 'Editar estado' : 'Crear nuevo estado'}
                   </h3>
                   {editingLabel && (
                     <button

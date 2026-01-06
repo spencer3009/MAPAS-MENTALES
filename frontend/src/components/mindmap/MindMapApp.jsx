@@ -616,10 +616,13 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
   // Handler para confirmar nombre de proyecto
   const handleConfirmProjectName = useCallback(async (name) => {
     if (projectNameModalConfig.isRename && projectNameModalConfig.projectId) {
-      // Renombrar proyecto existente
+      // Renombrar proyecto existente - verificar
+      if (!checkVerification('renombrar proyecto')) return;
       renameProject(projectNameModalConfig.projectId, name);
     } else {
-      // Crear nuevo proyecto con el layout seleccionado
+      // Crear nuevo proyecto - verificar primero
+      if (!checkVerification('crear proyecto')) return;
+      
       const layoutType = projectNameModalConfig.layoutType || 'mindflow';
       const result = await createBlankMap(name, layoutType);
       
@@ -633,7 +636,7 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
       }
     }
     setShowProjectNameModal(false);
-  }, [projectNameModalConfig, createBlankMap, renameProject, resetPan, resetZoom]);
+  }, [projectNameModalConfig, createBlankMap, renameProject, resetPan, resetZoom, checkVerification]);
 
   // Handler para renombrar proyecto (doble clic en el nombre)
   const handleRenameProject = useCallback((projectId, currentName) => {

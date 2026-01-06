@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { 
   format, parse, startOfWeek, endOfWeek, startOfMonth, endOfMonth, 
   startOfYear, endOfYear, getWeek, getYear, addWeeks, subWeeks,
@@ -36,7 +37,7 @@ const DEFAULT_COLUMNS = [
   { id: 'created_at', label: 'Fecha de creación', required: false }
 ];
 
-// Tipos de contacto con sus etiquetas
+// Tipos de contacto
 const CONTACT_TYPES = {
   client: { id: 'client', label: 'Clientes', icon: UserCheck, color: 'cyan', singular: 'cliente' },
   prospect: { id: 'prospect', label: 'Prospectos', icon: Users, color: 'amber', singular: 'prospecto' },
@@ -1594,11 +1595,11 @@ const ContactsPage = () => {
                   )}
                 </div>
 
-                {/* Chart 2: Distribución por etiquetas */}
+                {/* Chart 2: Distribución por estados */}
                 <div className="bg-slate-800/50 rounded-xl p-5 border border-slate-700">
                   <div className="flex items-center gap-2 mb-4">
                     <PieChart size={18} className="text-purple-400" />
-                    <h3 className="text-sm font-semibold text-white">Distribución por etiquetas</h3>
+                    <h3 className="text-sm font-semibold text-white">Distribución por estados</h3>
                   </div>
                   {labelDistributionData.length > 0 ? (
                     <div className="flex items-center gap-4">
@@ -1645,7 +1646,7 @@ const ContactsPage = () => {
                     </div>
                   ) : (
                     <div className="h-[180px] flex items-center justify-center text-slate-500 text-sm text-center px-4">
-                      Aún no hay etiquetas suficientes para mostrar estadísticas
+                      Aún no hay estados suficientes para mostrar estadísticas
                     </div>
                   )}
                 </div>
@@ -1692,11 +1693,11 @@ const ContactsPage = () => {
                   </ResponsiveContainer>
                 </div>
 
-                {/* Chart 4: Top 5 etiquetas más usadas */}
+                {/* Chart 4: Top 5 estados más usados */}
                 <div className="bg-slate-800/50 rounded-xl p-5 border border-slate-700">
                   <div className="flex items-center gap-2 mb-4">
                     <Award size={18} className="text-emerald-400" />
-                    <h3 className="text-sm font-semibold text-white">Top 5 etiquetas más usadas</h3>
+                    <h3 className="text-sm font-semibold text-white">Top 5 estados más usados</h3>
                   </div>
                   {topLabelsData.length > 0 ? (
                     <div className="space-y-3">
@@ -1732,7 +1733,7 @@ const ContactsPage = () => {
                     </div>
                   ) : (
                     <div className="h-[150px] flex items-center justify-center text-slate-500 text-sm text-center px-4">
-                      No hay etiquetas asignadas a los contactos
+                      No hay estados asignados a los contactos
                     </div>
                   )}
                 </div>
@@ -1750,7 +1751,7 @@ const ContactsPage = () => {
                 </div>
                 <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
                   <div className="text-2xl font-bold text-purple-400">{contactLabels.length}</div>
-                  <div className="text-xs text-slate-400">Etiquetas creadas</div>
+                  <div className="text-xs text-slate-400">Estados creados</div>
                 </div>
                 <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
                   <div className="text-2xl font-bold text-amber-400">
@@ -2203,7 +2204,7 @@ const ContactsPage = () => {
                         );
                       })}
                     </div>
-                    <p className="text-xs text-gray-400 mt-2">Selecciona una o más etiquetas para clasificar este contacto</p>
+                    <p className="text-xs text-gray-400 mt-2">Selecciona uno o más estados para clasificar este contacto</p>
                   </div>
                 )}
               </div>
@@ -2895,15 +2896,15 @@ const ContactsPage = () => {
                 </div>
               )}
               
-              {/* Etiquetas */}
+              {/* Estado */}
               {(() => {
                 const viewLabels = showViewModal.labels || [];
                 if (viewLabels.length === 0 && contactLabels.length === 0) return null;
                 return (
                   <div>
                     <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                      <Tag size={16} />
-                      Etiquetas
+                      <CircleDot size={16} />
+                      Estado
                     </h3>
                     <div className="bg-gray-50 rounded-xl p-4">
                       {viewLabels.length > 0 ? (
@@ -2927,7 +2928,7 @@ const ContactsPage = () => {
                           })}
                         </div>
                       ) : (
-                        <p className="text-gray-400 text-sm italic">Sin etiquetas asignadas</p>
+                        <p className="text-gray-400 text-sm italic">Sin estado asignado</p>
                       )}
                     </div>
                   </div>

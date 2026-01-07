@@ -1733,6 +1733,14 @@ async def create_reminder(
         scheduled_datetime = reminder_data.reminder_date
         reminder_date = reminder_data.reminder_date
     
+    # Calcular cuándo debe enviarse la notificación por email
+    email_notification_time = None
+    if reminder_data.notify_by_email and reminder_date:
+        email_notification_time = reminder_email_service.calculate_notification_time(
+            reminder_date, 
+            reminder_data.notify_before
+        ).isoformat()
+    
     reminder = {
         "id": str(uuid.uuid4()),
         # Campos de proyecto/nodo
@@ -1757,11 +1765,21 @@ async def create_reminder(
         "description": reminder_data.description,
         "reminder_date": reminder_date,
         "is_completed": False,
+        # Campos para notificación por email
+        "notify_by_email": reminder_data.notify_by_email,
+        "use_account_email": reminder_data.use_account_email,
+        "custom_email": reminder_data.custom_email,
+        "notify_before": reminder_data.notify_before,
+        "email_notification_time": email_notification_time,  # Cuándo enviar el email
+        "email_sent": False,
+        "email_sent_at": None,
         # Estado de notificación (anti-spam)
         "notification_status": "pending"
     }
     
     await db.reminders.insert_one(reminder)
+    
+    logger.info(f"📅 Recordatorio creado: {reminder['title']} - Email: {'Sí' if reminder_data.notify_by_email else 'No'} - Notify: {reminder_data.notify_before}")
     
     return reminder
 

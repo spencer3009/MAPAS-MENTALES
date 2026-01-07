@@ -1489,12 +1489,18 @@ class ReminderCreate(BaseModel):
     scheduled_date: Optional[str] = None  # ISO format date (legacy)
     scheduled_time: Optional[str] = None  # HH:MM format (legacy)
     message: Optional[str] = None
-    channel: str = "whatsapp"  # 'whatsapp' or 'email'
+    channel: str = "email"  # 'whatsapp' or 'email' - default changed to email
     
     # Campos para recordatorios de calendario/agenda
     title: Optional[str] = None
     description: Optional[str] = None
     reminder_date: Optional[str] = None  # ISO format datetime (new unified field)
+    
+    # Campos para notificación por email
+    notify_by_email: bool = True  # Activar notificación por email
+    use_account_email: bool = True  # Usar email de la cuenta o uno personalizado
+    custom_email: Optional[str] = None  # Email personalizado para este recordatorio
+    notify_before: str = "15min"  # 'now', '5min', '15min', '1hour'
 
 class ReminderResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -1523,6 +1529,14 @@ class ReminderResponse(BaseModel):
     reminder_date: Optional[str] = None
     is_completed: bool = False
     
+    # Campos para notificación por email
+    notify_by_email: bool = True
+    use_account_email: bool = True
+    custom_email: Optional[str] = None
+    notify_before: str = "15min"
+    email_sent: bool = False
+    email_sent_at: Optional[str] = None
+    
     # Estado de notificación: 'pending', 'triggered', 'read'
     notification_status: str = "pending"
 
@@ -1536,6 +1550,11 @@ class ReminderUpdate(BaseModel):
     description: Optional[str] = None
     reminder_date: Optional[str] = None
     is_completed: Optional[bool] = None
+    # Campos para notificación por email
+    notify_by_email: Optional[bool] = None
+    use_account_email: Optional[bool] = None
+    custom_email: Optional[str] = None
+    notify_before: Optional[str] = None
     # Estado de notificación
     notification_status: Optional[str] = None  # 'pending', 'triggered', 'read'
 

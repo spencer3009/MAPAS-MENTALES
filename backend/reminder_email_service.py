@@ -23,6 +23,8 @@ if _env_sender and "resend.dev" not in _env_sender:
 else:
     SENDER_EMAIL = "noreply@mindora.pe"  # Dominio verificado
 
+logger.info(f"📧 [reminder_email_service] SENDER_EMAIL configurado: {SENDER_EMAIL}")
+
 SENDER_NAME = "Mindora"
 LOGO_URL = "https://customer-assets.emergentagent.com/job_c7c9b123-4484-446c-b0cd-4986bb2bb2189/artifacts/hk2d8hgn_MINDORA%20TRANSPARENTE.png"
 

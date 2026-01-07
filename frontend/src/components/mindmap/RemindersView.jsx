@@ -1227,6 +1227,8 @@ const RemindersView = ({ token }) => {
         ? `${API_URL}/api/reminders/${reminderData.id}`
         : `${API_URL}/api/reminders`;
       
+      console.log('📤 [RemindersView] Guardando recordatorio:', JSON.stringify(reminderData, null, 2));
+      
       const response = await fetch(url, {
         method: reminderData.id ? 'PUT' : 'POST',
         headers: {
@@ -1237,10 +1239,17 @@ const RemindersView = ({ token }) => {
       });
       
       if (response.ok) {
+        const savedReminder = await response.json();
+        console.log('✅ [RemindersView] Recordatorio guardado:', JSON.stringify(savedReminder, null, 2));
         await loadReminders();
+      } else {
+        const errorData = await response.text();
+        console.error('❌ [RemindersView] Error guardando recordatorio:', response.status, errorData);
+        alert(`Error al guardar el recordatorio: ${response.status}`);
       }
     } catch (error) {
-      console.error('Error saving reminder:', error);
+      console.error('❌ [RemindersView] Error de red guardando recordatorio:', error);
+      alert('Error de conexión al guardar el recordatorio');
     }
   };
   

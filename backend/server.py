@@ -44,9 +44,6 @@ from contacts_service import (
 )
 
 
-ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
-
 # JWT Configuration
 SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'mindoramap-secret-key-2024-change-in-production')
 ALGORITHM = "HS256"

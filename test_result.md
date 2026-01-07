@@ -1,5 +1,40 @@
 # Test Results - Project Management System
 
+## REMINDERS WITH EMAIL NOTIFICATION TESTING (January 7, 2026) - IN PROGRESS
+
+### 🔍 FEATURE: Recordatorios con Notificación por Email
+
+#### Test Objective:
+Verify the complete Reminders with Email Notification feature including:
+1. Backend endpoint saves new email notification fields
+2. Scheduler job sends emails at the correct time
+3. Frontend modal displays all new fields correctly
+4. Email is sent to account email or custom email
+
+#### Implementation Status:
+- ✅ Backend models updated (ReminderCreate, ReminderResponse, ReminderUpdate)
+- ✅ Endpoint POST /api/reminders saves: notify_by_email, use_account_email, custom_email, notify_before, email_notification_time
+- ✅ New scheduler job `check_and_send_email_reminders()` created
+- ✅ Frontend ReminderModal updated with toggle, dropdown, and radio buttons
+
+#### Test URLs:
+- Frontend: http://localhost:3000
+- API: REACT_APP_BACKEND_URL/api/reminders
+
+#### Credentials:
+- Username: spencer3009
+- Password: Socios3009
+
+### 🧪 TESTS TO RUN:
+1. Create reminder with email to account email
+2. Create reminder with custom email
+3. Verify email_notification_time is calculated correctly
+4. Test different notify_before options (now, 5min, 15min, 1hour)
+5. Edit existing reminder and verify email settings preserved
+6. Test scheduler detects and sends emails
+
+---
+
 ## EMAIL VERIFICATION SYSTEM TESTING (December 30, 2025) ✅ COMPREHENSIVE SUCCESS
 
 ### 🔍 EMAIL VERIFICATION SYSTEM TESTING - MINDORAMAP

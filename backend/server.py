@@ -1699,6 +1699,86 @@ async def check_and_send_reminders():
         # Esperar 30 segundos para prueba (cambiar a 300 en producción)
         await asyncio.sleep(30)
 
+
+email_reminder_scheduler_running = False
+
+async def check_and_send_email_reminders():
+    """Verificar y enviar notificaciones de recordatorios por email"""
+    global email_reminder_scheduler_running
+    email_reminder_scheduler_running = True
+    
+    while email_reminder_scheduler_running:
+        try:
+            now = datetime.now(timezone.utc)
+            
+            # Buscar recordatorios pendientes que:
+            # 1. Tienen notificación por email activada
+            # 2. El tiempo de notificación ya llegó
+            # 3. No se ha enviado el email todavía
+            # 4. No están completados
+            pending_reminders = await db.reminders.find({
+                "notify_by_email": True,
+                "email_sent": {"$ne": True},
+                "is_completed": {"$ne": True},
+                "email_notification_time": {"$lte": now.isoformat()}
+            }, {"_id": 0}).to_list(50)
+            
+            for reminder in pending_reminders:
+                try:
+                    username = reminder.get("username")
+                    
+                    # Determinar a qué email enviar
+                    recipient_email = None
+                    recipient_name = username
+                    
+                    if reminder.get("use_account_email", True):
+                        # Buscar email del usuario
+                        user = await db.users.find_one({"username": username}, {"_id": 0})
+                        if user:
+                            recipient_email = user.get("email")
+                            recipient_name = user.get("full_name", username)
+                    else:
+                        # Usar email personalizado
+                        recipient_email = reminder.get("custom_email")
+                    
+                    if not recipient_email:
+                        logger.warning(f"⚠️ Recordatorio {reminder['id']}: No se encontró email para {username}")
+                        continue
+                    
+                    # Enviar email
+                    result = await reminder_email_service.send_reminder_email(
+                        recipient_email=recipient_email,
+                        recipient_name=recipient_name,
+                        title=reminder.get("title", "Recordatorio"),
+                        description=reminder.get("description", ""),
+                        reminder_date=reminder.get("reminder_date", "")
+                    )
+                    
+                    # Actualizar estado del recordatorio
+                    if result.get("success"):
+                        await db.reminders.update_one(
+                            {"id": reminder["id"]},
+                            {
+                                "$set": {
+                                    "email_sent": True,
+                                    "email_sent_at": datetime.now(timezone.utc).isoformat()
+                                }
+                            }
+                        )
+                        logger.info(f"✅ Email de recordatorio enviado: {reminder['title']} -> {recipient_email}")
+                    else:
+                        logger.error(f"❌ Error enviando email de recordatorio {reminder['id']}: {result.get('error')}")
+                        
+                except Exception as e:
+                    logger.error(f"❌ Error procesando recordatorio {reminder.get('id')}: {str(e)}")
+            
+        except Exception as e:
+            logger.error(f"❌ Error en scheduler de emails de recordatorios: {str(e)}")
+        
+        # Verificar cada 30 segundos
+        await asyncio.sleep(30)
+
+
 async def start_scheduler():
     """Iniciar el scheduler de recordatorios"""
     # Scheduler de recordatorios WhatsApp (existente)
@@ -1708,6 +1788,10 @@ async def start_scheduler():
     # Scheduler de recordatorios de verificación de email
     reminder_scheduler.start_reminder_scheduler(db)
     logger.info("✅ Scheduler de recordatorios de verificación de email iniciado")
+    
+    # Scheduler de emails de recordatorios de calendario
+    asyncio.create_task(check_and_send_email_reminders())
+    logger.info("✅ Scheduler de emails de recordatorios de calendario iniciado")
 
 
 # ==========================================

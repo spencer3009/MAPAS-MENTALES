@@ -102,6 +102,20 @@ const ReminderModal = ({ isOpen, onClose, onSave, selectedDate, editingReminder 
   const [time, setTime] = useState('09:00');
   const [loading, setLoading] = useState(false);
   
+  // Nuevos campos para notificación por email
+  const [notifyByEmail, setNotifyByEmail] = useState(true);
+  const [notifyBefore, setNotifyBefore] = useState('15min');
+  const [useAccountEmail, setUseAccountEmail] = useState(true);
+  const [customEmail, setCustomEmail] = useState('');
+  
+  // Opciones para cuándo notificar
+  const NOTIFY_OPTIONS = [
+    { value: 'now', label: 'Al momento del evento' },
+    { value: '5min', label: '5 minutos antes' },
+    { value: '15min', label: '15 minutos antes' },
+    { value: '1hour', label: '1 hora antes' },
+  ];
+  
   useEffect(() => {
     if (!isOpen) {
       // Reset state when modal closes
@@ -125,6 +139,11 @@ const ReminderModal = ({ isOpen, onClose, onSave, selectedDate, editingReminder 
         setDate(new Date().toISOString().split('T')[0]);
         setTime('09:00');
       }
+      // Cargar configuración de notificación existente
+      setNotifyByEmail(editingReminder.notify_by_email !== false);
+      setNotifyBefore(editingReminder.notify_before || '15min');
+      setUseAccountEmail(editingReminder.use_account_email !== false);
+      setCustomEmail(editingReminder.custom_email || '');
     } else if (selectedDate) {
       try {
         if (selectedDate instanceof Date && !isNaN(selectedDate.getTime())) {
@@ -147,12 +166,21 @@ const ReminderModal = ({ isOpen, onClose, onSave, selectedDate, editingReminder 
       }
       setTitle('');
       setDescription('');
+      // Defaults para notificación
+      setNotifyByEmail(true);
+      setNotifyBefore('15min');
+      setUseAccountEmail(true);
+      setCustomEmail('');
     } else {
       // Default: today
       setDate(new Date().toISOString().split('T')[0]);
       setTime('09:00');
       setTitle('');
       setDescription('');
+      setNotifyByEmail(true);
+      setNotifyBefore('15min');
+      setUseAccountEmail(true);
+      setCustomEmail('');
     }
   }, [selectedDate, editingReminder, isOpen]);
   
@@ -163,6 +191,12 @@ const ReminderModal = ({ isOpen, onClose, onSave, selectedDate, editingReminder 
     const trimmedTitle = (title || '').trim();
     if (!trimmedTitle || !date) return;
     
+    // Validar email personalizado si está activo
+    if (notifyByEmail && !useAccountEmail && !customEmail.trim()) {
+      alert('Por favor ingresa un email para la notificación');
+      return;
+    }
+    
     setLoading(true);
     const reminderDateTime = new Date(`${date}T${time || '09:00'}`);
     
@@ -170,7 +204,12 @@ const ReminderModal = ({ isOpen, onClose, onSave, selectedDate, editingReminder 
       id: editingReminder?.id,
       title: trimmedTitle,
       description: (description || '').trim(),
-      reminder_date: reminderDateTime.toISOString()
+      reminder_date: reminderDateTime.toISOString(),
+      // Campos de notificación por email
+      notify_by_email: notifyByEmail,
+      notify_before: notifyBefore,
+      use_account_email: useAccountEmail,
+      custom_email: !useAccountEmail ? customEmail.trim() : null,
     });
     
     setLoading(false);
@@ -179,8 +218,8 @@ const ReminderModal = ({ isOpen, onClose, onSave, selectedDate, editingReminder 
   
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden max-h-[90vh] flex flex-col">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 flex-shrink-0">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-white flex items-center gap-2">
               <Bell size={20} />
@@ -192,7 +231,7 @@ const ReminderModal = ({ isOpen, onClose, onSave, selectedDate, editingReminder 
           </div>
         </div>
         
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Título *</label>
             <input
@@ -211,7 +250,7 @@ const ReminderModal = ({ isOpen, onClose, onSave, selectedDate, editingReminder 
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Detalles adicionales..."
-              rows={3}
+              rows={2}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
             />
           </div>
@@ -234,15 +273,98 @@ const ReminderModal = ({ isOpen, onClose, onSave, selectedDate, editingReminder 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 <Clock size={14} className="inline mr-1" />
-                Hora
+                Hora *
               </label>
               <input
                 type="time"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                required
               />
             </div>
+          </div>
+          
+          {/* Sección de Notificación por Email */}
+          <div className="border-t border-gray-200 pt-4">
+            <div className="flex items-center justify-between mb-3">
+              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <Bell size={16} className="text-blue-500" />
+                Notificar por Email
+              </label>
+              <button
+                type="button"
+                onClick={() => setNotifyByEmail(!notifyByEmail)}
+                className={`relative w-11 h-6 rounded-full transition-colors ${
+                  notifyByEmail ? 'bg-blue-500' : 'bg-gray-300'
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                    notifyByEmail ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+            
+            {notifyByEmail && (
+              <div className="space-y-3 bg-blue-50 rounded-lg p-3">
+                {/* Cuándo enviar */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    ¿Cuándo enviar la notificación?
+                  </label>
+                  <select
+                    value={notifyBefore}
+                    onChange={(e) => setNotifyBefore(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                  >
+                    {NOTIFY_OPTIONS.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                {/* Email destino */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    Enviar a:
+                  </label>
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="emailDestination"
+                        checked={useAccountEmail}
+                        onChange={() => setUseAccountEmail(true)}
+                        className="w-4 h-4 text-blue-500 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-700">Mi email de cuenta</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="emailDestination"
+                        checked={!useAccountEmail}
+                        onChange={() => setUseAccountEmail(false)}
+                        className="w-4 h-4 text-blue-500 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-700">Otro email</span>
+                    </label>
+                    
+                    {!useAccountEmail && (
+                      <input
+                        type="email"
+                        value={customEmail}
+                        onChange={(e) => setCustomEmail(e.target.value)}
+                        placeholder="ejemplo@correo.com"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mt-1"
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="flex gap-3 pt-4">

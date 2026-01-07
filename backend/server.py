@@ -1703,29 +1703,76 @@ async def check_and_send_reminders():
 
 email_reminder_scheduler_running = False
 
+def parse_datetime_safe(date_str: str) -> Optional[datetime]:
+    """Parsear fecha ISO de forma segura, manejando diferentes formatos"""
+    if not date_str:
+        return None
+    try:
+        # Reemplazar Z por +00:00 para compatibilidad
+        date_str = date_str.replace('Z', '+00:00')
+        dt = datetime.fromisoformat(date_str)
+        # Si no tiene timezone, asumir UTC
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt
+    except Exception as e:
+        logger.warning(f"⚠️ Error parseando fecha '{date_str}': {e}")
+        return None
+
 async def check_and_send_email_reminders():
     """Verificar y enviar notificaciones de recordatorios por email"""
     global email_reminder_scheduler_running
     email_reminder_scheduler_running = True
     
+    logger.info("🚀 [Email Scheduler] Iniciando scheduler de emails de recordatorios...")
+    
     while email_reminder_scheduler_running:
         try:
             now = datetime.now(timezone.utc)
             
-            # Buscar recordatorios pendientes que:
-            # 1. Tienen notificación por email activada
-            # 2. El tiempo de notificación ya llegó
-            # 3. No se ha enviado el email todavía
-            # 4. No están completados
-            pending_reminders = await db.reminders.find({
+            # Buscar TODOS los recordatorios con notificación por email pendiente
+            # La comparación de fechas la hacemos en Python para evitar problemas de formato
+            all_pending = await db.reminders.find({
                 "notify_by_email": True,
                 "email_sent": {"$ne": True},
-                "is_completed": {"$ne": True},
-                "email_notification_time": {"$lte": now.isoformat()}
-            }, {"_id": 0}).to_list(50)
+                "is_completed": {"$ne": True}
+            }, {"_id": 0}).to_list(100)
             
-            for reminder in pending_reminders:
+            if all_pending:
+                logger.info(f"📋 [Email Scheduler] Evaluando {len(all_pending)} recordatorios pendientes...")
+            
+            for reminder in all_pending:
                 try:
+                    reminder_id = reminder.get("id", "unknown")
+                    title = reminder.get("title", "Sin título")
+                    email_notification_time_str = reminder.get("email_notification_time")
+                    
+                    # Si no tiene tiempo de notificación, usar reminder_date
+                    if not email_notification_time_str:
+                        email_notification_time_str = reminder.get("reminder_date")
+                    
+                    if not email_notification_time_str:
+                        logger.warning(f"⚠️ [Email Scheduler] Recordatorio {reminder_id} ({title}): Sin fecha de notificación configurada")
+                        continue
+                    
+                    # Parsear la fecha de notificación
+                    notification_dt = parse_datetime_safe(email_notification_time_str)
+                    if not notification_dt:
+                        logger.warning(f"⚠️ [Email Scheduler] Recordatorio {reminder_id} ({title}): Fecha inválida: {email_notification_time_str}")
+                        continue
+                    
+                    # Comparar fechas como datetime objects
+                    time_diff = (notification_dt - now).total_seconds()
+                    
+                    # Log de evaluación
+                    if time_diff > 0:
+                        mins_remaining = int(time_diff / 60)
+                        logger.debug(f"⏳ [Email Scheduler] Recordatorio '{title}' - Faltan {mins_remaining} minutos para notificar")
+                        continue
+                    
+                    # ¡Es hora de enviar!
+                    logger.info(f"🔔 [Email Scheduler] Evaluando recordatorio '{title}' (ID: {reminder_id[:8]}...) — Hora notificación: {notification_dt.isoformat()}")
+                    
                     username = reminder.get("username")
                     
                     # Determinar a qué email enviar
@@ -1738,19 +1785,28 @@ async def check_and_send_email_reminders():
                         if user:
                             recipient_email = user.get("email")
                             recipient_name = user.get("full_name", username)
+                            logger.info(f"📧 [Email Scheduler] Usando email de cuenta: {recipient_email}")
                     else:
                         # Usar email personalizado
                         recipient_email = reminder.get("custom_email")
+                        logger.info(f"📧 [Email Scheduler] Usando email personalizado: {recipient_email}")
                     
                     if not recipient_email:
-                        logger.warning(f"⚠️ Recordatorio {reminder['id']}: No se encontró email para {username}")
+                        logger.warning(f"⚠️ [Email Scheduler] Recordatorio {reminder_id} ({title}): No se encontró email para usuario '{username}' — NO SE ENVIÓ")
+                        # Marcar como enviado para evitar reintentos infinitos
+                        await db.reminders.update_one(
+                            {"id": reminder_id},
+                            {"$set": {"email_sent": True, "email_sent_at": now.isoformat(), "email_send_error": "No email found"}}
+                        )
                         continue
                     
-                    # Enviar email
+                    # ¡ENVIAR EMAIL!
+                    logger.info(f"📤 [Email Scheduler] Enviando email a {recipient_email} — Recordatorio: '{title}'")
+                    
                     result = await reminder_email_service.send_reminder_email(
                         recipient_email=recipient_email,
                         recipient_name=recipient_name,
-                        title=reminder.get("title", "Recordatorio"),
+                        title=title,
                         description=reminder.get("description", ""),
                         reminder_date=reminder.get("reminder_date", "")
                     )
@@ -1758,26 +1814,37 @@ async def check_and_send_email_reminders():
                     # Actualizar estado del recordatorio
                     if result.get("success"):
                         await db.reminders.update_one(
-                            {"id": reminder["id"]},
+                            {"id": reminder_id},
                             {
                                 "$set": {
                                     "email_sent": True,
-                                    "email_sent_at": datetime.now(timezone.utc).isoformat()
+                                    "email_sent_at": now.isoformat(),
+                                    "email_result": result
                                 }
                             }
                         )
-                        logger.info(f"✅ Email de recordatorio enviado: {reminder['title']} -> {recipient_email}")
+                        logger.info(f"✅ [Email Scheduler] Email enviado correctamente: '{title}' -> {recipient_email}")
                     else:
-                        logger.error(f"❌ Error enviando email de recordatorio {reminder['id']}: {result.get('error')}")
+                        # Guardar error pero no marcar como enviado para reintentar
+                        await db.reminders.update_one(
+                            {"id": reminder_id},
+                            {
+                                "$set": {
+                                    "email_send_error": result.get("error"),
+                                    "email_last_attempt": now.isoformat()
+                                }
+                            }
+                        )
+                        logger.error(f"❌ [Email Scheduler] Error enviando email — Recordatorio: '{title}' — Error: {result.get('error')}")
                         
                 except Exception as e:
-                    logger.error(f"❌ Error procesando recordatorio {reminder.get('id')}: {str(e)}")
+                    logger.error(f"❌ [Email Scheduler] Error procesando recordatorio {reminder.get('id')}: {str(e)}")
             
         except Exception as e:
-            logger.error(f"❌ Error en scheduler de emails de recordatorios: {str(e)}")
+            logger.error(f"❌ [Email Scheduler] Error general en scheduler: {str(e)}")
         
-        # Verificar cada 30 segundos
-        await asyncio.sleep(30)
+        # Verificar cada 15 segundos (más frecuente para mejor precisión)
+        await asyncio.sleep(15)
 
 
 async def start_scheduler():

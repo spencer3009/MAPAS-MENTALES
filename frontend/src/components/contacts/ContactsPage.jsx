@@ -1384,12 +1384,7 @@ const ContactsPage = () => {
           </div>
         );
       case 'whatsapp':
-        return (
-          <div className="flex items-center gap-1.5 text-gray-600">
-            <Phone size={14} className="text-gray-400" />
-            {contact.whatsapp}
-          </div>
-        );
+        return <WhatsAppLink phoneNumber={contact.whatsapp} />;
       case 'email':
         return contact.email ? (
           <div className="flex items-center gap-1.5 text-gray-600">

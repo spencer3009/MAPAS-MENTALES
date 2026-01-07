@@ -1931,7 +1931,15 @@ async def create_reminder(
     
     await db.reminders.insert_one(reminder)
     
-    logger.info(f"📅 Recordatorio creado: {reminder['title']} - Email: {'Sí' if reminder_data.notify_by_email else 'No'} - Notify: {reminder_data.notify_before}")
+    logger.info(f"📅 [CREATE REMINDER] ============================================")
+    logger.info(f"📅 [CREATE REMINDER] Título: {reminder['title']}")
+    logger.info(f"📅 [CREATE REMINDER] reminder_date: {reminder_date}")
+    logger.info(f"📅 [CREATE REMINDER] notify_by_email: {reminder_data.notify_by_email}")
+    logger.info(f"📅 [CREATE REMINDER] notify_before: {reminder_data.notify_before}")
+    logger.info(f"📅 [CREATE REMINDER] email_notification_time: {email_notification_time}")
+    logger.info(f"📅 [CREATE REMINDER] use_account_email: {reminder_data.use_account_email}")
+    logger.info(f"📅 [CREATE REMINDER] custom_email: {reminder_data.custom_email}")
+    logger.info(f"📅 [CREATE REMINDER] ============================================")
     
     return reminder
 

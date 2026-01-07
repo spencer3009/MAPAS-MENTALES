@@ -1535,6 +1535,7 @@ class ReminderResponse(BaseModel):
     use_account_email: bool = True
     custom_email: Optional[str] = None
     notify_before: str = "15min"
+    email_notification_time: Optional[str] = None
     email_sent: bool = False
     email_sent_at: Optional[str] = None
     

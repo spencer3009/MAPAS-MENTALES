@@ -29,6 +29,7 @@ import paypal_service
 import email_service
 import reminder_service
 import reminder_scheduler
+import reminder_email_service
 import board_service
 from board_service import (
     CreateBoardRequest, UpdateBoardRequest, 

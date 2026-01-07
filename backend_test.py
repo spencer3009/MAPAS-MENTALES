@@ -1398,6 +1398,31 @@ class EmailVerificationTester:
                 data = response.json()
                 
                 # After verification, email_verified should be true
+                email_verified = data.get("email_verified", False)
+                username = data.get("username")
+                email = data.get("email")
+                
+                success = (email_verified == True)
+                
+                details = f"User: {username}, email: {email}, email_verified: {email_verified}"
+                
+                self.log_test(
+                    "GET /api/auth/me (after verification)", 
+                    success, 
+                    details,
+                    {"email_verified": email_verified}
+                )
+                return success
+            else:
+                error_data = response.json() if response.content else {}
+                self.log_test("GET /api/auth/me (after verification)", False, f"HTTP {response.status_code}", error_data)
+                return False
+                
+        except Exception as e:
+            self.log_test("GET /api/auth/me (after verification)", False, f"Exception: {str(e)}")
+            return False
+
+
 class ReminderEmailNotificationTester:
     def __init__(self):
         self.base_url = BASE_URL

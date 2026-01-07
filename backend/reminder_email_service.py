@@ -224,23 +224,33 @@ def calculate_notification_time(reminder_date: str, notify_before: str) -> datet
     notify_before puede ser: 'now', '5min', '15min', '1hour'
     """
     try:
-        reminder_dt = datetime.fromisoformat(reminder_date.replace('Z', '+00:00'))
+        # Normalizar el formato de fecha
+        reminder_date = reminder_date.replace('Z', '+00:00')
+        reminder_dt = datetime.fromisoformat(reminder_date)
         
         # Asegurar que tenga timezone
         if reminder_dt.tzinfo is None:
             reminder_dt = reminder_dt.replace(tzinfo=timezone.utc)
         
+        logger.info(f"📆 [calculate_notification_time] reminder_date original: {reminder_date}")
+        logger.info(f"📆 [calculate_notification_time] reminder_dt parseado: {reminder_dt.isoformat()}")
+        logger.info(f"📆 [calculate_notification_time] notify_before: {notify_before}")
+        
         if notify_before == 'now':
-            return reminder_dt
+            notification_time = reminder_dt
         elif notify_before == '5min':
-            return reminder_dt - timedelta(minutes=5)
+            notification_time = reminder_dt - timedelta(minutes=5)
         elif notify_before == '15min':
-            return reminder_dt - timedelta(minutes=15)
+            notification_time = reminder_dt - timedelta(minutes=15)
         elif notify_before == '1hour':
-            return reminder_dt - timedelta(hours=1)
+            notification_time = reminder_dt - timedelta(hours=1)
         else:
             # Default: 15 minutos antes
-            return reminder_dt - timedelta(minutes=15)
+            notification_time = reminder_dt - timedelta(minutes=15)
+        
+        logger.info(f"📆 [calculate_notification_time] notification_time calculado: {notification_time.isoformat()}")
+        return notification_time
+        
     except Exception as e:
-        logger.error(f"Error calculando tiempo de notificación: {e}")
+        logger.error(f"❌ [calculate_notification_time] Error calculando tiempo de notificación: {e}")
         return datetime.now(timezone.utc)

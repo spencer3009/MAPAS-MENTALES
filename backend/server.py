@@ -19,6 +19,12 @@ from passlib.context import CryptContext
 from PIL import Image
 import io
 import base64
+
+# IMPORTANTE: Cargar variables de entorno ANTES de importar servicios de email
+ROOT_DIR = Path(__file__).parent
+load_dotenv(ROOT_DIR / '.env')
+
+# Ahora sí importar los servicios que dependen de variables de entorno
 import paypal_service
 import email_service
 import reminder_service

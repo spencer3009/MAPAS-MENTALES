@@ -1398,11 +1398,620 @@ class EmailVerificationTester:
                 data = response.json()
                 
                 # After verification, email_verified should be true
+class ReminderEmailNotificationTester:
+    def __init__(self):
+        self.base_url = BASE_URL
+        self.session = requests.Session()
+        self.test_results = []
+        self.auth_token = None
+        self.created_reminders = []
+        
+    def log_test(self, test_name: str, success: bool, details: str = "", response_data: dict = None):
+        """Log test results"""
+        status = "✅ PASS" if success else "❌ FAIL"
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        
+        result = {
+            "timestamp": timestamp,
+            "test": test_name,
+            "status": status,
+            "success": success,
+            "details": details,
+            "response_data": response_data
+        }
+        
+        self.test_results.append(result)
+        print(f"[{timestamp}] {status} - {test_name}")
+        if details:
+            print(f"    Details: {details}")
+        if not success and response_data:
+            print(f"    Response: {response_data}")
+        print()
+
+    def get_auth_token(self) -> bool:
+        """Get authentication token"""
+        try:
+            url = f"{self.base_url}/auth/login"
+            response = self.session.post(url, json=ADMIN_CREDENTIALS)
+            
+            if response.status_code == 200:
+                data = response.json()
+                self.auth_token = data.get("access_token")
+                
+                if self.auth_token:
+                    self.log_test(
+                        "User Login", 
+                        True, 
+                        f"Successfully logged in as: {ADMIN_CREDENTIALS['username']}",
+                        {"token_received": True}
+                    )
+                    return True
+                else:
+                    self.log_test("User Login", False, "No access token received", data)
+                    return False
+            else:
+                self.log_test("User Login", False, f"HTTP {response.status_code}", response.json())
+                return False
+                
+        except Exception as e:
+            self.log_test("User Login", False, f"Exception: {str(e)}")
+            return False
+
+    def test_create_reminder_with_account_email_15min(self) -> bool:
+        """Test creating reminder with email notification ON, account email, 15 min before"""
+        try:
+            if not self.auth_token:
+                self.log_test("Create Reminder - Account Email 15min", False, "No auth token available")
+                return False
+            
+            # Calculate reminder date (1 hour from now for testing)
+            from datetime import datetime, timezone, timedelta
+            reminder_time = datetime.now(timezone.utc) + timedelta(hours=1)
+            reminder_date_str = reminder_time.isoformat()
+            
+            reminder_data = {
+                "title": "Test Reminder - Account Email",
+                "description": "Testing email notification to account email 15 minutes before",
+                "reminder_date": reminder_date_str,
+                "notify_by_email": True,
+                "use_account_email": True,
+                "notify_before": "15min"
+            }
+            
+            url = f"{self.base_url}/reminders"
+            headers = {"Authorization": f"Bearer {self.auth_token}"}
+            response = self.session.post(url, json=reminder_data, headers=headers)
+            
+            if response.status_code == 200:
+                data = response.json()
+                reminder_id = data.get("id")
+                self.created_reminders.append(reminder_id)
+                
+                # Verify response fields
+                notify_by_email = data.get("notify_by_email", False)
+                use_account_email = data.get("use_account_email", False)
+                notify_before = data.get("notify_before", "")
+                email_notification_time = data.get("email_notification_time")
+                email_sent = data.get("email_sent", True)  # Should be False initially
+                
+                # Calculate expected notification time (15 min before reminder)
+                expected_notification_time = reminder_time - timedelta(minutes=15)
+                
+                # Parse actual notification time
+                actual_notification_time = None
+                if email_notification_time:
+                    try:
+                        actual_notification_time = datetime.fromisoformat(email_notification_time.replace('Z', '+00:00'))
+                    except:
+                        pass
+                
+                # Check if notification time is calculated correctly (within 1 minute tolerance)
+                time_calculation_correct = False
+                if actual_notification_time:
+                    time_diff = abs((actual_notification_time - expected_notification_time).total_seconds())
+                    time_calculation_correct = time_diff < 60  # Within 1 minute
+                
+                success = (
+                    notify_by_email == True and
+                    use_account_email == True and
+                    notify_before == "15min" and
+                    email_sent == False and
+                    time_calculation_correct
+                )
+                
+                details = f"ID: {reminder_id}, notify_by_email: {notify_by_email}, use_account_email: {use_account_email}, notify_before: {notify_before}, email_sent: {email_sent}, time_calc_correct: {time_calculation_correct}"
+                
+                self.log_test(
+                    "Create Reminder - Account Email 15min", 
+                    success, 
+                    details,
+                    {
+                        "reminder_id": reminder_id,
+                        "notify_by_email": notify_by_email,
+                        "use_account_email": use_account_email,
+                        "notify_before": notify_before,
+                        "email_notification_time": email_notification_time,
+                        "email_sent": email_sent
+                    }
+                )
+                return success
+            else:
+                error_data = response.json() if response.content else {}
+                self.log_test("Create Reminder - Account Email 15min", False, f"HTTP {response.status_code}", error_data)
+                return False
+                
+        except Exception as e:
+            self.log_test("Create Reminder - Account Email 15min", False, f"Exception: {str(e)}")
+            return False
+
+    def test_create_reminder_with_custom_email_1hour(self) -> bool:
+        """Test creating reminder with email notification ON, custom email, 1 hour before"""
+        try:
+            if not self.auth_token:
+                self.log_test("Create Reminder - Custom Email 1hour", False, "No auth token available")
+                return False
+            
+            # Calculate reminder date (2 hours from now for testing)
+            from datetime import datetime, timezone, timedelta
+            reminder_time = datetime.now(timezone.utc) + timedelta(hours=2)
+            reminder_date_str = reminder_time.isoformat()
+            
+            reminder_data = {
+                "title": "Test Reminder - Custom Email",
+                "description": "Testing email notification to custom email 1 hour before",
+                "reminder_date": reminder_date_str,
+                "notify_by_email": True,
+                "use_account_email": False,
+                "custom_email": "custom@test.com",
+                "notify_before": "1hour"
+            }
+            
+            url = f"{self.base_url}/reminders"
+            headers = {"Authorization": f"Bearer {self.auth_token}"}
+            response = self.session.post(url, json=reminder_data, headers=headers)
+            
+            if response.status_code == 200:
+                data = response.json()
+                reminder_id = data.get("id")
+                self.created_reminders.append(reminder_id)
+                
+                # Verify response fields
+                notify_by_email = data.get("notify_by_email", False)
+                use_account_email = data.get("use_account_email", True)  # Should be False
+                custom_email = data.get("custom_email", "")
+                notify_before = data.get("notify_before", "")
+                email_notification_time = data.get("email_notification_time")
+                email_sent = data.get("email_sent", True)  # Should be False initially
+                
+                # Calculate expected notification time (1 hour before reminder)
+                expected_notification_time = reminder_time - timedelta(hours=1)
+                
+                # Parse actual notification time
+                actual_notification_time = None
+                if email_notification_time:
+                    try:
+                        actual_notification_time = datetime.fromisoformat(email_notification_time.replace('Z', '+00:00'))
+                    except:
+                        pass
+                
+                # Check if notification time is calculated correctly (within 1 minute tolerance)
+                time_calculation_correct = False
+                if actual_notification_time:
+                    time_diff = abs((actual_notification_time - expected_notification_time).total_seconds())
+                    time_calculation_correct = time_diff < 60  # Within 1 minute
+                
+                success = (
+                    notify_by_email == True and
+                    use_account_email == False and
+                    custom_email == "custom@test.com" and
+                    notify_before == "1hour" and
+                    email_sent == False and
+                    time_calculation_correct
+                )
+                
+                details = f"ID: {reminder_id}, notify_by_email: {notify_by_email}, use_account_email: {use_account_email}, custom_email: {custom_email}, notify_before: {notify_before}, email_sent: {email_sent}, time_calc_correct: {time_calculation_correct}"
+                
+                self.log_test(
+                    "Create Reminder - Custom Email 1hour", 
+                    success, 
+                    details,
+                    {
+                        "reminder_id": reminder_id,
+                        "notify_by_email": notify_by_email,
+                        "use_account_email": use_account_email,
+                        "custom_email": custom_email,
+                        "notify_before": notify_before,
+                        "email_notification_time": email_notification_time,
+                        "email_sent": email_sent
+                    }
+                )
+                return success
+            else:
+                error_data = response.json() if response.content else {}
+                self.log_test("Create Reminder - Custom Email 1hour", False, f"HTTP {response.status_code}", error_data)
+                return False
+                
+        except Exception as e:
+            self.log_test("Create Reminder - Custom Email 1hour", False, f"Exception: {str(e)}")
+            return False
+
+    def test_create_reminder_email_off(self) -> bool:
+        """Test creating reminder with email notification OFF"""
+        try:
+            if not self.auth_token:
+                self.log_test("Create Reminder - Email OFF", False, "No auth token available")
+                return False
+            
+            # Calculate reminder date (30 minutes from now for testing)
+            from datetime import datetime, timezone, timedelta
+            reminder_time = datetime.now(timezone.utc) + timedelta(minutes=30)
+            reminder_date_str = reminder_time.isoformat()
+            
+            reminder_data = {
+                "title": "Test Reminder - No Email",
+                "description": "Testing reminder with email notification disabled",
+                "reminder_date": reminder_date_str,
+                "notify_by_email": False,
+                "use_account_email": True,
+                "notify_before": "5min"
+            }
+            
+            url = f"{self.base_url}/reminders"
+            headers = {"Authorization": f"Bearer {self.auth_token}"}
+            response = self.session.post(url, json=reminder_data, headers=headers)
+            
+            if response.status_code == 200:
+                data = response.json()
+                reminder_id = data.get("id")
+                self.created_reminders.append(reminder_id)
+                
+                # Verify response fields
+                notify_by_email = data.get("notify_by_email", True)  # Should be False
+                email_notification_time = data.get("email_notification_time")
+                email_sent = data.get("email_sent", True)  # Should be False
+                
+                # When email notification is OFF, email_notification_time should be None or empty
+                success = (
+                    notify_by_email == False and
+                    email_sent == False and
+                    (email_notification_time is None or email_notification_time == "")
+                )
+                
+                details = f"ID: {reminder_id}, notify_by_email: {notify_by_email}, email_notification_time: {email_notification_time}, email_sent: {email_sent}"
+                
+                self.log_test(
+                    "Create Reminder - Email OFF", 
+                    success, 
+                    details,
+                    {
+                        "reminder_id": reminder_id,
+                        "notify_by_email": notify_by_email,
+                        "email_notification_time": email_notification_time,
+                        "email_sent": email_sent
+                    }
+                )
+                return success
+            else:
+                error_data = response.json() if response.content else {}
+                self.log_test("Create Reminder - Email OFF", False, f"HTTP {response.status_code}", error_data)
+                return False
+                
+        except Exception as e:
+            self.log_test("Create Reminder - Email OFF", False, f"Exception: {str(e)}")
+            return False
+
+    def test_update_reminder_email_settings(self) -> bool:
+        """Test updating an existing reminder's email settings"""
+        try:
+            if not self.auth_token or not self.created_reminders:
+                self.log_test("Update Reminder Email Settings", False, "No auth token or created reminders available")
+                return False
+            
+            # Use the first created reminder
+            reminder_id = self.created_reminders[0]
+            
+            # Update email settings
+            update_data = {
+                "notify_by_email": True,
+                "use_account_email": False,
+                "custom_email": "updated@test.com",
+                "notify_before": "5min"
+            }
+            
+            url = f"{self.base_url}/reminders/{reminder_id}"
+            headers = {"Authorization": f"Bearer {self.auth_token}"}
+            response = self.session.put(url, json=update_data, headers=headers)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Verify updated fields
+                notify_by_email = data.get("notify_by_email", False)
+                use_account_email = data.get("use_account_email", True)
+                custom_email = data.get("custom_email", "")
+                notify_before = data.get("notify_before", "")
+                email_notification_time = data.get("email_notification_time")
+                
+                success = (
+                    notify_by_email == True and
+                    use_account_email == False and
+                    custom_email == "updated@test.com" and
+                    notify_before == "5min" and
+                    email_notification_time is not None
+                )
+                
+                details = f"ID: {reminder_id}, notify_by_email: {notify_by_email}, use_account_email: {use_account_email}, custom_email: {custom_email}, notify_before: {notify_before}"
+                
+                self.log_test(
+                    "Update Reminder Email Settings", 
+                    success, 
+                    details,
+                    {
+                        "reminder_id": reminder_id,
+                        "notify_by_email": notify_by_email,
+                        "use_account_email": use_account_email,
+                        "custom_email": custom_email,
+                        "notify_before": notify_before,
+                        "email_notification_time": email_notification_time
+                    }
+                )
+                return success
+            else:
+                error_data = response.json() if response.content else {}
+                self.log_test("Update Reminder Email Settings", False, f"HTTP {response.status_code}", error_data)
+                return False
+                
+        except Exception as e:
+            self.log_test("Update Reminder Email Settings", False, f"Exception: {str(e)}")
+            return False
+
+    def test_notification_time_calculation_now(self) -> bool:
+        """Test email_notification_time calculation for 'now' option"""
+        try:
+            if not self.auth_token:
+                self.log_test("Notification Time Calculation - Now", False, "No auth token available")
+                return False
+            
+            # Calculate reminder date (1 hour from now for testing)
+            from datetime import datetime, timezone, timedelta
+            reminder_time = datetime.now(timezone.utc) + timedelta(hours=1)
+            reminder_date_str = reminder_time.isoformat()
+            
+            reminder_data = {
+                "title": "Test Reminder - Now Notification",
+                "description": "Testing email notification time calculation for 'now'",
+                "reminder_date": reminder_date_str,
+                "notify_by_email": True,
+                "use_account_email": True,
+                "notify_before": "now"
+            }
+            
+            url = f"{self.base_url}/reminders"
+            headers = {"Authorization": f"Bearer {self.auth_token}"}
+            response = self.session.post(url, json=reminder_data, headers=headers)
+            
+            if response.status_code == 200:
+                data = response.json()
+                reminder_id = data.get("id")
+                self.created_reminders.append(reminder_id)
+                
+                email_notification_time = data.get("email_notification_time")
+                notify_before = data.get("notify_before", "")
+                
+                # For 'now', notification time should equal reminder time
+                expected_notification_time = reminder_time
+                
+                # Parse actual notification time
+                actual_notification_time = None
+                if email_notification_time:
+                    try:
+                        actual_notification_time = datetime.fromisoformat(email_notification_time.replace('Z', '+00:00'))
+                    except:
+                        pass
+                
+                # Check if notification time equals reminder time (within 1 minute tolerance)
+                time_calculation_correct = False
+                if actual_notification_time:
+                    time_diff = abs((actual_notification_time - expected_notification_time).total_seconds())
+                    time_calculation_correct = time_diff < 60  # Within 1 minute
+                
+                success = (
+                    notify_before == "now" and
+                    time_calculation_correct
+                )
+                
+                details = f"ID: {reminder_id}, notify_before: {notify_before}, time_calc_correct: {time_calculation_correct}, expected: {expected_notification_time}, actual: {actual_notification_time}"
+                
+                self.log_test(
+                    "Notification Time Calculation - Now", 
+                    success, 
+                    details,
+                    {
+                        "reminder_id": reminder_id,
+                        "notify_before": notify_before,
+                        "email_notification_time": email_notification_time,
+                        "time_calculation_correct": time_calculation_correct
+                    }
+                )
+                return success
+            else:
+                error_data = response.json() if response.content else {}
+                self.log_test("Notification Time Calculation - Now", False, f"HTTP {response.status_code}", error_data)
+                return False
+                
+        except Exception as e:
+            self.log_test("Notification Time Calculation - Now", False, f"Exception: {str(e)}")
+            return False
+
+    def test_get_reminders_with_email_fields(self) -> bool:
+        """Test GET /api/reminders returns email notification fields"""
+        try:
+            if not self.auth_token:
+                self.log_test("GET Reminders with Email Fields", False, "No auth token available")
+                return False
+            
+            url = f"{self.base_url}/reminders"
+            headers = {"Authorization": f"Bearer {self.auth_token}"}
+            response = self.session.get(url, headers=headers)
+            
+            if response.status_code == 200:
+                reminders = response.json()
+                
+                if not reminders:
+                    self.log_test("GET Reminders with Email Fields", False, "No reminders found")
+                    return False
+                
+                # Check if at least one reminder has email notification fields
+                has_email_fields = False
+                sample_reminder = None
+                
+                for reminder in reminders:
+                    if (
+                        "notify_by_email" in reminder and
+                        "use_account_email" in reminder and
+                        "notify_before" in reminder and
+                        "email_sent" in reminder
+                    ):
+                        has_email_fields = True
+                        sample_reminder = reminder
+                        break
+                
+                success = has_email_fields
+                
+                details = f"Total reminders: {len(reminders)}, has_email_fields: {has_email_fields}"
+                if sample_reminder:
+                    details += f", sample_reminder_id: {sample_reminder.get('id')}"
+                
+                self.log_test(
+                    "GET Reminders with Email Fields", 
+                    success, 
+                    details,
+                    {
+                        "total_reminders": len(reminders),
+                        "has_email_fields": has_email_fields,
+                        "sample_fields": {
+                            "notify_by_email": sample_reminder.get("notify_by_email") if sample_reminder else None,
+                            "use_account_email": sample_reminder.get("use_account_email") if sample_reminder else None,
+                            "notify_before": sample_reminder.get("notify_before") if sample_reminder else None,
+                            "email_sent": sample_reminder.get("email_sent") if sample_reminder else None
+                        } if sample_reminder else None
+                    }
+                )
+                return success
+            else:
+                error_data = response.json() if response.content else {}
+                self.log_test("GET Reminders with Email Fields", False, f"HTTP {response.status_code}", error_data)
+                return False
+                
+        except Exception as e:
+            self.log_test("GET Reminders with Email Fields", False, f"Exception: {str(e)}")
+            return False
+
+    def cleanup_test_reminders(self):
+        """Clean up test reminders"""
+        try:
+            if not self.auth_token:
+                return
+            
+            headers = {"Authorization": f"Bearer {self.auth_token}"}
+            for reminder_id in self.created_reminders:
+                try:
+                    delete_url = f"{self.base_url}/reminders/{reminder_id}"
+                    self.session.delete(delete_url, headers=headers)
+                except:
+                    pass  # Ignore cleanup errors
+            
+            if self.created_reminders:
+                print(f"🧹 Cleaned up {len(self.created_reminders)} test reminders")
+        except Exception as e:
+            print(f"Warning: Could not clean up test reminders: {e}")
+
+    def run_comprehensive_test(self):
+        """Run all reminder email notification tests in sequence"""
+        print("=" * 80)
+        print("📧 MINDORA REMINDERS EMAIL NOTIFICATION TESTING")
+        print("=" * 80)
+        print(f"Base URL: {self.base_url}")
+        print(f"User: {ADMIN_CREDENTIALS['username']}")
+        print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print()
+        
+        # Step 1: Get authentication token
+        print("🔍 Getting Authentication Token...")
+        if not self.get_auth_token():
+            print("❌ Cannot proceed without authentication token")
+            self.print_summary()
+            return
+        
+        # Step 2: Test create reminder with account email, 15 min before
+        print("🔍 Testing Create Reminder - Account Email 15min...")
+        self.test_create_reminder_with_account_email_15min()
+        
+        # Step 3: Test create reminder with custom email, 1 hour before
+        print("🔍 Testing Create Reminder - Custom Email 1hour...")
+        self.test_create_reminder_with_custom_email_1hour()
+        
+        # Step 4: Test create reminder with email notification OFF
+        print("🔍 Testing Create Reminder - Email OFF...")
+        self.test_create_reminder_email_off()
+        
+        # Step 5: Test notification time calculation for 'now'
+        print("🔍 Testing Notification Time Calculation - Now...")
+        self.test_notification_time_calculation_now()
+        
+        # Step 6: Test update reminder email settings
+        print("🔍 Testing Update Reminder Email Settings...")
+        self.test_update_reminder_email_settings()
+        
+        # Step 7: Test GET reminders includes email fields
+        print("🔍 Testing GET Reminders with Email Fields...")
+        self.test_get_reminders_with_email_fields()
+        
+        # Cleanup
+        print("🔍 Cleaning up test data...")
+        self.cleanup_test_reminders()
+        
+        # Print summary
+        self.print_summary()
+
+    def print_summary(self):
+        """Print test summary"""
+        print("\n" + "=" * 80)
+        print("📊 REMINDER EMAIL NOTIFICATION TEST SUMMARY")
+        print("=" * 80)
+        
+        total_tests = len(self.test_results)
+        passed_tests = sum(1 for result in self.test_results if result["success"])
+        failed_tests = total_tests - passed_tests
+        
+        print(f"Total Tests: {total_tests}")
+        print(f"✅ Passed: {passed_tests}")
+        print(f"❌ Failed: {failed_tests}")
+        print(f"Success Rate: {(passed_tests/total_tests*100):.1f}%" if total_tests > 0 else "0%")
+        print()
+        
+        if failed_tests > 0:
+            print("❌ FAILED TESTS:")
+            for result in self.test_results:
+                if not result["success"]:
+                    print(f"  - {result['test']}: {result['details']}")
+            print()
+        
+        print("✅ PASSED TESTS:")
+        for result in self.test_results:
+            if result["success"]:
+                print(f"  - {result['test']}")
+        
+        print("\n" + "=" * 80)
+        print(f"Testing completed at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print("=" * 80)
+
+
 if __name__ == "__main__":
-    # Run email verification tests
-    print("Starting Email Verification System Tests...")
-    email_tester = EmailVerificationTester()
-    email_tester.run_comprehensive_test()
+    # Run reminder email notification tests
+    print("Starting Reminder Email Notification Tests...")
+    reminder_tester = ReminderEmailNotificationTester()
+    reminder_tester.run_comprehensive_test()
                 email_verified = data.get("email_verified", False)
                 username = data.get("username")
                 email = data.get("email")

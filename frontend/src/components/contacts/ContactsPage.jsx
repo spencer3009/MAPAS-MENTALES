@@ -2924,7 +2924,9 @@ const ContactsPage = () => {
                     <label className="text-xs text-gray-500 uppercase tracking-wide flex items-center gap-1">
                       <Phone size={12} /> WhatsApp
                     </label>
-                    <p className="text-gray-900 font-medium">{showViewModal.whatsapp || '—'}</p>
+                    <div className="mt-1">
+                      <WhatsAppLink phoneNumber={showViewModal.whatsapp} className="font-medium" />
+                    </div>
                   </div>
                   <div>
                     <label className="text-xs text-gray-500 uppercase tracking-wide flex items-center gap-1">

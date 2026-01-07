@@ -3175,6 +3175,111 @@ async def get_unverified_users(current_user: dict = Depends(require_admin)):
         logger.error(f"Error obteniendo usuarios no verificados: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
+@api_router.get("/admin/email-diagnostics")
+async def get_email_diagnostics(current_user: dict = Depends(require_admin)):
+    """
+    Diagnóstico del sistema de emails.
+    Solo disponible para administradores.
+    """
+    import resend as resend_module
+    
+    # Verificar configuración
+    api_key = os.environ.get("RESEND_API_KEY", "")
+    sender_email = os.environ.get("SENDER_EMAIL", "")
+    app_url = os.environ.get("APP_URL", "")
+    
+    diagnostics = {
+        "config": {
+            "api_key_configured": bool(api_key) and len(api_key) > 10,
+            "api_key_preview": api_key[:15] + "..." if api_key else "NOT SET",
+            "sender_email": sender_email or "NOT SET",
+            "app_url": app_url or "NOT SET (will use localhost)",
+            "resend_api_key_loaded": bool(resend_module.api_key)
+        },
+        "status": "unknown",
+        "message": "",
+        "recommendations": []
+    }
+    
+    if not api_key:
+        diagnostics["status"] = "error"
+        diagnostics["message"] = "API Key de Resend no configurada"
+        diagnostics["recommendations"].append("Configura RESEND_API_KEY en /app/backend/.env")
+    elif not sender_email:
+        diagnostics["status"] = "warning"
+        diagnostics["message"] = "Email del remitente no configurado"
+        diagnostics["recommendations"].append("Configura SENDER_EMAIL en /app/backend/.env")
+    else:
+        # Intentar obtener info de la cuenta (esto verifica si la key es válida)
+        try:
+            # No hay un endpoint directo para verificar, pero podemos intentar
+            diagnostics["status"] = "configured"
+            diagnostics["message"] = "Configuración de email detectada"
+            
+            if sender_email == "onboarding@resend.dev":
+                diagnostics["recommendations"].append(
+                    "⚠️ Estás usando el email de prueba de Resend. Solo puedes enviar emails a tu propia dirección."
+                )
+                diagnostics["recommendations"].append(
+                    "Para enviar a otros destinatarios, verifica un dominio en resend.com/domains"
+                )
+        except Exception as e:
+            diagnostics["status"] = "error"
+            diagnostics["message"] = f"Error verificando configuración: {str(e)}"
+    
+    # Obtener últimos intentos de envío desde logs (si están disponibles)
+    recent_emails = await db.email_logs.find(
+        {},
+        {"_id": 0}
+    ).sort("timestamp", -1).limit(20).to_list(20)
+    
+    diagnostics["recent_attempts"] = recent_emails if recent_emails else []
+    
+    return diagnostics
+
+
+@api_router.post("/admin/test-email")
+async def test_email_send(current_user: dict = Depends(require_admin)):
+    """
+    Envía un email de prueba al admin.
+    Solo disponible para administradores.
+    """
+    admin_email = current_user.get("email")
+    if not admin_email:
+        raise HTTPException(status_code=400, detail="El usuario admin no tiene email configurado")
+    
+    try:
+        result = await email_service.send_verification_email(
+            admin_email,
+            current_user.get("full_name", "Admin"),
+            "test-token-123"
+        )
+        
+        # Guardar log del intento
+        await db.email_logs.insert_one({
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "type": "test",
+            "recipient": admin_email,
+            "success": result.get("success", False),
+            "error": result.get("error"),
+            "triggered_by": current_user["username"]
+        })
+        
+        return {
+            "success": result.get("success", False),
+            "message": result.get("message", ""),
+            "error": result.get("error"),
+            "sent_to": admin_email
+        }
+    except Exception as e:
+        logger.error(f"Error en test de email: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "sent_to": admin_email
+        }
+
 # Endpoint público para obtener contenido de landing (sin autenticación)
 @api_router.get("/landing-content")
 async def get_public_landing_content():

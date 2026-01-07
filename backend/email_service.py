@@ -15,7 +15,15 @@ logger = logging.getLogger(__name__)
 
 # Configurar Resend
 resend.api_key = os.environ.get("RESEND_API_KEY", "")
-SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "onboarding@resend.dev")
+
+# IMPORTANTE: Usar siempre noreply@mindora.pe ya que es el dominio verificado en Resend
+# No usar onboarding@resend.dev porque solo permite enviar al owner de la cuenta
+_env_sender = os.environ.get("SENDER_EMAIL", "")
+if _env_sender and "resend.dev" not in _env_sender:
+    SENDER_EMAIL = _env_sender
+else:
+    SENDER_EMAIL = "noreply@mindora.pe"  # Dominio verificado
+
 SENDER_NAME = "Mindora"  # Nombre visible del remitente
 APP_URL = os.environ.get("APP_URL", "")
 

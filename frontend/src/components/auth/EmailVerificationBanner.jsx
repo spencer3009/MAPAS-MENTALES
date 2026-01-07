@@ -17,8 +17,14 @@ const EmailVerificationBanner = ({ email, onDismiss, onVerified, onEmailChange }
     if (cooldownSeconds > 0) {
       const timer = setTimeout(() => setCooldownSeconds(cooldownSeconds - 1), 1000);
       return () => clearTimeout(timer);
+    } else {
+      // Cuando el cooldown termina, limpiar el mensaje de error
+      if (errorMessage && errorMessage.includes('esperar')) {
+        setErrorMessage('');
+        setResendStatus(null);
+      }
     }
-  }, [cooldownSeconds]);
+  }, [cooldownSeconds, errorMessage]);
 
   const formatCooldown = useCallback(() => {
     const minutes = Math.floor(cooldownSeconds / 60);

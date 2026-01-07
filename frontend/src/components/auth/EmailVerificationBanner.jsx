@@ -44,19 +44,28 @@ const EmailVerificationBanner = ({ email, onDismiss, onVerified, onEmailChange }
         body: JSON.stringify({ email }),
       });
 
-      const data = await response.json();
+      // Intentar parsear el JSON incluso si hay error
+      let data = {};
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error('Error parsing JSON:', jsonError);
+      }
 
       if (response.status === 429) {
-        // Rate limited
-        const match = data.detail?.match(/(\d+):(\d+)/);
+        // Rate limited - extraer tiempo de espera
+        const detail = data.detail || '';
+        const match = detail.match(/(\d+):(\d+)/);
         if (match) {
           const minutes = parseInt(match[1]);
           const seconds = parseInt(match[2]);
           setCooldownSeconds(minutes * 60 + seconds);
-        } else if (data.detail?.includes('límite de 5')) {
-          setCooldownSeconds(86400);
+        } else if (detail.includes('límite de 5')) {
+          setCooldownSeconds(86400); // 24 horas
+        } else {
+          setCooldownSeconds(300); // Default 5 min
         }
-        setErrorMessage(data.detail);
+        setErrorMessage(detail || 'Debes esperar antes de reenviar');
         setResendStatus('error');
       } else if (response.ok) {
         setResendStatus('success');
@@ -67,11 +76,17 @@ const EmailVerificationBanner = ({ email, onDismiss, onVerified, onEmailChange }
         setTimeout(() => setResendStatus(null), 5000);
       } else {
         setResendStatus('error');
-        setErrorMessage(data.detail || 'Error al enviar');
+        setErrorMessage(data.detail || `Error del servidor (${response.status})`);
       }
     } catch (error) {
+      console.error('Error en resend:', error);
       setResendStatus('error');
-      setErrorMessage('Error de conexión');
+      // Verificar si es un error de red real o algo más
+      if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+        setErrorMessage('Error de conexión. Verifica tu internet.');
+      } else {
+        setErrorMessage('Error al procesar la solicitud');
+      }
     } finally {
       setIsResending(false);
     }

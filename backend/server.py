@@ -1971,6 +1971,44 @@ async def update_reminder(
     if update_data.notification_status is not None:
         update_dict["notification_status"] = update_data.notification_status
     
+    # Campos para notificación por email
+    if update_data.notify_by_email is not None:
+        update_dict["notify_by_email"] = update_data.notify_by_email
+    if update_data.use_account_email is not None:
+        update_dict["use_account_email"] = update_data.use_account_email
+    if update_data.custom_email is not None:
+        update_dict["custom_email"] = update_data.custom_email
+    if update_data.notify_before is not None:
+        update_dict["notify_before"] = update_data.notify_before
+        
+        # Recalcular email_notification_time si cambió notify_before
+        if update_data.notify_by_email is not False:  # Solo si email está activado
+            reminder_date = update_data.reminder_date or reminder.get("reminder_date")
+            if reminder_date:
+                try:
+                    from datetime import datetime, timezone, timedelta
+                    reminder_time = datetime.fromisoformat(reminder_date.replace('Z', '+00:00'))
+                    
+                    # Calcular tiempo de notificación basado en notify_before
+                    if update_data.notify_before == "now":
+                        notification_time = reminder_time
+                    elif update_data.notify_before == "5min":
+                        notification_time = reminder_time - timedelta(minutes=5)
+                    elif update_data.notify_before == "15min":
+                        notification_time = reminder_time - timedelta(minutes=15)
+                    elif update_data.notify_before == "1hour":
+                        notification_time = reminder_time - timedelta(hours=1)
+                    else:
+                        notification_time = reminder_time - timedelta(minutes=15)  # Default
+                    
+                    update_dict["email_notification_time"] = notification_time.isoformat()
+                except Exception as e:
+                    logger.warning(f"Error calculating email notification time: {e}")
+    
+    # Si se desactiva notify_by_email, limpiar campos relacionados
+    if update_data.notify_by_email is False:
+        update_dict["email_notification_time"] = None
+    
     # Recalcular scheduled_datetime si cambió fecha u hora (para recordatorios de proyecto)
     if update_data.scheduled_date or update_data.scheduled_time:
         new_date = update_data.scheduled_date or reminder.get("scheduled_date")

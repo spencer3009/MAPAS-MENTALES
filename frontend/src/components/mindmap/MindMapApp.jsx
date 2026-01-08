@@ -923,9 +923,48 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
   };
 
   return (
-    <div className={`flex h-screen w-full bg-gray-50 ${activeView === 'boards' ? 'overflow-x-auto' : 'overflow-hidden'}`}>
+    <div className={`flex flex-col md:flex-row h-screen w-full bg-gray-50 ${activeView === 'boards' ? 'overflow-x-auto' : 'overflow-hidden'}`}>
+      {/* Navegación móvil - Solo visible en móvil */}
+      <MobileNavigation
+        onOpenDashboard={handleOpenDashboard}
+        onOpenProjects={() => {
+          setActiveView('projects');
+          setIsProjectsSidebarOpen(true);
+        }}
+        onOpenFavorites={() => {
+          setActiveView('favorites');
+          setIsProjectsSidebarOpen(false);
+        }}
+        onOpenReminders={handleOpenRemindersPanel}
+        onOpenTrash={handleOpenTrash}
+        onOpenSettings={handleOpenSettings}
+        onOpenBoards={() => {
+          setActiveView('boards');
+          setIsProjectsSidebarOpen(false);
+          setSelectedBoard(null);
+        }}
+        onOpenContacts={() => {
+          setActiveView('contacts');
+          setIsProjectsSidebarOpen(false);
+        }}
+        onLogout={logout}
+        activeView={activeView}
+        trashCount={trashCount}
+        projectName={projectName}
+      />
+
+      {/* Drawer de proyectos móvil */}
+      <MobileProjectsDrawer
+        projects={projects}
+        activeProjectId={activeProjectId}
+        onSwitchProject={handleSwitchProject}
+        onNewProject={handleNewBlankClick}
+        isOpen={showMobileProjectsDrawer}
+        onClose={() => setShowMobileProjectsDrawer(false)}
+      />
+
       {/* Global Time Tracking Indicator */}
-      <div className="fixed top-3 right-4 z-[9999]">
+      <div className="fixed top-3 right-4 z-[9999] hidden md:block">
         <GlobalTimeIndicator 
           onOpenTask={(boardId, taskId) => {
             // Navegar a la tarea
@@ -935,7 +974,7 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
         />
       </div>
       
-      {/* Dock Sidebar - Barra lateral izquierda compacta */}
+      {/* Dock Sidebar - Barra lateral izquierda compacta (solo desktop) */}
       <DockSidebar
         onToggleProjectsSidebar={handleToggleProjectsSidebar}
         onOpenDashboard={handleOpenDashboard}
@@ -961,13 +1000,14 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
         trashCount={trashCount}
       />
 
-      {/* Sidebar de proyectos - Solo visible cuando isProjectsSidebarOpen y activeView === 'projects' */}
+      {/* Sidebar de proyectos - Solo visible cuando isProjectsSidebarOpen y activeView === 'projects' (solo desktop) */}
       {isProjectsSidebarOpen && activeView === 'projects' && (
-        <Sidebar
-          projects={projects}
-          activeProjectId={activeProjectId}
-          onNewBlank={handleNewBlankClick}
-          onNewFromTemplate={handleNewFromTemplateClick}
+        <div className="hidden md:block">
+          <Sidebar
+            projects={projects}
+            activeProjectId={activeProjectId}
+            onNewBlank={handleNewBlankClick}
+            onNewFromTemplate={handleNewFromTemplateClick}
           onDeleteProject={handleDeleteProjectClick}
           onSwitchProject={handleSwitchProject}
           onRenameProject={renameProject}

@@ -1021,6 +1021,7 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
           }}
           token={token}
         />
+        </div>
       )}
 
       {/* Área principal - Cambia según la vista activa */}
@@ -1029,7 +1030,7 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
           {renderMainContent()}
         </div>
       ) : (
-        <div className="flex-1 flex flex-col h-full overflow-hidden">
+        <div className="flex-1 flex flex-col h-full overflow-hidden relative">
         {/* Toolbar superior */}
         <Toolbar
           onAddNode={handleAddNode}

@@ -93,10 +93,6 @@ const Canvas = ({
   // Estado para selección por área (drag selection)
   const [selectionBox, setSelectionBox] = useState(null);
   const [isSelectingArea, setIsSelectingArea] = useState(false);
-  
-  // Estado para tracking de arrastre de nodos en touch
-  const [touchDraggingNode, setTouchDraggingNode] = useState(null);
-  const touchNodeStartRef = useRef({ x: 0, y: 0, nodeX: 0, nodeY: 0 });
 
   // Handler para tap en el canvas (touch)
   const handleTouchTap = useCallback((e) => {
@@ -131,8 +127,8 @@ const Canvas = ({
     }
   }, [nodes, pan, zoom, showRulers, onSelectNode, onClearSelection]);
 
-  // Gestos táctiles para pan y zoom
-  const { touchHandlers, isTouching, isPinching } = useTouchGestures({
+  // Gestos táctiles para pan y zoom (se desactiva cuando hay nodo arrastrándose)
+  const { touchHandlers: baseTouchHandlers, isTouching, isPinching } = useTouchGestures({
     zoom,
     setZoom,
     pan,
@@ -140,8 +136,70 @@ const Canvas = ({
     minZoom,
     maxZoom,
     onTap: handleTouchTap,
-    enabled: !dragging && !touchDraggingNode
+    enabled: !dragging
   });
+
+  // Handlers táctiles combinados (para mover nodos con touch)
+  const touchHandlers = useMemo(() => ({
+    onTouchStart: (e) => {
+      // Si hay un nodo siendo arrastrado por mouse, continuar con ese
+      if (dragging) return;
+      
+      // Llamar al handler base para pan/zoom/tap
+      baseTouchHandlers.onTouchStart(e);
+    },
+    onTouchMove: (e) => {
+      // Si hay un nodo siendo arrastrado, mover el nodo
+      if (dragging && e.touches.length === 1) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const rect = containerRef.current?.getBoundingClientRect();
+        if (!rect) return;
+        
+        const adjustedPanX = pan.x + (showRulers ? RULER_SIZE : 0);
+        const adjustedPanY = pan.y + (showRulers ? RULER_SIZE : 0);
+        
+        const newX = (touch.clientX - rect.left - adjustedPanX) / zoom - dragging.offsetX;
+        const newY = (touch.clientY - rect.top - adjustedPanY) / zoom - dragging.offsetY;
+        
+        // Mover el nodo
+        if (selectedNodeIds.size > 1 && selectedNodeIds.has(dragging.nodeId)) {
+          const node = nodes.find(n => n.id === dragging.nodeId);
+          if (node && onMoveSelectedNodes) {
+            const deltaX = newX - node.x;
+            const deltaY = newY - node.y;
+            onMoveSelectedNodes(deltaX, deltaY);
+          }
+        } else {
+          onUpdateNodePosition(dragging.nodeId, newX, newY);
+        }
+        return;
+      }
+      
+      // Si no hay nodo arrastrándose, usar pan/zoom
+      baseTouchHandlers.onTouchMove(e);
+    },
+    onTouchEnd: (e) => {
+      // Si había un nodo arrastrándose, terminar
+      if (dragging) {
+        setShowControls(true);
+        if (onSaveNodePositionToHistory) {
+          onSaveNodePositionToHistory();
+        }
+        setDragging(null);
+        return;
+      }
+      
+      baseTouchHandlers.onTouchEnd(e);
+    },
+    onTouchCancel: (e) => {
+      if (dragging) {
+        setDragging(null);
+        return;
+      }
+      baseTouchHandlers.onTouchCancel(e);
+    }
+  }), [baseTouchHandlers, dragging, pan, zoom, showRulers, nodes, selectedNodeIds, onUpdateNodePosition, onMoveSelectedNodes, onSaveNodePositionToHistory]);
 
   // Offset para las reglas (0 si están ocultas)
   const rulerOffset = showRulers ? RULER_SIZE : 0;

@@ -26,6 +26,8 @@ import { BoardsPage, BoardView } from '../boards';
 import ContactsPage from '../contacts/ContactsPage';
 import GlobalTimeIndicator from '../boards/GlobalTimeIndicator';
 import VerificationRequiredModal from '../auth/VerificationRequiredModal';
+import MobileNavigation from './MobileNavigation';
+import MobileProjectsDrawer, { MobileProjectsButton } from './MobileProjectsDrawer';
 import { useNodes } from '../../hooks/useNodes';
 import { usePanning } from '../../hooks/usePanning';
 import { useZoom } from '../../hooks/useZoom';

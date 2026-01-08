@@ -18,6 +18,8 @@ const Canvas = ({
   selectedNodeIds = new Set(),
   pan,
   zoom,
+  setPan,
+  setZoom,
   isPanning,
   interactionMode = 'hand',
   onSetInteractionMode,
@@ -75,7 +77,10 @@ const Canvas = ({
   showGrid = true,
   showRulers = true,
   onToggleGrid,
-  onToggleRulers
+  onToggleRulers,
+  // Zoom limits para gestos táctiles
+  minZoom = 0.3,
+  maxZoom = 2
 }) => {
   const containerRef = useRef(null);
   const [dragging, setDragging] = useState(null);

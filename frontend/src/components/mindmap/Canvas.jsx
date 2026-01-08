@@ -711,12 +711,14 @@ const Canvas = ({
         ${interactionMode === 'pointer' && !isSelectingArea ? 'cursor-crosshair' : ''}
         ${interactionMode === 'pointer' && isSelectingArea ? 'cursor-crosshair' : ''}
         ${dragging ? 'cursor-grabbing' : ''}
+        touch-none
       `}
       onMouseDown={handleCanvasMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
       onContextMenu={handleContextMenu}
+      {...touchHandlers}
     >
       {/* Reglas horizontales y verticales */}
       {showRulers && (

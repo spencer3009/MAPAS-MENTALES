@@ -199,6 +199,25 @@ const NodeItem = memo(({
     onDragStart(e, node);
   };
 
+  // Handler para touch en nodos (para arrastrar)
+  const handleTouchStart = (e) => {
+    if (isEditing || isResizing) return;
+    
+    e.stopPropagation();
+    const touch = e.touches[0];
+    
+    // Crear un evento sintético compatible con onDragStart
+    const syntheticEvent = {
+      clientX: touch.clientX,
+      clientY: touch.clientY,
+      preventDefault: () => {},
+      stopPropagation: () => {}
+    };
+    
+    onSelect(node.id, syntheticEvent);
+    onDragStart(syntheticEvent, node);
+  };
+
   const handleDoubleClick = (e) => {
     e.stopPropagation();
     handleStartEdit();

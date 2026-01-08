@@ -550,6 +550,7 @@ const NodeItem = memo(({
         transform: 'translateZ(0)', // Forzar aceleración por GPU
       }}
       onMouseDown={handleMouseDown}
+      onTouchStart={handleTouchStart}
       onClick={handleNodeClick}
       onDoubleClick={handleDoubleClick}
       onContextMenu={handleRightClick}

@@ -93,6 +93,55 @@ const Canvas = ({
   // Estado para selección por área (drag selection)
   const [selectionBox, setSelectionBox] = useState(null);
   const [isSelectingArea, setIsSelectingArea] = useState(false);
+  
+  // Estado para tracking de arrastre de nodos en touch
+  const [touchDraggingNode, setTouchDraggingNode] = useState(null);
+  const touchNodeStartRef = useRef({ x: 0, y: 0, nodeX: 0, nodeY: 0 });
+
+  // Handler para tap en el canvas (touch)
+  const handleTouchTap = useCallback((e) => {
+    if (!containerRef.current) return;
+    
+    const rect = containerRef.current.getBoundingClientRect();
+    const adjustedPanX = pan.x + (showRulers ? RULER_SIZE : 0);
+    const adjustedPanY = pan.y + (showRulers ? RULER_SIZE : 0);
+    
+    // Convertir coordenadas de pantalla a coordenadas del canvas
+    const canvasX = (e.clientX - rect.left - adjustedPanX) / zoom;
+    const canvasY = (e.clientY - rect.top - adjustedPanY) / zoom;
+    
+    // Verificar si se tocó un nodo
+    const touchedNode = nodes.find(node => {
+      const nodeW = node.width || NODE_WIDTH;
+      const nodeH = node.height || NODE_HEIGHT;
+      return (
+        canvasX >= node.x &&
+        canvasX <= node.x + nodeW &&
+        canvasY >= node.y &&
+        canvasY <= node.y + nodeH
+      );
+    });
+    
+    if (touchedNode) {
+      onSelectNode(touchedNode.id);
+    } else {
+      // Tap en el canvas vacío - deseleccionar
+      if (onClearSelection) onClearSelection();
+      onSelectNode(null);
+    }
+  }, [nodes, pan, zoom, showRulers, onSelectNode, onClearSelection]);
+
+  // Gestos táctiles para pan y zoom
+  const { touchHandlers, isTouching, isPinching } = useTouchGestures({
+    zoom,
+    setZoom,
+    pan,
+    setPan,
+    minZoom,
+    maxZoom,
+    onTap: handleTouchTap,
+    enabled: !dragging && !touchDraggingNode
+  });
 
   // Offset para las reglas (0 si están ocultas)
   const rulerOffset = showRulers ? RULER_SIZE : 0;

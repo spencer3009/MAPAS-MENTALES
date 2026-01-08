@@ -10,6 +10,7 @@ import SelectionBox from './SelectionBox';
 import CanvasModePanel from './CanvasModePanel';
 import CanvasGrid from './CanvasGrid';
 import CanvasRulers, { RULER_SIZE } from './CanvasRulers';
+import { useTouchGestures } from '../../hooks/useTouchGestures';
 
 const Canvas = ({
   nodes,

@@ -217,6 +217,9 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
   // Estado para Tableros
   const [selectedBoard, setSelectedBoard] = useState(null);
 
+  // Estado para el drawer de proyectos en móvil
+  const [showMobileProjectsDrawer, setShowMobileProjectsDrawer] = useState(false);
+
   // Efecto para navegar desde notificaciones
   useEffect(() => {
     if (forceView) {

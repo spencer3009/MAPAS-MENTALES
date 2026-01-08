@@ -1173,6 +1173,12 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
             onToggleRulers={() => setShowRulers(prev => !prev)}
             onExitFullscreen={exitFullscreen}
           />
+
+          {/* Botón flotante de proyectos - Solo móvil */}
+          <MobileProjectsButton 
+            onClick={() => setShowMobileProjectsDrawer(true)}
+            projectCount={projects.length}
+          />
         </div>
       </div>
       )}

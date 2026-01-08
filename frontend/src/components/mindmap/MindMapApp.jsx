@@ -124,6 +124,7 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
 
   const {
     pan,
+    setPan,
     isPanning,
     startPanning,
     updatePanning,
@@ -133,10 +134,13 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
 
   const {
     zoom,
+    setZoom,
     handleWheel,
     zoomIn,
     zoomOut,
-    resetZoom
+    resetZoom,
+    minZoom,
+    maxZoom
   } = useZoom();
 
   const {

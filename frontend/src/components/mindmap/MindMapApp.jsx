@@ -1019,6 +1019,8 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
             selectedNodeIds={selectedNodeIds}
             pan={pan}
             zoom={zoom}
+            setPan={setPan}
+            setZoom={setZoom}
             isPanning={isPanning}
             interactionMode={interactionMode}
             onSetInteractionMode={setInteractionMode}
@@ -1072,6 +1074,8 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
             showRulers={showRulers}
             onToggleGrid={() => setShowGrid(prev => !prev)}
             onToggleRulers={() => setShowRulers(prev => !prev)}
+            minZoom={minZoom}
+            maxZoom={maxZoom}
             />
 
           {/* Toolbar de selección múltiple */}

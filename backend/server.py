@@ -605,6 +605,23 @@ async def register(register_data: RegisterRequest, background_tasks: BackgroundT
     logger.info(f"📋 Tablero de prueba creado para nuevo usuario: {register_data.username}")
     # === FIN TABLERO DE PRUEBA ===
     
+    # === CREAR WORKSPACE PERSONAL ===
+    try:
+        workspace = await create_personal_workspace(
+            db, 
+            register_data.username, 
+            register_data.email, 
+            full_name
+        )
+        logger.info(f"🏠 Workspace personal creado para {register_data.username}: {workspace['id']}")
+        
+        # Migrar los recursos recién creados al workspace
+        await migrate_user_resources_to_workspace(db, register_data.username, workspace['id'])
+    except Exception as e:
+        logger.error(f"⚠️ Error creando workspace para {register_data.username}: {e}")
+        # No fallar el registro por error en workspace
+    # === FIN WORKSPACE PERSONAL ===
+    
     # Enviar email de verificación en background
     background_tasks.add_task(
         email_service.send_verification_email,

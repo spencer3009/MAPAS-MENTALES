@@ -44,6 +44,10 @@ const BoardsPage = ({ onBack, onSelectBoard, onTrashUpdate }) => {
   // Estado para duplicación
   const [duplicatingBoardId, setDuplicatingBoardId] = useState(null);
   
+  // Estado para compartir
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [shareBoard, setShareBoard] = useState(null);
+  
   // Estado para mensajes de éxito/error
   const [toast, setToast] = useState(null);
 

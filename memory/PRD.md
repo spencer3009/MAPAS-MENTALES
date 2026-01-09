@@ -2,6 +2,42 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-09: Sistema de Compartir y Colaboración ✅ IMPLEMENTADO
+- **Feature**: Sistema completo para compartir Mind Maps y Tableros con otros usuarios
+- **Backend implementado**:
+  - Nuevas colecciones: `workspaces`, `workspace_members`, `resource_permissions`, `invites`, `share_links`
+  - Endpoints API:
+    - `GET /api/workspaces` - Obtener workspaces del usuario
+    - `GET /api/{resource_type}/{resource_id}/collaborators` - Listar colaboradores
+    - `POST /api/invites` - Crear invitación por email
+    - `POST /api/{resource_type}/{resource_id}/share-link` - Crear link público
+    - `PUT /api/{resource_type}/{resource_id}/share-link` - Toggle link activo
+    - `DELETE /api/invites/{invite_id}` - Cancelar invitación
+    - `GET /api/shared/{token}` - Acceso público a recurso
+    - `GET /api/invites/pending` - Invitaciones pendientes
+    - `GET /api/shared-with-me` - Recursos compartidos conmigo
+  - Roles disponibles: viewer, commenter, editor, admin
+  - Tipos de recurso: mindmap, board
+- **Frontend implementado**:
+  - `ShareModal.jsx` - Modal unificado para compartir (funciona con mapas y tableros)
+  - `AcceptInvitePage.jsx` - Página para aceptar invitaciones
+  - Integración en DashboardView.jsx (menú de mapas)
+  - Integración en BoardsPage.jsx (menú de tableros)
+  - Ruta `/invite?token=xxx` para aceptar invitaciones
+- **Email de invitación**: Template HTML profesional via Resend
+- **Testing**: iteration_26.json - 17/17 tests backend PASS, frontend 100%
+- **Files creados**:
+  - `/app/frontend/src/components/sharing/ShareModal.jsx`
+  - `/app/frontend/src/components/sharing/AcceptInvitePage.jsx`
+  - `/app/frontend/src/components/sharing/index.js`
+  - `/app/tests/test_sharing_system.py`
+- **Files modificados**:
+  - `/app/backend/server.py` - Endpoints de sharing
+  - `/app/backend/workspace_service.py` - Lógica de workspaces e invitaciones
+  - `/app/frontend/src/components/mindmap/DashboardView.jsx` - Botón compartir
+  - `/app/frontend/src/components/boards/BoardsPage.jsx` - Botón compartir
+  - `/app/frontend/src/App.js` - Ruta /invite
+
 ### 2026-01-09: BUG CRÍTICO - Toolbar No Ejecutaba Acciones (Desktop NI Móvil) ✅ FIXED
 - **Bug**: Los botones del toolbar se veían pero NO ejecutaban ninguna acción ni en desktop ni en móvil
 - **Causa raíz**:

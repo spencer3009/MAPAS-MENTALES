@@ -495,6 +495,8 @@ async def create_share_link(
     
     await db.share_links.insert_one(share_link)
     
+    # Retornar sin _id
+    share_link.pop("_id", None)
     return share_link
 
 async def get_share_link(db, token: str) -> Optional[dict]:

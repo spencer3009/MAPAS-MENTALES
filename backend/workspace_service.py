@@ -237,7 +237,9 @@ async def check_resource_permission(
     # 1. Verificar si es owner del recurso
     resource = None
     if resource_type == "mindmap":
-        resource = await db.projects.find_one({"project_id": resource_id}, {"_id": 0})
+        resource = await db.projects.find_one({"id": resource_id}, {"_id": 0})
+        if not resource:
+            resource = await db.projects.find_one({"project_id": resource_id}, {"_id": 0})
         if resource and resource.get("username") == username:
             return True
     elif resource_type == "board":

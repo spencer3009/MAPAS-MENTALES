@@ -54,8 +54,17 @@ const AppContent = () => {
   // Detectar rutas especiales en pathname
   useEffect(() => {
     const pathname = window.location.pathname;
+    const searchParams = new URLSearchParams(window.location.search);
+    
     if (pathname === '/verify') {
       setAuthView('verify');
+    } else if (pathname === '/invite') {
+      // Ruta de invitación
+      const token = searchParams.get('token');
+      if (token) {
+        setInviteToken(token);
+        setAuthView('invite');
+      }
     } else if (pathname === '/app') {
       // Ruta /app: si no está autenticado, ir a login
       if (!loading && !isAuthenticated) {

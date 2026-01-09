@@ -990,23 +990,37 @@ const Canvas = ({
           {controlPositions.addButtonLeft && (
             <button
               onClick={handleAddChildLeft}
-              onMouseDown={(e) => e.stopPropagation()}
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                if (e.pointerType === 'touch') {
+                  e.preventDefault();
+                  handleAddChildLeft();
+                }
+              }}
+              onTouchEnd={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                handleAddChildLeft();
+              }}
               className="
                 absolute z-50
-                w-7 h-7 rounded-full
-                bg-teal-500 hover:bg-teal-600
+                w-9 h-9 md:w-7 md:h-7 rounded-full
+                bg-teal-500 hover:bg-teal-600 active:bg-teal-700
                 text-white shadow-lg
                 flex items-center justify-center
                 transition-all duration-200
                 hover:scale-110 active:scale-95
                 border-2 border-white
+                touch-manipulation select-none
               "
               style={{
                 left: controlPositions.addButtonLeft.x,
                 top: controlPositions.addButtonLeft.y,
-                transform: 'translate(-50%, -50%)'
+                transform: 'translate(-50%, -50%)',
+                WebkitTapHighlightColor: 'transparent'
               }}
               title="Agregar rama izquierda (←)"
+              aria-label="Agregar rama izquierda"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -1019,23 +1033,37 @@ const Canvas = ({
           {controlPositions.addButtonRight && (
             <button
               onClick={handleAddChildRight}
-              onMouseDown={(e) => e.stopPropagation()}
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                if (e.pointerType === 'touch') {
+                  e.preventDefault();
+                  handleAddChildRight();
+                }
+              }}
+              onTouchEnd={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                handleAddChildRight();
+              }}
               className="
                 absolute z-50
-                w-7 h-7 rounded-full
-                bg-cyan-500 hover:bg-cyan-600
+                w-9 h-9 md:w-7 md:h-7 rounded-full
+                bg-cyan-500 hover:bg-cyan-600 active:bg-cyan-700
                 text-white shadow-lg
                 flex items-center justify-center
                 transition-all duration-200
                 hover:scale-110 active:scale-95
                 border-2 border-white
+                touch-manipulation select-none
               "
               style={{
                 left: controlPositions.addButtonRight.x,
                 top: controlPositions.addButtonRight.y,
-                transform: 'translate(-50%, -50%)'
+                transform: 'translate(-50%, -50%)',
+                WebkitTapHighlightColor: 'transparent'
               }}
               title="Agregar rama derecha (→)"
+              aria-label="Agregar rama derecha"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                 <line x1="12" y1="5" x2="12" y2="19"></line>

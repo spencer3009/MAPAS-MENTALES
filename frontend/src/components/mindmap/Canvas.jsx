@@ -892,15 +892,7 @@ const Canvas = ({
           {/* Botón DERECHO → crear hijo horizontal */}
           {controlPositions.addButtonRight && (
             <button
-              onClick={handleAddChildHorizontal}
               onPointerDown={(e) => {
-                e.stopPropagation();
-                if (e.pointerType === 'touch') {
-                  e.preventDefault();
-                  handleAddChildHorizontal();
-                }
-              }}
-              onTouchEnd={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
                 handleAddChildHorizontal();
@@ -915,6 +907,7 @@ const Canvas = ({
                 hover:scale-110 active:scale-95
                 border-2 border-white
                 touch-manipulation select-none
+                cursor-pointer
               "
               style={{
                 left: controlPositions.addButtonRight.x,
@@ -924,6 +917,7 @@ const Canvas = ({
               }}
               title="Agregar nodo horizontal (→)"
               aria-label="Agregar nodo horizontal"
+              data-testid="add-child-horizontal-button"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -935,15 +929,7 @@ const Canvas = ({
           {/* Botón INFERIOR ↓ crear hijo vertical */}
           {controlPositions.addButtonBottom && (
             <button
-              onClick={handleAddChildVertical}
               onPointerDown={(e) => {
-                e.stopPropagation();
-                if (e.pointerType === 'touch') {
-                  e.preventDefault();
-                  handleAddChildVertical();
-                }
-              }}
-              onTouchEnd={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
                 handleAddChildVertical();
@@ -958,6 +944,7 @@ const Canvas = ({
                 hover:scale-110 active:scale-95
                 border-2 border-white
                 touch-manipulation select-none
+                cursor-pointer
               "
               style={{
                 left: controlPositions.addButtonBottom.x,
@@ -967,6 +954,7 @@ const Canvas = ({
               }}
               title="Agregar nodo vertical (↓)"
               aria-label="Agregar nodo vertical"
+              data-testid="add-child-vertical-button"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                 <line x1="12" y1="5" x2="12" y2="19"></line>

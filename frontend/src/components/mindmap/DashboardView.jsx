@@ -1295,6 +1295,15 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
           </div>
         </div>
       )}
+
+      {/* Modal de Compartir */}
+      <ShareModal
+        isOpen={shareModal.isOpen}
+        onClose={() => setShareModal({ isOpen: false, projectId: null, projectName: '' })}
+        resourceType="mindmap"
+        resourceId={shareModal.projectId}
+        resourceName={shareModal.projectName}
+      />
     </div>
   );
 };

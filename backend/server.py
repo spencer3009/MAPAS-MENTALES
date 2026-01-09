@@ -5701,7 +5701,9 @@ async def get_my_pending_invites(current_user: dict = Depends(get_current_user))
     for invite in invites:
         resource_name = "Recurso"
         if invite["resource_type"] == "mindmap":
-            resource = await db.projects.find_one({"project_id": invite["resource_id"]}, {"_id": 0})
+            resource = await db.projects.find_one({"id": invite["resource_id"]}, {"_id": 0})
+            if not resource:
+                resource = await db.projects.find_one({"project_id": invite["resource_id"]}, {"_id": 0})
             resource_name = resource.get("name", "Mapa mental") if resource else "Mapa mental"
         elif invite["resource_type"] == "board":
             resource = await db.boards.find_one({"id": invite["resource_id"]}, {"_id": 0})

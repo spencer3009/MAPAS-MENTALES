@@ -39,6 +39,20 @@ const MobileNavigation = ({
   projectName = ''
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showIOSModal, setShowIOSModal] = useState(false);
+  
+  // Hook de PWA para detectar si se puede instalar
+  const { showInstallButton, isIOS, promptInstall } = usePWAInstall();
+
+  // Handler para instalar PWA
+  const handleInstallClick = async () => {
+    const result = await promptInstall();
+    if (result === 'ios' || result === 'unsupported') {
+      setShowIOSModal(true);
+    } else if (result === 'accepted') {
+      setIsOpen(false);
+    }
+  };
 
   // Cerrar menú al cambiar de vista
   useEffect(() => {

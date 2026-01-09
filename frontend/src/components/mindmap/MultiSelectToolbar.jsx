@@ -140,6 +140,37 @@ const AlignNodesBottomIcon = ({ size = 18, className = "" }) => (
   </svg>
 );
 
+// Botón con soporte para touch Y mouse
+const ToolbarBtn = ({ onClick, title, children, danger = false }) => {
+  const handlePointerUp = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onClick) onClick(e);
+  };
+
+  return (
+    <button
+      onPointerUp={handlePointerUp}
+      onPointerDown={(e) => e.stopPropagation()}
+      className={`
+        p-2 rounded-lg transition-colors
+        touch-manipulation select-none
+        min-w-[40px] min-h-[40px]
+        flex items-center justify-center
+        ${danger 
+          ? 'hover:bg-red-50 active:bg-red-100' 
+          : 'hover:bg-gray-100 active:bg-gray-200'
+        }
+      `}
+      style={{ WebkitTapHighlightColor: 'transparent' }}
+      title={title}
+      aria-label={title}
+    >
+      {children}
+    </button>
+  );
+};
+
 /**
  * Toolbar que aparece cuando hay múltiples nodos seleccionados
  */
@@ -154,7 +185,7 @@ const MultiSelectToolbar = ({
   onAlignNodesCenter,
   onAlignNodesRight,
   onAlignNodesTop,
-  onAlignNodesMiddle,  // Este también distribuye verticalmente
+  onAlignNodesMiddle,
   onAlignNodesBottom,
   // Acciones
   onDeleteSelected,
@@ -166,142 +197,94 @@ const MultiSelectToolbar = ({
 
   return (
     <div
-      className="fixed z-50 flex items-center gap-1 px-3 py-2 bg-white rounded-xl shadow-xl border border-gray-200"
+      className="fixed z-[70] flex items-center gap-1 px-2 sm:px-3 py-2 bg-white rounded-xl shadow-xl border border-gray-200 touch-manipulation overflow-x-auto max-w-[95vw]"
       style={{
         left: `${position?.x || 50}%`,
         top: '80px',
         transform: 'translateX(-50%)',
+        pointerEvents: 'auto',
+        touchAction: 'pan-x',
+        WebkitTapHighlightColor: 'transparent'
       }}
+      onPointerDown={(e) => e.stopPropagation()}
+      onTouchStart={(e) => e.stopPropagation()}
     >
       {/* Contador de selección */}
-      <div className="flex items-center gap-2 pr-3 border-r border-gray-200">
+      <div className="flex items-center gap-2 pr-2 sm:pr-3 border-r border-gray-200 shrink-0">
         <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
           <span className="text-white text-xs font-bold">{selectedCount}</span>
         </div>
-        <span className="text-sm text-gray-600 font-medium">seleccionados</span>
+        <span className="text-sm text-gray-600 font-medium hidden sm:inline">seleccionados</span>
       </div>
 
       {/* Separador */}
-      <div className="w-px h-6 bg-gray-200 mx-1" />
+      <div className="w-px h-6 bg-gray-200 mx-1 hidden sm:block" />
 
       {/* Alineación de TEXTO dentro del nodo */}
-      <div className="flex items-center gap-0.5 px-1">
-        <button
-          onClick={onAlignTextLeft}
-          className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-          title="Alinear texto a la izquierda"
-        >
+      <div className="flex items-center gap-0.5 px-1 shrink-0">
+        <ToolbarBtn onClick={onAlignTextLeft} title="Alinear texto a la izquierda">
           <AlignLeft size={18} className="text-gray-600" />
-        </button>
-        <button
-          onClick={onAlignTextCenter}
-          className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-          title="Alinear texto al centro"
-        >
+        </ToolbarBtn>
+        <ToolbarBtn onClick={onAlignTextCenter} title="Alinear texto al centro">
           <AlignCenter size={18} className="text-gray-600" />
-        </button>
-        <button
-          onClick={onAlignTextRight}
-          className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-          title="Alinear texto a la derecha"
-        >
+        </ToolbarBtn>
+        <ToolbarBtn onClick={onAlignTextRight} title="Alinear texto a la derecha">
           <AlignRight size={18} className="text-gray-600" />
-        </button>
+        </ToolbarBtn>
       </div>
 
       {/* Separador */}
-      <div className="w-px h-6 bg-gray-200 mx-1" />
+      <div className="w-px h-6 bg-gray-200 mx-1 hidden sm:block" />
 
       {/* Alineación de NODOS en el canvas (horizontal) */}
-      <div className="flex items-center gap-0.5 px-1">
-        <button
-          onClick={onAlignNodesLeft}
-          className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-          title="Alinear nodos a la izquierda"
-        >
+      <div className="flex items-center gap-0.5 px-1 shrink-0">
+        <ToolbarBtn onClick={onAlignNodesLeft} title="Alinear nodos a la izquierda">
           <AlignNodesLeftIcon size={18} className="text-gray-600" />
-        </button>
-        <button
-          onClick={onAlignNodesCenter}
-          className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-          title="Alinear nodos al centro horizontal"
-        >
+        </ToolbarBtn>
+        <ToolbarBtn onClick={onAlignNodesCenter} title="Alinear nodos al centro horizontal">
           <AlignNodesCenterIcon size={18} className="text-gray-600" />
-        </button>
-        <button
-          onClick={onAlignNodesRight}
-          className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-          title="Alinear nodos a la derecha"
-        >
+        </ToolbarBtn>
+        <ToolbarBtn onClick={onAlignNodesRight} title="Alinear nodos a la derecha">
           <AlignNodesRightIcon size={18} className="text-gray-600" />
-        </button>
+        </ToolbarBtn>
       </div>
 
       {/* Separador */}
-      <div className="w-px h-6 bg-gray-200 mx-1" />
+      <div className="w-px h-6 bg-gray-200 mx-1 hidden sm:block" />
 
       {/* Alineación de NODOS en el canvas (vertical) */}
-      <div className="flex items-center gap-0.5 px-1">
-        <button
-          onClick={onAlignNodesTop}
-          className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-          title="Alinear nodos arriba"
-        >
+      <div className="flex items-center gap-0.5 px-1 shrink-0">
+        <ToolbarBtn onClick={onAlignNodesTop} title="Alinear nodos arriba">
           <AlignNodesTopIcon size={18} className="text-gray-600" />
-        </button>
-        <button
-          onClick={onAlignNodesMiddle}
-          className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-          title="Alinear y distribuir verticalmente — iguala el espacio entre nodos"
-        >
+        </ToolbarBtn>
+        <ToolbarBtn onClick={onAlignNodesMiddle} title="Alinear y distribuir verticalmente">
           <AlignNodesMiddleIcon size={18} className="text-gray-600" />
-        </button>
-        <button
-          onClick={onAlignNodesBottom}
-          className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-          title="Alinear nodos abajo"
-        >
+        </ToolbarBtn>
+        <ToolbarBtn onClick={onAlignNodesBottom} title="Alinear nodos abajo">
           <AlignNodesBottomIcon size={18} className="text-gray-600" />
-        </button>
+        </ToolbarBtn>
       </div>
 
       {/* Separador */}
-      <div className="w-px h-6 bg-gray-200 mx-1" />
+      <div className="w-px h-6 bg-gray-200 mx-1 hidden sm:block" />
 
       {/* Acciones */}
-      <div className="flex items-center gap-0.5 px-1">
-        <button
-          onClick={onDuplicateSelected}
-          className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-          title="Duplicar seleccionados"
-        >
+      <div className="flex items-center gap-0.5 px-1 shrink-0">
+        <ToolbarBtn onClick={onDuplicateSelected} title="Duplicar seleccionados">
           <Copy size={18} className="text-gray-600" />
-        </button>
-        <button
-          onClick={onDeleteSelected}
-          className="p-1.5 rounded-lg hover:bg-red-50 transition-colors"
-          title="Eliminar seleccionados"
-        >
+        </ToolbarBtn>
+        <ToolbarBtn onClick={onDeleteSelected} title="Eliminar seleccionados" danger>
           <Trash2 size={18} className="text-red-500" />
-        </button>
+        </ToolbarBtn>
       </div>
 
       {/* Separador */}
-      <div className="w-px h-6 bg-gray-200 mx-1" />
+      <div className="w-px h-6 bg-gray-200 mx-1 hidden sm:block" />
 
       {/* Limpiar selección */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          onClearSelection();
-        }}
-        onMouseDown={(e) => e.stopPropagation()}
-        className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors pointer-events-auto"
-        title="Limpiar selección (ESC)"
-      >
+      <ToolbarBtn onClick={onClearSelection} title="Limpiar selección (ESC)">
         <X size={18} className="text-gray-500" />
-      </button>
+      </ToolbarBtn>
     </div>
   );
 };

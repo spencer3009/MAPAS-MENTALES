@@ -408,6 +408,13 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
     projectName: ''
   });
 
+  // Estado para el modal de compartir
+  const [shareModal, setShareModal] = useState({
+    isOpen: false,
+    projectId: null,
+    projectName: ''
+  });
+
   // Cerrar menú al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event) => {

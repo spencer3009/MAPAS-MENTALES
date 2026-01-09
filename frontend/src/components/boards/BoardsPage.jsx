@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, LayoutGrid, Search, Trash2, ArrowLeft, MoreHorizontal, Star, Clock, AlertTriangle, X, Pencil, Copy, FolderInput, Loader2, Check } from 'lucide-react';
+import { Plus, LayoutGrid, Search, Trash2, ArrowLeft, MoreHorizontal, Star, Clock, AlertTriangle, X, Pencil, Copy, FolderInput, Loader2, Check, Users } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,6 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
+import { ShareModal } from '../sharing/ShareModal';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 

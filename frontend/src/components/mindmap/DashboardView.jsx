@@ -885,11 +885,16 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
                           onClick={(e) => {
                             e.stopPropagation();
                             setOpenMenuId(null);
-                            alert('Funcionalidad de compartir próximamente');
+                            setShareModal({
+                              isOpen: true,
+                              projectId: project.id,
+                              projectName: project.name
+                            });
                           }}
                           className="w-full flex items-center gap-4 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          data-testid={`share-map-${project.id}`}
                         >
-                          <Share2 size={18} className="text-gray-400 flex-shrink-0" />
+                          <Share2 size={18} className="text-blue-500 flex-shrink-0" />
                           <span className="font-medium">Compartir mapa</span>
                         </button>
 

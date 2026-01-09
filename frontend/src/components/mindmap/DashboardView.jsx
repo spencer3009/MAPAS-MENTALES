@@ -33,6 +33,7 @@ import {
   LayoutGrid,
   List as ListIcon
 } from 'lucide-react';
+import { ShareModal } from '../sharing/ShareModal';
 
 // Ícono personalizado para MindFlow (horizontal)
 const MindFlowIcon = ({ className }) => (

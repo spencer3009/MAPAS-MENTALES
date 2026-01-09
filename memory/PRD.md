@@ -2,6 +2,23 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-09: BUG CRÍTICO - Desktop Roto por Touch ✅ FIXED
+- **Bug**: Los botones "+" funcionaban en móvil pero se rompieron en desktop (PC)
+- **Causa raíz**: Handlers duplicados (`onClick`, `onPointerDown`, `onTouchEnd`) causaban conflictos
+- **Solución**: Unificado a solo `onPointerDown` que funciona para mouse, touch y stylus
+- **Cambios**:
+  - Eliminados `onClick` y `onTouchEnd` de todos los botones "+"
+  - Solo `onPointerDown` con `e.stopPropagation()` y `e.preventDefault()`
+  - Agregado `cursor-pointer` y data-testid a todos los botones
+- **Files Modified**:
+  - `/app/frontend/src/components/mindmap/Canvas.jsx` - Botones "+": add-child-button, add-child-horizontal-button, add-child-vertical-button, add-child-left-button, add-child-right-button
+  - `/app/frontend/src/components/mindmap/NodeAddButton.jsx` - Botón flotante
+- **Testing**: iteration_23.json - 100% PASS
+  - Desktop MindFlow: 1 nodo ✅
+  - Móvil MindFlow: 1 nodo ✅
+  - Desktop MindHybrid horizontal: 1 nodo ✅
+  - Desktop MindHybrid vertical: 1 nodo ✅
+
 ### 2026-01-09: BUG PWA - Abría Landing en vez de App ✅ FIXED
 - **Bug**: Al abrir la PWA desde el ícono, mostraba la landing page en vez del dashboard
 - **Causa raíz**: `start_url` en manifest.json era `/` (landing) en vez de `/app`

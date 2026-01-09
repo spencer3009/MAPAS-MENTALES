@@ -5997,12 +5997,17 @@ async def access_shared_resource(token: str):
     resource_info = None
     if share_link["resource_type"] == "mindmap":
         resource = await db.projects.find_one(
-            {"project_id": share_link["resource_id"]},
+            {"id": share_link["resource_id"]},
             {"_id": 0}
         )
+        if not resource:
+            resource = await db.projects.find_one(
+                {"project_id": share_link["resource_id"]},
+                {"_id": 0}
+            )
         if resource:
             resource_info = {
-                "id": resource.get("project_id"),
+                "id": resource.get("id") or resource.get("project_id"),
                 "name": resource.get("name"),
                 "type": "mindmap"
             }

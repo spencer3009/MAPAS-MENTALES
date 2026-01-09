@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
 /**
  * Hook para manejar la instalación de la PWA
@@ -10,32 +10,35 @@ export const usePWAInstall = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
-  const [isIOSSafari, setIsIOSSafari] = useState(false);
+
+  // Detectar iOS de forma sincrónica (no en useEffect)
+  const isIOS = useMemo(() => {
+    if (typeof navigator === 'undefined') return false;
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  }, []);
+
+  // Detectar Safari en iOS
+  const isIOSSafari = useMemo(() => {
+    if (typeof navigator === 'undefined') return false;
+    const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome|CriOS|FxiOS|EdgiOS/.test(navigator.userAgent);
+    return isIOS && isSafari;
+  }, [isIOS]);
 
   useEffect(() => {
-    // Detectar iOS
-    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    setIsIOS(isIOSDevice);
-
-    // Detectar Safari en iOS (no Chrome iOS, no otros navegadores)
-    const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome|CriOS|FxiOS|EdgiOS/.test(navigator.userAgent);
-    setIsIOSSafari(isIOSDevice && isSafari);
-
     // Verificar si ya está instalada como PWA
     const checkIfInstalled = () => {
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
         || window.navigator.standalone === true
         || document.referrer.includes('android-app://');
       
-      setIsInstalled(isStandalone);
       return isStandalone;
     };
 
     const installed = checkIfInstalled();
+    setIsInstalled(installed);
 
     // Si es iOS Safari y no está instalada, es instalable
-    if (isIOSDevice && isSafari && !installed) {
+    if (isIOSSafari && !installed) {
       setIsInstallable(true);
     }
 
@@ -75,7 +78,7 @@ export const usePWAInstall = () => {
       window.removeEventListener('appinstalled', handleAppInstalled);
       mediaQuery.removeEventListener('change', handleDisplayModeChange);
     };
-  }, []);
+  }, [isIOSSafari]);
 
   /**
    * Ejecutar la instalación de la PWA

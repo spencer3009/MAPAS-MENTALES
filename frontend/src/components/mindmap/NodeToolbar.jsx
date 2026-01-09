@@ -19,22 +19,44 @@ import {
 
 // Botón del toolbar con soporte para touch Y mouse
 const ToolbarButton = ({ icon: Icon, label, onClick, danger = false, active = false, hasIndicator = false, badge = null }) => {
-  // Handler unificado para pointer (funciona con mouse, touch y stylus)
-  const handlePointerUp = (e) => {
+  // Usar ref para evitar doble disparo
+  const lastClickTime = useRef(0);
+  
+  // Handler que funciona para click (mouse) y touch
+  const handleClick = (e) => {
+    // Evitar doble disparo en menos de 300ms
+    const now = Date.now();
+    if (now - lastClickTime.current < 300) {
+      return;
+    }
+    lastClickTime.current = now;
+    
     e.preventDefault();
     e.stopPropagation();
-    if (onClick) onClick(e);
+    
+    console.log('[NodeToolbar] Button clicked:', label);
+    if (onClick) {
+      onClick(e);
+    }
   };
 
   return (
     <button
-      onPointerUp={handlePointerUp}
-      onPointerDown={(e) => e.stopPropagation()}
+      onClick={handleClick}
+      onTouchEnd={(e) => {
+        // Evitar que el evento touch también dispare click
+        e.preventDefault();
+        e.stopPropagation();
+        handleClick(e);
+      }}
+      onMouseDown={(e) => e.stopPropagation()}
+      onTouchStart={(e) => e.stopPropagation()}
       className={`
         relative p-2.5 rounded-lg transition-all duration-150
         flex items-center justify-center
         touch-manipulation select-none
         min-w-[44px] min-h-[44px]
+        cursor-pointer
         ${danger 
           ? 'text-red-500 hover:bg-red-50 hover:text-red-600 active:bg-red-100' 
           : active
@@ -45,6 +67,7 @@ const ToolbarButton = ({ icon: Icon, label, onClick, danger = false, active = fa
       style={{ WebkitTapHighlightColor: 'transparent' }}
       title={label}
       aria-label={label}
+      data-testid={`toolbar-btn-${label.toLowerCase().replace(/\s+/g, '-')}`}
     >
       <Icon size={18} />
       {hasIndicator && !badge && (
@@ -194,12 +217,19 @@ const NodeToolbar = ({
     ? { left: customPosition.x, top: customPosition.y }
     : { left: position.x, top: position.y - 4 };
 
+  // Handlers wrapper para debug
+  const wrapHandler = (handler, name) => (e) => {
+    console.log(`[NodeToolbar] ${name} clicked`);
+    if (handler) handler(e);
+  };
+
   return (
     <div
       ref={toolbarRef}
       data-toolbar="node-toolbar"
+      data-testid="node-toolbar"
       className={`
-        absolute z-[60]
+        absolute z-[9999]
         bg-white rounded-xl shadow-xl
         border border-gray-200
         flex items-center
@@ -210,16 +240,15 @@ const NodeToolbar = ({
       style={{
         ...positionStyle,
         pointerEvents: 'auto',
-        touchAction: 'none',
         WebkitTapHighlightColor: 'transparent'
       }}
-      onPointerDown={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
       onTouchStart={(e) => e.stopPropagation()}
     >
       {/* Handle lateral izquierdo */}
       <div
-        onPointerDown={handleDragStart}
+        onMouseDown={handleDragStart}
         onTouchStart={handleDragStart}
         className={`
           w-5 h-full min-h-[52px]
@@ -247,7 +276,7 @@ const NodeToolbar = ({
         <ToolbarButton 
           icon={CheckCircle2} 
           label={isCompleted ? "Desmarcar tarea" : "Marcar como completada"}
-          onClick={onToggleCompleted}
+          onClick={wrapHandler(onToggleCompleted, 'ToggleCompleted')}
           active={isCompleted}
         />
         
@@ -257,7 +286,7 @@ const NodeToolbar = ({
         <ToolbarButton 
           icon={Type} 
           label="Editar texto" 
-          onClick={onEdit}
+          onClick={wrapHandler(onEdit, 'Edit')}
         />
         
         {/* Panel de estilos */}
@@ -265,7 +294,7 @@ const NodeToolbar = ({
           <ToolbarButton 
             icon={Palette} 
             label="Personalizar estilo" 
-            onClick={onStyle}
+            onClick={wrapHandler(onStyle, 'Style')}
             active={stylePanelOpen}
           />
         )}
@@ -274,7 +303,7 @@ const NodeToolbar = ({
         <ToolbarButton 
           icon={MessageSquare} 
           label={hasComment ? "Ver comentario" : "Agregar comentario"}
-          onClick={onComment}
+          onClick={wrapHandler(onComment, 'Comment')}
           hasIndicator={hasComment}
         />
 
@@ -284,7 +313,7 @@ const NodeToolbar = ({
         <ToolbarButton 
           icon={Laugh} 
           label="Agregar icono" 
-          onClick={onAddIcon}
+          onClick={wrapHandler(onAddIcon, 'AddIcon')}
           active={iconPanelOpen}
           hasIndicator={hasIcon}
         />
@@ -295,19 +324,19 @@ const NodeToolbar = ({
         <ToolbarButton 
           icon={AlignLeft} 
           label="Alinear texto a la izquierda" 
-          onClick={onAlignTextLeft}
+          onClick={wrapHandler(onAlignTextLeft, 'AlignLeft')}
           active={currentTextAlign === 'left'}
         />
         <ToolbarButton 
           icon={AlignCenter} 
           label="Alinear texto al centro" 
-          onClick={onAlignTextCenter}
+          onClick={wrapHandler(onAlignTextCenter, 'AlignCenter')}
           active={currentTextAlign === 'center'}
         />
         <ToolbarButton 
           icon={AlignRight} 
           label="Alinear texto a la derecha" 
-          onClick={onAlignTextRight}
+          onClick={wrapHandler(onAlignTextRight, 'AlignRight')}
           active={currentTextAlign === 'right'}
         />
         
@@ -317,7 +346,7 @@ const NodeToolbar = ({
         <ToolbarButton 
           icon={Link2} 
           label={hasLinks ? `Ver enlaces (${linksCount})` : "Agregar enlace"}
-          onClick={onAddLink}
+          onClick={wrapHandler(onAddLink, 'AddLink')}
           badge={linksCount > 0 ? linksCount : null}
         />
 
@@ -325,7 +354,7 @@ const NodeToolbar = ({
         <ToolbarButton 
           icon={Bell} 
           label={hasReminder ? "Ver recordatorio" : "Agregar recordatorio"}
-          onClick={onAddReminder}
+          onClick={wrapHandler(onAddReminder, 'AddReminder')}
           active={reminderPanelOpen}
           hasIndicator={hasReminder}
         />
@@ -336,21 +365,21 @@ const NodeToolbar = ({
         <ToolbarButton 
           icon={Copy} 
           label="Duplicar nodo" 
-          onClick={onDuplicate}
+          onClick={wrapHandler(onDuplicate, 'Duplicate')}
         />
         
         {/* Eliminar */}
         <ToolbarButton 
           icon={Trash2} 
           label="Eliminar nodo" 
-          onClick={onDelete}
+          onClick={wrapHandler(onDelete, 'Delete')}
           danger
         />
       </div>
 
       {/* Handle lateral derecho */}
       <div
-        onPointerDown={handleDragStart}
+        onMouseDown={handleDragStart}
         onTouchStart={handleDragStart}
         className={`
           w-5 h-full min-h-[52px]

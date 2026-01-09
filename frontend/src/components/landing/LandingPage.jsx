@@ -445,6 +445,21 @@ const LandingPage = ({ onLogin, onRegister, onDemo, onTerms, onPrivacy, onCookie
                 </button>
               </div>
 
+              {/* Botón de instalación PWA - visible en móvil */}
+              {showInstallButton && (
+                <div className="flex justify-center lg:justify-start mb-6">
+                  <button
+                    onClick={handleInstallClick}
+                    data-testid="landing-install-button"
+                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all hover:scale-105"
+                  >
+                    <Smartphone size={20} />
+                    <span>Instalar Mindora</span>
+                    <span className="hidden sm:inline text-emerald-200 text-sm ml-1">• Acceso rápido</span>
+                  </button>
+                </div>
+              )}
+
               {/* Trust badges */}
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-gray-500">
                 <div className="flex items-center gap-2">

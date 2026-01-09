@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useCookies } from '../../contexts/CookieContext';
+import InstallPWABanner from '../pwa/InstallPWABanner';
 import { 
   Brain, 
   Zap, 

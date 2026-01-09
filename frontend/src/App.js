@@ -101,6 +101,11 @@ const AppContent = () => {
 
   // Si está autenticado
   if (isAuthenticated) {
+    // Limpiar URL si entró por /app (PWA)
+    if (window.location.pathname === '/app') {
+      window.history.replaceState({}, document.title, '/');
+    }
+    
     // Verificar si necesita mostrar banner de verificación
     const needsVerification = user && !user.email_verified && user.email;
 

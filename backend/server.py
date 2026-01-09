@@ -5586,7 +5586,9 @@ async def create_invitation(
     if not can_share:
         is_owner = False
         if request.resource_type == "mindmap":
-            resource = await db.projects.find_one({"project_id": request.resource_id}, {"_id": 0})
+            resource = await db.projects.find_one({"id": request.resource_id}, {"_id": 0})
+            if not resource:
+                resource = await db.projects.find_one({"project_id": request.resource_id}, {"_id": 0})
             is_owner = resource and resource.get("username") == current_user["username"]
         elif request.resource_type == "board":
             resource = await db.boards.find_one({"id": request.resource_id}, {"_id": 0})

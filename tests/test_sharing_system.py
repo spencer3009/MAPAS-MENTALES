@@ -108,7 +108,9 @@ class TestSharingSystem:
         if projects_response.status_code != 200:
             pytest.skip("Could not fetch projects")
         
-        projects = projects_response.json().get("projects", [])
+        # API returns list directly
+        projects_data = projects_response.json()
+        projects = projects_data if isinstance(projects_data, list) else projects_data.get("projects", [])
         if not projects:
             pytest.skip("No projects available for testing")
         
@@ -184,7 +186,9 @@ class TestSharingSystem:
         if projects_response.status_code != 200:
             pytest.skip("Could not fetch projects")
         
-        projects = projects_response.json().get("projects", [])
+        # API returns list directly
+        projects_data = projects_response.json()
+        projects = projects_data if isinstance(projects_data, list) else projects_data.get("projects", [])
         if not projects:
             pytest.skip("No projects available for testing")
         

@@ -481,6 +481,18 @@ const BoardsPage = ({ onBack, onSelectBoard, onTrashUpdate }) => {
                               <DropdownMenuItem
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  setShareBoard(board);
+                                  setShareModalOpen(true);
+                                }}
+                                className="cursor-pointer text-blue-600"
+                                data-testid={`share-board-${board.id}`}
+                              >
+                                <Users className="mr-2 h-4 w-4" />
+                                Compartir
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   moveToFolder(board);
                                 }}
                                 className="cursor-pointer text-gray-400"

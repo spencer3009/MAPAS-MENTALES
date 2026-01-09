@@ -172,10 +172,10 @@ const Toolbar = ({
           </button>
         </div>
 
-        <Divider />
+        <Divider className="hidden lg:block" />
 
-        {/* Switch de Alineación Automática */}
-        <div className="flex items-center gap-2 px-2">
+        {/* Switch de Alineación Automática - Solo en pantallas grandes */}
+        <div className="hidden lg:flex items-center gap-2 px-2">
           <AlignLeft size={16} className={autoAlignEnabled ? 'text-blue-500' : 'text-gray-400'} />
           <ToggleSwitch
             enabled={autoAlignEnabled}
@@ -186,10 +186,12 @@ const Toolbar = ({
       </div>
 
       {/* Grupo derecho: Exportación, Notificaciones y Usuario */}
-      <div className="flex items-center gap-2">
-        <ExportMenu projectName={projectName} />
+      <div className="flex items-center gap-1 md:gap-2">
+        <div className="hidden sm:block">
+          <ExportMenu projectName={projectName} />
+        </div>
 
-        <Divider />
+        <Divider className="hidden sm:block" />
 
         {/* Campanita de notificaciones */}
         <NotificationBell
@@ -197,14 +199,16 @@ const Toolbar = ({
           onRefresh={onRefreshNotifications}
         />
 
-        {/* Avatar y dropdown de usuario */}
-        <UserDropdown
-          user={user}
-          onOpenProfile={onOpenProfile}
-          onLogout={onLogout}
-          onAdminClick={onAdminClick}
-          isAdmin={isAdmin}
-        />
+        {/* Avatar y dropdown de usuario - Solo desktop */}
+        <div className="hidden md:block">
+          <UserDropdown
+            user={user}
+            onOpenProfile={onOpenProfile}
+            onLogout={onLogout}
+            onAdminClick={onAdminClick}
+            isAdmin={isAdmin}
+          />
+        </div>
       </div>
     </div>
   );

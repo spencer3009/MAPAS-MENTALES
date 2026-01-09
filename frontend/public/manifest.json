@@ -2,7 +2,7 @@
   "name": "Mindora",
   "short_name": "Mindora",
   "description": "Organiza tus ideas con mapas mentales",
-  "start_url": "/",
+  "start_url": "/app",
   "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",

@@ -2,6 +2,54 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-09: Corrección Botón "+" Móvil + Conversión PWA ✅
+- **Fixed (P0 Critical)**: El botón "+" para agregar nodos hijos no funcionaba en móvil
+  - **Causa**: Los botones solo tenían handlers de mouse (`onClick`, `onMouseDown`) sin touch handlers
+  - **Solución**: Agregados handlers `onPointerDown` (con `pointerType === 'touch'`) y `onTouchEnd` a todos los botones "+"
+  - **Botones corregidos**:
+    - Botón principal (MindFlow, MindTree, MindOrbit, MindAxis hijos) - líneas 853-893
+    - Botones MindHybrid (horizontal e inferior) - líneas 896-984
+    - Botones MindAxis (izquierda y derecha para nodo central) - líneas 987-1063
+  - **CSS agregado**: `touch-manipulation`, `select-none`, `WebkitTapHighlightColor: transparent`
+  - **Tamaño móvil**: Botones más grandes en móvil (`w-10 h-10`) vs desktop (`md:w-8 md:h-8`)
+- **Files Modified**: `/app/frontend/src/components/mindmap/Canvas.jsx`
+- **Testing**: 100% - Touch handlers verificados funcionando con viewport móvil 390x844
+
+### 2026-01-09: PWA (Progressive Web App) Implementation ✅
+- **Added**: Conversión completa a PWA para instalación en dispositivos móviles
+- **Added**: `/app/frontend/public/manifest.json` con configuración completa:
+  - `name`: "Mindora - Mapas Mentales"
+  - `short_name`: "Mindora"
+  - `display`: "standalone"
+  - `theme_color`: "#3b82f6"
+  - `background_color`: "#f8fafc"
+  - Iconos: 16x16, 32x32, 180x180, 192x192, 512x512
+- **Added**: `/app/frontend/public/service-worker.js`:
+  - Estrategia Network First para contenido dinámico
+  - Caché de assets estáticos
+  - Soporte offline básico (fallback a index.html para SPA)
+  - Preparado para notificaciones push (futuro)
+- **Added**: Registro del Service Worker en `/app/frontend/src/index.js`
+  - Verificación automática de actualizaciones cada hora
+- **Added**: Link al manifest en `/app/frontend/public/index.html`
+- **Added**: Icono PWA 512x512 generado (`icon-512.png`)
+- **Added**: `/app/frontend/src/components/pwa/InstallPWABanner.jsx`:
+  - Banner flotante de instalación para dispositivos móviles
+  - Aparece 3 segundos después de cargar la página
+  - Detecta iOS y muestra instrucciones específicas para Safari
+  - Almacena preferencia de descarte en localStorage (7 días)
+  - No aparece si la app ya está instalada como PWA
+- **Files Created**:
+  - `/app/frontend/public/manifest.json`
+  - `/app/frontend/public/service-worker.js`
+  - `/app/frontend/public/icon-512.png`
+  - `/app/frontend/src/components/pwa/InstallPWABanner.jsx`
+- **Files Modified**:
+  - `/app/frontend/public/index.html` - Link al manifest
+  - `/app/frontend/src/index.js` - Registro del Service Worker
+  - `/app/frontend/src/components/landing/LandingPage.jsx` - Integración InstallPWABanner
+- **Testing**: 100% - Manifest, Service Worker y componentes verificados funcionando
+
 ### 2026-01-06: Emails Automáticos de Recordatorio de Verificación ✅
 - **Added**: Sistema de recordatorios automáticos para usuarios no verificados:
   - 📧 24h después: "¿Olvidaste verificar tu cuenta?" (tono amigable)

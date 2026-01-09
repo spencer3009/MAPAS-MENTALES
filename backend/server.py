@@ -5638,7 +5638,9 @@ async def create_invitation(
     # Obtener nombre del recurso para el email
     resource_name = "Recurso"
     if request.resource_type == "mindmap":
-        resource = await db.projects.find_one({"project_id": request.resource_id}, {"_id": 0})
+        resource = await db.projects.find_one({"id": request.resource_id}, {"_id": 0})
+        if not resource:
+            resource = await db.projects.find_one({"project_id": request.resource_id}, {"_id": 0})
         resource_name = resource.get("name", "Mapa mental") if resource else "Mapa mental"
     elif request.resource_type == "board":
         resource = await db.boards.find_one({"id": request.resource_id}, {"_id": 0})

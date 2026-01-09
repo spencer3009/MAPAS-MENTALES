@@ -2,6 +2,27 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-09: BUG CRÍTICO PWA - Android No Instalaba ✅ FIXED
+- **Bug**: La PWA no se instalaba realmente en Android - no creaba ícono
+- **Causas raíz encontradas**:
+  1. `Content-Type` del manifest era `application/json` (DEBE ser `application/manifest+json`)
+  2. `favicon.png` era 64x64 pero manifest decía 192x192 (MENTIRA)
+  3. `icon-512.png` era 1024x1024 pero manifest decía 512x512 (MENTIRA)
+  4. Rutas de iconos eran relativas (`favicon.png`) en vez de absolutas (`/icon-192.png`)
+- **Solución**:
+  1. Creados iconos reales con dimensiones correctas: `icon-192.png` (192x192) y `icon-512.png` (512x512)
+  2. Manifest simplificado con solo los iconos requeridos y rutas absolutas
+  3. Agregado middleware en `craco.config.js` para Content-Type correcto en desarrollo
+  4. Agregada ruta específica en `server.js` para Content-Type correcto en producción
+- **Files Modified**:
+  - `/app/frontend/public/manifest.json` - Estructura limpia, iconos correctos
+  - `/app/frontend/craco.config.js` - Middleware Content-Type
+  - `/app/frontend/server.js` - Ruta manifest con Content-Type
+- **Files Created**:
+  - `/app/frontend/public/icon-192.png` - Icono 192x192 real
+  - `/app/frontend/public/icon-512.png` - Icono 512x512 real
+- **Testing**: iteration_21.json - 100% PASS - PWA installable verified
+
 ### 2026-01-09: PWA Install Button - CTA Visible ✅
 - **Added**: Sistema completo de instalación PWA con CTA visible
 - **Added**: Hook centralizado `/app/frontend/src/hooks/usePWAInstall.js`:

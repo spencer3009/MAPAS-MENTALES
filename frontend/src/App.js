@@ -28,12 +28,13 @@ const LoadingScreen = () => (
 // Componente principal con lógica de autenticación
 const AppContent = () => {
   const { isAuthenticated, isAdmin, loading, refreshUser, user } = useAuth();
-  const [authView, setAuthView] = useState(null); // null = landing, 'login', 'register', 'callback', 'admin', 'demo', 'terms', 'privacy', 'cookies', 'verify'
+  const [authView, setAuthView] = useState(null); // null = landing, 'login', 'register', 'callback', 'admin', 'demo', 'terms', 'privacy', 'cookies', 'verify', 'invite'
   const [authError, setAuthError] = useState(null);
   const [selectedPlanId, setSelectedPlanId] = useState(null); // Plan seleccionado desde la landing
   const [paypalCallback, setPaypalCallback] = useState(null); // 'success' o 'cancel'
   const [showVerificationBanner, setShowVerificationBanner] = useState(true);
   const [isPWAEntry, setIsPWAEntry] = useState(false); // Detectar si entró desde PWA
+  const [inviteToken, setInviteToken] = useState(null); // Token de invitación
 
   // Detectar si está ejecutando como PWA (standalone)
   useEffect(() => {

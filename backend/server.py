@@ -5756,7 +5756,10 @@ async def get_collaborators(
     is_owner = False
     owner_info = None
     if resource_type == "mindmap":
-        resource = await db.projects.find_one({"project_id": resource_id}, {"_id": 0})
+        # Try both 'id' and 'project_id' for backwards compatibility
+        resource = await db.projects.find_one({"id": resource_id}, {"_id": 0})
+        if not resource:
+            resource = await db.projects.find_one({"project_id": resource_id}, {"_id": 0})
         if resource:
             is_owner = resource.get("username") == current_user["username"]
             owner_username = resource.get("username")

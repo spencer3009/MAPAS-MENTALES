@@ -43,6 +43,16 @@ from contacts_service import (
     CreateContactRequest, UpdateContactRequest,
     CreateCustomFieldRequest, UpdateCustomFieldRequest
 )
+import workspace_service
+from workspace_service import (
+    WORKSPACE_ROLES, RESOURCE_ROLES, RESOURCE_TYPES,
+    create_personal_workspace, get_user_workspaces, get_workspace_members,
+    ensure_user_has_workspace, check_resource_permission, grant_resource_permission,
+    revoke_resource_permission, create_invite, accept_invite, get_pending_invites_for_email,
+    create_share_link, get_share_link, toggle_share_link, get_resource_share_link,
+    get_resource_collaborators, update_collaborator_role, remove_collaborator,
+    get_resource_permissions, migrate_user_resources_to_workspace
+)
 
 
 # JWT Configuration

@@ -8,6 +8,39 @@ const LINE_WIDTH_OPTIONS = [
   { value: 3, label: 'Muy gruesa (3px)' },
 ];
 
+// Botón con soporte para touch Y mouse
+const MenuButton = ({ onClick, children, danger = false, active = false, className = '' }) => {
+  const handlePointerUp = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onClick) onClick(e);
+  };
+
+  return (
+    <button
+      onPointerUp={handlePointerUp}
+      onPointerDown={(e) => e.stopPropagation()}
+      className={`
+        w-full text-left px-4 py-2.5 text-sm
+        flex items-center gap-3
+        transition-colors
+        touch-manipulation select-none
+        min-h-[44px]
+        ${danger 
+          ? 'text-red-500 hover:bg-red-50 active:bg-red-100' 
+          : active
+            ? 'text-sky-600 bg-sky-50 font-medium'
+            : 'text-gray-700 hover:bg-gray-50 active:bg-gray-100'
+        }
+        ${className}
+      `}
+      style={{ WebkitTapHighlightColor: 'transparent' }}
+    >
+      {children}
+    </button>
+  );
+};
+
 const ContextMenu = ({
   position,
   nodeId,
@@ -87,39 +120,29 @@ const ContextMenu = ({
         absolute bg-white rounded-xl shadow-xl
         border border-gray-200 w-56 overflow-hidden
         animate-in fade-in zoom-in-95 duration-150
+        touch-manipulation
       "
       style={{
         left: adjustedPos.x,
         top: adjustedPos.y,
-        zIndex: 100
+        zIndex: 100,
+        pointerEvents: 'auto',
+        touchAction: 'none',
+        WebkitTapHighlightColor: 'transparent'
       }}
-      onClick={(e) => e.stopPropagation()}
-      onMouseDown={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
+      onTouchStart={(e) => e.stopPropagation()}
     >
       <div className="py-2">
-        <button
-          onClick={() => handleAction(() => onAddChild(nodeId))}
-          className="
-            w-full text-left px-4 py-2.5 text-sm text-gray-700
-            hover:bg-gray-50 flex items-center gap-3
-            transition-colors
-          "
-        >
+        <MenuButton onClick={() => handleAction(() => onAddChild(nodeId))}>
           <Plus size={16} className="text-gray-500" />
           <span>Crear nodo hijo</span>
-        </button>
+        </MenuButton>
         
-        <button
-          onClick={() => handleAction(() => onDuplicate(nodeId))}
-          className="
-            w-full text-left px-4 py-2.5 text-sm text-gray-700
-            hover:bg-gray-50 flex items-center gap-3
-            transition-colors
-          "
-        >
+        <MenuButton onClick={() => handleAction(() => onDuplicate(nodeId))}>
           <Copy size={16} className="text-gray-500" />
           <span>Duplicar nodo</span>
-        </button>
+        </MenuButton>
 
         {/* Separador */}
         <div className="border-t border-gray-100 my-1" />
@@ -128,51 +151,33 @@ const ContextMenu = ({
         {isDashedNode ? (
           <>
             {/* Convertir a rectángulo */}
-            <button
-              onClick={handleConvertToDefault}
-              className="
-                w-full text-left px-4 py-2.5 text-sm text-gray-700
-                hover:bg-gray-50 flex items-center gap-3
-                transition-colors
-              "
-            >
+            <MenuButton onClick={handleConvertToDefault}>
               <Square size={16} className="text-blue-500" />
               <span>Cambiar a rectángulo</span>
-            </button>
+            </MenuButton>
 
             {/* Submenu para grosor de línea */}
             <div className="relative">
-              <button
+              <MenuButton 
                 onClick={() => setShowLineWidthMenu(!showLineWidthMenu)}
-                className="
-                  w-full text-left px-4 py-2.5 text-sm text-gray-700
-                  hover:bg-gray-50 flex items-center gap-3
-                  transition-colors justify-between
-                "
+                className="justify-between"
               >
                 <div className="flex items-center gap-3">
                   <Minus size={16} className="text-sky-500" />
                   <span>Grosor de línea</span>
                 </div>
                 <ChevronRight size={14} className={`text-gray-400 transition-transform ${showLineWidthMenu ? 'rotate-90' : ''}`} />
-              </button>
+              </MenuButton>
               
               {/* Submenu de grosor - se muestra debajo cuando está expandido */}
               {showLineWidthMenu && (
                 <div className="bg-gray-50 border-t border-gray-100">
                   {LINE_WIDTH_OPTIONS.map((option) => (
-                    <button
+                    <MenuButton
                       key={option.value}
                       onClick={() => handleChangeLineWidth(option.value)}
-                      className={`
-                        w-full text-left px-6 py-2 text-sm
-                        hover:bg-gray-100 flex items-center gap-2
-                        transition-colors
-                        ${(currentLineWidth || 1) === option.value 
-                          ? 'text-sky-600 bg-sky-50 font-medium' 
-                          : 'text-gray-700'
-                        }
-                      `}
+                      active={(currentLineWidth || 1) === option.value}
+                      className="px-6 py-2"
                     >
                       {/* Preview de la línea */}
                       <div 
@@ -188,7 +193,7 @@ const ContextMenu = ({
                       {(currentLineWidth || 1) === option.value && (
                         <span className="ml-auto text-sky-500">✓</span>
                       )}
-                    </button>
+                    </MenuButton>
                   ))}
                 </div>
               )}
@@ -196,14 +201,7 @@ const ContextMenu = ({
           </>
         ) : (
           /* Convertir a solo línea */
-          <button
-            onClick={handleConvertToDashed}
-            className="
-              w-full text-left px-4 py-2.5 text-sm text-gray-700
-              hover:bg-gray-50 flex items-center gap-3
-              transition-colors
-            "
-          >
+          <MenuButton onClick={handleConvertToDashed}>
             <div className="flex items-center justify-center w-4">
               <div 
                 style={{
@@ -216,23 +214,16 @@ const ContextMenu = ({
               />
             </div>
             <span>Cambiar a solo línea</span>
-          </button>
+          </MenuButton>
         )}
 
         {/* Separador */}
         <div className="border-t border-gray-100 my-1" />
         
-        <button
-          onClick={() => handleAction(() => onDelete(nodeId))}
-          className="
-            w-full text-left px-4 py-2.5 text-sm text-red-500
-            hover:bg-red-50 flex items-center gap-3
-            transition-colors
-          "
-        >
+        <MenuButton onClick={() => handleAction(() => onDelete(nodeId))} danger>
           <Trash2 size={16} />
           <span>Eliminar nodo</span>
-        </button>
+        </MenuButton>
       </div>
     </div>
   );

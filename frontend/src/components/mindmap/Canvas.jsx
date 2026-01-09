@@ -971,15 +971,7 @@ const Canvas = ({
           {/* Botón IZQUIERDO ← crear rama izquierda */}
           {controlPositions.addButtonLeft && (
             <button
-              onClick={handleAddChildLeft}
               onPointerDown={(e) => {
-                e.stopPropagation();
-                if (e.pointerType === 'touch') {
-                  e.preventDefault();
-                  handleAddChildLeft();
-                }
-              }}
-              onTouchEnd={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
                 handleAddChildLeft();
@@ -994,6 +986,7 @@ const Canvas = ({
                 hover:scale-110 active:scale-95
                 border-2 border-white
                 touch-manipulation select-none
+                cursor-pointer
               "
               style={{
                 left: controlPositions.addButtonLeft.x,
@@ -1003,6 +996,7 @@ const Canvas = ({
               }}
               title="Agregar rama izquierda (←)"
               aria-label="Agregar rama izquierda"
+              data-testid="add-child-left-button"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -1014,15 +1008,7 @@ const Canvas = ({
           {/* Botón DERECHO → crear rama derecha */}
           {controlPositions.addButtonRight && (
             <button
-              onClick={handleAddChildRight}
               onPointerDown={(e) => {
-                e.stopPropagation();
-                if (e.pointerType === 'touch') {
-                  e.preventDefault();
-                  handleAddChildRight();
-                }
-              }}
-              onTouchEnd={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
                 handleAddChildRight();
@@ -1037,6 +1023,7 @@ const Canvas = ({
                 hover:scale-110 active:scale-95
                 border-2 border-white
                 touch-manipulation select-none
+                cursor-pointer
               "
               style={{
                 left: controlPositions.addButtonRight.x,
@@ -1046,6 +1033,7 @@ const Canvas = ({
               }}
               title="Agregar rama derecha (→)"
               aria-label="Agregar rama derecha"
+              data-testid="add-child-right-button"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                 <line x1="12" y1="5" x2="12" y2="19"></line>

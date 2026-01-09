@@ -17,36 +17,50 @@ import {
   GripHorizontal
 } from 'lucide-react';
 
-const ToolbarButton = ({ icon: Icon, label, onClick, danger = false, active = false, hasIndicator = false, badge = null }) => (
-  <button
-    onClick={onClick}
-    onMouseDown={(e) => e.stopPropagation()}
-    className={`
-      relative p-2.5 rounded-lg transition-all duration-150
-      flex items-center justify-center
-      ${danger 
-        ? 'text-red-500 hover:bg-red-50 hover:text-red-600' 
-        : active
-          ? 'bg-blue-100 text-blue-600'
-          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800'
-      }
-    `}
-    title={label}
-  >
-    <Icon size={18} />
-    {hasIndicator && !badge && (
-      <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-blue-500 rounded-full" />
-    )}
-    {badge !== null && badge > 0 && (
-      <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-blue-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-        {badge}
-      </span>
-    )}
-  </button>
-);
+// Botón del toolbar con soporte para touch Y mouse
+const ToolbarButton = ({ icon: Icon, label, onClick, danger = false, active = false, hasIndicator = false, badge = null }) => {
+  // Handler unificado para pointer (funciona con mouse, touch y stylus)
+  const handlePointerUp = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onClick) onClick(e);
+  };
+
+  return (
+    <button
+      onPointerUp={handlePointerUp}
+      onPointerDown={(e) => e.stopPropagation()}
+      className={`
+        relative p-2.5 rounded-lg transition-all duration-150
+        flex items-center justify-center
+        touch-manipulation select-none
+        min-w-[44px] min-h-[44px]
+        ${danger 
+          ? 'text-red-500 hover:bg-red-50 hover:text-red-600 active:bg-red-100' 
+          : active
+            ? 'bg-blue-100 text-blue-600'
+            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800 active:bg-gray-200'
+        }
+      `}
+      style={{ WebkitTapHighlightColor: 'transparent' }}
+      title={label}
+      aria-label={label}
+    >
+      <Icon size={18} />
+      {hasIndicator && !badge && (
+        <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-blue-500 rounded-full" />
+      )}
+      {badge !== null && badge > 0 && (
+        <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-blue-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+          {badge}
+        </span>
+      )}
+    </button>
+  );
+};
 
 const Divider = () => (
-  <div className="w-px h-7 bg-gray-200 mx-1" />
+  <div className="w-px h-7 bg-gray-200 mx-1 hidden sm:block" />
 );
 
 const NodeToolbar = ({
@@ -97,16 +111,20 @@ const NodeToolbar = ({
     }
   }, [position]);
 
-  // Iniciar arrastre desde el handle
+  // Iniciar arrastre desde el handle (pointer events para touch y mouse)
   const handleDragStart = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
     
-    if (toolbarRef.current) {
+    // Obtener coordenadas según el tipo de evento
+    const clientX = e.clientX ?? e.touches?.[0]?.clientX;
+    const clientY = e.clientY ?? e.touches?.[0]?.clientY;
+    
+    if (toolbarRef.current && clientX !== undefined) {
       const rect = toolbarRef.current.getBoundingClientRect();
       setDragOffset({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
+        x: clientX - rect.left,
+        y: clientY - rect.top
       });
       setIsDragging(true);
     }
@@ -118,14 +136,20 @@ const NodeToolbar = ({
     
     e.preventDefault();
     
+    // Obtener coordenadas según el tipo de evento
+    const clientX = e.clientX ?? e.touches?.[0]?.clientX;
+    const clientY = e.clientY ?? e.touches?.[0]?.clientY;
+    
+    if (clientX === undefined) return;
+    
     const toolbarWidth = toolbarRef.current?.offsetWidth || 680;
     const toolbarHeight = toolbarRef.current?.offsetHeight || 60;
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
     
     // Calcular nueva posición
-    let newX = e.clientX - dragOffset.x;
-    let newY = e.clientY - dragOffset.y;
+    let newX = clientX - dragOffset.x;
+    let newY = clientY - dragOffset.y;
     
     // Limitar a los bordes de la ventana (mantener al menos 100px visible)
     const margin = 100;
@@ -140,14 +164,23 @@ const NodeToolbar = ({
     setIsDragging(false);
   }, []);
 
-  // Event listeners para el arrastre
+  // Event listeners para el arrastre (mouse y touch)
   useEffect(() => {
     if (isDragging) {
+      // Mouse events
       window.addEventListener('mousemove', handleDrag);
       window.addEventListener('mouseup', handleDragEnd);
+      // Touch events
+      window.addEventListener('touchmove', handleDrag, { passive: false });
+      window.addEventListener('touchend', handleDragEnd);
+      window.addEventListener('touchcancel', handleDragEnd);
+      
       return () => {
         window.removeEventListener('mousemove', handleDrag);
         window.removeEventListener('mouseup', handleDragEnd);
+        window.removeEventListener('touchmove', handleDrag);
+        window.removeEventListener('touchend', handleDragEnd);
+        window.removeEventListener('touchcancel', handleDragEnd);
       };
     }
   }, [isDragging, handleDrag, handleDragEnd]);
@@ -155,16 +188,6 @@ const NodeToolbar = ({
   if (!visible) return null;
 
   const isDashedNode = nodeType === 'dashed' || nodeType === 'dashed_text';
-
-  const handleStyleClick = (e) => {
-    e.stopPropagation();
-    if (onStyle) onStyle();
-  };
-
-  const handleIconClick = (e) => {
-    e.stopPropagation();
-    if (onAddIcon) onAddIcon();
-  };
 
   // Estilos de posición: personalizada o centrada sobre el nodo
   const positionStyle = customPosition 
@@ -176,29 +199,39 @@ const NodeToolbar = ({
       ref={toolbarRef}
       data-toolbar="node-toolbar"
       className={`
-        absolute z-40
+        absolute z-[60]
         bg-white rounded-xl shadow-xl
         border border-gray-200
         flex items-center
         ${!customPosition ? '-translate-x-1/2' : ''}
         ${isDragging ? 'cursor-grabbing shadow-2xl' : ''}
+        touch-manipulation
       `}
-      style={positionStyle}
-      onMouseDown={(e) => e.stopPropagation()}
+      style={{
+        ...positionStyle,
+        pointerEvents: 'auto',
+        touchAction: 'none',
+        WebkitTapHighlightColor: 'transparent'
+      }}
+      onPointerDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
+      onTouchStart={(e) => e.stopPropagation()}
     >
       {/* Handle lateral izquierdo */}
       <div
-        onMouseDown={handleDragStart}
+        onPointerDown={handleDragStart}
+        onTouchStart={handleDragStart}
         className={`
           w-5 h-full min-h-[52px]
-          bg-blue-500 hover:bg-blue-600
+          bg-blue-500 hover:bg-blue-600 active:bg-blue-700
           rounded-l-xl
           flex items-center justify-center
           cursor-grab active:cursor-grabbing
           transition-colors duration-150
+          touch-manipulation select-none
           ${isDragging ? 'bg-blue-700' : ''}
         `}
+        style={{ touchAction: 'none' }}
         title="Arrastrar para mover"
       >
         <div className="flex flex-col gap-1">
@@ -208,8 +241,8 @@ const NodeToolbar = ({
         </div>
       </div>
 
-      {/* Contenedor de botones */}
-      <div className="flex items-center gap-1 px-1.5 py-2">
+      {/* Contenedor de botones - scrollable en móvil */}
+      <div className="flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-2 overflow-x-auto max-w-[80vw] sm:max-w-none">
         {/* Marcar como completado */}
         <ToolbarButton 
           icon={CheckCircle2} 
@@ -232,7 +265,7 @@ const NodeToolbar = ({
           <ToolbarButton 
             icon={Palette} 
             label="Personalizar estilo" 
-            onClick={handleStyleClick}
+            onClick={onStyle}
             active={stylePanelOpen}
           />
         )}
@@ -251,7 +284,7 @@ const NodeToolbar = ({
         <ToolbarButton 
           icon={Laugh} 
           label="Agregar icono" 
-          onClick={handleIconClick}
+          onClick={onAddIcon}
           active={iconPanelOpen}
           hasIndicator={hasIcon}
         />
@@ -317,16 +350,19 @@ const NodeToolbar = ({
 
       {/* Handle lateral derecho */}
       <div
-        onMouseDown={handleDragStart}
+        onPointerDown={handleDragStart}
+        onTouchStart={handleDragStart}
         className={`
           w-5 h-full min-h-[52px]
-          bg-blue-500 hover:bg-blue-600
+          bg-blue-500 hover:bg-blue-600 active:bg-blue-700
           rounded-r-xl
           flex items-center justify-center
           cursor-grab active:cursor-grabbing
           transition-colors duration-150
+          touch-manipulation select-none
           ${isDragging ? 'bg-blue-700' : ''}
         `}
+        style={{ touchAction: 'none' }}
         title="Arrastrar para mover"
       >
         <div className="flex flex-col gap-1">

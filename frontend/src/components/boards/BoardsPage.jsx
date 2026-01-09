@@ -725,6 +725,19 @@ const BoardsPage = ({ onBack, onSelectBoard, onTrashUpdate }) => {
           </button>
         </div>
       )}
+
+      {/* Modal de Compartir */}
+      <ShareModal
+        isOpen={shareModalOpen}
+        onClose={() => {
+          setShareModalOpen(false);
+          setShareBoard(null);
+        }}
+        resourceType="board"
+        resourceId={shareBoard?.id}
+        resourceName={shareBoard?.title}
+        onCollaboratorsChange={fetchBoards}
+      />
     </div>
   );
 };

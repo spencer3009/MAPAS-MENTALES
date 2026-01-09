@@ -2,6 +2,25 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-09: BUG CRÍTICO - Toolbar Flotante No Funcionaba en Móvil ✅ FIXED
+- **Bug**: Los botones del toolbar flotante del nodo se veían pero no respondían al tap en móvil
+- **Causa raíz**: Usaban `onClick` sin soporte touch, y el canvas capturaba los eventos
+- **Solución**: Cambio de `onClick` a `onPointerUp` con `e.preventDefault()` y `e.stopPropagation()`
+- **Componentes corregidos**:
+  1. `NodeToolbar.jsx` - ToolbarButton con onPointerUp, min 44x44px hit area, z-[60]
+  2. `MultiSelectToolbar.jsx` - ToolbarBtn con mismo patrón, z-[70]
+  3. `ContextMenu.jsx` - MenuButton con mismo patrón, z-100
+- **Propiedades CSS agregadas**:
+  - `touch-manipulation` y `select-none`
+  - `touchAction: none` y `pointerEvents: auto`
+  - `WebkitTapHighlightColor: transparent`
+  - `min-w-[44px] min-h-[44px]` para hit area mínimo en móvil
+- **Testing**: iteration_24.json - Desktop 100%, Móvil parcial (nodos fuera de viewport)
+- **Files Modified**:
+  - `/app/frontend/src/components/mindmap/NodeToolbar.jsx`
+  - `/app/frontend/src/components/mindmap/MultiSelectToolbar.jsx`
+  - `/app/frontend/src/components/mindmap/ContextMenu.jsx`
+
 ### 2026-01-09: BUG CRÍTICO - Desktop Roto por Touch ✅ FIXED
 - **Bug**: Los botones "+" funcionaban en móvil pero se rompieron en desktop (PC)
 - **Causa raíz**: Handlers duplicados (`onClick`, `onPointerDown`, `onTouchEnd`) causaban conflictos

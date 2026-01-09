@@ -5920,7 +5920,9 @@ async def create_or_get_share_link(
     
     is_owner = False
     if resource_type == "mindmap":
-        resource = await db.projects.find_one({"project_id": resource_id}, {"_id": 0})
+        resource = await db.projects.find_one({"id": resource_id}, {"_id": 0})
+        if not resource:
+            resource = await db.projects.find_one({"project_id": resource_id}, {"_id": 0})
         is_owner = resource and resource.get("username") == current_user["username"]
     elif resource_type == "board":
         resource = await db.boards.find_one({"id": resource_id}, {"_id": 0})

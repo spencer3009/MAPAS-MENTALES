@@ -229,18 +229,21 @@ const NodeToolbar = ({
       data-toolbar="node-toolbar"
       data-testid="node-toolbar"
       className={`
-        absolute z-[9999]
+        fixed z-[9999]
         bg-white rounded-xl shadow-xl
         border border-gray-200
         flex items-center
-        ${!customPosition ? '-translate-x-1/2' : ''}
         ${isDragging ? 'cursor-grabbing shadow-2xl' : ''}
-        touch-manipulation
       `}
       style={{
-        ...positionStyle,
+        left: positionStyle.left,
+        top: positionStyle.top,
+        transform: customPosition ? 'none' : 'translateX(-50%)',
         pointerEvents: 'auto',
-        WebkitTapHighlightColor: 'transparent'
+        touchAction: 'manipulation',
+        WebkitTapHighlightColor: 'transparent',
+        WebkitUserSelect: 'none',
+        userSelect: 'none'
       }}
       onMouseDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}

@@ -35,6 +35,21 @@ const cacheHeaders = (req, res, next) => {
 // Aplicar headers de caché
 app.use(cacheHeaders);
 
+// PWA Manifest con Content-Type correcto
+app.get('/manifest.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/manifest+json');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.sendFile(path.join(BUILD_DIR, 'manifest.json'));
+});
+
+// Service Worker con headers correctos
+app.get('/service-worker.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Service-Worker-Allowed', '/');
+  res.sendFile(path.join(BUILD_DIR, 'service-worker.js'));
+});
+
 // Servir archivos estáticos
 app.use(express.static(BUILD_DIR));
 

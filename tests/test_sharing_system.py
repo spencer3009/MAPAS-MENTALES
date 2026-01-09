@@ -114,7 +114,7 @@ class TestSharingSystem:
         if not projects:
             pytest.skip("No projects available for testing")
         
-        project_id = projects[0]["project_id"]
+        project_id = projects[0].get("project_id") or projects[0].get("id")
         
         # Get collaborators
         response = self.session.get(f"{BASE_URL}/api/mindmap/{project_id}/collaborators")
@@ -192,7 +192,7 @@ class TestSharingSystem:
         if not projects:
             pytest.skip("No projects available for testing")
         
-        project_id = projects[0]["project_id"]
+        project_id = projects[0].get("project_id") or projects[0].get("id")
         test_email = f"test_mindmap_invite_{uuid.uuid4().hex[:8]}@example.com"
         
         # Create invite

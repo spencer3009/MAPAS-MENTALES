@@ -130,6 +130,7 @@ async def create_personal_workspace(db, username: str, user_email: str, user_ful
     
     # Insertar workspace
     await db.workspaces.insert_one(workspace)
+    workspace.pop("_id", None)
     
     # Agregar al usuario como owner
     member = {

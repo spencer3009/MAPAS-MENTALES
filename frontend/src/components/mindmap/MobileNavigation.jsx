@@ -270,6 +270,110 @@ const MobileNavigation = ({
         </div>
       </nav>
 
+      {/* Modal de instrucciones iOS para instalación */}
+      {showIOSModal && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => setShowIOSModal(false)}
+        >
+          <div 
+            className="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-lg p-6 pb-8 animate-in slide-in-from-bottom-10 duration-300"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
+                  <Smartphone className="text-white" size={24} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">
+                    {isIOS ? 'Instalar en iPhone/iPad' : 'Instalar Mindora'}
+                  </h3>
+                  <p className="text-sm text-gray-500">Acceso rápido desde tu inicio</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowIOSModal(false)}
+                className="p-2 text-gray-400 hover:text-gray-600 rounded-xl hover:bg-gray-100"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              {isIOS ? (
+                <>
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Share2 size={20} className="text-emerald-600" />
+                    </div>
+                    <div className="pt-1">
+                      <p className="font-semibold text-gray-900 mb-0.5">Toca el botón Compartir</p>
+                      <p className="text-sm text-gray-500">En la barra inferior de Safari</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-emerald-600 font-bold">2</span>
+                    </div>
+                    <div className="pt-1">
+                      <p className="font-semibold text-gray-900 mb-0.5">"Añadir a pantalla de inicio"</p>
+                      <p className="text-sm text-gray-500">Desplázate y selecciona esta opción</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <CheckCircle2 size={20} className="text-emerald-600" />
+                    </div>
+                    <div className="pt-1">
+                      <p className="font-semibold text-gray-900 mb-0.5">Confirma tocando "Añadir"</p>
+                      <p className="text-sm text-gray-500">¡Listo! Mindora estará en tu inicio</p>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-emerald-600 font-bold">1</span>
+                    </div>
+                    <div className="pt-1">
+                      <p className="font-semibold text-gray-900 mb-0.5">Abre el menú del navegador</p>
+                      <p className="text-sm text-gray-500">Los tres puntos (⋮) en la esquina</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-emerald-600 font-bold">2</span>
+                    </div>
+                    <div className="pt-1">
+                      <p className="font-semibold text-gray-900 mb-0.5">"Instalar app" o "Agregar a inicio"</p>
+                      <p className="text-sm text-gray-500">Selecciona esta opción del menú</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <CheckCircle2 size={20} className="text-emerald-600" />
+                    </div>
+                    <div className="pt-1">
+                      <p className="font-semibold text-gray-900 mb-0.5">Confirma la instalación</p>
+                      <p className="text-sm text-gray-500">¡Listo! Mindora estará en tu inicio</p>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <button
+              onClick={() => setShowIOSModal(false)}
+              className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-xl"
+            >
+              Entendido
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Espaciador para el contenido (evita que el header tape contenido) */}
       <div className="md:hidden h-14" />
     </>

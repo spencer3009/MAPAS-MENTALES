@@ -950,6 +950,9 @@ const LandingPage = ({ onLogin, onRegister, onDemo, onTerms, onPrivacy, onCookie
           </div>
         </div>
       </footer>
+
+      {/* Banner de instalación PWA (solo móvil) */}
+      <InstallPWABanner />
     </div>
   );
 };

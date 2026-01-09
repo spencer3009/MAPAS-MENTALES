@@ -391,6 +391,8 @@ async def create_invite(
     
     await db.invites.insert_one(invite)
     
+    # Retornar sin _id
+    invite.pop("_id", None)
     return invite
 
 async def accept_invite(db, token: str, username: str) -> dict:

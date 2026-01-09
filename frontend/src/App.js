@@ -32,14 +32,39 @@ const AppContent = () => {
   const [selectedPlanId, setSelectedPlanId] = useState(null); // Plan seleccionado desde la landing
   const [paypalCallback, setPaypalCallback] = useState(null); // 'success' o 'cancel'
   const [showVerificationBanner, setShowVerificationBanner] = useState(true);
+  const [isPWAEntry, setIsPWAEntry] = useState(false); // Detectar si entró desde PWA
+
+  // Detectar si está ejecutando como PWA (standalone)
+  useEffect(() => {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
+      || window.navigator.standalone === true;
+    const isAppRoute = window.location.pathname === '/app';
+    
+    if (isStandalone || isAppRoute) {
+      setIsPWAEntry(true);
+      // Si no está autenticado y entró por /app, ir a login
+      if (!loading && !isAuthenticated) {
+        setAuthView('login');
+      }
+    }
+  }, [loading, isAuthenticated]);
 
   // Detectar rutas especiales en pathname
   useEffect(() => {
     const pathname = window.location.pathname;
     if (pathname === '/verify') {
       setAuthView('verify');
+    } else if (pathname === '/app') {
+      // Ruta /app: si no está autenticado, ir a login
+      if (!loading && !isAuthenticated) {
+        setAuthView('login');
+      }
+    } else if (pathname === '/login') {
+      setAuthView('login');
+    } else if (pathname === '/register') {
+      setAuthView('register');
     }
-  }, []);
+  }, [loading, isAuthenticated]);
 
   // Detectar session_id en la URL (Google OAuth callback)
   useEffect(() => {

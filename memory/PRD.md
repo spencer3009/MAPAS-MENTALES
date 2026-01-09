@@ -2,6 +2,23 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-09: BUG PWA - Abría Landing en vez de App ✅ FIXED
+- **Bug**: Al abrir la PWA desde el ícono, mostraba la landing page en vez del dashboard
+- **Causa raíz**: `start_url` en manifest.json era `/` (landing) en vez de `/app`
+- **Solución**:
+  1. Cambiado `start_url` de `/` a `/app` en manifest.json
+  2. Agregada lógica en App.js para detectar ruta `/app`:
+     - Si NO hay sesión → mostrar Login
+     - Si SÍ hay sesión → mostrar Dashboard y limpiar URL a `/`
+  3. Verificada persistencia de sesión en localStorage (mm_auth_token, mm_auth_user)
+- **Flujo corregido**:
+  - PWA abre → /app → Si no logueado → Login → Dashboard
+  - PWA abre → /app → Si logueado → Dashboard directo
+- **Files Modified**:
+  - `/app/frontend/public/manifest.json` - start_url: '/app'
+  - `/app/frontend/src/App.js` - Lógica de ruta /app y limpieza de URL
+- **Testing**: iteration_22.json - 100% PASS
+
 ### 2026-01-09: BUG CRÍTICO PWA - Android No Instalaba ✅ FIXED
 - **Bug**: La PWA no se instalaba realmente en Android - no creaba ícono
 - **Causas raíz encontradas**:

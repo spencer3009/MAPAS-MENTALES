@@ -852,15 +852,7 @@ const Canvas = ({
       {/* Botón único "+" para MindFlow y MindTree */}
       {shouldShowAddButton && controlPositions.addButton && layoutType !== 'mindhybrid' && (
         <button
-          onClick={handleAddChildFromButton}
           onPointerDown={(e) => {
-            e.stopPropagation();
-            if (e.pointerType === 'touch') {
-              e.preventDefault();
-              handleAddChildFromButton();
-            }
-          }}
-          onTouchEnd={(e) => {
             e.stopPropagation();
             e.preventDefault();
             handleAddChildFromButton();
@@ -875,6 +867,7 @@ const Canvas = ({
             hover:scale-110 active:scale-95
             border-2 border-white
             touch-manipulation select-none
+            cursor-pointer
           "
           style={{
             left: controlPositions.addButton.x,
@@ -884,6 +877,7 @@ const Canvas = ({
           }}
           title="Agregar nodo hijo"
           aria-label="Agregar nodo hijo"
+          data-testid="add-child-button"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <line x1="12" y1="5" x2="12" y2="19"></line>

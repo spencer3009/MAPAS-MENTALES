@@ -6059,9 +6059,14 @@ async def get_shared_with_me(current_user: dict = Depends(get_current_user)):
         
         if resource_type == "mindmap":
             resource = await db.projects.find_one(
-                {"project_id": resource_id, "isDeleted": {"$ne": True}},
+                {"id": resource_id, "isDeleted": {"$ne": True}},
                 {"_id": 0}
             )
+            if not resource:
+                resource = await db.projects.find_one(
+                    {"project_id": resource_id, "isDeleted": {"$ne": True}},
+                    {"_id": 0}
+                )
             if resource:
                 # Obtener info del owner
                 owner = await db.users.find_one(
@@ -6069,7 +6074,7 @@ async def get_shared_with_me(current_user: dict = Depends(get_current_user)):
                     {"_id": 0, "full_name": 1, "picture": 1}
                 )
                 shared_resources["mindmaps"].append({
-                    "id": resource.get("project_id"),
+                    "id": resource.get("id") or resource.get("project_id"),
                     "name": resource.get("name"),
                     "role": perm.get("role"),
                     "shared_at": perm.get("created_at"),

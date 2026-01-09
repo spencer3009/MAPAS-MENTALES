@@ -5469,6 +5469,742 @@ async def delete_contact_label(contact_type: str, label_id: str, current_user: d
     return {"message": "Etiqueta eliminada"}
 
 
+# ==========================================
+# SHARING & COLLABORATION ENDPOINTS
+# ==========================================
+
+# --- Pydantic Models for Sharing ---
+class CreateInviteRequest(BaseModel):
+    email: str
+    resource_type: str  # 'mindmap', 'board', 'contacts', 'reminders'
+    resource_id: str
+    role: str = "viewer"  # 'viewer', 'commenter', 'editor', 'admin'
+
+class UpdateCollaboratorRoleRequest(BaseModel):
+    role: str
+
+class CreateShareLinkRequest(BaseModel):
+    resource_type: str
+    resource_id: str
+    role: str = "viewer"
+    expires_in_days: Optional[int] = None
+
+class ToggleShareLinkRequest(BaseModel):
+    is_active: bool
+
+
+# --- Workspace Endpoints ---
+
+@api_router.get("/workspaces")
+async def get_my_workspaces(current_user: dict = Depends(get_current_user)):
+    """Obtener todos los workspaces del usuario"""
+    workspaces = await get_user_workspaces(db, current_user["username"])
+    return {"workspaces": workspaces}
+
+@api_router.get("/workspaces/{workspace_id}")
+async def get_workspace_by_id(workspace_id: str, current_user: dict = Depends(get_current_user)):
+    """Obtener un workspace específico"""
+    # Verificar que el usuario es miembro
+    membership = await db.workspace_members.find_one({
+        "workspace_id": workspace_id,
+        "username": current_user["username"]
+    }, {"_id": 0})
+    
+    if not membership:
+        raise HTTPException(status_code=403, detail="No tienes acceso a este workspace")
+    
+    workspace = await db.workspaces.find_one({"id": workspace_id}, {"_id": 0})
+    if not workspace:
+        raise HTTPException(status_code=404, detail="Workspace no encontrado")
+    
+    workspace["user_role"] = membership["role"]
+    return workspace
+
+@api_router.get("/workspaces/{workspace_id}/members")
+async def get_workspace_members_endpoint(workspace_id: str, current_user: dict = Depends(get_current_user)):
+    """Obtener miembros de un workspace"""
+    # Verificar acceso
+    membership = await db.workspace_members.find_one({
+        "workspace_id": workspace_id,
+        "username": current_user["username"]
+    })
+    
+    if not membership:
+        raise HTTPException(status_code=403, detail="No tienes acceso a este workspace")
+    
+    members = await get_workspace_members(db, workspace_id)
+    
+    # Enriquecer con datos de usuario
+    enriched_members = []
+    for member in members:
+        user = await db.users.find_one(
+            {"username": member["username"]},
+            {"_id": 0, "username": 1, "email": 1, "full_name": 1, "picture": 1}
+        )
+        if user:
+            enriched_members.append({
+                **member,
+                "full_name": user.get("full_name", member["username"]),
+                "picture": user.get("picture"),
+                "email": user.get("email")
+            })
+        else:
+            enriched_members.append(member)
+    
+    return {"members": enriched_members}
+
+
+# --- Invitation Endpoints ---
+
+@api_router.post("/invites")
+async def create_invitation(
+    request: CreateInviteRequest, 
+    background_tasks: BackgroundTasks,
+    current_user: dict = Depends(get_current_user)
+):
+    """Crear una invitación para compartir un recurso"""
+    # Validar tipo de recurso
+    if request.resource_type not in RESOURCE_TYPES:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Tipo de recurso inválido. Debe ser uno de: {', '.join(RESOURCE_TYPES)}"
+        )
+    
+    # Validar rol
+    if request.role not in RESOURCE_ROLES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Rol inválido. Debe ser uno de: {', '.join(RESOURCE_ROLES.keys())}"
+        )
+    
+    # Verificar que el usuario tiene permiso para compartir
+    can_share = await check_resource_permission(
+        db, current_user["username"], request.resource_type, request.resource_id, "share"
+    )
+    
+    # Si no tiene permiso de "share", verificar si es el dueño
+    if not can_share:
+        is_owner = False
+        if request.resource_type == "mindmap":
+            resource = await db.projects.find_one({"project_id": request.resource_id}, {"_id": 0})
+            is_owner = resource and resource.get("username") == current_user["username"]
+        elif request.resource_type == "board":
+            resource = await db.boards.find_one({"id": request.resource_id}, {"_id": 0})
+            is_owner = resource and resource.get("owner_username") == current_user["username"]
+        
+        if not is_owner:
+            raise HTTPException(status_code=403, detail="No tienes permiso para compartir este recurso")
+    
+    # Verificar que no se esté invitando a sí mismo
+    invitee_email = request.email.lower().strip()
+    inviter = await db.users.find_one({"username": current_user["username"]}, {"_id": 0})
+    if inviter and inviter.get("email", "").lower() == invitee_email:
+        raise HTTPException(status_code=400, detail="No puedes invitarte a ti mismo")
+    
+    # Verificar si el usuario ya tiene acceso
+    existing_user = await db.users.find_one({"email": invitee_email}, {"_id": 0})
+    if existing_user:
+        existing_permission = await db.resource_permissions.find_one({
+            "resource_type": request.resource_type,
+            "resource_id": request.resource_id,
+            "principal_type": "user",
+            "principal_id": existing_user["username"]
+        })
+        if existing_permission:
+            raise HTTPException(status_code=400, detail="Este usuario ya tiene acceso al recurso")
+    
+    # Verificar si ya hay una invitación pendiente
+    existing_invite = await db.invites.find_one({
+        "email": invitee_email,
+        "resource_type": request.resource_type,
+        "resource_id": request.resource_id,
+        "status": "pending"
+    })
+    if existing_invite:
+        raise HTTPException(status_code=400, detail="Ya existe una invitación pendiente para este email")
+    
+    # Crear invitación
+    invite = await create_invite(
+        db,
+        invitee_email,
+        request.resource_type,
+        request.resource_id,
+        request.role,
+        current_user["username"]
+    )
+    
+    # Obtener nombre del recurso para el email
+    resource_name = "Recurso"
+    if request.resource_type == "mindmap":
+        resource = await db.projects.find_one({"project_id": request.resource_id}, {"_id": 0})
+        resource_name = resource.get("name", "Mapa mental") if resource else "Mapa mental"
+    elif request.resource_type == "board":
+        resource = await db.boards.find_one({"id": request.resource_id}, {"_id": 0})
+        resource_name = resource.get("title", "Tablero") if resource else "Tablero"
+    
+    # Enviar email de invitación en background
+    inviter_name = inviter.get("full_name", current_user["username"]) if inviter else current_user["username"]
+    background_tasks.add_task(
+        send_collaboration_invite_email,
+        invitee_email,
+        inviter_name,
+        resource_name,
+        request.resource_type,
+        request.role,
+        invite["token"]
+    )
+    
+    logger.info(f"📧 Invitación creada: {invitee_email} -> {request.resource_type}/{request.resource_id}")
+    
+    return {
+        "success": True,
+        "invite_id": invite["id"],
+        "message": f"Invitación enviada a {invitee_email}"
+    }
+
+@api_router.get("/invites/accept/{token}")
+async def accept_invitation_get(token: str, current_user: dict = Depends(get_current_user)):
+    """Aceptar una invitación (GET para links desde email)"""
+    result = await accept_invite(db, token, current_user["username"])
+    
+    if not result["success"]:
+        raise HTTPException(status_code=400, detail=result["error"])
+    
+    return {
+        "success": True,
+        "resource_type": result["resource_type"],
+        "resource_id": result["resource_id"],
+        "role": result["role"],
+        "message": "¡Invitación aceptada! Ahora tienes acceso al recurso."
+    }
+
+@api_router.post("/invites/accept/{token}")
+async def accept_invitation_post(token: str, current_user: dict = Depends(get_current_user)):
+    """Aceptar una invitación (POST)"""
+    return await accept_invitation_get(token, current_user)
+
+@api_router.get("/invites/pending")
+async def get_my_pending_invites(current_user: dict = Depends(get_current_user)):
+    """Obtener invitaciones pendientes para el usuario actual"""
+    user = await db.users.find_one({"username": current_user["username"]}, {"_id": 0})
+    if not user or not user.get("email"):
+        return {"invites": []}
+    
+    invites = await get_pending_invites_for_email(db, user["email"])
+    
+    # Enriquecer con información del recurso
+    enriched_invites = []
+    for invite in invites:
+        resource_name = "Recurso"
+        if invite["resource_type"] == "mindmap":
+            resource = await db.projects.find_one({"project_id": invite["resource_id"]}, {"_id": 0})
+            resource_name = resource.get("name", "Mapa mental") if resource else "Mapa mental"
+        elif invite["resource_type"] == "board":
+            resource = await db.boards.find_one({"id": invite["resource_id"]}, {"_id": 0})
+            resource_name = resource.get("title", "Tablero") if resource else "Tablero"
+        
+        # Obtener nombre del invitador
+        inviter = await db.users.find_one({"username": invite["invited_by"]}, {"_id": 0})
+        inviter_name = inviter.get("full_name", invite["invited_by"]) if inviter else invite["invited_by"]
+        
+        enriched_invites.append({
+            **invite,
+            "resource_name": resource_name,
+            "inviter_name": inviter_name
+        })
+    
+    return {"invites": enriched_invites}
+
+@api_router.delete("/invites/{invite_id}")
+async def cancel_invitation(invite_id: str, current_user: dict = Depends(get_current_user)):
+    """Cancelar una invitación pendiente"""
+    invite = await db.invites.find_one({"id": invite_id}, {"_id": 0})
+    
+    if not invite:
+        raise HTTPException(status_code=404, detail="Invitación no encontrada")
+    
+    # Solo el que invitó puede cancelar
+    if invite["invited_by"] != current_user["username"]:
+        raise HTTPException(status_code=403, detail="No tienes permiso para cancelar esta invitación")
+    
+    await db.invites.update_one(
+        {"id": invite_id},
+        {"$set": {"status": "cancelled"}}
+    )
+    
+    return {"success": True, "message": "Invitación cancelada"}
+
+
+# --- Collaborators Endpoints ---
+
+@api_router.get("/{resource_type}/{resource_id}/collaborators")
+async def get_collaborators(
+    resource_type: str, 
+    resource_id: str, 
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener colaboradores de un recurso"""
+    if resource_type not in RESOURCE_TYPES:
+        raise HTTPException(status_code=400, detail="Tipo de recurso inválido")
+    
+    # Verificar acceso al recurso
+    has_access = await check_resource_permission(
+        db, current_user["username"], resource_type, resource_id, "view"
+    )
+    
+    # También verificar si es el dueño
+    is_owner = False
+    owner_info = None
+    if resource_type == "mindmap":
+        resource = await db.projects.find_one({"project_id": resource_id}, {"_id": 0})
+        if resource:
+            is_owner = resource.get("username") == current_user["username"]
+            owner_username = resource.get("username")
+    elif resource_type == "board":
+        resource = await db.boards.find_one({"id": resource_id}, {"_id": 0})
+        if resource:
+            is_owner = resource.get("owner_username") == current_user["username"]
+            owner_username = resource.get("owner_username")
+    
+    if not has_access and not is_owner:
+        raise HTTPException(status_code=403, detail="No tienes acceso a este recurso")
+    
+    collaborators = await get_resource_collaborators(db, resource_type, resource_id)
+    
+    # Agregar información del owner
+    if owner_username:
+        owner = await db.users.find_one(
+            {"username": owner_username},
+            {"_id": 0, "username": 1, "email": 1, "full_name": 1, "picture": 1}
+        )
+        if owner:
+            owner_info = {
+                "username": owner.get("username"),
+                "email": owner.get("email"),
+                "full_name": owner.get("full_name", owner.get("username")),
+                "picture": owner.get("picture"),
+                "role": "owner",
+                "is_owner": True
+            }
+    
+    # Obtener link compartido si existe
+    share_link = await get_resource_share_link(db, resource_type, resource_id)
+    
+    return {
+        "owner": owner_info,
+        "collaborators": collaborators,
+        "share_link": share_link,
+        "current_user_is_owner": is_owner
+    }
+
+@api_router.put("/{resource_type}/{resource_id}/collaborators/{username}")
+async def update_collaborator(
+    resource_type: str,
+    resource_id: str,
+    username: str,
+    request: UpdateCollaboratorRoleRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Actualizar rol de un colaborador"""
+    if resource_type not in RESOURCE_TYPES:
+        raise HTTPException(status_code=400, detail="Tipo de recurso inválido")
+    
+    if request.role not in RESOURCE_ROLES:
+        raise HTTPException(status_code=400, detail="Rol inválido")
+    
+    # Verificar que el usuario tiene permiso para gestionar colaboradores
+    can_share = await check_resource_permission(
+        db, current_user["username"], resource_type, resource_id, "share"
+    )
+    
+    # También verificar si es el dueño
+    is_owner = False
+    if resource_type == "mindmap":
+        resource = await db.projects.find_one({"project_id": resource_id}, {"_id": 0})
+        is_owner = resource and resource.get("username") == current_user["username"]
+    elif resource_type == "board":
+        resource = await db.boards.find_one({"id": resource_id}, {"_id": 0})
+        is_owner = resource and resource.get("owner_username") == current_user["username"]
+    
+    if not can_share and not is_owner:
+        raise HTTPException(status_code=403, detail="No tienes permiso para gestionar colaboradores")
+    
+    # No permitir cambiar el rol del dueño
+    if resource_type == "mindmap":
+        if resource and resource.get("username") == username:
+            raise HTTPException(status_code=400, detail="No puedes cambiar el rol del propietario")
+    elif resource_type == "board":
+        if resource and resource.get("owner_username") == username:
+            raise HTTPException(status_code=400, detail="No puedes cambiar el rol del propietario")
+    
+    success = await update_collaborator_role(
+        db, resource_type, resource_id, username, request.role, current_user["username"]
+    )
+    
+    if not success:
+        raise HTTPException(status_code=404, detail="Colaborador no encontrado")
+    
+    return {"success": True, "message": "Rol actualizado"}
+
+@api_router.delete("/{resource_type}/{resource_id}/collaborators/{username}")
+async def remove_collaborator_endpoint(
+    resource_type: str,
+    resource_id: str,
+    username: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Remover un colaborador de un recurso"""
+    if resource_type not in RESOURCE_TYPES:
+        raise HTTPException(status_code=400, detail="Tipo de recurso inválido")
+    
+    # Verificar que el usuario tiene permiso para gestionar colaboradores
+    can_share = await check_resource_permission(
+        db, current_user["username"], resource_type, resource_id, "share"
+    )
+    
+    # También verificar si es el dueño
+    is_owner = False
+    if resource_type == "mindmap":
+        resource = await db.projects.find_one({"project_id": resource_id}, {"_id": 0})
+        is_owner = resource and resource.get("username") == current_user["username"]
+    elif resource_type == "board":
+        resource = await db.boards.find_one({"id": resource_id}, {"_id": 0})
+        is_owner = resource and resource.get("owner_username") == current_user["username"]
+    
+    # Permitir que un usuario se remueva a sí mismo
+    is_self = username == current_user["username"]
+    
+    if not can_share and not is_owner and not is_self:
+        raise HTTPException(status_code=403, detail="No tienes permiso para remover colaboradores")
+    
+    # No permitir remover al dueño
+    if resource_type == "mindmap":
+        if resource and resource.get("username") == username:
+            raise HTTPException(status_code=400, detail="No puedes remover al propietario")
+    elif resource_type == "board":
+        if resource and resource.get("owner_username") == username:
+            raise HTTPException(status_code=400, detail="No puedes remover al propietario")
+    
+    success = await remove_collaborator(db, resource_type, resource_id, username)
+    
+    if not success:
+        raise HTTPException(status_code=404, detail="Colaborador no encontrado")
+    
+    return {"success": True, "message": "Colaborador removido"}
+
+
+# --- Share Link Endpoints ---
+
+@api_router.post("/{resource_type}/{resource_id}/share-link")
+async def create_or_get_share_link(
+    resource_type: str,
+    resource_id: str,
+    request: CreateShareLinkRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Crear o obtener link de compartir"""
+    if resource_type not in RESOURCE_TYPES:
+        raise HTTPException(status_code=400, detail="Tipo de recurso inválido")
+    
+    # Verificar que es el dueño o tiene permiso de share
+    can_share = await check_resource_permission(
+        db, current_user["username"], resource_type, resource_id, "share"
+    )
+    
+    is_owner = False
+    if resource_type == "mindmap":
+        resource = await db.projects.find_one({"project_id": resource_id}, {"_id": 0})
+        is_owner = resource and resource.get("username") == current_user["username"]
+    elif resource_type == "board":
+        resource = await db.boards.find_one({"id": resource_id}, {"_id": 0})
+        is_owner = resource and resource.get("owner_username") == current_user["username"]
+    
+    if not can_share and not is_owner:
+        raise HTTPException(status_code=403, detail="No tienes permiso para crear links de compartir")
+    
+    # Verificar si ya existe un link
+    existing_link = await get_resource_share_link(db, resource_type, resource_id)
+    
+    if existing_link:
+        # Actualizar el link existente
+        await db.share_links.update_one(
+            {"id": existing_link["id"]},
+            {"$set": {"role": request.role, "is_active": True}}
+        )
+        existing_link["role"] = request.role
+        existing_link["is_active"] = True
+        return {"share_link": existing_link}
+    
+    # Crear nuevo link
+    share_link = await create_share_link(
+        db,
+        resource_type,
+        resource_id,
+        request.role,
+        current_user["username"],
+        request.expires_in_days
+    )
+    
+    return {"share_link": share_link}
+
+@api_router.put("/{resource_type}/{resource_id}/share-link")
+async def toggle_share_link_endpoint(
+    resource_type: str,
+    resource_id: str,
+    request: ToggleShareLinkRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Activar/desactivar link de compartir"""
+    if resource_type not in RESOURCE_TYPES:
+        raise HTTPException(status_code=400, detail="Tipo de recurso inválido")
+    
+    # Verificar permisos
+    is_owner = False
+    if resource_type == "mindmap":
+        resource = await db.projects.find_one({"project_id": resource_id}, {"_id": 0})
+        is_owner = resource and resource.get("username") == current_user["username"]
+    elif resource_type == "board":
+        resource = await db.boards.find_one({"id": resource_id}, {"_id": 0})
+        is_owner = resource and resource.get("owner_username") == current_user["username"]
+    
+    if not is_owner:
+        raise HTTPException(status_code=403, detail="Solo el propietario puede gestionar links de compartir")
+    
+    await toggle_share_link(db, resource_type, resource_id, request.is_active)
+    
+    return {"success": True, "is_active": request.is_active}
+
+@api_router.get("/shared/{token}")
+async def access_shared_resource(token: str):
+    """Acceder a un recurso compartido via link (público, no requiere auth)"""
+    share_link = await get_share_link(db, token)
+    
+    if not share_link:
+        raise HTTPException(status_code=404, detail="Link no válido o expirado")
+    
+    # Obtener información del recurso
+    resource_info = None
+    if share_link["resource_type"] == "mindmap":
+        resource = await db.projects.find_one(
+            {"project_id": share_link["resource_id"]},
+            {"_id": 0}
+        )
+        if resource:
+            resource_info = {
+                "id": resource.get("project_id"),
+                "name": resource.get("name"),
+                "type": "mindmap"
+            }
+    elif share_link["resource_type"] == "board":
+        resource = await db.boards.find_one(
+            {"id": share_link["resource_id"]},
+            {"_id": 0}
+        )
+        if resource:
+            resource_info = {
+                "id": resource.get("id"),
+                "name": resource.get("title"),
+                "type": "board"
+            }
+    
+    if not resource_info:
+        raise HTTPException(status_code=404, detail="Recurso no encontrado")
+    
+    return {
+        "resource": resource_info,
+        "role": share_link["role"],
+        "access_type": "public_link"
+    }
+
+
+# --- Resources Shared With Me ---
+
+@api_router.get("/shared-with-me")
+async def get_shared_with_me(current_user: dict = Depends(get_current_user)):
+    """Obtener todos los recursos compartidos con el usuario actual"""
+    username = current_user["username"]
+    
+    # Buscar permisos directos
+    permissions = await db.resource_permissions.find(
+        {"principal_type": "user", "principal_id": username},
+        {"_id": 0}
+    ).to_list(100)
+    
+    shared_resources = {
+        "mindmaps": [],
+        "boards": [],
+        "contacts": [],
+        "reminders": []
+    }
+    
+    for perm in permissions:
+        resource_type = perm["resource_type"]
+        resource_id = perm["resource_id"]
+        
+        if resource_type == "mindmap":
+            resource = await db.projects.find_one(
+                {"project_id": resource_id, "isDeleted": {"$ne": True}},
+                {"_id": 0}
+            )
+            if resource:
+                # Obtener info del owner
+                owner = await db.users.find_one(
+                    {"username": resource.get("username")},
+                    {"_id": 0, "full_name": 1, "picture": 1}
+                )
+                shared_resources["mindmaps"].append({
+                    "id": resource.get("project_id"),
+                    "name": resource.get("name"),
+                    "role": perm.get("role"),
+                    "shared_at": perm.get("created_at"),
+                    "owner": {
+                        "username": resource.get("username"),
+                        "full_name": owner.get("full_name") if owner else resource.get("username"),
+                        "picture": owner.get("picture") if owner else None
+                    }
+                })
+        
+        elif resource_type == "board":
+            resource = await db.boards.find_one(
+                {"id": resource_id, "is_deleted": {"$ne": True}},
+                {"_id": 0}
+            )
+            if resource:
+                owner = await db.users.find_one(
+                    {"username": resource.get("owner_username")},
+                    {"_id": 0, "full_name": 1, "picture": 1}
+                )
+                shared_resources["boards"].append({
+                    "id": resource.get("id"),
+                    "name": resource.get("title"),
+                    "role": perm.get("role"),
+                    "shared_at": perm.get("created_at"),
+                    "owner": {
+                        "username": resource.get("owner_username"),
+                        "full_name": owner.get("full_name") if owner else resource.get("owner_username"),
+                        "picture": owner.get("picture") if owner else None
+                    }
+                })
+    
+    return shared_resources
+
+
+# --- Email helper for invitations ---
+
+async def send_collaboration_invite_email(
+    recipient_email: str,
+    inviter_name: str,
+    resource_name: str,
+    resource_type: str,
+    role: str,
+    invite_token: str
+):
+    """Enviar email de invitación a colaborar"""
+    import resend
+    
+    app_url = email_service.get_app_url()
+    invite_link = f"{app_url}/invite?token={invite_token}"
+    
+    resource_type_names = {
+        "mindmap": "mapa mental",
+        "board": "tablero",
+        "contacts": "contactos",
+        "reminders": "recordatorios"
+    }
+    
+    role_names = {
+        "viewer": "Visualizador",
+        "commenter": "Comentador", 
+        "editor": "Editor",
+        "admin": "Administrador"
+    }
+    
+    resource_type_display = resource_type_names.get(resource_type, resource_type)
+    role_display = role_names.get(role, role)
+    
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7fa;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f7fa; padding: 40px 20px;">
+            <tr>
+                <td align="center">
+                    <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                        <!-- Header -->
+                        <tr>
+                            <td style="background: linear-gradient(135deg, #3B82F6 0%, #6366F1 100%); padding: 40px 40px 30px; text-align: center;">
+                                <img src="{email_service.LOGO_URL}" alt="Mindora" style="height: 50px; width: auto;" />
+                            </td>
+                        </tr>
+                        
+                        <!-- Body -->
+                        <tr>
+                            <td style="padding: 40px;">
+                                <h1 style="color: #1f2937; font-size: 24px; margin: 0 0 20px; text-align: center;">
+                                    ¡Te han invitado a colaborar!
+                                </h1>
+                                
+                                <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
+                                    <strong>{inviter_name}</strong> te ha invitado a colaborar en el {resource_type_display}:
+                                </p>
+                                
+                                <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 12px; padding: 20px; margin: 20px 0; text-align: center;">
+                                    <p style="color: #0369a1; font-size: 20px; font-weight: 600; margin: 0;">
+                                        📋 {resource_name}
+                                    </p>
+                                    <p style="color: #0284c7; font-size: 14px; margin: 10px 0 0;">
+                                        Rol asignado: <strong>{role_display}</strong>
+                                    </p>
+                                </div>
+                                
+                                <div style="text-align: center; margin: 30px 0;">
+                                    <a href="{invite_link}" style="display: inline-block; background: linear-gradient(135deg, #3B82F6 0%, #6366F1 100%); color: white; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                                        Aceptar invitación
+                                    </a>
+                                </div>
+                                
+                                <p style="color: #6b7280; font-size: 14px; text-align: center; margin: 20px 0 0;">
+                                    Esta invitación expira en 7 días.
+                                </p>
+                            </td>
+                        </tr>
+                        
+                        <!-- Footer -->
+                        <tr>
+                            <td style="background-color: #f9fafb; padding: 24px 40px; text-align: center; border-top: 1px solid #e5e7eb;">
+                                <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+                                    © 2025 Mindora. Todos los derechos reservados.
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>
+    """
+    
+    try:
+        params = {
+            "from": email_service.get_sender(),
+            "to": [recipient_email],
+            "subject": f"📋 {inviter_name} te invita a colaborar en Mindora",
+            "html": html_content
+        }
+        
+        response = resend.Emails.send(params)
+        logger.info(f"✅ Email de invitación enviado a {recipient_email}")
+        return {"success": True, "response": response}
+    except Exception as e:
+        logger.error(f"❌ Error enviando email de invitación: {e}")
+        return {"success": False, "error": str(e)}
+
+
 # Include the router in the main app
 app.include_router(api_router)
 

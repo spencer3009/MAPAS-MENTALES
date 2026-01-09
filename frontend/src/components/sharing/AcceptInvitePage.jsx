@@ -155,7 +155,7 @@ export function AcceptInvitePage({ token, onGoToLogin, onGoToDashboard }) {
             ¡Invitación aceptada!
           </h1>
           <p className="mt-2 text-slate-400">
-            Ahora tienes acceso al {resourceTypeName} "{inviteInfo?.resource?.name}"
+            Ahora tienes acceso al {resourceTypeName} &ldquo;{inviteInfo?.resource?.name}&rdquo;
           </p>
           <Button
             onClick={() => {

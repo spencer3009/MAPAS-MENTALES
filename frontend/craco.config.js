@@ -81,32 +81,37 @@ if (config.enableVisualEdits) {
 }
 
 // Setup dev server with visual edits and/or health check
-if (config.enableVisualEdits || config.enableHealthCheck) {
-  webpackConfig.devServer = (devServerConfig) => {
-    // Apply visual edits dev server setup if enabled
-    if (config.enableVisualEdits && setupDevServer) {
-      devServerConfig = setupDevServer(devServerConfig);
+// Always configure devServer for PWA manifest Content-Type
+webpackConfig.devServer = (devServerConfig) => {
+  // Apply visual edits dev server setup if enabled
+  if (config.enableVisualEdits && setupDevServer) {
+    devServerConfig = setupDevServer(devServerConfig);
+  }
+
+  // Get or create setupMiddlewares
+  const originalSetupMiddlewares = devServerConfig.setupMiddlewares;
+
+  devServerConfig.setupMiddlewares = (middlewares, devServer) => {
+    // Add PWA manifest Content-Type middleware FIRST
+    devServer.app.get('/manifest.json', (req, res, next) => {
+      res.setHeader('Content-Type', 'application/manifest+json');
+      next();
+    });
+
+    // Call original setup if exists
+    if (originalSetupMiddlewares) {
+      middlewares = originalSetupMiddlewares(middlewares, devServer);
     }
 
-    // Add health check endpoints if enabled
+    // Setup health endpoints if enabled
     if (config.enableHealthCheck && setupHealthEndpoints && healthPluginInstance) {
-      const originalSetupMiddlewares = devServerConfig.setupMiddlewares;
-
-      devServerConfig.setupMiddlewares = (middlewares, devServer) => {
-        // Call original setup if exists
-        if (originalSetupMiddlewares) {
-          middlewares = originalSetupMiddlewares(middlewares, devServer);
-        }
-
-        // Setup health endpoints
-        setupHealthEndpoints(devServer, healthPluginInstance);
-
-        return middlewares;
-      };
+      setupHealthEndpoints(devServer, healthPluginInstance);
     }
 
-    return devServerConfig;
+    return middlewares;
   };
-}
+
+  return devServerConfig;
+};
 
 module.exports = webpackConfig;

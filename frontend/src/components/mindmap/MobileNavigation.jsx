@@ -12,8 +12,13 @@ import {
   LayoutGrid,
   Users,
   ChevronRight,
-  FolderOpen
+  FolderOpen,
+  Download,
+  Smartphone,
+  Share2,
+  CheckCircle2
 } from 'lucide-react';
+import { usePWAInstall } from '../../hooks/usePWAInstall';
 
 /**
  * Componente de navegación móvil con menú hamburguesa

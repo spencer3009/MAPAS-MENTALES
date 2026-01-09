@@ -96,12 +96,12 @@ const Toolbar = ({
 }) => {
   return (
     <div className="
-      h-16 bg-white border-b border-gray-200
-      flex items-center justify-between px-4
+      h-14 md:h-16 bg-white border-b border-gray-200
+      flex items-center justify-between px-2 md:px-4
       shadow-sm z-20 shrink-0
     ">
       {/* Grupo izquierdo: Acciones principales */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0.5 md:gap-1">
         <ToolbarButton
           icon={<Plus size={18} />}
           text="Nodo"
@@ -111,39 +111,41 @@ const Toolbar = ({
         
         <ToolbarButton
           icon={<Trash2 size={18} />}
-          text="Eliminar"
+          text=""
           onClick={onDeleteNode}
           disabled={!hasSelection}
           variant="danger"
         />
         
-        <Divider />
+        <Divider className="hidden md:block" />
         
-        <ToolbarButton
-          icon={<Undo2 size={18} />}
-          text="Deshacer"
-          onClick={onUndo}
-          disabled={!canUndo}
-        />
+        <div className="hidden sm:flex items-center gap-0.5 md:gap-1">
+          <ToolbarButton
+            icon={<Undo2 size={18} />}
+            text=""
+            onClick={onUndo}
+            disabled={!canUndo}
+          />
+          
+          <ToolbarButton
+            icon={<Redo2 size={18} />}
+            text=""
+            onClick={onRedo}
+            disabled={!canRedo}
+          />
+        </div>
         
-        <ToolbarButton
-          icon={<Redo2 size={18} />}
-          text="Rehacer"
-          onClick={onRedo}
-          disabled={!canRedo}
-        />
-        
-        <Divider />
+        <Divider className="hidden md:block" />
         
         <ToolbarButton
           icon={<Target size={18} />}
-          text="Centrar"
+          text=""
           onClick={onCenter}
         />
         
-        <Divider />
+        <Divider className="hidden md:block" />
         
-        <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+        <div className="hidden md:flex items-center gap-1 bg-gray-100 rounded-lg p-1">
           <button
             onClick={onZoomOut}
             className="p-1.5 rounded hover:bg-gray-200 text-gray-600 transition-colors"

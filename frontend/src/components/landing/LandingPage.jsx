@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useCookies } from '../../contexts/CookieContext';
-import InstallPWABanner from '../pwa/InstallPWABanner';
+import InstallPWABanner, { InstallButton } from '../pwa/InstallPWABanner';
+import { usePWAInstall } from '../../hooks/usePWAInstall';
 import { 
   Brain, 
   Zap, 
@@ -32,7 +33,8 @@ import {
   Palette,
   FolderTree,
   Eye,
-  Loader2
+  Loader2,
+  Smartphone
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';

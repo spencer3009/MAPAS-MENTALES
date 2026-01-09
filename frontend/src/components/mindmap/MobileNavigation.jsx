@@ -194,7 +194,7 @@ const MobileNavigation = ({
         </div>
 
         {/* Items del menú */}
-        <div className="py-4 px-3 space-y-1 overflow-y-auto max-h-[calc(100vh-120px)]">
+        <div className="py-4 px-3 space-y-1 overflow-y-auto max-h-[calc(100vh-180px)]">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeView === item.id;
@@ -235,6 +235,24 @@ const MobileNavigation = ({
               </button>
             );
           })}
+
+          {/* Botón de instalación PWA - solo si está disponible */}
+          {showInstallButton && (
+            <div className="pt-3 mt-3 border-t border-slate-700/50">
+              <button
+                onClick={handleInstallClick}
+                data-testid="mobile-nav-install-button"
+                className="w-full flex items-center gap-4 py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600/20 to-teal-600/20 text-emerald-400 hover:from-emerald-600/30 hover:to-teal-600/30 active:from-emerald-600/40 active:to-teal-600/40 transition-all border border-emerald-500/30"
+              >
+                <Download size={22} className="shrink-0" />
+                <div className="flex-1 text-left">
+                  <span className="text-base font-medium block">Instalar Mindora</span>
+                  <span className="text-xs text-emerald-400/70">Crear ícono en inicio</span>
+                </div>
+                <Smartphone size={18} className="text-emerald-500/70" />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Footer con logout */}

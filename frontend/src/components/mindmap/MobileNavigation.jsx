@@ -317,7 +317,7 @@ const MobileNavigation = ({
                       <span className="text-emerald-600 font-bold">2</span>
                     </div>
                     <div className="pt-1">
-                      <p className="font-semibold text-gray-900 mb-0.5">"Añadir a pantalla de inicio"</p>
+                      <p className="font-semibold text-gray-900 mb-0.5">&quot;Añadir a pantalla de inicio&quot;</p>
                       <p className="text-sm text-gray-500">Desplázate y selecciona esta opción</p>
                     </div>
                   </div>
@@ -326,7 +326,7 @@ const MobileNavigation = ({
                       <CheckCircle2 size={20} className="text-emerald-600" />
                     </div>
                     <div className="pt-1">
-                      <p className="font-semibold text-gray-900 mb-0.5">Confirma tocando "Añadir"</p>
+                      <p className="font-semibold text-gray-900 mb-0.5">Confirma tocando &quot;Añadir&quot;</p>
                       <p className="text-sm text-gray-500">¡Listo! Mindora estará en tu inicio</p>
                     </div>
                   </div>
@@ -347,7 +347,7 @@ const MobileNavigation = ({
                       <span className="text-emerald-600 font-bold">2</span>
                     </div>
                     <div className="pt-1">
-                      <p className="font-semibold text-gray-900 mb-0.5">"Instalar app" o "Agregar a inicio"</p>
+                      <p className="font-semibold text-gray-900 mb-0.5">&quot;Instalar app&quot; o &quot;Agregar a inicio&quot;</p>
                       <p className="text-sm text-gray-500">Selecciona esta opción del menú</p>
                     </div>
                   </div>

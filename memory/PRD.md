@@ -2,6 +2,42 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-09: PWA Install Button - CTA Visible ✅
+- **Added**: Sistema completo de instalación PWA con CTA visible
+- **Added**: Hook centralizado `/app/frontend/src/hooks/usePWAInstall.js`:
+  - Captura `beforeinstallprompt` para Android/Chrome
+  - Detecta iOS Safari para mostrar instrucciones manuales
+  - Detecta si la app ya está instalada (standalone mode)
+  - Gestión de descarte del banner (7 días localStorage)
+- **Added**: Botón visible "Instalar Mindora" en Landing Page hero:
+  - Color verde/turquesa para destacar
+  - data-testid: `landing-install-button`
+  - Solo visible en móvil cuando es instalable
+- **Added**: Banner flotante de instalación mejorado:
+  - Aparece 3s después de cargar
+  - Incluye botón "Instalar" y "X" para cerrar
+  - data-testid: `pwa-install-banner`, `pwa-install-button`, `pwa-dismiss-button`
+- **Added**: Item "Instalar Mindora" en menú hamburguesa:
+  - Ubicado dentro del sistema para usuarios logueados
+  - data-testid: `mobile-nav-install-button`
+  - Con icono y subtexto descriptivo
+- **Added**: Modal de instrucciones iOS:
+  - Detecta iOS/Safari automáticamente
+  - Instrucciones paso a paso con iconos
+  - data-testid: `ios-install-modal`
+- **Comportamiento**:
+  - Android/Chrome: Ejecuta `deferredPrompt.prompt()` directamente
+  - iOS/Safari: Muestra modal con instrucciones manuales
+  - Si ya instalada: No muestra ningún CTA
+  - Si descartado: No muestra por 7 días
+- **Files Created**:
+  - `/app/frontend/src/hooks/usePWAInstall.js`
+- **Files Modified**:
+  - `/app/frontend/src/components/pwa/InstallPWABanner.jsx` - Completamente reescrito
+  - `/app/frontend/src/components/landing/LandingPage.jsx` - Botón en hero + modal
+  - `/app/frontend/src/components/mindmap/MobileNavigation.jsx` - Item en menú + modal
+- **Testing**: 100% - iteration_20.json - Todos los componentes verificados
+
 ### 2026-01-09: Corrección Botón "+" Móvil + Conversión PWA ✅
 - **Fixed (P0 Critical)**: El botón "+" para agregar nodos hijos no funcionaba en móvil
   - **Causa**: Los botones solo tenían handlers de mouse (`onClick`, `onMouseDown`) sin touch handlers

@@ -52,11 +52,21 @@ const MINDMAP_IMAGES = {
 
 const LandingPage = ({ onLogin, onRegister, onDemo, onTerms, onPrivacy, onCookies, onSelectPlan }) => {
   const { openSettings: openCookieSettings } = useCookies();
+  const { showInstallButton, isIOS, promptInstall } = usePWAInstall();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
   const [content, setContent] = useState(null);
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showIOSModal, setShowIOSModal] = useState(false);
+
+  // Handler para instalar PWA desde el botón visible
+  const handleInstallClick = async () => {
+    const result = await promptInstall();
+    if (result === 'ios' || result === 'unsupported') {
+      setShowIOSModal(true);
+    }
+  };
 
   // Handler para seleccionar un plan
   const handlePlanSelect = (plan) => {

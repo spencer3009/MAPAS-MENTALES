@@ -101,13 +101,41 @@ const AppContent = () => {
     setAuthView('verify');
   }
 
-  if (loading && authView !== 'callback' && authView !== 'demo' && authView !== 'verify') {
+  // Detectar ruta /invite
+  if (window.location.pathname === '/invite' && authView !== 'invite') {
+    const searchParams = new URLSearchParams(window.location.search);
+    const token = searchParams.get('token');
+    if (token) {
+      setInviteToken(token);
+      setAuthView('invite');
+    }
+  }
+
+  if (loading && authView !== 'callback' && authView !== 'demo' && authView !== 'verify' && authView !== 'invite') {
     return <LoadingScreen />;
   }
 
   // Página de verificación de email (accesible sin autenticación)
   if (authView === 'verify') {
     return <VerifyEmailPage />;
+  }
+
+  // Página de aceptar invitación (accesible con o sin autenticación)
+  if (authView === 'invite') {
+    return (
+      <AcceptInvitePage 
+        token={inviteToken}
+        onGoToLogin={() => {
+          // Guardar token para después del login
+          sessionStorage.setItem('pending_invite_token', inviteToken);
+          setAuthView('login');
+        }}
+        onGoToDashboard={() => {
+          setAuthView(null);
+          window.history.replaceState({}, document.title, '/');
+        }}
+      />
+    );
   }
 
   // Si está autenticado

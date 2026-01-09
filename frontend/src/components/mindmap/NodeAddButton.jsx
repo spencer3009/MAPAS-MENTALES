@@ -9,31 +9,11 @@ const NodeAddButton = ({
 }) => {
   if (!visible) return null;
 
-  // Handler unificado para mouse, touch y pointer
-  const handleActivate = (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    onAdd();
-  };
-
   return (
     <button
-      onClick={handleActivate}
       onPointerDown={(e) => {
         e.stopPropagation();
-        // En touch, activar inmediatamente para mejor respuesta
-        if (e.pointerType === 'touch') {
-          e.preventDefault();
-          onAdd();
-        }
-      }}
-      onTouchStart={(e) => {
-        e.stopPropagation();
-      }}
-      onTouchEnd={(e) => {
-        e.stopPropagation();
         e.preventDefault();
-        // Fallback para dispositivos que no soportan pointer events
         onAdd();
       }}
       className="
@@ -48,6 +28,7 @@ const NodeAddButton = ({
         border-2 border-white
         touch-manipulation
         select-none
+        cursor-pointer
       "
       style={{
         left: position.x,
@@ -58,6 +39,7 @@ const NodeAddButton = ({
       }}
       title="Agregar nodo hijo"
       aria-label="Agregar nodo hijo"
+      data-testid="floating-add-button"
     >
       <Plus size={18} strokeWidth={2.5} />
     </button>

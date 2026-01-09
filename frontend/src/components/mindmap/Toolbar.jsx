@@ -65,8 +65,8 @@ const ToolbarButton = ({ icon, text, onClick, disabled, variant = 'default' }) =
   );
 };
 
-const Divider = () => (
-  <div className="w-px h-6 bg-gray-200 mx-1" />
+const Divider = ({ className = '' }) => (
+  <div className={`w-px h-6 bg-gray-200 mx-1 ${className}`} />
 );
 
 const Toolbar = ({

@@ -2,6 +2,29 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-09: BUG CRÍTICO - Toolbar No Ejecutaba Acciones (Desktop NI Móvil) ✅ FIXED
+- **Bug**: Los botones del toolbar se veían pero NO ejecutaban ninguna acción ni en desktop ni en móvil
+- **Causa raíz**:
+  1. El toolbar estaba DENTRO del contenedor Canvas que tiene `touch-none`, bloqueando eventos
+  2. Los handlers usaban `onPointerUp` que no se disparaba correctamente en algunos navegadores
+- **Solución**:
+  1. Cambiado de `position: absolute` a `position: fixed` para escapar del contenedor
+  2. Cambiado de `onPointerUp` a `onClick` + `onTouchEnd` con debounce (300ms)
+  3. Agregado `z-[9999]` para asegurar que esté encima de todo
+  4. Agregado `touchAction: 'manipulation'` explícito
+- **Componentes corregidos**:
+  - `NodeToolbar.jsx` - position: fixed, z-[9999], onClick + onTouchEnd con debounce
+  - `MultiSelectToolbar.jsx` - Mismo patrón
+  - `ContextMenu.jsx` - Mismo patrón, z-index: 99999
+- **Testing**: iteration_25.json - 100% PASS Desktop + Móvil
+  - Desktop: Editar, Duplicar, Eliminar, Alineación, "+" → TODO FUNCIONA
+  - Móvil: Editar, Duplicar, Eliminar, Alineación, "+" → TODO FUNCIONA
+  - Console logs confirman: '[NodeToolbar] Button clicked:'
+- **Files Modified**:
+  - `/app/frontend/src/components/mindmap/NodeToolbar.jsx`
+  - `/app/frontend/src/components/mindmap/MultiSelectToolbar.jsx`
+  - `/app/frontend/src/components/mindmap/ContextMenu.jsx`
+
 ### 2026-01-09: BUG CRÍTICO - Toolbar Flotante No Funcionaba en Móvil ✅ FIXED
 - **Bug**: Los botones del toolbar flotante del nodo se veían pero no respondían al tap en móvil
 - **Causa raíz**: Usaban `onClick` sin soporte touch, y el canvas capturaba los eventos

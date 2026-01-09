@@ -42,6 +42,13 @@ export const usePWAInstall = () => {
       setIsInstallable(true);
     }
 
+    // En móvil, siempre mostrar la opción aunque no haya prompt
+    // porque el usuario puede instalar manualmente desde el menú del navegador
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile && !installed) {
+      setIsInstallable(true);
+    }
+
     // Escuchar el evento beforeinstallprompt (Chrome, Edge, Samsung Internet, Firefox Android)
     const handleBeforeInstallPrompt = (e) => {
       // Prevenir que Chrome muestre el mini-infobar automático

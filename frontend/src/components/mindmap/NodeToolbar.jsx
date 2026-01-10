@@ -102,6 +102,7 @@ const NodeToolbar = ({
   stylePanelOpen = false,
   iconPanelOpen = false,
   reminderPanelOpen = false,
+  canvasBounds = null, // { left, right, top, bottom } - límites del canvas
   onEdit,
   onStyle,
   onToggleCompleted,
@@ -119,8 +120,19 @@ const NodeToolbar = ({
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [customPosition, setCustomPosition] = useState(null);
+  const [toolbarWidth, setToolbarWidth] = useState(0);
   const toolbarRef = useRef(null);
   const lastNodePosition = useRef(null);
+
+  // Medir el ancho del toolbar cuando se monta o cambia
+  useEffect(() => {
+    if (toolbarRef.current && visible) {
+      const width = toolbarRef.current.offsetWidth;
+      if (width > 0) {
+        setToolbarWidth(width);
+      }
+    }
+  }, [visible]);
 
   // Resetear posición personalizada cuando cambia el nodo seleccionado
   useEffect(() => {

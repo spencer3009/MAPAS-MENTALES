@@ -2,6 +2,32 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-10: Implementación de Sistema Team/Workspace para Contactos ✅ COMPLETADO
+- **Arquitectura SaaS implementada**:
+  - Modelo Workspace para contenedor de contactos compartidos
+  - Separación clara entre "Mis contactos" (personales) y "Contactos de equipo" (workspace)
+  - Sistema de permisos por workspace (owner, admin, member, viewer)
+  
+- **Backend** (`/app/backend/server.py`):
+  - `POST /api/workspaces/team` - Crear workspace de equipo
+  - `POST /api/workspaces/{id}/invite` - Invitar usuario al workspace
+  - `PUT /api/workspaces/{id}/members/{username}/role` - Actualizar rol de miembro
+  - `DELETE /api/workspaces/{id}/members/{username}` - Remover miembro
+  - `POST /api/contacts/move-to-workspace` - Mover contactos personales a workspace
+  - `GET /api/contacts?workspace_id=` - Obtener contactos por contexto
+  - `POST /api/contacts` con `workspace_id` - Crear contacto en workspace
+  - Verificación de permisos en PUT/DELETE de contactos
+  
+- **Frontend** (`/app/frontend/src/components/contacts/ContactsPage.jsx`):
+  - Selector de contexto en header (dropdown)
+  - Opciones: "Mis contactos" y Workspaces de equipo
+  - Indicador visual del contexto actual
+  - Rol del usuario visible en cada workspace
+  - Opción de crear nuevo workspace de equipo
+  - Contactos creados se asocian automáticamente al contexto actual
+
+- **Testing**: Verificado visualmente con screenshots
+
 ### 2026-01-10: FIX — Posicionamiento del Toolbar Flotante de Nodos ✅ COMPLETADO
 - **Bug**: El toolbar flotante que aparece al seleccionar un nodo se posicionaba incorrectamente:
   - Aparecía demasiado hacia la izquierda

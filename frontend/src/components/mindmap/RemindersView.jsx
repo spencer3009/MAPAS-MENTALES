@@ -1599,6 +1599,15 @@ const RemindersView = ({ token }) => {
         selectedDate={selectedDate}
         editingReminder={editingReminder}
       />
+      
+      {/* Modal de Compartir Recordatorios */}
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        resourceType="reminders"
+        resourceId="user-reminders"
+        resourceName="Mis Recordatorios"
+      />
     </div>
   );
 };

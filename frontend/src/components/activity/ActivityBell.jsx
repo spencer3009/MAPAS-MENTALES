@@ -228,25 +228,30 @@ export function ActivityBell({ token }) {
             </span>
           )}
         </button>
+      </div>
 
-        {/* Dropdown */}
-        {isOpen && (
-          <div
-            ref={dropdownRef}
-            className="
-              absolute right-0 top-full mt-2
-              w-[calc(100vw-2rem)] sm:w-96
-              max-w-[400px]
-              bg-white rounded-xl shadow-xl
-              border border-gray-200
-              overflow-hidden
-              z-[100]
-              animate-in fade-in slide-in-from-top-2
-              duration-200
-            "
-            style={{ maxHeight: 'calc(100vh - 100px)' }}
-            data-testid="activity-dropdown"
-          >
+      {/* Dropdown - Fixed position para evitar ser cortado por el header */}
+      {isOpen && (
+        <div
+          ref={dropdownRef}
+          className="
+            fixed
+            w-[calc(100vw-2rem)] sm:w-96
+            max-w-[400px]
+            bg-white rounded-xl shadow-2xl
+            border border-gray-200
+            overflow-hidden
+            animate-in fade-in slide-in-from-top-2
+            duration-200
+          "
+          style={{ 
+            zIndex: 9999,
+            top: buttonRef.current ? buttonRef.current.getBoundingClientRect().bottom + 8 : 60,
+            right: 16,
+            maxHeight: 'calc(100vh - 100px)'
+          }}
+          data-testid="activity-dropdown"
+        >
             {/* Header del dropdown */}
             <div className="
               flex items-center justify-between

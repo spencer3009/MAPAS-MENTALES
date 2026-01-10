@@ -1090,6 +1090,7 @@ const BoardView = ({ board: initialBoard, onBack }) => {
           {/* Right section - Actions */}
           <div className="flex items-center gap-2">
             <button 
+              onClick={() => setShareModalOpen(true)}
               className="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg transition-colors font-medium text-sm flex items-center gap-2"
               data-testid="share-board-btn"
             >

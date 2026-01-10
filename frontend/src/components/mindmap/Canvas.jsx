@@ -1103,6 +1103,7 @@ const Canvas = ({
           stylePanelOpen={styleSidebarOpen && sidebarTab === 'styles'}
           iconPanelOpen={styleSidebarOpen && sidebarTab === 'icons'}
           reminderPanelOpen={styleSidebarOpen && sidebarTab === 'reminders'}
+          canvasBounds={canvasBounds}
           onEdit={handleToolbarEdit}
           onStyle={handleToolbarStyle}
           onToggleCompleted={handleToolbarToggleCompleted}

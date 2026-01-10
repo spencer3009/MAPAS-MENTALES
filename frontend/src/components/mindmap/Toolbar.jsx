@@ -79,6 +79,7 @@ const Toolbar = ({
   onRedo,
   onCenter,
   projectName,
+  projectId,
   onZoomIn,
   onZoomOut,
   onResetZoom,
@@ -97,7 +98,10 @@ const Toolbar = ({
   autoAlignEnabled,
   onToggleAutoAlign
 }) => {
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+
   return (
+    <>
     <div className="
       h-14 md:h-16 bg-white border-b border-gray-200
       flex items-center justify-between px-2 md:px-4

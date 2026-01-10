@@ -1039,6 +1039,7 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
           onRedo={redo}
           onCenter={handleCenter}
           projectName={projectName}
+          projectId={activeProjectId}
           onZoomIn={zoomIn}
           onZoomOut={zoomOut}
           onResetZoom={resetZoom}

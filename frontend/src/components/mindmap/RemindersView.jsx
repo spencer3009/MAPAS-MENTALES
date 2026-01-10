@@ -1428,17 +1428,29 @@ const RemindersView = ({ token }) => {
               </div>
             </div>
             
-            <button
-              onClick={() => {
-                setSelectedDate(new Date());
-                setEditingReminder(null);
-                setShowModal(true);
-              }}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium flex items-center gap-2 transition-colors shadow-sm"
-            >
-              <Plus size={18} />
-              Nuevo
-            </button>
+            {/* Botones de acción: Compartir y Nuevo */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowShareModal(true)}
+                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg font-semibold flex items-center gap-2 transition-all shadow-md hover:shadow-lg"
+                data-testid="share-reminders-btn"
+              >
+                <Share2 size={18} />
+                <span className="hidden sm:inline">Compartir</span>
+              </button>
+              
+              <button
+                onClick={() => {
+                  setSelectedDate(new Date());
+                  setEditingReminder(null);
+                  setShowModal(true);
+                }}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium flex items-center gap-2 transition-colors shadow-sm"
+              >
+                <Plus size={18} />
+                Nuevo
+              </button>
+            </div>
           </div>
           
           {/* Pestañas de vista */}

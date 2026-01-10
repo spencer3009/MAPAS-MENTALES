@@ -1254,6 +1254,15 @@ const BoardView = ({ board: initialBoard, onBack }) => {
           onDelete={handleDeleteCardFromModal}
         />
       )}
+
+      {/* Modal de Compartir */}
+      <ShareModal
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        resourceType="board"
+        resourceId={board.id}
+        resourceName={board.title}
+      />
     </div>
   );
 };

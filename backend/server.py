@@ -5123,9 +5123,39 @@ async def delete_time_entry(entry_id: str, current_user: dict = Depends(get_curr
 # ==========================================
 
 @api_router.get("/contacts")
-async def get_contacts(contact_type: Optional[str] = None, current_user: dict = Depends(get_current_user)):
-    """Obtener todos los contactos del usuario, opcionalmente filtrados por tipo"""
-    query = {"owner_username": current_user["username"]}
+async def get_contacts(
+    contact_type: Optional[str] = None, 
+    workspace_id: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Obtener contactos según el contexto:
+    - Sin workspace_id: Retorna contactos personales (owner_username = current_user)
+    - Con workspace_id: Retorna contactos del workspace (si el usuario tiene acceso)
+    """
+    username = current_user["username"]
+    
+    if workspace_id:
+        # Verificar que el usuario tiene acceso al workspace
+        membership = await db.workspace_members.find_one({
+            "workspace_id": workspace_id,
+            "username": username
+        })
+        if not membership:
+            raise HTTPException(status_code=403, detail="No tienes acceso a este workspace")
+        
+        # Obtener contactos del workspace
+        query = {"workspace_id": workspace_id}
+    else:
+        # Obtener contactos personales (sin workspace_id asignado)
+        query = {
+            "owner_username": username,
+            "$or": [
+                {"workspace_id": {"$exists": False}},
+                {"workspace_id": None}
+            ]
+        }
+    
     if contact_type:
         query["contact_type"] = contact_type
     

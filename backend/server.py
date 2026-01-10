@@ -5671,6 +5671,260 @@ async def get_workspace_members_endpoint(workspace_id: str, current_user: dict =
     return {"members": enriched_members}
 
 
+# --- Pydantic Models for Team Workspaces ---
+class CreateTeamWorkspaceRequest(BaseModel):
+    name: str
+    description: Optional[str] = ""
+
+class InviteToWorkspaceRequest(BaseModel):
+    email: str
+    role: str = "member"  # owner, admin, member, viewer
+
+class UpdateWorkspaceMemberRoleRequest(BaseModel):
+    role: str
+
+class MoveContactsToWorkspaceRequest(BaseModel):
+    contact_ids: List[str]
+    workspace_id: str
+
+
+# --- Team Workspace Endpoints ---
+
+@api_router.post("/workspaces/team")
+async def create_team_workspace(
+    request: CreateTeamWorkspaceRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Crear un nuevo Team Workspace"""
+    username = current_user["username"]
+    now = datetime.now(timezone.utc).isoformat()
+    workspace_id = f"ws_{uuid.uuid4().hex[:12]}"
+    
+    workspace = {
+        "id": workspace_id,
+        "name": request.name,
+        "description": request.description or f"Workspace de equipo: {request.name}",
+        "type": "team",
+        "owner_username": username,
+        "created_at": now,
+        "updated_at": now,
+        "settings": {
+            "default_sharing": "workspace",
+            "allow_public_links": True
+        }
+    }
+    
+    await db.workspaces.insert_one(workspace)
+    workspace.pop("_id", None)
+    
+    # Agregar al creador como owner
+    member = {
+        "id": f"wm_{uuid.uuid4().hex[:12]}",
+        "workspace_id": workspace_id,
+        "username": username,
+        "email": current_user.get("email", ""),
+        "role": "owner",
+        "joined_at": now,
+        "invited_by": None
+    }
+    await db.workspace_members.insert_one(member)
+    
+    workspace["user_role"] = "owner"
+    return {"workspace": workspace, "message": "Workspace de equipo creado"}
+
+
+@api_router.post("/workspaces/{workspace_id}/invite")
+async def invite_to_workspace(
+    workspace_id: str,
+    request: InviteToWorkspaceRequest,
+    background_tasks: BackgroundTasks,
+    current_user: dict = Depends(get_current_user)
+):
+    """Invitar a un usuario a un workspace"""
+    username = current_user["username"]
+    
+    # Verificar que el usuario tiene permisos para invitar
+    membership = await db.workspace_members.find_one({
+        "workspace_id": workspace_id,
+        "username": username
+    })
+    
+    if not membership:
+        raise HTTPException(status_code=403, detail="No tienes acceso a este workspace")
+    
+    if membership.get("role") not in ["owner", "admin"]:
+        raise HTTPException(status_code=403, detail="Solo owners y admins pueden invitar miembros")
+    
+    # Verificar que no está ya invitado o es miembro
+    existing_member = await db.workspace_members.find_one({
+        "workspace_id": workspace_id,
+        "email": request.email.lower().strip()
+    })
+    if existing_member:
+        raise HTTPException(status_code=400, detail="Este usuario ya es miembro del workspace")
+    
+    # Crear invitación
+    now = datetime.now(timezone.utc)
+    invite_id = f"inv_{uuid.uuid4().hex[:12]}"
+    token = secrets.token_urlsafe(32)
+    
+    invite = {
+        "id": invite_id,
+        "email": request.email.lower().strip(),
+        "resource_type": "workspace",
+        "resource_id": workspace_id,
+        "workspace_id": workspace_id,
+        "role": request.role,
+        "token": token,
+        "status": "pending",
+        "invited_by": username,
+        "created_at": now.isoformat(),
+        "expires_at": (now + timedelta(days=7)).isoformat()
+    }
+    
+    await db.invites.insert_one(invite)
+    invite.pop("_id", None)
+    
+    # Obtener info del workspace para el email
+    workspace = await db.workspaces.find_one({"id": workspace_id}, {"_id": 0, "name": 1})
+    workspace_name = workspace.get("name", "Workspace") if workspace else "Workspace"
+    
+    # Enviar email de invitación
+    background_tasks.add_task(
+        send_share_invitation_email,
+        to_email=request.email,
+        inviter_name=current_user.get("full_name", username),
+        resource_type="workspace",
+        resource_name=workspace_name,
+        role=request.role,
+        invite_token=token
+    )
+    
+    return {"invite": invite, "message": f"Invitación enviada a {request.email}"}
+
+
+@api_router.put("/workspaces/{workspace_id}/members/{member_username}/role")
+async def update_workspace_member_role(
+    workspace_id: str,
+    member_username: str,
+    request: UpdateWorkspaceMemberRoleRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Actualizar el rol de un miembro del workspace"""
+    username = current_user["username"]
+    
+    # Verificar permisos
+    membership = await db.workspace_members.find_one({
+        "workspace_id": workspace_id,
+        "username": username
+    })
+    
+    if not membership or membership.get("role") not in ["owner", "admin"]:
+        raise HTTPException(status_code=403, detail="No tienes permisos para cambiar roles")
+    
+    # No se puede cambiar el rol del owner
+    target_member = await db.workspace_members.find_one({
+        "workspace_id": workspace_id,
+        "username": member_username
+    })
+    
+    if not target_member:
+        raise HTTPException(status_code=404, detail="Miembro no encontrado")
+    
+    if target_member.get("role") == "owner":
+        raise HTTPException(status_code=400, detail="No se puede cambiar el rol del propietario")
+    
+    # Actualizar rol
+    await db.workspace_members.update_one(
+        {"workspace_id": workspace_id, "username": member_username},
+        {"$set": {"role": request.role, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"message": f"Rol actualizado a {request.role}"}
+
+
+@api_router.delete("/workspaces/{workspace_id}/members/{member_username}")
+async def remove_workspace_member(
+    workspace_id: str,
+    member_username: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Remover un miembro del workspace"""
+    username = current_user["username"]
+    
+    # Verificar permisos
+    membership = await db.workspace_members.find_one({
+        "workspace_id": workspace_id,
+        "username": username
+    })
+    
+    if not membership or membership.get("role") not in ["owner", "admin"]:
+        raise HTTPException(status_code=403, detail="No tienes permisos para remover miembros")
+    
+    # No se puede remover al owner
+    target_member = await db.workspace_members.find_one({
+        "workspace_id": workspace_id,
+        "username": member_username
+    })
+    
+    if not target_member:
+        raise HTTPException(status_code=404, detail="Miembro no encontrado")
+    
+    if target_member.get("role") == "owner":
+        raise HTTPException(status_code=400, detail="No se puede remover al propietario del workspace")
+    
+    await db.workspace_members.delete_one({
+        "workspace_id": workspace_id,
+        "username": member_username
+    })
+    
+    return {"message": "Miembro removido del workspace"}
+
+
+@api_router.post("/contacts/move-to-workspace")
+async def move_contacts_to_workspace(
+    request: MoveContactsToWorkspaceRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Mover contactos personales a un workspace compartido"""
+    username = current_user["username"]
+    
+    # Verificar acceso al workspace
+    membership = await db.workspace_members.find_one({
+        "workspace_id": request.workspace_id,
+        "username": username
+    })
+    
+    if not membership:
+        raise HTTPException(status_code=403, detail="No tienes acceso a este workspace")
+    
+    if membership.get("role") not in ["owner", "admin", "member"]:
+        raise HTTPException(status_code=403, detail="No tienes permisos para agregar contactos")
+    
+    # Mover solo los contactos que pertenecen al usuario
+    result = await db.contacts.update_many(
+        {
+            "id": {"$in": request.contact_ids},
+            "owner_username": username,
+            "$or": [
+                {"workspace_id": {"$exists": False}},
+                {"workspace_id": None}
+            ]
+        },
+        {
+            "$set": {
+                "workspace_id": request.workspace_id,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }
+        }
+    )
+    
+    return {
+        "message": f"{result.modified_count} contactos movidos al workspace",
+        "moved_count": result.modified_count
+    }
+
+
 # --- Invitation Endpoints ---
 
 @api_router.post("/invites")

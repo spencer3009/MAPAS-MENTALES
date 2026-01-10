@@ -234,14 +234,18 @@ const NodeToolbar = ({
     const width = toolbarWidth || 680;
     const halfWidth = width / 2;
     
-    // Posición centrada ideal
-    let left = position.x;
+    // Offset visual para compensar el desbalance óptico del diseño
+    // (el toolbar tiene handles, iconos y paddings que lo hacen parecer cargado a la izquierda)
+    const VISUAL_OFFSET_X = 16;
+    
+    // Posición centrada ideal + offset visual
+    let left = position.x + VISUAL_OFFSET_X;
     let top = position.y - 4;
     let transform = 'translateX(-50%)';
     
     // Si tenemos límites del canvas, restringir la posición
     if (canvasBounds) {
-      // Calcular los bordes del toolbar si estuviera centrado
+      // Calcular los bordes del toolbar si estuviera centrado (con el offset aplicado)
       const toolbarLeft = left - halfWidth;
       const toolbarRight = left + halfWidth;
       

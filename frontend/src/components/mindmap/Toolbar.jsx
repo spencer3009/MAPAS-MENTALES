@@ -194,7 +194,10 @@ const Toolbar = ({
 
         <Divider className="hidden sm:block" />
 
-        {/* Campanita de notificaciones */}
+        {/* Campanita de actividad/colaboración */}
+        <ActivityBell token={token} />
+
+        {/* Campanita de notificaciones de recordatorios */}
         <NotificationBell
           token={token}
           onRefresh={onRefreshNotifications}

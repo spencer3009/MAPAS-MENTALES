@@ -3594,6 +3594,15 @@ const ContactsPage = () => {
         </div>,
         document.body
       )}
+
+      {/* Modal de Compartir Contactos */}
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        resourceType="contacts"
+        resourceId={activeTab}
+        resourceName={`Contactos - ${CONTACT_TYPES[activeTab]?.label || activeTab}`}
+      />
     </div>
   );
 };

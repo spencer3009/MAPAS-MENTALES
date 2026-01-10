@@ -2,6 +2,28 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-10: FIX — Posicionamiento del Toolbar Flotante de Nodos ✅ COMPLETADO
+- **Bug**: El toolbar flotante que aparece al seleccionar un nodo se posicionaba incorrectamente:
+  - Aparecía demasiado hacia la izquierda
+  - No estaba centrado respecto al nodo
+  - Invadía el sidebar izquierdo cuando el nodo estaba cerca del borde
+- **Solución implementada**:
+  1. Añadido cálculo de límites del canvas usando `ResizeObserver` en `Canvas.jsx`
+  2. Pasados los `canvasBounds` como prop al `NodeToolbar`
+  3. Implementada lógica de restricción en `NodeToolbar.jsx`:
+     - El toolbar se centra sobre el nodo (comportamiento ideal)
+     - Si el borde izquierdo excede el canvas, se fija al borde izquierdo
+     - Si el borde derecho excede el canvas, se fija al borde derecho
+  4. Reducido z-index de `z-[9999]` a `z-[50]` para que quede por debajo del sidebar/header
+- **Archivos modificados**:
+  - `/app/frontend/src/components/mindmap/Canvas.jsx` — Añadido estado `canvasBounds` y ResizeObserver
+  - `/app/frontend/src/components/mindmap/NodeToolbar.jsx` — Añadida prop `canvasBounds` y lógica de restricción
+- **Testing**: Verificado visualmente que el toolbar:
+  - Se centra sobre el nodo cuando hay espacio
+  - Se restringe al borde izquierdo del canvas cuando el nodo está a la izquierda
+  - Se restringe al borde derecho del canvas cuando el nodo está a la derecha
+  - Nunca invade el sidebar ni el header
+
 ### 2026-01-10: FIX BUGS P0 — UX de Compartir y Actividad ✅ COMPLETADO
 - **Bugs corregidos**:
   1. **Panel de Actividad oculto**: El dropdown de "Actividad Reciente" quedaba detrás del canvas

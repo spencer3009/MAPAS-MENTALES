@@ -5683,6 +5683,32 @@ async def accept_invitation_get(token: str, current_user: dict = Depends(get_cur
     if not result["success"]:
         raise HTTPException(status_code=400, detail=result["error"])
     
+    # Obtener nombre del recurso para el activity log
+    resource_name = "Recurso"
+    if result["resource_type"] == "mindmap":
+        resource = await db.projects.find_one(
+            {"$or": [{"id": result["resource_id"]}, {"project_id": result["resource_id"]}]},
+            {"_id": 0}
+        )
+        resource_name = resource.get("name", "Mapa mental") if resource else "Mapa mental"
+    elif result["resource_type"] == "board":
+        resource = await db.boards.find_one({"id": result["resource_id"]}, {"_id": 0})
+        resource_name = resource.get("title", "Tablero") if resource else "Tablero"
+    
+    # Registrar actividad
+    activity = await log_activity(
+        db,
+        user_id=current_user["username"],
+        action="invite_accepted",
+        resource_type=result["resource_type"],
+        resource_id=result["resource_id"],
+        resource_name=resource_name,
+        metadata={"role": result["role"], "invited_by": result.get("invited_by")}
+    )
+    
+    # Procesar notificación al invitador
+    await process_activity_notification(db, activity, send_activity_notification_email)
+    
     return {
         "success": True,
         "resource_type": result["resource_type"],

@@ -417,7 +417,6 @@ export function ActivityBell({ token }) {
             )}
           </div>
         )}
-      </div>
 
       {/* Modal de preferencias */}
       <NotificationPreferences

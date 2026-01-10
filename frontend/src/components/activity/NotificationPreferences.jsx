@@ -1,26 +1,13 @@
 /**
  * NotificationPreferences - Modal de preferencias de notificación
- * Permite al usuario configurar qué emails recibir
+ * Usa React Portal y position fixed para renderizar sobre todo
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '../ui/dialog';
+import { createPortal } from 'react-dom';
 import { Button } from '../ui/button';
 import { Switch } from '../ui/switch';
 import { Label } from '../ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../ui/select';
 import { useToast } from '../../hooks/use-toast';
 import {
   Bell,
@@ -33,6 +20,7 @@ import {
   Clock,
   Loader2,
   Save,
+  X,
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -144,7 +132,12 @@ export function NotificationPreferences({ isOpen, onClose }) {
   useEffect(() => {
     if (isOpen) {
       loadPreferences();
+      // Bloquear scroll del body
+      document.body.style.overflow = 'hidden';
     }
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [isOpen, loadPreferences]);
 
   // Guardar preferencias
@@ -190,166 +183,195 @@ export function NotificationPreferences({ isOpen, onClose }) {
     }));
   };
 
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent 
-        className="sm:max-w-[500px] bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700"
-        data-testid="notification-preferences-modal"
+  if (!isOpen) return null;
+
+  const modalContent = (
+    <div 
+      className="fixed inset-0 flex items-center justify-center p-4"
+      style={{ zIndex: 99999 }}
+      data-testid="notification-preferences-modal"
+    >
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      
+      {/* Modal */}
+      <div 
+        className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-200 dark:border-slate-700 flex flex-col"
+        style={{ maxHeight: '90vh' }}
       >
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-            <Bell className="w-5 h-5 text-blue-500" />
-            Preferencias de notificación
-          </DialogTitle>
-          <DialogDescription className="text-gray-500 dark:text-slate-400">
-            Configura qué notificaciones quieres recibir por email
-          </DialogDescription>
-        </DialogHeader>
-
-        {loading ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
-          </div>
-        ) : (
-          <div className="space-y-6 py-4">
-            {/* Email Toggle Global */}
-            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-800 rounded-lg">
-              <div className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-gray-500 dark:text-slate-400" />
-                <div>
-                  <Label className="text-sm font-medium text-gray-900 dark:text-white">
-                    Notificaciones por email
-                  </Label>
-                  <p className="text-xs text-gray-500 dark:text-slate-400">
-                    Activar o desactivar todos los emails
-                  </p>
-                </div>
-              </div>
-              <Switch
-                checked={preferences.email_enabled}
-                onCheckedChange={(checked) =>
-                  setPreferences((prev) => ({ ...prev, email_enabled: checked }))
-                }
-                data-testid="email-enabled-toggle"
-              />
+        {/* Header - Fixed */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-700 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
+              <Bell className="w-5 h-5 text-white" />
             </div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                Preferencias de notificación
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-slate-400">
+                Configura qué notificaciones recibir
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+          >
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
 
-            {/* Frecuencia */}
-            {preferences.email_enabled && (
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700 dark:text-slate-300 flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
-                  Frecuencia de emails
-                </Label>
-                <Select
-                  value={preferences.email_digest}
-                  onValueChange={(value) =>
-                    setPreferences((prev) => ({ ...prev, email_digest: value }))
+        {/* Content - Scrollable */}
+        <div className="flex-1 overflow-y-auto p-6">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {/* Email Toggle Global */}
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-800 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <Mail className="w-5 h-5 text-gray-500 dark:text-slate-400" />
+                  <div>
+                    <Label className="text-sm font-medium text-gray-900 dark:text-white">
+                      Notificaciones por email
+                    </Label>
+                    <p className="text-xs text-gray-500 dark:text-slate-400">
+                      Activar o desactivar todos los emails
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  checked={preferences.email_enabled}
+                  onCheckedChange={(checked) =>
+                    setPreferences((prev) => ({ ...prev, email_enabled: checked }))
                   }
-                >
-                  <SelectTrigger className="w-full bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700">
-                    {DIGEST_OPTIONS.map((option) => (
-                      <SelectItem
-                        key={option.value}
-                        value={option.value}
-                        className="cursor-pointer"
-                      >
-                        <div className="flex flex-col">
-                          <span className="font-medium">{option.label}</span>
-                          <span className="text-xs text-gray-500 dark:text-slate-400">
-                            {option.description}
-                          </span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  data-testid="email-enabled-toggle"
+                />
               </div>
-            )}
 
-            {/* Opciones individuales */}
-            {preferences.email_enabled && preferences.email_digest !== 'none' && (
-              <div className="space-y-3">
-                <Label className="text-sm font-medium text-gray-700 dark:text-slate-300">
-                  Notificarme cuando:
-                </Label>
-                <div className="space-y-2">
-                  {NOTIFICATION_OPTIONS.map((option) => {
-                    const Icon = option.icon;
-                    return (
-                      <div
-                        key={option.key}
-                        className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
-                          preferences.notify_on[option.key]
-                            ? 'border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/20'
-                            : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800'
+              {/* Frecuencia */}
+              {preferences.email_enabled && (
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-slate-300 flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    Frecuencia de emails
+                  </Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {DIGEST_OPTIONS.map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={() => setPreferences(prev => ({ ...prev, email_digest: option.value }))}
+                        className={`p-3 rounded-xl border-2 text-left transition-all ${
+                          preferences.email_digest === option.value
+                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                            : 'border-gray-200 dark:border-slate-700 hover:border-gray-300'
                         }`}
                       >
-                        <div className="flex items-center gap-3">
-                          <Icon
-                            className={`w-4 h-4 ${
-                              preferences.notify_on[option.key]
-                                ? 'text-blue-500'
-                                : 'text-gray-400 dark:text-slate-500'
-                            }`}
-                          />
-                          <div>
-                            <Label className="text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
-                              {option.label}
-                            </Label>
-                            <p className="text-xs text-gray-500 dark:text-slate-400">
-                              {option.description}
-                            </p>
-                            {option.warning && (
-                              <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                                ⚠️ Puede generar muchos emails
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        <Switch
-                          checked={preferences.notify_on[option.key]}
-                          onCheckedChange={() => toggleOption(option.key)}
-                          data-testid={`notify-${option.key}-toggle`}
-                        />
-                      </div>
-                    );
-                  })}
+                        <p className={`text-sm font-medium ${
+                          preferences.email_digest === option.value 
+                            ? 'text-purple-700 dark:text-purple-400' 
+                            : 'text-gray-900 dark:text-white'
+                        }`}>
+                          {option.label}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
+                          {option.description}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Botones */}
-            <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-slate-700">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={onClose}
-              >
-                Cancelar
-              </Button>
-              <Button
-                className="flex-1 bg-blue-600 hover:bg-blue-700"
-                onClick={savePreferences}
-                disabled={saving}
-                data-testid="save-preferences-btn"
-              >
-                {saving ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                ) : (
-                  <Save className="w-4 h-4 mr-2" />
-                )}
-                Guardar
-              </Button>
+              {/* Opciones individuales */}
+              {preferences.email_enabled && preferences.email_digest !== 'none' && (
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-slate-300">
+                    Notificarme cuando:
+                  </Label>
+                  <div className="space-y-2">
+                    {NOTIFICATION_OPTIONS.map((option) => {
+                      const Icon = option.icon;
+                      return (
+                        <div
+                          key={option.key}
+                          className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${
+                            preferences.notify_on[option.key]
+                              ? 'border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/20'
+                              : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <Icon
+                              className={`w-4 h-4 ${
+                                preferences.notify_on[option.key]
+                                  ? 'text-blue-500'
+                                  : 'text-gray-400 dark:text-slate-500'
+                              }`}
+                            />
+                            <div>
+                              <Label className="text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
+                                {option.label}
+                              </Label>
+                              <p className="text-xs text-gray-500 dark:text-slate-400">
+                                {option.description}
+                              </p>
+                              {option.warning && (
+                                <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                                  ⚠️ Puede generar muchos emails
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <Switch
+                            checked={preferences.notify_on[option.key]}
+                            onCheckedChange={() => toggleOption(option.key)}
+                            data-testid={`notify-${option.key}-toggle`}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+          )}
+        </div>
+
+        {/* Footer - Fixed */}
+        <div className="flex gap-3 p-6 border-t border-gray-200 dark:border-slate-700 shrink-0 bg-gray-50 dark:bg-slate-800/50 rounded-b-2xl">
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={onClose}
+          >
+            Cancelar
+          </Button>
+          <Button
+            className="flex-1 bg-purple-600 hover:bg-purple-700"
+            onClick={savePreferences}
+            disabled={saving || loading}
+            data-testid="save-preferences-btn"
+          >
+            {saving ? (
+              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+            ) : (
+              <Save className="w-4 h-4 mr-2" />
+            )}
+            Guardar
+          </Button>
+        </div>
+      </div>
+    </div>
   );
+
+  return createPortal(modalContent, document.body);
 }
 
 export default NotificationPreferences;

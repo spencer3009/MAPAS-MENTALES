@@ -301,6 +301,29 @@ const ContactsPage = () => {
     }
   }, [token]);
 
+  // Cargar workspaces del usuario
+  useEffect(() => {
+    const loadWorkspaces = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/workspaces`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          // Filtrar solo workspaces de tipo "team" para el selector
+          const teamWorkspaces = (data.workspaces || []).filter(ws => ws.type === 'team');
+          setWorkspaces(teamWorkspaces);
+        }
+      } catch (err) {
+        console.error('Error loading workspaces:', err);
+      }
+    };
+    
+    if (token) {
+      loadWorkspaces();
+    }
+  }, [token]);
+
   // Cargar contactos y campos personalizados
   const loadData = useCallback(async () => {
     setLoading(true);

@@ -1492,6 +1492,16 @@ const ContactsPage = () => {
                   <p className="text-sm text-gray-500">Gestiona tus clientes, prospectos y proveedores</p>
                 </div>
               </div>
+              
+              {/* Botón de compartir */}
+              <button
+                onClick={() => setShowShareModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg font-medium text-sm transition-colors border border-blue-200"
+                data-testid="share-contacts-btn"
+              >
+                <Share2 size={18} />
+                <span className="hidden sm:inline">Compartir</span>
+              </button>
             </div>
           </div>
           

@@ -5165,8 +5165,26 @@ async def get_contacts(
 
 @api_router.post("/contacts")
 async def create_contact(request: CreateContactRequest, current_user: dict = Depends(get_current_user)):
-    """Crear un nuevo contacto"""
+    """
+    Crear un nuevo contacto.
+    - Si workspace_id está presente, el contacto pertenece al workspace (compartido)
+    - Si workspace_id es None, el contacto es personal del usuario
+    """
+    username = current_user["username"]
     now = datetime.now(timezone.utc).isoformat()
+    
+    # Si se especifica workspace_id, verificar acceso y permisos
+    if request.workspace_id:
+        membership = await db.workspace_members.find_one({
+            "workspace_id": request.workspace_id,
+            "username": username
+        })
+        if not membership:
+            raise HTTPException(status_code=403, detail="No tienes acceso a este workspace")
+        
+        # Verificar que puede editar (owner, admin, member)
+        if membership.get("role") == "viewer":
+            raise HTTPException(status_code=403, detail="No tienes permisos para crear contactos en este workspace")
     
     contact = {
         "id": f"contact_{uuid.uuid4().hex[:12]}",
@@ -5177,7 +5195,8 @@ async def create_contact(request: CreateContactRequest, current_user: dict = Dep
         "email": request.email or "",
         "custom_fields": request.custom_fields or {},
         "labels": request.labels or [],
-        "owner_username": current_user["username"],
+        "owner_username": username,
+        "workspace_id": request.workspace_id,  # None para contactos personales
         "created_at": now,
         "updated_at": now
     }

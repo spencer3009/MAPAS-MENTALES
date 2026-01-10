@@ -417,11 +417,16 @@ const ContactsPage = () => {
           setShowDateFilter(false);
         }
       }
+      
+      // Context selector
+      if (showContextSelector && contextSelectorRef.current && !contextSelectorRef.current.contains(event.target)) {
+        setShowContextSelector(false);
+      }
     };
     
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showDateFilter]);
+  }, [showDateFilter, showContextSelector]);
 
   // Reset filters when changing tabs
   useEffect(() => {

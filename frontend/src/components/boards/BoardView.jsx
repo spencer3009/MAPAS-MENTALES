@@ -624,6 +624,9 @@ const BoardView = ({ board: initialBoard, onBack }) => {
   const [selectedListId, setSelectedListId] = useState(null);
   const [selectedListTitle, setSelectedListTitle] = useState('');
   
+  // Estado para el modal de compartir
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  
   // Time tracking global
   const { activeEntry, formattedTime, isTaskTracking } = useTimeTracking();
   

@@ -284,7 +284,7 @@ const NodeToolbar = ({
       data-toolbar="node-toolbar"
       data-testid="node-toolbar"
       className={`
-        fixed z-[9999]
+        fixed z-[50]
         bg-white rounded-xl shadow-xl
         border border-gray-200
         flex items-center
@@ -293,7 +293,7 @@ const NodeToolbar = ({
       style={{
         left: positionStyle.left,
         top: positionStyle.top,
-        transform: customPosition ? 'none' : 'translateX(-50%)',
+        transform: positionStyle.transform,
         pointerEvents: 'auto',
         touchAction: 'manipulation',
         WebkitTapHighlightColor: 'transparent',

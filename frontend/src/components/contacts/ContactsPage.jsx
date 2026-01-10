@@ -8,7 +8,7 @@ import {
   Type, Hash, List, CheckSquare, AlignLeft, Clock,
   ChevronUp, Columns3, GripVertical, Eye, EyeOff, Tag,
   Filter, FilterX, CalendarDays, CalendarRange, ChevronLeft, ChevronRight,
-  BarChart3, PieChart, TrendingUp, Award, Globe, CircleDot, Lock
+  BarChart3, PieChart, TrendingUp, Award, Globe, CircleDot, Lock, Share2
 } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
@@ -26,6 +26,7 @@ import {
   PieChart as RechartsPieChart, Pie, Cell, LineChart, Line, Area, AreaChart
 } from 'recharts';
 import { useAuth } from '../../contexts/AuthContext';
+import { ShareModal } from '../sharing/ShareModal';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 

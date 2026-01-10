@@ -2,6 +2,23 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-10: Botones de Compartir en todas las secciones ✅ IMPLEMENTADO
+- **Feature**: Agregar botón de "Compartir" visible en las diferentes secciones de la app
+- **Mapas Mentales (Editor)**: 
+  - Botón "Compartir" en el Toolbar superior derecho
+  - Abre el ShareModal con resource_type="mindmap"
+  - Modificado: `/app/frontend/src/components/mindmap/Toolbar.jsx`
+  - Prop `projectId` añadida desde MindMapApp.jsx
+- **Tableros (BoardView)**:
+  - Botón "Compartir" en el header del tablero (ya existía, ahora conectado al ShareModal)
+  - Abre el ShareModal con resource_type="board"
+  - Modificado: `/app/frontend/src/components/boards/BoardView.jsx`
+- **Contactos**:
+  - Botón "Compartir" en el header de la página
+  - Abre el ShareModal con resource_type="contacts"
+  - Modificado: `/app/frontend/src/components/contacts/ContactsPage.jsx`
+- **Diseño del botón**: Fondo azul claro, texto azul, ícono de usuarios (👥)
+
 ### 2026-01-10: Activity Feed + Sistema de Notificaciones ✅ IMPLEMENTADO
 - **Feature**: Sistema completo de Activity Feed y preferencias de notificaciones estilo Notion/Trello
 - **Backend implementado**:

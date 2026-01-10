@@ -194,20 +194,22 @@ const Toolbar = ({
 
       {/* Grupo derecho: Exportación, Notificaciones y Usuario */}
       <div className="flex items-center gap-1 md:gap-2">
-        {/* Botón de Compartir */}
+        {/* Botón de Compartir - PROMINENTE */}
         <button
           onClick={() => setShareModalOpen(true)}
           className="
-            flex items-center gap-2 px-3 py-2 rounded-lg
-            text-sm font-medium transition-all duration-150
-            bg-blue-50 text-blue-600 hover:bg-blue-100
-            border border-blue-200
+            flex items-center gap-2 px-4 py-2 rounded-lg
+            text-sm font-semibold transition-all duration-150
+            bg-gradient-to-r from-blue-500 to-blue-600 
+            text-white hover:from-blue-600 hover:to-blue-700
+            shadow-md hover:shadow-lg
+            border-0
           "
-          title="Compartir mapa"
+          title="Compartir este mapa"
           data-testid="share-map-toolbar-btn"
         >
           <Users size={18} />
-          <span className="hidden md:inline">Compartir</span>
+          <span className="hidden sm:inline">Compartir</span>
         </button>
 
         <Divider className="hidden sm:block" />

@@ -1181,6 +1181,9 @@ const RemindersView = ({ token }) => {
   const [selectedDayForDetail, setSelectedDayForDetail] = useState(null);
   const [selectedDayReminders, setSelectedDayReminders] = useState([]);
   
+  // Estado para el modal de compartir
+  const [showShareModal, setShowShareModal] = useState(false);
+  
   // Cargar recordatorios
   useEffect(() => {
     loadReminders();

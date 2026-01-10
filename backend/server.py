@@ -53,6 +53,15 @@ from workspace_service import (
     get_resource_collaborators, update_collaborator_role, remove_collaborator,
     get_resource_permissions, migrate_user_resources_to_workspace
 )
+import activity_service
+from activity_service import (
+    log_activity, get_activity_feed, get_resource_activity,
+    mark_activities_as_read, get_unread_count,
+    get_notification_preferences, update_notification_preferences,
+    should_send_email, process_activity_notification,
+    generate_activity_message, DEFAULT_NOTIFICATION_PREFERENCES,
+    EMAIL_WORTHY_ACTIONS
+)
 
 
 # JWT Configuration

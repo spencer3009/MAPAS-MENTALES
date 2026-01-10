@@ -5792,11 +5792,11 @@ async def invite_to_workspace(
     
     # Enviar email de invitación
     background_tasks.add_task(
-        send_share_invitation_email,
-        to_email=request.email,
+        send_collaboration_invite_email,
+        recipient_email=request.email,
         inviter_name=current_user.get("full_name", username),
-        resource_type="workspace",
         resource_name=workspace_name,
+        resource_type="workspace",
         role=request.role,
         invite_token=token
     )

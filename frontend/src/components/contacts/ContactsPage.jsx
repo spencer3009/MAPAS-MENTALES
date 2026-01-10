@@ -960,9 +960,14 @@ const ContactsPage = () => {
       
       const method = editingContact ? 'PUT' : 'POST';
       
+      // Para crear nuevo contacto, incluir workspace_id si no es contexto personal
       const body = editingContact 
         ? formData 
-        : { ...formData, contact_type: activeTab };
+        : { 
+            ...formData, 
+            contact_type: activeTab,
+            workspace_id: currentContext !== 'personal' ? currentContext : null
+          };
       
       const response = await fetch(url, {
         method,

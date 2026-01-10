@@ -5211,27 +5211,66 @@ async def create_contact(request: CreateContactRequest, current_user: dict = Dep
 
 @api_router.get("/contacts/{contact_id}")
 async def get_contact(contact_id: str, current_user: dict = Depends(get_current_user)):
-    """Obtener un contacto específico"""
-    contact = await db.contacts.find_one(
-        {"id": contact_id, "owner_username": current_user["username"]},
-        {"_id": 0}
-    )
+    """Obtener un contacto específico (personal o de workspace con acceso)"""
+    username = current_user["username"]
+    
+    # Buscar el contacto primero
+    contact = await db.contacts.find_one({"id": contact_id}, {"_id": 0})
     
     if not contact:
         raise HTTPException(status_code=404, detail="Contacto no encontrado")
+    
+    # Verificar acceso
+    has_access = False
+    
+    # Si es contacto personal del usuario
+    if contact.get("owner_username") == username and not contact.get("workspace_id"):
+        has_access = True
+    
+    # Si es contacto de workspace, verificar membresía
+    if contact.get("workspace_id"):
+        membership = await db.workspace_members.find_one({
+            "workspace_id": contact["workspace_id"],
+            "username": username
+        })
+        if membership:
+            has_access = True
+    
+    if not has_access:
+        raise HTTPException(status_code=403, detail="No tienes acceso a este contacto")
     
     return {"contact": contact}
 
 
 @api_router.put("/contacts/{contact_id}")
 async def update_contact(contact_id: str, request: UpdateContactRequest, current_user: dict = Depends(get_current_user)):
-    """Actualizar un contacto"""
-    contact = await db.contacts.find_one(
-        {"id": contact_id, "owner_username": current_user["username"]}
-    )
+    """Actualizar un contacto (personal o de workspace con permisos de edición)"""
+    username = current_user["username"]
+    
+    # Buscar el contacto
+    contact = await db.contacts.find_one({"id": contact_id})
     
     if not contact:
         raise HTTPException(status_code=404, detail="Contacto no encontrado")
+    
+    # Verificar permisos de edición
+    can_edit = False
+    
+    # Si es contacto personal del usuario
+    if contact.get("owner_username") == username and not contact.get("workspace_id"):
+        can_edit = True
+    
+    # Si es contacto de workspace, verificar rol
+    if contact.get("workspace_id"):
+        membership = await db.workspace_members.find_one({
+            "workspace_id": contact["workspace_id"],
+            "username": username
+        })
+        if membership and membership.get("role") in ["owner", "admin", "member"]:
+            can_edit = True
+    
+    if not can_edit:
+        raise HTTPException(status_code=403, detail="No tienes permisos para editar este contacto")
     
     update_data = {"updated_at": datetime.now(timezone.utc).isoformat()}
     

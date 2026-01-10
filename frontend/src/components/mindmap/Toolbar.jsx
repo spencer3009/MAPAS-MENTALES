@@ -11,6 +11,7 @@ import {
   AlignLeft
 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
+import { ActivityBell } from '../activity';
 import UserDropdown from './UserDropdown';
 import ExportMenu from './ExportMenu';
 

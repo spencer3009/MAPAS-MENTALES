@@ -6241,6 +6241,275 @@ async def send_collaboration_invite_email(
         return {"success": False, "error": str(e)}
 
 
+# ==========================================
+# ACTIVITY FEED & NOTIFICATIONS ENDPOINTS
+# ==========================================
+
+# --- Pydantic Models for Activity ---
+class UpdateNotificationPrefsRequest(BaseModel):
+    email_enabled: Optional[bool] = None
+    email_digest: Optional[str] = None  # instant, daily, weekly, none
+    notify_on: Optional[dict] = None
+    quiet_hours: Optional[dict] = None
+
+class MarkActivitiesReadRequest(BaseModel):
+    activity_ids: Optional[List[str]] = None
+
+
+# --- Activity Feed Endpoints ---
+
+@api_router.get("/activity/feed")
+async def get_my_activity_feed(
+    workspace_id: Optional[str] = None,
+    resource_type: Optional[str] = None,
+    resource_id: Optional[str] = None,
+    limit: int = 50,
+    offset: int = 0,
+    include_own: bool = False,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Obtener feed de actividad del usuario.
+    Muestra actividad de sus workspaces y recursos compartidos.
+    """
+    activities = await get_activity_feed(
+        db,
+        username=current_user["username"],
+        workspace_id=workspace_id,
+        resource_type=resource_type,
+        resource_id=resource_id,
+        limit=limit,
+        offset=offset,
+        include_own_actions=include_own
+    )
+    
+    # Generar mensajes legibles
+    for activity in activities:
+        activity["message"] = generate_activity_message(activity)
+    
+    return {
+        "activities": activities,
+        "total": len(activities),
+        "has_more": len(activities) == limit
+    }
+
+@api_router.get("/activity/resource/{resource_type}/{resource_id}")
+async def get_activity_for_resource(
+    resource_type: str,
+    resource_id: str,
+    limit: int = 20,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Obtener historial de actividad de un recurso específico.
+    """
+    # Verificar acceso al recurso
+    has_access = await check_resource_permission(
+        db, current_user["username"], resource_type, resource_id, "view"
+    )
+    
+    # También verificar si es owner
+    is_owner = False
+    if resource_type == "mindmap":
+        resource = await db.projects.find_one(
+            {"$or": [{"id": resource_id}, {"project_id": resource_id}]},
+            {"_id": 0}
+        )
+        is_owner = resource and resource.get("username") == current_user["username"]
+    elif resource_type == "board":
+        resource = await db.boards.find_one({"id": resource_id}, {"_id": 0})
+        is_owner = resource and resource.get("owner_username") == current_user["username"]
+    
+    if not has_access and not is_owner:
+        raise HTTPException(status_code=403, detail="No tienes acceso a este recurso")
+    
+    activities = await get_resource_activity(db, resource_type, resource_id, limit)
+    
+    for activity in activities:
+        activity["message"] = generate_activity_message(activity)
+    
+    return {"activities": activities}
+
+@api_router.get("/activity/unread-count")
+async def get_my_unread_count(current_user: dict = Depends(get_current_user)):
+    """
+    Obtener cantidad de actividades no leídas.
+    """
+    count = await get_unread_count(db, current_user["username"])
+    return {"unread_count": count}
+
+@api_router.post("/activity/mark-read")
+async def mark_my_activities_as_read(
+    request: MarkActivitiesReadRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Marcar actividades como leídas.
+    """
+    count = await mark_activities_as_read(
+        db,
+        current_user["username"],
+        request.activity_ids
+    )
+    return {"marked_count": count}
+
+
+# --- Notification Preferences Endpoints ---
+
+@api_router.get("/user/notification-preferences")
+async def get_my_notification_preferences(current_user: dict = Depends(get_current_user)):
+    """
+    Obtener preferencias de notificación del usuario.
+    """
+    prefs = await get_notification_preferences(db, current_user["username"])
+    return prefs
+
+@api_router.put("/user/notification-preferences")
+async def update_my_notification_preferences(
+    request: UpdateNotificationPrefsRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Actualizar preferencias de notificación.
+    """
+    prefs_dict = {}
+    
+    if request.email_enabled is not None:
+        prefs_dict["email_enabled"] = request.email_enabled
+    if request.email_digest is not None:
+        prefs_dict["email_digest"] = request.email_digest
+    if request.notify_on is not None:
+        prefs_dict["notify_on"] = request.notify_on
+    if request.quiet_hours is not None:
+        prefs_dict["quiet_hours"] = request.quiet_hours
+    
+    updated = await update_notification_preferences(
+        db,
+        current_user["username"],
+        prefs_dict
+    )
+    
+    return {"success": True, "preferences": updated}
+
+
+# --- Activity Email Notification Helper ---
+
+async def send_activity_notification_email(
+    recipient_email: str,
+    subject: str,
+    template: str,
+    context: dict
+):
+    """
+    Enviar email de notificación de actividad.
+    """
+    import resend
+    
+    app_url = email_service.get_app_url()
+    
+    # Templates de email
+    templates = {
+        "invite_accepted": f"""
+            <p><strong>{context.get('actor_name')}</strong> aceptó tu invitación para colaborar en el {context.get('resource_type')} <strong>{context.get('resource_name')}</strong>.</p>
+            <p>Ahora pueden trabajar juntos en este recurso.</p>
+        """,
+        "new_comment": f"""
+            <p><strong>{context.get('actor_name')}</strong> dejó un comentario en el {context.get('resource_type')} <strong>{context.get('resource_name')}</strong>:</p>
+            <div style="background: #f4f4f5; padding: 16px; border-radius: 8px; margin: 16px 0;">
+                <p style="margin: 0; color: #374151;">{context.get('metadata', {}).get('comment_preview', 'Ver comentario...')}</p>
+            </div>
+        """,
+        "mention": f"""
+            <p><strong>{context.get('actor_name')}</strong> te mencionó en el {context.get('resource_type')} <strong>{context.get('resource_name')}</strong>.</p>
+        """,
+        "collaborator_added": f"""
+            <p><strong>{context.get('actor_name')}</strong> te agregó como colaborador en el {context.get('resource_type')} <strong>{context.get('resource_name')}</strong>.</p>
+            <p>Rol asignado: <strong>{context.get('metadata', {}).get('role', 'Visualizador')}</strong></p>
+        """,
+        "role_changed": f"""
+            <p>Tu rol en el {context.get('resource_type')} <strong>{context.get('resource_name')}</strong> ha cambiado.</p>
+            <p>Nuevo rol: <strong>{context.get('metadata', {}).get('new_role', '')}</strong></p>
+        """,
+        "task_completed": f"""
+            <p><strong>{context.get('actor_name')}</strong> completó una tarea en el tablero <strong>{context.get('resource_name')}</strong>:</p>
+            <p style="color: #16a34a;">✅ {context.get('metadata', {}).get('task_title', 'Tarea completada')}</p>
+        """,
+        "resource_deleted": f"""
+            <p><strong>{context.get('actor_name')}</strong> eliminó el {context.get('resource_type')} <strong>{context.get('resource_name')}</strong>.</p>
+        """
+    }
+    
+    body_content = templates.get(template, f"<p>Nueva actividad en {context.get('resource_name')}</p>")
+    
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7fa;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f7fa; padding: 40px 20px;">
+            <tr>
+                <td align="center">
+                    <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                        <!-- Header -->
+                        <tr>
+                            <td style="background: linear-gradient(135deg, #3B82F6 0%, #6366F1 100%); padding: 30px 40px; text-align: center;">
+                                <img src="{email_service.LOGO_URL}" alt="Mindora" style="height: 40px; width: auto;" />
+                            </td>
+                        </tr>
+                        
+                        <!-- Body -->
+                        <tr>
+                            <td style="padding: 40px;">
+                                <div style="color: #374151; font-size: 16px; line-height: 1.6;">
+                                    {body_content}
+                                </div>
+                                
+                                <div style="text-align: center; margin-top: 30px;">
+                                    <a href="{app_url}" style="display: inline-block; background: linear-gradient(135deg, #3B82F6 0%, #6366F1 100%); color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600;">
+                                        Ver en Mindora
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <!-- Footer -->
+                        <tr>
+                            <td style="background-color: #f9fafb; padding: 20px 40px; text-align: center; border-top: 1px solid #e5e7eb;">
+                                <p style="color: #6b7280; font-size: 12px; margin: 0 0 8px;">
+                                    Puedes <a href="{app_url}/settings/notifications" style="color: #3B82F6;">ajustar tus preferencias de notificación</a>.
+                                </p>
+                                <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+                                    © 2025 Mindora. Todos los derechos reservados.
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>
+    """
+    
+    try:
+        params = {
+            "from": email_service.get_sender(),
+            "to": [recipient_email],
+            "subject": subject,
+            "html": html_content
+        }
+        
+        response = resend.Emails.send(params)
+        logger.info(f"✅ Email de notificación enviado a {recipient_email}: {template}")
+        return {"success": True}
+    except Exception as e:
+        logger.error(f"❌ Error enviando email de notificación: {e}")
+        return {"success": False, "error": str(e)}
+
+
 # Include the router in the main app
 app.include_router(api_router)
 

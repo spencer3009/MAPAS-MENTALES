@@ -194,6 +194,24 @@ const Toolbar = ({
 
       {/* Grupo derecho: Exportación, Notificaciones y Usuario */}
       <div className="flex items-center gap-1 md:gap-2">
+        {/* Botón de Compartir */}
+        <button
+          onClick={() => setShareModalOpen(true)}
+          className="
+            flex items-center gap-2 px-3 py-2 rounded-lg
+            text-sm font-medium transition-all duration-150
+            bg-blue-50 text-blue-600 hover:bg-blue-100
+            border border-blue-200
+          "
+          title="Compartir mapa"
+          data-testid="share-map-toolbar-btn"
+        >
+          <Users size={18} />
+          <span className="hidden md:inline">Compartir</span>
+        </button>
+
+        <Divider className="hidden sm:block" />
+
         <div className="hidden sm:block">
           <ExportMenu projectName={projectName} />
         </div>
@@ -221,6 +239,16 @@ const Toolbar = ({
         </div>
       </div>
     </div>
+
+    {/* Modal de Compartir */}
+    <ShareModal
+      isOpen={shareModalOpen}
+      onClose={() => setShareModalOpen(false)}
+      resourceType="mindmap"
+      resourceId={projectId}
+      resourceName={projectName}
+    />
+    </>
   );
 };
 

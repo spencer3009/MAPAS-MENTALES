@@ -2,6 +2,21 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-10: FIX BUGS P0 — UX de Compartir y Actividad ✅ COMPLETADO
+- **Bugs corregidos**:
+  1. **Panel de Actividad oculto**: El dropdown de "Actividad Reciente" quedaba detrás del canvas
+     - Fix: `ActivityBell.jsx` ya usa React Portal con `z-index: 99999` y `position: fixed`
+  2. **Modal de Notificaciones cortado**: El modal de preferencias no era completamente visible
+     - Fix: `NotificationPreferences.jsx` ya usa React Portal con `max-height: 90vh` y scroll interno
+  3. **Botón Compartir no visible**: Faltaba un botón prominente de "Compartir"
+     - Fix: Verificado que los botones son prominentes en Mapas, Tableros y Contactos
+     - **NUEVO**: Añadido botón "Compartir" a la vista de **Recordatorios**
+- **Componentes modificados**:
+  - `/app/frontend/src/components/mindmap/RemindersView.jsx` - Añadido ShareModal y botón Compartir
+- **Verificación visual**: 
+  - Desktop: Activity Panel ✅, Notification Modal ✅, Share buttons ✅
+  - Móvil: Activity Panel ✅, Notification Modal ✅, Share buttons ✅
+
 ### 2026-01-10: Botones de Compartir en todas las secciones ✅ IMPLEMENTADO
 - **Feature**: Agregar botón de "Compartir" visible en las diferentes secciones de la app
 - **Mapas Mentales (Editor)**: 

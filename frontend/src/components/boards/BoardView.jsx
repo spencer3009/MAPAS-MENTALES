@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import TaskModal from './TaskModal';
 import { useTimeTracking } from '../../contexts/TimeTrackingContext';
+import { ShareModal } from '../sharing/ShareModal';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 

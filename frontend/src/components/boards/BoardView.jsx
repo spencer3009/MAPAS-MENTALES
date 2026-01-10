@@ -1091,7 +1091,7 @@ const BoardView = ({ board: initialBoard, onBack }) => {
           <div className="flex items-center gap-2">
             <button 
               onClick={() => setShareModalOpen(true)}
-              className="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg transition-colors font-medium text-sm flex items-center gap-2"
+              className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg transition-all font-semibold text-sm flex items-center gap-2 shadow-md hover:shadow-lg"
               data-testid="share-board-btn"
             >
               <Share2 size={16} />

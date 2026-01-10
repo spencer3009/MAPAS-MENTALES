@@ -54,7 +54,7 @@
   "pwa_verification": {
     "manifest_json": {
       "status": "PASS",
-      "url": "https://mapshare-17.preview.emergentagent.com/manifest.json",
+      "url": "https://collab-mindora.preview.emergentagent.com/manifest.json",
       "http_status": 200,
       "content": {
         "name": "Mindora - Mapas Mentales",
@@ -66,9 +66,9 @@
     },
     "service_worker": {
       "status": "PASS",
-      "url": "https://mapshare-17.preview.emergentagent.com/service-worker.js",
+      "url": "https://collab-mindora.preview.emergentagent.com/service-worker.js",
       "http_status": 200,
-      "registration_log": "[PWA] Service Worker registrado: https://mapshare-17.preview.emergentagent.com/"
+      "registration_log": "[PWA] Service Worker registrado: https://collab-mindora.preview.emergentagent.com/"
     },
     "icons": {
       "favicon_16": "PASS (200)",

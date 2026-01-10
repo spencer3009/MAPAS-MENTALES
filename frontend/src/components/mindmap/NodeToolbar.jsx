@@ -224,10 +224,53 @@ const NodeToolbar = ({
 
   const isDashedNode = nodeType === 'dashed' || nodeType === 'dashed_text';
 
-  // Estilos de posición: personalizada o centrada sobre el nodo
-  const positionStyle = customPosition 
-    ? { left: customPosition.x, top: customPosition.y }
-    : { left: position.x, top: position.y - 4 };
+  // Calcular posición restringida a los límites del canvas
+  const getConstrainedPosition = () => {
+    if (customPosition) {
+      return { left: customPosition.x, top: customPosition.y, transform: 'none' };
+    }
+
+    // Ancho estimado del toolbar (usar el medido o un valor por defecto)
+    const width = toolbarWidth || 680;
+    const halfWidth = width / 2;
+    
+    // Posición centrada ideal
+    let left = position.x;
+    let top = position.y - 4;
+    let transform = 'translateX(-50%)';
+    
+    // Si tenemos límites del canvas, restringir la posición
+    if (canvasBounds) {
+      // Calcular los bordes del toolbar si estuviera centrado
+      const toolbarLeft = left - halfWidth;
+      const toolbarRight = left + halfWidth;
+      
+      // Margen de seguridad desde los bordes
+      const margin = 8;
+      
+      // Si el borde izquierdo del toolbar sale del canvas
+      if (toolbarLeft < canvasBounds.left + margin) {
+        // Fijar al borde izquierdo del canvas
+        left = canvasBounds.left + margin;
+        transform = 'none';
+      }
+      // Si el borde derecho del toolbar sale del canvas
+      else if (toolbarRight > canvasBounds.right - margin) {
+        // Fijar al borde derecho del canvas
+        left = canvasBounds.right - width - margin;
+        transform = 'none';
+      }
+      
+      // Restringir verticalmente también
+      if (top < canvasBounds.top + margin) {
+        top = canvasBounds.top + margin;
+      }
+    }
+    
+    return { left, top, transform };
+  };
+
+  const positionStyle = getConstrainedPosition();
 
   // Handlers wrapper para debug
   const wrapHandler = (handler, name) => (e) => {

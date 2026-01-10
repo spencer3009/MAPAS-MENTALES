@@ -1,13 +1,13 @@
 /**
  * ActivityBell - Botón de notificaciones de actividad
- * Muestra un dropdown con el feed de actividad reciente
+ * Usa React Portal para renderizar fuera del canvas
  */
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Activity, 
   Bell, 
-  Check, 
   CheckCheck, 
   X, 
   Settings,
@@ -78,9 +78,10 @@ export function ActivityBell({ token }) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [showPreferences, setShowPreferences] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
   
-  const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   const getAuthHeaders = useCallback(() => {
     return {
@@ -88,6 +89,17 @@ export function ActivityBell({ token }) {
       'Authorization': `Bearer ${token}`,
     };
   }, [token]);
+
+  // Calcular posición del dropdown
+  const updateDropdownPosition = useCallback(() => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      });
+    }
+  }, []);
 
   // Cargar contador de no leídos
   const loadUnreadCount = useCallback(async () => {
@@ -150,14 +162,13 @@ export function ActivityBell({ token }) {
   // Cargar contador al montar y periódicamente
   useEffect(() => {
     loadUnreadCount();
-    
-    // Auto-refresh cada 60 segundos
     const interval = setInterval(loadUnreadCount, 60000);
     return () => clearInterval(interval);
   }, [loadUnreadCount]);
 
   // Manejar apertura del dropdown
   const handleOpen = async () => {
+    updateDropdownPosition();
     setIsOpen(true);
     await loadActivities();
   };
@@ -175,9 +186,18 @@ export function ActivityBell({ token }) {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      window.addEventListener('resize', updateDropdownPosition);
+      window.addEventListener('scroll', updateDropdownPosition, true);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('resize', updateDropdownPosition);
+      window.removeEventListener('scroll', updateDropdownPosition, true);
+    };
+  }, [isOpen, updateDropdownPosition]);
 
   const handleToggle = () => {
     if (isOpen) {
@@ -192,231 +212,160 @@ export function ActivityBell({ token }) {
     return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
-  return (
-    <>
-      <div className="relative">
-        {/* Botón de actividad */}
-        <button
-          ref={buttonRef}
-          onClick={handleToggle}
-          className={`
-            relative p-2 rounded-lg transition-all duration-200
-            ${isOpen 
-              ? 'bg-purple-100 text-purple-600' 
-              : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800'
-            }
-          `}
-          title={unreadCount > 0 ? `${unreadCount} actividades nuevas` : 'Actividad'}
-          data-testid="activity-bell-btn"
-        >
-          <Activity size={20} />
-          
-          {/* Badge numérico */}
+  // Dropdown content usando Portal
+  const dropdownContent = isOpen && createPortal(
+    <div
+      ref={dropdownRef}
+      className="w-96 max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden"
+      style={{ 
+        position: 'fixed',
+        top: dropdownPosition.top,
+        right: dropdownPosition.right,
+        zIndex: 99999,
+        maxHeight: 'calc(100vh - 100px)',
+      }}
+      data-testid="activity-dropdown"
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-purple-50 to-blue-50 border-b border-gray-100">
+        <div className="flex items-center gap-2">
+          <Activity size={18} className="text-purple-500" />
+          <h3 className="font-semibold text-gray-800 text-sm">Actividad Reciente</h3>
+        </div>
+        <div className="flex items-center gap-1">
           {unreadCount > 0 && (
-            <span className="
-              absolute -top-1 -right-1
-              min-w-[18px] h-[18px]
-              bg-purple-500 text-white
-              text-[10px] font-bold
-              rounded-full
-              flex items-center justify-center
-              px-1
-              shadow-sm
-              animate-pulse
-            ">
-              {unreadCount > 99 ? '99+' : unreadCount}
-            </span>
+            <button
+              onClick={markAllAsRead}
+              className="p-1.5 rounded-lg text-gray-400 hover:text-purple-600 hover:bg-purple-50 transition-colors"
+              title="Marcar todo como leído"
+            >
+              <CheckCheck size={16} />
+            </button>
           )}
-        </button>
+          <button
+            onClick={() => {
+              setIsOpen(false);
+              setShowPreferences(true);
+            }}
+            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            title="Preferencias de notificación"
+            data-testid="notification-preferences-btn"
+          >
+            <Settings size={16} />
+          </button>
+          <button
+            onClick={() => setIsOpen(false)}
+            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+          >
+            <X size={16} />
+          </button>
+        </div>
       </div>
 
-      {/* Dropdown - Fixed position para evitar ser cortado por el header */}
-      {isOpen && (
-        <div
-          ref={dropdownRef}
-          className="
-            fixed
-            w-[calc(100vw-2rem)] sm:w-96
-            max-w-[400px]
-            bg-white rounded-xl shadow-2xl
-            border border-gray-200
-            overflow-hidden
-            animate-in fade-in slide-in-from-top-2
-            duration-200
-          "
-          style={{ 
-            zIndex: 9999,
-            top: buttonRef.current ? buttonRef.current.getBoundingClientRect().bottom + 8 : 60,
-            right: 16,
-            maxHeight: 'calc(100vh - 100px)'
-          }}
-          data-testid="activity-dropdown"
-        >
-            {/* Header del dropdown */}
-            <div className="
-              flex items-center justify-between
-              px-4 py-3
-              bg-gradient-to-r from-purple-50 to-blue-50
-              border-b border-gray-100
-            ">
-              <div className="flex items-center gap-2">
-                <Activity size={18} className="text-purple-500" />
-                <h3 className="font-semibold text-gray-800 text-sm">
-                  Actividad Reciente
-                </h3>
-              </div>
-              <div className="flex items-center gap-1">
-                {unreadCount > 0 && (
-                  <button
-                    onClick={markAllAsRead}
-                    className="
-                      p-1.5 rounded-lg
-                      text-gray-400 hover:text-purple-600
-                      hover:bg-purple-50
-                      transition-colors
-                    "
-                    title="Marcar todo como leído"
-                  >
-                    <CheckCheck size={16} />
-                  </button>
-                )}
-                <button
-                  onClick={() => {
-                    setIsOpen(false);
-                    setShowPreferences(true);
-                  }}
-                  className="
-                    p-1.5 rounded-lg
-                    text-gray-400 hover:text-gray-600
-                    hover:bg-gray-100
-                    transition-colors
-                  "
-                  title="Preferencias de notificación"
-                  data-testid="notification-preferences-btn"
+      {/* Lista de actividades con scroll */}
+      <div className="max-h-80 overflow-y-auto">
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 size={24} className="animate-spin text-purple-500" />
+          </div>
+        ) : activities.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8 px-4 text-gray-400">
+            <Activity size={32} className="mb-2 opacity-50" />
+            <p className="text-sm font-medium">No hay actividad reciente</p>
+            <p className="text-xs mt-1">La actividad de colaboración aparecerá aquí</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-100">
+            {activities.map((activity) => {
+              const ActionIcon = ACTION_ICONS[activity.action] || Activity;
+              const ResourceIcon = RESOURCE_ICONS[activity.resource_type] || Activity;
+              const actionColor = ACTION_COLORS[activity.action] || 'text-gray-500';
+
+              return (
+                <div
+                  key={activity.id}
+                  className={`px-4 py-3 hover:bg-gray-50 transition-colors cursor-default ${!activity.is_read ? 'bg-purple-50/30' : ''}`}
                 >
-                  <Settings size={16} />
-                </button>
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="
-                    p-1.5 rounded-lg
-                    text-gray-400 hover:text-gray-600
-                    hover:bg-gray-100
-                    transition-colors
-                  "
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            </div>
+                  <div className="flex gap-3">
+                    <Avatar className="w-8 h-8 flex-shrink-0">
+                      <AvatarImage src={activity.actor?.picture} />
+                      <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-500 text-white text-xs">
+                        {getInitials(activity.actor?.full_name)}
+                      </AvatarFallback>
+                    </Avatar>
 
-            {/* Lista de actividades */}
-            <div className="max-h-80 overflow-y-auto">
-              {loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 size={24} className="animate-spin text-purple-500" />
-                </div>
-              ) : activities.length === 0 ? (
-                <div className="
-                  flex flex-col items-center justify-center
-                  py-8 px-4
-                  text-gray-400
-                ">
-                  <Activity size={32} className="mb-2 opacity-50" />
-                  <p className="text-sm font-medium">No hay actividad reciente</p>
-                  <p className="text-xs mt-1">La actividad de colaboración aparecerá aquí</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-gray-100">
-                  {activities.map((activity) => {
-                    const ActionIcon = ACTION_ICONS[activity.action] || Activity;
-                    const ResourceIcon = RESOURCE_ICONS[activity.resource_type] || Activity;
-                    const actionColor = ACTION_COLORS[activity.action] || 'text-gray-500';
-
-                    return (
-                      <div
-                        key={activity.id}
-                        className={`
-                          px-4 py-3
-                          hover:bg-gray-50
-                          transition-colors
-                          cursor-default
-                          ${!activity.is_read ? 'bg-purple-50/30' : ''}
-                        `}
-                      >
-                        <div className="flex gap-3">
-                          {/* Avatar */}
-                          <Avatar className="w-8 h-8 flex-shrink-0">
-                            <AvatarImage src={activity.actor?.picture} />
-                            <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-500 text-white text-xs">
-                              {getInitials(activity.actor?.full_name)}
-                            </AvatarFallback>
-                          </Avatar>
-
-                          {/* Content */}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm text-gray-800">
-                              <span className="font-medium">
-                                {activity.actor?.full_name || activity.actor?.username}
-                              </span>{' '}
-                              <span className="text-gray-600">
-                                {activity.message}
-                              </span>
-                            </p>
-
-                            <div className="flex items-center gap-2 mt-1">
-                              <ActionIcon className={`w-3 h-3 ${actionColor}`} />
-                              <span className="text-xs text-gray-400">
-                                {activity.human_time}
-                              </span>
-                              {!activity.is_read && (
-                                <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Resource Icon */}
-                          <div className="flex-shrink-0">
-                            <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center">
-                              <ResourceIcon className="w-3.5 h-3.5 text-gray-500" />
-                            </div>
-                          </div>
-                        </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-gray-800">
+                        <span className="font-medium">
+                          {activity.actor?.full_name || activity.actor?.username}
+                        </span>{' '}
+                        <span className="text-gray-600">{activity.message}</span>
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <ActionIcon className={`w-3 h-3 ${actionColor}`} />
+                        <span className="text-xs text-gray-400">{activity.human_time}</span>
+                        {!activity.is_read && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                        )}
                       </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+                    </div>
 
-            {/* Footer */}
-            {activities.length > 0 && (
-              <div className="
-                px-4 py-2
-                bg-gray-50
-                border-t border-gray-100
-              ">
-                <button
-                  onClick={loadActivities}
-                  disabled={loading}
-                  className="
-                    w-full py-2
-                    text-xs font-medium
-                    text-purple-600 hover:text-purple-700
-                    hover:bg-purple-50
-                    rounded-lg
-                    transition-colors
-                    disabled:opacity-50
-                    flex items-center justify-center gap-2
-                  "
-                >
-                  <RefreshCw size={12} className={loading ? 'animate-spin' : ''} />
-                  {loading ? 'Actualizando...' : 'Actualizar'}
-                </button>
-              </div>
-            )}
+                    <div className="flex-shrink-0">
+                      <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center">
+                        <ResourceIcon className="w-3.5 h-3.5 text-gray-500" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
+      </div>
+
+      {/* Footer */}
+      {activities.length > 0 && (
+        <div className="px-4 py-2 bg-gray-50 border-t border-gray-100">
+          <button
+            onClick={loadActivities}
+            disabled={loading}
+            className="w-full py-2 text-xs font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            <RefreshCw size={12} className={loading ? 'animate-spin' : ''} />
+            {loading ? 'Actualizando...' : 'Actualizar'}
+          </button>
+        </div>
+      )}
+    </div>,
+    document.body
+  );
+
+  return (
+    <>
+      {/* Botón de actividad */}
+      <button
+        ref={buttonRef}
+        onClick={handleToggle}
+        className={`relative p-2 rounded-lg transition-all duration-200 ${
+          isOpen 
+            ? 'bg-purple-100 text-purple-600' 
+            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800'
+        }`}
+        title={unreadCount > 0 ? `${unreadCount} actividades nuevas` : 'Actividad'}
+        data-testid="activity-bell-btn"
+      >
+        <Activity size={20} />
+        
+        {/* Badge numérico */}
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-purple-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-sm animate-pulse">
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </span>
+        )}
+      </button>
+
+      {/* Dropdown via Portal */}
+      {dropdownContent}
 
       {/* Modal de preferencias */}
       <NotificationPreferences

@@ -1525,15 +1525,121 @@ const ContactsPage = () => {
                 </div>
               </div>
               
-              {/* Botón de compartir */}
-              <button
-                onClick={() => setShowShareModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg font-medium text-sm transition-colors border border-blue-200"
-                data-testid="share-contacts-btn"
-              >
-                <Share2 size={18} />
-                <span className="hidden sm:inline">Compartir</span>
-              </button>
+              <div className="flex items-center gap-3">
+                {/* Selector de Contexto (Mis Contactos / Workspaces) */}
+                <div className="relative" ref={contextSelectorRef}>
+                  <button
+                    onClick={() => setShowContextSelector(!showContextSelector)}
+                    className="flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors min-w-[160px]"
+                    data-testid="context-selector-btn"
+                  >
+                    {currentContext === 'personal' ? (
+                      <>
+                        <UserCheck size={16} className="text-cyan-600" />
+                        <span className="text-sm font-medium text-gray-700">Mis contactos</span>
+                      </>
+                    ) : (
+                      <>
+                        <Building2 size={16} className="text-purple-600" />
+                        <span className="text-sm font-medium text-gray-700 truncate max-w-[120px]">
+                          {workspaces.find(ws => ws.id === currentContext)?.name || 'Workspace'}
+                        </span>
+                      </>
+                    )}
+                    <ChevronDown size={14} className={`ml-auto text-gray-400 transition-transform ${showContextSelector ? 'rotate-180' : ''}`} />
+                  </button>
+                  
+                  {showContextSelector && (
+                    <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50">
+                      {/* Mis Contactos */}
+                      <button
+                        onClick={() => {
+                          setCurrentContext('personal');
+                          setShowContextSelector(false);
+                        }}
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-gray-50 transition-colors ${
+                          currentContext === 'personal' ? 'bg-cyan-50' : ''
+                        }`}
+                      >
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                          currentContext === 'personal' ? 'bg-cyan-100' : 'bg-gray-100'
+                        }`}>
+                          <UserCheck size={16} className={currentContext === 'personal' ? 'text-cyan-600' : 'text-gray-500'} />
+                        </div>
+                        <div>
+                          <p className={`text-sm font-medium ${currentContext === 'personal' ? 'text-cyan-700' : 'text-gray-700'}`}>
+                            Mis contactos
+                          </p>
+                          <p className="text-xs text-gray-400">Contactos personales</p>
+                        </div>
+                        {currentContext === 'personal' && <Check size={16} className="ml-auto text-cyan-600" />}
+                      </button>
+                      
+                      {/* Workspaces */}
+                      {workspaces.length > 0 && (
+                        <>
+                          <div className="border-t border-gray-100 my-2" />
+                          <p className="px-4 py-1 text-xs font-medium text-gray-400 uppercase tracking-wider">
+                            Workspaces de equipo
+                          </p>
+                          {workspaces.map(ws => (
+                            <button
+                              key={ws.id}
+                              onClick={() => {
+                                setCurrentContext(ws.id);
+                                setShowContextSelector(false);
+                              }}
+                              className={`w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-gray-50 transition-colors ${
+                                currentContext === ws.id ? 'bg-purple-50' : ''
+                              }`}
+                            >
+                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                                currentContext === ws.id ? 'bg-purple-100' : 'bg-gray-100'
+                              }`}>
+                                <Building2 size={16} className={currentContext === ws.id ? 'text-purple-600' : 'text-gray-500'} />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className={`text-sm font-medium truncate ${currentContext === ws.id ? 'text-purple-700' : 'text-gray-700'}`}>
+                                  {ws.name}
+                                </p>
+                                <p className="text-xs text-gray-400 capitalize">{ws.user_role}</p>
+                              </div>
+                              {currentContext === ws.id && <Check size={16} className="text-purple-600" />}
+                            </button>
+                          ))}
+                        </>
+                      )}
+                      
+                      {/* Crear nuevo workspace */}
+                      <div className="border-t border-gray-100 mt-2 pt-2">
+                        <button
+                          onClick={() => {
+                            setShowContextSelector(false);
+                            // TODO: Abrir modal de crear workspace
+                            alert('Función para crear nuevo workspace - Próximamente');
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-gray-50 transition-colors text-blue-600"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                            <Plus size={16} className="text-blue-600" />
+                          </div>
+                          <span className="text-sm font-medium">Crear workspace de equipo</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Botón de compartir */}
+                <button
+                  onClick={() => setShowShareModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg font-medium text-sm transition-colors border border-blue-200"
+                  data-testid="share-contacts-btn"
+                >
+                  <Share2 size={18} />
+                  <span className="hidden sm:inline">Compartir</span>
+                </button>
+              </div>
             </div>
           </div>
           

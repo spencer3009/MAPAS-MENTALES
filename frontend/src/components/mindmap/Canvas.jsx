@@ -89,10 +89,42 @@ const Canvas = ({
   const [commentPopover, setCommentPopover] = useState({ isOpen: false, nodeId: null });
   const [linkPopover, setLinkPopover] = useState({ isOpen: false, nodeId: null });
   const [nodeTypeSelector, setNodeTypeSelector] = useState({ isOpen: false, position: null, parentId: null });
+  const [canvasBounds, setCanvasBounds] = useState(null);
   
   // Estado para selección por área (drag selection)
   const [selectionBox, setSelectionBox] = useState(null);
   const [isSelectingArea, setIsSelectingArea] = useState(false);
+
+  // Actualizar los límites del canvas cuando cambie el tamaño o las reglas
+  useEffect(() => {
+    const updateCanvasBounds = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        setCanvasBounds({
+          left: rect.left,
+          right: rect.right,
+          top: rect.top,
+          bottom: rect.bottom
+        });
+      }
+    };
+    
+    updateCanvasBounds();
+    
+    // Actualizar en resize
+    window.addEventListener('resize', updateCanvasBounds);
+    
+    // Observer para cambios de layout
+    const resizeObserver = new ResizeObserver(updateCanvasBounds);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+    
+    return () => {
+      window.removeEventListener('resize', updateCanvasBounds);
+      resizeObserver.disconnect();
+    };
+  }, [showRulers]);
 
   // Handler para tap en el canvas (touch)
   const handleTouchTap = useCallback((e) => {

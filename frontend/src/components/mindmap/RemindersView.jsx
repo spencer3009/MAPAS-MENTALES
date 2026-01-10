@@ -14,8 +14,10 @@ import {
   Check,
   AlertCircle,
   LayoutGrid,
-  CalendarCheck
+  CalendarCheck,
+  Share2
 } from 'lucide-react';
+import { ShareModal } from '../sharing/ShareModal';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 

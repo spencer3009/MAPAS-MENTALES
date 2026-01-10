@@ -5295,15 +5295,35 @@ async def update_contact(contact_id: str, request: UpdateContactRequest, current
 
 @api_router.delete("/contacts/{contact_id}")
 async def delete_contact(contact_id: str, current_user: dict = Depends(get_current_user)):
-    """Eliminar un contacto"""
-    result = await db.contacts.delete_one({
-        "id": contact_id,
-        "owner_username": current_user["username"]
-    })
+    """Eliminar un contacto (personal o de workspace con permisos)"""
+    username = current_user["username"]
     
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Contacto no encontrado o sin permisos")
+    # Buscar el contacto
+    contact = await db.contacts.find_one({"id": contact_id})
     
+    if not contact:
+        raise HTTPException(status_code=404, detail="Contacto no encontrado")
+    
+    # Verificar permisos de eliminación
+    can_delete = False
+    
+    # Si es contacto personal del usuario
+    if contact.get("owner_username") == username and not contact.get("workspace_id"):
+        can_delete = True
+    
+    # Si es contacto de workspace, verificar rol (solo owner y admin pueden eliminar)
+    if contact.get("workspace_id"):
+        membership = await db.workspace_members.find_one({
+            "workspace_id": contact["workspace_id"],
+            "username": username
+        })
+        if membership and membership.get("role") in ["owner", "admin"]:
+            can_delete = True
+    
+    if not can_delete:
+        raise HTTPException(status_code=403, detail="No tienes permisos para eliminar este contacto")
+    
+    await db.contacts.delete_one({"id": contact_id})
     return {"message": "Contacto eliminado"}
 
 

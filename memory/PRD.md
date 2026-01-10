@@ -2,6 +2,40 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-10: Activity Feed + Sistema de Notificaciones ✅ IMPLEMENTADO
+- **Feature**: Sistema completo de Activity Feed y preferencias de notificaciones estilo Notion/Trello
+- **Backend implementado**:
+  - Nuevo servicio `activity_service.py` con funciones de logging y notificaciones
+  - Colección `activity_logs` para registro de actividad
+  - Colección `notification_preferences` para preferencias de usuario
+  - Endpoints API:
+    - `GET /api/activity/feed` - Feed de actividad con filtros
+    - `GET /api/activity/unread-count` - Contador de no leídos
+    - `POST /api/activity/mark-read` - Marcar como leídas
+    - `GET /api/user/notification-preferences` - Obtener preferencias
+    - `PUT /api/user/notification-preferences` - Actualizar preferencias
+  - Función `log_activity()` integrada en `accept_invite` endpoint
+  - `process_activity_notification()` para envío automático de emails
+- **Frontend implementado**:
+  - `ActivityBell.jsx` - Botón de campana con dropdown de actividad
+  - `NotificationPreferences.jsx` - Modal de configuración de notificaciones
+  - `ActivityFeed.jsx` - Componente de feed reutilizable
+  - Integración en Toolbar.jsx junto al NotificationBell existente
+- **Preferencias configurables**:
+  - Email habilitado: toggle global
+  - Frecuencia: instant, daily, weekly, none
+  - Opciones individuales: comments, mentions, invitations, permission_changes, task_updates, resource_changes
+- **Testing**: iteration_27.json - 15/15 tests backend PASS, frontend 100%
+- **Files creados**:
+  - `/app/backend/activity_service.py`
+  - `/app/frontend/src/components/activity/ActivityBell.jsx`
+  - `/app/frontend/src/components/activity/ActivityFeed.jsx`
+  - `/app/frontend/src/components/activity/NotificationPreferences.jsx`
+  - `/app/tests/test_activity_feed.py`
+- **Files modificados**:
+  - `/app/backend/server.py` - Endpoints de activity + notifications
+  - `/app/frontend/src/components/mindmap/Toolbar.jsx` - ActivityBell integration
+
 ### 2026-01-09: Sistema de Compartir y Colaboración ✅ IMPLEMENTADO
 - **Feature**: Sistema completo para compartir Mind Maps y Tableros con otros usuarios
 - **Backend implementado**:

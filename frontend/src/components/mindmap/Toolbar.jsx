@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Plus,
   Trash2,
@@ -8,12 +8,14 @@ import {
   ZoomIn,
   ZoomOut,
   RotateCcw,
-  AlignLeft
+  AlignLeft,
+  Users
 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import { ActivityBell } from '../activity';
 import UserDropdown from './UserDropdown';
 import ExportMenu from './ExportMenu';
+import { ShareModal } from '../sharing/ShareModal';
 
 // Componente Switch para toggle
 const ToggleSwitch = ({ enabled, onChange, label }) => (

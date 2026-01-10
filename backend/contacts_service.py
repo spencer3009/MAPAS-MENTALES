@@ -76,6 +76,7 @@ class CreateContactRequest(BaseModel):
     email: Optional[str] = ""
     custom_fields: Optional[dict] = {}
     labels: Optional[List[str]] = []  # Lista de IDs de etiquetas
+    workspace_id: Optional[str] = None  # ID del workspace (si es compartido)
 
 
 class UpdateContactRequest(BaseModel):

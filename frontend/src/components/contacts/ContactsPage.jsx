@@ -189,6 +189,12 @@ const ContactsPage = () => {
   const [userCountry, setUserCountry] = useState('PE'); // País del usuario desde configuración
   const [showVerificationAlert, setShowVerificationAlert] = useState(false);
   
+  // Workspace/Context states
+  const [workspaces, setWorkspaces] = useState([]);
+  const [currentContext, setCurrentContext] = useState('personal'); // 'personal' | workspace_id
+  const [showContextSelector, setShowContextSelector] = useState(false);
+  const contextSelectorRef = useRef(null);
+  
   // Phone input states
   const [selectedCountry, setSelectedCountry] = useState(COUNTRIES.find(c => c.code === 'PE') || COUNTRIES[0]);
   const [phoneNumber, setPhoneNumber] = useState('');

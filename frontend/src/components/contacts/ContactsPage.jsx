@@ -328,8 +328,11 @@ const ContactsPage = () => {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
+      // Construir URL con workspace_id si no es contexto personal
+      const workspaceParam = currentContext !== 'personal' ? `&workspace_id=${currentContext}` : '';
+      
       // Cargar contactos del tipo actual
-      const contactsRes = await fetch(`${API_URL}/api/contacts?contact_type=${activeTab}`, {
+      const contactsRes = await fetch(`${API_URL}/api/contacts?contact_type=${activeTab}${workspaceParam}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (contactsRes.ok) {
@@ -339,9 +342,9 @@ const ContactsPage = () => {
       
       // Cargar conteos de todos los tipos (para el gráfico por tipo)
       const [clientRes, prospectRes, supplierRes] = await Promise.all([
-        fetch(`${API_URL}/api/contacts?contact_type=client`, { headers: { 'Authorization': `Bearer ${token}` } }),
-        fetch(`${API_URL}/api/contacts?contact_type=prospect`, { headers: { 'Authorization': `Bearer ${token}` } }),
-        fetch(`${API_URL}/api/contacts?contact_type=supplier`, { headers: { 'Authorization': `Bearer ${token}` } })
+        fetch(`${API_URL}/api/contacts?contact_type=client${workspaceParam}`, { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch(`${API_URL}/api/contacts?contact_type=prospect${workspaceParam}`, { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch(`${API_URL}/api/contacts?contact_type=supplier${workspaceParam}`, { headers: { 'Authorization': `Bearer ${token}` } })
       ]);
       
       const clientData = clientRes.ok ? await clientRes.json() : { contacts: [] };
@@ -376,7 +379,7 @@ const ContactsPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [activeTab, token]);
+  }, [activeTab, token, currentContext]);
 
   useEffect(() => {
     loadData();

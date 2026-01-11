@@ -164,14 +164,41 @@ const WhatsAppSettings = () => {
     setTimeout(handleConnect, 500);
   };
 
-  // Initial status check
+  // Initial status check and QR fetch
   useEffect(() => {
-    fetchStatus();
+    const initialize = async () => {
+      try {
+        // First fetch status
+        const response = await fetch(`${API_URL}/api/whatsapp/status`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          const currentStatus = data.status || 'disconnected';
+          setStatus(currentStatus);
+          setPhone(data.phone);
+          
+          // If already waiting for QR or connecting, start polling and fetch QR
+          if (currentStatus === 'waiting_qr' || currentStatus === 'connecting') {
+            startPolling();
+            // Immediately fetch QR
+            await fetchQR();
+          }
+        }
+      } catch (err) {
+        console.error('Error initializing:', err);
+      }
+    };
+    
+    if (token) {
+      initialize();
+    }
     
     return () => {
       stopPolling();
     };
-  }, [fetchStatus, stopPolling]);
+  }, [token, startPolling, fetchQR, stopPolling]);
 
   // Status config
   const getStatusConfig = () => {

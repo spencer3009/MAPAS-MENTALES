@@ -99,6 +99,12 @@ const MobileNavigation = ({
       onClick: onOpenContacts,
     },
     {
+      id: 'whatsapp',
+      icon: MessageSquare,
+      label: 'WhatsApp',
+      onClick: onOpenWhatsApp,
+    },
+    {
       id: 'favorites',
       icon: Star,
       label: 'Favoritos',

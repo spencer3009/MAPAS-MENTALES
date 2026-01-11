@@ -957,6 +957,10 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
           setActiveView('contacts');
           setIsProjectsSidebarOpen(false);
         }}
+        onOpenWhatsApp={() => {
+          setActiveView('whatsapp');
+          setIsProjectsSidebarOpen(false);
+        }}
         onLogout={logout}
         activeView={activeView}
         trashCount={trashCount}

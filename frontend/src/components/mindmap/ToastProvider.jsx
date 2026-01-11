@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback, createContext, useContext, useRef } from 'react';
 import { Bell, X, Clock, CheckCircle, AlertTriangle, Calendar, ChevronRight } from 'lucide-react';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+// Use relative URLs for production compatibility
+const API_URL = '';
 
 // Contexto para el sistema de notificaciones global
 const NotificationContext = createContext(null);

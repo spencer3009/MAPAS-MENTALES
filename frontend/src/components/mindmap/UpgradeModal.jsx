@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Crown, Zap, Infinity, CheckCircle2, Sparkles, Loader2, CreditCard, Shield } from 'lucide-react';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+// Use relative URLs for production compatibility
+const API_URL = '';
 
 const UpgradeModal = ({ isOpen, onClose, limitType = 'active', onUpgrade, token, initialPlan }) => {
   const [upgradePlan, setUpgradePlan] = useState(null);

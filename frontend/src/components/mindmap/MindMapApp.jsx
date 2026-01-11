@@ -37,7 +37,8 @@ import { useVerificationCheck } from '../../hooks/useVerificationCheck';
 import { useAuth } from '../../contexts/AuthContext';
 import { TimeTrackingProvider } from '../../contexts/TimeTrackingContext';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+// Use relative URLs for production compatibility
+const API_URL = '';
 
 // Componente interno principal
 const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clearForceView, pendingPlanId, onClearPendingPlan }) => {

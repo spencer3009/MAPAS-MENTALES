@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { CheckCircle2, XCircle, Loader2, Mail, ArrowRight } from 'lucide-react';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+// Use relative URLs for production compatibility
+const API_URL = '';
 
 const VerifyEmailPage = () => {
   const [status, setStatus] = useState('verifying'); // verifying, success, error, expired

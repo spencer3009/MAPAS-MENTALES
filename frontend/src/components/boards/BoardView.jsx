@@ -29,7 +29,8 @@ import TaskModal from './TaskModal';
 import { useTimeTracking } from '../../contexts/TimeTrackingContext';
 import { ShareModal } from '../sharing/ShareModal';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+// Use relative URLs for production compatibility
+const API_URL = '';
 
 // Colores de etiquetas para tarjetas
 const LABEL_COLORS = [

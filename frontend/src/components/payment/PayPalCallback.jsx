@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Loader2, CheckCircle2, XCircle, AlertCircle, Crown, Sparkles } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+// Use relative URLs for production compatibility
+const API_URL = '';
 
 const PayPalCallback = ({ type, onSuccess, onError, onClose }) => {
   const { token } = useAuth();

@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Play, Pause, Clock, Users, TrendingUp, Timer } from 'lucide-react';
 import { useTimeTracking } from '../../contexts/TimeTrackingContext';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+// Use relative URLs for production compatibility
+const API_URL = '';
 
 const TimeTracker = ({ taskId, boardId, listId, taskTitle, onTimeUpdate }) => {
   const { 

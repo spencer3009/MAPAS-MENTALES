@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Mail, X, Loader2, CheckCircle2, RefreshCw, Edit3, AlertCircle } from 'lucide-react';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+// Use relative URLs for production compatibility
+const API_URL = '';
 
 const EmailVerificationBanner = ({ email, onDismiss, onVerified, onEmailChange }) => {
   const [isResending, setIsResending] = useState(false);

@@ -8,7 +8,8 @@ import 'react-phone-input-2/lib/style.css';
 import { parsePhoneNumber, isValidPhoneNumber } from 'libphonenumber-js';
 import { useAuth } from '../../contexts/AuthContext';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+// Use relative URLs for production compatibility
+const API_URL = '';
 
 // Lista de países con códigos y zonas horarias
 const COUNTRIES = [

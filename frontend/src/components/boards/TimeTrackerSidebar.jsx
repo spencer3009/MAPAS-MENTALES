@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Play, Square, Clock, TrendingUp, Users, Timer, ChevronDown, ChevronUp } from 'lucide-react';
 import { useTimeTracking } from '../../contexts/TimeTrackingContext';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+// Use relative URLs for production compatibility
+const API_URL = '';
 
 /**
  * TimeTrackerSidebar - Versión compacta del registro de tiempo para el sidebar del modal

@@ -19,7 +19,8 @@ const NotificationBell = ({
   const buttonRef = useRef(null);
   const listRef = useRef(null);
 
-  const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+  // Use relative URLs for production compatibility
+const API_URL = '';
 
   // Cargar contador de no vistos
   const loadUnseenCount = useCallback(async () => {

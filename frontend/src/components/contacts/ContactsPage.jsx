@@ -28,7 +28,8 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { ShareModal } from '../sharing/ShareModal';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+// Use relative URLs for production compatibility
+const API_URL = '';
 
 // Columnas predeterminadas (fijas del sistema)
 const DEFAULT_COLUMNS = [

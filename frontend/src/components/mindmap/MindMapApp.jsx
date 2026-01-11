@@ -921,6 +921,12 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
         return <IntegrationsView />;
       case 'contacts':
         return <ContactsPage />;
+      case 'whatsapp':
+        return whatsappView === 'inbox' ? (
+          <WhatsAppInbox />
+        ) : (
+          <WhatsAppSettings />
+        );
       default:
         return null;
     }

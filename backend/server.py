@@ -6899,6 +6899,196 @@ async def send_activity_notification_email(
         return {"success": False, "error": str(e)}
 
 
+# --- WhatsApp Bridge API ---
+# These endpoints proxy requests to the WhatsApp Bridge service
+
+WHATSAPP_BRIDGE_URL = os.environ.get('WHATSAPP_BRIDGE_URL', 'http://localhost:3001')
+
+
+class SendWhatsAppMessageRequest(BaseModel):
+    phone: str
+    text: str
+
+
+@api_router.post("/whatsapp/connect")
+async def whatsapp_connect(current_user: dict = Depends(get_current_user)):
+    """Start WhatsApp connection for user's workspace"""
+    username = current_user["username"]
+    
+    # Get user's default workspace
+    workspace = await db.workspaces.find_one({"owner_username": username})
+    if not workspace:
+        raise HTTPException(status_code=404, detail="No workspace found")
+    
+    workspace_id = workspace.get("id")
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(f"{WHATSAPP_BRIDGE_URL}/bridge/instances/{workspace_id}/start")
+            return response.json()
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=503, detail=f"WhatsApp Bridge unavailable: {str(e)}")
+
+
+@api_router.get("/whatsapp/qr")
+async def whatsapp_get_qr(current_user: dict = Depends(get_current_user)):
+    """Get QR code for WhatsApp connection"""
+    username = current_user["username"]
+    
+    workspace = await db.workspaces.find_one({"owner_username": username})
+    if not workspace:
+        raise HTTPException(status_code=404, detail="No workspace found")
+    
+    workspace_id = workspace.get("id")
+    
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(f"{WHATSAPP_BRIDGE_URL}/bridge/instances/{workspace_id}/qr")
+            return response.json()
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=503, detail=f"WhatsApp Bridge unavailable: {str(e)}")
+
+
+@api_router.get("/whatsapp/status")
+async def whatsapp_get_status(current_user: dict = Depends(get_current_user)):
+    """Get WhatsApp connection status"""
+    username = current_user["username"]
+    
+    workspace = await db.workspaces.find_one({"owner_username": username})
+    if not workspace:
+        raise HTTPException(status_code=404, detail="No workspace found")
+    
+    workspace_id = workspace.get("id")
+    
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(f"{WHATSAPP_BRIDGE_URL}/bridge/instances/{workspace_id}/status")
+            return response.json()
+    except httpx.RequestError as e:
+        # Return disconnected status if bridge is unavailable
+        return {"status": "disconnected", "phone": None, "lastSeen": None}
+
+
+@api_router.post("/whatsapp/disconnect")
+async def whatsapp_disconnect(current_user: dict = Depends(get_current_user)):
+    """Disconnect WhatsApp"""
+    username = current_user["username"]
+    
+    workspace = await db.workspaces.find_one({"owner_username": username})
+    if not workspace:
+        raise HTTPException(status_code=404, detail="No workspace found")
+    
+    workspace_id = workspace.get("id")
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(f"{WHATSAPP_BRIDGE_URL}/bridge/instances/{workspace_id}/disconnect")
+            return response.json()
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=503, detail=f"WhatsApp Bridge unavailable: {str(e)}")
+
+
+@api_router.post("/whatsapp/send")
+async def whatsapp_send_message(
+    request: SendWhatsAppMessageRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Send a WhatsApp message"""
+    username = current_user["username"]
+    
+    workspace = await db.workspaces.find_one({"owner_username": username})
+    if not workspace:
+        raise HTTPException(status_code=404, detail="No workspace found")
+    
+    workspace_id = workspace.get("id")
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                f"{WHATSAPP_BRIDGE_URL}/bridge/instances/{workspace_id}/send",
+                json={"phone": request.phone, "text": request.text}
+            )
+            return response.json()
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=503, detail=f"WhatsApp Bridge unavailable: {str(e)}")
+
+
+@api_router.get("/whatsapp/messages")
+async def whatsapp_get_messages(
+    contact_phone: Optional[str] = None,
+    limit: int = 50,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get WhatsApp messages"""
+    username = current_user["username"]
+    
+    workspace = await db.workspaces.find_one({"owner_username": username})
+    if not workspace:
+        raise HTTPException(status_code=404, detail="No workspace found")
+    
+    workspace_id = workspace.get("id")
+    
+    query = {"workspace_id": workspace_id, "channel": "whatsapp"}
+    if contact_phone:
+        query["contact_phone"] = contact_phone.replace("+", "").replace(" ", "")
+    
+    messages = await db.whatsapp_messages.find(
+        query,
+        {"_id": 0}
+    ).sort("timestamp", -1).limit(limit).to_list(limit)
+    
+    return {"messages": messages}
+
+
+@api_router.get("/whatsapp/conversations")
+async def whatsapp_get_conversations(current_user: dict = Depends(get_current_user)):
+    """Get list of WhatsApp conversations with last message"""
+    username = current_user["username"]
+    
+    workspace = await db.workspaces.find_one({"owner_username": username})
+    if not workspace:
+        raise HTTPException(status_code=404, detail="No workspace found")
+    
+    workspace_id = workspace.get("id")
+    
+    # Aggregate to get unique contacts with their last message
+    pipeline = [
+        {"$match": {"workspace_id": workspace_id, "channel": "whatsapp"}},
+        {"$sort": {"timestamp": -1}},
+        {"$group": {
+            "_id": "$contact_phone",
+            "last_message": {"$first": "$content.text"},
+            "last_timestamp": {"$first": "$timestamp"},
+            "direction": {"$first": "$direction"},
+            "unread_count": {
+                "$sum": {
+                    "$cond": [
+                        {"$and": [
+                            {"$eq": ["$direction", "inbound"]},
+                            {"$ne": ["$status", "read"]}
+                        ]},
+                        1, 0
+                    ]
+                }
+            },
+            "push_name": {"$first": "$meta.push_name"}
+        }},
+        {"$sort": {"last_timestamp": -1}},
+        {"$project": {
+            "_id": 0,
+            "phone": "$_id",
+            "name": {"$ifNull": ["$push_name", "$_id"]},
+            "last_message": 1,
+            "last_timestamp": 1,
+            "unread_count": 1
+        }}
+    ]
+    
+    conversations = await db.whatsapp_messages.aggregate(pipeline).to_list(100)
+    
+    return {"conversations": conversations}
+
+
 # Include the router in the main app
 app.include_router(api_router)
 

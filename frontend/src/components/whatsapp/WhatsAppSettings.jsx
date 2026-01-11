@@ -104,10 +104,31 @@ const WhatsAppSettings = () => {
     setError(null);
     
     try {
+      if (!token) {
+        setError('Sesión expirada. Por favor, vuelve a iniciar sesión.');
+        return;
+      }
+      
       const response = await fetch(`${API_URL}/api/whatsapp/connect`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Connect response error:', response.status, errorText);
+        if (response.status === 401) {
+          setError('Sesión expirada. Por favor, vuelve a iniciar sesión.');
+        } else if (response.status === 503) {
+          setError('Servicio de WhatsApp no disponible. Intenta en unos segundos.');
+        } else {
+          setError(`Error del servidor (${response.status})`);
+        }
+        return;
+      }
       
       const data = await response.json();
       
@@ -118,11 +139,15 @@ const WhatsAppSettings = () => {
         // Immediately try to get QR
         setTimeout(fetchQR, 1000);
       } else {
-        setError(data.message || 'Error al conectar');
+        setError(data.message || data.detail || 'Error al conectar');
       }
     } catch (err) {
-      setError('Error de conexión con el servidor');
       console.error('Connect error:', err);
+      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+        setError('Error de red. Verifica tu conexión a internet.');
+      } else {
+        setError(`Error de conexión: ${err.message}`);
+      }
     } finally {
       setLoading(false);
     }

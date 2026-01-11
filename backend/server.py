@@ -7006,12 +7006,10 @@ async def whatsapp_get_status(current_user: dict = Depends(get_current_user)):
 async def whatsapp_disconnect(current_user: dict = Depends(get_current_user)):
     """Disconnect WhatsApp"""
     username = current_user["username"]
+    full_name = current_user.get("full_name", current_user.get("nombre", username))
     
-    workspace = await db.workspaces.find_one({"owner_username": username})
-    if not workspace:
-        raise HTTPException(status_code=404, detail="No workspace found")
-    
-    workspace_id = workspace.get("id")
+    # Get or create workspace
+    workspace_id = await get_or_create_workspace(username, full_name)
     
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
@@ -7028,12 +7026,10 @@ async def whatsapp_send_message(
 ):
     """Send a WhatsApp message"""
     username = current_user["username"]
+    full_name = current_user.get("full_name", current_user.get("nombre", username))
     
-    workspace = await db.workspaces.find_one({"owner_username": username})
-    if not workspace:
-        raise HTTPException(status_code=404, detail="No workspace found")
-    
-    workspace_id = workspace.get("id")
+    # Get or create workspace
+    workspace_id = await get_or_create_workspace(username, full_name)
     
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
@@ -7054,12 +7050,10 @@ async def whatsapp_get_messages(
 ):
     """Get WhatsApp messages"""
     username = current_user["username"]
+    full_name = current_user.get("full_name", current_user.get("nombre", username))
     
-    workspace = await db.workspaces.find_one({"owner_username": username})
-    if not workspace:
-        raise HTTPException(status_code=404, detail="No workspace found")
-    
-    workspace_id = workspace.get("id")
+    # Get or create workspace
+    workspace_id = await get_or_create_workspace(username, full_name)
     
     query = {"workspace_id": workspace_id, "channel": "whatsapp"}
     if contact_phone:
@@ -7077,12 +7071,10 @@ async def whatsapp_get_messages(
 async def whatsapp_get_conversations(current_user: dict = Depends(get_current_user)):
     """Get list of WhatsApp conversations with last message"""
     username = current_user["username"]
+    full_name = current_user.get("full_name", current_user.get("nombre", username))
     
-    workspace = await db.workspaces.find_one({"owner_username": username})
-    if not workspace:
-        raise HTTPException(status_code=404, detail="No workspace found")
-    
-    workspace_id = workspace.get("id")
+    # Get or create workspace
+    workspace_id = await get_or_create_workspace(username, full_name)
     
     # Aggregate to get unique contacts with their last message
     pipeline = [

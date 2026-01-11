@@ -1,6 +1,8 @@
 /**
  * WhatsApp Inbox Component
  * Chat interface for WhatsApp conversations
+ * 
+ * FIX: Uses relative URLs (/api/whatsapp/*) to work in any environment
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -19,7 +21,15 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+// Helper to safely parse JSON response
+const safeParseResponse = async (response) => {
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { error: text };
+  }
+};
 
 const WhatsAppInbox = () => {
   const { token } = useAuth();
@@ -32,15 +42,17 @@ const WhatsAppInbox = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const messagesEndRef = useRef(null);
 
-  // Fetch conversations
+  // Fetch conversations - uses relative URL
   const fetchConversations = useCallback(async () => {
+    if (!token) return;
+    
     try {
-      const response = await fetch(`${API_URL}/api/whatsapp/conversations`, {
+      const response = await fetch('/api/whatsapp/conversations', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
       if (response.ok) {
-        const data = await response.json();
+        const data = await safeParseResponse(response);
         setConversations(data.conversations || []);
       }
     } catch (err) {
@@ -48,19 +60,18 @@ const WhatsAppInbox = () => {
     }
   }, [token]);
 
-  // Fetch messages for selected conversation
+  // Fetch messages for selected conversation - uses relative URL
   const fetchMessages = useCallback(async (phone) => {
-    if (!phone) return;
+    if (!phone || !token) return;
     
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/api/whatsapp/messages?contact_phone=${phone}&limit=100`, {
+      const response = await fetch(`/api/whatsapp/messages?contact_phone=${phone}&limit=100`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
       if (response.ok) {
-        const data = await response.json();
-        // Reverse to show oldest first
+        const data = await safeParseResponse(response);
         setMessages((data.messages || []).reverse());
       }
     } catch (err) {
@@ -70,14 +81,14 @@ const WhatsAppInbox = () => {
     }
   }, [token]);
 
-  // Send message
+  // Send message - uses relative URL
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim() || !selectedConversation) return;
+    if (!newMessage.trim() || !selectedConversation || !token) return;
     
     setSending(true);
     try {
-      const response = await fetch(`${API_URL}/api/whatsapp/send`, {
+      const response = await fetch('/api/whatsapp/send', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -91,9 +102,7 @@ const WhatsAppInbox = () => {
       
       if (response.ok) {
         setNewMessage('');
-        // Refresh messages
         await fetchMessages(selectedConversation.phone);
-        // Refresh conversations to update last message
         await fetchConversations();
       }
     } catch (err) {
@@ -118,7 +127,6 @@ const WhatsAppInbox = () => {
   useEffect(() => {
     fetchConversations();
     
-    // Poll for new messages every 5 seconds
     const interval = setInterval(fetchConversations, 5000);
     return () => clearInterval(interval);
   }, [fetchConversations]);
@@ -136,9 +144,9 @@ const WhatsAppInbox = () => {
     const now = new Date();
     const diff = now - date;
     
-    if (diff < 86400000) { // Less than 24 hours
+    if (diff < 86400000) {
       return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-    } else if (diff < 604800000) { // Less than 7 days
+    } else if (diff < 604800000) {
       return date.toLocaleDateString('es-ES', { weekday: 'short' });
     } else {
       return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });

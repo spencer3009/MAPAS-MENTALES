@@ -234,7 +234,13 @@ const WhatsAppSettings = () => {
       {/* Status Card */}
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Estado de conexión</h2>
-        <StatusIndicator />
+        <div className={`flex items-center gap-3 px-4 py-3 rounded-xl ${statusConfig.bgColor}`}>
+          <StatusIcon className={`w-6 h-6 ${statusConfig.color} ${status === 'connecting' ? 'animate-spin' : ''}`} />
+          <div>
+            <p className={`font-semibold ${statusConfig.color}`}>{statusConfig.label}</p>
+            <p className="text-sm text-gray-600">{statusConfig.description}</p>
+          </div>
+        </div>
       </div>
 
       {/* QR Code Section */}

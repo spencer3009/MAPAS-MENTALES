@@ -173,9 +173,9 @@ const WhatsAppSettings = () => {
     };
   }, [fetchStatus, stopPolling]);
 
-  // Status indicator component
-  const StatusIndicator = () => {
-    const statusConfig = {
+  // Status config
+  const getStatusConfig = () => {
+    const configs = {
       connected: {
         icon: Wifi,
         color: 'text-green-500',
@@ -212,20 +212,11 @@ const WhatsAppSettings = () => {
         description: error || 'Ha ocurrido un error'
       }
     };
-    
-    const config = statusConfig[status] || statusConfig.disconnected;
-    const Icon = config.icon;
-    
-    return (
-      <div className={`flex items-center gap-3 px-4 py-3 rounded-xl ${config.bgColor}`}>
-        <Icon className={`w-6 h-6 ${config.color} ${status === 'connecting' ? 'animate-spin' : ''}`} />
-        <div>
-          <p className={`font-semibold ${config.color}`}>{config.label}</p>
-          <p className="text-sm text-gray-600">{config.description}</p>
-        </div>
-      </div>
-    );
+    return configs[status] || configs.disconnected;
   };
+
+  const statusConfig = getStatusConfig();
+  const StatusIcon = statusConfig.icon;
 
   return (
     <div className="max-w-2xl mx-auto p-6">

@@ -423,7 +423,7 @@ export class WhatsAppManager {
       
       await this.db.collection('whatsapp_messages').insertOne(messageDoc);
       
-      return { success: true, messageId: result?.key?.id };
+      return { success: true, messageId: result?.key?.id || undefined };
     } catch (error: any) {
       this.logger.error({ error }, 'Failed to send message');
       return { success: false, error: error.message };

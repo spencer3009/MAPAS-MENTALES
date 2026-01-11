@@ -16,7 +16,8 @@ import {
   Download,
   Smartphone,
   Share2,
-  CheckCircle2
+  CheckCircle2,
+  MessageSquare
 } from 'lucide-react';
 import { usePWAInstall } from '../../hooks/usePWAInstall';
 
@@ -33,6 +34,7 @@ const MobileNavigation = ({
   onOpenSettings,
   onOpenBoards,
   onOpenContacts,
+  onOpenWhatsApp,
   onLogout,
   activeView = 'projects',
   trashCount = 0,

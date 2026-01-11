@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+// Use relative URLs to work in any environment
+const API_URL = '';
 
 const TimeTrackingContext = createContext(null);
 

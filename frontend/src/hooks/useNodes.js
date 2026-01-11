@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 
 const PROJECTS_KEY = 'mm_projects';
 const ACTIVE_PROJECT_KEY = 'mm_activeProjectId';
-const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+// Use relative URLs to work in any environment
+const API_URL = '';
 
 // Template por defecto para nuevos proyectos
 const createDefaultProject = () => ({

@@ -193,6 +193,11 @@ const WhatsAppSettings = () => {
   useEffect(() => {
     const initialize = async () => {
       try {
+        if (!token) {
+          console.warn('No token available for WhatsApp initialization');
+          return;
+        }
+        
         // First fetch status
         const response = await fetch(`${API_URL}/api/whatsapp/status`, {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -203,6 +208,7 @@ const WhatsAppSettings = () => {
           const currentStatus = data.status || 'disconnected';
           setStatus(currentStatus);
           setPhone(data.phone);
+          setError(null); // Clear any previous errors
           
           // If already waiting for QR or connecting, start polling and fetch QR
           if (currentStatus === 'waiting_qr' || currentStatus === 'connecting') {
@@ -210,9 +216,14 @@ const WhatsAppSettings = () => {
             // Immediately fetch QR
             await fetchQR();
           }
+        } else if (response.status === 401) {
+          setError('Sesión expirada. Por favor, vuelve a iniciar sesión.');
+        } else {
+          console.error('Status fetch failed:', response.status);
         }
       } catch (err) {
-        console.error('Error initializing:', err);
+        console.error('Error initializing WhatsApp:', err);
+        // Don't show error on initial load, just log it
       }
     };
     

@@ -1,6 +1,9 @@
 /**
  * WhatsApp Connection Settings Component
  * Allows users to connect their WhatsApp account via QR code
+ * 
+ * FIX: Uses relative URLs (/api/whatsapp/*) to work in any environment
+ * FIX: Properly handles response body to avoid "body stream already read" error
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -19,31 +22,39 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+// Helper to safely parse JSON response
+const safeParseResponse = async (response) => {
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { error: text };
+  }
+};
 
 const WhatsAppSettings = () => {
   const { token } = useAuth();
-  const [status, setStatus] = useState('disconnected'); // waiting_qr | connecting | connected | disconnected | error
+  const [status, setStatus] = useState('disconnected');
   const [qrCode, setQrCode] = useState(null);
   const [phone, setPhone] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const pollingRef = useRef(null);
-  const wsRef = useRef(null);
 
-  // Fetch current status
+  // Fetch current status - uses relative URL
   const fetchStatus = useCallback(async () => {
+    if (!token) return;
+    
     try {
-      const response = await fetch(`${API_URL}/api/whatsapp/status`, {
+      const response = await fetch('/api/whatsapp/status', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
       if (response.ok) {
-        const data = await response.json();
+        const data = await safeParseResponse(response);
         setStatus(data.status || 'disconnected');
         setPhone(data.phone);
         
-        // If connected, stop polling for QR
         if (data.status === 'connected') {
           stopPolling();
           setQrCode(null);
@@ -54,15 +65,17 @@ const WhatsAppSettings = () => {
     }
   }, [token]);
 
-  // Fetch QR code
+  // Fetch QR code - uses relative URL
   const fetchQR = useCallback(async () => {
+    if (!token) return;
+    
     try {
-      const response = await fetch(`${API_URL}/api/whatsapp/qr`, {
+      const response = await fetch('/api/whatsapp/qr', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
       if (response.ok) {
-        const data = await response.json();
+        const data = await safeParseResponse(response);
         
         if (data.status === 'connected') {
           setStatus('connected');
@@ -83,7 +96,6 @@ const WhatsAppSettings = () => {
   const startPolling = useCallback(() => {
     if (pollingRef.current) return;
     
-    // Poll every 3 seconds for QR updates and status
     pollingRef.current = setInterval(async () => {
       await fetchQR();
       await fetchStatus();
@@ -98,7 +110,7 @@ const WhatsAppSettings = () => {
     }
   }, []);
 
-  // Connect WhatsApp
+  // Connect WhatsApp - uses relative URL
   const handleConnect = async () => {
     setLoading(true);
     setError(null);
@@ -106,10 +118,11 @@ const WhatsAppSettings = () => {
     try {
       if (!token) {
         setError('Sesión expirada. Por favor, vuelve a iniciar sesión.');
+        setLoading(false);
         return;
       }
       
-      const response = await fetch(`${API_URL}/api/whatsapp/connect`, {
+      const response = await fetch('/api/whatsapp/connect', {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -117,54 +130,49 @@ const WhatsAppSettings = () => {
         }
       });
       
+      // Parse response once
+      const data = await safeParseResponse(response);
+      
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Connect response error:', response.status, errorText);
+        console.error('Connect response error:', response.status, data);
         if (response.status === 401) {
           setError('Sesión expirada. Por favor, vuelve a iniciar sesión.');
         } else if (response.status === 503) {
           setError('Servicio de WhatsApp no disponible. Intenta en unos segundos.');
         } else {
-          setError(`Error del servidor (${response.status})`);
+          setError(data.detail || data.message || `Error del servidor (${response.status})`);
         }
+        setLoading(false);
         return;
       }
       
-      const data = await response.json();
-      
       if (data.success) {
         setStatus('connecting');
-        // Start polling for QR code
         startPolling();
-        // Immediately try to get QR
         setTimeout(fetchQR, 1000);
       } else {
         setError(data.message || data.detail || 'Error al conectar');
       }
     } catch (err) {
       console.error('Connect error:', err);
-      if (err.name === 'TypeError' && err.message.includes('fetch')) {
-        setError('Error de red. Verifica tu conexión a internet.');
-      } else {
-        setError(`Error de conexión: ${err.message}`);
-      }
+      setError(`Error de conexión: ${err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  // Disconnect WhatsApp
+  // Disconnect WhatsApp - uses relative URL
   const handleDisconnect = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      const response = await fetch(`${API_URL}/api/whatsapp/disconnect`, {
+      const response = await fetch('/api/whatsapp/disconnect', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
-      const data = await response.json();
+      const data = await safeParseResponse(response);
       
       if (data.success) {
         setStatus('disconnected');
@@ -172,10 +180,10 @@ const WhatsAppSettings = () => {
         setQrCode(null);
         stopPolling();
       } else {
-        setError(data.message || 'Error al desconectar');
+        setError(data.message || data.detail || 'Error al desconectar');
       }
     } catch (err) {
-      setError('Error de conexión con el servidor');
+      setError(`Error de conexión: ${err.message}`);
       console.error('Disconnect error:', err);
     } finally {
       setLoading(false);
@@ -189,41 +197,35 @@ const WhatsAppSettings = () => {
     setTimeout(handleConnect, 500);
   };
 
-  // Initial status check and QR fetch
+  // Initial status check
   useEffect(() => {
     const initialize = async () => {
+      if (!token) {
+        console.warn('No token available for WhatsApp initialization');
+        return;
+      }
+      
       try {
-        if (!token) {
-          console.warn('No token available for WhatsApp initialization');
-          return;
-        }
-        
-        // First fetch status
-        const response = await fetch(`${API_URL}/api/whatsapp/status`, {
+        const response = await fetch('/api/whatsapp/status', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
         if (response.ok) {
-          const data = await response.json();
+          const data = await safeParseResponse(response);
           const currentStatus = data.status || 'disconnected';
           setStatus(currentStatus);
           setPhone(data.phone);
-          setError(null); // Clear any previous errors
+          setError(null);
           
-          // If already waiting for QR or connecting, start polling and fetch QR
           if (currentStatus === 'waiting_qr' || currentStatus === 'connecting') {
             startPolling();
-            // Immediately fetch QR
             await fetchQR();
           }
         } else if (response.status === 401) {
           setError('Sesión expirada. Por favor, vuelve a iniciar sesión.');
-        } else {
-          console.error('Status fetch failed:', response.status);
         }
       } catch (err) {
         console.error('Error initializing WhatsApp:', err);
-        // Don't show error on initial load, just log it
       }
     };
     
@@ -386,6 +388,7 @@ const WhatsAppSettings = () => {
           <button
             onClick={handleConnect}
             disabled={loading}
+            data-testid="connect-whatsapp-btn"
             className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50"
           >
             {loading ? (
@@ -401,6 +404,7 @@ const WhatsAppSettings = () => {
           <button
             onClick={handleDisconnect}
             disabled={loading}
+            data-testid="disconnect-whatsapp-btn"
             className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-red-500 text-white rounded-xl font-semibold hover:bg-red-600 transition-all shadow-lg hover:shadow-xl disabled:opacity-50"
           >
             {loading ? (
@@ -416,6 +420,7 @@ const WhatsAppSettings = () => {
           <button
             onClick={handleDisconnect}
             disabled={loading}
+            data-testid="cancel-whatsapp-btn"
             className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gray-500 text-white rounded-xl font-semibold hover:bg-gray-600 transition-all shadow-lg hover:shadow-xl disabled:opacity-50"
           >
             <X className="w-5 h-5" />

@@ -39,14 +39,14 @@
   "pwa_verification": {
     "manifest_json": {
       "status": "PASS",
-      "url": "https://collab-mindora.preview.emergentagent.com/manifest.json",
+      "url": "https://wapp-automation-1.preview.emergentagent.com/manifest.json",
       "http_status": 200
     },
     "service_worker": {
       "status": "PASS",
-      "url": "https://collab-mindora.preview.emergentagent.com/service-worker.js",
+      "url": "https://wapp-automation-1.preview.emergentagent.com/service-worker.js",
       "http_status": 200,
-      "registration_log": "[PWA] Service Worker registrado: https://collab-mindora.preview.emergentagent.com/"
+      "registration_log": "[PWA] Service Worker registrado: https://wapp-automation-1.preview.emergentagent.com/"
     },
     "manifest_link_in_html": {
       "status": "PASS",

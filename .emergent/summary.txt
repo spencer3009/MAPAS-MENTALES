@@ -1,55 +1,60 @@
 <analysis>**original_problem_statement:**
-The user's initial goal was to transform the Mindora web application into a fully functional, mobile-first Progressive Web App (PWA) and fix all associated usability bugs. After completing that, the user's priority shifted to implementing a comprehensive multi-user sharing and collaboration system unified across all resources (Mind Maps, Contacts, Reminders, Boards), complete with workspaces, roles, and permissions.
+The user's primary goal is to build a full-featured WhatsApp Automation Platform inside the Mindora application, similar to TokeChat. The implementation is planned in phases:
+1.  **Phase 1: QR Connection & Status:** Allow users to connect their WhatsApp account by scanning a QR code and see the connection status.
+2.  **Phase 2: Inbox & Messaging:** Implement a basic inbox to send and receive messages.
+3.  **Phase 3: Bot & Flows Integration:** Connect the WhatsApp channel to the existing Mindora flows engine.
+4.  **Phase 4: Campaigns & Broadcast:** Add functionality for mass messaging.
 
-Following the initial implementation of the sharing system and a new Activity Feed, the user has identified critical UX/UI bugs that make these new features unusable. The current top priority (P0) is to fix these layout and accessibility issues.
+The agent has completed the initial setup for Phase 1. However, the user reported a server connection error, which was diagnosed as a bug where users without a pre-existing workspace cannot use the feature. The current top priority is to fix this blocker.
 
 **PRODUCT REQUIREMENTS:**
-1.  **FIX CRITICAL UX BUGS (P0 - CURRENT):**
-    *   **Activity Panel ():** The activity dropdown panel is hidden behind other UI elements (like the main canvas). It must be rendered as a  overlay with a high  (using a React Portal) to be fully visible.
-    *   **Notification Settings ():** The settings modal is cut off and does not scroll correctly. It must also be implemented as a properly centered, fixed-position modal with its own scroll (, ), rendered via a React Portal.
-    *   **Visible Share Button:** The Share button must be prominently visible in the main UI for Maps, Boards, Contacts, and Reminders, not just hidden in a dropdown menu.
-2.  **Complete Sharing Integration (P1):**
-    *   Add a Share button to the **Reminders** section. The backend already supports this, but the UI is missing.
-3.  **Implement Activity Logging (P1):**
-    *   Expand the activity logging to include more user actions (e.g., creating a map, editing a node, completing a task) to make the Activity Feed more useful.
-4.  **Bloqueo tras 7 días sin verificar (P1):** Implement account blocking if the user does not verify their email within 7 days.
-5.  **Exportar Reportes (P1):** Add functionality to export contacts or reports to PDF/CSV.
+1.  **FIX WHATSAPP CONNECTION BUG (P0 - CURRENT):**
+    *   The system must automatically create a Personal Workspace for any user who tries to access the WhatsApp connection feature but does not already have a workspace. This ensures all users can use the feature without manual setup.
+2.  **Complete WhatsApp Integration - Phase 2 (P1):**
+    *   Build a functional inbox UI for viewing conversations and sending messages.
+    *   When a message arrives from an unknown number, automatically create a new contact in the Mindora CRM.
+3.  **Implement Bot/Flows Integration - Phase 3 (P1):**
+    *   Integrate the WhatsApp channel with the existing flows engine.
+4.  **Implement Campaigns - Phase 4 (P2):**
+    *   Create a system for sending scheduled broadcast messages to audiences defined by CRM tags.
 
 **User's preferred language**: Spanish
 
 **what currently exists?**
-The application is a stable, PWA-enabled full-stack app (React, FastAPI, MongoDB). The core features are a Mind Map editor, a CRM (Contacts), Boards (Kanban), and a Reminders calendar.
+The application is a full-stack PWA with Mind Maps, Boards, Contacts, and Reminders. A multi-user workspace system is in place.
 
-A full backend for a multi-user sharing system and an activity/notification system has been implemented. This includes:
--   **Backend:**  and  with APIs for creating workspaces, inviting users, managing permissions, fetching activity logs, and managing notification preferences.
--   **Frontend:** A reusable  component, an  dropdown, and a  modal have been created. The Share button has been added to the Mind Map editor, Boards page/view, and Contacts page.
+For the WhatsApp integration (Phase 1), the following has been built:
+*   A separate Node.js microservice () using the Baileys library to handle WhatsApp connections. This service runs on port  and is managed by .
+*   Proxy API endpoints in the main FastAPI backend () that communicate with the bridge service.
+*   A new frontend section under  () which displays the connection status and the QR code for scanning.
+*   MongoDB schemas for  and .
 
-However, the new frontend components suffer from critical CSS layout bugs (z-index, positioning) that make them unusable, as they are rendered behind other elements or are cut off. The agent has started rewriting them to use React Portals to fix this.
+The agent successfully fixed several major UI/UX bugs, added a Share button to Reminders, corrected the positioning of the Mind Map's floating node toolbar, and refactored the Contacts page to be workspace-aware before starting the WhatsApp feature.
 
 **Last working item**:
--   **Last item agent was working:** The agent was addressing the critical UX bug where the Share button in the Boards view () was not prominent enough. The agent's last action was to improve its styling to match the user's expectations for a primary action button.
--   **Status:** IN PROGRESS
--   **Agent Testing Done:** N
--   **Which testing method agent to use?** Frontend testing agent. The core issues are visual (CSS, z-index, positioning). The agent should use the screenshot tool to verify the fixes for the Activity panel, Notification modal, and the visibility of the Share buttons across all relevant sections.
--   **User Testing Done:** N
+*   **Last item agent was working:** Fixing a critical bug where users without a default workspace would get a server connection error when trying to use the WhatsApp connection feature. The agent identified the root cause and created a helper function  in  to automatically create a workspace on-demand.
+*   **Status:** IN PROGRESS
+*   **Agent Testing Done:** N
+*   **Which testing method agent to use?** Backend testing. Use  to test all  endpoints with a user account that does not have a workspace to verify one is created automatically and the API call succeeds.
+*   **User Testing Done:** N (User reported the bug and is waiting for the fix).
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Critical UX/UI Bugs for Sharing & Activity Features (P0)**
+-   **Issue 1: WhatsApp connection fails for users without a workspace (P0)**
 -   **Issue 2: Low-priority Mind Map layout and interaction bugs (P2)**
 
 **Issues Detail:**
--   **Issue 1: Critical UX/UI Bugs for Sharing & Activity Features**
-    -   **Attempted fixes:** The agent identified that the core problem is that the new UI components (, ) are being rendered inside containers with conflicting CSS (, low ). The agent correctly decided to rewrite these components to use  to render them at the top level of the DOM. The agent also began restyling the various Share buttons to be more prominent.
+-   **Issue 1: WhatsApp connection fails for users without a workspace**
+    -   **Attempted fixes:** The agent created a helper function  in . However, this function was only applied to the  endpoint and needs to be integrated into all other WhatsApp-related endpoints.
     -   **Next debug checklist:**
-        1.  Verify the implementation of the React Portals in  and .
-        2.  Take screenshots of the Activity dropdown and the Notification Settings modal to confirm they are fully visible and not cut off.
-        3.  Verify the Share button is prominent and correctly styled in  (for the map editor).
-        4.  Finish styling the Share button in .
-        5.  Verify the Share button is prominent in .
-    -   **Why fix this issue and what will be achieved with the fix?** The sharing and activity features are currently unusable because of these UI bugs. Fixing them will make these core new features functional for the user.
+        1.  In , locate the  helper function.
+        2.  Apply this function within the dependency injection or at the beginning of each WhatsApp proxy endpoint: , , and .
+        3.  Restart the backend service using backend: stopped
+backend: started.
+        4.  Test the fix by making  requests to the endpoints as a new user who lacks a workspace.
+    -   **Why fix this issue and what will be achieved with the fix?** This is a critical blocker preventing users from using the new WhatsApp feature. Fixing it will make Phase 1 fully functional for all users.
     -   **Status:** IN PROGRESS
     -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** Frontend
+    -   **Should Test frontend/backend/both after fix?** Backend
     -   **Blocked on other issue:** None
 
 -   **Issue 2: Low-priority Mind Map layout and interaction bugs**
@@ -60,42 +65,34 @@ However, the new frontend components suffer from critical CSS layout bugs (z-ind
     -   **Should Test frontend/backend/both after fix?** Frontend
 
 **In progress Task List**:
--   **Task 1: Fix Critical UX Bugs (P0)**
-    -   **Where to resume:** The agent just finished rewriting  and  to use React Portals. The next step is to improve the styling of the Share button in  to make it more prominent, as it was just done for the . After that, verify all fixes with screenshots.
-    -   **What will be achieved with this?** A fully usable sharing and activity system, as per the user's P0 request.
-    -   **Status:** IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?** Frontend
-    -   **Blocked on something:** None
+-   **Task 1: Complete WhatsApp Integration - Phase 1**
+    -   **Where to resume:** The task is blocked until the user without workspace bug (Issue 1) is resolved. Once the fix is fully implemented and tested, Phase 1 will be complete.
+    -   **What will be achieved with this?** A fully functional QR code connection system, allowing any user to link their WhatsApp account.
+    -   **Status:** BLOCKED (on Issue 1)
+    -   **Should Test frontend/backend/both after fix?** Both
+    -   **Blocked on something:** Issue 1: WhatsApp connection fails for users without a workspace.
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks:**
-    *   **P1: Add Share button to Reminders:** Integrate the  into the  component. This only requires frontend work.
-    *   **P1: Bloqueo tras 7 días sin verificar:** Implement backend logic to check  against the current date for unverified users and block access.
-    *   **P1: Exportar Reportes:** Add a feature to export data (e.g., from the Contacts page) to PDF/CSV.
-    *   **P1: Expand Activity Logging:** Integrate  into more backend endpoints (e.g., creating/editing maps, nodes, contacts) to provide a richer activity feed.
-*   **Future Tasks (Backlog):**
-    *   **CRITICAL: Refactorizar :** Decompose the massive 3500+ line component.
-    *   Agregar campo tipo Moneda para contactos.
-    *   Presets de vistas de columnas para el CRM.
-    *   Timeline de actividad de contacto (a more detailed view than the global feed).
-    *   Filtrar y ordenar tareas en tableros.
+    *   **P1: WhatsApp - Phase 2 (Inbox & Messaging):** Build the UI and backend logic for a basic chat inbox, including sending/receiving messages and auto-creating CRM contacts from new conversations.
+    *   **P1: WhatsApp - Phase 3 (Bot & Flows Integration):** Connect the WhatsApp channel to the existing Mindora flows engine.
+    *   **P1: Account blocking after 7 days:** Implement backend logic to block unverified accounts.
+    *   **P1: Export Reports:** Add functionality to export contacts to PDF/CSV.
+*   **Future Tasks:**
+    *   **P2: WhatsApp - Phase 4 (Campaigns & Broadcast):** Implement scheduled mass messaging.
+    *   **CRITICAL: Refactor :** Decompose the massive 3500+ line component.
+    *   Add Currency field type for contacts.
     *   Notificaciones en tiempo real (WebSocket).
 
 **Completed work in this session**
--   **Feature: Sharing & Collaboration System (Backend):**
-    -   Created and integrated .
-    -   Implemented automatic Personal Workspace creation on user registration in .
-    -   Added all required API endpoints for inviting users, managing collaborators, and generating share links.
-    -   Fixed a critical  serialization bug in  that was causing API calls to fail.
--   **Feature: Sharing & Collaboration System (Frontend):**
-    -   Created a reusable  and an .
-    -   Integrated the Share button and modal into  (for maps list),  (for boards list),  (for inside the map editor), and .
--   **Feature: Activity Feed & Notification Preferences:**
-    -   Created  with endpoints to log activity and manage user notification preferences.
-    -   Created frontend components: , , and .
-    -   Integrated the  into the main .
--   **Bug Fix: Activity Dropdown Visibility:**
-    -   Fixed a z-index issue where the activity dropdown was hidden behind the header by rewriting  to use  and a high . (This was later improved by using a React Portal).
+-   **Bug Fix (P0): Critical UX/UI Bugs for Sharing & Activity:** Resolved rendering issues for the Activity Panel and Notifications Modal using React Portals.
+-   **Feature: Unified Share Button:** Added the missing Share button to the  and ensured its prominence across all modules.
+-   **Bug Fix: Node Toolbar Positioning:** Fixed the floating toolbar's positioning to keep it centered over the selected node and constrained within the canvas.
+-   **Architecture: Team/Workspace Model for Contacts:** Refactored the Contacts feature to be workspace-aware, including a context-switching UI.
+-   **Feature: WhatsApp Integration - Phase 1 Setup:**
+    -   Created and configured the  Node.js service.
+    -   Implemented backend proxy APIs and the frontend UI () for QR code connection.
+    -   The service now runs under , and the QR code is successfully displayed in the UI.
 
 **Earlier issues found/mentioned but not fixed**
 -   The P2 mind map issues (MindOrbit/MindHybrid layouts, MultiSelectToolbar 'X' button) are known but have not been prioritized.
@@ -107,83 +104,68 @@ However, the new frontend components suffer from critical CSS layout bugs (z-ind
 
 
 **Key Technical Concepts**
--   **Backend Services:** Logic for workspaces, permissions, and activities has been encapsulated into dedicated service files (, ) for better separation of concerns.
--   **ObjectId Serialization:** Handled a common MongoDB issue by ensuring API responses exclude the non-serializable  field after database insertions.
--   **Unified Frontend Components:** Created a single  that is reused across different resources (Maps, Boards, Contacts), demonstrating good component design.
--   **React Portals for Overlays:** The agent correctly identified the need to use  to solve z-index and  issues with modals and dropdowns, ensuring they render correctly on top of all other UI elements.
+-   **Microservice Architecture:** A separate Node.js service () was introduced to handle WhatsApp communications, isolating it from the main FastAPI backend.
+-   **Workspace-based Multi-tenancy:** Core features like Contacts and the new WhatsApp integration are built upon the workspace model to ensure data isolation.
+-   **On-demand Resource Creation:** The current fix involves creating a user's personal workspace automatically when needed, which is a key pattern for improving user experience.
 
 **key DB schema**
--   **workspaces:** 
--   **workspace_members:** 
--   **resource_permissions:** 
--   **invites:** 
--   **share_links:** 
--   **activity_logs:** 
--   **users:** now includes 
+-   **contacts:** 
+-   **whatsapp_instances:** 
+-   **whatsapp_sessions:** 
 
 **All files of reference**
--   : Needs verification after being rewritten with a React Portal to fix layout issues.
--   : Needs verification after being rewritten with a React Portal.
--   : The Share button was made more prominent here.
--   : The Share button here needs its styling improved.
--   : The Share button was added here and needs its visibility verified.
--   : Contains all the new API endpoints for sharing and activity.
--   : Contains the core logic for the sharing system.
+-   : Contains the WhatsApp proxy APIs and the  helper function that needs to be fully implemented.
+-   : Directory for the Node.js WhatsApp service.
+-   : Frontend UI for connecting WhatsApp.
+-   : Supervisor configuration for the new Node.js service.
 
 **Areas that need refactoring**:
--   : This remains a critical piece of technical debt at over 3500 lines. It urgently needs to be decomposed into smaller, manageable components.
--   : This is also a very large and complex component that could benefit from refactoring.
+-   : This component is over 3500 lines and is a critical piece of technical debt that needs to be broken down.
 
 **key api endpoints**
--   : Creates an email invitation.
--   : Creates a public share link.
--   : Gets the list of collaborators and pending invites.
--   : Fetches the activity feed for the current user's workspace.
--   : Gets user's notification settings.
--   : Updates user's notification settings.
--   : Accepts an invitation.
+-   : Initiates a WhatsApp connection session.
+-   : Fetches the QR code for scanning.
+-   : Gets the current connection status.
+-   : Fetches contacts for a specific workspace.
 
 **Critical Info for New Agent**
--   **Your immediate task is to fix the critical UX bugs.** The sharing and activity features are functionally implemented in the backend but are unusable on the frontend.
--   **Use React Portals.** The chosen strategy is to wrap overlay components ('s dropdown,  modal, ) in Portals to solve the CSS stacking context issues. You must verify these implementations work.
--   **Make Share buttons obvious.** The user explicitly requested large, visible Share buttons in the main headers/toolbars of Maps, Boards, and Contacts. Ensure they are styled as primary actions.
--   **Do not forget Reminders.** After fixing the P0 bugs, the next step is to add the Share button to the Reminders section to complete the unified sharing experience.
+-   **Your immediate task is to fix the WhatsApp connection bug.** The user is blocked. You must apply the  helper function to all WhatsApp endpoints (, , ) in .
+-   **The user's preferred language is Spanish.** All communication, including plans and summaries, must be in Spanish.
+-   **The WhatsApp Bridge is a separate Node.js service.** It runs on port 3001, is managed by , and its source code is in . You may need to check its logs separately from the main backend.
+-   After fixing the current bug, the project moves to **Phase 2: Building the WhatsApp Inbox**.
 
 **documents and test reports created in this job**
--   : Test report for the Sharing System backend.
--   : Test report for the Activity Feed & Notifications backend.
--   : Has been updated with the new feature requirements and completions.
+-   : Updated with requirements for the WhatsApp integration.
+-   : New supervisor config for the bridge service.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Asks where the sharing feature is implemented. (COMPLETE)
-2.  **Agent:** Explains it's in Maps and Boards, but not Contacts or Reminders yet. (COMPLETE)
-3.  **User:** Confirms the Share icon should be visible inside the map editor, board view, and especially on the Contacts and Reminders pages. (IN PROGRESS)
-4.  **Agent:** Implements the Share button in the map editor toolbar, board view, and contacts page header. (IN PROGRESS)
-5.  **User:** Reports a visual bug with a screenshot: the Activity Reciente dropdown is cut off by the header. (COMPLETE)
-6.  **Agent:** Fixes the activity dropdown by increasing z-index and changing position to fixed. (COMPLETE)
-7.  **Agent:** Summarizes the fix and asks for the next steps. (COMPLETE)
-8.  **User:** Provides a detailed bug report (P0 priority) for three critical UX issues: 1) The Activity panel is hidden behind the canvas. 2) The Notification Settings modal is cut off. 3) The Share button is not obvious enough and needs to be a prominent UI element in all relevant sections. (IN PROGRESS)
-9.  **Agent:** Acknowledges the critical bugs and begins rewriting the components using React Portals to fix them. (IN PROGRESS)
-10. **Agent's last action:** Was in the process of improving the styling of the Share button on the  page. (IN PROGRESS)
+1.  **User:** Requests an adjustment to the floating node toolbar's visual centering. (COMPLETE)
+2.  **Agent:** Implements the visual offset for the toolbar. (COMPLETE)
+3.  **User:** Proposes a major architectural change for a Team/Workspace model for Contacts. (COMPLETE)
+4.  **Agent:** Implements the full-stack changes for the workspace-aware Contacts feature. (COMPLETE)
+5.  **User:** Provides a detailed prompt to build a WhatsApp Automation Platform (TokeChat-style). (COMPLETE)
+6.  **Agent:** Asks for clarification before starting. (COMPLETE)
+7.  **User:** Confirms the plan and breaks it down into phases, starting with Phase 1 (QR connection). (COMPLETE)
+8.  **Agent:** Implements Phase 1, setting up the bridge service, backend, and frontend. (IN PROGRESS)
+9.  **User:** Reports a server connection error with a screenshot when trying to use the new feature. (IN PROGRESS)
+10. **Agent:** Diagnoses the issue as a missing workspace for the user's account and begins implementing a fix to create one automatically. (IN PROGRESS)
 
 **Project Health Check:**
--   **Broken:** The UI/UX for the newly implemented **Sharing** and **Activity Feed** features is critically broken. Modals and dropdowns are hidden or cut off, making them unusable.
--   **Mocked:** None.
+*   **Broken:** The primary workflow for the new WhatsApp feature is blocked for any user who does not have a pre-existing workspace.
+*   **Mocked:**  is a placeholder.
 
 **3rd Party Integrations**
--   **Resend:** Used for all transactional emails, including sharing invitations.
--   ****: Used for charts.
--   ****: Used for backend background jobs (reminders).
+*   **Baileys (via Node.js):** Newly integrated to power the  service for WhatsApp Web automation.
+*   **Resend:** Used for transactional emails.
 
 **Testing status**
--   **Testing agent used after significant changes:** YES. The backend logic for the sharing and activity systems was successfully tested and validated (, ).
+-   **Testing agent used after significant changes:** NO
 -   **Troubleshoot agent used after agent stuck in loop:** NO
--   **Test files created:** The testing agent created temporary test files which were removed after execution. No permanent test files exist.
+-   **Test files created:** None.
 -   **Known regressions:** None.
 
 **Credentials to test flow:**
--   Use the standard test user or create a new one to log in and access the dashboard. Testing the sharing flow requires at least two user accounts.
+*   Create a new user account for testing. This new user will not have a workspace, which is the exact scenario needed to test the current bug fix.
 
 **What agent forgot to execute**
--   The agent has not yet implemented the Share button for the **Reminders** section, which was part of the user's request to unify sharing across all modules.
--   The agent was in the middle of applying the prominent button styling to all Share buttons and had only completed it for  before starting . The fix needs to be verified across all components.</analysis>
+*   The agent created the  helper function in  but only applied it to the  endpoint. It was not applied to the other critical endpoints (, , ), leaving the bug only partially fixed.</analysis>

@@ -8,7 +8,7 @@ import requests
 import os
 import time
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://collab-mindora.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://wapp-automation-1.preview.emergentagent.com')
 
 # Test credentials
 TEST_USERNAME = "spencer3009"

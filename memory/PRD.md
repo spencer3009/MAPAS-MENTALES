@@ -2,6 +2,21 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-11: FIX BUG — WhatsApp Conexión para Usuarios Sin Workspace ✅ COMPLETADO
+- **Bug reportado**: Usuarios sin workspace preexistente recibían error 404 "No workspace found" al intentar usar la función de WhatsApp
+- **Causa raíz**: Los endpoints `/api/whatsapp/disconnect`, `/api/whatsapp/send`, `/api/whatsapp/messages` y `/api/whatsapp/conversations` no creaban workspace automáticamente
+- **Solución implementada**:
+  - Aplicada función `get_or_create_workspace()` a TODOS los endpoints de WhatsApp
+  - La función crea automáticamente un "Workspace Personal" si el usuario no tiene uno
+  - El workspace incluye: ID único, nombre personalizado, membresía como owner
+- **Endpoints corregidos**:
+  - `POST /api/whatsapp/disconnect` ✅
+  - `POST /api/whatsapp/send` ✅
+  - `GET /api/whatsapp/messages` ✅
+  - `GET /api/whatsapp/conversations` ✅
+- **Testing**: Verificado con curl - todos los endpoints responden correctamente para usuarios sin workspace
+- **Archivos modificados**: `/app/backend/server.py` (líneas 7005-7122)
+
 ### 2026-01-11: WhatsApp Automation Platform - Fase 1 ✅ COMPLETADA
 - **Arquitectura implementada**:
   - Servicio WhatsApp Bridge separado (Node.js + TypeScript + Baileys)

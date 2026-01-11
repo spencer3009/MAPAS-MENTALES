@@ -4,7 +4,8 @@ import {
   FileText, Loader2, ArrowLeft, Layers, Trash, LayoutGrid
 } from 'lucide-react';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL;
+// Use relative URLs for production compatibility
+const API_URL = '';
 
 const TrashView = ({ isOpen, onClose, onProjectRestored, token }) => {
   const [trashProjects, setTrashProjects] = useState([]);

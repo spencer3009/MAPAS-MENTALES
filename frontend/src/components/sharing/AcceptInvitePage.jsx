@@ -17,7 +17,8 @@ import {
   ArrowRight,
 } from 'lucide-react';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL;
+// Use relative URLs for production compatibility
+const API_URL = '';
 
 const RESOURCE_ICONS = {
   mindmap: Map,

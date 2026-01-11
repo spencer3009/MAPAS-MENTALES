@@ -9,7 +9,8 @@ import {
   ChevronRight,
   LogOut,
   LayoutGrid,
-  Users
+  Users,
+  MessageSquare
 } from 'lucide-react';
 
 const DockSidebar = ({ 
@@ -21,6 +22,7 @@ const DockSidebar = ({
   onOpenSettings,
   onOpenBoards,
   onOpenContacts,
+  onOpenWhatsApp,
   onLogout,
   isProjectsSidebarOpen = true,
   activeView = 'projects',
@@ -61,6 +63,14 @@ const DockSidebar = ({
       icon: Users,
       label: 'Contactos',
       onClick: onOpenContacts,
+    },
+    {
+      id: 'whatsapp',
+      icon: MessageSquare,
+      label: 'WhatsApp',
+      onClick: onOpenWhatsApp,
+      highlight: true,
+      badge: null, // Para mostrar mensajes no leídos en el futuro
     },
     {
       id: 'favorites',

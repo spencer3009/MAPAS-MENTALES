@@ -6910,17 +6910,54 @@ class SendWhatsAppMessageRequest(BaseModel):
     text: str
 
 
+async def get_or_create_workspace(username: str, user_full_name: str = None) -> str:
+    """Get user's workspace or create one if it doesn't exist"""
+    workspace = await db.workspaces.find_one({"owner_username": username})
+    
+    if workspace:
+        return workspace.get("id")
+    
+    # Create a new personal workspace for the user
+    now = datetime.now(timezone.utc).isoformat()
+    workspace_id = f"ws_{uuid.uuid4().hex[:12]}"
+    
+    new_workspace = {
+        "id": workspace_id,
+        "name": f"Espacio de {user_full_name or username}",
+        "description": "Workspace personal",
+        "type": "personal",
+        "owner_username": username,
+        "created_at": now,
+        "updated_at": now,
+        "settings": {
+            "default_sharing": "private",
+            "allow_public_links": True
+        }
+    }
+    
+    await db.workspaces.insert_one(new_workspace)
+    
+    # Add owner as member
+    member = {
+        "id": f"wm_{uuid.uuid4().hex[:12]}",
+        "workspace_id": workspace_id,
+        "username": username,
+        "role": "owner",
+        "joined_at": now
+    }
+    await db.workspace_members.insert_one(member)
+    
+    return workspace_id
+
+
 @api_router.post("/whatsapp/connect")
 async def whatsapp_connect(current_user: dict = Depends(get_current_user)):
     """Start WhatsApp connection for user's workspace"""
     username = current_user["username"]
+    full_name = current_user.get("full_name", current_user.get("nombre", username))
     
-    # Get user's default workspace
-    workspace = await db.workspaces.find_one({"owner_username": username})
-    if not workspace:
-        raise HTTPException(status_code=404, detail="No workspace found")
-    
-    workspace_id = workspace.get("id")
+    # Get or create workspace
+    workspace_id = await get_or_create_workspace(username, full_name)
     
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
@@ -6934,12 +6971,10 @@ async def whatsapp_connect(current_user: dict = Depends(get_current_user)):
 async def whatsapp_get_qr(current_user: dict = Depends(get_current_user)):
     """Get QR code for WhatsApp connection"""
     username = current_user["username"]
+    full_name = current_user.get("full_name", current_user.get("nombre", username))
     
-    workspace = await db.workspaces.find_one({"owner_username": username})
-    if not workspace:
-        raise HTTPException(status_code=404, detail="No workspace found")
-    
-    workspace_id = workspace.get("id")
+    # Get or create workspace
+    workspace_id = await get_or_create_workspace(username, full_name)
     
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
@@ -6953,12 +6988,10 @@ async def whatsapp_get_qr(current_user: dict = Depends(get_current_user)):
 async def whatsapp_get_status(current_user: dict = Depends(get_current_user)):
     """Get WhatsApp connection status"""
     username = current_user["username"]
+    full_name = current_user.get("full_name", current_user.get("nombre", username))
     
-    workspace = await db.workspaces.find_one({"owner_username": username})
-    if not workspace:
-        raise HTTPException(status_code=404, detail="No workspace found")
-    
-    workspace_id = workspace.get("id")
+    # Get or create workspace
+    workspace_id = await get_or_create_workspace(username, full_name)
     
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:

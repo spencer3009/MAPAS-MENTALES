@@ -2,6 +2,37 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-11: WhatsApp Automation Platform - Fase 1 ✅ COMPLETADA
+- **Arquitectura implementada**:
+  - Servicio WhatsApp Bridge separado (Node.js + TypeScript + Baileys)
+  - Backend FastAPI con APIs proxy
+  - Frontend con componentes WhatsAppSettings y WhatsAppInbox
+  
+- **Backend** (`/app/backend/server.py`):
+  - `POST /api/whatsapp/connect` - Iniciar conexión WhatsApp
+  - `GET /api/whatsapp/qr` - Obtener código QR
+  - `GET /api/whatsapp/status` - Estado de conexión
+  - `POST /api/whatsapp/disconnect` - Desconectar
+  - `POST /api/whatsapp/send` - Enviar mensaje
+  - `GET /api/whatsapp/messages` - Obtener mensajes
+  - `GET /api/whatsapp/conversations` - Lista de conversaciones
+  
+- **WhatsApp Bridge Service** (`/app/services/whatsapp-bridge/`):
+  - `WhatsAppManager.ts` - Gestión de instancias con Baileys
+  - `instance.ts` - Rutas REST para el bridge
+  - WebSocket para eventos en tiempo real
+  - Manejo de sesiones persistentes
+  
+- **Frontend**:
+  - `WhatsAppSettings.jsx` - Configuración y conexión QR
+  - `WhatsAppInbox.jsx` - Interfaz de chat estilo WhatsApp
+  - Integrado en DockSidebar y MobileNavigation
+
+- **Próximas fases**:
+  - Fase 2: Inbox completo con envío/recepción
+  - Fase 3: Bot & Flows integration
+  - Fase 4: Campaigns & Broadcast
+
 ### 2026-01-10: Implementación de Sistema Team/Workspace para Contactos ✅ COMPLETADO
 - **Arquitectura SaaS implementada**:
   - Modelo Workspace para contenedor de contactos compartidos

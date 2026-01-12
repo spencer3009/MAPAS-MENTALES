@@ -1186,6 +1186,12 @@ const Canvas = ({
           Zoom: {Math.round(zoom * 100)}%
         </span>
       </div>
+
+      {/* Botón de modo navegación (solo móvil/tablet) */}
+      <NavigationModeButton
+        isNavigationMode={isNavigationMode}
+        onToggle={setIsNavigationMode}
+      />
     </div>
   );
 };

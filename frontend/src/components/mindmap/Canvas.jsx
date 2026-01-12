@@ -177,17 +177,19 @@ const Canvas = ({
   });
 
   // Handlers táctiles combinados (para mover nodos con touch)
+  // En modo navegación, solo permite pan/zoom, no arrastrar nodos
   const touchHandlers = useMemo(() => ({
     onTouchStart: (e) => {
       // Si hay un nodo siendo arrastrado por mouse, continuar con ese
-      if (dragging) return;
+      // PERO en modo navegación, ignorar el arrastre de nodos
+      if (dragging && !isNavigationMode) return;
       
       // Llamar al handler base para pan/zoom/tap
       baseTouchHandlers.onTouchStart(e);
     },
     onTouchMove: (e) => {
-      // Si hay un nodo siendo arrastrado, mover el nodo
-      if (dragging && e.touches.length === 1) {
+      // Si hay un nodo siendo arrastrado Y NO estamos en modo navegación, mover el nodo
+      if (dragging && !isNavigationMode && e.touches.length === 1) {
         e.preventDefault();
         const touch = e.touches[0];
         const rect = containerRef.current?.getBoundingClientRect();
@@ -213,12 +215,12 @@ const Canvas = ({
         return;
       }
       
-      // Si no hay nodo arrastrándose, usar pan/zoom
+      // En modo navegación O si no hay nodo arrastrándose, usar pan/zoom
       baseTouchHandlers.onTouchMove(e);
     },
     onTouchEnd: (e) => {
-      // Si había un nodo arrastrándose, terminar
-      if (dragging) {
+      // Si había un nodo arrastrándose Y NO estamos en modo navegación, terminar
+      if (dragging && !isNavigationMode) {
         setShowControls(true);
         if (onSaveNodePositionToHistory) {
           onSaveNodePositionToHistory();
@@ -230,13 +232,13 @@ const Canvas = ({
       baseTouchHandlers.onTouchEnd(e);
     },
     onTouchCancel: (e) => {
-      if (dragging) {
+      if (dragging && !isNavigationMode) {
         setDragging(null);
         return;
       }
       baseTouchHandlers.onTouchCancel(e);
     }
-  }), [baseTouchHandlers, dragging, pan, zoom, showRulers, nodes, selectedNodeIds, onUpdateNodePosition, onMoveSelectedNodes, onSaveNodePositionToHistory]);
+  }), [baseTouchHandlers, dragging, isNavigationMode, pan, zoom, showRulers, nodes, selectedNodeIds, onUpdateNodePosition, onMoveSelectedNodes, onSaveNodePositionToHistory]);
 
   // Offset para las reglas (0 si están ocultas)
   const rulerOffset = showRulers ? RULER_SIZE : 0;

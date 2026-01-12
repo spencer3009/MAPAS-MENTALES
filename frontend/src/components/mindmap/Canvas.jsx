@@ -887,6 +887,7 @@ const Canvas = ({
             onCommentClick={handleNodeCommentClick}
             forceEdit={newNodeId === node.id}
             onEditComplete={handleEditComplete}
+            isNavigationMode={isNavigationMode}
           />
         ))}
       </div>

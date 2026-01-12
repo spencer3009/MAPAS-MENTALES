@@ -620,7 +620,11 @@ const Canvas = ({
   }, [selectedNodeId, handleDeleteWithAutoAlign]);
 
   // Manejar inicio de arrastre de nodo
+  // En modo navegación, no permitir arrastrar nodos
   const handleNodeDragStart = useCallback((e, node) => {
+    // Si está en modo navegación, no iniciar arrastre
+    if (isNavigationMode) return;
+    
     if (!containerRef.current) return;
     
     setShowControls(false);
@@ -636,7 +640,7 @@ const Canvas = ({
       offsetX: (e.clientX - rect.left - adjustedPanX) / zoom - node.x,
       offsetY: (e.clientY - rect.top - adjustedPanY) / zoom - node.y
     });
-  }, [pan, zoom]);
+  }, [pan, zoom, isNavigationMode]);
 
   // Manejar movimiento del mouse
   const handleMouseMove = useCallback((e) => {

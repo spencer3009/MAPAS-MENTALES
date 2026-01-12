@@ -24,7 +24,9 @@ const isTouchDevice = () => {
   const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i;
   const isMobileUA = mobileRegex.test(navigator.userAgent);
   
-  return hasTouchScreen && (isSmallScreen || isMobileUA);
+  // Mostrar en dispositivos táctiles O en pantallas pequeñas (para tablets que no reportan touch correctamente)
+  // También mostrar si el user agent indica móvil/tablet
+  return hasTouchScreen || isSmallScreen || isMobileUA;
 };
 
 const NavigationModeButton = ({ 

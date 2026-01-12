@@ -549,6 +549,10 @@ const NodeItem = memo(({
         // Optimización para movimiento suave
         willChange: 'transform, left, top',
         transform: 'translateZ(0)', // Forzar aceleración por GPU
+        // MODO NAVEGACIÓN: Deshabilitar completamente la captura de eventos táctiles
+        // para que el canvas pueda hacer pan desde cualquier punto
+        pointerEvents: isNavigationMode ? 'none' : 'auto',
+        touchAction: isNavigationMode ? 'none' : 'auto',
       }}
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}

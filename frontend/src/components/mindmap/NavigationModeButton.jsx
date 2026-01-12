@@ -88,21 +88,21 @@ const NavigationModeButton = ({
 
   return (
     <>
-      {/* Botón flotante */}
+      {/* Botón flotante - posicionado junto al indicador de zoom */}
       <button
         onClick={handleToggle}
         data-testid="navigation-mode-button"
         className={`
-          fixed z-[100] bottom-20 right-4
-          w-14 h-14 rounded-full
+          absolute z-[100] bottom-4 right-28
+          w-12 h-12 rounded-full
           shadow-xl border-2
           flex items-center justify-center
           transition-all duration-300 ease-out
           active:scale-95
           touch-manipulation
           ${isNavigationMode 
-            ? 'bg-blue-500 border-blue-400 text-white shadow-blue-500/30' 
-            : 'bg-white border-gray-200 text-gray-700 shadow-gray-400/20'
+            ? 'bg-blue-500 border-blue-400 text-white shadow-blue-500/40' 
+            : 'bg-white/90 backdrop-blur-sm border-gray-200 text-gray-700 shadow-gray-400/30'
           }
         `}
         style={{

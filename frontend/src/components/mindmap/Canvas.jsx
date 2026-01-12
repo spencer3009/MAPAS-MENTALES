@@ -96,6 +96,10 @@ const Canvas = ({
   const [selectionBox, setSelectionBox] = useState(null);
   const [isSelectingArea, setIsSelectingArea] = useState(false);
 
+  // Estado para modo navegación (móvil/tablet)
+  // Cuando está activo, los nodos no se pueden mover, solo hacer pan/zoom
+  const [isNavigationMode, setIsNavigationMode] = useState(false);
+
   // Actualizar los límites del canvas cuando cambie el tamaño o las reglas
   useEffect(() => {
     const updateCanvasBounds = () => {

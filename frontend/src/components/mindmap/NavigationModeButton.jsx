@@ -129,13 +129,11 @@ const NavigationModeButton = ({
       {showFeedback && (
         <div 
           className={`
-            fixed z-[101] bottom-36 right-4
+            absolute z-[101] bottom-20 right-4
             px-4 py-2 rounded-xl
             text-sm font-medium
             shadow-lg
-            animate-in fade-in slide-in-from-bottom-2
-            duration-200
-            max-w-[200px] text-center
+            max-w-[220px] text-center
             ${isNavigationMode 
               ? 'bg-blue-500 text-white' 
               : 'bg-green-500 text-white'

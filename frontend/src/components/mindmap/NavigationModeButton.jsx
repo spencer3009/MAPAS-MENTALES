@@ -67,8 +67,8 @@ const NavigationModeButton = ({
     // Mostrar feedback
     setFeedbackMessage(
       newMode 
-        ? 'Modo navegación — nodos bloqueados' 
-        : 'Modo edición — puedes mover nodos'
+        ? 'Modo navegación — mueve el mapa sin alterar nodos' 
+        : 'Modo edición — puedes mover los nodos'
     );
     setShowFeedback(true);
     
@@ -76,7 +76,7 @@ const NavigationModeButton = ({
     if (showToast) {
       showToast(
         newMode 
-          ? 'Modo navegación activado — los nodos están bloqueados' 
+          ? 'Modo navegación activado — puedes mover el mapa sin alterar los nodos' 
           : 'Modo edición activado — puedes mover los nodos',
         newMode ? 'info' : 'success'
       );

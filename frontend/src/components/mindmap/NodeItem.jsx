@@ -100,7 +100,8 @@ const NodeItem = memo(({
   onContextMenu,
   onCommentClick,
   forceEdit = false,
-  onEditComplete
+  onEditComplete,
+  isNavigationMode = false  // Modo navegación: deshabilita interacción táctil
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [localText, setLocalText] = useState(node.text);

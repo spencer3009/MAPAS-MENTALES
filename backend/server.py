@@ -3049,6 +3049,12 @@ class UserUpdate(BaseModel):
     is_pro: Optional[bool] = None
     disabled: Optional[bool] = None
 
+# Modelo para cambio de plan administrativo
+class AdminPlanChange(BaseModel):
+    plan: str  # free, pro, team, business, admin
+    expires_at: Optional[str] = None  # ISO date string, null = permanente
+    unlimited_access: bool = False  # Salta todos los límites del plan
+
 class LandingContentSection(BaseModel):
     title: Optional[str] = None
     subtitle: Optional[str] = None

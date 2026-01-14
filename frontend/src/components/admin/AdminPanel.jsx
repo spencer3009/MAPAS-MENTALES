@@ -281,12 +281,67 @@ const UsersSection = ({ users, loading, onEditUser, token }) => {
   const [actionLoading, setActionLoading] = useState(null);
   const [confirmModal, setConfirmModal] = useState(null);
   const [openMenuUser, setOpenMenuUser] = useState(null);
+  
+  // Estado para modal de cambio de plan
+  const [planModal, setPlanModal] = useState(null); // usuario seleccionado
+  const [planForm, setPlanForm] = useState({
+    plan: 'free',
+    expiresAt: '',
+    unlimitedAccess: false
+  });
+  const [savingPlan, setSavingPlan] = useState(false);
 
   const filteredUsers = users.filter(user => 
     user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.full_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Manejar apertura del modal de cambio de plan
+  const handleOpenPlanModal = (user) => {
+    setPlanModal(user);
+    setPlanForm({
+      plan: user.plan || 'free',
+      expiresAt: user.plan_expires_at ? user.plan_expires_at.split('T')[0] : '',
+      unlimitedAccess: user.plan_override || false
+    });
+    setOpenMenuUser(null);
+  };
+
+  // Manejar cambio de plan
+  const handleChangePlan = async () => {
+    if (!planModal) return;
+    
+    setSavingPlan(true);
+    try {
+      const response = await fetch(`${API_URL}/api/admin/users/${planModal.username}/change-plan`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          plan: planForm.plan,
+          expires_at: planForm.expiresAt ? new Date(planForm.expiresAt).toISOString() : null,
+          unlimited_access: planForm.unlimitedAccess
+        })
+      });
+      
+      if (response.ok) {
+        // Recargar usuarios
+        if (onEditUser) onEditUser();
+        setPlanModal(null);
+      } else {
+        const error = await response.json();
+        alert(error.detail || 'Error al cambiar plan');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error de conexión');
+    } finally {
+      setSavingPlan(false);
+    }
+  };
 
   const handleEdit = (user) => {
     setEditingUser(user.username);

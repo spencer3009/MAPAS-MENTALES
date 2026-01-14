@@ -3219,6 +3219,19 @@ async def get_all_users(current_user: dict = Depends(require_admin)):
         user_role = user.get("role", "user")
         user_plan = "admin" if user_role == "admin" else user.get("plan", "free")
         
+        # Convertir fechas a string si son datetime
+        created_at = user.get("created_at")
+        if hasattr(created_at, 'isoformat'):
+            created_at = created_at.isoformat()
+        
+        plan_expires_at = user.get("plan_expires_at")
+        if hasattr(plan_expires_at, 'isoformat'):
+            plan_expires_at = plan_expires_at.isoformat()
+            
+        plan_assigned_at = user.get("plan_assigned_at")
+        if hasattr(plan_assigned_at, 'isoformat'):
+            plan_assigned_at = plan_assigned_at.isoformat()
+        
         result.append({
             "username": user.get("username", ""),
             "email": user.get("email", ""),
@@ -3226,15 +3239,15 @@ async def get_all_users(current_user: dict = Depends(require_admin)):
             "role": user_role,
             "plan": user_plan,
             "auth_provider": user.get("auth_provider", "local"),
-            "created_at": user.get("created_at"),
+            "created_at": created_at,
             "is_pro": user_plan in ["pro", "team", "business", "admin"],
             "disabled": user.get("disabled", False),
             # Nuevos campos de control de planes
-            "plan_expires_at": user.get("plan_expires_at"),
+            "plan_expires_at": plan_expires_at,
             "plan_override": user.get("plan_override", False),
             "plan_source": user.get("plan_source", "system"),
             "plan_assigned_by": user.get("plan_assigned_by"),
-            "plan_assigned_at": user.get("plan_assigned_at")
+            "plan_assigned_at": plan_assigned_at
         })
     
     return result

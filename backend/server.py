@@ -3351,6 +3351,108 @@ async def unblock_user(username: str, current_user: dict = Depends(require_admin
     
     return {"message": f"Usuario {username} desbloqueado correctamente"}
 
+@api_router.post("/admin/users/{username}/change-plan")
+async def admin_change_plan(
+    username: str,
+    plan_data: AdminPlanChange,
+    current_user: dict = Depends(require_admin)
+):
+    """Cambiar plan de un usuario manualmente (sin pasarela de pago)"""
+    # Verificar que el usuario existe
+    existing_user = await db.users.find_one({"username": username})
+    if not existing_user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    # Validar plan
+    valid_plans = ["free", "pro", "team", "business", "admin"]
+    if plan_data.plan not in valid_plans:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Plan inválido. Opciones: {', '.join(valid_plans)}"
+        )
+    
+    # Guardar plan anterior para auditoría
+    previous_plan = existing_user.get("plan", "free")
+    previous_expires = existing_user.get("plan_expires_at")
+    previous_override = existing_user.get("plan_override", False)
+    
+    now = datetime.now(timezone.utc).isoformat()
+    
+    # Preparar actualización del usuario
+    update_data = {
+        "plan": plan_data.plan,
+        "plan_source": "manual_admin",
+        "plan_assigned_by": current_user["username"],
+        "plan_assigned_at": now,
+        "plan_override": plan_data.unlimited_access,
+        "is_pro": plan_data.plan in ["pro", "team", "business", "admin"],
+        "updated_at": now
+    }
+    
+    # Manejar fecha de expiración
+    if plan_data.expires_at:
+        update_data["plan_expires_at"] = plan_data.expires_at
+    else:
+        # Si no hay fecha, el plan es permanente - eliminar expiración
+        update_data["plan_expires_at"] = None
+    
+    # Actualizar usuario
+    await db.users.update_one({"username": username}, {"$set": update_data})
+    
+    # Crear registro de auditoría
+    audit_record = {
+        "id": f"audit_{uuid.uuid4().hex[:12]}",
+        "type": "plan_change",
+        "target_username": username,
+        "target_email": existing_user.get("email"),
+        "admin_username": current_user["username"],
+        "previous_plan": previous_plan,
+        "new_plan": plan_data.plan,
+        "previous_expires_at": previous_expires,
+        "new_expires_at": plan_data.expires_at,
+        "previous_override": previous_override,
+        "new_override": plan_data.unlimited_access,
+        "plan_source": "manual_admin",
+        "timestamp": now,
+        "ip_address": None  # Podría agregarse si es necesario
+    }
+    await db.admin_audit_log.insert_one(audit_record)
+    
+    logger.info(f"Admin {current_user['username']} cambió plan de {username}: {previous_plan} → {plan_data.plan}")
+    
+    return {
+        "message": f"Plan de {username} actualizado a {plan_data.plan}",
+        "previous_plan": previous_plan,
+        "new_plan": plan_data.plan,
+        "expires_at": plan_data.expires_at,
+        "unlimited_access": plan_data.unlimited_access
+    }
+
+@api_router.get("/admin/audit-log")
+async def get_audit_log(
+    type: Optional[str] = None,
+    username: Optional[str] = None,
+    limit: int = 100,
+    current_user: dict = Depends(require_admin)
+):
+    """Obtener historial de auditoría de cambios administrativos"""
+    query = {}
+    
+    if type:
+        query["type"] = type
+    if username:
+        query["$or"] = [
+            {"target_username": username},
+            {"admin_username": username}
+        ]
+    
+    audit_logs = await db.admin_audit_log.find(
+        query,
+        {"_id": 0}
+    ).sort("timestamp", -1).limit(limit).to_list(limit)
+    
+    return audit_logs
+
 @api_router.get("/admin/landing-content")
 async def get_landing_content(current_user: dict = Depends(require_admin)):
     """Obtener todo el contenido editable de la landing page"""

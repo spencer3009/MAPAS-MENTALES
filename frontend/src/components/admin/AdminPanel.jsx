@@ -598,20 +598,53 @@ const UsersSection = ({ users, loading, onEditUser, token }) => {
                         <option value="free">Gratis</option>
                         <option value="pro">Pro</option>
                         <option value="team">Team</option>
+                        <option value="business">Business</option>
                       </select>
                     ) : (
-                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
-                        user.plan === 'admin' || user.role === 'admin'
-                          ? 'bg-gradient-to-r from-red-100 to-pink-100 text-red-700'
-                          : user.plan === 'team' 
-                          ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700'
-                          : user.plan === 'pro'
-                          ? 'bg-gradient-to-r from-amber-100 to-orange-100 text-amber-700' 
-                          : 'bg-gray-100 text-gray-700'
-                      }`}>
-                        {(user.plan === 'pro' || user.plan === 'team' || user.plan === 'admin' || user.role === 'admin') && <Crown className="w-3 h-3" />}
-                        {user.plan === 'admin' || user.role === 'admin' ? 'Admin ∞' : user.plan === 'team' ? 'Team' : user.plan === 'pro' ? 'Pro' : 'Gratis'}
-                      </span>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {/* Badge del plan */}
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
+                          user.plan === 'admin' || user.role === 'admin'
+                            ? 'bg-gradient-to-r from-red-100 to-pink-100 text-red-700'
+                            : user.plan === 'business'
+                            ? 'bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-700'
+                            : user.plan === 'team' 
+                            ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700'
+                            : user.plan === 'pro'
+                            ? 'bg-gradient-to-r from-amber-100 to-orange-100 text-amber-700' 
+                            : 'bg-gray-100 text-gray-700'
+                        }`}>
+                          {(user.plan === 'pro' || user.plan === 'team' || user.plan === 'business' || user.plan === 'admin' || user.role === 'admin') && <Crown className="w-3 h-3" />}
+                          {user.plan === 'admin' || user.role === 'admin' ? 'Admin' : 
+                           user.plan === 'business' ? 'Business' :
+                           user.plan === 'team' ? 'Team' : 
+                           user.plan === 'pro' ? 'Pro' : 'Free'}
+                        </span>
+                        
+                        {/* Badge Manual (asignado por admin) */}
+                        {user.plan_source === 'manual_admin' && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-purple-100 text-purple-700" title={`Asignado por ${user.plan_assigned_by || 'admin'}`}>
+                            <Shield className="w-2.5 h-2.5" />
+                            Manual
+                          </span>
+                        )}
+                        
+                        {/* Badge Fecha de expiración */}
+                        {user.plan_expires_at && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-orange-100 text-orange-700" title="Fecha de expiración">
+                            <CalendarClock className="w-2.5 h-2.5" />
+                            {new Date(user.plan_expires_at).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                          </span>
+                        )}
+                        
+                        {/* Badge Ilimitado (override) */}
+                        {user.plan_override && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-yellow-100 text-yellow-700" title="Acceso ilimitado">
+                            <Infinity className="w-2.5 h-2.5" />
+                            Ilimitado
+                          </span>
+                        )}
+                      </div>
                     )}
                   </td>
                   <td className="px-6 py-4">

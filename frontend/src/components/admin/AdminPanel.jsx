@@ -642,11 +642,9 @@ const AdminPanel = ({ onBack }) => {
             <DashboardSection metrics={metrics} loading={loading} />
           )}
           {activeTab === 'users' && (
-            <UsersSection 
-              users={users} 
-              loading={loading} 
-              onEditUser={fetchData}
+            <UsersManagement 
               token={token}
+              onUserChange={fetchData}
             />
           )}
           {activeTab === 'landing' && (

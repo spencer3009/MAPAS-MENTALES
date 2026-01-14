@@ -2,6 +2,18 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-14: FEATURE — Dashboard de Analytics ✅ COMPLETADO
+- **Endpoint**: `GET /api/admin/analytics`
+- **Métricas Overview**: total_users, total_projects, total_contacts, total_boards
+- **Métricas de Crecimiento**: users_today, users_this_week, users_this_month, growth_rate_weekly, growth_rate_monthly
+- **Gráficos**:
+  - Crecimiento de usuarios (últimos 30 días) - Area + Bar Chart
+  - Distribución de planes - Pie Chart
+  - Actividad diaria (14 días) - Bar Chart
+  - Retención por cohortes (4 semanas) - Progress Bars
+- **Frontend**: `/app/frontend/src/components/admin/AnalyticsDashboard.jsx` usando recharts
+- **Testing**: 97% backend (30/31), 100% frontend
+
 ### 2026-01-14: FEATURE — Módulo Avanzado de Gestión de Usuarios ✅ COMPLETADO
 - **Funcionalidades implementadas**:
   1. **Ordenamiento de registros**: Por defecto ordenados por fecha de registro (descendente)

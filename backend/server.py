@@ -3040,6 +3040,12 @@ class UserListItem(BaseModel):
     created_at: Optional[str] = None
     is_pro: bool = False
     disabled: bool = False
+    # Nuevos campos para control de planes
+    plan_expires_at: Optional[str] = None
+    plan_override: bool = False
+    plan_source: str = "system"
+    plan_assigned_by: Optional[str] = None
+    plan_assigned_at: Optional[str] = None
 
 class UserUpdate(BaseModel):
     email: Optional[str] = None

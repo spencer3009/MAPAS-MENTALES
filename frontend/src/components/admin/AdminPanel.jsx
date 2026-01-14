@@ -264,8 +264,6 @@ const DashboardSection = ({ metrics, loading }) => {
 };
 
 // Sección de Editor de Landing Page mejorada
-
-// Sección de Editor de Landing Page mejorada
 const LandingEditorSection = ({ content, loading, token, onUpdate }) => {
   const [editContent, setEditContent] = useState(content || {});
   const [saving, setSaving] = useState(false);

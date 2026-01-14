@@ -30,7 +30,11 @@ import {
   UserX,
   CheckCircle,
   AlertTriangle,
-  MoreVertical
+  MoreVertical,
+  CreditCard,
+  Star,
+  Infinity,
+  CalendarClock
 } from 'lucide-react';
 
 // Use relative URLs for production compatibility

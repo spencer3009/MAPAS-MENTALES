@@ -514,21 +514,18 @@ const AdminPanel = ({ onBack }) => {
   const { token, user } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [metrics, setMetrics] = useState({});
-  const [users, setUsers] = useState([]);
   const [landingContent, setLandingContent] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [metricsRes, usersRes, contentRes] = await Promise.all([
+      const [metricsRes, contentRes] = await Promise.all([
         fetch(`${API_URL}/api/admin/metrics`, { headers: { 'Authorization': `Bearer ${token}` } }),
-        fetch(`${API_URL}/api/admin/users`, { headers: { 'Authorization': `Bearer ${token}` } }),
         fetch(`${API_URL}/api/admin/landing-content`, { headers: { 'Authorization': `Bearer ${token}` } })
       ]);
 
       if (metricsRes.ok) setMetrics(await metricsRes.json());
-      if (usersRes.ok) setUsers(await usersRes.json());
       if (contentRes.ok) setLandingContent(await contentRes.json());
     } catch (error) {
       console.error('Error fetching admin data:', error);

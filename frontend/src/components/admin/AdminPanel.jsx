@@ -24,18 +24,9 @@ import {
   Sparkles,
   Eye,
   Mail,
-  Clock,
-  Trash2,
-  Ban,
-  UserX,
-  CheckCircle,
-  AlertTriangle,
-  MoreVertical,
-  CreditCard,
-  Star,
-  Infinity,
-  CalendarClock
+  Clock
 } from 'lucide-react';
+import UsersManagement from './UsersManagement';
 
 // Use relative URLs for production compatibility
 const API_URL = '';

@@ -641,6 +641,9 @@ const AdminPanel = ({ onBack }) => {
           {activeTab === 'dashboard' && (
             <DashboardSection metrics={metrics} loading={loading} />
           )}
+          {activeTab === 'analytics' && (
+            <AnalyticsDashboard token={token} />
+          )}
           {activeTab === 'users' && (
             <UsersManagement 
               token={token}

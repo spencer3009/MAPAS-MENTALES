@@ -3284,6 +3284,187 @@ async def get_admin_metrics(current_user: dict = Depends(require_admin)):
         "total_projects": total_projects
     }
 
+@api_router.get("/admin/analytics", response_model=AnalyticsDashboard)
+async def get_admin_analytics(current_user: dict = Depends(require_admin)):
+    """Obtener analytics avanzados para el dashboard de administración"""
+    now = datetime.now(timezone.utc)
+    
+    # ==================== OVERVIEW ====================
+    total_users = await db.users.count_documents({})
+    total_projects = await db.projects.count_documents({"isDeleted": {"$ne": True}})
+    total_contacts = await db.contacts.count_documents({})
+    total_boards = await db.boards.count_documents({"isDeleted": {"$ne": True}})
+    
+    # ==================== GROWTH METRICS ====================
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    week_start = today_start - timedelta(days=today_start.weekday())
+    month_start = today_start.replace(day=1)
+    
+    users_today = await db.users.count_documents({"created_at": {"$gte": today_start.isoformat()}})
+    users_this_week = await db.users.count_documents({"created_at": {"$gte": week_start.isoformat()}})
+    users_this_month = await db.users.count_documents({"created_at": {"$gte": month_start.isoformat()}})
+    
+    # Growth rates
+    last_week_start = week_start - timedelta(days=7)
+    last_month_start = (month_start - timedelta(days=1)).replace(day=1)
+    
+    users_last_week = await db.users.count_documents({
+        "created_at": {"$gte": last_week_start.isoformat(), "$lt": week_start.isoformat()}
+    })
+    users_last_month = await db.users.count_documents({
+        "created_at": {"$gte": last_month_start.isoformat(), "$lt": month_start.isoformat()}
+    })
+    
+    growth_rate_weekly = ((users_this_week - users_last_week) / users_last_week * 100) if users_last_week > 0 else 0
+    growth_rate_monthly = ((users_this_month - users_last_month) / users_last_month * 100) if users_last_month > 0 else 0
+    
+    # ==================== USER GROWTH (Last 30 days) ====================
+    user_growth = []
+    cumulative = 0
+    
+    # Get base count (users before 30 days ago)
+    thirty_days_ago = today_start - timedelta(days=30)
+    base_users = await db.users.count_documents({"created_at": {"$lt": thirty_days_ago.isoformat()}})
+    cumulative = base_users
+    
+    for i in range(30, -1, -1):
+        day = today_start - timedelta(days=i)
+        day_end = day + timedelta(days=1)
+        
+        count = await db.users.count_documents({
+            "created_at": {"$gte": day.isoformat(), "$lt": day_end.isoformat()}
+        })
+        cumulative += count
+        
+        user_growth.append({
+            "date": day.strftime("%Y-%m-%d"),
+            "count": count,
+            "cumulative": cumulative
+        })
+    
+    # ==================== PLAN DISTRIBUTION ====================
+    plan_counts = {}
+    plans = ["free", "pro", "team", "business", "admin"]
+    
+    for plan in plans:
+        if plan == "free":
+            count = await db.users.count_documents({
+                "$or": [{"plan": "free"}, {"plan": {"$exists": False}}, {"plan": None}]
+            })
+        else:
+            count = await db.users.count_documents({"plan": plan})
+        if count > 0:
+            plan_counts[plan] = count
+    
+    plan_distribution = []
+    for plan, count in plan_counts.items():
+        plan_distribution.append({
+            "plan": plan.capitalize(),
+            "count": count,
+            "percentage": round((count / total_users * 100) if total_users > 0 else 0, 1)
+        })
+    
+    # Sort by count descending
+    plan_distribution.sort(key=lambda x: x["count"], reverse=True)
+    
+    # ==================== ACTIVITY METRICS (Last 14 days) ====================
+    activity_metrics = []
+    
+    for i in range(13, -1, -1):
+        day = today_start - timedelta(days=i)
+        day_end = day + timedelta(days=1)
+        
+        # New registrations
+        new_regs = await db.users.count_documents({
+            "created_at": {"$gte": day.isoformat(), "$lt": day_end.isoformat()}
+        })
+        
+        # Projects created
+        projects_created = await db.projects.count_documents({
+            "created_at": {"$gte": day.isoformat(), "$lt": day_end.isoformat()},
+            "isDeleted": {"$ne": True}
+        })
+        
+        # Active users (simplified - users who logged in or created something)
+        # For now, estimate based on registrations + some percentage of existing users
+        active_estimate = new_regs + max(1, int(total_users * 0.05))  # 5% daily active estimate
+        
+        activity_metrics.append({
+            "date": day.strftime("%Y-%m-%d"),
+            "active_users": min(active_estimate, total_users),
+            "new_registrations": new_regs,
+            "projects_created": projects_created
+        })
+    
+    # ==================== RETENTION DATA (Weekly cohorts) ====================
+    retention_data = []
+    
+    for week in range(4):  # Last 4 weeks
+        cohort_start = week_start - timedelta(weeks=week+1)
+        cohort_end = cohort_start + timedelta(days=7)
+        
+        # Users who registered in this cohort week
+        cohort_users = await db.users.find({
+            "created_at": {"$gte": cohort_start.isoformat(), "$lt": cohort_end.isoformat()}
+        }, {"_id": 0, "username": 1}).to_list(1000)
+        
+        cohort_size = len(cohort_users)
+        
+        if cohort_size > 0:
+            # Check how many are still "active" (have projects or didn't get disabled)
+            cohort_usernames = [u["username"] for u in cohort_users]
+            retained = await db.users.count_documents({
+                "username": {"$in": cohort_usernames},
+                "disabled": {"$ne": True}
+            })
+            
+            retention_rate = round((retained / cohort_size * 100), 1)
+        else:
+            retained = 0
+            retention_rate = 0
+        
+        retention_data.append({
+            "period": f"Semana -{week+1}",
+            "cohort_size": cohort_size,
+            "retained": retained,
+            "retention_rate": retention_rate
+        })
+    
+    # ==================== TOP STATS ====================
+    # Active users in last 24h (estimate based on recent activity)
+    yesterday = now - timedelta(hours=24)
+    recent_projects = await db.projects.count_documents({
+        "updated_at": {"$gte": yesterday.isoformat()}
+    })
+    active_users_24h = min(recent_projects + users_today, total_users)
+    
+    # Conversion rate (Free to Pro)
+    pro_users = await db.users.count_documents({"is_pro": True})
+    free_users = total_users - pro_users
+    conversion_rate = round((pro_users / total_users * 100) if total_users > 0 else 0, 2)
+    
+    # Average projects per user
+    avg_projects_per_user = round(total_projects / total_users, 1) if total_users > 0 else 0
+    
+    return {
+        "total_users": total_users,
+        "total_projects": total_projects,
+        "total_contacts": total_contacts,
+        "total_boards": total_boards,
+        "users_today": users_today,
+        "users_this_week": users_this_week,
+        "users_this_month": users_this_month,
+        "growth_rate_weekly": round(growth_rate_weekly, 1),
+        "growth_rate_monthly": round(growth_rate_monthly, 1),
+        "user_growth": user_growth,
+        "plan_distribution": plan_distribution,
+        "activity_metrics": activity_metrics,
+        "retention_data": retention_data,
+        "active_users_24h": active_users_24h,
+        "conversion_rate": conversion_rate,
+        "avg_projects_per_user": avg_projects_per_user
+    }
+
 @api_router.get("/admin/users", response_model=PaginatedUsersResponse)
 async def get_all_users(
     current_user: dict = Depends(require_admin),

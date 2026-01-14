@@ -3230,14 +3230,99 @@ async def get_admin_metrics(current_user: dict = Depends(require_admin)):
         "total_projects": total_projects
     }
 
-@api_router.get("/admin/users", response_model=List[UserListItem])
-async def get_all_users(current_user: dict = Depends(require_admin)):
-    """Obtener lista de todos los usuarios"""
-    users = await db.users.find({}, {"_id": 0}).to_list(1000)
+@api_router.get("/admin/users", response_model=PaginatedUsersResponse)
+async def get_all_users(
+    current_user: dict = Depends(require_admin),
+    page: int = 1,
+    per_page: int = 20,
+    sort_by: str = "created_at",
+    sort_order: str = "desc",
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+    filter_type: Optional[str] = None,  # day, week, month
+    search: Optional[str] = None,
+    plan_filter: Optional[str] = None,
+    status_filter: Optional[str] = None  # active, blocked
+):
+    """Obtener lista paginada de usuarios con filtros avanzados"""
+    
+    # Construir query de filtros
+    query = {}
+    
+    # Filtro de búsqueda (username, email, full_name)
+    if search:
+        query["$or"] = [
+            {"username": {"$regex": search, "$options": "i"}},
+            {"email": {"$regex": search, "$options": "i"}},
+            {"full_name": {"$regex": search, "$options": "i"}}
+        ]
+    
+    # Filtro por plan
+    if plan_filter and plan_filter != "all":
+        query["plan"] = plan_filter
+    
+    # Filtro por estado
+    if status_filter == "active":
+        query["disabled"] = {"$ne": True}
+    elif status_filter == "blocked":
+        query["disabled"] = True
+    
+    # Filtros de fecha
+    now = datetime.now(timezone.utc)
+    date_query = {}
+    
+    if filter_type == "day":
+        # Hoy
+        start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        date_query["$gte"] = start_of_day.isoformat()
+        date_query["$lt"] = (start_of_day + timedelta(days=1)).isoformat()
+    elif filter_type == "week":
+        # Esta semana (lunes a domingo)
+        start_of_week = now - timedelta(days=now.weekday())
+        start_of_week = start_of_week.replace(hour=0, minute=0, second=0, microsecond=0)
+        date_query["$gte"] = start_of_week.isoformat()
+        date_query["$lt"] = (start_of_week + timedelta(days=7)).isoformat()
+    elif filter_type == "month":
+        # Este mes
+        start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        if now.month == 12:
+            end_of_month = start_of_month.replace(year=now.year + 1, month=1)
+        else:
+            end_of_month = start_of_month.replace(month=now.month + 1)
+        date_query["$gte"] = start_of_month.isoformat()
+        date_query["$lt"] = end_of_month.isoformat()
+    elif date_from or date_to:
+        # Rango personalizado
+        if date_from:
+            date_query["$gte"] = date_from
+        if date_to:
+            # Incluir todo el día final
+            date_query["$lte"] = date_to + "T23:59:59.999Z"
+    
+    if date_query:
+        query["created_at"] = date_query
+    
+    # Contar total antes de paginar
+    total = await db.users.count_documents(query)
+    
+    # Calcular paginación
+    total_pages = (total + per_page - 1) // per_page if total > 0 else 1
+    page = max(1, min(page, total_pages))
+    skip = (page - 1) * per_page
+    
+    # Ordenamiento
+    sort_direction = -1 if sort_order == "desc" else 1
+    valid_sort_fields = ["created_at", "username", "email", "plan"]
+    if sort_by not in valid_sort_fields:
+        sort_by = "created_at"
+    
+    # Obtener usuarios paginados
+    cursor = db.users.find(query, {"_id": 0, "hashed_password": 0})
+    cursor = cursor.sort(sort_by, sort_direction).skip(skip).limit(per_page)
+    users = await cursor.to_list(per_page)
     
     result = []
     for user in users:
-        # Admin siempre tiene plan máximo
         user_role = user.get("role", "user")
         user_plan = "admin" if user_role == "admin" else user.get("plan", "free")
         
@@ -3264,7 +3349,6 @@ async def get_all_users(current_user: dict = Depends(require_admin)):
             "created_at": created_at,
             "is_pro": user_plan in ["pro", "team", "business", "admin"],
             "disabled": user.get("disabled", False),
-            # Nuevos campos de control de planes
             "plan_expires_at": plan_expires_at,
             "plan_override": user.get("plan_override", False),
             "plan_source": user.get("plan_source", "system"),
@@ -3272,7 +3356,15 @@ async def get_all_users(current_user: dict = Depends(require_admin)):
             "plan_assigned_at": plan_assigned_at
         })
     
-    return result
+    return {
+        "users": result,
+        "total": total,
+        "page": page,
+        "per_page": per_page,
+        "total_pages": total_pages,
+        "has_next": page < total_pages,
+        "has_prev": page > 1
+    }
 
 @api_router.get("/admin/users/{username}")
 async def get_user_details(username: str, current_user: dict = Depends(require_admin)):

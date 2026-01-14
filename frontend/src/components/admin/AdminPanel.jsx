@@ -541,6 +541,7 @@ const AdminPanel = ({ onBack }) => {
 
   const tabs = [
     { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard },
+    { id: 'analytics', name: 'Analytics', icon: PieChart },
     { id: 'users', name: 'Usuarios', icon: Users },
     { id: 'landing', name: 'Landing Page', icon: Globe },
   ];

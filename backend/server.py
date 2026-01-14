@@ -1897,6 +1897,85 @@ async def start_scheduler():
     # Scheduler de emails de recordatorios de calendario
     asyncio.create_task(check_and_send_email_reminders())
     logger.info("✅ Scheduler de emails de recordatorios de calendario iniciado")
+    
+    # Scheduler de expiración de planes
+    asyncio.create_task(check_plan_expirations())
+    logger.info("✅ Scheduler de expiración de planes iniciado")
+
+
+# Flag para scheduler de expiración de planes
+plan_expiration_scheduler_running = False
+
+async def check_plan_expirations():
+    """Verificar y procesar planes expirados cada hora"""
+    global plan_expiration_scheduler_running
+    plan_expiration_scheduler_running = True
+    
+    logger.info("🚀 [Plan Expiration] Iniciando scheduler de expiración de planes...")
+    
+    while plan_expiration_scheduler_running:
+        try:
+            now = datetime.now(timezone.utc)
+            now_str = now.isoformat()
+            
+            # Buscar usuarios con planes que tienen fecha de expiración pasada
+            # y que fueron asignados manualmente (plan_source = manual_admin)
+            expired_users = await db.users.find({
+                "plan_expires_at": {"$ne": None, "$lte": now_str},
+                "plan": {"$ne": "free"},  # Solo procesar si no es ya free
+                "plan_source": "manual_admin"
+            }, {"_id": 0, "username": 1, "email": 1, "plan": 1, "plan_expires_at": 1}).to_list(100)
+            
+            if expired_users:
+                logger.info(f"⏰ [Plan Expiration] Encontrados {len(expired_users)} planes expirados")
+            
+            for user in expired_users:
+                username = user.get("username")
+                previous_plan = user.get("plan")
+                
+                try:
+                    # Revertir plan a free
+                    await db.users.update_one(
+                        {"username": username},
+                        {
+                            "$set": {
+                                "plan": "free",
+                                "plan_source": "system",
+                                "plan_override": False,
+                                "is_pro": False,
+                                "plan_expires_at": None,
+                                "plan_expired_at": now_str,
+                                "updated_at": now_str
+                            }
+                        }
+                    )
+                    
+                    # Crear registro de auditoría
+                    audit_record = {
+                        "id": f"audit_{uuid.uuid4().hex[:12]}",
+                        "type": "plan_expiration",
+                        "target_username": username,
+                        "target_email": user.get("email"),
+                        "admin_username": "system",
+                        "previous_plan": previous_plan,
+                        "new_plan": "free",
+                        "previous_expires_at": user.get("plan_expires_at"),
+                        "new_expires_at": None,
+                        "reason": "Plan expired automatically",
+                        "timestamp": now_str
+                    }
+                    await db.admin_audit_log.insert_one(audit_record)
+                    
+                    logger.info(f"✅ [Plan Expiration] Plan de {username} expirado: {previous_plan} → free")
+                    
+                except Exception as user_error:
+                    logger.error(f"❌ [Plan Expiration] Error procesando {username}: {str(user_error)}")
+            
+        except Exception as e:
+            logger.error(f"❌ [Plan Expiration] Error en scheduler: {str(e)}")
+        
+        # Verificar cada hora
+        await asyncio.sleep(3600)
 
 
 # ==========================================

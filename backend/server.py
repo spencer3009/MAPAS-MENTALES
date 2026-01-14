@@ -3148,8 +3148,14 @@ async def get_all_users(current_user: dict = Depends(require_admin)):
             "plan": user_plan,
             "auth_provider": user.get("auth_provider", "local"),
             "created_at": user.get("created_at"),
-            "is_pro": user_plan in ["pro", "team", "admin"],
-            "disabled": user.get("disabled", False)
+            "is_pro": user_plan in ["pro", "team", "business", "admin"],
+            "disabled": user.get("disabled", False),
+            # Nuevos campos de control de planes
+            "plan_expires_at": user.get("plan_expires_at"),
+            "plan_override": user.get("plan_override", False),
+            "plan_source": user.get("plan_source", "system"),
+            "plan_assigned_by": user.get("plan_assigned_by"),
+            "plan_assigned_at": user.get("plan_assigned_at")
         })
     
     return result

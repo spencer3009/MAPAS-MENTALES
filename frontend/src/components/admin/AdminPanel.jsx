@@ -771,6 +771,146 @@ const UsersSection = ({ users, loading, onEditUser, token }) => {
           </div>
         )}
       </div>
+      
+      {/* Modal de Cambio de Plan */}
+      {planModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-purple-50 to-indigo-50">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                  <CreditCard className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900">Cambiar plan</h3>
+              </div>
+              <button
+                onClick={() => setPlanModal(null)}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            {/* Contenido */}
+            <div className="p-6 space-y-5">
+              {/* Info del usuario (solo lectura) */}
+              <div className="bg-gray-50 rounded-xl p-4 space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500">Usuario:</span>
+                  <span className="font-medium text-gray-900">{planModal.full_name || planModal.username}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500">Email:</span>
+                  <span className="text-gray-700">{planModal.email}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500">Plan actual:</span>
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                    planModal.plan === 'admin' ? 'bg-red-100 text-red-700' :
+                    planModal.plan === 'business' ? 'bg-emerald-100 text-emerald-700' :
+                    planModal.plan === 'team' ? 'bg-purple-100 text-purple-700' :
+                    planModal.plan === 'pro' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-700'
+                  }`}>
+                    <Crown className="w-3 h-3" />
+                    {planModal.plan === 'admin' ? 'Admin' :
+                     planModal.plan === 'business' ? 'Business' :
+                     planModal.plan === 'team' ? 'Team' :
+                     planModal.plan === 'pro' ? 'Pro' : 'Free'}
+                  </span>
+                </div>
+              </div>
+              
+              {/* Selector de nuevo plan */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nuevo plan
+                </label>
+                <select
+                  value={planForm.plan}
+                  onChange={(e) => setPlanForm({...planForm, plan: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                >
+                  <option value="free">🆓 Free - Gratuito</option>
+                  <option value="pro">⭐ Pro - Profesional</option>
+                  <option value="team">👥 Team - Equipos</option>
+                  <option value="business">🏢 Business - Empresas</option>
+                  <option value="admin">👑 Admin - Administrador</option>
+                </select>
+              </div>
+              
+              {/* Fecha de expiración */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Válido hasta
+                  <span className="text-gray-400 font-normal ml-2">(opcional - vacío = permanente)</span>
+                </label>
+                <input
+                  type="date"
+                  value={planForm.expiresAt}
+                  onChange={(e) => setPlanForm({...planForm, expiresAt: e.target.value})}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                />
+              </div>
+              
+              {/* Checkbox de acceso ilimitado */}
+              <div className="flex items-center gap-3 p-4 bg-yellow-50 rounded-xl border border-yellow-200">
+                <input
+                  type="checkbox"
+                  id="unlimitedAccess"
+                  checked={planForm.unlimitedAccess}
+                  onChange={(e) => setPlanForm({...planForm, unlimitedAccess: e.target.checked})}
+                  className="w-5 h-5 rounded border-yellow-300 text-yellow-600 focus:ring-yellow-500"
+                />
+                <label htmlFor="unlimitedAccess" className="flex-1 cursor-pointer">
+                  <div className="flex items-center gap-2">
+                    <Infinity className="w-4 h-4 text-yellow-600" />
+                    <span className="font-medium text-gray-900">Acceso ilimitado</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-0.5">Salta todos los límites del plan (nodos, proyectos, etc.)</p>
+                </label>
+              </div>
+              
+              {/* Nota informativa */}
+              <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <AlertTriangle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-blue-700">
+                  Este plan se asigna manualmente y no generará cargos ni pasará por pasarelas de pago. 
+                  El cambio quedará registrado en el historial de auditoría.
+                </p>
+              </div>
+            </div>
+            
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-3 bg-gray-50">
+              <button
+                onClick={() => setPlanModal(null)}
+                className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-lg transition-colors font-medium"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleChangePlan}
+                disabled={savingPlan}
+                className="px-6 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all shadow-lg shadow-purple-500/25 font-medium flex items-center gap-2 disabled:opacity-50"
+              >
+                {savingPlan ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Aplicando...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-4 h-4" />
+                    Aplicar plan
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

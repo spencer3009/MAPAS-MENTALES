@@ -3490,6 +3490,147 @@ async def delete_user(username: str, current_user: dict = Depends(require_admin)
     
     return {"message": f"Usuario {username} eliminado correctamente"}
 
+@api_router.post("/admin/users/bulk-delete")
+async def bulk_delete_users(
+    request: BulkDeleteRequest,
+    current_user: dict = Depends(require_admin)
+):
+    """Eliminar múltiples usuarios de forma masiva"""
+    usernames = request.usernames
+    
+    if not usernames:
+        raise HTTPException(status_code=400, detail="No se proporcionaron usuarios para eliminar")
+    
+    # Filtrar: no permitir eliminar al admin actual ni a otros admins
+    admin_username = current_user["username"]
+    
+    # Obtener usuarios a eliminar y verificar permisos
+    users_to_delete = await db.users.find({"username": {"$in": usernames}}, {"_id": 0}).to_list(len(usernames))
+    
+    deleted = []
+    skipped = []
+    errors = []
+    
+    for user in users_to_delete:
+        username = user.get("username")
+        
+        # No eliminar al propio admin
+        if username == admin_username:
+            skipped.append({"username": username, "reason": "No puedes eliminarte a ti mismo"})
+            continue
+        
+        # No eliminar otros admins
+        if user.get("role") == "admin":
+            skipped.append({"username": username, "reason": "No puedes eliminar a otro administrador"})
+            continue
+        
+        try:
+            # Eliminar usuario
+            await db.users.delete_one({"username": username})
+            await db.user_profiles.delete_one({"username": username})
+            await db.user_sessions.delete_many({"user_id": user.get("user_id")})
+            
+            # Marcar proyectos como eliminados
+            await db.projects.update_many(
+                {"username": username},
+                {"$set": {"isDeleted": True, "deleted_at": datetime.now(timezone.utc).isoformat()}}
+            )
+            
+            deleted.append(username)
+        except Exception as e:
+            errors.append({"username": username, "error": str(e)})
+    
+    # Registrar auditoría
+    audit_record = {
+        "id": f"audit_{uuid.uuid4().hex[:12]}",
+        "type": "bulk_delete",
+        "admin_username": admin_username,
+        "deleted_users": deleted,
+        "skipped_users": skipped,
+        "total_requested": len(usernames),
+        "total_deleted": len(deleted),
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+    await db.admin_audit_log.insert_one(audit_record)
+    
+    logger.info(f"Admin {admin_username} eliminó masivamente {len(deleted)} usuarios")
+    
+    return {
+        "message": f"Se eliminaron {len(deleted)} de {len(usernames)} usuarios",
+        "deleted": deleted,
+        "skipped": skipped,
+        "errors": errors
+    }
+
+@api_router.post("/admin/users/{username}/impersonate")
+async def impersonate_user(
+    username: str,
+    current_user: dict = Depends(require_admin)
+):
+    """Acceder como otro usuario (Login as User) - Solo para admins"""
+    # Verificar que el usuario existe
+    target_user = await db.users.find_one({"username": username})
+    if not target_user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    # No permitir impersonar a otros admins (seguridad)
+    if target_user.get("role") == "admin" and username != current_user["username"]:
+        raise HTTPException(
+            status_code=403,
+            detail="No puedes impersonar a otro administrador"
+        )
+    
+    admin_username = current_user["username"]
+    now = datetime.now(timezone.utc)
+    
+    # Crear token para el usuario impersonado
+    # Incluimos información de impersonación en el token
+    impersonate_token_data = {
+        "sub": target_user.get("user_id") or target_user.get("username"),
+        "username": username,
+        "role": target_user.get("role", "user"),
+        "plan": target_user.get("plan", "free"),
+        "impersonated_by": admin_username,
+        "impersonation_time": now.isoformat(),
+        "exp": now + timedelta(hours=2)  # Token más corto para impersonación
+    }
+    impersonate_token = jwt.encode(impersonate_token_data, SECRET_KEY, algorithm=ALGORITHM)
+    
+    # Crear token de retorno para volver al admin
+    return_token_data = {
+        "sub": current_user.get("user_id") or current_user.get("username"),
+        "username": admin_username,
+        "role": "admin",
+        "plan": "admin",
+        "return_from_impersonation": True,
+        "exp": now + timedelta(hours=24)
+    }
+    return_token = jwt.encode(return_token_data, SECRET_KEY, algorithm=ALGORITHM)
+    
+    # Registrar en auditoría
+    audit_record = {
+        "id": f"audit_{uuid.uuid4().hex[:12]}",
+        "type": "user_impersonation",
+        "admin_username": admin_username,
+        "target_username": username,
+        "target_email": target_user.get("email"),
+        "timestamp": now.isoformat(),
+        "ip_address": None
+    }
+    await db.admin_audit_log.insert_one(audit_record)
+    
+    logger.info(f"Admin {admin_username} inició impersonación como {username}")
+    
+    return {
+        "access_token": impersonate_token,
+        "token_type": "bearer",
+        "impersonated_user": username,
+        "impersonated_email": target_user.get("email"),
+        "impersonated_full_name": target_user.get("full_name", ""),
+        "admin_user": admin_username,
+        "return_token": return_token
+    }
+
 @api_router.post("/admin/users/{username}/block")
 async def block_user(username: str, current_user: dict = Depends(require_admin)):
     """Bloquear acceso a un usuario"""

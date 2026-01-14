@@ -3185,6 +3185,60 @@ class AdminMetrics(BaseModel):
     pro_users: int
     total_projects: int
 
+# Modelo para analytics avanzados
+class UserGrowthPoint(BaseModel):
+    date: str
+    count: int
+    cumulative: int
+
+class PlanDistribution(BaseModel):
+    plan: str
+    count: int
+    percentage: float
+
+class ActivityMetric(BaseModel):
+    date: str
+    active_users: int
+    new_registrations: int
+    projects_created: int
+
+class RetentionData(BaseModel):
+    period: str
+    cohort_size: int
+    retained: int
+    retention_rate: float
+
+class AnalyticsDashboard(BaseModel):
+    # Overview
+    total_users: int
+    total_projects: int
+    total_contacts: int
+    total_boards: int
+    
+    # Growth metrics
+    users_today: int
+    users_this_week: int
+    users_this_month: int
+    growth_rate_weekly: float
+    growth_rate_monthly: float
+    
+    # User growth over time (last 30 days)
+    user_growth: List[UserGrowthPoint]
+    
+    # Plan distribution
+    plan_distribution: List[PlanDistribution]
+    
+    # Activity metrics (last 14 days)
+    activity_metrics: List[ActivityMetric]
+    
+    # Retention (weekly cohorts)
+    retention_data: List[RetentionData]
+    
+    # Top stats
+    active_users_24h: int
+    conversion_rate: float  # Free to Pro
+    avg_projects_per_user: float
+
 # Admin middleware - verify user is admin
 async def require_admin(current_user: dict = Depends(get_current_user)):
     """Verificar que el usuario actual es administrador"""

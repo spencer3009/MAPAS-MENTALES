@@ -3140,6 +3140,28 @@ class AdminPlanChange(BaseModel):
     expires_at: Optional[str] = None  # ISO date string, null = permanente
     unlimited_access: bool = False  # Salta todos los límites del plan
 
+# Modelo para respuesta paginada de usuarios
+class PaginatedUsersResponse(BaseModel):
+    users: List[UserListItem]
+    total: int
+    page: int
+    per_page: int
+    total_pages: int
+    has_next: bool
+    has_prev: bool
+
+# Modelo para eliminación masiva
+class BulkDeleteRequest(BaseModel):
+    usernames: List[str]
+
+# Modelo para impersonación de usuario
+class ImpersonateResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    impersonated_user: str
+    admin_user: str
+    return_token: str  # Token para volver al admin
+
 class LandingContentSection(BaseModel):
     title: Optional[str] = None
     subtitle: Optional[str] = None

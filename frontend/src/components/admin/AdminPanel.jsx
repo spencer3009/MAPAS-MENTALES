@@ -24,9 +24,11 @@ import {
   Sparkles,
   Eye,
   Mail,
-  Clock
+  Clock,
+  PieChart
 } from 'lucide-react';
 import UsersManagement from './UsersManagement';
+import AnalyticsDashboard from './AnalyticsDashboard';
 
 // Use relative URLs for production compatibility
 const API_URL = '';

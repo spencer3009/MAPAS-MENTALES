@@ -296,7 +296,9 @@ function App() {
   return (
     <AuthProvider>
       <CookieProvider>
-        <AppWithCookies />
+        <NodeDefaultsProvider>
+          <AppWithCookies />
+        </NodeDefaultsProvider>
       </CookieProvider>
     </AuthProvider>
   );

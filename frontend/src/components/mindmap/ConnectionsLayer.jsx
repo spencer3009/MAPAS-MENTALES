@@ -226,17 +226,24 @@ const ConnectionsLayer = memo(({
       const lineStyle = node.lineStyle || 'solid';
       const strokeDasharray = getStrokeDasharray(lineStyle);
 
-      return (
-        <path
-          key={`${parent.id}-${node.id}`}
-          d={path}
-          stroke={lineColor}
-          strokeWidth={lineWidth}
-          strokeDasharray={strokeDasharray}
-          fill="none"
-          className="transition-all duration-150"
-        />
-      );
+      // Calcular punto medio para el botón de desconectar
+      const midX = (start.x + end.x) / 2;
+      const midY = (start.y + end.y) / 2;
+      const connectionId = `${parent.id}-${node.id}`;
+      const isHovered = hoveredConnectionId === connectionId;
+
+      return {
+        connectionId,
+        nodeId: node.id,
+        parentId: parent.id,
+        path,
+        lineColor,
+        lineWidth,
+        strokeDasharray,
+        midX,
+        midY,
+        isHovered
+      };
     })
     .filter(Boolean);
 

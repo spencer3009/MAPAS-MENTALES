@@ -235,6 +235,7 @@ const Toolbar = ({
           <UserDropdown
             user={user}
             onOpenProfile={onOpenProfile}
+            onOpenEditorSettings={onOpenEditorSettings}
             onLogout={onLogout}
             onAdminClick={onAdminClick}
             isAdmin={isAdmin}

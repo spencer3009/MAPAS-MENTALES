@@ -530,7 +530,7 @@ const Canvas = ({
   // Cancelar modo de conexión
   const cancelConnectionMode = useCallback(() => {
     console.log('[Canvas] Cancelando modo conexión');
-    setConnectionMode({ isActive: false, sourceNodeId: null, mousePosition: { x: 0, y: 0 } });
+    setConnectionMode({ isActive: false, sourceNodeId: null, mousePosition: { x: 0, y: 0 }, snapTargetId: null });
   }, []);
 
   // Completar conexión al hacer clic en un nodo destino

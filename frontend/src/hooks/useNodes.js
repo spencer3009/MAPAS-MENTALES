@@ -3450,8 +3450,8 @@ export const useNodes = () => {
     return `${baseCopyName} ${copyNumber}`;
   }, [projects]);
 
-  // Duplicar proyecto completo
-  const duplicateProject = useCallback(async (projectId) => {
+  // Duplicar proyecto completo (con nombre personalizado opcional)
+  const duplicateProject = useCallback(async (projectId, customName = null) => {
     try {
       const sourceProject = projects.find(p => p.id === projectId);
       if (!sourceProject) {
@@ -3461,8 +3461,8 @@ export const useNodes = () => {
 
       console.log('Duplicando proyecto:', sourceProject.name);
       
-      // Generar nombre único para la copia
-      const newName = generateUniqueCopyName(sourceProject.name);
+      // Usar nombre personalizado o generar uno único
+      const newName = customName || generateUniqueCopyName(sourceProject.name);
       
       // Generar nuevos IDs para todos los nodos
       const idMap = {};
@@ -3496,30 +3496,24 @@ export const useNodes = () => {
       if (!result.success) {
         console.error('Servidor rechazó la duplicación:', result.error);
         
-        // Si es conflicto de nombre, intentar con otro nombre
+        // Si es conflicto de nombre, retornar error (el usuario debe elegir otro nombre)
         if (result.status === 409 || result.conflict) {
-          // Añadir timestamp para garantizar unicidad
-          const fallbackName = `${sourceProject.name} - copia ${Date.now()}`;
-          newProject.name = fallbackName;
-          
-          const retryResult = await saveProjectToServer(newProject);
-          if (!retryResult.success) {
-            return { 
-              success: false, 
-              error: retryResult.error || 'No se pudo duplicar el proyecto'
-            };
-          }
-        } else {
           return { 
             success: false, 
-            error: result.error,
-            isPlanLimit: result.status === 403,
-            limitType: result.error?.includes('total') ? 'total' : 'active'
+            error: 'Ya existe un mapa con este nombre',
+            isNameConflict: true
           };
         }
+        
+        return { 
+          success: false, 
+          error: result.error,
+          isPlanLimit: result.status === 403,
+          limitType: result.error?.includes('total') ? 'total' : 'active'
+        };
       }
 
-      // Agregar al estado local
+      // Agregar al estado local (al inicio para que aparezca primero)
       historyRef.current[newProject.id] = {
         states: [JSON.stringify(mappedNodes)],
         pointer: 0

@@ -97,7 +97,8 @@ const DockSidebar = ({
       id: 'settings',
       icon: Settings,
       label: 'Configuración',
-      onClick: onOpenSettings,
+      onClick: () => setShowSettingsMenu(!showSettingsMenu),
+      hasSubmenu: true,
     },
   ];
 
@@ -110,7 +111,7 @@ const DockSidebar = ({
         ${isExpanded ? 'w-52' : 'w-16'}
       `}
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseLeave={() => { setIsHovered(false); setShowSettingsMenu(false); }}
     >
       {/* Dock Container */}
       <div 

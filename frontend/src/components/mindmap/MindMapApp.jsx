@@ -1520,6 +1520,19 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
         onReplace={handleReplaceExistingProject}
         onRename={handleRenameAndCreate}
       />
+
+      {/* Modal para duplicar proyecto */}
+      <DuplicateProjectModal
+        isOpen={showDuplicateModal}
+        originalName={projectToDuplicate?.name || ''}
+        existingNames={projects.map(p => p.name)}
+        onConfirm={handleConfirmDuplicate}
+        onCancel={() => {
+          setShowDuplicateModal(false);
+          setProjectToDuplicate(null);
+        }}
+        isLoading={isDuplicating}
+      />
       
       {/* Modal de verificación requerida */}
       <VerificationRequiredModal

@@ -659,8 +659,18 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
       if (result.success) {
         resetPan();
         resetZoom();
-      } else if (result.error) {
-        // Mostrar modal de upgrade si hay error de límites
+      } else if (result.isNameConflict) {
+        // Conflicto de nombre duplicado - mostrar modal de conflicto
+        setNameConflictData({
+          conflictingName: name,
+          existingProjectId: result.existingProjectId,
+          pendingLayoutType: layoutType,
+          isFromTemplate: false,
+          templateNodes: null
+        });
+        setShowNameConflictModal(true);
+      } else if (result.isPlanLimit || result.error) {
+        // Límite de plan - mostrar modal de upgrade
         setUpgradeLimitType(result.limitType || 'active');
         setShowUpgradeModal(true);
       }

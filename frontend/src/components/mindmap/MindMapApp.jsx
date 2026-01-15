@@ -180,6 +180,9 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
   // Estado para modal de perfil
   const [showProfileModal, setShowProfileModal] = useState(false);
 
+  // Estado para modal de configuración de nodos
+  const [showNodeDefaultsModal, setShowNodeDefaultsModal] = useState(false);
+
   // Estado para modal de todos los proyectos
   const [showAllProjectsModal, setShowAllProjectsModal] = useState(false);
 

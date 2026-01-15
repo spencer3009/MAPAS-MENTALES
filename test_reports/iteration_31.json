@@ -1,0 +1,71 @@
+{
+  "summary": "Bug Fix Verified: Project name conflict (409) vs Plan limit (403) separation. All 14 backend tests passed. The fix correctly separates duplicate name validation (HTTP 409) from plan limit validation (HTTP 403).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/tests/test_project_name_conflict.py",
+    "/app/test_reports/pytest/pytest_project_name_conflict.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "✅ Backend POST /api/projects correctly returns HTTP 409 when project name already exists",
+    "✅ Backend POST /api/projects correctly returns HTTP 403 when plan limit is exceeded",
+    "✅ Backend 409 response includes proper structure: message, existing_project_id, existing_project_name, suggestion",
+    "✅ Backend validates name conflict BEFORE checking plan limits (correct order)",
+    "✅ Admin user (unlimited plan, max_active_maps=-1) never receives 403 for map limit",
+    "✅ Frontend useNodes.js saveProjectToServer correctly detects 409 and returns conflict info",
+    "✅ Frontend useNodes.js createBlankMap distinguishes isNameConflict vs isPlanLimit",
+    "✅ Frontend MindMapApp.jsx handleConfirmProjectName shows NameConflictModal for 409, UpgradeModal for 403",
+    "✅ NameConflictModal component provides Replace/Rename/Cancel options for name conflicts"
+  ],
+  "updated_files": [
+    "/app/tests/test_project_name_conflict.py"
+  ],
+  "success_rate": {
+    "backend": "100% (14/14 tests passed)",
+    "frontend": "N/A (backend-only testing as requested)"
+  },
+  "test_credentials": {
+    "admin_user": {
+      "username": "admin",
+      "password": "admin123"
+    }
+  },
+  "seed_data_creation": "Test projects created with TEST_ prefix and cleaned up after each test",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Bug fix for project name conflict vs plan limit has been verified. Backend correctly returns: 409 Conflict for duplicate names (with existing_project_id in response), 403 Forbidden for plan limits. Frontend correctly handles both cases: 409 triggers NameConflictModal, 403 triggers UpgradeModal. Test file: /app/tests/test_project_name_conflict.py covers all scenarios.",
+  "features_tested": {
+    "backend_apis": [
+      "POST /api/projects - ✅ Returns 200/201 for unique name within limits",
+      "POST /api/projects - ✅ Returns 409 Conflict for duplicate name",
+      "POST /api/projects - ✅ 409 response contains existing_project_id",
+      "POST /api/projects - ✅ 409 response contains existing_project_name",
+      "POST /api/projects - ✅ 409 response contains message and suggestion",
+      "POST /api/projects - ✅ 409 error message mentions name conflict, NOT plan limit",
+      "POST /api/projects - ✅ Unlimited plan users never get 403 for map limit",
+      "GET /api/user/plan-limits - ✅ Returns correct structure with plan, limits, usage",
+      "GET /api/user/plan-limits - ✅ Admin has max_active_maps=-1 (unlimited)",
+      "GET /api/projects - ✅ Returns list of projects",
+      "GET /api/projects/{id} - ✅ Returns specific project",
+      "PUT /api/projects/{id} - ✅ Updates project successfully",
+      "DELETE /api/projects/{id} - ✅ Soft deletes project",
+      "POST /api/projects - ✅ Returns 401/403 without authentication"
+    ],
+    "code_review": [
+      "✅ server.py lines 2797-2815: Name conflict check returns 409 with proper detail structure",
+      "✅ server.py lines 2853-2867: Plan limit check returns 403 (only after name check passes)",
+      "✅ useNodes.js lines 152-162: saveProjectToServer detects 409 and extracts conflict info",
+      "✅ useNodes.js lines 3284-3300: createBlankMap distinguishes isNameConflict vs isPlanLimit",
+      "✅ MindMapApp.jsx lines 662-675: handleConfirmProjectName shows correct modal based on error type",
+      "✅ NameConflictModal.jsx: Provides Replace/Rename/Cancel options for name conflicts"
+    ]
+  }
+}

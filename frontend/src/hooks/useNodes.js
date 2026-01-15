@@ -3777,6 +3777,7 @@ export const useNodes = () => {
     createBlankMap,
     loadFromTemplate,
     deleteProject,
+    duplicateProject,
     switchProject,
     renameProject,
     setProjectName,

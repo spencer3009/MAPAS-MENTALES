@@ -1080,6 +1080,7 @@ const Canvas = ({
             node={node}
             isSelected={isNodeSelected ? isNodeSelected(node.id) : selectedNodeId === node.id}
             isMultiSelected={selectedNodeIds.has(node.id)}
+            isSnapTarget={connectionMode.isActive && connectionMode.snapTargetId === node.id}
             layoutType={layoutType}
             onSelect={handleNodeSelect}
             onDragStart={handleNodeDragStart}

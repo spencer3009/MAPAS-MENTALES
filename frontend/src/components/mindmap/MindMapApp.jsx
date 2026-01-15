@@ -1303,6 +1303,7 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
               onDuplicateNode={duplicateNode}
               onDeleteNode={deleteNode}
               onDisconnectNode={disconnectNode}
+              onConnectNodes={connectNodes}
               onChangeNodeColor={updateNodeColor}
               onChangeNodeType={updateNodeType}
               onChangeLineWidth={updateDashedLineWidth}

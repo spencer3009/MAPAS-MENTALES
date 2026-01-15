@@ -1,6 +1,7 @@
 import "./App.css";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { CookieProvider, useCookies } from "./contexts/CookieContext";
+import { NodeDefaultsProvider } from "./contexts/NodeDefaultsContext";
 import { MindMapApp } from "./components/mindmap";
 import { LoginPage, RegisterPage, AuthCallback } from "./components/auth";
 import VerifyEmailPage from "./components/auth/VerifyEmailPage";

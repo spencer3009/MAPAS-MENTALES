@@ -612,59 +612,6 @@ const Canvas = ({
     }
   }, [linkPopover.nodeId, onUpdateNodeLink]);
 
-  // ======== MODO DE CONEXIÓN MANUAL ========
-  
-  // Iniciar modo de conexión desde un nodo
-  const startConnectionMode = useCallback((sourceNodeId) => {
-    console.log('[Canvas] Iniciando modo conexión desde nodo:', sourceNodeId);
-    setConnectionMode({
-      isActive: true,
-      sourceNodeId,
-      mousePosition: { x: 0, y: 0 }
-    });
-  }, []);
-
-  // Actualizar posición del mouse durante conexión
-  const updateConnectionPosition = useCallback((e) => {
-    if (!connectionMode.isActive) return;
-    
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (rect) {
-      setConnectionMode(prev => ({
-        ...prev,
-        mousePosition: {
-          x: (e.clientX - rect.left - pan.x) / zoom,
-          y: (e.clientY - rect.top - pan.y) / zoom
-        }
-      }));
-    }
-  }, [connectionMode.isActive, pan, zoom]);
-
-  // Completar conexión al hacer clic en un nodo destino
-  const completeConnection = useCallback((targetNodeId) => {
-    if (!connectionMode.isActive || !connectionMode.sourceNodeId) return;
-    
-    if (targetNodeId === connectionMode.sourceNodeId) {
-      console.log('[Canvas] No se puede conectar un nodo a sí mismo');
-      setConnectionMode({ isActive: false, sourceNodeId: null, mousePosition: { x: 0, y: 0 } });
-      return;
-    }
-    
-    console.log('[Canvas] Completando conexión:', connectionMode.sourceNodeId, '->', targetNodeId);
-    
-    if (onConnectNodes) {
-      onConnectNodes(connectionMode.sourceNodeId, targetNodeId);
-    }
-    
-    setConnectionMode({ isActive: false, sourceNodeId: null, mousePosition: { x: 0, y: 0 } });
-  }, [connectionMode, onConnectNodes]);
-
-  // Cancelar modo de conexión
-  const cancelConnectionMode = useCallback(() => {
-    console.log('[Canvas] Cancelando modo conexión');
-    setConnectionMode({ isActive: false, sourceNodeId: null, mousePosition: { x: 0, y: 0 } });
-  }, []);
-
   // Manejar tecla ESC para cancelar conexión
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -676,8 +623,6 @@ const Canvas = ({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [connectionMode.isActive, cancelConnectionMode]);
-
-  // ======== FIN MODO DE CONEXIÓN MANUAL ========
 
   const handleCommentSave = useCallback((comment) => {
     if (commentPopover.nodeId && onUpdateNodeComment) {

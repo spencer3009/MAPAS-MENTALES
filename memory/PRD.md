@@ -2,6 +2,28 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-15: BUG FIX — Separación de Conflicto de Nombre vs Límite de Plan ✅ COMPLETADO
+- **Bug reportado**: Al crear un mapa con nombre duplicado, el sistema mostraba incorrectamente el popup de "Necesitas más espacio" (upgrade de plan) en lugar de un modal para resolver el conflicto de nombre
+- **Causa raíz**: El frontend no distinguía entre error 409 (nombre duplicado) y error 403 (límite de plan excedido)
+- **Solución implementada**:
+  - **Backend** ya retornaba correctamente:
+    - HTTP 409 para nombres duplicados (con `existing_project_id`, `existing_project_name`, `message`, `suggestion`)
+    - HTTP 403 para límite de mapas excedido
+  - **Frontend modificado**:
+    - `useNodes.js` → `saveProjectToServer` detecta 409 y extrae info del conflicto
+    - `useNodes.js` → `createBlankMap` y `loadFromTemplate` distinguen `isNameConflict` vs `isPlanLimit`
+    - `MindMapApp.jsx` → `handleConfirmProjectName` muestra `NameConflictModal` para 409, `UpgradeModal` para 403
+    - **Nuevo componente**: `NameConflictModal.jsx` con opciones de Reemplazar, Cambiar nombre, Cancelar
+- **Comportamiento correcto**:
+  - Si nombre duplicado → Modal de conflicto (no consume cupo, no paywall)
+  - Si límite de plan excedido → Modal de upgrade (paywall)
+  - Planes ilimitados (`max_active_maps = -1`) nunca ven el modal de upgrade
+- **Testing**: 100% backend (14/14 tests), archivo: `/app/tests/test_project_name_conflict.py`
+- **Archivos modificados**: 
+  - `/app/frontend/src/hooks/useNodes.js`
+  - `/app/frontend/src/components/mindmap/MindMapApp.jsx`
+  - `/app/frontend/src/components/mindmap/NameConflictModal.jsx` (nuevo)
+
 ### 2026-01-14: FEATURE — Dashboard de Analytics ✅ COMPLETADO
 - **Endpoint**: `GET /api/admin/analytics`
 - **Métricas Overview**: total_users, total_projects, total_contacts, total_boards

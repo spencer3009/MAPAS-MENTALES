@@ -545,26 +545,29 @@ const Canvas = ({
   // El nodo destino (targetNodeId) será el HIJO
   // El modo conexión permanece activo para permitir múltiples conexiones
   const completeConnection = useCallback((targetNodeId) => {
-    console.log('[Canvas] completeConnection llamado con targetNodeId:', targetNodeId);
-    console.log('[Canvas] connectionMode.isActive:', connectionMode.isActive);
-    console.log('[Canvas] connectionMode.sourceNodeId:', connectionMode.sourceNodeId);
+    // Usar la ref para obtener el estado más actualizado
+    const currentMode = connectionModeRef.current;
     
-    if (!connectionMode.isActive || !connectionMode.sourceNodeId) {
+    console.log('[Canvas] completeConnection llamado con targetNodeId:', targetNodeId);
+    console.log('[Canvas] connectionMode.isActive:', currentMode.isActive);
+    console.log('[Canvas] connectionMode.sourceNodeId:', currentMode.sourceNodeId);
+    
+    if (!currentMode.isActive || !currentMode.sourceNodeId) {
       console.log('[Canvas] Modo conexión no activo o sin nodo origen');
       return;
     }
     
-    if (targetNodeId === connectionMode.sourceNodeId) {
+    if (targetNodeId === currentMode.sourceNodeId) {
       console.log('[Canvas] No se puede conectar un nodo a sí mismo');
       return; // No cancelar el modo, solo ignorar el clic
     }
     
     // El nodo origen es el PADRE, el nodo destino es el HIJO
     // connectNodes(childNodeId, parentNodeId)
-    console.log('[Canvas] Completando conexión: hijo', targetNodeId, '-> padre', connectionMode.sourceNodeId);
+    console.log('[Canvas] Completando conexión: hijo', targetNodeId, '-> padre', currentMode.sourceNodeId);
     
     if (onConnectNodes) {
-      const success = onConnectNodes(targetNodeId, connectionMode.sourceNodeId);
+      const success = onConnectNodes(targetNodeId, currentMode.sourceNodeId);
       if (success) {
         console.log('[Canvas] Conexión exitosa - modo conexión sigue activo');
       } else {
@@ -584,7 +587,7 @@ const Canvas = ({
     
     // NO cancelar el modo - permanece activo para conectar más nodos
     // El usuario puede presionar ESC o hacer clic en el canvas para salir
-  }, [connectionMode, onConnectNodes]);
+  }, [onConnectNodes]);
 
   // ======== FIN MODO DE CONEXIÓN MANUAL ========
 

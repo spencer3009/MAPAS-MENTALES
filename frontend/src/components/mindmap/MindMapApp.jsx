@@ -19,6 +19,7 @@ import DashboardView from './DashboardView';
 import TemplatesView from './TemplatesView';
 import IntegrationsView from './IntegrationsView';
 import UpgradeModal from './UpgradeModal';
+import NameConflictModal from './NameConflictModal';
 import RemindersView from './RemindersView';
 import NodeDefaultsSettings from './NodeDefaultsSettings';
 import MapEditorSettings from './MapEditorSettings';

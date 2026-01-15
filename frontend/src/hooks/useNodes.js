@@ -3430,6 +3430,111 @@ export const useNodes = () => {
     }
   }, [activeProjectId, projects, deleteProjectFromServer]);
 
+  // Generar nombre único para proyecto duplicado
+  const generateUniqueCopyName = useCallback((originalName) => {
+    const baseCopyName = `${originalName} - copia`;
+    
+    // Verificar si ya existe un proyecto con ese nombre
+    const existingNames = projects.map(p => p.name.toLowerCase());
+    
+    if (!existingNames.includes(baseCopyName.toLowerCase())) {
+      return baseCopyName;
+    }
+    
+    // Buscar el siguiente número disponible
+    let copyNumber = 2;
+    while (existingNames.includes(`${baseCopyName} ${copyNumber}`.toLowerCase())) {
+      copyNumber++;
+    }
+    
+    return `${baseCopyName} ${copyNumber}`;
+  }, [projects]);
+
+  // Duplicar proyecto completo
+  const duplicateProject = useCallback(async (projectId) => {
+    try {
+      const sourceProject = projects.find(p => p.id === projectId);
+      if (!sourceProject) {
+        console.error('Proyecto no encontrado para duplicar:', projectId);
+        return { success: false, error: 'Proyecto no encontrado' };
+      }
+
+      console.log('Duplicando proyecto:', sourceProject.name);
+      
+      // Generar nombre único para la copia
+      const newName = generateUniqueCopyName(sourceProject.name);
+      
+      // Generar nuevos IDs para todos los nodos
+      const idMap = {};
+      const newNodes = sourceProject.nodes.map(node => {
+        const newId = crypto.randomUUID();
+        idMap[node.id] = newId;
+        return { ...node, id: newId };
+      });
+      
+      // Actualizar parentIds y connectorIds con los nuevos IDs
+      const mappedNodes = newNodes.map(node => ({
+        ...node,
+        parentId: node.parentId ? idMap[node.parentId] : null,
+        connectorParentId: node.connectorParentId ? idMap[node.connectorParentId] : null,
+        connectorTargetId: node.connectorTargetId ? idMap[node.connectorTargetId] : null
+      }));
+
+      const newProject = {
+        id: crypto.randomUUID(),
+        name: newName,
+        layoutType: sourceProject.layoutType || 'mindflow',
+        nodes: mappedNodes,
+        isPinned: false, // No copiar el estado de anclado
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      // Intentar guardar en servidor
+      const result = await saveProjectToServer(newProject);
+      
+      if (!result.success) {
+        console.error('Servidor rechazó la duplicación:', result.error);
+        
+        // Si es conflicto de nombre, intentar con otro nombre
+        if (result.status === 409 || result.conflict) {
+          // Añadir timestamp para garantizar unicidad
+          const fallbackName = `${sourceProject.name} - copia ${Date.now()}`;
+          newProject.name = fallbackName;
+          
+          const retryResult = await saveProjectToServer(newProject);
+          if (!retryResult.success) {
+            return { 
+              success: false, 
+              error: retryResult.error || 'No se pudo duplicar el proyecto'
+            };
+          }
+        } else {
+          return { 
+            success: false, 
+            error: result.error,
+            isPlanLimit: result.status === 403,
+            limitType: result.error?.includes('total') ? 'total' : 'active'
+          };
+        }
+      }
+
+      // Agregar al estado local
+      historyRef.current[newProject.id] = {
+        states: [JSON.stringify(mappedNodes)],
+        pointer: 0
+      };
+
+      setProjects(prev => [newProject, ...prev]);
+      
+      console.log('Proyecto duplicado exitosamente:', newProject.name);
+      return { success: true, newProjectId: newProject.id, newName: newProject.name };
+    } catch (error) {
+      console.error('Error al duplicar proyecto:', error);
+      return { success: false, error: 'Error al duplicar el proyecto. Intenta de nuevo.' };
+    }
+  }, [projects, generateUniqueCopyName, saveProjectToServer]);
+
   // Renombrar proyecto
   const renameProject = useCallback(async (projectId, newName) => {
     try {

@@ -1,4 +1,5 @@
 import React, { useRef, useCallback, useState, useEffect, useMemo } from 'react';
+import { Link2 } from 'lucide-react';
 import NodeItem, { NODE_WIDTH, NODE_HEIGHT } from './NodeItem';
 import ConnectionsLayer from './ConnectionsLayer';
 import ContextMenu from './ContextMenu';

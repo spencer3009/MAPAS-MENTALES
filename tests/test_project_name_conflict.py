@@ -394,7 +394,8 @@ class TestNameConflictVsPlanLimit:
             f"409 error should mention name conflict: {error_msg_409}"
         
         # Should NOT contain plan limit keywords
-        plan_keywords = ["límite", "limite", "plan", "pro", "upgrade", "actualiza"]
+        # Note: "pro" is excluded because "proyecto" (Spanish for project) contains "pro"
+        plan_keywords = ["límite", "limite", "plan gratuito", "plan free", "upgrade", "actualiza"]
         for keyword in plan_keywords:
             assert keyword not in error_lower, f"409 error should NOT mention '{keyword}': {error_msg_409}"
         

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, Settings, LogOut, ChevronDown, Shield } from 'lucide-react';
+import { User, Settings, LogOut, ChevronDown, Shield, Sliders } from 'lucide-react';
 
-const UserDropdown = ({ user, onOpenProfile, onLogout, onAdminClick, isAdmin }) => {
+const UserDropdown = ({ user, onOpenProfile, onOpenEditorSettings, onLogout, onAdminClick, isAdmin }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);

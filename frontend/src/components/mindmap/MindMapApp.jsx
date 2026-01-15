@@ -211,6 +211,11 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
     templateNodes: null
   });
 
+  // Estado para el modal de duplicar proyecto
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [projectToDuplicate, setProjectToDuplicate] = useState(null);
+  const [isDuplicating, setIsDuplicating] = useState(false);
+
   // Efecto para abrir modal de PayPal si hay un plan pendiente
   useEffect(() => {
     if (pendingPlanId && !showUpgradeModal) {

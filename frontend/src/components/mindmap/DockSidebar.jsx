@@ -133,8 +133,8 @@ const DockSidebar = ({
             const isActive = activeView === item.id;
             
             return (
+              <React.Fragment key={item.id}>
               <button
-                key={item.id}
                 onClick={item.onClick}
                 className={`
                   w-full flex items-center gap-3

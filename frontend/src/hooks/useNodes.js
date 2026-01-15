@@ -3519,7 +3519,13 @@ export const useNodes = () => {
         pointer: 0
       };
 
+      // Agregar el proyecto y establecerlo como activo inmediatamente
       setProjects(prev => [newProject, ...prev]);
+      setActiveProjectId(newProject.id);
+      setSelectedNodeId(null);
+      
+      // Activar en el servidor para que lastActiveAt se actualice
+      activateProject(newProject.id);
       
       console.log('Proyecto duplicado exitosamente:', newProject.name);
       return { success: true, newProjectId: newProject.id, newName: newProject.name };
@@ -3527,7 +3533,7 @@ export const useNodes = () => {
       console.error('Error al duplicar proyecto:', error);
       return { success: false, error: 'Error al duplicar el proyecto. Intenta de nuevo.' };
     }
-  }, [projects, generateUniqueCopyName, saveProjectToServer]);
+  }, [projects, generateUniqueCopyName, saveProjectToServer, activateProject]);
 
   // Renombrar proyecto
   const renameProject = useCallback(async (projectId, newName) => {

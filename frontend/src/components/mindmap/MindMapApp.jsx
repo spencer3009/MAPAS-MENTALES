@@ -1004,6 +1004,7 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
         onOpenReminders={handleOpenRemindersPanel}
         onOpenTrash={handleOpenTrash}
         onOpenSettings={handleOpenSettings}
+        onOpenNodeSettings={() => setShowNodeDefaultsModal(true)}
         onOpenBoards={() => {
           setActiveView('boards');
           setIsProjectsSidebarOpen(false);

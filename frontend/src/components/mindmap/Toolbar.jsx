@@ -91,6 +91,7 @@ const Toolbar = ({
   onRefreshNotifications,
   user,
   onOpenProfile,
+  onOpenEditorSettings,
   onLogout,
   onAdminClick,
   isAdmin,

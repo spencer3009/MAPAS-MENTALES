@@ -535,6 +535,8 @@ const Canvas = ({
   }, []);
 
   // Completar conexión al hacer clic en un nodo destino
+  // El nodo origen (sourceNodeId) será el PADRE
+  // El nodo destino (targetNodeId) será el HIJO
   const completeConnection = useCallback((targetNodeId) => {
     if (!connectionMode.isActive || !connectionMode.sourceNodeId) return;
     
@@ -544,10 +546,12 @@ const Canvas = ({
       return;
     }
     
-    console.log('[Canvas] Completando conexión:', connectionMode.sourceNodeId, '->', targetNodeId);
+    // El nodo origen es el PADRE, el nodo destino es el HIJO
+    // connectNodes(childNodeId, parentNodeId)
+    console.log('[Canvas] Completando conexión: hijo', targetNodeId, '-> padre', connectionMode.sourceNodeId);
     
     if (onConnectNodes) {
-      onConnectNodes(connectionMode.sourceNodeId, targetNodeId);
+      onConnectNodes(targetNodeId, connectionMode.sourceNodeId);
     }
     
     cancelConnectionMode();

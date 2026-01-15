@@ -734,7 +734,18 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
         resetPan();
         resetZoom();
         console.log('Proyecto desde template creado exitosamente');
-      } else if (result.error) {
+      } else if (result.isNameConflict) {
+        // Conflicto de nombre duplicado - mostrar modal de conflicto
+        setNameConflictData({
+          conflictingName: templateName,
+          existingProjectId: result.existingProjectId,
+          pendingLayoutType: 'mindflow',
+          isFromTemplate: true,
+          templateNodes: templateNodes
+        });
+        setShowNameConflictModal(true);
+      } else if (result.isPlanLimit || result.error) {
+        // Límite de plan - mostrar modal de upgrade
         setUpgradeLimitType(result.limitType || 'active');
         setShowUpgradeModal(true);
       }

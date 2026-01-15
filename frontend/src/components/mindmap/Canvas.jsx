@@ -510,6 +510,45 @@ const Canvas = ({
     onSelectNode(nodeId);
   }, [onSelectNode]);
 
+  // ======== MODO DE CONEXIÓN MANUAL ========
+  
+  // Iniciar modo de conexión desde un nodo
+  const startConnectionMode = useCallback((sourceNodeId) => {
+    console.log('[Canvas] Iniciando modo conexión desde nodo:', sourceNodeId);
+    setConnectionMode({
+      isActive: true,
+      sourceNodeId,
+      mousePosition: { x: 0, y: 0 }
+    });
+  }, []);
+
+  // Cancelar modo de conexión
+  const cancelConnectionMode = useCallback(() => {
+    console.log('[Canvas] Cancelando modo conexión');
+    setConnectionMode({ isActive: false, sourceNodeId: null, mousePosition: { x: 0, y: 0 } });
+  }, []);
+
+  // Completar conexión al hacer clic en un nodo destino
+  const completeConnection = useCallback((targetNodeId) => {
+    if (!connectionMode.isActive || !connectionMode.sourceNodeId) return;
+    
+    if (targetNodeId === connectionMode.sourceNodeId) {
+      console.log('[Canvas] No se puede conectar un nodo a sí mismo');
+      cancelConnectionMode();
+      return;
+    }
+    
+    console.log('[Canvas] Completando conexión:', connectionMode.sourceNodeId, '->', targetNodeId);
+    
+    if (onConnectNodes) {
+      onConnectNodes(connectionMode.sourceNodeId, targetNodeId);
+    }
+    
+    cancelConnectionMode();
+  }, [connectionMode, onConnectNodes, cancelConnectionMode]);
+
+  // ======== FIN MODO DE CONEXIÓN MANUAL ========
+
   // Manejar selección de nodo con soporte para CTRL/CMD + clic
   const handleNodeSelect = useCallback((nodeId, e) => {
     // Si estamos en modo conexión, completar la conexión

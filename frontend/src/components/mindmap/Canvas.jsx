@@ -727,16 +727,22 @@ const Canvas = ({
       const mouseX = (e.clientX - rect.left - adjustedPanX) / zoom;
       const mouseY = (e.clientY - rect.top - adjustedPanY) / zoom;
       
+      // Obtener el nodo origen para calcular anclajes inteligentes
+      const sourceNode = nodes.find(n => n.id === connectionMode.sourceNodeId);
+      
       // Buscar nodo cercano para snap (excluyendo el nodo origen)
       let snapTarget = null;
+      let snapAnchorData = null;
       let minDistance = SNAP_DISTANCE;
       
       for (const node of nodes) {
         if (node.id === connectionMode.sourceNodeId) continue;
         
         // Calcular centro del nodo
-        const nodeCenterX = node.x + (node.width || 160) / 2;
-        const nodeCenterY = node.y + (node.height || 64) / 2;
+        const nodeWidth = node.width || 160;
+        const nodeHeight = node.height || 64;
+        const nodeCenterX = node.x + nodeWidth / 2;
+        const nodeCenterY = node.y + nodeHeight / 2;
         
         // Calcular distancia al cursor
         const distance = Math.sqrt(
@@ -744,9 +750,7 @@ const Canvas = ({
           Math.pow(mouseY - nodeCenterY, 2)
         );
         
-        // También considerar si el cursor está dentro del bounding box del nodo
-        const nodeWidth = node.width || 160;
-        const nodeHeight = node.height || 64;
+        // También considerar si el cursor está dentro del bounding box del nodo (con margen)
         const isInsideNode = 
           mouseX >= node.x - 20 && 
           mouseX <= node.x + nodeWidth + 20 &&
@@ -756,13 +760,24 @@ const Canvas = ({
         if (isInsideNode || distance < minDistance) {
           minDistance = distance;
           snapTarget = node.id;
+          
+          // Calcular el mejor punto de anclaje para el snap usando getSmartAnchorPoints
+          if (sourceNode) {
+            const anchors = getSmartAnchorPoints(
+              sourceNode, node,
+              sourceNode.width || 160, sourceNode.height || 64,
+              nodeWidth, nodeHeight
+            );
+            snapAnchorData = anchors.target; // { point, x, y }
+          }
         }
       }
       
       setConnectionMode(prev => ({
         ...prev,
         mousePosition: { x: mouseX, y: mouseY },
-        snapTargetId: snapTarget
+        snapTargetId: snapTarget,
+        snapAnchor: snapAnchorData
       }));
       return;
     }

@@ -1185,16 +1185,16 @@ const Canvas = ({
         </button>
       )}
 
-      {/* Indicador de modo conexión activo */}
+      {/* Indicador de modo conexión activo - permanece para múltiples conexiones */}
       {connectionMode.isActive && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-purple-600 text-white rounded-full shadow-lg flex items-center gap-2 animate-pulse">
-          <Link2 size={16} />
-          <span className="text-sm font-medium">Haz clic en un nodo para conectar</span>
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-purple-600 text-white rounded-full shadow-lg flex items-center gap-2">
+          <Link2 size={16} className="animate-pulse" />
+          <span className="text-sm font-medium">Modo conexión activo - Haz clic en nodos para conectar</span>
           <button 
             onClick={cancelConnectionMode}
-            className="ml-2 px-2 py-0.5 bg-white/20 rounded text-xs hover:bg-white/30"
+            className="ml-2 px-2 py-0.5 bg-white/20 rounded text-xs hover:bg-white/30 transition-colors"
           >
-            ESC
+            ESC para salir
           </button>
         </div>
       )}

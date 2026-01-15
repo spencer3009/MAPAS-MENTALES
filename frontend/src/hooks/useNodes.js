@@ -1973,7 +1973,7 @@ export const useNodes = () => {
         }
         // Valores por defecto si no hay configuración guardada
         return {
-          icon: { name: 'CircleCheck', color: '#10b981' },
+          icon: { name: 'CircleCheck', color: '#64748b' },
           textAlign: 'left'
         };
       };
@@ -2101,7 +2101,7 @@ export const useNodes = () => {
             return defaults;
           }
         } catch (e) { /* ignore */ }
-        return { icon: { name: 'CircleCheck', color: '#10b981' }, textAlign: 'left' };
+        return { icon: { name: 'CircleCheck', color: '#64748b' }, textAlign: 'left' };
       };
       const nodeDefaults = getNodeDefaults();
 
@@ -2203,7 +2203,7 @@ export const useNodes = () => {
             return defaults;
           }
         } catch (e) { /* ignore */ }
-        return { icon: { name: 'CircleCheck', color: '#10b981' }, textAlign: 'left' };
+        return { icon: { name: 'CircleCheck', color: '#64748b' }, textAlign: 'left' };
       };
       const nodeDefaults = getNodeDefaults();
 

@@ -853,7 +853,11 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
       
       if (result.success) {
         console.log('Proyecto duplicado exitosamente:', result.newName);
-        // Opcionalmente cambiar al nuevo proyecto
+        
+        // Mostrar toast de éxito con el nombre del nuevo mapa
+        showSuccess(`Mapa duplicado. Se creó "${result.newName}"`);
+        
+        // Cambiar al nuevo proyecto automáticamente
         if (result.newProjectId) {
           switchProject(result.newProjectId);
           resetPan();
@@ -869,7 +873,7 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
     } catch (error) {
       console.error('Error al duplicar proyecto:', error);
     }
-  }, [duplicateProject, switchProject, resetPan, resetZoom]);
+  }, [duplicateProject, switchProject, resetPan, resetZoom, showSuccess]);
 
   // Handler para confirmar eliminación (soft delete - va a la papelera)
   const handleConfirmDelete = useCallback(() => {

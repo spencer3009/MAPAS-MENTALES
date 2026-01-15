@@ -969,6 +969,38 @@ const Canvas = ({
           showLineButtons={layoutType === 'mindhybrid' || layoutType === 'mindtree'}
         />
 
+        {/* Línea de preview durante modo de conexión */}
+        {connectionMode.isActive && connectionMode.sourceNodeId && (
+          <svg 
+            className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-visible"
+            style={{ minWidth: '5000px', minHeight: '5000px' }}
+          >
+            {(() => {
+              const sourceNode = nodes.find(n => n.id === connectionMode.sourceNodeId);
+              if (!sourceNode) return null;
+              
+              const sourceX = sourceNode.x + (sourceNode.width || 160) / 2;
+              const sourceY = sourceNode.y + (sourceNode.height || 64) / 2;
+              const targetX = connectionMode.mousePosition.x;
+              const targetY = connectionMode.mousePosition.y;
+              
+              // Línea recta con estilo punteado
+              return (
+                <line
+                  x1={sourceX}
+                  y1={sourceY}
+                  x2={targetX}
+                  y2={targetY}
+                  stroke="#8b5cf6"
+                  strokeWidth={2}
+                  strokeDasharray="8,4"
+                  className="animate-pulse"
+                />
+              );
+            })()}
+          </svg>
+        )}
+
         {nodes.map(node => (
           <NodeItem
             key={node.id}

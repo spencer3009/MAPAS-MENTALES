@@ -48,6 +48,7 @@ const Sidebar = ({
   const [planInfo, setPlanInfo] = useState(null);
   const [openMenuId, setOpenMenuId] = useState(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+  const [showNodeSettings, setShowNodeSettings] = useState(false);
   const menuContainerRef = useRef(null);
   const menuButtonRefs = useRef({});
 

@@ -13,7 +13,7 @@ import CanvasGrid from './CanvasGrid';
 import CanvasRulers, { RULER_SIZE } from './CanvasRulers';
 import NavigationModeButton from './NavigationModeButton';
 import { useTouchGestures } from '../../hooks/useTouchGestures';
-import { getSmartAnchorToPosition, generatePreviewPath } from '../../utils/curve';
+import { getSmartAnchorToPosition, getSmartAnchorPoints, generatePreviewPath, generateSmartPath } from '../../utils/curve';
 
 const Canvas = ({
   nodes,

@@ -537,13 +537,13 @@ const Canvas = ({
   // Completar conexión al hacer clic en un nodo destino
   // El nodo origen (sourceNodeId) será el PADRE
   // El nodo destino (targetNodeId) será el HIJO
+  // El modo conexión permanece activo para permitir múltiples conexiones
   const completeConnection = useCallback((targetNodeId) => {
     if (!connectionMode.isActive || !connectionMode.sourceNodeId) return;
     
     if (targetNodeId === connectionMode.sourceNodeId) {
       console.log('[Canvas] No se puede conectar un nodo a sí mismo');
-      cancelConnectionMode();
-      return;
+      return; // No cancelar el modo, solo ignorar el clic
     }
     
     // El nodo origen es el PADRE, el nodo destino es el HIJO
@@ -551,11 +551,22 @@ const Canvas = ({
     console.log('[Canvas] Completando conexión: hijo', targetNodeId, '-> padre', connectionMode.sourceNodeId);
     
     if (onConnectNodes) {
-      onConnectNodes(targetNodeId, connectionMode.sourceNodeId);
+      const success = onConnectNodes(targetNodeId, connectionMode.sourceNodeId);
+      if (success) {
+        console.log('[Canvas] Conexión exitosa - modo conexión sigue activo');
+      }
     }
     
-    cancelConnectionMode();
-  }, [connectionMode, onConnectNodes, cancelConnectionMode]);
+    // Limpiar el snap pero mantener el modo activo
+    setConnectionMode(prev => ({
+      ...prev,
+      snapTargetId: null,
+      snapAnchor: null
+    }));
+    
+    // NO cancelar el modo - permanece activo para conectar más nodos
+    // El usuario puede presionar ESC o hacer clic en el canvas para salir
+  }, [connectionMode, onConnectNodes]);
 
   // ======== FIN MODO DE CONEXIÓN MANUAL ========
 

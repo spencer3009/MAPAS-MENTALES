@@ -409,7 +409,30 @@ const ConnectionsLayer = memo(({
         className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-visible"
         style={{ minWidth: '5000px', minHeight: '5000px' }}
       >
-        {connections}
+        {/* Renderizar conexiones */}
+        {connections.map(conn => (
+          <g key={conn.connectionId}>
+            {/* Línea invisible más ancha para detectar hover */}
+            <path
+              d={conn.path}
+              stroke="transparent"
+              strokeWidth={Math.max(conn.lineWidth * 5, 20)}
+              fill="none"
+              className="pointer-events-auto cursor-pointer"
+              onMouseEnter={() => setHoveredConnectionId(conn.connectionId)}
+              onMouseLeave={() => setHoveredConnectionId(null)}
+            />
+            {/* Línea visible */}
+            <path
+              d={conn.path}
+              stroke={conn.isHovered ? '#ef4444' : conn.lineColor}
+              strokeWidth={conn.isHovered ? conn.lineWidth + 1 : conn.lineWidth}
+              strokeDasharray={conn.strokeDasharray}
+              fill="none"
+              className="transition-all duration-150"
+            />
+          </g>
+        ))}
         
         {/* Líneas verticales que conectan hermanos horizontales al botón "+" */}
         {horizontalLineButtons.map(btn => {
@@ -424,6 +447,36 @@ const ConnectionsLayer = memo(({
           );
         })}
       </svg>
+      
+      {/* Botones de desconectar - aparecen en hover sobre la línea */}
+      {showDisconnectButtons && connections.map(conn => conn.isHovered && (
+        <button
+          key={`disconnect-${conn.connectionId}`}
+          onClick={(e) => handleDisconnect(e, conn.nodeId)}
+          onMouseEnter={() => setHoveredConnectionId(conn.connectionId)}
+          onMouseLeave={() => setHoveredConnectionId(null)}
+          onMouseDown={(e) => e.stopPropagation()}
+          className="
+            absolute z-50
+            w-7 h-7 rounded-full
+            bg-white hover:bg-red-500
+            text-gray-400 hover:text-white
+            shadow-lg border border-gray-200 hover:border-red-500
+            flex items-center justify-center
+            transition-all duration-200
+            hover:scale-110 active:scale-95
+            pointer-events-auto
+          "
+          style={{
+            left: conn.midX,
+            top: conn.midY,
+            transform: 'translate(-50%, -50%)'
+          }}
+          title="Desconectar nodos"
+        >
+          <Unlink size={14} />
+        </button>
+      ))}
       
       {/* Botones "+" para líneas horizontales - renderizados fuera del SVG para interactividad */}
       {horizontalLineButtons.map(btn => (

@@ -21,7 +21,6 @@ const DockSidebar = ({
   onOpenReminders,
   onOpenTrash,
   onOpenSettings,
-  onOpenNodeSettings,
   onOpenBoards,
   onOpenContacts,
   onOpenWhatsApp,
@@ -31,7 +30,6 @@ const DockSidebar = ({
   trashCount = 0
 }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   
   // Determinar si estamos en la vista de proyectos
   const isInProjectsView = activeView === 'projects';

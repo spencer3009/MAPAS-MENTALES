@@ -2662,13 +2662,58 @@ async def create_project(
     current_user: dict = Depends(get_current_user)
 ):
     """Crear un nuevo proyecto"""
+    username = current_user["username"]
+    
+    # === PREVENCIÓN DE DUPLICADOS ===
+    # Verificar si ya existe un proyecto con el mismo nombre (no eliminado)
+    existing_by_name = await db.projects.find_one({
+        "username": username,
+        "name": project_data.name,
+        "isDeleted": {"$ne": True}
+    })
+    
+    if existing_by_name:
+        # Si ya existe un proyecto con ese nombre, retornar error con info del existente
+        raise HTTPException(
+            status_code=409,  # Conflict
+            detail={
+                "message": f"Ya existe un proyecto con el nombre '{project_data.name}'",
+                "existing_project_id": existing_by_name.get("id"),
+                "existing_project_name": existing_by_name.get("name"),
+                "suggestion": "Usa un nombre diferente o abre el proyecto existente"
+            }
+        )
+    
+    # Verificar si el ID ya existe (para evitar duplicados por ID también)
+    if project_data.id:
+        existing_by_id = await db.projects.find_one({
+            "id": project_data.id,
+            "username": username
+        })
+        if existing_by_id:
+            # El proyecto ya existe, actualizar en lugar de crear
+            logger.info(f"Proyecto {project_data.id} ya existe, actualizando en lugar de crear")
+            now = datetime.now(timezone.utc).isoformat()
+            await db.projects.update_one(
+                {"id": project_data.id},
+                {"$set": {
+                    "name": project_data.name,
+                    "nodes": [node.model_dump() for node in project_data.nodes],
+                    "updatedAt": now,
+                    "lastActiveAt": now,
+                    "layoutType": project_data.layoutType or existing_by_id.get("layoutType", "mindflow")
+                }}
+            )
+            updated = await db.projects.find_one({"id": project_data.id}, {"_id": 0})
+            return updated
+    
     # Obtener usuario y sus límites de plan
-    user = await db.users.find_one({"username": current_user["username"]}, {"_id": 0})
+    user = await db.users.find_one({"username": username}, {"_id": 0})
     plan_limits = get_user_plan_limits(user or {})
     
     # Contar mapas activos (no eliminados)
     active_maps_count = await db.projects.count_documents({
-        "username": current_user["username"],
+        "username": username,
         "isDeleted": {"$ne": True}
     })
     
@@ -2705,7 +2750,7 @@ async def create_project(
         "id": project_data.id or str(uuid.uuid4()),
         "name": project_data.name,
         "nodes": [node.model_dump() for node in project_data.nodes],
-        "username": current_user["username"],
+        "username": username,
         "createdAt": now,
         "updatedAt": now,
         "lastActiveAt": now,
@@ -2718,9 +2763,11 @@ async def create_project(
     
     # Incrementar contador histórico de mapas creados
     await db.users.update_one(
-        {"username": current_user["username"]},
+        {"username": username},
         {"$inc": {"total_maps_created": 1}}
     )
+    
+    logger.info(f"Nuevo proyecto creado: {project['name']} (ID: {project['id']}) por {username}")
     
     # Return without _id
     project.pop("_id", None)

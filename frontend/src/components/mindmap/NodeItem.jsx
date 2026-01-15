@@ -534,22 +534,31 @@ const NodeItem = memo(({
         borderColor: isDashedNode ? 'transparent' : (isLineShape || isCloudShape ? 'transparent' : borderColor),
         borderRadius: isOrbitLayout ? '50%' : undefined,
         color: isDashedNode ? '#374151' : textColor,
-        zIndex: isInSelection ? 20 : 10,
+        zIndex: isInSelection || isSnapTarget ? 20 : 10,
         padding: isDashedNode ? '8px 4px' : (isOrbitLayout ? '8px' : undefined),
         // Opacidad reducida cuando está completado (41%)
         opacity: node.isCompleted ? 0.41 : 1,
-        // Agregar box-shadow extra para selección múltiple (más visible)
-        boxShadow: isMultiSelected 
-          ? '0 0 0 4px rgba(37, 99, 235, 0.6), 0 10px 25px -5px rgba(0, 0, 0, 0.2)' 
-          : isOrbitLayout 
-            ? '0 4px 12px rgba(0, 0, 0, 0.15)' 
-            : undefined,
-        // Cambiar borde cuando está multi-seleccionado para mayor énfasis
-        outline: isMultiSelected ? '2px solid #2563eb' : 'none',
-        outlineOffset: isMultiSelected ? '3px' : 0,
+        // Agregar box-shadow extra para selección múltiple (más visible) o SNAP TARGET
+        boxShadow: isSnapTarget
+          ? '0 0 0 3px rgba(34, 197, 94, 0.8), 0 0 20px 5px rgba(34, 197, 94, 0.4), 0 10px 25px -5px rgba(0, 0, 0, 0.2)'
+          : isMultiSelected 
+            ? '0 0 0 4px rgba(37, 99, 235, 0.6), 0 10px 25px -5px rgba(0, 0, 0, 0.2)' 
+            : isOrbitLayout 
+              ? '0 4px 12px rgba(0, 0, 0, 0.15)' 
+              : undefined,
+        // Cambiar borde cuando está multi-seleccionado o es snap target
+        outline: isSnapTarget 
+          ? '3px solid #22c55e' 
+          : isMultiSelected 
+            ? '2px solid #2563eb' 
+            : 'none',
+        outlineOffset: isSnapTarget ? '2px' : isMultiSelected ? '3px' : 0,
+        // Animación de pulso para snap target
+        animation: isSnapTarget ? 'pulse-snap 0.8s ease-in-out infinite' : 'none',
         // Optimización para movimiento suave
         willChange: 'transform, left, top',
-        transform: 'translateZ(0)', // Forzar aceleración por GPU
+        transform: isSnapTarget ? 'translateZ(0) scale(1.02)' : 'translateZ(0)', // Escala sutil para snap
+        transition: isSnapTarget ? 'transform 0.15s ease-out, box-shadow 0.15s ease-out, outline 0.15s ease-out' : 'none',
         // MODO NAVEGACIÓN: Deshabilitar completamente la captura de eventos táctiles
         // para que el canvas pueda hacer pan desde cualquier punto
         pointerEvents: isNavigationMode ? 'none' : 'auto',

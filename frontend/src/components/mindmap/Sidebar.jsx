@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { 
   Plus, FileText, Trash2, Check, Pencil, 
   Bell, Pin, PinOff, GripVertical, ArrowUpDown, ExternalLink, Archive,
-  Crown, Zap, Sparkles, MoreHorizontal
+  Crown, Zap, Sparkles, MoreHorizontal, Copy
 } from 'lucide-react';
 
 // Use relative URLs for production compatibility
@@ -31,6 +31,7 @@ const Sidebar = ({
   onNewBlank,
   onNewFromTemplate,
   onDeleteProject,
+  onDuplicateProject,
   onSwitchProject,
   onRenameProject,
   onProjectReminder,

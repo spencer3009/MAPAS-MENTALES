@@ -2085,6 +2085,26 @@ export const useNodes = () => {
       const baseY = parentCenterY - newNodeHeight / 2; // Y donde el centro del nodo se alinea con el centro del padre
       const newY = baseY + (horizontalSiblings.length * verticalSpacing);
       
+      // Obtener valores por defecto de configuración
+      const getNodeDefaults = () => {
+        try {
+          const saved = localStorage.getItem('mindora_node_defaults');
+          if (saved) {
+            const settings = JSON.parse(saved);
+            const defaults = {};
+            if (settings.showIconByDefault && settings.defaultIcon) {
+              defaults.icon = settings.defaultIcon;
+            }
+            if (settings.textAlignLeft) {
+              defaults.textAlign = 'left';
+            }
+            return defaults;
+          }
+        } catch (e) { /* ignore */ }
+        return { icon: { name: 'CircleCheck', color: '#10b981' }, textAlign: 'left' };
+      };
+      const nodeDefaults = getNodeDefaults();
+
       const newNode = {
         id: newId,
         text: 'Nuevo Nodo',
@@ -2095,7 +2115,8 @@ export const useNodes = () => {
         width: 160,
         height: newNodeHeight,
         nodeType: options?.nodeType || 'default',
-        childDirection: 'horizontal' // Marca la dirección
+        childDirection: 'horizontal', // Marca la dirección
+        ...nodeDefaults
       };
       
       console.log('[MindHybrid] Creando nodo HORIZONTAL:', newNode);

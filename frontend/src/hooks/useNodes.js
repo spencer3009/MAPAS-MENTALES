@@ -1953,6 +1953,33 @@ export const useNodes = () => {
         newY = position.y;
       }
 
+      // Obtener valores por defecto de configuración
+      const getNodeDefaults = () => {
+        try {
+          const saved = localStorage.getItem('mindora_node_defaults');
+          if (saved) {
+            const settings = JSON.parse(saved);
+            const defaults = {};
+            if (settings.showIconByDefault && settings.defaultIcon) {
+              defaults.icon = settings.defaultIcon;
+            }
+            if (settings.textAlignLeft) {
+              defaults.textAlign = 'left';
+            }
+            return defaults;
+          }
+        } catch (e) {
+          console.warn('Error loading node defaults:', e);
+        }
+        // Valores por defecto si no hay configuración guardada
+        return {
+          icon: { name: 'CircleCheck', color: '#10b981' },
+          textAlign: 'left'
+        };
+      };
+
+      const nodeDefaults = getNodeDefaults();
+
       const newNode = {
         id: newId,
         text: (options?.nodeType === 'dashed' || options?.nodeType === 'dashed_text') ? '' : 'Nuevo Nodo', // Texto vacío para dashed (mostrará placeholder)
@@ -1965,7 +1992,9 @@ export const useNodes = () => {
         // Normalizar 'dashed' a 'dashed_text' para nuevos nodos
         nodeType: options?.nodeType === 'dashed' ? 'dashed_text' : (options?.nodeType || 'default'), // 'default' | 'dashed_text'
         // MindAxis: guardar el lado del eje
-        ...(axisSide && { axisSide })
+        ...(axisSide && { axisSide }),
+        // Aplicar valores por defecto (ícono y alineación)
+        ...nodeDefaults
       };
 
       console.log('Creating new node:', newNode, 'Layout:', layoutType);

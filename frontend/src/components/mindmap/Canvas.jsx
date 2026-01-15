@@ -511,6 +511,12 @@ const Canvas = ({
 
   // Manejar selección de nodo con soporte para CTRL/CMD + clic
   const handleNodeSelect = useCallback((nodeId, e) => {
+    // Si estamos en modo conexión, completar la conexión
+    if (connectionMode.isActive) {
+      completeConnection(nodeId);
+      return;
+    }
+    
     const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
     const modifierKey = isMac ? e?.metaKey : e?.ctrlKey;
     
@@ -530,7 +536,7 @@ const Canvas = ({
       // Si no está en selección múltiple, seleccionar solo este nodo
       onSelectNode(nodeId);
     }
-  }, [onSelectNode, onAddToSelection, selectedNodeIds]);
+  }, [connectionMode.isActive, completeConnection, onSelectNode, onAddToSelection, selectedNodeIds]);
 
   // Handlers del popover de enlaces
   const handleToolbarLink = useCallback(() => {

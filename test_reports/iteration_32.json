@@ -1,0 +1,69 @@
+{
+  "summary": "Backend testing completed for 'Duplicar' (Duplicate Project) feature. All 13 tests passed. The implementation correctly copies all nodes with new IDs, maps parentIds properly, and follows the unique name pattern '- copia', '- copia 2', etc.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/tests/test_duplicate_project.py",
+    "/app/test_reports/pytest/pytest_duplicate_project.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "✅ useNodes.js generateUniqueCopyName (lines 3434-3451): Correctly generates unique names following pattern 'Name - copia', 'Name - copia 2', etc.",
+    "✅ useNodes.js duplicateProject (lines 3454-3536): Correctly creates new IDs for all nodes using crypto.randomUUID()",
+    "✅ useNodes.js duplicateProject: Correctly maps parentId, connectorParentId, connectorTargetId to new IDs",
+    "✅ useNodes.js duplicateProject: Preserves layoutType from source project",
+    "✅ useNodes.js duplicateProject: Does NOT copy isPinned state (correct behavior)",
+    "✅ useNodes.js duplicateProject: Handles 409 conflict by adding timestamp fallback",
+    "✅ useNodes.js duplicateProject: Handles 403 plan limit and returns isPlanLimit flag",
+    "✅ Sidebar.jsx (lines 687-698): 'Duplicar' option correctly placed in project menu with Copy icon",
+    "✅ MindMapApp.jsx handleDuplicateProject (lines 848-871): Correctly calls duplicateProject, switches to new project, handles plan limits",
+    "✅ Backend POST /api/projects: Correctly validates name conflicts (409) and plan limits (403)"
+  ],
+  "updated_files": [
+    "/app/tests/test_duplicate_project.py"
+  ],
+  "success_rate": {
+    "backend": "100% (13/13 tests passed)",
+    "frontend": "N/A (backend-only testing as requested)"
+  },
+  "test_credentials": {
+    "admin_user": {
+      "username": "admin",
+      "password": "admin123"
+    }
+  },
+  "seed_data_creation": "Test projects created with TEST_ prefix and cleaned up after each test",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Duplicate project feature fully tested. Backend correctly handles: 1) Creating projects with unique names following '- copia' pattern, 2) Node ID generation and parentId mapping, 3) Layout type preservation, 4) Plan limit validation (403), 5) Name conflict handling (409). Test file: /app/tests/test_duplicate_project.py covers all scenarios.",
+  "features_tested": {
+    "backend_apis": [
+      "POST /api/projects - ✅ Creates duplicate with new ID",
+      "POST /api/projects - ✅ Accepts '- copia' suffix naming pattern",
+      "POST /api/projects - ✅ Accepts '- copia 2', '- copia 3' sequence",
+      "POST /api/projects - ✅ Returns 409 for duplicate name conflict",
+      "POST /api/projects - ✅ Preserves layoutType (mindflow, mindtree)",
+      "POST /api/projects - ✅ Stores all node properties correctly",
+      "GET /api/projects - ✅ Returns all projects including duplicates",
+      "GET /api/projects/{id} - ✅ Returns specific project",
+      "PUT /api/projects/{id} - ✅ Updates duplicate independently",
+      "DELETE /api/projects/{id} - ✅ Deletes test projects for cleanup",
+      "GET /api/user/plan-limits - ✅ Admin has unlimited maps (max_active_maps=-1)"
+    ],
+    "code_review": [
+      "✅ useNodes.js lines 3434-3451: generateUniqueCopyName correctly checks existing names case-insensitively",
+      "✅ useNodes.js lines 3467-3481: Node ID mapping creates idMap and updates parentId references",
+      "✅ useNodes.js lines 3483-3491: New project preserves layoutType, sets isPinned=false",
+      "✅ useNodes.js lines 3496-3519: Error handling for 409 (name conflict) and 403 (plan limit)",
+      "✅ Sidebar.jsx lines 687-698: Duplicar button with Copy icon in project menu",
+      "✅ MindMapApp.jsx lines 848-871: handleDuplicateProject switches to new project after duplication"
+    ]
+  }
+}

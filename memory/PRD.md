@@ -2,6 +2,27 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-15: FEATURE — Efecto "Snap" Visual para Conexión de Nodos ✅ COMPLETADO
+- **Funcionalidad**: Feedback visual cuando el cursor se acerca a un nodo válido durante el modo conexión manual
+- **Implementación**:
+  - **Detección de snap**: Se activa cuando el cursor está dentro de 60px del centro de un nodo, o dentro de su bounding box (+20px de margen)
+  - **Estado en Canvas.jsx**: `connectionMode.snapTargetId` y `connectionMode.snapAnchor` para tracking
+  - **Cálculo inteligente de anchor**: Usa `getSmartAnchorPoints()` para determinar el mejor punto de conexión
+- **Efectos visuales en el nodo objetivo (NodeItem.jsx)**:
+  - **Borde verde brillante**: `outline: 3px solid #22c55e`
+  - **Efecto de resplandor (glow)**: `box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.8), 0 0 20px 5px rgba(34, 197, 94, 0.4)`
+  - **Animación de pulso**: `animation: pulse-snap 0.8s ease-in-out infinite` (definido en index.css)
+  - **Escala sutil**: `transform: scale(1.02)` con transición suave
+- **Cambio en línea de preview**:
+  - **Sin snap**: Línea púrpura punteada (`#8b5cf6`, `strokeDasharray: "8,4"`)
+  - **Con snap activo**: Línea verde sólida (`#22c55e`, sin dash), usando `generateSmartPath()` para curva más limpia
+- **UX mejorada**: El usuario sabe exactamente cuándo puede soltar para crear la conexión
+- **Testing**: 100% verificado (6/6 features) - `/app/test_reports/iteration_33.json`
+- **Archivos modificados**:
+  - `/app/frontend/src/components/mindmap/Canvas.jsx` - handleMouseMove, preview SVG, prop isSnapTarget
+  - `/app/frontend/src/components/mindmap/NodeItem.jsx` - isSnapTarget prop y estilos visuales
+  - `/app/frontend/src/index.css` - @keyframes pulse-snap
+
 ### 2026-01-15: FEATURE — Sistema de Anclaje Inteligente para Conectores ✅ COMPLETADO
 - **Sistema de anchor points inteligente** (`/app/frontend/src/utils/curve.js`):
   - 4 puntos de anclaje por nodo: derecha, izquierda, arriba, abajo

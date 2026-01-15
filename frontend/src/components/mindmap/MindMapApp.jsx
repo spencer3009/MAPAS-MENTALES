@@ -84,6 +84,7 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
     createBlankMap,
     loadFromTemplate,
     deleteProject,
+    duplicateProject,
     switchProject,
     renameProject,
     pinProject,

@@ -880,12 +880,10 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
         // Mostrar toast de éxito
         showSuccess(`Mapa duplicado. Se creó "${result.newName}"`);
         
-        // Cambiar al nuevo proyecto automáticamente
-        if (result.newProjectId) {
-          switchProject(result.newProjectId);
-          resetPan();
-          resetZoom();
-        }
+        // Reset pan y zoom para el nuevo proyecto
+        // (el switchProject ya se hizo en duplicateProject)
+        resetPan();
+        resetZoom();
       } else if (result.isPlanLimit) {
         // Cerrar modal de duplicación y mostrar modal de upgrade
         setShowDuplicateModal(false);
@@ -900,7 +898,7 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
     } finally {
       setIsDuplicating(false);
     }
-  }, [projectToDuplicate, duplicateProject, switchProject, resetPan, resetZoom, showSuccess]);
+  }, [projectToDuplicate, duplicateProject, resetPan, resetZoom, showSuccess]);
 
   // Handler para confirmar eliminación (soft delete - va a la papelera)
   const handleConfirmDelete = useCallback(() => {

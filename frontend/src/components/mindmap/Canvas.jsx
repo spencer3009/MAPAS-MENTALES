@@ -1014,7 +1014,7 @@ const Canvas = ({
           showLineButtons={layoutType === 'mindhybrid' || layoutType === 'mindtree'}
         />
 
-        {/* Línea de preview durante modo de conexión con anclaje inteligente */}
+        {/* Línea de preview durante modo de conexión con anclaje inteligente y SNAP */}
         {connectionMode.isActive && connectionMode.sourceNodeId && (
           <svg 
             className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-visible"
@@ -1024,8 +1024,11 @@ const Canvas = ({
               const sourceNode = nodes.find(n => n.id === connectionMode.sourceNodeId);
               if (!sourceNode) return null;
               
-              const targetX = connectionMode.mousePosition.x;
-              const targetY = connectionMode.mousePosition.y;
+              // Si hay snap activo, usar las coordenadas del anchor del nodo objetivo
+              // Si no, usar la posición del mouse
+              const hasSnap = connectionMode.snapTargetId && connectionMode.snapAnchor;
+              const targetX = hasSnap ? connectionMode.snapAnchor.x : connectionMode.mousePosition.x;
+              const targetY = hasSnap ? connectionMode.snapAnchor.y : connectionMode.mousePosition.y;
               
               // Usar anclaje inteligente para la línea de preview
               const anchor = getSmartAnchorToPosition(
@@ -1036,22 +1039,35 @@ const Canvas = ({
                 sourceNode.height || 64
               );
               
-              // Generar path suave desde el anchor hasta el cursor
-              const previewPath = generatePreviewPath(
-                anchor.x, anchor.y,
-                targetX, targetY,
-                anchor.point
-              );
+              // Generar path suave desde el anchor hasta el destino
+              // Si hay snap, usar generateSmartPath para una curva más limpia
+              let previewPath;
+              if (hasSnap) {
+                previewPath = generateSmartPath(
+                  { x: anchor.x, y: anchor.y, point: anchor.point },
+                  { x: targetX, y: targetY, point: connectionMode.snapAnchor.point }
+                );
+              } else {
+                previewPath = generatePreviewPath(
+                  anchor.x, anchor.y,
+                  targetX, targetY,
+                  anchor.point
+                );
+              }
               
               return (
                 <path
                   d={previewPath}
-                  stroke="#8b5cf6"
-                  strokeWidth={2.5}
-                  strokeDasharray="8,4"
+                  stroke={hasSnap ? "#22c55e" : "#8b5cf6"}
+                  strokeWidth={hasSnap ? 3 : 2.5}
+                  strokeDasharray={hasSnap ? "none" : "8,4"}
                   fill="none"
-                  className="transition-all duration-75"
-                  style={{ filter: 'drop-shadow(0 0 3px rgba(139, 92, 246, 0.5))' }}
+                  className="transition-all duration-100"
+                  style={{ 
+                    filter: hasSnap 
+                      ? 'drop-shadow(0 0 6px rgba(34, 197, 94, 0.6))' 
+                      : 'drop-shadow(0 0 3px rgba(139, 92, 246, 0.5))' 
+                  }}
                 />
               );
             })()}

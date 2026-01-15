@@ -51,6 +51,7 @@ const Canvas = ({
   onAddNodeFromLine,
   onDuplicateNode,
   onDeleteNode,
+  onDisconnectNode,
   onChangeNodeColor,
   onChangeNodeType,
   onChangeLineWidth,

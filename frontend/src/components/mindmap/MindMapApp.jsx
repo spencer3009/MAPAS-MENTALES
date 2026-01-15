@@ -754,6 +754,89 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
     }
   }, [loadFromTemplate, resetPan, resetZoom, checkVerification]);
 
+  // Handler para reemplazar proyecto existente (desde conflicto de nombre)
+  const handleReplaceExistingProject = useCallback(async (existingProjectId) => {
+    try {
+      console.log('Reemplazando proyecto existente:', existingProjectId);
+      
+      // Primero eliminar el proyecto existente
+      await deleteProject(existingProjectId);
+      
+      // Ahora crear el nuevo proyecto con el mismo nombre
+      const { conflictingName, pendingLayoutType, isFromTemplate, templateNodes } = nameConflictData;
+      
+      let result;
+      if (isFromTemplate && templateNodes) {
+        result = await loadFromTemplate(templateNodes, conflictingName, pendingLayoutType);
+      } else {
+        result = await createBlankMap(conflictingName, pendingLayoutType);
+      }
+      
+      if (result.success) {
+        resetPan();
+        resetZoom();
+        console.log('Proyecto reemplazado exitosamente');
+      }
+    } catch (error) {
+      console.error('Error al reemplazar proyecto:', error);
+    } finally {
+      setShowNameConflictModal(false);
+      setNameConflictData({
+        conflictingName: '',
+        existingProjectId: null,
+        pendingLayoutType: 'mindflow',
+        isFromTemplate: false,
+        templateNodes: null
+      });
+    }
+  }, [nameConflictData, deleteProject, createBlankMap, loadFromTemplate, resetPan, resetZoom]);
+
+  // Handler para crear proyecto con nombre diferente (desde conflicto de nombre)
+  const handleRenameAndCreate = useCallback(async (newName) => {
+    try {
+      console.log('Creando proyecto con nuevo nombre:', newName);
+      
+      const { pendingLayoutType, isFromTemplate, templateNodes } = nameConflictData;
+      
+      let result;
+      if (isFromTemplate && templateNodes) {
+        result = await loadFromTemplate(templateNodes, newName, pendingLayoutType);
+      } else {
+        result = await createBlankMap(newName, pendingLayoutType);
+      }
+      
+      if (result.success) {
+        resetPan();
+        resetZoom();
+        console.log('Proyecto creado con nuevo nombre exitosamente');
+      } else if (result.isNameConflict) {
+        // Otro conflicto de nombre - actualizar el modal
+        setNameConflictData(prev => ({
+          ...prev,
+          conflictingName: newName,
+          existingProjectId: result.existingProjectId
+        }));
+        return; // No cerrar el modal
+      } else if (result.isPlanLimit || result.error) {
+        // Límite de plan - mostrar modal de upgrade
+        setShowNameConflictModal(false);
+        setUpgradeLimitType(result.limitType || 'active');
+        setShowUpgradeModal(true);
+      }
+    } catch (error) {
+      console.error('Error al crear proyecto con nuevo nombre:', error);
+    } finally {
+      setShowNameConflictModal(false);
+      setNameConflictData({
+        conflictingName: '',
+        existingProjectId: null,
+        pendingLayoutType: 'mindflow',
+        isFromTemplate: false,
+        templateNodes: null
+      });
+    }
+  }, [nameConflictData, createBlankMap, loadFromTemplate, resetPan, resetZoom]);
+
   // Handler para eliminar proyecto - Abrir modal
   const handleDeleteProjectClick = useCallback((projectId) => {
     setProjectToDelete(projectId || activeProjectId);

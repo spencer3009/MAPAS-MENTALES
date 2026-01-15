@@ -2,6 +2,26 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-15: FEATURE — Duplicar Mapas ✅ COMPLETADO
+- **Nueva funcionalidad**: Opción "Duplicar" en el menú de opciones de cada proyecto (tres puntos)
+- **Comportamiento**:
+  - Crea una copia exacta del mapa incluyendo todos los nodos, estructura, conexiones y estilos
+  - Genera nuevos IDs únicos para todos los nodos (usando `crypto.randomUUID()`)
+  - Mapea correctamente los `parentId`, `connectorParentId` y `connectorTargetId` a los nuevos IDs
+  - No copia el estado de anclado (`isPinned = false`)
+- **Nombre único automático**:
+  - Primera copia: "Nombre Original - copia"
+  - Copias subsecuentes: "Nombre Original - copia 2", "Nombre Original - copia 3", etc.
+  - Validación case-insensitive para evitar colisiones
+- **UX**:
+  - Después de duplicar, navega automáticamente al nuevo proyecto
+  - Respeta límites de plan (muestra modal de upgrade si se excede)
+- **Testing**: 100% backend (13/13 tests)
+- **Archivos modificados**:
+  - `/app/frontend/src/hooks/useNodes.js` - funciones `generateUniqueCopyName` y `duplicateProject`
+  - `/app/frontend/src/components/mindmap/Sidebar.jsx` - nueva opción "Duplicar" en el menú
+  - `/app/frontend/src/components/mindmap/MindMapApp.jsx` - handler `handleDuplicateProject`
+
 ### 2026-01-15: BUG FIX — Separación de Conflicto de Nombre vs Límite de Plan ✅ COMPLETADO
 - **Bug reportado**: Al crear un mapa con nombre duplicado, el sistema mostraba incorrectamente el popup de "Necesitas más espacio" (upgrade de plan) en lugar de un modal para resolver el conflicto de nombre
 - **Causa raíz**: El frontend no distinguía entre error 409 (nombre duplicado) y error 403 (límite de plan excedido)

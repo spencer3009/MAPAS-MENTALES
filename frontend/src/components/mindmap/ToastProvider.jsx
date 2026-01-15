@@ -390,6 +390,17 @@ export const NotificationProvider = ({ children, token, onNavigateToReminders })
     }]);
   }, [playSound]);
   
+  // Auto-dismiss para toasts de success (4 segundos)
+  useEffect(() => {
+    if (currentToast && currentToast.type === 'success') {
+      const timer = setTimeout(() => {
+        setCurrentToast(null);
+      }, 4000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [currentToast]);
+  
   return (
     <NotificationContext.Provider value={{ showSuccess, checkReminders }}>
       {children}

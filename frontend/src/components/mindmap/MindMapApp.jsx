@@ -1075,6 +1075,7 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
           onRefreshNotifications={loadReminders}
           user={user}
           onOpenProfile={() => setShowProfileModal(true)}
+          onOpenEditorSettings={() => setShowMapEditorSettings(true)}
           onLogout={logout}
           onAdminClick={onAdminClick}
           isAdmin={isAdmin}

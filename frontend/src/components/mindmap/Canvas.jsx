@@ -545,15 +545,10 @@ const Canvas = ({
   // El nodo destino (targetNodeId) será el HIJO
   // El modo conexión permanece activo para permitir múltiples conexiones
   const completeConnection = useCallback((targetNodeId) => {
-    // Usar la ref para obtener el estado más actualizado
+    // Usar la ref para obtener el estado más actualizado (evita stale closures)
     const currentMode = connectionModeRef.current;
     
-    console.log('[Canvas] completeConnection llamado con targetNodeId:', targetNodeId);
-    console.log('[Canvas] connectionMode.isActive:', currentMode.isActive);
-    console.log('[Canvas] connectionMode.sourceNodeId:', currentMode.sourceNodeId);
-    
     if (!currentMode.isActive || !currentMode.sourceNodeId) {
-      console.log('[Canvas] Modo conexión no activo o sin nodo origen');
       return;
     }
     
@@ -570,20 +565,15 @@ const Canvas = ({
       const success = onConnectNodes(targetNodeId, currentMode.sourceNodeId);
       if (success) {
         console.log('[Canvas] Conexión exitosa - modo conexión sigue activo');
-      } else {
-        console.log('[Canvas] Conexión falló');
       }
     }
     
     // Limpiar el snap pero mantener el modo activo con el MISMO sourceNodeId
-    setConnectionMode(prev => {
-      console.log('[Canvas] Manteniendo modo activo con sourceNodeId:', prev.sourceNodeId);
-      return {
-        ...prev,
-        snapTargetId: null,
-        snapAnchor: null
-      };
-    });
+    setConnectionMode(prev => ({
+      ...prev,
+      snapTargetId: null,
+      snapAnchor: null
+    }));
     
     // NO cancelar el modo - permanece activo para conectar más nodos
     // El usuario puede presionar ESC o hacer clic en el canvas para salir

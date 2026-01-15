@@ -271,23 +271,34 @@ const Sidebar = ({
           </span>
         </div>
         
-        {/* Botón de reordenar */}
-        {projects.length > 1 && (
+        <div className="flex items-center gap-1">
+          {/* Botón de configuración de nodos */}
           <button
-            onClick={() => setIsReorderMode(!isReorderMode)}
-            className={`
-              p-1.5 rounded-lg text-xs
-              transition-all duration-200
-              ${isReorderMode 
-                ? 'bg-blue-100 text-blue-600' 
-                : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
-              }
-            `}
-            title={isReorderMode ? 'Salir del modo ordenar' : 'Ordenar proyectos'}
+            onClick={() => setShowNodeSettings(true)}
+            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all duration-200"
+            title="Configuración de nodos"
           >
-            <ArrowUpDown size={14} />
+            <Settings size={14} />
           </button>
-        )}
+          
+          {/* Botón de reordenar */}
+          {projects.length > 1 && (
+            <button
+              onClick={() => setIsReorderMode(!isReorderMode)}
+              className={`
+                p-1.5 rounded-lg text-xs
+                transition-all duration-200
+                ${isReorderMode 
+                  ? 'bg-blue-100 text-blue-600' 
+                  : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                }
+              `}
+              title={isReorderMode ? 'Salir del modo ordenar' : 'Ordenar proyectos'}
+            >
+              <ArrowUpDown size={14} />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Indicador de modo reordenar */}

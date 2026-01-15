@@ -187,10 +187,9 @@ const DockSidebar = ({
                   />
                 )}
               </button>
-            </React.Fragment>
-          );
-        })}
-      </nav>
+            );
+          })}
+        </nav>
 
         {/* Logout Button */}
         <div className="p-2 border-t border-slate-700/50">

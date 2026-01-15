@@ -869,6 +869,7 @@ const Canvas = ({
           nodes={nodes} 
           layoutType={layoutType}
           onAddNodeFromLine={onAddNodeFromLine}
+          onDisconnectNode={onDisconnectNode}
           showLineButtons={layoutType === 'mindhybrid' || layoutType === 'mindtree'}
         />
 

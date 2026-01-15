@@ -844,6 +844,32 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
     setShowDeleteModal(true);
   }, [activeProjectId]);
 
+  // Handler para duplicar proyecto
+  const handleDuplicateProject = useCallback(async (projectId) => {
+    try {
+      console.log('Duplicando proyecto:', projectId);
+      const result = await duplicateProject(projectId);
+      
+      if (result.success) {
+        console.log('Proyecto duplicado exitosamente:', result.newName);
+        // Opcionalmente cambiar al nuevo proyecto
+        if (result.newProjectId) {
+          switchProject(result.newProjectId);
+          resetPan();
+          resetZoom();
+        }
+      } else if (result.isPlanLimit) {
+        // Mostrar modal de upgrade si hay límite de plan
+        setUpgradeLimitType(result.limitType || 'active');
+        setShowUpgradeModal(true);
+      } else {
+        console.error('Error al duplicar proyecto:', result.error);
+      }
+    } catch (error) {
+      console.error('Error al duplicar proyecto:', error);
+    }
+  }, [duplicateProject, switchProject, resetPan, resetZoom]);
+
   // Handler para confirmar eliminación (soft delete - va a la papelera)
   const handleConfirmDelete = useCallback(() => {
     try {

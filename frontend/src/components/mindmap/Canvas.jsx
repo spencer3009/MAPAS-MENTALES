@@ -1067,6 +1067,56 @@ const Canvas = ({
         </button>
       )}
 
+      {/* Botón de conexión manual - púrpura, aparece debajo del botón "+" */}
+      {shouldShowAddButton && controlPositions.addButton && !connectionMode.isActive && (
+        <button
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            if (selectedNodeId) {
+              startConnectionMode(selectedNodeId);
+            }
+          }}
+          className="
+            absolute z-50
+            w-8 h-8 md:w-7 md:h-7 rounded-full
+            bg-purple-500 hover:bg-purple-600 active:bg-purple-700
+            text-white shadow-lg
+            flex items-center justify-center
+            transition-all duration-200
+            hover:scale-110 active:scale-95
+            border-2 border-white
+            touch-manipulation select-none
+            cursor-pointer
+          "
+          style={{
+            left: controlPositions.addButton.x,
+            top: controlPositions.addButton.y + 35,
+            transform: 'translate(-50%, -50%)',
+            WebkitTapHighlightColor: 'transparent'
+          }}
+          title="Conectar con otro nodo"
+          aria-label="Conectar con otro nodo"
+          data-testid="connect-node-button"
+        >
+          <Link2 size={14} />
+        </button>
+      )}
+
+      {/* Indicador de modo conexión activo */}
+      {connectionMode.isActive && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-purple-600 text-white rounded-full shadow-lg flex items-center gap-2 animate-pulse">
+          <Link2 size={16} />
+          <span className="text-sm font-medium">Haz clic en un nodo para conectar</span>
+          <button 
+            onClick={cancelConnectionMode}
+            className="ml-2 px-2 py-0.5 bg-white/20 rounded text-xs hover:bg-white/30"
+          >
+            ESC
+          </button>
+        </div>
+      )}
+
       {/* Botones MindHybrid: Derecha (horizontal) e Inferior (vertical) */}
       {shouldShowAddButton && layoutType === 'mindhybrid' && (
         <>

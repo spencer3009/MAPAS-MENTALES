@@ -717,12 +717,6 @@ const Sidebar = ({
       </div>,
       document.body
     )}
-    
-    {/* Modal de configuración de nodos */}
-    <NodeDefaultsSettings 
-      isOpen={showNodeSettings} 
-      onClose={() => setShowNodeSettings(false)} 
-    />
     </>
   );
 };

@@ -108,8 +108,12 @@ const Canvas = ({
   const [connectionMode, setConnectionMode] = useState({
     isActive: false,
     sourceNodeId: null,
-    mousePosition: { x: 0, y: 0 }
+    mousePosition: { x: 0, y: 0 },
+    snapTargetId: null  // ID del nodo al que se está haciendo "snap"
   });
+
+  // Constante para la distancia de snap (en píxeles del canvas)
+  const SNAP_DISTANCE = 60;
 
   // Actualizar los límites del canvas cuando cambie el tamaño o las reglas
   useEffect(() => {

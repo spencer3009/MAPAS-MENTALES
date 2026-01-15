@@ -190,38 +190,7 @@ const DockSidebar = ({
                     `}
                   />
                 )}
-
-                {/* Expand indicator for Settings */}
-                {item.hasSubmenu && isExpanded && (
-                  <ChevronRight 
-                    size={16} 
-                    className={`
-                      ml-auto transition-transform duration-200
-                      ${showSettingsMenu ? 'rotate-90' : ''}
-                    `}
-                  />
-                )}
               </button>
-
-              {/* Submenu para Configuración */}
-              {item.id === 'settings' && showSettingsMenu && isExpanded && (
-                <div className="ml-4 mt-1 space-y-1 pb-2">
-                  <button
-                    onClick={() => { onOpenSettings(); setShowSettingsMenu(false); }}
-                    className="w-full flex items-center gap-2 py-2 px-3 rounded-lg text-sm text-slate-400 hover:bg-slate-700/50 hover:text-white transition-colors"
-                  >
-                    <User size={16} />
-                    Mi Perfil
-                  </button>
-                  <button
-                    onClick={() => { onOpenNodeSettings && onOpenNodeSettings(); setShowSettingsMenu(false); }}
-                    className="w-full flex items-center gap-2 py-2 px-3 rounded-lg text-sm text-slate-400 hover:bg-slate-700/50 hover:text-white transition-colors"
-                  >
-                    <Settings size={16} />
-                    Nodos por defecto
-                  </button>
-                </div>
-              )}
             </React.Fragment>
           );
         })}

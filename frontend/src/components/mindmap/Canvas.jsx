@@ -808,6 +808,12 @@ const Canvas = ({
   const handleCanvasMouseDown = useCallback((e) => {
     if (e.button !== 0) return;
     
+    // Si estamos en modo conexión, cancelar al hacer clic en el canvas
+    if (connectionMode.isActive) {
+      cancelConnectionMode();
+      return;
+    }
+    
     onCloseContextMenu();
     
     const rect = containerRef.current.getBoundingClientRect();
@@ -837,7 +843,7 @@ const Canvas = ({
     setCommentPopover({ isOpen: false, nodeId: null });
     setLinkPopover({ isOpen: false, nodeId: null });
     onStartPanning(e);
-  }, [onCloseContextMenu, onClearSelection, onStartPanning, interactionMode]);
+  }, [connectionMode.isActive, cancelConnectionMode, onCloseContextMenu, onClearSelection, onStartPanning, interactionMode]);
 
   // Manejar click derecho en nodo
   const handleNodeContextMenu = useCallback((e, nodeId) => {

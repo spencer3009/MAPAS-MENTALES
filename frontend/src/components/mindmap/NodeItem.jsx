@@ -91,6 +91,7 @@ const NodeItem = memo(({
   node,
   isSelected,
   isMultiSelected = false,
+  isSnapTarget = false,  // Indica si este nodo es el objetivo del snap durante conexión
   layoutType = 'mindflow',
   onSelect,
   onDragStart,

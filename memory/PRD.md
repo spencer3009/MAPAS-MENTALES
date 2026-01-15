@@ -2,6 +2,21 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-15: BUG FIX — Conexiones Manuales Múltiples ✅ CORREGIDO
+- **Problema**: Al crear conexiones manuales desde un nodo origen, las conexiones anteriores se eliminaban automáticamente
+- **Causa raíz**: Los parámetros en `completeConnection()` estaban invertidos - el nodo origen se convertía en HIJO en lugar de PADRE
+- **Fix aplicado en Canvas.jsx línea ~554**:
+  - **Antes**: `onConnectNodes(sourceNodeId, targetNodeId)` → El origen se volvía hijo del destino
+  - **Después**: `onConnectNodes(targetNodeId, sourceNodeId)` → El destino se vuelve hijo del origen
+- **Comportamiento correcto ahora**:
+  - El nodo donde se inicia el modo conexión (origen) = **PADRE**
+  - El nodo donde se hace clic (destino) = **HIJO**
+  - Un nodo padre puede tener **múltiples hijos** (modelo árbol con parentId)
+  - Las conexiones anteriores **NO se eliminan** al crear nuevas
+- **Testing**: 100% verificado (6/6 features) - `/app/test_reports/iteration_34.json`
+- **Archivos modificados**:
+  - `/app/frontend/src/components/mindmap/Canvas.jsx` - completeConnection() parámetros invertidos
+
 ### 2026-01-15: FEATURE — Efecto "Snap" Visual para Conexión de Nodos ✅ COMPLETADO
 - **Funcionalidad**: Feedback visual cuando el cursor se acerca a un nodo válido durante el modo conexión manual
 - **Implementación**:

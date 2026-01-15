@@ -2,6 +2,16 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-15: MEJORA UX — Modo Conexión Persistente ✅ COMPLETADO
+- **Funcionalidad**: El modo conexión ahora permanece activo después de crear una conexión
+- **Beneficio**: Permite conectar múltiples hijos al mismo padre sin reactivar el modo cada vez
+- **Comportamiento**:
+  - Seleccionar nodo padre → Click botón púrpura → Click en nodo hijo 1 → Click en nodo hijo 2 → ... → ESC para salir
+  - El banner indica "Modo conexión activo - Haz clic en nodos para conectar"
+  - Presionar ESC o hacer clic en canvas vacío para salir del modo
+- **Archivos modificados**:
+  - `/app/frontend/src/components/mindmap/Canvas.jsx` - completeConnection() ya no cancela el modo
+
 ### 2026-01-15: BUG FIX — Conexiones Manuales Múltiples ✅ CORREGIDO
 - **Problema**: Al crear conexiones manuales desde un nodo origen, las conexiones anteriores se eliminaban automáticamente
 - **Causa raíz**: Los parámetros en `completeConnection()` estaban invertidos - el nodo origen se convertía en HIJO en lugar de PADRE

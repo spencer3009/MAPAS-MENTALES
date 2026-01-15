@@ -184,7 +184,34 @@ const UserDropdown = ({ user, onOpenProfile, onOpenEditorSettings, onLogout, onA
 
           {/* Menu Options */}
           <div className="py-2">
-            {/* Configuración / Perfil */}
+            {/* Configuración del Editor de Mapas */}
+            <button
+              onClick={() => {
+                setIsOpen(false);
+                if (onOpenEditorSettings) onOpenEditorSettings();
+              }}
+              className="
+                w-full px-4 py-2.5
+                flex items-center gap-3
+                text-sm text-gray-700
+                hover:bg-gray-50
+                transition-colors
+              "
+            >
+              <div className="
+                w-8 h-8 rounded-lg
+                bg-slate-100 text-slate-600
+                flex items-center justify-center
+              ">
+                <Sliders size={16} />
+              </div>
+              <div className="text-left">
+                <p className="font-medium">Configuración</p>
+                <p className="text-xs text-gray-400">Editor de mapas, nodos, estilos</p>
+              </div>
+            </button>
+
+            {/* Mi Cuenta / Perfil */}
             <button
               onClick={() => {
                 setIsOpen(false);
@@ -203,11 +230,11 @@ const UserDropdown = ({ user, onOpenProfile, onOpenEditorSettings, onLogout, onA
                 bg-blue-50 text-blue-600
                 flex items-center justify-center
               ">
-                <Settings size={16} />
+                <User size={16} />
               </div>
               <div className="text-left">
-                <p className="font-medium">Configuración</p>
-                <p className="text-xs text-gray-400">Perfil, notificaciones, cuenta</p>
+                <p className="font-medium">Mi Cuenta</p>
+                <p className="text-xs text-gray-400">Perfil, notificaciones, plan</p>
               </div>
             </button>
 

@@ -20,6 +20,7 @@ import TemplatesView from './TemplatesView';
 import IntegrationsView from './IntegrationsView';
 import UpgradeModal from './UpgradeModal';
 import NameConflictModal from './NameConflictModal';
+import DuplicateProjectModal from './DuplicateProjectModal';
 import RemindersView from './RemindersView';
 import NodeDefaultsSettings from './NodeDefaultsSettings';
 import MapEditorSettings from './MapEditorSettings';

@@ -24,7 +24,7 @@ import RemindersView from './RemindersView';
 import NodeDefaultsSettings from './NodeDefaultsSettings';
 import MapEditorSettings from './MapEditorSettings';
 import { FullscreenControls } from './FullscreenMode';
-import { NotificationProvider } from './ToastProvider';
+import { NotificationProvider, useNotifications } from './ToastProvider';
 import { BoardsPage, BoardView } from '../boards';
 import ContactsPage from '../contacts/ContactsPage';
 import { WhatsAppSettings, WhatsAppInbox } from '../whatsapp';

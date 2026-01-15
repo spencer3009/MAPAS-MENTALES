@@ -216,11 +216,33 @@ const ConnectionsLayer = memo(({
         start = getNodeOutputPointOrgChart(parent, parentWidth, parentHeight);
         end = getNodeInputPointOrgChart(node, nodeWidth);
         path = generateOrgChartPath(start.x, start.y, end.x, end.y);
+      } else if (useSmartAnchors && node.isManualConnection) {
+        // Conexión manual: usar sistema de anclaje inteligente
+        const anchors = getSmartAnchorPoints(
+          parent, node,
+          parentWidth, parentHeight,
+          nodeWidth, nodeHeight
+        );
+        start = anchors.source;
+        end = anchors.target;
+        path = generateSmartPath(anchors.source, anchors.target);
       } else {
-        // MindFlow: conectores horizontales con curvas bezier
-        start = getNodeOutputPoint(parent, parentWidth, parentHeight);
-        end = getNodeInputPoint(node, nodeHeight);
-        path = generateBezierPath(start.x, start.y, end.x, end.y);
+        // MindFlow: usar sistema inteligente para conexiones más limpias
+        if (useSmartAnchors) {
+          const anchors = getSmartAnchorPoints(
+            parent, node,
+            parentWidth, parentHeight,
+            nodeWidth, nodeHeight
+          );
+          start = anchors.source;
+          end = anchors.target;
+          path = generateSmartPath(anchors.source, anchors.target);
+        } else {
+          // Fallback: conectores horizontales clásicos con curvas bezier
+          start = getNodeOutputPoint(parent, parentWidth, parentHeight);
+          end = getNodeInputPoint(node, nodeHeight);
+          path = generateBezierPath(start.x, start.y, end.x, end.y);
+        }
       }
 
       // Usar estilos de línea del nodo hijo (la línea va hacia el hijo)

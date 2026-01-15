@@ -1,5 +1,9 @@
 /* eslint-disable no-restricted-globals */
 
+// Workbox precache manifest (requerido por workbox-webpack-plugin)
+// eslint-disable-next-line no-unused-vars
+const ignored = self.__WB_MANIFEST;
+
 const CACHE_NAME = 'mindora-cache-v1';
 
 // Lista de recursos estáticos para cachear

@@ -1273,10 +1273,10 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
         user={user}
       />
 
-      {/* Modal: Configuración de nodos por defecto */}
-      <NodeDefaultsSettings
-        isOpen={showNodeDefaultsModal}
-        onClose={() => setShowNodeDefaultsModal(false)}
+      {/* Modal: Configuración del Editor de Mapas */}
+      <MapEditorSettings
+        isOpen={showMapEditorSettings}
+        onClose={() => setShowMapEditorSettings(false)}
       />
 
       {/* Modal: Todos los proyectos */}

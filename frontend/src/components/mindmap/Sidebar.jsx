@@ -3,8 +3,9 @@ import { createPortal } from 'react-dom';
 import { 
   Plus, FileText, Trash2, Check, Pencil, 
   Bell, Pin, PinOff, GripVertical, ArrowUpDown, ExternalLink, Archive,
-  Crown, Zap, Sparkles, MoreHorizontal
+  Crown, Zap, Sparkles, MoreHorizontal, Settings
 } from 'lucide-react';
+import NodeDefaultsSettings from './NodeDefaultsSettings';
 
 // Use relative URLs for production compatibility
 const API_URL = '';

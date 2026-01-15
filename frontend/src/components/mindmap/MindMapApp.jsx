@@ -47,6 +47,7 @@ const API_URL = '';
 const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clearForceView, pendingPlanId, onClearPendingPlan }) => {
   const { user, logout, token, isAdmin } = useAuth();
   const { checkVerification, showRestrictionModal, closeRestrictionModal, userEmail } = useVerificationCheck();
+  const { showSuccess } = useNotifications();
   
   const {
     nodes,

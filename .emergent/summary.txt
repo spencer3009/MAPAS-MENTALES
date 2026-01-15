@@ -1,33 +1,35 @@
 <analysis>**original_problem_statement:**
-The user initially requested to implement several large features: a WhatsApp Automation Platform, a Mobile-First Mind Map Navigation Mode, and Admin Plan Management.
-
-During this session, the scope expanded to include:
-1.  **Advanced User Management:** Add sorting, filtering, pagination, bulk deletion, and user impersonation to the admin panel.
-2.  **Admin Analytics Dashboard:** Create a dashboard with charts for user growth, activity, and retention metrics.
-3.  **Fix Project Duplication:** Investigate, merge, and prevent the creation of mind maps with duplicate names.
-4.  **UI/UX Improvements:**
-    *   Increase the number of visible projects in the mind map sidebar to 7.
-    *   Add a default icon (gray check) and left alignment to all new mind map nodes.
-    *   Implement a highly specific and context-aware settings architecture, separating global Account settings from Map Editor settings.
+The user provided a series of feature requests and bug fixes to improve the mind mapping application's user experience. The core tasks for this session were:
+1.  **Fix Critical UX Bug:** When a user creates a map with a name that already exists, the system incorrectly shows a plan limit reached paywall instead of a name conflict error. This needed to be fixed by separating the validation logic for name conflicts and plan limits.
+2.  **Implement Map Duplication:** Add a Duplicate option to the project menu. The initial implementation should create a copy with a unique name (e.g., Map - copy).
+3.  **Enhance Duplication UX:**
+    *   Add a toast notification to confirm successful duplication.
+    *   Implement a modal that allows the user to name the duplicate copy and provides real-time validation to prevent name conflicts.
+    *   Ensure the newly duplicated map is automatically selected, opened in the editor, and appears at the top of the project list (sorted by ).
+4.  **Implement Advanced Connector Management:**
+    *   Allow users to visually disconnect nodes by clicking a delete icon that appears on the connector line on hover.
+    *   Add a new manual connection mode initiated by a purple link icon on each node, allowing users to draw new connections between existing nodes.
+5.  **Implement Intelligent Connector Anchors:** Improve the connector drawing logic to use smart anchor points (top, bottom, left, right) on nodes. This should create shorter, cleaner, and more logical connection paths (straight lines or smooth Bezier curves) instead of long, confusing diagonals.
+6.  **Implement Connector Snap Effect:** Add a visual snap effect. When in manual connection mode, the preview line should snap to a nearby node, and the target node should be highlighted to give the user clear feedback.
 
 **User's preferred language**: Spanish
 
 **what currently exists?**
-The application is a full-stack PWA (React, FastAPI, MongoDB) featuring Mind Maps, Boards, Contacts, and a highly advanced Admin Panel.
+The application is a full-stack PWA (React, FastAPI, MongoDB) for mind mapping. The key features implemented in this session are:
 
-*   **Admin Panel:** Now includes sophisticated user management (sorting, filtering, pagination, bulk delete, impersonation), plan management, and a new Analytics Dashboard with  for data visualization.
-*   **Mind Map Module:**
-    *   Project creation logic now prevents duplicate names. A merge utility was built and used to fix existing duplicates.
-    *   The project list in the sidebar now shows 7 projects by default.
-    *   A new feature adds a default gray check icon and left alignment to all newly created nodes.
-    *   The settings architecture has been refactored. A Map Editor Settings modal (containing Node Defaults) is now accessible from the User Avatar dropdown when inside a map, separating it from the global Account Settings.
-*   **WhatsApp Integration:** Remains non-functional in production due to a deployment limitation with the  microservice.
+*   **Corrected Creation Flow:** The frontend now correctly distinguishes between a  (duplicate name) and a  (plan limit) from the API. It shows a  for name collisions and the  only when plan limits are actually reached.
+*   **Complete Duplication Feature:** A Duplicate option exists in the map's context menu. This action opens a  where the user can name the new copy, with real-time validation against existing names.
+*   **Enhanced UX:** Upon duplication, a success toast confirms the action, and the new map immediately becomes the active project, appearing at the top of the list.
+*   **Advanced Connector Management:**
+    *   Users can now disconnect nodes by hovering over a connection line and clicking the trash icon that appears.
+    *   A new purple link icon on nodes activates a manual connection mode.
+*   **Intelligent Connectors:** A smart anchor point system () has been implemented. All connectors (new and existing) now use the cleanest, shortest path between nodes, dynamically choosing the best anchor point (top, bottom, left, or right). This applies to the preview line as well.
 
 **Last working item**:
-*   **Last item agent was working:** The agent completed a significant UX and architectural refactor of the settings system. The Node Defaults configuration was moved from a global setting into a new, context-specific Map Editor Settings modal. This modal is now accessible from the user avatar's dropdown menu () only when inside the map editor. The global profile settings were separated into an Mi Cuenta option. The default node icon color was also changed to a neutral gray as requested.
-*   **Status:** USER VERIFICATION PENDING
-*   **Agent Testing Done:** Y (Agent confirmed file edits, compilation, and attempted UI verification with screenshots, but was limited by tool's session persistence).
-*   **Which testing method agent to use?** Frontend testing agent. The agent should test the full user flow: log in, navigate to a map, click the user avatar, click Configuración, verify the Map Editor Settings modal opens, change a setting, create a new node, and confirm the new default is applied.
+*   **Last item agent was working:** Implementing a visual snap effect for the manual node connection feature. The goal is to make the preview line snap to a nearby target node and highlight that node to provide clear visual feedback that a connection is possible. The agent added the necessary state () and started modifying the  handler in  to detect nearby nodes.
+*   **Status:** IN PROGRESS
+*   **Agent Testing Done:** N
+*   **Which testing method agent to use?** Frontend testing agent. The agent should create a multi-node map, enter connection mode, and verify that moving the cursor near a non-connected node causes the preview line to snap to it and the target node to be visually highlighted.
 *   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
@@ -37,16 +39,13 @@ The application is a full-stack PWA (React, FastAPI, MongoDB) featuring Mind Map
 
 **Issues Detail:**
 *   **Issue 1: WhatsApp Bridge Not Deployed in Production**
-    *   **Attempted fixes:** The issue is architectural. The custom  Node.js service cannot be deployed by the platform's standard pipeline. The user must decide on a new architecture.
-    *   **Next debug checklist:** The agent must present the architectural options to the user again to get a decision before any further work on WhatsApp can proceed. Options are:
-        1.  Migrate to a managed provider (Meta Cloud API, Twilio).
-        2.  Deploy the bridge to a third-party host.
-        3.  Wait for platform support for multi-service applications.
-    *   **Why fix this issue and what will be achieved with the fix?** This is the main project blocker. Resolving it enables the entire WhatsApp Automation feature suite.
+    *   **Attempted fixes:** None in this session. This is an architectural limitation.
+    *   **Next debug checklist:** Present the architectural options to the user to get a decision: 1) Migrate to a managed provider (Meta Cloud API, Twilio), 2) Deploy the bridge to a third-party host, or 3) Wait for platform support for multi-service apps.
+    *   **Why fix this issue and what will be achieved with the fix?** Unblocks the entire WhatsApp Automation feature suite.
     *   **Status:** BLOCKED
     *   **Is recurring issue?** Y
     *   **Should Test frontend/backend/both after fix?** Both.
-    *   **Blocked on other issue:** None.
+    *   **Blocked on other issue:** User decision.
 
 *   **Issue 2: Low-priority Mind Map layout and interaction bugs**
     *   **Attempted fixes:** None.
@@ -58,36 +57,44 @@ The application is a full-stack PWA (React, FastAPI, MongoDB) featuring Mind Map
     *   **Blocked on other issue:** None.
 
 *   **Issue 3: Date format inconsistency in DB**
-    *   **Attempted fixes:** None. The agent identified the issue during testing (some dates have timezone info, others do not) but classified it as a low-priority legacy data problem.
-    *   **Next debug checklist:** Write a one-time migration script to normalize all  fields in the  and  collections to a consistent format (e.g., UTC with Z-suffix). Update the backend code to always store dates in this format.
-    *   **Why fix this issue and what will be achieved with the fix?** This will fix bugs related to sorting users/projects by date in the admin panel and other areas.
+    *   **Attempted fixes:** None.
+    *   **Next debug checklist:** Write a one-time migration script to normalize all  fields in the  and  collections to UTC. Update backend to always store dates in a consistent format.
+    *   **Why fix this issue and what will be achieved with the fix?** Fixes bugs related to sorting by date.
     *   **Status:** NOT STARTED
     *   **Is recurring issue?** N
     *   **Should Test frontend/backend/both after fix?** Backend.
     *   **Blocked on other issue:** None.
 
 **In progress Task List**:
-*   None.
+*   **Task 1: Complete and Verify Snap Effect for Node Connection (P0)**
+    *   **Where to resume:** Resume work in . The  state and detection logic in  are partially implemented. The agent needs to ensure:
+        1.  The preview line's endpoint coordinates are updated to the target node's anchor when  is set.
+        2.  A visual highlight (e.g., a border or glow) is applied to the target node. This may require passing  down to .
+    *   **What will be achieved with this?** Provides a highly intuitive and professional-feeling UX for creating manual connections, confirming for the user which node they are about to connect to.
+    *   **Status:** IN PROGRESS
+    *   **Should Test frontend/backend/both after fix?** Frontend.
+    *   **Blocked on something:** None.
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks:**
-    *   **P0 - Verification: Contextual Map Editor Settings.** Guide the user to test the new settings architecture or use the testing agent.
-    *   **P1 - WhatsApp Phases 2, 3, & 4.** (Blocked by Issue #1).
+    *   **P0 - User Decision on WhatsApp Architecture.**
+    *   **P1 - WhatsApp Phases 2, 3, & 4** (Blocked by the above).
     *   **P1 - Account blocking after 7 days.**
     *   **P1 - Export Reports:** Add PDF/CSV export for contacts.
 *   **Future Tasks:**
-    *   **P2 - Add more Map Editor Settings:** Implement Estilo de nodos, Colores, Alineación automática, Plantillas de mapas into the new  modal.
+    *   **P2 - Add more Map Editor Settings:** Implement Estilo de nodos, Colores, Alineación automática, Plantillas de mapas into .
     *   **P2 - Admin Audit Log UI.**
     *   **CRITICAL Refactor: **.
     *   Add Currency field type for contacts.
     *   Implement real-time notifications (WebSocket).
 
 **Completed work in this session**
-- **Feature: Advanced Admin User Management (DONE & Verified)**: Implemented sorting, filtering, pagination, bulk delete, and user impersonation.
-- **Feature: Admin Analytics Dashboard (DONE & Verified)**: Implemented a new analytics tab with charts for user growth, activity, and retention.
-- **Bug Fix: Project Duplication (DONE)**: Prevented creation of projects with duplicate names and created a tool to merge existing ones.
-- **UX Improvement: Increased Visible Projects (DONE)**: Increased the mind map sidebar project limit to 7.
-- **Feature & Refactor: Node Defaults Setting (DONE)**: Implemented default icons/alignment for new nodes and correctly placed the setting within a new Map Editor Settings modal, following precise UX direction from the user.
+- **Bug Fix:** Correctly separated the handling of duplicate map names (409 Conflict) from plan limits (403 Forbidden). (DONE & Verified by Testing Agent)
+- **Feature:** Implemented a full map duplication flow, including a custom naming modal with real-time validation. (DONE & Verified with Screenshots)
+- **UX Improvement:** Added a success toast notification with auto-dismiss for the duplication action. (DONE & Verified with Screenshots)
+- **UX Improvement:** Ensured the duplicated map is automatically selected and moved to the top of the project list. (DONE & Verified with Screenshots)
+- **Feature:** Implemented advanced connector management, allowing users to visually disconnect nodes and manually create new connections. (DONE & Verified with Screenshots)
+- **Feature:** Implemented an intelligent anchor point system for connectors, resulting in clean, logical, and aesthetically pleasing connection lines. (DONE & Verified with Screenshots)
 
 **Earlier issues found/mentioned but not fixed**
 *   The P2 mind map layout and 'X' button bugs (/, ).
@@ -100,77 +107,72 @@ The application is a full-stack PWA (React, FastAPI, MongoDB) featuring Mind Map
 
 
 **Key Technical Concepts**
-*   **Contextual Settings:** Architecting settings to be either global (Account) or context-specific (Map Editor), improving UX by placing controls where they are relevant.
-*   **Backend Pagination & Filtering:** Building scalable API endpoints that support query parameters for , , , , and various filters.
-*   **Data Deduplication:** A two-pronged approach of preventing new duplicates at the API level () and providing a tool to fix existing ones ().
-*   **Component Refactoring:** Decomposing a large component () into smaller, more manageable children (, ).
+*   **Stateful UX Flow:** Managing complex multi-step UI interactions (e.g., duplicate modal, connection mode) using component state and callbacks.
+*   **Real-time Input Validation:** Checking for duplicate map names as the user types in the .
+*   **Dynamic SVG Path Generation:** Using functions in  to calculate and render clean Bezier curves and straight lines for connectors based on the relative positions of nodes.
+*   **Geometric Calculations for UI:** Calculating anchor points, distances, and midpoints on the canvas to enable features like smart connectors, disconnect buttons, and the new snap effect.
+*   **Separation of API Error Handling:** Distinguishing between different HTTP error codes (409 vs. 403) on the frontend to drive distinct user experiences.
+*   **Custom Hooks for Business Logic:** Consolidating almost all data manipulation logic within the  hook, which acts as the single source of truth for map state.
 
 **key DB schema**
-*   **users:** Queries now support advanced filtering and sorting.  field has inconsistent formatting (some with timezone, some without).
-*   **projects:** Logic added to merge nodes between documents.  field has inconsistent formatting.
+*   No schema changes were made. The existing  and  collections were used.
 
 **All files of reference**
-*   
-*   
-*   
-*   
-*   
-*   
-*   
-*   
+*   **/app/frontend/src/components/mindmap/Canvas.jsx** (Last worked on)
+*   **/app/frontend/src/utils/curve.js** (Core logic for smart connectors)
+*   **/app/frontend/src/hooks/useNodes.js** (Core logic for all data operations)
+*   **/app/frontend/src/components/mindmap/MindMapApp.jsx** (Main component orchestrating all features)
+*   **/app/frontend/src/components/mindmap/ConnectionsLayer.jsx** (Renders all connectors)
+*   **/app/frontend/src/components/mindmap/DuplicateProjectModal.jsx** (New)
+*   **/app/frontend/src/components/mindmap/NameConflictModal.jsx** (New)
+*   **/app/backend/server.py** (Contains the  endpoint logic)
 
 **Areas that need refactoring**:
-*   : This 3500+ line component remains a critical piece of technical debt.
-*   : This hook is growing in complexity and is responsible for all node-related logic; it could be broken down.
+*   : Remains a very large and complex component.
+*   : Is becoming increasingly large. Some logic could be split into more specialized hooks.
+*   : Has also grown significantly and manages a lot of state; could be broken down.
 
 **key api endpoints**
-*   : Enhanced with pagination, sorting, and filtering.
-*   : (New) Endpoint for the analytics dashboard.
-*   : (New) For mass user deletion.
-*   : (New) For admin Login as User functionality.
-*   : Updated to return a  if a project with the same name exists.
-*   : (New) Finds projects with duplicate names.
-*   : (New) Merges two projects.
+*   : Logic confirmed to correctly handle 409 (duplicate) and 403 (limit) errors.
+*   : New endpoint to create a complete copy of a project, optionally with a custom name.
+*   The  and  features were implemented by updating the node's  and reusing the existing  functionality, without creating new dedicated endpoints.
 
 **Critical Info for New Agent**
 *   **The user's preferred language is Spanish.** All communication MUST be in Spanish.
-*   **The user is highly detail-oriented about UX and product architecture.** You must follow their instructions precisely and understand the reasoning for separating contextual settings from global ones.
-*   Your first step should be to confirm the plan with the user. The highest priorities are verifying the last set of changes (Contextual Settings) and then re-addressing the critical WhatsApp production blocker (Issue #1). Do not proceed with new WhatsApp features until the user decides on an architectural path forward for the deployment issue.
+*   **Priorities:** The immediate task is to finish the **snap effect** for node connections. After that, the main project blocker is the **WhatsApp bridge deployment**, which requires a decision from the user. Do not work on new WhatsApp features until the architecture is decided.
+*   **User is UX-focused:** The user has a strong vision for the product's feel. Pay close attention to requests regarding animations, feedback (toasts, highlights), and intuitive workflows.
 
 **documents and test reports created in this job**
-*    (Updated)
-*   
+*    (Updated with completed tasks and new feature requests)
 *   
 *   
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **Request:** Fix project duplication issue for user .
-2.  **Clarification:** Provided an image showing the duplicate projects.
-3.  **Approval:** Agreed to merge the duplicate projects.
-4.  **Request:** Change the mind map sidebar to show 7 projects instead of 6.
-5.  **Request:** Add a default check icon and left alignment to new nodes, with a settings button to toggle it.
-6.  **Feedback:** Questioned the location of the new settings button, as it was not discoverable.
-7.  **UX Correction:** Stated that Node Defaults is a map-specific setting and should not be in the global settings menu.
-8.  **Architectural Mandate:** Provided a detailed final architecture: Map Editor Settings (including node defaults) must be accessed via . A separate Mi Cuenta option should handle profile settings. The default icon must be a neutral gray, not green.
+1.  **Request:** Implement an advanced connector management system (disconnect, reconnect, manual creation).
+2.  **Request:** Implement an intelligent anchor point system for connectors to make them clean and logical.
+3.  **Approval:** User approved the implementation of the intelligent anchor system after seeing it in action.
+4.  **Request:** Add a snap effect for when the cursor is near a valid target node during connection mode.
+5.  **User Message (Pending):** Si me gustaría agregar un efecto de snap visual cuando el cursor se acerca a otro nodo durante el modo conexión. Esto daría feedback de que el nodo destino es válido para conectar. Hazlo (Yes, I would like to add a visual 'snap' effect... Do it). This is the active task.
 
 **Project Health Check:**
-*   **Broken:** The entire WhatsApp feature is broken in production (503 error) because its required  microservice is not supported by the deployment pipeline.
-*   **Mocked:**  remains a placeholder.
+*   **Broken:** The WhatsApp feature remains non-functional in the production environment due to the  deployment issue.
+*   **Mocked:** None.
 
 **3rd Party Integrations**
 *   **Baileys (via Node.js):** The source of the critical production deployment blocker.
 *   **Resend:** Used for transactional emails.
-*   **recharts:** Used for the new Admin Analytics Dashboard.
+*   **recharts:** Used for the Admin Analytics Dashboard.
+*   **lucide-react:** Used for icons across the application.
 
 **Testing status**
-*   **Testing agent used after significant changes:** YES. Used successfully to test the Admin User Management and Analytics Dashboard features.
+*   **Testing agent used after significant changes:** YES. Used to verify the backend logic and frontend flow for the initial bug fix (duplicate name vs. plan limit).
 *   **Troubleshoot agent used after agent stuck in loop:** NO
-*   **Test files created:** None. Test reports were generated at .
+*   **Test files created:** None.
 *   **Known regressions:** None.
 
 **Credentials to test flow:**
 *   **Admin Panel:** Login as  to access .
-*   **User for testing:**  / 
+*   **User for testing:**  /  (Note: this user's email may not be verified, which can block some actions. The  user is verified).
 
 **What agent forgot to execute**
-*   The agent successfully followed all of the user's immediate requests but did not circle back to the most critical, overarching problem: the non-functional WhatsApp feature in production. The next agent should prioritize getting a decision on this blocker.</analysis>
+*   The agent successfully implemented a large number of complex, sequential user requests. It did not forget any part of the user's explicit instructions during this session. The main outstanding item from previous sessions (WhatsApp) was correctly identified as blocked by the user.</analysis>

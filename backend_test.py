@@ -13,7 +13,7 @@ from datetime import datetime
 from typing import Dict, List, Optional
 
 # Test Configuration
-BASE_URL = "https://whatsapp-bridge-20.preview.emergentagent.com/api"
+BASE_URL = "https://nodeconnect-pro.preview.emergentagent.com/api"
 ADMIN_CREDENTIALS = {
     "username": "spencer3009",
     "password": "Socios3009"

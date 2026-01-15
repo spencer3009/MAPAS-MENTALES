@@ -12,20 +12,22 @@
 - **Archivos modificados**:
   - `/app/frontend/src/components/mindmap/Canvas.jsx` - completeConnection() ya no cancela el modo
 
-### 2026-01-15: BUG FIX — Conexiones Manuales Múltiples ✅ CORREGIDO
-- **Problema**: Al crear conexiones manuales desde un nodo origen, las conexiones anteriores se eliminaban automáticamente
-- **Causa raíz**: Los parámetros en `completeConnection()` estaban invertidos - el nodo origen se convertía en HIJO en lugar de PADRE
-- **Fix aplicado en Canvas.jsx línea ~554**:
-  - **Antes**: `onConnectNodes(sourceNodeId, targetNodeId)` → El origen se volvía hijo del destino
-  - **Después**: `onConnectNodes(targetNodeId, sourceNodeId)` → El destino se vuelve hijo del origen
-- **Comportamiento correcto ahora**:
-  - El nodo donde se inicia el modo conexión (origen) = **PADRE**
-  - El nodo donde se hace clic (destino) = **HIJO**
-  - Un nodo padre puede tener **múltiples hijos** (modelo árbol con parentId)
-  - Las conexiones anteriores **NO se eliminan** al crear nuevas
-- **Testing**: 100% verificado (6/6 features) - `/app/test_reports/iteration_34.json`
+### 2026-01-15: BUG FIX — Conexiones Manuales Múltiples (COMPLETO) ✅ CORREGIDO
+- **Problema original**: Al crear conexiones manuales desde un nodo origen, las conexiones anteriores se eliminaban
+- **Problema adicional encontrado**: Los callbacks de React tenían "stale closures" que impedían múltiples conexiones consecutivas
+- **Fixes aplicados**:
+  1. **Canvas.jsx línea ~554**: Invertir parámetros en `completeConnection()` - El destino es HIJO, origen es PADRE
+  2. **Canvas.jsx línea ~112**: Agregar `connectionModeRef` (useRef) para evitar stale closures
+  3. **Canvas.jsx línea ~746**: Deshabilitar drag durante modo conexión (`if (connectionMode.isActive) return`)
+  4. **Canvas.jsx**: `completeConnection` y `handleNodeSelect` ahora usan `connectionModeRef.current` en lugar del estado directo
+- **Comportamiento correcto verificado**:
+  - Un nodo padre puede tener **múltiples hijos** conectados simultáneamente
+  - Las conexiones **coexisten** sin sobrescribirse
+  - El modo conexión permanece activo para permitir múltiples conexiones
+  - ESC o click en canvas vacío para salir del modo
+- **Testing**: Verificado con 3 conexiones consecutivas desde el mismo nodo padre - `/app/test_reports/` logs confirman 3 conexiones exitosas
 - **Archivos modificados**:
-  - `/app/frontend/src/components/mindmap/Canvas.jsx` - completeConnection() parámetros invertidos
+  - `/app/frontend/src/components/mindmap/Canvas.jsx`
 
 ### 2026-01-15: FEATURE — Efecto "Snap" Visual para Conexión de Nodos ✅ COMPLETADO
 - **Funcionalidad**: Feedback visual cuando el cursor se acerca a un nodo válido durante el modo conexión manual

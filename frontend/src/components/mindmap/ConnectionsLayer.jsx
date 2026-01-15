@@ -3,6 +3,8 @@ import { Unlink } from 'lucide-react';
 import { 
   generateBezierPath, 
   generateOrgChartPath,
+  generateSmartPath,
+  getSmartAnchorPoints,
   getNodeOutputPoint, 
   getNodeInputPoint,
   getNodeOutputPointOrgChart,
@@ -30,7 +32,8 @@ const ConnectionsLayer = memo(({
   onAddNodeFromLine,
   onDisconnectNode,
   showLineButtons = false,
-  showDisconnectButtons = true
+  showDisconnectButtons = true,
+  useSmartAnchors = true  // Nuevo prop para activar anclaje inteligente
 }) => {
   const [hoveredConnectionId, setHoveredConnectionId] = useState(null);
 

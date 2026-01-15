@@ -3172,6 +3172,15 @@ export const useNodes = () => {
     const childNode = nodes.find(n => n.id === childNodeId);
     const parentNode = nodes.find(n => n.id === newParentId);
     
+    console.log('[connectNodes] === INICIO ===');
+    console.log('[connectNodes] childNodeId:', childNodeId);
+    console.log('[connectNodes] newParentId:', newParentId);
+    console.log('[connectNodes] Total nodos ANTES:', nodes.length);
+    
+    // Log de nodos con parentId = newParentId ANTES de la conexión
+    const existingChildren = nodes.filter(n => n.parentId === newParentId);
+    console.log('[connectNodes] Hijos existentes del padre ANTES:', existingChildren.map(c => c.id));
+    
     if (!childNode || !parentNode) {
       console.error('[connectNodes] Nodo hijo o padre no encontrado');
       return false;
@@ -3210,8 +3219,11 @@ export const useNodes = () => {
       childDirection = (relY > 50 && Math.abs(relX) < 100) ? 'vertical' : 'horizontal';
     }
 
+    // IMPORTANTE: Solo modificamos el nodo que se está conectando
+    // NO tocamos los otros nodos
     const newNodes = nodes.map(n => {
       if (n.id === childNodeId) {
+        console.log('[connectNodes] Actualizando parentId de', childNodeId, 'de', n.parentId, 'a', newParentId);
         return {
           ...n,
           parentId: newParentId,
@@ -3223,6 +3235,11 @@ export const useNodes = () => {
       }
       return n;
     });
+    
+    // Log de nodos con parentId = newParentId DESPUÉS de la conexión
+    const newChildren = newNodes.filter(n => n.parentId === newParentId);
+    console.log('[connectNodes] Hijos del padre DESPUÉS:', newChildren.map(c => c.id));
+    console.log('[connectNodes] Total nodos DESPUÉS:', newNodes.length);
 
     pushToHistory(activeProjectId, newNodes);
     setProjects(prev => prev.map(p => 
@@ -3232,6 +3249,7 @@ export const useNodes = () => {
     ));
 
     console.log('[connectNodes] Nodos conectados exitosamente');
+    console.log('[connectNodes] === FIN ===');
     return true;
   }, [nodes, projects, activeProjectId, pushToHistory]);
 

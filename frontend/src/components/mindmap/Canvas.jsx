@@ -594,7 +594,8 @@ const Canvas = ({
   // Manejar selección de nodo con soporte para CTRL/CMD + clic
   const handleNodeSelect = useCallback((nodeId, e) => {
     // Si estamos en modo conexión, completar la conexión
-    if (connectionMode.isActive) {
+    // Usar la ref para obtener el estado más actualizado
+    if (connectionModeRef.current.isActive) {
       completeConnection(nodeId);
       return;
     }

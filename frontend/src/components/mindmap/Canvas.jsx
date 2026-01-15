@@ -961,7 +961,7 @@ const Canvas = ({
           showLineButtons={layoutType === 'mindhybrid' || layoutType === 'mindtree'}
         />
 
-        {/* Línea de preview durante modo de conexión */}
+        {/* Línea de preview durante modo de conexión con anclaje inteligente */}
         {connectionMode.isActive && connectionMode.sourceNodeId && (
           <svg 
             className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-visible"
@@ -971,22 +971,34 @@ const Canvas = ({
               const sourceNode = nodes.find(n => n.id === connectionMode.sourceNodeId);
               if (!sourceNode) return null;
               
-              const sourceX = sourceNode.x + (sourceNode.width || 160) / 2;
-              const sourceY = sourceNode.y + (sourceNode.height || 64) / 2;
               const targetX = connectionMode.mousePosition.x;
               const targetY = connectionMode.mousePosition.y;
               
-              // Línea recta con estilo punteado
+              // Usar anclaje inteligente para la línea de preview
+              const anchor = getSmartAnchorToPosition(
+                sourceNode,
+                targetX,
+                targetY,
+                sourceNode.width || 160,
+                sourceNode.height || 64
+              );
+              
+              // Generar path suave desde el anchor hasta el cursor
+              const previewPath = generatePreviewPath(
+                anchor.x, anchor.y,
+                targetX, targetY,
+                anchor.point
+              );
+              
               return (
-                <line
-                  x1={sourceX}
-                  y1={sourceY}
-                  x2={targetX}
-                  y2={targetY}
+                <path
+                  d={previewPath}
                   stroke="#8b5cf6"
-                  strokeWidth={2}
+                  strokeWidth={2.5}
                   strokeDasharray="8,4"
-                  className="animate-pulse"
+                  fill="none"
+                  className="transition-all duration-75"
+                  style={{ filter: 'drop-shadow(0 0 3px rgba(139, 92, 246, 0.5))' }}
                 />
               );
             })()}

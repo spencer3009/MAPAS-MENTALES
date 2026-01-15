@@ -2,6 +2,32 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-15: FEATURE — Sistema Avanzado de Gestión de Conectores ✅ COMPLETADO
+- **Eliminación visual de conectores (Desconectar nodos)**:
+  - Al pasar el mouse sobre una línea de conexión, aparece botón de desconexión (🔗)
+  - El botón cambia de gris a rojo en hover
+  - Al hacer clic, solo elimina la conexión (parentId), no los nodos
+  - Zona de hover invisible más ancha (20px) para facilitar la interacción
+  - Línea se resalta en rojo durante hover
+- **Modo de conexión manual (crear conectores)**:
+  - Nuevo botón púrpura 🔗 debajo del botón "+" azul
+  - Al hacer clic, activa el "modo conexión":
+    - Indicador visual en la parte superior: "Haz clic en un nodo para conectar"
+    - Línea de preview punteada púrpura siguiendo el cursor
+    - ESC o clic en canvas vacío cancela el modo
+  - Al hacer clic en un nodo destino, se crea la conexión padre-hijo
+- **Funciones en useNodes.js**:
+  - `disconnectNode(nodeId)`: Elimina parentId sin borrar el nodo
+  - `connectNodes(childNodeId, parentNodeId)`: Crea conexión con validación anti-ciclos
+- **Validaciones implementadas**:
+  - No se puede conectar un nodo a sí mismo
+  - Se detectan ciclos (un nodo no puede conectarse a sus descendientes)
+- **Archivos modificados**:
+  - `/app/frontend/src/hooks/useNodes.js` - funciones disconnectNode, connectNodes
+  - `/app/frontend/src/components/mindmap/ConnectionsLayer.jsx` - botón de desconexión en hover
+  - `/app/frontend/src/components/mindmap/Canvas.jsx` - modo conexión, botón púrpura, línea preview
+  - `/app/frontend/src/components/mindmap/MindMapApp.jsx` - props para nuevas funciones
+
 ### 2026-01-15: FEATURE — Duplicar Mapas (Mejorado) ✅ COMPLETADO
 - **Funcionalidad completa**: Opción "Duplicar" en el menú de opciones con flujo UX mejorado
 - **Modal de duplicación** (`DuplicateProjectModal.jsx`):

@@ -722,6 +722,21 @@ const Canvas = ({
   const handleMouseMove = useCallback((e) => {
     if (!containerRef.current) return;
 
+    // Actualizar posición del mouse durante modo conexión
+    if (connectionMode.isActive) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const adjustedPanX = pan.x + rulerOffset;
+      const adjustedPanY = pan.y + rulerOffset;
+      setConnectionMode(prev => ({
+        ...prev,
+        mousePosition: {
+          x: (e.clientX - rect.left - adjustedPanX) / zoom,
+          y: (e.clientY - rect.top - adjustedPanY) / zoom
+        }
+      }));
+      return;
+    }
+
     // Ajustar por el offset de las reglas
     const adjustedPanX = pan.x + rulerOffset;
     const adjustedPanY = pan.y + rulerOffset;
@@ -760,7 +775,7 @@ const Canvas = ({
     if (isPanning) {
       onUpdatePanning(e);
     }
-  }, [dragging, isPanning, isSelectingArea, selectionBox, pan, zoom, nodes, selectedNodeIds, onUpdateNodePosition, onUpdatePanning, onMoveSelectedNodes]);
+  }, [connectionMode.isActive, dragging, isPanning, isSelectingArea, selectionBox, pan, zoom, nodes, selectedNodeIds, onUpdateNodePosition, onUpdatePanning, onMoveSelectedNodes]);
 
   // Manejar fin de arrastre
   const handleMouseUp = useCallback((e) => {

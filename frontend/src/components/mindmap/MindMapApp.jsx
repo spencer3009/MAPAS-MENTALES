@@ -1441,6 +1441,25 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
           setPendingPlanForPayment(null);
         }}
       />
+
+      {/* Modal de conflicto de nombre duplicado */}
+      <NameConflictModal
+        isOpen={showNameConflictModal}
+        onClose={() => {
+          setShowNameConflictModal(false);
+          setNameConflictData({
+            conflictingName: '',
+            existingProjectId: null,
+            pendingLayoutType: 'mindflow',
+            isFromTemplate: false,
+            templateNodes: null
+          });
+        }}
+        conflictingName={nameConflictData.conflictingName}
+        existingProjectId={nameConflictData.existingProjectId}
+        onReplace={handleReplaceExistingProject}
+        onRename={handleRenameAndCreate}
+      />
       
       {/* Modal de verificación requerida */}
       <VerificationRequiredModal

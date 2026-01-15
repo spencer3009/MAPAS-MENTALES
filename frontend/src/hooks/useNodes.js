@@ -3524,16 +3524,13 @@ export const useNodes = () => {
       setActiveProjectId(newProject.id);
       setSelectedNodeId(null);
       
-      // Activar en el servidor para que lastActiveAt se actualice
-      activateProject(newProject.id);
-      
       console.log('Proyecto duplicado exitosamente:', newProject.name);
       return { success: true, newProjectId: newProject.id, newName: newProject.name };
     } catch (error) {
       console.error('Error al duplicar proyecto:', error);
       return { success: false, error: 'Error al duplicar el proyecto. Intenta de nuevo.' };
     }
-  }, [projects, generateUniqueCopyName, saveProjectToServer, activateProject]);
+  }, [projects, generateUniqueCopyName, saveProjectToServer]);
 
   // Renombrar proyecto
   const renameProject = useCallback(async (projectId, newName) => {

@@ -1175,6 +1175,7 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
             onNewBlank={handleNewBlankClick}
             onNewFromTemplate={handleNewFromTemplateClick}
           onDeleteProject={handleDeleteProjectClick}
+          onDuplicateProject={handleDuplicateProject}
           onSwitchProject={handleSwitchProject}
           onRenameProject={renameProject}
           onProjectReminder={handleProjectReminder}

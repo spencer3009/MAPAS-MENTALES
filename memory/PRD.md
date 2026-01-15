@@ -2,6 +2,29 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-15: FEATURE — Sistema de Anclaje Inteligente para Conectores ✅ COMPLETADO
+- **Sistema de anchor points inteligente** (`/app/frontend/src/utils/curve.js`):
+  - 4 puntos de anclaje por nodo: derecha, izquierda, arriba, abajo
+  - `getSmartAnchorPoints()`: Selecciona automáticamente los mejores anchors entre dos nodos
+  - `getSmartAnchorToPosition()`: Selecciona el mejor anchor hacia una posición arbitraria (para preview)
+  - Validación de distancia mínima y preferencia por conexiones opuestas (left-right, top-bottom)
+- **Generación de paths mejorada**:
+  - `generateSmartPath()`: Curvas Bezier con control points proporcionales a la distancia
+  - `generatePreviewPath()`: Paths suaves para la línea de preview
+  - Offset máximo limitado (20-100px) para evitar curvas exageradas
+- **Preview inteligente durante modo conexión**:
+  - El anchor cambia dinámicamente según la posición del cursor
+  - Curva suave con efecto glow púrpura
+  - Transición fluida al mover el cursor
+- **Conexiones existentes mejoradas**:
+  - Los conectores entre nodos usan el sistema inteligente
+  - Líneas más cortas y lógicas
+  - Recálculo automático al mover nodos
+- **Archivos modificados**:
+  - `/app/frontend/src/utils/curve.js` - Sistema completo de anclaje
+  - `/app/frontend/src/components/mindmap/ConnectionsLayer.jsx` - Uso de smart anchors
+  - `/app/frontend/src/components/mindmap/Canvas.jsx` - Preview inteligente
+
 ### 2026-01-15: FEATURE — Sistema Avanzado de Gestión de Conectores ✅ COMPLETADO
 - **Eliminación visual de conectores (Desconectar nodos)**:
   - Al pasar el mouse sobre una línea de conexión, aparece botón de desconexión (🔗)

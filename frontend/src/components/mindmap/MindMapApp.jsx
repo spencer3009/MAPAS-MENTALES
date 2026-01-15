@@ -198,6 +198,16 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
   const [upgradeLimitType, setUpgradeLimitType] = useState('active');
   const [pendingPlanForPayment, setPendingPlanForPayment] = useState(null);
 
+  // Estado para el modal de conflicto de nombre duplicado
+  const [showNameConflictModal, setShowNameConflictModal] = useState(false);
+  const [nameConflictData, setNameConflictData] = useState({
+    conflictingName: '',
+    existingProjectId: null,
+    pendingLayoutType: 'mindflow',
+    isFromTemplate: false,
+    templateNodes: null
+  });
+
   // Efecto para abrir modal de PayPal si hay un plan pendiente
   useEffect(() => {
     if (pendingPlanId && !showUpgradeModal) {

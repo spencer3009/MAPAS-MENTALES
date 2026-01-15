@@ -2,29 +2,33 @@
 
 ## Changelog (Latest First)
 
-### 2026-01-15: FEATURE — Duplicar Mapas ✅ COMPLETADO
-- **Nueva funcionalidad**: Opción "Duplicar" en el menú de opciones de cada proyecto (tres puntos)
+### 2026-01-15: FEATURE — Duplicar Mapas (Mejorado) ✅ COMPLETADO
+- **Funcionalidad completa**: Opción "Duplicar" en el menú de opciones con flujo UX mejorado
+- **Modal de duplicación** (`DuplicateProjectModal.jsx`):
+  - Título descriptivo: "Duplicar mapa"
+  - Subtítulo: "Crear una copia de 'Nombre Original'"
+  - Campo editable pre-llenado con nombre sugerido ("Nombre - copia X")
+  - **Validación en tiempo real**:
+    - Check verde ✓ cuando el nombre es válido
+    - Alerta roja ⚠ cuando el nombre ya existe
+    - Botón "Crear copia" deshabilitado si nombre inválido
+  - Contador de caracteres (máximo 50)
+  - Spinner de carga mientras se crea
 - **Comportamiento**:
-  - Crea una copia exacta del mapa incluyendo todos los nodos, estructura, conexiones y estilos
-  - Genera nuevos IDs únicos para todos los nodos (usando `crypto.randomUUID()`)
-  - Mapea correctamente los `parentId`, `connectorParentId` y `connectorTargetId` a los nuevos IDs
-  - No copia el estado de anclado (`isPinned = false`)
-- **Nombre único automático**:
-  - Primera copia: "Nombre Original - copia"
-  - Copias subsecuentes: "Nombre Original - copia 2", "Nombre Original - copia 3", etc.
-  - Validación case-insensitive para evitar colisiones
-- **UX**:
-  - ✅ Toast de éxito: "Mapa duplicado. Se creó 'Nombre - copia X'"
-  - ✅ Navega automáticamente al nuevo proyecto
-  - ✅ El nuevo mapa queda seleccionado en el editor
-  - ✅ Toast se auto-oculta después de 4 segundos
-  - Respeta límites de plan (muestra modal de upgrade si se excede)
-- **Testing**: 100% backend (13/13 tests)
-- **Archivos modificados**:
-  - `/app/frontend/src/hooks/useNodes.js` - funciones `generateUniqueCopyName` y `duplicateProject`
-  - `/app/frontend/src/components/mindmap/Sidebar.jsx` - nueva opción "Duplicar" en el menú
-  - `/app/frontend/src/components/mindmap/MindMapApp.jsx` - handler `handleDuplicateProject` con toast
-  - `/app/frontend/src/components/mindmap/ToastProvider.jsx` - auto-dismiss para toasts de success
+  - El usuario puede personalizar el nombre antes de crear la copia
+  - Copia todos los nodos, conexiones y estilos con nuevos IDs
+  - Después de crear: navega automáticamente al nuevo mapa
+  - Toast de éxito: "Mapa duplicado. Se creó 'Nombre'"
+  - El mapa duplicado aparece primero en la lista (ordenado por fecha)
+- **Nombres únicos automáticos**:
+  - Sugerencia: "Nombre - copia", "Nombre - copia 2", etc.
+  - Validación case-insensitive
+- **Testing**: 100% verificado visualmente
+- **Archivos modificados/creados**:
+  - `/app/frontend/src/components/mindmap/DuplicateProjectModal.jsx` (nuevo)
+  - `/app/frontend/src/hooks/useNodes.js` - `duplicateProject` ahora acepta `customName`
+  - `/app/frontend/src/components/mindmap/MindMapApp.jsx` - nuevo flujo con modal
+  - `/app/frontend/src/components/mindmap/ToastProvider.jsx` - auto-dismiss de 4s
 
 ### 2026-01-15: BUG FIX — Separación de Conflicto de Nombre vs Límite de Plan ✅ COMPLETADO
 - **Bug reportado**: Al crear un mapa con nombre duplicado, el sistema mostraba incorrectamente el popup de "Necesitas más espacio" (upgrade de plan) en lugar de un modal para resolver el conflicto de nombre

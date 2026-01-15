@@ -20,6 +20,7 @@ import TemplatesView from './TemplatesView';
 import IntegrationsView from './IntegrationsView';
 import UpgradeModal from './UpgradeModal';
 import RemindersView from './RemindersView';
+import NodeDefaultsSettings from './NodeDefaultsSettings';
 import { FullscreenControls } from './FullscreenMode';
 import { NotificationProvider } from './ToastProvider';
 import { BoardsPage, BoardView } from '../boards';

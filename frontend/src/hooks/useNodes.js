@@ -3352,10 +3352,24 @@ export const useNodes = () => {
       const result = await saveProjectToServer(newProject);
       
       if (!result.success) {
-        console.error('Servidor rechazó la creación desde template:', result.error);
+        console.error('Servidor rechazó la creación desde template:', result.error, 'Status:', result.status);
+        
+        // Si es conflicto de nombre (409), retornar info del conflicto
+        if (result.status === 409 || result.conflict) {
+          return { 
+            success: false, 
+            error: result.error,
+            isNameConflict: true,
+            existingProjectId: result.existingProjectId,
+            conflictingName: templateName
+          };
+        }
+        
+        // Si es límite de plan (403), retornar info del límite
         return { 
           success: false, 
           error: result.error,
+          isPlanLimit: true,
           limitType: result.error?.includes('total') || result.error?.includes('5 mapas') ? 'total' : 'active'
         };
       }

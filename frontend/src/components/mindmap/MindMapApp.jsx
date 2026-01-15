@@ -77,6 +77,8 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
     updateNodeLink,
     saveNodePositionToHistory,
     deleteNode,
+    disconnectNode,
+    connectNodes,
     duplicateNode,
     centerAllNodes,
     undo,

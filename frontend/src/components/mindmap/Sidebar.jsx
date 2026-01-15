@@ -684,6 +684,19 @@ const Sidebar = ({
                 Editar nombre
               </button>
               
+              {/* Duplicar */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onDuplicateProject) onDuplicateProject(project.id);
+                  setOpenMenuId(null);
+                }}
+                className="w-full px-3 py-2 text-left text-sm flex items-center gap-2.5 text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+              >
+                <Copy size={16} className="text-gray-400" />
+                Duplicar
+              </button>
+              
               {/* Recordatorio */}
               <button
                 onClick={(e) => {

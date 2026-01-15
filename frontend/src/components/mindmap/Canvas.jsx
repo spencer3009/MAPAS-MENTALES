@@ -101,6 +101,13 @@ const Canvas = ({
   // Cuando está activo, los nodos no se pueden mover, solo hacer pan/zoom
   const [isNavigationMode, setIsNavigationMode] = useState(false);
 
+  // Estado para modo de conexión manual
+  const [connectionMode, setConnectionMode] = useState({
+    isActive: false,
+    sourceNodeId: null,
+    mousePosition: { x: 0, y: 0 }
+  });
+
   // Actualizar los límites del canvas cuando cambie el tamaño o las reglas
   useEffect(() => {
     const updateCanvasBounds = () => {

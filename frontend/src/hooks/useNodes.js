@@ -2186,6 +2186,27 @@ export const useNodes = () => {
       
       // Crear el nuevo nodo con posición temporal
       const newY = parent.y + parentHeight + verticalGap;
+      
+      // Obtener valores por defecto de configuración
+      const getNodeDefaults = () => {
+        try {
+          const saved = localStorage.getItem('mindora_node_defaults');
+          if (saved) {
+            const settings = JSON.parse(saved);
+            const defaults = {};
+            if (settings.showIconByDefault && settings.defaultIcon) {
+              defaults.icon = settings.defaultIcon;
+            }
+            if (settings.textAlignLeft) {
+              defaults.textAlign = 'left';
+            }
+            return defaults;
+          }
+        } catch (e) { /* ignore */ }
+        return { icon: { name: 'CircleCheck', color: '#10b981' }, textAlign: 'left' };
+      };
+      const nodeDefaults = getNodeDefaults();
+
       const newNode = {
         id: newId,
         text: 'Nuevo Nodo',
@@ -2196,7 +2217,8 @@ export const useNodes = () => {
         width: nodeWidth,
         height: nodeHeight,
         nodeType: options?.nodeType || 'default',
-        childDirection: 'vertical'
+        childDirection: 'vertical',
+        ...nodeDefaults
       };
       
       // Agregar el nuevo nodo

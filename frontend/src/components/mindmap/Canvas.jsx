@@ -112,6 +112,12 @@ const Canvas = ({
     snapTargetId: null,  // ID del nodo al que se está haciendo "snap"
     snapAnchor: null     // Coordenadas del anchor del nodo snap { x, y, point }
   });
+  
+  // Ref para mantener el estado de conexión actualizado (evita stale closures)
+  const connectionModeRef = useRef(connectionMode);
+  useEffect(() => {
+    connectionModeRef.current = connectionMode;
+  }, [connectionMode]);
 
   // Constante para la distancia de snap (en píxeles del canvas)
   const SNAP_DISTANCE = 60;

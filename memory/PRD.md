@@ -14,13 +14,17 @@
   - Copias subsecuentes: "Nombre Original - copia 2", "Nombre Original - copia 3", etc.
   - Validación case-insensitive para evitar colisiones
 - **UX**:
-  - Después de duplicar, navega automáticamente al nuevo proyecto
+  - ✅ Toast de éxito: "Mapa duplicado. Se creó 'Nombre - copia X'"
+  - ✅ Navega automáticamente al nuevo proyecto
+  - ✅ El nuevo mapa queda seleccionado en el editor
+  - ✅ Toast se auto-oculta después de 4 segundos
   - Respeta límites de plan (muestra modal de upgrade si se excede)
 - **Testing**: 100% backend (13/13 tests)
 - **Archivos modificados**:
   - `/app/frontend/src/hooks/useNodes.js` - funciones `generateUniqueCopyName` y `duplicateProject`
   - `/app/frontend/src/components/mindmap/Sidebar.jsx` - nueva opción "Duplicar" en el menú
-  - `/app/frontend/src/components/mindmap/MindMapApp.jsx` - handler `handleDuplicateProject`
+  - `/app/frontend/src/components/mindmap/MindMapApp.jsx` - handler `handleDuplicateProject` con toast
+  - `/app/frontend/src/components/mindmap/ToastProvider.jsx` - auto-dismiss para toasts de success
 
 ### 2026-01-15: BUG FIX — Separación de Conflicto de Nombre vs Límite de Plan ✅ COMPLETADO
 - **Bug reportado**: Al crear un mapa con nombre duplicado, el sistema mostraba incorrectamente el popup de "Necesitas más espacio" (upgrade de plan) en lugar de un modal para resolver el conflicto de nombre

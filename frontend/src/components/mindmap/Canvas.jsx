@@ -109,7 +109,8 @@ const Canvas = ({
     isActive: false,
     sourceNodeId: null,
     mousePosition: { x: 0, y: 0 },
-    snapTargetId: null  // ID del nodo al que se está haciendo "snap"
+    snapTargetId: null,  // ID del nodo al que se está haciendo "snap"
+    snapAnchor: null     // Coordenadas del anchor del nodo snap { x, y, point }
   });
 
   // Constante para la distancia de snap (en píxeles del canvas)
@@ -530,7 +531,7 @@ const Canvas = ({
   // Cancelar modo de conexión
   const cancelConnectionMode = useCallback(() => {
     console.log('[Canvas] Cancelando modo conexión');
-    setConnectionMode({ isActive: false, sourceNodeId: null, mousePosition: { x: 0, y: 0 }, snapTargetId: null });
+    setConnectionMode({ isActive: false, sourceNodeId: null, mousePosition: { x: 0, y: 0 }, snapTargetId: null, snapAnchor: null });
   }, []);
 
   // Completar conexión al hacer clic en un nodo destino

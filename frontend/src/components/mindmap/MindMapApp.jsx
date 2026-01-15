@@ -1271,6 +1271,12 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
         user={user}
       />
 
+      {/* Modal: Configuración de nodos por defecto */}
+      <NodeDefaultsSettings
+        isOpen={showNodeDefaultsModal}
+        onClose={() => setShowNodeDefaultsModal(false)}
+      />
+
       {/* Modal: Todos los proyectos */}
       <AllProjectsModal
         isOpen={showAllProjectsModal}

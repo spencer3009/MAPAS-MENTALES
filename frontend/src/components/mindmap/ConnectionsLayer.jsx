@@ -1,4 +1,5 @@
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useState, useCallback } from 'react';
+import { Unlink } from 'lucide-react';
 import { 
   generateBezierPath, 
   generateOrgChartPath,
@@ -27,8 +28,19 @@ const ConnectionsLayer = memo(({
   nodes, 
   layoutType = 'mindflow',
   onAddNodeFromLine,
-  showLineButtons = false
+  onDisconnectNode,
+  showLineButtons = false,
+  showDisconnectButtons = true
 }) => {
+  const [hoveredConnectionId, setHoveredConnectionId] = useState(null);
+
+  const handleDisconnect = useCallback((e, nodeId) => {
+    e.stopPropagation();
+    if (onDisconnectNode) {
+      onDisconnectNode(nodeId);
+    }
+  }, [onDisconnectNode]);
+
   const connections = nodes
     .filter(node => node.parentId)
     .map(node => {

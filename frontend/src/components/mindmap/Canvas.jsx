@@ -725,6 +725,9 @@ const Canvas = ({
     // Si está en modo navegación, no iniciar arrastre
     if (isNavigationMode) return;
     
+    // Si está en modo conexión, no iniciar arrastre (solo queremos conectar)
+    if (connectionMode.isActive) return;
+    
     if (!containerRef.current) return;
     
     setShowControls(false);
@@ -740,7 +743,7 @@ const Canvas = ({
       offsetX: (e.clientX - rect.left - adjustedPanX) / zoom - node.x,
       offsetY: (e.clientY - rect.top - adjustedPanY) / zoom - node.y
     });
-  }, [pan, zoom, isNavigationMode]);
+  }, [pan, zoom, isNavigationMode, connectionMode.isActive]);
 
   // Manejar movimiento del mouse
   const handleMouseMove = useCallback((e) => {

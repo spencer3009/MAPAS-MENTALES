@@ -3137,6 +3137,104 @@ export const useNodes = () => {
     setSelectedNodeId(null);
   }, [nodes, projects, activeProjectId, pushToHistory, autoAlignHierarchy, autoAlignMindTree]);
 
+  // Desconectar un nodo de su padre (eliminar solo la conexión, no el nodo)
+  const disconnectNode = useCallback((nodeId) => {
+    const node = nodes.find(n => n.id === nodeId);
+    if (!node || !node.parentId) {
+      console.log('[disconnectNode] Nodo no tiene padre para desconectar:', nodeId);
+      return false;
+    }
+
+    console.log('[disconnectNode] Desconectando nodo:', nodeId, 'de padre:', node.parentId);
+    
+    const newNodes = nodes.map(n => {
+      if (n.id === nodeId) {
+        // Remover parentId y propiedades relacionadas con la conexión
+        const { parentId, childDirection, connectorParentId, connectorTargetId, ...rest } = n;
+        return rest;
+      }
+      return n;
+    });
+
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+
+    console.log('[disconnectNode] Nodo desconectado exitosamente');
+    return true;
+  }, [nodes, activeProjectId, pushToHistory]);
+
+  // Conectar un nodo a un nuevo padre
+  const connectNodes = useCallback((childNodeId, newParentId, options = {}) => {
+    const childNode = nodes.find(n => n.id === childNodeId);
+    const parentNode = nodes.find(n => n.id === newParentId);
+    
+    if (!childNode || !parentNode) {
+      console.error('[connectNodes] Nodo hijo o padre no encontrado');
+      return false;
+    }
+
+    // Evitar auto-conexión
+    if (childNodeId === newParentId) {
+      console.error('[connectNodes] No se puede conectar un nodo a sí mismo');
+      return false;
+    }
+
+    // Evitar ciclos: verificar que el nuevo padre no sea descendiente del hijo
+    const isDescendant = (potentialChild, ancestorId) => {
+      if (!potentialChild.parentId) return false;
+      if (potentialChild.parentId === ancestorId) return true;
+      const parent = nodes.find(n => n.id === potentialChild.parentId);
+      return parent ? isDescendant(parent, ancestorId) : false;
+    };
+
+    if (isDescendant(parentNode, childNodeId)) {
+      console.error('[connectNodes] No se puede crear ciclo: el padre es descendiente del hijo');
+      return false;
+    }
+
+    console.log('[connectNodes] Conectando nodo:', childNodeId, 'a nuevo padre:', newParentId);
+
+    const currentProject = projects.find(p => p.id === activeProjectId);
+    const layoutType = currentProject?.layoutType || 'mindflow';
+
+    // Determinar la dirección del hijo según el layout y la posición
+    let childDirection = options.childDirection;
+    if (!childDirection && layoutType === 'mindhybrid') {
+      // Inferir dirección basada en posición relativa
+      const relY = childNode.y - parentNode.y;
+      const relX = childNode.x - (parentNode.x + (parentNode.width || 160));
+      childDirection = (relY > 50 && Math.abs(relX) < 100) ? 'vertical' : 'horizontal';
+    }
+
+    const newNodes = nodes.map(n => {
+      if (n.id === childNodeId) {
+        return {
+          ...n,
+          parentId: newParentId,
+          childDirection: childDirection,
+          // Limpiar propiedades de conectores especiales
+          connectorParentId: undefined,
+          connectorTargetId: undefined
+        };
+      }
+      return n;
+    });
+
+    pushToHistory(activeProjectId, newNodes);
+    setProjects(prev => prev.map(p => 
+      p.id === activeProjectId 
+        ? { ...p, nodes: newNodes, updatedAt: new Date().toISOString() }
+        : p
+    ));
+
+    console.log('[connectNodes] Nodos conectados exitosamente');
+    return true;
+  }, [nodes, projects, activeProjectId, pushToHistory]);
+
   const duplicateNode = useCallback((id, autoAlignAfter = false) => {
     const original = nodes.find(n => n.id === id);
     if (!original) return;

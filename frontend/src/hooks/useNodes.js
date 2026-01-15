@@ -3859,6 +3859,8 @@ export const useNodes = () => {
     updateNodeLink,
     saveNodePositionToHistory,
     deleteNode,
+    disconnectNode,
+    connectNodes,
     duplicateNode,
     centerAllNodes,
     

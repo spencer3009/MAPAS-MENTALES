@@ -723,12 +723,45 @@ const Canvas = ({
       const rect = containerRef.current.getBoundingClientRect();
       const adjustedPanX = pan.x + rulerOffset;
       const adjustedPanY = pan.y + rulerOffset;
+      const mouseX = (e.clientX - rect.left - adjustedPanX) / zoom;
+      const mouseY = (e.clientY - rect.top - adjustedPanY) / zoom;
+      
+      // Buscar nodo cercano para snap (excluyendo el nodo origen)
+      let snapTarget = null;
+      let minDistance = SNAP_DISTANCE;
+      
+      for (const node of nodes) {
+        if (node.id === connectionMode.sourceNodeId) continue;
+        
+        // Calcular centro del nodo
+        const nodeCenterX = node.x + (node.width || 160) / 2;
+        const nodeCenterY = node.y + (node.height || 64) / 2;
+        
+        // Calcular distancia al cursor
+        const distance = Math.sqrt(
+          Math.pow(mouseX - nodeCenterX, 2) + 
+          Math.pow(mouseY - nodeCenterY, 2)
+        );
+        
+        // También considerar si el cursor está dentro del bounding box del nodo
+        const nodeWidth = node.width || 160;
+        const nodeHeight = node.height || 64;
+        const isInsideNode = 
+          mouseX >= node.x - 20 && 
+          mouseX <= node.x + nodeWidth + 20 &&
+          mouseY >= node.y - 20 && 
+          mouseY <= node.y + nodeHeight + 20;
+        
+        if (isInsideNode || distance < minDistance) {
+          minDistance = distance;
+          snapTarget = node.id;
+        }
+      }
+      
       setConnectionMode(prev => ({
         ...prev,
-        mousePosition: {
-          x: (e.clientX - rect.left - adjustedPanX) / zoom,
-          y: (e.clientY - rect.top - adjustedPanY) / zoom
-        }
+        mousePosition: { x: mouseX, y: mouseY },
+        snapTargetId: snapTarget
       }));
       return;
     }
@@ -771,7 +804,7 @@ const Canvas = ({
     if (isPanning) {
       onUpdatePanning(e);
     }
-  }, [connectionMode.isActive, dragging, isPanning, isSelectingArea, selectionBox, pan, zoom, nodes, selectedNodeIds, onUpdateNodePosition, onUpdatePanning, onMoveSelectedNodes]);
+  }, [connectionMode.isActive, connectionMode.sourceNodeId, dragging, isPanning, isSelectingArea, selectionBox, pan, zoom, nodes, selectedNodeIds, onUpdateNodePosition, onUpdatePanning, onMoveSelectedNodes, SNAP_DISTANCE]);
 
   // Manejar fin de arrastre
   const handleMouseUp = useCallback((e) => {

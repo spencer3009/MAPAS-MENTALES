@@ -10,6 +10,7 @@ import {
   LogOut,
   LayoutGrid,
   Users,
+  User,
   MessageSquare
 } from 'lucide-react';
 

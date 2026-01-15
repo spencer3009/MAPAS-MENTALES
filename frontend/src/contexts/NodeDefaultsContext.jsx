@@ -6,7 +6,7 @@ const NodeDefaultsContext = createContext();
 // Valores por defecto
 const DEFAULT_SETTINGS = {
   showIconByDefault: true,          // Mostrar ícono de check por defecto
-  defaultIcon: { name: 'CircleCheck', color: '#10b981' }, // Verde esmeralda
+  defaultIcon: { name: 'CircleCheck', color: '#64748b' }, // Gris pizarra (slate-500)
   textAlignLeft: true,              // Alineación a la izquierda por defecto
 };
 

@@ -149,6 +149,17 @@ export const useNodes = () => {
       if (response.ok) {
         console.log(`Proyecto ${method === 'PUT' ? 'actualizado' : 'creado'} en servidor:`, project.name);
         return { success: true };
+      } else if (response.status === 409) {
+        // Conflicto - ya existe un proyecto con ese nombre
+        const errorData = await response.json().catch(() => ({}));
+        console.warn('Conflicto de proyecto:', errorData);
+        return { 
+          success: false, 
+          error: errorData.detail?.message || 'Ya existe un proyecto con ese nombre',
+          conflict: true,
+          existingProjectId: errorData.detail?.existing_project_id,
+          status: 409
+        };
       } else {
         // Capturar el mensaje de error del servidor
         const errorData = await response.json().catch(() => ({}));

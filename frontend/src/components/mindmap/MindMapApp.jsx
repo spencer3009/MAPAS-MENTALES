@@ -851,16 +851,33 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
     setShowDeleteModal(true);
   }, [activeProjectId]);
 
-  // Handler para duplicar proyecto
-  const handleDuplicateProject = useCallback(async (projectId) => {
+  // Handler para abrir modal de duplicación
+  const handleDuplicateProject = useCallback((projectId) => {
+    const project = projects.find(p => p.id === projectId);
+    if (project) {
+      setProjectToDuplicate(project);
+      setShowDuplicateModal(true);
+    }
+  }, [projects]);
+
+  // Handler para confirmar duplicación con nombre personalizado
+  const handleConfirmDuplicate = useCallback(async (customName) => {
+    if (!projectToDuplicate) return;
+    
+    setIsDuplicating(true);
+    
     try {
-      console.log('Duplicando proyecto:', projectId);
-      const result = await duplicateProject(projectId);
+      console.log('Duplicando proyecto:', projectToDuplicate.name, 'con nuevo nombre:', customName);
+      const result = await duplicateProject(projectToDuplicate.id, customName);
       
       if (result.success) {
         console.log('Proyecto duplicado exitosamente:', result.newName);
         
-        // Mostrar toast de éxito con el nombre del nuevo mapa
+        // Cerrar modal
+        setShowDuplicateModal(false);
+        setProjectToDuplicate(null);
+        
+        // Mostrar toast de éxito
         showSuccess(`Mapa duplicado. Se creó "${result.newName}"`);
         
         // Cambiar al nuevo proyecto automáticamente
@@ -870,7 +887,9 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
           resetZoom();
         }
       } else if (result.isPlanLimit) {
-        // Mostrar modal de upgrade si hay límite de plan
+        // Cerrar modal de duplicación y mostrar modal de upgrade
+        setShowDuplicateModal(false);
+        setProjectToDuplicate(null);
         setUpgradeLimitType(result.limitType || 'active');
         setShowUpgradeModal(true);
       } else {
@@ -878,8 +897,10 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
       }
     } catch (error) {
       console.error('Error al duplicar proyecto:', error);
+    } finally {
+      setIsDuplicating(false);
     }
-  }, [duplicateProject, switchProject, resetPan, resetZoom, showSuccess]);
+  }, [projectToDuplicate, duplicateProject, switchProject, resetPan, resetZoom, showSuccess]);
 
   // Handler para confirmar eliminación (soft delete - va a la papelera)
   const handleConfirmDelete = useCallback(() => {

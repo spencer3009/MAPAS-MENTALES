@@ -272,15 +272,6 @@ const Sidebar = ({
         </div>
         
         <div className="flex items-center gap-1">
-          {/* Botón de configuración de nodos */}
-          <button
-            onClick={() => setShowNodeSettings(true)}
-            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all duration-200"
-            title="Configuración de nodos"
-          >
-            <Settings size={14} />
-          </button>
-          
           {/* Botón de reordenar */}
           {projects.length > 1 && (
             <button

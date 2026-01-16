@@ -71,7 +71,7 @@ const CanvasModePanel = ({
   return (
     <div 
       className={`
-        fixed top-1/2 -translate-y-1/2 z-[9999] 
+        fixed top-1/2 -translate-y-1/2 z-[60] 
         transition-all duration-300 ease-in-out
         ${shouldHideOnMobile ? 'opacity-0 pointer-events-none -translate-x-full' : 'opacity-100 translate-x-0'}
       `}

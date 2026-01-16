@@ -1015,6 +1015,7 @@ const Canvas = ({
         onToggleGrid={onToggleGrid}
         onToggleRulers={onToggleRulers}
         isSidebarExpanded={isSidebarExpanded}
+        isMobileOverlayOpen={isMobileOverlayOpen}
       />
 
       {/* Cuadrícula del lienzo */}

@@ -65,14 +65,6 @@ const DockSidebar = ({
       onClick: onOpenContacts,
     },
     {
-      id: 'whatsapp',
-      icon: MessageSquare,
-      label: 'WhatsApp',
-      onClick: onOpenWhatsApp,
-      highlight: true,
-      badge: null, // Para mostrar mensajes no leídos en el futuro
-    },
-    {
       id: 'favorites',
       icon: Star,
       label: 'Favoritos',

@@ -4,7 +4,8 @@
 // eslint-disable-next-line no-unused-vars
 const ignored = self.__WB_MANIFEST;
 
-const CACHE_NAME = 'mindora-cache-v1';
+// IMPORTANTE: Incrementar versión en cada deploy para forzar actualización del cache
+const CACHE_NAME = 'mindora-cache-v2';
 
 // Lista de recursos estáticos para cachear
 const STATIC_ASSETS = [

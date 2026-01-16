@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { MousePointer2, Hand, Maximize2, Grid3X3, Ruler } from 'lucide-react';
 
 // Constantes de layout (deben coincidir con los valores reales de los componentes)
@@ -7,6 +7,7 @@ const PROJECT_SIDEBAR_WIDTH = 288; // w-72 del Sidebar de proyectos
 const RULER_WIDTH = 20;            // RULER_SIZE de CanvasRulers
 const TOOLBAR_MARGIN = 8;          // Pequeño margen para separación visual
 const MOBILE_LEFT = 16;            // left-4 en móvil
+const MOBILE_BREAKPOINT = 768;     // md breakpoint de Tailwind
 
 const CanvasModePanel = ({ 
   interactionMode, 
@@ -19,6 +20,23 @@ const CanvasModePanel = ({
   onToggleRulers,
   isSidebarExpanded = false
 }) => {
+  // Estado para detectar si es móvil
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detectar cambios de tamaño de ventana
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    };
+    
+    // Verificar al montar
+    checkMobile();
+    
+    // Escuchar cambios de tamaño
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Ocultar el panel en modo fullscreen (se usan otros controles)
   if (isFullscreen) return null;
 
@@ -43,8 +61,6 @@ const CanvasModePanel = ({
     return left;
   };
 
-  // Detectar si es móvil (simplificado, se mejorará con CSS media queries)
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const leftPosition = isMobile ? MOBILE_LEFT : calculateDesktopLeft();
 
   return (
@@ -54,6 +70,7 @@ const CanvasModePanel = ({
         left: leftPosition,
         marginTop: 10
       }}
+      data-testid="canvas-mode-panel"
     >
       <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-1.5 flex flex-col gap-1">
         {/* Modo Puntero */}

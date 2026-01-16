@@ -27,6 +27,7 @@ const Canvas = ({
   interactionMode = 'hand',
   onSetInteractionMode,
   contextMenu,
+  isSidebarExpanded = false,
   onSelectNode,
   onAddToSelection,
   onSelectNodesInArea,

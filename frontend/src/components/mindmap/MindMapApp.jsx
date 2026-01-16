@@ -46,7 +46,7 @@ const API_URL = '';
 
 // Componente interno principal
 const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clearForceView, pendingPlanId, onClearPendingPlan }) => {
-  const { user, logout, token, isAdmin } = useAuth();
+  const { user, logout, token, isAdmin, isImpersonating, impersonatingUser, adminUsername, returnToAdmin } = useAuth();
   const { checkVerification, showRestrictionModal, closeRestrictionModal, userEmail } = useVerificationCheck();
   const { showSuccess } = useNotifications();
   

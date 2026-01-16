@@ -96,7 +96,11 @@ const MobileProjectsDrawer = ({
         if (onDuplicateProject) onDuplicateProject(projectId);
         break;
       case 'reminder':
-        if (onProjectReminder) onProjectReminder(projectId);
+        // Cerrar el drawer antes de abrir el modal de recordatorio
+        onClose();
+        setTimeout(() => {
+          if (onProjectReminder) onProjectReminder(projectId);
+        }, 150);
         break;
       case 'delete':
         // Cerrar el drawer ANTES de mostrar el diálogo de confirmación

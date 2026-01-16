@@ -12,6 +12,21 @@
 - **Archivos modificados**:
   - `/app/frontend/src/components/mindmap/Canvas.jsx` - completeConnection() ya no cancela el modo
 
+### 2026-01-16: BUG FIX — Botón Candado Móvil Desaparecía al Desplazar Canvas ✅ CORREGIDO
+- **Problema**: En móvil, el botón de candado (lock/unlock) desaparecía cuando el canvas se desplazaba hacia la derecha
+- **Causa raíz**: El botón usaba `position: absolute` (relativo al canvas) en lugar de `position: fixed` (relativo al viewport)
+- **Fix aplicado en NavigationModeButton.jsx**:
+  - Cambió `absolute` → `fixed` para el botón principal
+  - Cambió `z-[100]` → `z-[9999]` para asegurar visibilidad sobre todo
+  - También corregido el feedback visual flotante
+- **Comportamiento correcto ahora**:
+  - El candado está **100% fijo al viewport**
+  - Nunca desaparece sin importar el desplazamiento del canvas
+  - Siempre accesible para alternar entre navegación y edición
+- **Testing**: Verificado en viewport móvil (390x844)
+- **Archivos modificados**:
+  - `/app/frontend/src/components/mindmap/NavigationModeButton.jsx`
+
 ### 2026-01-15: BUG FIX — Conexiones Manuales Múltiples (COMPLETO) ✅ CORREGIDO
 - **Problema original**: Al crear conexiones manuales desde un nodo origen, las conexiones anteriores se eliminaban
 - **Problema adicional encontrado**: Los callbacks de React tenían "stale closures" que impedían múltiples conexiones consecutivas

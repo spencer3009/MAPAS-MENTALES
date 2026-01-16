@@ -99,7 +99,13 @@ const MobileProjectsDrawer = ({
         if (onProjectReminder) onProjectReminder(projectId);
         break;
       case 'delete':
-        if (onDeleteProject) onDeleteProject(projectId);
+        // Cerrar el drawer ANTES de mostrar el diálogo de confirmación
+        // para que el modal de confirmación no quede detrás
+        onClose();
+        // Pequeño delay para que se cierre el drawer antes de mostrar el modal
+        setTimeout(() => {
+          if (onDeleteProject) onDeleteProject(projectId);
+        }, 150);
         break;
       default:
         break;

@@ -398,7 +398,14 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     try:
         token = credentials.credentials
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
+        
+        # Primero intentamos obtener el username directamente del payload
+        # (presente en tokens de impersonación)
+        username = payload.get("username")
+        if username is None:
+            # Si no hay username, usamos sub (método tradicional)
+            username = payload.get("sub")
+        
         if username is None:
             raise credentials_exception
     except JWTError:
@@ -407,6 +414,12 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     user = await get_user(username)
     if user is None:
         raise credentials_exception
+    
+    # Si es un token de impersonación, agregar esa información al usuario
+    if payload.get("impersonated_by"):
+        user["impersonated_by"] = payload.get("impersonated_by")
+        user["impersonation_time"] = payload.get("impersonation_time")
+    
     return user
 
 

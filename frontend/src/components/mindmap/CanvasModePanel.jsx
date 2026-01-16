@@ -18,7 +18,8 @@ const CanvasModePanel = ({
   showRulers = true,
   onToggleGrid,
   onToggleRulers,
-  isSidebarExpanded = false
+  isSidebarExpanded = false,
+  isMobileOverlayOpen = false // Nuevo: indica si hay un overlay móvil abierto (drawer, modal, etc.)
 }) => {
   // Estado para detectar si es móvil
   const [isMobile, setIsMobile] = useState(false);
@@ -62,15 +63,24 @@ const CanvasModePanel = ({
   };
 
   const leftPosition = isMobile ? MOBILE_LEFT : calculateDesktopLeft();
+  
+  // En móvil, ocultar el toolbar cuando hay overlays abiertos (drawer de navegación, modal de proyectos, etc.)
+  // Usamos transform para una animación suave en lugar de ocultarlo bruscamente
+  const shouldHideOnMobile = isMobile && isMobileOverlayOpen;
 
   return (
     <div 
-      className="fixed top-1/2 -translate-y-1/2 z-[9999] transition-all duration-300"
+      className={`
+        fixed top-1/2 -translate-y-1/2 z-[9999] 
+        transition-all duration-300 ease-in-out
+        ${shouldHideOnMobile ? 'opacity-0 pointer-events-none -translate-x-full' : 'opacity-100 translate-x-0'}
+      `}
       style={{ 
         left: leftPosition,
         marginTop: 10
       }}
       data-testid="canvas-mode-panel"
+      aria-hidden={shouldHideOnMobile}
     >
       <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-1.5 flex flex-col gap-1">
         {/* Modo Puntero */}
@@ -86,6 +96,7 @@ const CanvasModePanel = ({
           `}
           title="Modo Puntero: Seleccionar nodos y hacer selección múltiple"
           data-testid="canvas-mode-pointer"
+          tabIndex={shouldHideOnMobile ? -1 : 0}
         >
           <MousePointer2 size={20} />
         </button>
@@ -103,6 +114,7 @@ const CanvasModePanel = ({
           `}
           title="Modo Mano: Mover el lienzo arrastrando"
           data-testid="canvas-mode-hand"
+          tabIndex={shouldHideOnMobile ? -1 : 0}
         >
           <Hand size={20} />
         </button>
@@ -123,6 +135,7 @@ const CanvasModePanel = ({
           `}
           title={showGrid ? 'Ocultar cuadrícula' : 'Mostrar cuadrícula'}
           data-testid="canvas-toggle-grid"
+          tabIndex={shouldHideOnMobile ? -1 : 0}
         >
           <Grid3X3 size={20} />
         </button>
@@ -140,6 +153,7 @@ const CanvasModePanel = ({
           `}
           title={showRulers ? 'Ocultar reglas' : 'Mostrar reglas'}
           data-testid="canvas-toggle-rulers"
+          tabIndex={shouldHideOnMobile ? -1 : 0}
         >
           <Ruler size={20} />
         </button>
@@ -157,6 +171,7 @@ const CanvasModePanel = ({
           "
           title="Pantalla completa"
           data-testid="canvas-fullscreen"
+          tabIndex={shouldHideOnMobile ? -1 : 0}
         >
           <Maximize2 size={20} />
         </button>

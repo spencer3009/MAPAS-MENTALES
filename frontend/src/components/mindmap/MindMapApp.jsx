@@ -1159,6 +1159,11 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
         onNewProject={handleNewBlankClick}
         isOpen={showMobileProjectsDrawer}
         onClose={() => setShowMobileProjectsDrawer(false)}
+        onDeleteProject={handleDeleteProjectClick}
+        onDuplicateProject={handleDuplicateProject}
+        onRenameProject={renameProject}
+        onProjectReminder={handleProjectReminder}
+        onPinProject={pinProject}
       />
 
       {/* Global Time Tracking Indicator */}

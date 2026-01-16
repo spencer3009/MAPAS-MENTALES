@@ -1117,6 +1117,30 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
 
   return (
     <div className={`flex flex-col md:flex-row h-screen w-full bg-gray-50 ${activeView === 'boards' ? 'overflow-x-auto' : 'overflow-hidden'}`}>
+      
+      {/* Banner de Impersonación - Visible cuando un admin está viendo la cuenta de otro usuario */}
+      {isImpersonating && (
+        <div className="fixed top-0 left-0 right-0 z-[9999] bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-2 flex items-center justify-between shadow-lg">
+          <div className="flex items-center gap-3">
+            <Shield size={18} className="text-white/90" />
+            <span className="text-sm font-medium">
+              Viendo como: <strong>{impersonatingUser}</strong>
+            </span>
+            <span className="text-xs text-white/70 hidden sm:inline">
+              (Admin: {adminUsername})
+            </span>
+          </div>
+          <button
+            onClick={returnToAdmin}
+            className="flex items-center gap-2 px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors"
+          >
+            <ArrowLeft size={16} />
+            <span className="hidden sm:inline">Volver a mi cuenta</span>
+            <span className="sm:hidden">Volver</span>
+          </button>
+        </div>
+      )}
+      
       {/* Navegación móvil - Solo visible en móvil */}
       <MobileNavigation
         onOpenDashboard={handleOpenDashboard}

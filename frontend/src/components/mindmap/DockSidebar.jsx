@@ -10,7 +10,8 @@ import {
   LogOut,
   LayoutGrid,
   Users,
-  MessageSquare
+  MessageSquare,
+  Shield
 } from 'lucide-react';
 
 const DockSidebar = ({ 
@@ -26,7 +27,9 @@ const DockSidebar = ({
   onLogout,
   isProjectsSidebarOpen = true,
   activeView = 'projects',
-  trashCount = 0
+  trashCount = 0,
+  isAdmin = false,
+  onAdminClick
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   

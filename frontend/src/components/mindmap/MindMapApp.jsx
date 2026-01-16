@@ -1281,6 +1281,7 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
             onSetInteractionMode={setInteractionMode}
             contextMenu={contextMenu}
             isSidebarExpanded={isProjectsSidebarOpen}
+            isMobileOverlayOpen={isMobileNavDrawerOpen || showMobileProjectsDrawer || showAllProjectsModal}
               onSelectNode={selectSingleNode}
               onAddToSelection={addToSelection}
               onSelectNodesInArea={selectNodesInArea}

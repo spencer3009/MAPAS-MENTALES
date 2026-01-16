@@ -17,7 +17,8 @@ import {
   Smartphone,
   Share2,
   CheckCircle2,
-  MessageSquare
+  MessageSquare,
+  Shield
 } from 'lucide-react';
 import { usePWAInstall } from '../../hooks/usePWAInstall';
 
@@ -39,7 +40,9 @@ const MobileNavigation = ({
   activeView = 'projects',
   trashCount = 0,
   projectName = '',
-  onDrawerStateChange // Callback para notificar cambios en el estado del drawer
+  onDrawerStateChange, // Callback para notificar cambios en el estado del drawer
+  isAdmin = false,
+  onAdminClick
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showIOSModal, setShowIOSModal] = useState(false);

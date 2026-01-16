@@ -2,6 +2,22 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-16: BUG FIX — Barra de Herramientas Superpuesta al Sidebar ✅ CORREGIDO
+- **Problema**: La barra de herramientas flotante (CanvasModePanel) se superponía con el menú lateral en desktop
+- **Causa raíz**: El componente usaba `position: fixed` con `left` estático, sin considerar el estado del sidebar
+- **Fix aplicado**:
+  - Agregada prop `isSidebarExpanded` desde MindMapApp → Canvas → CanvasModePanel
+  - Posicionamiento dinámico basado en el estado del sidebar:
+    - Móvil: `fixed left-4` (16px)
+    - Desktop con sidebar colapsado: `md:left-20` (80px)
+    - Desktop con sidebar expandido: `md:left-[310px]` (310px)
+  - Agregada transición suave (`transition-all duration-300`)
+- **Archivos modificados**:
+  - `/app/frontend/src/components/mindmap/MindMapApp.jsx` - Pasó `isSidebarExpanded` a Canvas
+  - `/app/frontend/src/components/mindmap/Canvas.jsx` - Recibió y pasó `isSidebarExpanded` a CanvasModePanel
+  - `/app/frontend/src/components/mindmap/CanvasModePanel.jsx` - Implementó posicionamiento dinámico
+- **Testing**: Verificado con capturas de pantalla en desktop (1920x800)
+
 ### 2026-01-15: MEJORA UX — Modo Conexión Persistente ✅ COMPLETADO
 - **Funcionalidad**: El modo conexión ahora permanece activo después de crear una conexión
 - **Beneficio**: Permite conectar múltiples hijos al mismo padre sin reactivar el modo cada vez

@@ -15,9 +15,9 @@ const CanvasModePanel = ({
   if (isFullscreen) return null;
 
   return (
-    // En móviles: fixed para que no desaparezca al hacer scroll del canvas
-    // En desktop (md+): absolute porque el canvas ya está posicionado correctamente
-    <div className="fixed md:absolute left-6 md:left-6 top-1/2 -translate-y-1/2 z-[9999] md:z-30" style={{ marginTop: 10 }}>
+    // En móviles: fixed left-4 para que no desaparezca al hacer scroll del canvas
+    // En desktop (md+): fixed left-20 para estar después del sidebar (w-16 = 64px, left-20 = 80px)
+    <div className="fixed left-4 md:left-20 top-1/2 -translate-y-1/2 z-[9999]" style={{ marginTop: 10 }}>
       <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-1.5 flex flex-col gap-1">
         {/* Modo Puntero */}
         <button

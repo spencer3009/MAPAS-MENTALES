@@ -28,6 +28,7 @@ const Canvas = ({
   onSetInteractionMode,
   contextMenu,
   isSidebarExpanded = false,
+  isMobileOverlayOpen = false,
   onSelectNode,
   onAddToSelection,
   onSelectNodesInArea,

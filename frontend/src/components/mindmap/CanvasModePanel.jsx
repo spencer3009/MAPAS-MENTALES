@@ -1,6 +1,12 @@
 import React from 'react';
 import { MousePointer2, Hand, Maximize2, Grid3X3, Ruler } from 'lucide-react';
 
+// Constantes de layout (deben coincidir con los valores reales de los componentes)
+const DOCK_SIDEBAR_WIDTH = 64;    // w-16 del DockSidebar
+const PROJECT_SIDEBAR_WIDTH = 288; // w-72 del Sidebar de proyectos
+const RULER_WIDTH = 20;            // RULER_SIZE de CanvasRulers
+const TOOLBAR_MARGIN = 8;          // Pequeño margen para separación visual
+
 const CanvasModePanel = ({ 
   interactionMode, 
   onSetInteractionMode,
@@ -15,14 +21,48 @@ const CanvasModePanel = ({
   // Ocultar el panel en modo fullscreen (se usan otros controles)
   if (isFullscreen) return null;
 
-  // Posicionamiento dinámico:
-  // - Móvil: fixed left-4 (16px) para que no desaparezca al hacer scroll
-  // - Desktop con sidebar colapsado: left-20 (80px) - después del DockSidebar (w-16 = 64px)
-  // - Desktop con sidebar expandido: left-[310px] - después del DockSidebar + Sidebar de proyectos (64px + 288px = 352px aprox)
-  const desktopLeft = isSidebarExpanded ? 'md:left-[310px]' : 'md:left-20';
+  // Calcular posición exacta en desktop:
+  // Base: DockSidebar (64px)
+  // + Sidebar de proyectos si está expandido (288px)
+  // + Regla vertical si está visible (20px)
+  // + Margen de separación (8px)
+  const calculateDesktopLeft = () => {
+    let left = DOCK_SIDEBAR_WIDTH; // Siempre hay DockSidebar (64px)
+    
+    if (isSidebarExpanded) {
+      left += PROJECT_SIDEBAR_WIDTH; // + 288px si sidebar expandido
+    }
+    
+    if (showRulers) {
+      left += RULER_WIDTH; // + 20px si reglas visibles
+    }
+    
+    left += TOOLBAR_MARGIN; // + 8px de margen
+    
+    return left;
+  };
+
+  const desktopLeftPx = calculateDesktopLeft();
 
   return (
-    <div className={`fixed left-4 ${desktopLeft} top-1/2 -translate-y-1/2 z-[9999] transition-all duration-300`} style={{ marginTop: 10 }}>
+    <div 
+      className="fixed left-4 top-1/2 -translate-y-1/2 z-[9999] transition-all duration-300 md:left-auto"
+      style={{ 
+        marginTop: 10,
+        // En desktop (md+), usar el valor calculado dinámicamente
+        // En móvil, Tailwind usa left-4 (16px)
+      }}
+    >
+      <style>
+        {`
+          @media (min-width: 768px) {
+            .canvas-mode-panel-positioned {
+              left: ${desktopLeftPx}px !important;
+            }
+          }
+        `}
+      </style>
+      <div className="canvas-mode-panel-positioned fixed left-4 md:left-auto top-1/2 -translate-y-1/2 z-[9999] transition-all duration-300" style={{ marginTop: 10 }}>
       <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-1.5 flex flex-col gap-1">
         {/* Modo Puntero */}
         <button

@@ -2,10 +2,11 @@ import React from 'react';
 import { MousePointer2, Hand, Maximize2, Grid3X3, Ruler } from 'lucide-react';
 
 // Constantes de layout (deben coincidir con los valores reales de los componentes)
-const DOCK_SIDEBAR_WIDTH = 64;    // w-16 del DockSidebar
+const DOCK_SIDEBAR_WIDTH = 64;     // w-16 del DockSidebar
 const PROJECT_SIDEBAR_WIDTH = 288; // w-72 del Sidebar de proyectos
 const RULER_WIDTH = 20;            // RULER_SIZE de CanvasRulers
 const TOOLBAR_MARGIN = 8;          // Pequeño margen para separación visual
+const MOBILE_LEFT = 16;            // left-4 en móvil
 
 const CanvasModePanel = ({ 
   interactionMode, 
@@ -42,27 +43,18 @@ const CanvasModePanel = ({
     return left;
   };
 
-  const desktopLeftPx = calculateDesktopLeft();
+  // Detectar si es móvil (simplificado, se mejorará con CSS media queries)
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const leftPosition = isMobile ? MOBILE_LEFT : calculateDesktopLeft();
 
   return (
     <div 
-      className="fixed left-4 top-1/2 -translate-y-1/2 z-[9999] transition-all duration-300 md:left-auto"
+      className="fixed top-1/2 -translate-y-1/2 z-[9999] transition-all duration-300"
       style={{ 
-        marginTop: 10,
-        // En desktop (md+), usar el valor calculado dinámicamente
-        // En móvil, Tailwind usa left-4 (16px)
+        left: leftPosition,
+        marginTop: 10
       }}
     >
-      <style>
-        {`
-          @media (min-width: 768px) {
-            .canvas-mode-panel-positioned {
-              left: ${desktopLeftPx}px !important;
-            }
-          }
-        `}
-      </style>
-      <div className="canvas-mode-panel-positioned fixed left-4 md:left-auto top-1/2 -translate-y-1/2 z-[9999] transition-all duration-300" style={{ marginTop: 10 }}>
       <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-1.5 flex flex-col gap-1">
         {/* Modo Puntero */}
         <button
@@ -76,6 +68,7 @@ const CanvasModePanel = ({
             }
           `}
           title="Modo Puntero: Seleccionar nodos y hacer selección múltiple"
+          data-testid="canvas-mode-pointer"
         >
           <MousePointer2 size={20} />
         </button>
@@ -92,6 +85,7 @@ const CanvasModePanel = ({
             }
           `}
           title="Modo Mano: Mover el lienzo arrastrando"
+          data-testid="canvas-mode-hand"
         >
           <Hand size={20} />
         </button>
@@ -111,6 +105,7 @@ const CanvasModePanel = ({
             }
           `}
           title={showGrid ? 'Ocultar cuadrícula' : 'Mostrar cuadrícula'}
+          data-testid="canvas-toggle-grid"
         >
           <Grid3X3 size={20} />
         </button>
@@ -127,6 +122,7 @@ const CanvasModePanel = ({
             }
           `}
           title={showRulers ? 'Ocultar reglas' : 'Mostrar reglas'}
+          data-testid="canvas-toggle-rulers"
         >
           <Ruler size={20} />
         </button>
@@ -143,6 +139,7 @@ const CanvasModePanel = ({
             text-gray-500 hover:bg-gray-100 hover:text-gray-700
           "
           title="Pantalla completa"
+          data-testid="canvas-fullscreen"
         >
           <Maximize2 size={20} />
         </button>

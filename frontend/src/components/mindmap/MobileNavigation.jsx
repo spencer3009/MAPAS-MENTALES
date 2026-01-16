@@ -128,6 +128,14 @@ const MobileNavigation = ({
       onClick: onOpenTrash,
       badge: trashCount > 0 ? trashCount : null,
     },
+    // Panel de Admin - solo visible para administradores
+    ...(isAdmin && onAdminClick ? [{
+      id: 'admin',
+      icon: Shield,
+      label: 'Panel Admin',
+      onClick: onAdminClick,
+      adminOnly: true,
+    }] : []),
     {
       id: 'settings',
       icon: Settings,

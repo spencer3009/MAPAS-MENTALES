@@ -1205,6 +1205,8 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
         isProjectsSidebarOpen={isProjectsSidebarOpen}
         activeView={activeView}
         trashCount={trashCount}
+        isAdmin={isAdmin}
+        onAdminClick={onAdminClick}
       />
 
       {/* Sidebar de proyectos - Solo visible cuando isProjectsSidebarOpen y activeView === 'projects' (solo desktop) */}

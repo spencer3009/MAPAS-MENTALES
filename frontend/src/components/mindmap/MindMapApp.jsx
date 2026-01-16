@@ -1116,7 +1116,7 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
   };
 
   return (
-    <div className={`flex flex-col md:flex-row h-screen w-full bg-gray-50 ${activeView === 'boards' ? 'overflow-x-auto' : 'overflow-hidden'}`}>
+    <div className={`flex flex-col md:flex-row h-screen w-full bg-gray-50 ${activeView === 'boards' ? 'overflow-x-auto' : 'overflow-hidden'} ${isImpersonating ? 'pt-10' : ''}`}>
       
       {/* Banner de Impersonación - Visible cuando un admin está viendo la cuenta de otro usuario */}
       {isImpersonating && (

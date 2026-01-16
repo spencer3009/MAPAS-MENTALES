@@ -277,15 +277,27 @@ const UsersManagement = ({ token, onUserChange }) => {
       
       if (response.ok) {
         const data = await response.json();
-        // Guardar token de retorno en localStorage
+        // Guardar tokens de admin para poder retornar después
         localStorage.setItem('admin_return_token', data.return_token);
         localStorage.setItem('admin_username', data.admin_user);
         localStorage.setItem('impersonating_user', username);
         
-        // Hacer login con el token del usuario impersonado
-        // Redirigir al dashboard del usuario
-        localStorage.setItem('token', data.access_token);
-        window.location.href = '/dashboard';
+        // Crear objeto de usuario impersonado para el AuthContext
+        const impersonatedUser = {
+          username: data.impersonated_user,
+          email: data.impersonated_email,
+          full_name: data.impersonated_full_name,
+          role: 'user', // Usuario impersonado no es admin
+          plan: 'user', // Se actualizará al cargar /api/auth/me
+          impersonated_by: data.admin_user
+        };
+        
+        // Guardar en localStorage con las keys que usa AuthContext
+        localStorage.setItem('mm_auth_token', data.access_token);
+        localStorage.setItem('mm_auth_user', JSON.stringify(impersonatedUser));
+        
+        // Recargar la página para que AuthContext cargue el nuevo usuario
+        window.location.href = '/';
       } else {
         const error = await response.json();
         alert(error.detail || 'Error al acceder como usuario');

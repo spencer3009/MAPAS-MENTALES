@@ -9,15 +9,20 @@ const CanvasModePanel = ({
   showGrid = true,
   showRulers = true,
   onToggleGrid,
-  onToggleRulers
+  onToggleRulers,
+  isSidebarExpanded = false
 }) => {
   // Ocultar el panel en modo fullscreen (se usan otros controles)
   if (isFullscreen) return null;
 
+  // Posicionamiento dinámico:
+  // - Móvil: fixed left-4 (16px) para que no desaparezca al hacer scroll
+  // - Desktop con sidebar colapsado: left-20 (80px) - después del DockSidebar (w-16 = 64px)
+  // - Desktop con sidebar expandido: left-[310px] - después del DockSidebar + Sidebar de proyectos (64px + 288px = 352px aprox)
+  const desktopLeft = isSidebarExpanded ? 'md:left-[310px]' : 'md:left-20';
+
   return (
-    // En móviles: fixed left-4 para que no desaparezca al hacer scroll del canvas
-    // En desktop (md+): fixed left-20 para estar después del sidebar (w-16 = 64px, left-20 = 80px)
-    <div className="fixed left-4 md:left-20 top-1/2 -translate-y-1/2 z-[9999]" style={{ marginTop: 10 }}>
+    <div className={`fixed left-4 ${desktopLeft} top-1/2 -translate-y-1/2 z-[9999] transition-all duration-300`} style={{ marginTop: 10 }}>
       <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-1.5 flex flex-col gap-1">
         {/* Modo Puntero */}
         <button

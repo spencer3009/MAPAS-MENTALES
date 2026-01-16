@@ -250,6 +250,9 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
 
   // Estado para el drawer de proyectos en móvil
   const [showMobileProjectsDrawer, setShowMobileProjectsDrawer] = useState(false);
+  
+  // Estado para saber si el drawer de navegación móvil está abierto
+  const [isMobileNavDrawerOpen, setIsMobileNavDrawerOpen] = useState(false);
 
   // Efecto para navegar desde notificaciones
   useEffect(() => {

@@ -2,6 +2,39 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-16: BUG FIX — Toolbar Móvil Context-Aware (Ocultar con Overlays) ✅ CORREGIDO
+- **Problema**: En móvil, el toolbar flotante se superponía a:
+  - Drawer de navegación (hamburger menu)
+  - Modal de selección de plantillas
+  - Panel de "Mis Proyectos"
+  - Modal de todos los proyectos
+- **Causa raíz**: El toolbar no consideraba el estado de los overlays UI y mantenía un z-index alto fijo
+- **Fix aplicado**:
+  - Nuevo estado `isMobileNavDrawerOpen` en MindMapApp para rastrear drawer de navegación
+  - Callback `onDrawerStateChange` en MobileNavigation para notificar cambios
+  - Prop `isMobileOverlayOpen` que combina estados:
+    - `isMobileNavDrawerOpen` (drawer de navegación)
+    - `showMobileProjectsDrawer` (drawer de proyectos)
+    - `showAllProjectsModal` (modal de todos los proyectos)
+    - `showTemplateModal` (modal de plantillas)
+    - `showLayoutSelector` (selector de layout)
+  - En CanvasModePanel: cuando `isMobile && isMobileOverlayOpen`:
+    - `opacity: 0` (invisible)
+    - `pointer-events: none` (no bloquea clicks)
+    - `transform: translateX(-100%)` (se desliza fuera)
+    - `tabIndex: -1` en botones (no recibe focus)
+  - Transición suave con `transition-all duration-300 ease-in-out`
+- **Comportamiento correcto**:
+  - Toolbar VISIBLE cuando el canvas está activo sin overlays
+  - Toolbar OCULTO automáticamente cuando cualquier overlay móvil está abierto
+  - Toolbar REAPARECE suavemente cuando se cierra el overlay
+- **Archivos modificados**:
+  - `/app/frontend/src/components/mindmap/MobileNavigation.jsx` - Callback onDrawerStateChange
+  - `/app/frontend/src/components/mindmap/MindMapApp.jsx` - Estado isMobileNavDrawerOpen y prop isMobileOverlayOpen
+  - `/app/frontend/src/components/mindmap/Canvas.jsx` - Recibe y pasa isMobileOverlayOpen
+  - `/app/frontend/src/components/mindmap/CanvasModePanel.jsx` - Lógica de ocultamiento en móvil
+- **Testing**: Verificado con capturas de pantalla en móvil (390x844) ✅
+
 ### 2026-01-16: BUG FIX — Barra de Herramientas Alineada con Regla del Canvas ✅ CORREGIDO
 - **Problema**: La barra de herramientas flotante (CanvasModePanel) se superponía parcialmente con el sidebar de proyectos y la regla vertical del lienzo
 - **Causa raíz**: El componente usaba valores fijos de `left` sin considerar dinámicamente el ancho del sidebar ni la visibilidad de las reglas

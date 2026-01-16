@@ -88,12 +88,12 @@ const NavigationModeButton = ({
 
   return (
     <>
-      {/* Botón flotante - posicionado junto al indicador de zoom */}
+      {/* Botón flotante - FIJO al viewport, independiente del canvas */}
       <button
         onClick={handleToggle}
         data-testid="navigation-mode-button"
         className={`
-          absolute z-[100] bottom-4 right-28
+          fixed z-[9999] bottom-4 right-28
           w-12 h-12 rounded-full
           shadow-xl border-2
           flex items-center justify-center
@@ -125,11 +125,11 @@ const NavigationModeButton = ({
         )}
       </button>
 
-      {/* Feedback visual flotante */}
+      {/* Feedback visual flotante - también FIJO al viewport */}
       {showFeedback && (
         <div 
           className={`
-            absolute z-[101] bottom-20 right-4
+            fixed z-[9999] bottom-20 right-4
             px-4 py-2 rounded-xl
             text-sm font-medium
             shadow-lg

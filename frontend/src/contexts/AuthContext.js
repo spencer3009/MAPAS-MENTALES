@@ -243,13 +243,40 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!user && !!token,
     isAdmin: user?.role === 'admin',
     isPro: user?.is_pro || false,
+    // Impersonación: verificar si estamos impersonando a otro usuario
+    isImpersonating: !!localStorage.getItem('impersonating_user'),
+    impersonatingUser: localStorage.getItem('impersonating_user'),
+    adminUsername: localStorage.getItem('admin_username'),
     login,
     register,
     loginWithGoogle,
     processGoogleSession,
     logout,
     refreshUser,
-    clearError: () => setError(null)
+    clearError: () => setError(null),
+    // Función para volver al admin después de impersonar
+    returnToAdmin: () => {
+      const returnToken = localStorage.getItem('admin_return_token');
+      const adminUser = localStorage.getItem('admin_username');
+      
+      if (returnToken && adminUser) {
+        // Restaurar sesión del admin
+        localStorage.setItem('mm_auth_token', returnToken);
+        localStorage.setItem('mm_auth_user', JSON.stringify({
+          username: adminUser,
+          role: 'admin',
+          plan: 'admin'
+        }));
+        
+        // Limpiar datos de impersonación
+        localStorage.removeItem('admin_return_token');
+        localStorage.removeItem('admin_username');
+        localStorage.removeItem('impersonating_user');
+        
+        // Recargar para restaurar la sesión del admin
+        window.location.href = '/';
+      }
+    }
   };
 
   return (

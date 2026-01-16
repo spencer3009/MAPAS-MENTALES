@@ -1149,6 +1149,8 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
         trashCount={trashCount}
         projectName={projectName}
         onDrawerStateChange={setIsMobileNavDrawerOpen}
+        isAdmin={isAdmin}
+        onAdminClick={onAdminClick}
       />
 
       {/* Drawer de proyectos móvil */}

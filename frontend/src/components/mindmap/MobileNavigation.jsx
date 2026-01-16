@@ -38,13 +38,21 @@ const MobileNavigation = ({
   onLogout,
   activeView = 'projects',
   trashCount = 0,
-  projectName = ''
+  projectName = '',
+  onDrawerStateChange // Callback para notificar cambios en el estado del drawer
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showIOSModal, setShowIOSModal] = useState(false);
   
   // Hook de PWA para detectar si se puede instalar
   const { showInstallButton, isIOS, promptInstall } = usePWAInstall();
+
+  // Notificar cambios en el estado del drawer al padre
+  useEffect(() => {
+    if (onDrawerStateChange) {
+      onDrawerStateChange(isOpen);
+    }
+  }, [isOpen, onDrawerStateChange]);
 
   // Handler para instalar PWA
   const handleInstallClick = async () => {

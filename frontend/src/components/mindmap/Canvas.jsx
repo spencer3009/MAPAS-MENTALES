@@ -1013,6 +1013,7 @@ const Canvas = ({
         showRulers={showRulers}
         onToggleGrid={onToggleGrid}
         onToggleRulers={onToggleRulers}
+        isSidebarExpanded={isSidebarExpanded}
       />
 
       {/* Cuadrícula del lienzo */}

@@ -2,21 +2,30 @@
 
 ## Changelog (Latest First)
 
-### 2026-01-16: BUG FIX — Barra de Herramientas Superpuesta al Sidebar ✅ CORREGIDO
-- **Problema**: La barra de herramientas flotante (CanvasModePanel) se superponía con el menú lateral en desktop
-- **Causa raíz**: El componente usaba `position: fixed` con `left` estático, sin considerar el estado del sidebar
+### 2026-01-16: BUG FIX — Barra de Herramientas Alineada con Regla del Canvas ✅ CORREGIDO
+- **Problema**: La barra de herramientas flotante (CanvasModePanel) se superponía parcialmente con el sidebar de proyectos y la regla vertical del lienzo
+- **Causa raíz**: El componente usaba valores fijos de `left` sin considerar dinámicamente el ancho del sidebar ni la visibilidad de las reglas
 - **Fix aplicado**:
-  - Agregada prop `isSidebarExpanded` desde MindMapApp → Canvas → CanvasModePanel
-  - Posicionamiento dinámico basado en el estado del sidebar:
-    - Móvil: `fixed left-4` (16px)
-    - Desktop con sidebar colapsado: `md:left-20` (80px)
-    - Desktop con sidebar expandido: `md:left-[310px]` (310px)
-  - Agregada transición suave (`transition-all duration-300`)
+  - Constantes de layout definidas:
+    - `DOCK_SIDEBAR_WIDTH = 64px` (w-16)
+    - `PROJECT_SIDEBAR_WIDTH = 288px` (w-72)
+    - `RULER_WIDTH = 20px` (RULER_SIZE de CanvasRulers)
+    - `TOOLBAR_MARGIN = 8px` (separación visual)
+  - Hook `useEffect` para detectar viewport móvil vs desktop
+  - Función `calculateDesktopLeft()` que calcula la posición exacta:
+    - Base: DockSidebar (64px)
+    - + Sidebar de proyectos si expandido (288px)
+    - + Regla vertical si visible (20px)
+    - + Margen de separación (8px)
+  - Transición suave con `transition-all duration-300`
+- **Posicionamiento final**:
+  - Móvil: 16px (left-4)
+  - Desktop sin sidebar: 64 + 20 + 8 = 92px (con reglas)
+  - Desktop con sidebar: 64 + 288 + 20 + 8 = 380px (con reglas)
+  - Se ajusta automáticamente si las reglas están ocultas (-20px)
 - **Archivos modificados**:
-  - `/app/frontend/src/components/mindmap/MindMapApp.jsx` - Pasó `isSidebarExpanded` a Canvas
-  - `/app/frontend/src/components/mindmap/Canvas.jsx` - Recibió y pasó `isSidebarExpanded` a CanvasModePanel
-  - `/app/frontend/src/components/mindmap/CanvasModePanel.jsx` - Implementó posicionamiento dinámico
-- **Testing**: Verificado con capturas de pantalla en desktop (1920x800)
+  - `/app/frontend/src/components/mindmap/CanvasModePanel.jsx` - Reescrito con cálculo dinámico
+- **Testing**: Verificado con capturas de pantalla en desktop (1920x800) ✅
 
 ### 2026-01-15: MEJORA UX — Modo Conexión Persistente ✅ COMPLETADO
 - **Funcionalidad**: El modo conexión ahora permanece activo después de crear una conexión

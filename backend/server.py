@@ -1733,9 +1733,10 @@ async def check_and_send_reminders():
                             phone_number = user.get("whatsapp", "") if user else ""
                         
                         if not phone_number:
-                            logger.warning(f"Usuario {username} no tiene WhatsApp configurado")
+                            logger.warning(f"⚠️ [SCHEDULER] Usuario {username} no tiene WhatsApp configurado")
                             result = {"success": False, "error": "No hay número de WhatsApp configurado"}
                         else:
+                            logger.info(f"📱 [SCHEDULER] Enviando WhatsApp a {phone_number}...")
                             # Enviar mensaje por WhatsApp
                             result = await send_whatsapp_message(phone_number, message)
                             

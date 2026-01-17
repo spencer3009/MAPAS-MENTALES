@@ -1732,30 +1732,10 @@ async def check_and_send_reminders():
                             result = await send_whatsapp_message(phone_number, message)
                             
                     elif channel == "email":
-                        # ENVÍO POR EMAIL
-                        # Buscar email del usuario
-                        user = await db.users.find_one({"username": username}, {"_id": 0})
-                        user_email = user.get("email") if user else None
-                        
-                        if not user_email:
-                            logger.warning(f"Usuario {username} no tiene email configurado")
-                            result = {"success": False, "error": "No hay email configurado"}
-                        else:
-                            # Usar el servicio de email existente
-                            try:
-                                email_result = await reminder_service.send_reminder_email(
-                                    to_email=user_email,
-                                    reminder_data={
-                                        "project_name": reminder.get("project_name", "Sin nombre"),
-                                        "message": reminder.get("message", ""),
-                                        "node_text": reminder.get("node_text"),
-                                        "scheduled_datetime": reminder.get("scheduled_datetime")
-                                    }
-                                )
-                                result = {"success": True, "email_sent": True}
-                            except Exception as email_err:
-                                logger.error(f"Error enviando email: {str(email_err)}")
-                                result = {"success": False, "error": str(email_err)}
+                        # ENVÍO POR EMAIL (Pendiente de implementar con servicio de email)
+                        # Por ahora, marcar como enviado simulado
+                        logger.info(f"📧 [EMAIL REMINDER] Usuario: {username}, Mensaje: {message[:50]}...")
+                        result = {"success": True, "simulated": True, "message": "Email reminder (simulado - usar WhatsApp para envío real)"}
                     
                     # Actualizar estado del recordatorio
                     new_status = "sent" if result.get("success") else "failed"

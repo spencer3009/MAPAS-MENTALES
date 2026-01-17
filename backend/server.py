@@ -1760,15 +1760,15 @@ async def check_and_send_reminders():
                         }
                     )
                     
-                    logger.info(f"Recordatorio {reminder['id']} [{channel}] → {new_status}")
+                    logger.info(f"✅ [SCHEDULER] Recordatorio {reminder['id'][:8]}... [{channel}] → {new_status}")
                     
                 except Exception as e:
-                    logger.error(f"Error procesando recordatorio {reminder.get('id', 'unknown')}: {str(e)}")
+                    logger.error(f"❌ [SCHEDULER] Error procesando recordatorio {reminder.get('id', 'unknown')[:8]}...: {str(e)}")
             
         except Exception as e:
-            logger.error(f"Error en scheduler: {str(e)}")
+            logger.error(f"❌ [SCHEDULER] Error general en scheduler: {str(e)}")
         
-        # Esperar 30 segundos para prueba (cambiar a 300 en producción)
+        # Esperar 30 segundos entre ciclos
         await asyncio.sleep(30)
 
 

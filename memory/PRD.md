@@ -2,6 +2,30 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-17: VERIFICACIÓN E2E — Scheduler de Recordatorios WhatsApp con Twilio ✅ FUNCIONANDO
+- **Estado**: El sistema de recordatorios de WhatsApp está **100% funcional**
+- **Verificación realizada**:
+  - Se crearon recordatorios de prueba con `channel: 'whatsapp'` y `status: 'pending'`
+  - El scheduler procesó correctamente los recordatorios (ciclo cada 30 segundos)
+  - Los mensajes se enviaron exitosamente via Twilio WhatsApp API
+  - El estado de los recordatorios se actualizó a `sent` con el `sid` de Twilio
+- **Mensajes enviados (Twilio SIDs)**:
+  - `SMf201f9f22d026e0666651750ecc4f2d8`
+  - `SMba265c1c8961cd339ec4d8491874e065`
+  - `SMf1bdd7f83a88e564ae26ac2ed75f0c53`
+- **Mejoras aplicadas**:
+  - Logging detallado agregado al scheduler para facilitar monitoreo
+  - Logs incluyen: inicio del scheduler, recordatorios encontrados, procesamiento, envío y resultado
+- **Configuración requerida (ya presente en backend/.env)**:
+  - `TWILIO_ACCOUNT_SID`
+  - `TWILIO_AUTH_TOKEN`
+  - `TWILIO_WHATSAPP_NUMBER`
+- **Nota para usuarios**: 
+  - El usuario debe tener su número de WhatsApp configurado en su perfil (`user_profiles.whatsapp`)
+  - Para recibir mensajes del sandbox de Twilio, el usuario debe unirse enviando "join <código>" al número del sandbox
+- **Archivos modificados**:
+  - `/app/backend/server.py` - Logging mejorado en `check_and_send_reminders()`
+
 ### 2026-01-16: BUG FIX — Toolbar Móvil Context-Aware (Ocultar con Overlays) ✅ CORREGIDO
 - **Problema**: En móvil, el toolbar flotante se superponía a:
   - Drawer de navegación (hamburger menu)

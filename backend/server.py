@@ -2024,13 +2024,37 @@ async def create_reminder(
 ):
     """Crear un nuevo recordatorio (para nodos/proyectos o calendario simple)"""
     
+    # Obtener zona horaria del usuario desde su perfil
+    user_profile = await db.user_profiles.find_one({"username": current_user["username"]}, {"_id": 0})
+    user_timezone_str = user_profile.get("timezone", "America/Lima") if user_profile else "America/Lima"
+    
     # Determinar si es un recordatorio de proyecto/nodo o de calendario
     is_project_reminder = reminder_data.project_id is not None
     
     # Para recordatorios de proyecto, usar scheduled_date y scheduled_time
     if is_project_reminder:
-        scheduled_datetime = f"{reminder_data.scheduled_date}T{reminder_data.scheduled_time}:00"
-        reminder_date = scheduled_datetime
+        # Crear datetime en la zona horaria del usuario
+        local_datetime_str = f"{reminder_data.scheduled_date}T{reminder_data.scheduled_time}:00"
+        
+        try:
+            # Parsear como fecha/hora local del usuario
+            user_tz = ZoneInfo(user_timezone_str)
+            local_dt = datetime.fromisoformat(local_datetime_str)
+            local_dt = local_dt.replace(tzinfo=user_tz)
+            
+            # Convertir a UTC para el scheduler
+            utc_dt = local_dt.astimezone(timezone.utc)
+            scheduled_datetime = utc_dt.isoformat()
+            reminder_date = scheduled_datetime
+            
+            logger.info(f"📅 [TIMEZONE] Usuario: {user_timezone_str}")
+            logger.info(f"📅 [TIMEZONE] Hora local: {local_datetime_str}")
+            logger.info(f"📅 [TIMEZONE] Hora UTC: {scheduled_datetime}")
+        except Exception as e:
+            logger.error(f"Error convirtiendo timezone: {e}")
+            # Fallback: asumir que ya está en UTC
+            scheduled_datetime = f"{reminder_data.scheduled_date}T{reminder_data.scheduled_time}:00"
+            reminder_date = scheduled_datetime
     else:
         # Para recordatorios de calendario, usar reminder_date directamente
         scheduled_datetime = reminder_data.reminder_date

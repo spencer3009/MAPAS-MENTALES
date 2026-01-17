@@ -1704,6 +1704,9 @@ async def check_and_send_reminders():
                 try:
                     username = reminder["username"]
                     channel = reminder.get("channel", "email")  # Default: email
+                    reminder_id = reminder.get("id", "unknown")[:8]
+                    
+                    logger.info(f"⏳ [SCHEDULER] Procesando recordatorio {reminder_id}... (canal: {channel}, usuario: {username})")
                     
                     # Construir mensaje base
                     if reminder.get("type") == "node":

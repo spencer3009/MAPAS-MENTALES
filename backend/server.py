@@ -1681,19 +1681,24 @@ async def send_whatsapp_message(phone_number: str, message: str) -> dict:
 scheduler_running = False
 
 async def check_and_send_reminders():
-    """Verificar y enviar recordatorios pendientes"""
+    """Verificar y enviar recordatorios pendientes (WhatsApp/Email)"""
     global scheduler_running
     scheduler_running = True
+    logger.info("🚀 [SCHEDULER] Iniciando scheduler de recordatorios...")
     
     while scheduler_running:
         try:
             now = datetime.now(timezone.utc)
+            now_iso = now.isoformat()
             
             # Buscar recordatorios pendientes que ya deberían enviarse
             pending_reminders = await db.reminders.find({
                 "status": "pending",
-                "scheduled_datetime": {"$lte": now.isoformat()}
+                "scheduled_datetime": {"$lte": now_iso}
             }, {"_id": 0}).to_list(100)
+            
+            if pending_reminders:
+                logger.info(f"📬 [SCHEDULER] Encontrados {len(pending_reminders)} recordatorio(s) pendiente(s) para procesar")
             
             for reminder in pending_reminders:
                 try:

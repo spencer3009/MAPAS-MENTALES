@@ -592,36 +592,35 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
 
   return (
     <div className="flex-1 h-full overflow-y-auto bg-gray-50">
-      {/* Header con bienvenida y avatar */}
+      {/* Header con bienvenida y avatar - sticky */}
       <div className="border-b border-gray-100 bg-white sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <img 
-              src={LOGO_URL} 
-              alt="MindoraMap" 
-              style={{ width: '160px', height: 'auto' }}
-              className="object-contain"
-            />
-            
-            {/* Bienvenida y Avatar */}
-            <div className="flex items-center gap-4">
-              <h1 className="text-xl font-light text-gray-900">
-                ¡Te damos la bienvenida, <span className="font-semibold">{userName}</span>!
-              </h1>
-              {/* Avatar */}
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white font-semibold text-lg shadow-lg">
-                {userName.charAt(0).toUpperCase()}
-              </div>
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-end gap-4">
+            <h1 className="text-xl font-light text-gray-900">
+              ¡Te damos la bienvenida, <span className="font-semibold">{userName}</span>!
+            </h1>
+            {/* Avatar */}
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white font-semibold text-base shadow-lg">
+              {userName.charAt(0).toUpperCase()}
             </div>
           </div>
         </div>
       </div>
 
       <div className="w-full px-6 py-8 pb-24">
+        {/* Logo alineado con las tarjetas */}
+        <div className="mb-6 pl-2">
+          <img 
+            src={LOGO_URL} 
+            alt="MindoraMap" 
+            style={{ width: '160px', height: 'auto' }}
+            className="object-contain"
+          />
+        </div>
+
         {/* Sección: Crear un mapa */}
         <div className="mb-10">
-          <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center justify-between mb-5 pl-2">
             <h2 className="text-lg font-medium text-gray-900">Crear un mapa</h2>
             
             {/* Botón dinámico de Upgrade/Plan actual */}

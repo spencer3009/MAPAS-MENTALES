@@ -1749,16 +1749,22 @@ async def check_and_send_reminders():
                     
                     logger.info(f"⏳ [SCHEDULER] Procesando recordatorio {reminder_id}... (canal: {channel}, usuario: {username})")
                     
-                    # Construir mensaje base
-                    if reminder.get("type") == "node":
+                    # Datos para el mensaje
+                    project_name = reminder.get('project_name', 'Sin nombre')
+                    node_text = reminder.get('node_text', 'Sin nombre')
+                    user_message = reminder.get('message', '')
+                    reminder_type = reminder.get("type")
+                    
+                    # Construir mensaje base (para texto libre o fallback)
+                    if reminder_type == "node":
                         message = "🔔 Recordatorio de MindoraMap\n\n"
-                        message += f"📁 Proyecto: {reminder.get('project_name', 'Sin nombre')}\n"
-                        message += f"📌 Nodo: {reminder.get('node_text', 'Sin nombre')}\n\n"
-                        message += f"📝 {reminder.get('message', '')}"
+                        message += f"📁 Proyecto: {project_name}\n"
+                        message += f"📌 Nodo: {node_text}\n\n"
+                        message += f"📝 {user_message}"
                     else:
                         message = "🔔 Recordatorio de MindoraMap\n\n"
-                        message += f"📁 Proyecto: {reminder.get('project_name', 'Sin nombre')}\n\n"
-                        message += f"📝 {reminder.get('message', '')}"
+                        message += f"📁 Proyecto: {project_name}\n\n"
+                        message += f"📝 {user_message}"
                     
                     result = {"success": False, "error": "Canal no configurado"}
                     
@@ -1778,8 +1784,22 @@ async def check_and_send_reminders():
                             result = {"success": False, "error": "No hay número de WhatsApp configurado"}
                         else:
                             logger.info(f"📱 [SCHEDULER] Enviando WhatsApp a {phone_number}...")
-                            # Enviar mensaje por WhatsApp
-                            result = await send_whatsapp_message(phone_number, message)
+                            
+                            # Variables para la plantilla de Twilio
+                            # La plantilla debe tener variables {{1}}, {{2}}, {{3}} para:
+                            # 1 = Proyecto, 2 = Nodo/Tarea, 3 = Mensaje
+                            content_variables = {
+                                "1": project_name[:100],
+                                "2": node_text[:100] if reminder_type == "node" else "Recordatorio",
+                                "3": user_message[:500] if user_message else "Sin mensaje adicional"
+                            }
+                            
+                            # Enviar mensaje por WhatsApp (con plantilla si está configurada)
+                            result = await send_whatsapp_message(
+                                phone_number, 
+                                message,
+                                content_variables=content_variables
+                            )
                             
                     elif channel == "email":
                         # ENVÍO POR EMAIL (Pendiente de implementar con servicio de email)

@@ -15,6 +15,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 import uuid
 from datetime import datetime, timezone, timedelta
+from zoneinfo import ZoneInfo
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from PIL import Image

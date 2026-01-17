@@ -1698,33 +1698,64 @@ async def check_and_send_reminders():
             for reminder in pending_reminders:
                 try:
                     username = reminder["username"]
+                    channel = reminder.get("channel", "email")  # Default: email
                     
-                    # Buscar número en MongoDB (user_profiles)
-                    profile = await db.user_profiles.find_one({"username": username}, {"_id": 0})
-                    phone_number = profile.get("whatsapp") if profile else None
-                    
-                    # Si no hay en perfil, buscar en la colección de usuarios
-                    if not phone_number:
-                        user = await db.users.find_one({"username": username}, {"_id": 0})
-                        phone_number = user.get("whatsapp", "") if user else ""
-                    
-                    if not phone_number:
-                        logger.warning(f"Usuario {username} no tiene WhatsApp configurado")
-                        continue
-                    
-                    # Construir mensaje
-                    if reminder["type"] == "node":
+                    # Construir mensaje base
+                    if reminder.get("type") == "node":
                         message = "🔔 Recordatorio de MindoraMap\n\n"
-                        message += f"📁 Proyecto: {reminder['project_name']}\n"
+                        message += f"📁 Proyecto: {reminder.get('project_name', 'Sin nombre')}\n"
                         message += f"📌 Nodo: {reminder.get('node_text', 'Sin nombre')}\n\n"
-                        message += f"📝 {reminder['message']}"
+                        message += f"📝 {reminder.get('message', '')}"
                     else:
                         message = "🔔 Recordatorio de MindoraMap\n\n"
-                        message += f"📁 Proyecto: {reminder['project_name']}\n\n"
-                        message += f"📝 {reminder['message']}"
+                        message += f"📁 Proyecto: {reminder.get('project_name', 'Sin nombre')}\n\n"
+                        message += f"📝 {reminder.get('message', '')}"
                     
-                    # Enviar mensaje
-                    result = await send_whatsapp_message(phone_number, message)
+                    result = {"success": False, "error": "Canal no configurado"}
+                    
+                    if channel == "whatsapp":
+                        # ENVÍO POR WHATSAPP
+                        # Buscar número en MongoDB (user_profiles)
+                        profile = await db.user_profiles.find_one({"username": username}, {"_id": 0})
+                        phone_number = profile.get("whatsapp") if profile else None
+                        
+                        # Si no hay en perfil, buscar en la colección de usuarios
+                        if not phone_number:
+                            user = await db.users.find_one({"username": username}, {"_id": 0})
+                            phone_number = user.get("whatsapp", "") if user else ""
+                        
+                        if not phone_number:
+                            logger.warning(f"Usuario {username} no tiene WhatsApp configurado")
+                            result = {"success": False, "error": "No hay número de WhatsApp configurado"}
+                        else:
+                            # Enviar mensaje por WhatsApp
+                            result = await send_whatsapp_message(phone_number, message)
+                            
+                    elif channel == "email":
+                        # ENVÍO POR EMAIL
+                        # Buscar email del usuario
+                        user = await db.users.find_one({"username": username}, {"_id": 0})
+                        user_email = user.get("email") if user else None
+                        
+                        if not user_email:
+                            logger.warning(f"Usuario {username} no tiene email configurado")
+                            result = {"success": False, "error": "No hay email configurado"}
+                        else:
+                            # Usar el servicio de email existente
+                            try:
+                                email_result = await reminder_service.send_reminder_email(
+                                    to_email=user_email,
+                                    reminder_data={
+                                        "project_name": reminder.get("project_name", "Sin nombre"),
+                                        "message": reminder.get("message", ""),
+                                        "node_text": reminder.get("node_text"),
+                                        "scheduled_datetime": reminder.get("scheduled_datetime")
+                                    }
+                                )
+                                result = {"success": True, "email_sent": True}
+                            except Exception as email_err:
+                                logger.error(f"Error enviando email: {str(email_err)}")
+                                result = {"success": False, "error": str(email_err)}
                     
                     # Actualizar estado del recordatorio
                     new_status = "sent" if result.get("success") else "failed"
@@ -1734,15 +1765,16 @@ async def check_and_send_reminders():
                             "$set": {
                                 "status": new_status,
                                 "sent_at": datetime.now(timezone.utc).isoformat(),
-                                "send_result": result
+                                "send_result": result,
+                                "channel_used": channel
                             }
                         }
                     )
                     
-                    logger.info(f"Recordatorio {reminder['id']} enviado: {new_status}")
+                    logger.info(f"Recordatorio {reminder['id']} [{channel}] → {new_status}")
                     
                 except Exception as e:
-                    logger.error(f"Error procesando recordatorio {reminder['id']}: {str(e)}")
+                    logger.error(f"Error procesando recordatorio {reminder.get('id', 'unknown')}: {str(e)}")
             
         except Exception as e:
             logger.error(f"Error en scheduler: {str(e)}")

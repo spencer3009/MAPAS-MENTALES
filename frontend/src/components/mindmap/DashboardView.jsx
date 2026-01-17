@@ -695,7 +695,7 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
         </div>
 
         {/* Barra de búsqueda y botón Crear */}
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-3 mb-6 pl-2">
           {/* Campo de búsqueda */}
           <div className="flex-1 relative">
             <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />

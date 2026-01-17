@@ -1624,8 +1624,19 @@ def generate_twiml_response(message: str) -> str:
 </Response>'''
 
 
-async def send_whatsapp_message(phone_number: str, message: str) -> dict:
-    """Enviar mensaje por Twilio WhatsApp API"""
+async def send_whatsapp_message(phone_number: str, message: str, content_sid: str = None, content_variables: dict = None) -> dict:
+    """
+    Enviar mensaje por Twilio WhatsApp API.
+    
+    Para mensajes proactivos (recordatorios), usa content_sid con una plantilla aprobada.
+    Para mensajes dentro de ventana de 24h, puede usar texto libre (Body).
+    
+    Args:
+        phone_number: Número de WhatsApp del destinatario
+        message: Texto del mensaje (usado si no hay content_sid)
+        content_sid: ID de la plantilla de Twilio Content Template (ej: HX...)
+        content_variables: Variables para la plantilla (ej: {"1": "valor1", "2": "valor2"})
+    """
     
     # Si no hay configuración de Twilio, simular envío
     if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN or not TWILIO_WHATSAPP_NUMBER:
@@ -1633,6 +1644,7 @@ async def send_whatsapp_message(phone_number: str, message: str) -> dict:
         logger.info("📱 [SIMULACIÓN WHATSAPP - TWILIO] Notificación de recordatorio")
         logger.info(f"📞 Destinatario: {phone_number}")
         logger.info(f"📝 Mensaje: {message}")
+        logger.info(f"📋 Template SID: {content_sid or 'N/A'}")
         logger.info("✅ Estado: ENVIADO (simulado - Twilio no configurado)")
         logger.info("=" * 60)
         return {
@@ -1651,9 +1663,31 @@ async def send_whatsapp_message(phone_number: str, message: str) -> dict:
         # Payload para Twilio
         payload = {
             "From": TWILIO_WHATSAPP_NUMBER,
-            "To": to_number,
-            "Body": message
+            "To": to_number
         }
+        
+        # Usar plantilla aprobada si está configurada (requerido para mensajes proactivos)
+        twilio_content_sid = content_sid or os.environ.get("TWILIO_WHATSAPP_TEMPLATE_SID")
+        
+        if twilio_content_sid:
+            # Envío con plantilla aprobada (Content Template)
+            payload["ContentSid"] = twilio_content_sid
+            
+            # Variables para la plantilla
+            if content_variables:
+                import json
+                payload["ContentVariables"] = json.dumps(content_variables)
+            else:
+                # Variables por defecto basadas en el mensaje
+                # La plantilla debe tener variables como {{1}} para el mensaje
+                import json
+                payload["ContentVariables"] = json.dumps({"1": message[:1024]})  # Límite de 1024 chars
+            
+            logger.info(f"📱 [WHATSAPP] Enviando con plantilla: {twilio_content_sid}")
+        else:
+            # Envío con texto libre (solo funciona dentro de ventana de 24h)
+            payload["Body"] = message
+            logger.warning("⚠️ [WHATSAPP] Enviando sin plantilla - puede fallar fuera de ventana 24h")
         
         async with httpx.AsyncClient() as http_client:
             response = await http_client.post(
@@ -1667,8 +1701,14 @@ async def send_whatsapp_message(phone_number: str, message: str) -> dict:
                 logger.info(f"✅ WhatsApp enviado via Twilio. SID: {result.get('sid')}")
                 return {"success": True, "response": result, "sid": result.get("sid")}
             else:
-                logger.error(f"Twilio API error: {response.status_code} - {response.text}")
-                return {"success": False, "error": response.text, "status_code": response.status_code}
+                error_detail = response.text
+                logger.error(f"❌ Twilio API error: {response.status_code} - {error_detail}")
+                
+                # Detectar error de ventana de 24h
+                if "outside of allowed window" in error_detail.lower() or "template" in error_detail.lower():
+                    logger.error("💡 SOLUCIÓN: Configura TWILIO_WHATSAPP_TEMPLATE_SID con una plantilla aprobada")
+                
+                return {"success": False, "error": error_detail, "status_code": response.status_code}
                 
     except Exception as e:
         logger.error(f"Error sending WhatsApp via Twilio: {str(e)}")

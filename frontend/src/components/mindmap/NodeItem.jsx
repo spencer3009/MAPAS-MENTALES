@@ -225,6 +225,13 @@ const NodeItem = memo(({
 
   const handleDoubleClick = (e) => {
     e.stopPropagation();
+    
+    // Si es un nodo tipo proyecto, navegar al proyecto vinculado
+    if (isProjectNode && linkedProjectId && onNavigateToProject) {
+      onNavigateToProject(linkedProjectId);
+      return;
+    }
+    
     handleStartEdit();
   };
 

@@ -1676,12 +1676,10 @@ async def send_whatsapp_message(phone_number: str, message: str, content_sid: st
             
             # Variables para la plantilla
             if content_variables:
-                import json
                 payload["ContentVariables"] = json.dumps(content_variables)
             else:
                 # Variables por defecto basadas en el mensaje
                 # La plantilla debe tener variables como {{1}} para el mensaje
-                import json
                 payload["ContentVariables"] = json.dumps({"1": message[:1024]})  # Límite de 1024 chars
             
             logger.info(f"📱 [WHATSAPP] Enviando con plantilla: {twilio_content_sid}")

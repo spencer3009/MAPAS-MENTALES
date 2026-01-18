@@ -75,6 +75,14 @@ const NodeTypeSelector = ({
   }, [isOpen, onClose]);
 
   const handleSelect = (type) => {
+    if (type === NODE_TYPES.PROJECT) {
+      // Para tipo proyecto, abrir modal de selección de proyecto
+      if (onSelectProjectType) {
+        onSelectProjectType();
+      }
+      onClose();
+      return;
+    }
     saveLastNodeType(type);
     setLastUsedType(type);
     onSelect(type);

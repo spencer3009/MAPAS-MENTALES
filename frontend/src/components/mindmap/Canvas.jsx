@@ -87,7 +87,12 @@ const Canvas = ({
   onToggleRulers,
   // Zoom limits para gestos táctiles
   minZoom = 0.3,
-  maxZoom = 2
+  maxZoom = 2,
+  // Props para nodos tipo proyecto
+  projects = [],
+  currentProjectId = null,
+  onNavigateToProject,
+  onCreateProject
 }) => {
   const containerRef = useRef(null);
   const [dragging, setDragging] = useState(null);
@@ -96,6 +101,7 @@ const Canvas = ({
   const [commentPopover, setCommentPopover] = useState({ isOpen: false, nodeId: null });
   const [linkPopover, setLinkPopover] = useState({ isOpen: false, nodeId: null });
   const [nodeTypeSelector, setNodeTypeSelector] = useState({ isOpen: false, position: null, parentId: null });
+  const [linkedProjectModal, setLinkedProjectModal] = useState({ isOpen: false, parentId: null });
   const [canvasBounds, setCanvasBounds] = useState(null);
   
   // Estado para selección por área (drag selection)

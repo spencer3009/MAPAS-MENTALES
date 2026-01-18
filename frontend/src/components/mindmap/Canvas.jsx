@@ -450,6 +450,50 @@ const Canvas = ({
     }
   }, [nodeTypeSelector.parentId, onAddChildNode, autoAlignEnabled]);
 
+  // Handler para cuando se selecciona tipo "Proyecto" - abre modal de selección
+  const handleSelectProjectType = useCallback(() => {
+    const parentId = nodeTypeSelector.parentId;
+    setNodeTypeSelector({ isOpen: false, position: null, parentId: null });
+    setLinkedProjectModal({ isOpen: true, parentId });
+  }, [nodeTypeSelector.parentId]);
+
+  // Handler para seleccionar un proyecto existente para vincular
+  const handleSelectLinkedProject = useCallback((project) => {
+    if (linkedProjectModal.parentId && project) {
+      const newId = onAddChildNode(linkedProjectModal.parentId, project.name, { 
+        nodeType: 'project',
+        linkedProjectId: project.id,
+        autoAlign: autoAlignEnabled 
+      });
+      setNewNodeId(newId);
+      setLinkedProjectModal({ isOpen: false, parentId: null });
+      setTimeout(() => setShowControls(true), 500);
+    }
+  }, [linkedProjectModal.parentId, onAddChildNode, autoAlignEnabled]);
+
+  // Handler para crear un nuevo proyecto y vincularlo
+  const handleCreateAndLinkProject = useCallback(async (projectName) => {
+    if (linkedProjectModal.parentId && onCreateProject) {
+      const newProject = await onCreateProject(projectName);
+      if (newProject) {
+        const newId = onAddChildNode(linkedProjectModal.parentId, projectName, { 
+          nodeType: 'project',
+          linkedProjectId: newProject.id,
+          autoAlign: autoAlignEnabled 
+        });
+        setNewNodeId(newId);
+        setLinkedProjectModal({ isOpen: false, parentId: null });
+        setTimeout(() => setShowControls(true), 500);
+      }
+    }
+  }, [linkedProjectModal.parentId, onAddChildNode, onCreateProject, autoAlignEnabled]);
+
+  // Handler para cerrar modal de proyecto vinculado
+  const handleCloseLinkedProjectModal = useCallback(() => {
+    setLinkedProjectModal({ isOpen: false, parentId: null });
+    setShowControls(true);
+  }, []);
+
   // Handler para cerrar el selector de tipo de nodo
   const handleCloseNodeTypeSelector = useCallback(() => {
     setNodeTypeSelector({ isOpen: false, position: null, parentId: null });

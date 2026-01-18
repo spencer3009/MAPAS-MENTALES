@@ -1706,7 +1706,7 @@ async def send_whatsapp_message(phone_number: str, message: str, content_sid: st
                 
                 # Detectar error de ventana de 24h
                 if "outside of allowed window" in error_detail.lower() or "template" in error_detail.lower():
-                    logger.error("💡 SOLUCIÓN: Configura TWILIO_WHATSAPP_TEMPLATE_SID con una plantilla aprobada")
+                    logger.error("💡 SOLUCIÓN: Configura TWILIO_TEMPLATE_SID con una plantilla aprobada")
                 
                 return {"success": False, "error": error_detail, "status_code": response.status_code}
                 

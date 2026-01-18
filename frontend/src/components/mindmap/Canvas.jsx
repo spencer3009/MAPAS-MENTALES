@@ -7,6 +7,7 @@ import NodeToolbar from './NodeToolbar';
 import CommentPopover from './CommentPopover';
 import LinkPopover from './LinkPopover';
 import NodeTypeSelector from './NodeTypeSelector';
+import LinkedProjectModal from './LinkedProjectModal';
 import SelectionBox from './SelectionBox';
 import CanvasModePanel from './CanvasModePanel';
 import CanvasGrid from './CanvasGrid';

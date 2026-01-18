@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, memo, useCallback } from 'react';
-import { MessageSquare, Link2, Clock, FileText, Bell } from 'lucide-react';
+import { MessageSquare, Link2, Clock, FileText, Bell, FolderOpen } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 
 // Icono personalizado de WhatsApp

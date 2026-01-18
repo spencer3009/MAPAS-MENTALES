@@ -131,10 +131,12 @@ const NodeItem = memo(({
   const nodeWidth = node.width || NODE_WIDTH;
   const nodeHeight = node.height || NODE_HEIGHT;
 
-  // Tipo de nodo: 'default' | 'dashed_text'
+  // Tipo de nodo: 'default' | 'dashed_text' | 'project'
   // Compatibilidad: 'dashed' se trata igual que 'dashed_text'
   const nodeType = node.nodeType || 'default';
   const isDashedNode = nodeType === 'dashed' || nodeType === 'dashed_text';
+  const isProjectNode = nodeType === 'project';
+  const linkedProjectId = node.linkedProjectId;
   
   // Alineación de texto (left, center, right) - por defecto center
   const textAlign = node.textAlign || 'center';

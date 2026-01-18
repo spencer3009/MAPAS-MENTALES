@@ -1667,7 +1667,7 @@ async def send_whatsapp_message(phone_number: str, message: str, content_sid: st
         }
         
         # Usar plantilla aprobada si está configurada (requerido para mensajes proactivos)
-        twilio_content_sid = content_sid or os.environ.get("TWILIO_WHATSAPP_TEMPLATE_SID")
+        twilio_content_sid = content_sid or os.environ.get("TWILIO_TEMPLATE_SID")
         
         if twilio_content_sid:
             # Envío con plantilla aprobada (Content Template)

@@ -38,6 +38,7 @@ const NodeTypeSelector = ({
   position, 
   onSelect, 
   onClose,
+  onSelectProjectType,
   parentNode 
 }) => {
   const selectorRef = useRef(null);

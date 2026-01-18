@@ -1432,8 +1432,19 @@ const Canvas = ({
         isOpen={nodeTypeSelector.isOpen}
         position={nodeTypeSelector.position}
         onSelect={handleNodeTypeSelect}
+        onSelectProjectType={handleSelectProjectType}
         onClose={handleCloseNodeTypeSelector}
         parentNode={selectedNode}
+      />
+
+      {/* Modal para vincular proyecto */}
+      <LinkedProjectModal
+        isOpen={linkedProjectModal.isOpen}
+        onClose={handleCloseLinkedProjectModal}
+        onSelectProject={handleSelectLinkedProject}
+        onCreateNewProject={handleCreateAndLinkProject}
+        projects={projects}
+        currentProjectId={currentProjectId}
       />
 
       {/* Toolbar flotante - centrada sobre el nodo seleccionado */}

@@ -224,6 +224,50 @@ const NodeTypeSelector = ({
             </span>
           )}
         </button>
+
+        {/* Opción 3: Nodo tipo Proyecto (vinculado a otro mapa) */}
+        <button
+          onClick={() => handleSelect(NODE_TYPES.PROJECT)}
+          className={`
+            relative flex flex-col items-center gap-2 p-3
+            rounded-xl border-2 transition-all duration-200
+            hover:scale-105
+            ${lastUsedType === NODE_TYPES.PROJECT
+              ? 'border-emerald-500 bg-emerald-50' 
+              : 'border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/50'
+            }
+          `}
+        >
+          {/* Preview del nodo proyecto */}
+          <div className="
+            w-20 h-12 rounded-lg
+            bg-gradient-to-br from-emerald-100 to-emerald-200
+            border-2 border-emerald-300
+            border-dashed
+            shadow-sm
+            flex items-center justify-center
+            gap-1
+          ">
+            <FolderOpen size={12} className="text-emerald-600" />
+            <span className="text-[9px] text-emerald-700 font-medium">Mapa</span>
+          </div>
+          
+          <span className="text-xs font-medium text-gray-700">
+            Proyecto
+          </span>
+
+          {/* Indicador de último usado */}
+          {lastUsedType === NODE_TYPES.PROJECT && (
+            <span className="
+              absolute -top-1 -right-1
+              w-4 h-4 rounded-full
+              bg-emerald-500
+              flex items-center justify-center
+            ">
+              <span className="text-white text-[8px]">✓</span>
+            </span>
+          )}
+        </button>
       </div>
 
       {/* Footer con tip */}

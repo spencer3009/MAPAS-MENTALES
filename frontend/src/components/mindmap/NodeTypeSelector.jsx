@@ -1,10 +1,11 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Square, MinusSquare, X } from 'lucide-react';
+import { Square, MinusSquare, X, FolderOpen } from 'lucide-react';
 
 // Tipos de nodo disponibles
 export const NODE_TYPES = {
   DEFAULT: 'default',      // Nodo rectangular con fondo
-  DASHED_TEXT: 'dashed_text'  // Nodo con línea punteada celeste sin fondo
+  DASHED_TEXT: 'dashed_text',  // Nodo con línea punteada celeste sin fondo
+  PROJECT: 'project'       // Nodo vinculado a otro proyecto/mapa
 };
 
 // Alias para compatibilidad con código existente

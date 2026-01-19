@@ -8190,7 +8190,7 @@ async def create_income(
     }
     
     await db.finanzas_incomes.insert_one(income)
-    del income["_id"] if "_id" in income else None
+    income.pop("_id", None)
     return income
 
 @api_router.get("/finanzas/incomes/{income_id}", response_model=IncomeResponse)
@@ -8232,7 +8232,7 @@ async def update_income(
     if not result:
         raise HTTPException(status_code=404, detail="Ingreso no encontrado")
     
-    del result["_id"] if "_id" in result else None
+    result.pop("_id", None)
     return result
 
 @api_router.delete("/finanzas/incomes/{income_id}")
@@ -8312,7 +8312,7 @@ async def create_expense(
     }
     
     await db.finanzas_expenses.insert_one(expense)
-    del expense["_id"] if "_id" in expense else None
+    expense.pop("_id", None)
     return expense
 
 @api_router.get("/finanzas/expenses/{expense_id}", response_model=ExpenseResponse)
@@ -8354,7 +8354,7 @@ async def update_expense(
     if not result:
         raise HTTPException(status_code=404, detail="Gasto no encontrado")
     
-    del result["_id"] if "_id" in result else None
+    result.pop("_id", None)
     return result
 
 @api_router.delete("/finanzas/expenses/{expense_id}")
@@ -8401,7 +8401,7 @@ async def duplicate_expense(
     }
     
     await db.finanzas_expenses.insert_one(new_expense)
-    del new_expense["_id"] if "_id" in new_expense else None
+    new_expense.pop("_id", None)
     return new_expense
 
 # ==========================================
@@ -8455,7 +8455,7 @@ async def create_investment(
     }
     
     await db.finanzas_investments.insert_one(investment)
-    del investment["_id"] if "_id" in investment else None
+    investment.pop("_id", None)
     return investment
 
 @api_router.get("/finanzas/investments/{investment_id}", response_model=InvestmentResponse)
@@ -8497,7 +8497,7 @@ async def update_investment(
     if not result:
         raise HTTPException(status_code=404, detail="Inversión no encontrada")
     
-    del result["_id"] if "_id" in result else None
+    result.pop("_id", None)
     return result
 
 @api_router.delete("/finanzas/investments/{investment_id}")
@@ -8564,7 +8564,7 @@ async def create_category(
     }
     
     await db.finanzas_categories.insert_one(category)
-    del category["_id"] if "_id" in category else None
+    category.pop("_id", None)
     return category
 
 @api_router.get("/finanzas/income-sources")

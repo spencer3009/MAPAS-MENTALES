@@ -243,34 +243,12 @@ const FinanzasModule = ({ token, projects = [] }) => {
 
   // Eliminar empresa (con cascada de datos)
   const handleDeleteCompany = async (companyId, confirmation) => {
-    try {
-      const response = await fetch(`${API_URL}/api/finanzas/companies/${companyId}?confirmation=${encodeURIComponent(confirmation)}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (response.ok) {
-        // Remover la empresa de la lista
-        const remainingCompanies = companies.filter(c => c.id !== companyId);
-        setCompanies(remainingCompanies);
-        
-        // Si era la empresa seleccionada, seleccionar otra o ninguna
-        if (selectedCompany?.id === companyId) {
-          setSelectedCompany(remainingCompanies.length > 0 ? remainingCompanies[0] : null);
-        }
-        
-        setEditingCompany(null);
-        alert('Empresa eliminada exitosamente');
-      } else {
-        const error = await response.json();
-        alert(`Error al eliminar empresa: ${error.detail || 'Error desconocido'}`);
-      }
-    } catch (err) {
-      console.error('Error deleting company:', err);
-      alert(`Error de conexión: ${err.message}`);
+    const result = await deleteCompany(companyId, confirmation);
+    if (result.success) {
+      setEditingCompany(null);
+      alert('Empresa eliminada exitosamente');
+    } else {
+      alert(`Error al eliminar empresa: ${result.error}`);
     }
   };
 

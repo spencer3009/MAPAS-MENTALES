@@ -1513,15 +1513,16 @@ const InvestmentModal = ({ onClose, onSave, projects }) => {
   );
 };
 
-// Modal de Empresa
-const CompanyModal = ({ onClose, onSave }) => {
+// Modal de Empresa (crear o editar)
+const CompanyModal = ({ onClose, onSave, company = null }) => {
+  const isEditing = !!company;
   const [form, setForm] = useState({
-    name: '',
-    ruc: '',
-    address: '',
-    phone: '',
-    email: '',
-    currency: 'PEN',
+    name: company?.name || '',
+    ruc: company?.ruc || '',
+    address: company?.address || '',
+    phone: company?.phone || '',
+    email: company?.email || '',
+    currency: company?.currency || 'PEN',
   });
   const [saving, setSaving] = useState(false);
 
@@ -1540,9 +1541,9 @@ const CompanyModal = ({ onClose, onSave }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
-        <div className="px-6 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white">
-          <h2 className="text-lg font-semibold">Nueva Empresa</h2>
-          <p className="text-sm text-emerald-100">Crea una empresa para gestionar sus finanzas</p>
+        <div className={`px-6 py-4 ${isEditing ? 'bg-gradient-to-r from-blue-500 to-indigo-600' : 'bg-gradient-to-r from-emerald-500 to-teal-600'} text-white`}>
+          <h2 className="text-lg font-semibold">{isEditing ? 'Editar Empresa' : 'Nueva Empresa'}</h2>
+          <p className="text-sm opacity-90">{isEditing ? 'Modifica los datos de tu empresa' : 'Crea una empresa para gestionar sus finanzas'}</p>
         </div>
         
         <form onSubmit={handleSubmit} className="p-6 space-y-4">

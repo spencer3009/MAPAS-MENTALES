@@ -7,6 +7,7 @@ import {
   BarChart3, RefreshCw, Building2, ChevronDown, X, Pencil
 } from 'lucide-react';
 import ContactAutocomplete from './ContactAutocomplete';
+import { CompanyModal } from '../common/CompanySelector';
 
 const API_URL = '';
 

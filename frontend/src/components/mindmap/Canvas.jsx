@@ -1196,6 +1196,7 @@ const Canvas = ({
             onUpdateSize={onUpdateNodeSize}
             onContextMenu={handleNodeContextMenu}
             onCommentClick={handleNodeCommentClick}
+            onNavigateToProject={onNavigateToProject}
             forceEdit={newNodeId === node.id}
             onEditComplete={handleEditComplete}
             isNavigationMode={isNavigationMode}

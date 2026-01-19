@@ -65,6 +65,16 @@ from activity_service import (
     generate_activity_message, DEFAULT_NOTIFICATION_PREFERENCES,
     EMAIL_WORTHY_ACTIONS
 )
+import finanzas_service
+from finanzas_service import (
+    IncomeCreate, IncomeUpdate, IncomeResponse, IncomeStatus,
+    ExpenseCreate, ExpenseUpdate, ExpenseResponse, ExpenseStatus, ExpensePriority,
+    InvestmentCreate, InvestmentUpdate, InvestmentResponse, InvestmentStatus,
+    CategoryCreate, CategoryUpdate, CategoryResponse,
+    FinancialSummary, ProjectFinancialSummary,
+    DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_SOURCES,
+    generate_id, get_current_timestamp, calculate_health_status
+)
 
 
 # JWT Configuration

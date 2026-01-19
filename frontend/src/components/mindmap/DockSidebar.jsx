@@ -40,6 +40,9 @@ const DockSidebar = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   
+  // Obtener la función para abrir colaboradores del contexto
+  const { openCollaboratorsModal, activeCompany } = useCompany();
+  
   // Determinar si estamos en la vista de proyectos
   const isInProjectsView = activeView === 'projects';
   
@@ -80,6 +83,13 @@ const DockSidebar = ({
       label: 'Finanzas',
       onClick: onOpenFinanzas,
     },
+    // Colaboradores - visible solo si hay empresa activa
+    ...(activeCompany ? [{
+      id: 'collaborators',
+      icon: UserCog,
+      label: 'Colaboradores',
+      onClick: openCollaboratorsModal,
+    }] : []),
     {
       id: 'favorites',
       icon: Star,

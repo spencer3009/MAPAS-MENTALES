@@ -150,11 +150,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
     companies, 
     activeCompany: selectedCompany, 
     loading: loadingCompanies,
-    refreshCompanies,
-    selectCompany,
-    createCompany,
-    updateCompany,
-    deleteCompany
+    refreshCompanies
   } = useCompany();
   
   const [activeTab, setActiveTab] = useState('summary');
@@ -172,14 +168,11 @@ const FinanzasModule = ({ token, projects = [] }) => {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
   
-  // Modales
+  // Modales de finanzas (no de empresa - eso está en GlobalCompanySelector)
   const [showIncomeModal, setShowIncomeModal] = useState(false);
   const [showExpenseModal, setShowExpenseModal] = useState(false);
   const [showInvestmentModal, setShowInvestmentModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  const [showCompanyModal, setShowCompanyModal] = useState(false);
-  const [editingCompany, setEditingCompany] = useState(null);
-  const [showCollaborators, setShowCollaborators] = useState(false);
   
   const { fetchWithAuth } = useFinanzas(token);
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, LayoutGrid, Search, Trash2, ArrowLeft, MoreHorizontal, Star, Clock, AlertTriangle, X, Pencil, Copy, FolderInput, Loader2, Check, Users } from 'lucide-react';
+import { Plus, LayoutGrid, Search, Trash2, ArrowLeft, MoreHorizontal, Star, Clock, AlertTriangle, X, Pencil, Copy, FolderInput, Loader2, Check, Users, Building2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,6 +8,8 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { ShareModal } from '../sharing/ShareModal';
+import { useCompany } from '../../contexts/CompanyContext';
+import CompanySelector, { CompanyModal } from '../common/CompanySelector';
 
 // Use relative URLs for production compatibility
 const API_URL = '';
@@ -27,10 +29,13 @@ const BOARD_COLORS = [
 ];
 
 const BoardsPage = ({ onBack, onSelectBoard, onTrashUpdate }) => {
+  const { activeCompany, hasCompanies, createCompany } = useCompany();
+  
   const [boards, setBoards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showCompanyModal, setShowCompanyModal] = useState(false);
   const [newBoardTitle, setNewBoardTitle] = useState('');
   const [newBoardColor, setNewBoardColor] = useState('#3B82F6');
   const [creating, setCreating] = useState(false);

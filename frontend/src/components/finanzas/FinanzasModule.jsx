@@ -157,6 +157,12 @@ const FinanzasModule = ({ token, projects = [] }) => {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
   
+  // Estado para empresas
+  const [companies, setCompanies] = useState([]);
+  const [selectedCompany, setSelectedCompany] = useState(null);
+  const [showCompanyModal, setShowCompanyModal] = useState(false);
+  const [loadingCompanies, setLoadingCompanies] = useState(true);
+  
   // Modales
   const [showIncomeModal, setShowIncomeModal] = useState(false);
   const [showExpenseModal, setShowExpenseModal] = useState(false);
@@ -165,19 +171,54 @@ const FinanzasModule = ({ token, projects = [] }) => {
   
   const { fetchWithAuth } = useFinanzas(token);
 
-  // Cargar datos
+  // Cargar empresas
+  const loadCompanies = useCallback(async () => {
+    setLoadingCompanies(true);
+    try {
+      const response = await fetch(`${API_URL}/api/finanzas/companies`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setCompanies(data);
+        // Seleccionar la primera empresa por defecto si existe
+        if (data.length > 0 && !selectedCompany) {
+          setSelectedCompany(data[0]);
+        }
+      }
+    } catch (err) {
+      console.error('Error loading companies:', err);
+    } finally {
+      setLoadingCompanies(false);
+    }
+  }, [token, selectedCompany]);
+
+  // Cargar empresas al inicio
+  useEffect(() => {
+    if (token) {
+      loadCompanies();
+    }
+  }, [token, loadCompanies]);
+
+  // Cargar datos financieros (solo si hay empresa seleccionada)
   const loadData = useCallback(async () => {
+    if (!selectedCompany) return;
+    
     setLoading(true);
     try {
+      const companyId = selectedCompany.id;
       const [summaryData, incomesData, expensesData, investmentsData, categoriesData, sourcesData, receivablesData, payablesData] = await Promise.all([
-        fetchWithAuth(`/summary?period=${selectedPeriod}`),
-        fetchWithAuth('/incomes'),
-        fetchWithAuth('/expenses'),
-        fetchWithAuth('/investments'),
+        fetchWithAuth(`/summary?company_id=${companyId}&period=${selectedPeriod}`),
+        fetchWithAuth(`/incomes?company_id=${companyId}`),
+        fetchWithAuth(`/expenses?company_id=${companyId}`),
+        fetchWithAuth(`/investments?company_id=${companyId}`),
         fetchWithAuth('/categories'),
         fetchWithAuth('/income-sources'),
-        fetchWithAuth('/receivables'),
-        fetchWithAuth('/payables'),
+        fetchWithAuth(`/receivables?company_id=${companyId}`),
+        fetchWithAuth(`/payables?company_id=${companyId}`),
       ]);
       
       setSummary(summaryData);
@@ -193,20 +234,44 @@ const FinanzasModule = ({ token, projects = [] }) => {
     } finally {
       setLoading(false);
     }
-  }, [fetchWithAuth, selectedPeriod]);
+  }, [fetchWithAuth, selectedPeriod, selectedCompany]);
 
   useEffect(() => {
-    if (token) {
+    if (token && selectedCompany) {
       loadData();
     }
-  }, [token, loadData]);
+  }, [token, selectedCompany, loadData]);
+
+  // Crear empresa
+  const handleCreateCompany = async (companyData) => {
+    try {
+      const response = await fetch(`${API_URL}/api/finanzas/companies`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(companyData),
+      });
+      
+      if (response.ok) {
+        const newCompany = await response.json();
+        setCompanies(prev => [newCompany, ...prev]);
+        setSelectedCompany(newCompany);
+        setShowCompanyModal(false);
+      }
+    } catch (err) {
+      console.error('Error creating company:', err);
+    }
+  };
 
   // Crear ingreso
   const handleCreateIncome = async (data) => {
+    if (!selectedCompany) return;
     try {
       await fetchWithAuth('/incomes', {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, company_id: selectedCompany.id }),
       });
       loadData();
       setShowIncomeModal(false);

@@ -538,6 +538,15 @@ const FinanzasModule = ({ token, projects = [] }) => {
                 <Pencil size={18} />
               </button>
               
+              {/* Botón colaboradores */}
+              <button
+                onClick={() => setShowCollaborators(true)}
+                className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                title="Colaboradores y configuración"
+              >
+                <Users size={18} />
+              </button>
+              
               <button
                 onClick={() => setShowCompanyModal(true)}
                 className="p-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"

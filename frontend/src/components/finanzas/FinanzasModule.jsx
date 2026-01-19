@@ -1021,6 +1021,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
         <CompanyModal
           onClose={() => setEditingCompany(null)}
           onSave={handleUpdateCompany}
+          onDelete={handleDeleteCompany}
           company={editingCompany}
         />
       )}

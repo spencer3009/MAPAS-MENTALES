@@ -181,7 +181,7 @@ const NodeTypeSelector = ({
         <button
           onClick={() => handleSelect(NODE_TYPES.DASHED_TEXT)}
           className={`
-            relative flex flex-col items-center gap-2 p-3
+            relative flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3
             rounded-xl border-2 transition-all duration-200
             hover:scale-105
             ${lastUsedType === NODE_TYPES.DASHED_TEXT || lastUsedType === 'dashed'
@@ -192,13 +192,13 @@ const NodeTypeSelector = ({
         >
           {/* Preview del nodo - solo texto con línea punteada celeste */}
           <div className="
-            w-20 h-12
+            w-14 sm:w-20 h-10 sm:h-12
             flex flex-col items-center justify-center
           ">
-            <span className="text-[10px] text-gray-600 font-medium mb-1">Texto</span>
+            <span className="text-[9px] sm:text-[10px] text-gray-600 font-medium mb-1">Texto</span>
             {/* Línea celeste punteada - 1px de grosor (muy delgada) */}
             <div 
-              className="w-16"
+              className="w-12 sm:w-16"
               style={{
                 height: 0,
                 borderBottomWidth: '1px',
@@ -208,7 +208,7 @@ const NodeTypeSelector = ({
             />
           </div>
           
-          <span className="text-xs font-medium text-gray-700">
+          <span className="text-[10px] sm:text-xs font-medium text-gray-700">
             Solo línea
           </span>
 

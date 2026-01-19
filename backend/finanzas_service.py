@@ -91,6 +91,7 @@ DEFAULT_INCOME_SOURCES = [
 # ==========================================
 
 class IncomeCreate(BaseModel):
+    company_id: str = Field(..., description="ID de la empresa")
     amount: float = Field(..., gt=0, description="Monto del ingreso")
     source: str = Field(..., description="Fuente del ingreso")
     description: Optional[str] = Field(None, description="Descripción opcional")
@@ -99,6 +100,7 @@ class IncomeCreate(BaseModel):
     project_id: Optional[str] = Field(None, description="Proyecto asociado")
     project_name: Optional[str] = Field(None, description="Nombre del proyecto")
     client_name: Optional[str] = Field(None, description="Cliente asociado")
+    client_id: Optional[str] = Field(None, description="ID del contacto cliente")
     due_date: Optional[str] = Field(None, description="Fecha de vencimiento para cobrar")
     notes: Optional[str] = Field(None, description="Notas adicionales")
 
@@ -111,11 +113,13 @@ class IncomeUpdate(BaseModel):
     project_id: Optional[str] = None
     project_name: Optional[str] = None
     client_name: Optional[str] = None
+    client_id: Optional[str] = None
     due_date: Optional[str] = None
     notes: Optional[str] = None
 
 class IncomeResponse(BaseModel):
     id: str
+    company_id: str
     workspace_id: str
     username: str
     amount: float
@@ -126,6 +130,7 @@ class IncomeResponse(BaseModel):
     project_id: Optional[str]
     project_name: Optional[str]
     client_name: Optional[str]
+    client_id: Optional[str]
     due_date: Optional[str]
     notes: Optional[str]
     created_at: str

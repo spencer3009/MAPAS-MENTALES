@@ -223,7 +223,7 @@ const CompanyModal = ({
               <p className="text-gray-700">
                 Para confirmar la eliminación, escribe el nombre de la empresa:
               </p>
-              <p className="font-medium text-gray-900">"{company.name}"</p>
+              <p className="font-medium text-gray-900">&quot;{company.name}&quot;</p>
               
               <input
                 type="text"

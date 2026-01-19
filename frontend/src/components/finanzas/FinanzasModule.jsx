@@ -930,6 +930,14 @@ const FinanzasModule = ({ token, projects = [] }) => {
           projects={projects}
         />
       )}
+
+      {/* Modal Nueva Empresa */}
+      {showCompanyModal && (
+        <CompanyModal
+          onClose={() => setShowCompanyModal(false)}
+          onSave={handleCreateCompany}
+        />
+      )}
     </div>
   );
 };

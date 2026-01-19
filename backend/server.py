@@ -9349,7 +9349,7 @@ async def get_companies_for_user(username: str, user_email: str = None) -> List[
     return companies
 
 
-@api_router.get("/companies/{company_id}/collaborators")
+@api_router.get("/finanzas/companies/{company_id}/collaborators")
 async def get_company_collaborators(
     company_id: str,
     current_user: dict = Depends(get_current_user)
@@ -9414,7 +9414,7 @@ async def get_company_collaborators(
     }
 
 
-@api_router.post("/companies/{company_id}/collaborators/invite")
+@api_router.post("/finanzas/companies/{company_id}/collaborators/invite")
 async def invite_collaborator(
     company_id: str,
     invitation: CollaboratorInvite,
@@ -9744,7 +9744,7 @@ async def reject_invitation(
     return {"message": "Invitación rechazada"}
 
 
-@api_router.put("/companies/{company_id}/collaborators/{collaborator_username}/role")
+@api_router.put("/finanzas/companies/{company_id}/collaborators/{collaborator_username}/role")
 async def update_collaborator_role_endpoint(
     company_id: str,
     collaborator_username: str,
@@ -9834,7 +9834,7 @@ async def update_collaborator_role_endpoint(
     }
 
 
-@api_router.delete("/companies/{company_id}/collaborators/{collaborator_username}")
+@api_router.delete("/finanzas/companies/{company_id}/collaborators/{collaborator_username}")
 async def remove_company_collaborator(
     company_id: str,
     collaborator_username: str,
@@ -9905,7 +9905,7 @@ async def remove_company_collaborator(
     return {"message": "Colaborador eliminado exitosamente"}
 
 
-@api_router.get("/companies/{company_id}/invitations")
+@api_router.get("/finanzas/companies/{company_id}/invitations")
 async def get_company_invitations(
     company_id: str,
     status: Optional[str] = None,
@@ -9930,7 +9930,7 @@ async def get_company_invitations(
     return {"invitations": invitations}
 
 
-@api_router.delete("/companies/{company_id}/invitations/{invitation_id}")
+@api_router.delete("/finanzas/companies/{company_id}/invitations/{invitation_id}")
 async def revoke_invitation(
     company_id: str,
     invitation_id: str,
@@ -9961,7 +9961,7 @@ async def revoke_invitation(
     return {"message": "Invitación revocada"}
 
 
-@api_router.get("/companies/{company_id}/my-role")
+@api_router.get("/finanzas/companies/{company_id}/my-role")
 async def get_my_company_role(
     company_id: str,
     current_user: dict = Depends(get_current_user)

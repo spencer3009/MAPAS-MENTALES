@@ -85,6 +85,11 @@ from collaborator_service import (
     get_invitation_email_html, get_invitation_accepted_email_html, get_invitation_rejected_email_html,
     get_role_changed_email_html, get_access_revoked_email_html
 )
+import activity_company_service
+from activity_company_service import (
+    ActivityCreate, ACTIVITY_TYPES, MODULE_LABELS,
+    generate_activity_id, format_activity, build_activity_message
+)
 
 
 # JWT Configuration

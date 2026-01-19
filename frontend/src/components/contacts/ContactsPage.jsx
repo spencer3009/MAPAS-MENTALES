@@ -179,8 +179,12 @@ const WhatsAppLink = ({ phoneNumber, showIcon = true, className = '' }) => {
 };
 
 const ContactsPage = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
+  const { activeCompany, hasCompanies, createCompany } = useCompany();
   const isVerified = user?.email_verified ?? true;
+  
+  // Modal para crear empresa
+  const [showCompanyModal, setShowCompanyModal] = useState(false);
   
   const [activeTab, setActiveTab] = useState('client');
   const [contacts, setContacts] = useState([]);

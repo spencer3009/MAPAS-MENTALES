@@ -6,6 +6,7 @@ import {
   CheckCircle2, Clock, AlertTriangle,
   BarChart3, RefreshCw
 } from 'lucide-react';
+import ContactAutocomplete from './ContactAutocomplete';
 
 const API_URL = '';
 

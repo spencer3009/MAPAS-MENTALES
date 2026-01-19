@@ -1105,6 +1105,8 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
         return <IntegrationsView />;
       case 'contacts':
         return <ContactsPage />;
+      case 'finanzas':
+        return <FinanzasModule token={token} projects={projects} />;
       case 'whatsapp':
         return whatsappView === 'inbox' ? (
           <WhatsAppInbox />

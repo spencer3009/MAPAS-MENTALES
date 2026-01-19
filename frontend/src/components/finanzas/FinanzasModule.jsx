@@ -1484,10 +1484,18 @@ const CompanyModal = ({ onClose, onSave }) => {
     email: '',
     currency: 'PEN',
   });
+  const [saving, setSaving] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave(form);
+    if (saving) return;
+    
+    setSaving(true);
+    try {
+      await onSave(form);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (

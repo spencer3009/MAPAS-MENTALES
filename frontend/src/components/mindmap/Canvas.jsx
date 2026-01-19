@@ -1535,12 +1535,15 @@ const Canvas = ({
         currentColor={selectedNodeForMenu?.color}
         currentNodeType={selectedNodeForMenu?.nodeType}
         currentLineWidth={selectedNodeForMenu?.dashedLineWidth}
+        linkedProjectId={selectedNodeForMenu?.linkedProjectId}
         onAddChild={handleAddChildWithAutoAlign}
         onDuplicate={handleDuplicateWithAutoAlign}
         onDelete={handleDeleteWithAutoAlign}
         onChangeColor={onChangeNodeColor}
         onChangeNodeType={onChangeNodeType}
         onChangeLineWidth={onChangeLineWidth}
+        onLinkToProject={handleLinkToProjectFromContext}
+        onUnlinkProject={handleUnlinkProject}
         onClose={onCloseContextMenu}
       />
 

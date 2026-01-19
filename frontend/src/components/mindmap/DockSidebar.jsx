@@ -13,9 +13,11 @@ import {
   MessageSquare,
   Shield,
   DollarSign,
-  Building2
+  Building2,
+  UserCog
 } from 'lucide-react';
 import GlobalCompanySelector from '../common/GlobalCompanySelector';
+import { useCompany } from '../../contexts/CompanyContext';
 
 const DockSidebar = ({ 
   onToggleProjectsSidebar,

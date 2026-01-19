@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Building2, ChevronDown, Plus, Pencil, X } from 'lucide-react';
-import { useCompany } from '../contexts/CompanyContext';
+import { useCompany } from '../../contexts/CompanyContext';
 
 /**
  * CompanySelector - Selector de empresa global reutilizable

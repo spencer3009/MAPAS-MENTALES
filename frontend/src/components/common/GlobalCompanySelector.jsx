@@ -70,12 +70,15 @@ const GlobalCompanySelector = ({ token }) => {
     createCompany, 
     updateCompany, 
     deleteCompany,
-    refreshCompanies 
+    refreshCompanies,
+    showConfigModal,
+    configModalTab,
+    openConfigModal,
+    closeConfigModal
   } = useCompany();
   
   const [showDropdown, setShowDropdown] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showConfigModal, setShowConfigModal] = useState(false);
 
   if (loading) {
     return (

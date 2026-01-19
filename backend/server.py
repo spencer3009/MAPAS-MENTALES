@@ -8963,13 +8963,16 @@ async def get_project_financial_summaries(
 
 @api_router.get("/finanzas/receivables")
 async def get_receivables(
+    company_id: str,
     current_user: dict = Depends(get_current_user)
 ):
     """Obtener ingresos por cobrar ordenados por fecha de vencimiento"""
-    workspace_id = await get_user_workspace_id(current_user["username"])
+    username = current_user["username"]
+    await verify_company_access(company_id, username)
+    workspace_id = await get_user_workspace_id(username)
     
     receivables = await db.finanzas_incomes.find(
-        {"workspace_id": workspace_id, "status": "pending"},
+        {"company_id": company_id, "workspace_id": workspace_id, "status": "pending"},
         {"_id": 0}
     ).sort("due_date", 1).to_list(500)
     
@@ -8983,14 +8986,17 @@ async def get_receivables(
 
 @api_router.get("/finanzas/payables")
 async def get_payables(
+    company_id: str,
     current_user: dict = Depends(get_current_user)
 ):
     """Obtener gastos por pagar ordenados por prioridad y fecha"""
-    workspace_id = await get_user_workspace_id(current_user["username"])
+    username = current_user["username"]
+    await verify_company_access(company_id, username)
+    workspace_id = await get_user_workspace_id(username)
     
     # Ordenar por prioridad (high > medium > low) y luego por fecha
     payables = await db.finanzas_expenses.find(
-        {"workspace_id": workspace_id, "status": "pending"},
+        {"company_id": company_id, "workspace_id": workspace_id, "status": "pending"},
         {"_id": 0}
     ).to_list(500)
     

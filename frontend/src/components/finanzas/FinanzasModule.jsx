@@ -338,24 +338,13 @@ const FinanzasModule = ({ token, projects = [] }) => {
           </h2>
           <p className="text-gray-500 mb-6">
             Para comenzar a usar el módulo de Finanzas, necesitas crear al menos una empresa. 
-            Cada empresa tendrá sus propios datos financieros independientes.
+            Usa el <strong>selector de empresa</strong> en el menú lateral para crear tu primera empresa.
           </p>
-          <button
-            onClick={() => setShowCompanyModal(true)}
-            className="w-full px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-medium hover:from-emerald-600 hover:to-teal-700 transition-all flex items-center justify-center gap-2"
-          >
-            <Plus size={20} />
-            Crear Empresa
-          </button>
+          <div className="flex items-center justify-center gap-2 text-emerald-600">
+            <Building2 size={20} />
+            <span className="text-sm">Expande el menú lateral para ver el selector de empresa</span>
+          </div>
         </div>
-        
-        {/* Modal crear empresa */}
-        {showCompanyModal && (
-          <CompanyModal
-            onClose={() => setShowCompanyModal(false)}
-            onSave={handleCreateCompany}
-          />
-        )}
       </div>
     );
   }

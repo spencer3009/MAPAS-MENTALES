@@ -8676,6 +8676,17 @@ async def create_expense(
     
     await db.finanzas_expenses.insert_one(expense)
     expense.pop("_id", None)
+    
+    # Registrar actividad
+    await log_company_activity(
+        company_id=expense_data.company_id,
+        activity_type="expense_created",
+        actor_username=username,
+        target_name=expense_data.description or "Gasto",
+        target_id=expense["id"],
+        amount=expense_data.amount
+    )
+    
     return expense
 
 @api_router.get("/finanzas/expenses/{expense_id}", response_model=ExpenseResponse)

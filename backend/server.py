@@ -6175,7 +6175,7 @@ async def search_contacts(
 ):
     """
     Búsqueda de contactos para autocomplete.
-    Busca por nombre, email o teléfono.
+    Busca por nombre, apellidos, email o teléfono.
     """
     username = current_user["username"]
     
@@ -6201,9 +6201,12 @@ async def search_contacts(
     if q and q.strip():
         search_regex = {"$regex": q.strip(), "$options": "i"}
         search_conditions = [
-            {"name": search_regex},
+            {"nombre": search_regex},
+            {"apellidos": search_regex},
+            {"name": search_regex},  # Por compatibilidad
             {"email": search_regex},
             {"phone": search_regex},
+            {"whatsapp": search_regex},
             {"company": search_regex}
         ]
         # Combinar con la query base
@@ -6216,10 +6219,26 @@ async def search_contacts(
     else:
         final_query = base_query
     
-    contacts = await db.contacts.find(
+    contacts_cursor = await db.contacts.find(
         final_query, 
-        {"_id": 0, "id": 1, "name": 1, "email": 1, "phone": 1, "company": 1, "contact_type": 1}
-    ).sort("name", 1).limit(limit).to_list(limit)
+        {"_id": 0}
+    ).sort("nombre", 1).limit(limit).to_list(limit)
+    
+    # Formatear respuesta con nombre completo
+    contacts = []
+    for c in contacts_cursor:
+        nombre = c.get("nombre", "") or c.get("name", "")
+        apellidos = c.get("apellidos", "")
+        full_name = f"{nombre} {apellidos}".strip() if apellidos else nombre
+        
+        contacts.append({
+            "id": c.get("id"),
+            "name": full_name,
+            "email": c.get("email"),
+            "phone": c.get("phone") or c.get("whatsapp"),
+            "company": c.get("company"),
+            "contact_type": c.get("contact_type")
+        })
     
     return {"contacts": contacts}
 

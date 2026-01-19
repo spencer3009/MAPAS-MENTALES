@@ -29,6 +29,7 @@ import { NotificationProvider, useNotifications } from './ToastProvider';
 import { BoardsPage, BoardView } from '../boards';
 import ContactsPage from '../contacts/ContactsPage';
 import { WhatsAppSettings, WhatsAppInbox } from '../whatsapp';
+import FinanzasModule from '../finanzas/FinanzasModule';
 import GlobalTimeIndicator from '../boards/GlobalTimeIndicator';
 import VerificationRequiredModal from '../auth/VerificationRequiredModal';
 import MobileNavigation from './MobileNavigation';

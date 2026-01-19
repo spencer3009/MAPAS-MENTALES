@@ -6190,16 +6190,27 @@ async def search_contacts(
     q: str = "",
     limit: int = 10,
     workspace_id: Optional[str] = None,
+    company_id: Optional[str] = None,
     current_user: dict = Depends(get_current_user)
 ):
     """
     Búsqueda de contactos para autocomplete.
     Busca por nombre, apellidos, email o teléfono.
+    Si se especifica company_id, busca solo en esa empresa.
     """
     username = current_user["username"]
     
-    # Construir query base según workspace
-    if workspace_id:
+    # Construir query base según contexto
+    if company_id:
+        # Verificar acceso a empresa
+        company = await db.finanzas_companies.find_one({
+            "id": company_id,
+            "owner_username": username
+        })
+        if not company:
+            raise HTTPException(status_code=403, detail="No tienes acceso a esta empresa")
+        base_query = {"company_id": company_id}
+    elif workspace_id:
         membership = await db.workspace_members.find_one({
             "workspace_id": workspace_id,
             "username": username
@@ -6208,6 +6219,7 @@ async def search_contacts(
             raise HTTPException(status_code=403, detail="No tienes acceso a este workspace")
         base_query = {"workspace_id": workspace_id}
     else:
+        # Contactos personales del usuario (sin company_id ni workspace_id)
         base_query = {
             "owner_username": username,
             "$or": [

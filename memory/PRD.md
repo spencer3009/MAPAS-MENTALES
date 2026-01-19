@@ -14,6 +14,12 @@
   - Modales de creación: Nuevo Ingreso, Nuevo Gasto, Nueva Inversión
   - Estados con badges de color (Cobrado, Por cobrar, Pagado, Por pagar)
   - Acciones rápidas: Marcar como cobrado/pagado, Eliminar, Duplicar gastos recurrentes
+  - **Campo Cliente/Proveedor con Autocomplete Inteligente**:
+    - Búsqueda dinámica integrada con módulo de Contactos
+    - Sugerencias en tiempo real filtradas por nombre, email, teléfono, empresa
+    - Selección única con chip visual (nombre + botón X para desvincular)
+    - Navegación por teclado (flechas + Enter + Escape)
+    - Badge de tipo de contacto (Cliente/Proveedor/Contacto)
 - **Navegación**:
   - Botón "Finanzas" agregado al DockSidebar (desktop) con ícono DollarSign
   - Botón "Finanzas" agregado al MobileNavigation (mobile) con ícono DollarSign

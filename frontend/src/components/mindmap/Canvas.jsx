@@ -1463,8 +1463,8 @@ const Canvas = ({
       <LinkedProjectModal
         isOpen={linkedProjectModal.isOpen}
         onClose={handleCloseLinkedProjectModal}
-        onSelectProject={handleSelectLinkedProject}
-        onCreateNewProject={handleCreateAndLinkProject}
+        onSelectProject={linkedProjectModal.nodeIdToLink ? handleLinkExistingNodeToProject : handleSelectLinkedProject}
+        onCreateNewProject={linkedProjectModal.nodeIdToLink ? null : handleCreateAndLinkProject}
         projects={projects}
         currentProjectId={currentProjectId}
       />

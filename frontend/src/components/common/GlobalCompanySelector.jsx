@@ -638,11 +638,13 @@ const GeneralTab = ({ company, onSave, onDelete, canDelete }) => {
 const CollaboratorsTab = ({ company, token, canManage }) => {
   const [collaborators, setCollaborators] = useState([]);
   const [invitations, setInvitations] = useState([]);
+  const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showInviteForm, setShowInviteForm] = useState(false);
   const [inviteForm, setInviteForm] = useState({ email: '', role: 'collaborator', message: '' });
   const [actionLoading, setActionLoading] = useState(null);
   const [error, setError] = useState(null);
+  const [showActivity, setShowActivity] = useState(false);
 
   const loadData = useCallback(async () => {
     if (!company?.id || !token) return;
@@ -651,23 +653,39 @@ const CollaboratorsTab = ({ company, token, canManage }) => {
     setError(null);
     
     try {
-      const [collabRes, invitationsRes] = await Promise.all([
+      const requests = [
         fetch(`${API_URL}/api/finanzas/companies/${company.id}/collaborators`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }),
         fetch(`${API_URL}/api/finanzas/companies/${company.id}/invitations?status=pending`, {
           headers: { 'Authorization': `Bearer ${token}` }
         })
-      ]);
+      ];
+      
+      // Cargar actividad solo si puede gestionar
+      if (canManage) {
+        requests.push(
+          fetch(`${API_URL}/api/finanzas/companies/${company.id}/activity?limit=20`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          })
+        );
+      }
+      
+      const responses = await Promise.all(requests);
 
-      if (collabRes.ok) {
-        const data = await collabRes.json();
+      if (responses[0].ok) {
+        const data = await responses[0].json();
         setCollaborators(data.collaborators || []);
       }
 
-      if (invitationsRes.ok) {
-        const data = await invitationsRes.json();
+      if (responses[1].ok) {
+        const data = await responses[1].json();
         setInvitations(data.invitations || []);
+      }
+      
+      if (canManage && responses[2]?.ok) {
+        const data = await responses[2].json();
+        setActivities(data.activities || []);
       }
     } catch (err) {
       console.error('Error loading collaborators:', err);
@@ -675,7 +693,7 @@ const CollaboratorsTab = ({ company, token, canManage }) => {
     } finally {
       setLoading(false);
     }
-  }, [company?.id, token]);
+  }, [company?.id, token, canManage]);
 
   useEffect(() => {
     loadData();

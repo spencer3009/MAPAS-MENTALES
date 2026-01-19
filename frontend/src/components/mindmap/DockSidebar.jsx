@@ -84,13 +84,13 @@ const DockSidebar = ({
       label: 'Finanzas',
       onClick: onOpenFinanzas,
     },
-    // Colaboradores - visible solo si hay empresa activa
-    ...(activeCompany ? [{
+    // Colaboradores - siempre visible, la vista maneja el estado sin empresa
+    {
       id: 'collaborators',
       icon: UserCog,
       label: 'Colaboradores',
-      onClick: openCollaboratorsModal,
-    }] : []),
+      onClick: onOpenCollaborators,
+    },
     {
       id: 'favorites',
       icon: Star,

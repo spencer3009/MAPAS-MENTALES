@@ -1614,21 +1614,23 @@ const MindMapApp = (props) => {
   }, []);
   
   return (
-    <TimeTrackingProvider>
-      <NotificationProvider 
-        token={token}
-        onNavigateToReminders={handleNavigateToReminders}
-      >
-        <MindMapAppInner 
-          {...props} 
+    <CompanyProvider token={token}>
+      <TimeTrackingProvider>
+        <NotificationProvider 
+          token={token}
           onNavigateToReminders={handleNavigateToReminders}
-          forceView={activeViewForNav}
-          clearForceView={() => setActiveViewForNav(null)}
-          pendingPlanId={props.pendingPlanId}
-          onClearPendingPlan={props.onClearPendingPlan}
-        />
-      </NotificationProvider>
-    </TimeTrackingProvider>
+        >
+          <MindMapAppInner 
+            {...props} 
+            onNavigateToReminders={handleNavigateToReminders}
+            forceView={activeViewForNav}
+            clearForceView={() => setActiveViewForNav(null)}
+            pendingPlanId={props.pendingPlanId}
+            onClearPendingPlan={props.onClearPendingPlan}
+          />
+        </NotificationProvider>
+      </TimeTrackingProvider>
+    </CompanyProvider>
   );
 };
 

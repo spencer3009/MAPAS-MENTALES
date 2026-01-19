@@ -171,6 +171,8 @@ const FinanzasModule = ({ token, projects = [] }) => {
   const [showInvestmentModal, setShowInvestmentModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [editingCompany, setEditingCompany] = useState(null); // Para editar empresa
+  const [showCollaborators, setShowCollaborators] = useState(false); // Para gestionar colaboradores
+  const [userCompanyRole, setUserCompanyRole] = useState(null); // Rol del usuario en la empresa
   
   const { fetchWithAuth } = useFinanzas(token);
 

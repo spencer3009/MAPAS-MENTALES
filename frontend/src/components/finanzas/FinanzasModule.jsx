@@ -1038,6 +1038,16 @@ const FinanzasModule = ({ token, projects = [] }) => {
           company={editingCompany}
         />
       )}
+
+      {/* Modal de Colaboradores */}
+      {showCollaborators && selectedCompany && (
+        <CollaboratorsManager
+          company={selectedCompany}
+          token={token}
+          onClose={() => setShowCollaborators(false)}
+          userRole={selectedCompany?.user_role || 'owner'}
+        />
+      )}
     </div>
   );
 };

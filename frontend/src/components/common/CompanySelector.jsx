@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Building2, ChevronDown, Plus, Pencil, X, AlertTriangle, Trash2, Loader2 } from 'lucide-react';
+import { Building2, ChevronDown, Plus, Pencil, X, AlertTriangle, Trash2, Loader2, Settings, Users } from 'lucide-react';
 import { useCompany } from '../../contexts/CompanyContext';
 
 /**
@@ -8,16 +8,20 @@ import { useCompany } from '../../contexts/CompanyContext';
  * Props:
  * - showCreateButton: boolean - Mostrar botón de crear empresa
  * - showEditButton: boolean - Mostrar botón de editar empresa
+ * - showSettingsButton: boolean - Mostrar botón de configuración/colaboradores
  * - onCreateClick: function - Callback cuando se hace clic en crear
  * - onEditClick: function - Callback cuando se hace clic en editar
+ * - onSettingsClick: function - Callback cuando se hace clic en configuración
  * - compact: boolean - Modo compacto (solo icono y nombre)
  * - className: string - Clases adicionales
  */
 const CompanySelector = ({ 
   showCreateButton = true, 
   showEditButton = true,
+  showSettingsButton = false,
   onCreateClick,
   onEditClick,
+  onSettingsClick,
   compact = false,
   className = ''
 }) => {

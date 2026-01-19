@@ -967,6 +967,12 @@ const ContactsPage = () => {
       return;
     }
     
+    // Verificar que hay empresa activa
+    if (!activeCompany) {
+      alert('Debes seleccionar una empresa primero');
+      return;
+    }
+    
     if (!validateForm()) return;
     
     setSaving(true);
@@ -977,12 +983,13 @@ const ContactsPage = () => {
       
       const method = editingContact ? 'PUT' : 'POST';
       
-      // Para crear nuevo contacto, incluir workspace_id si no es contexto personal
+      // Para crear nuevo contacto, incluir company_id y opcionalmente workspace_id
       const body = editingContact 
         ? formData 
         : { 
             ...formData, 
             contact_type: activeTab,
+            company_id: activeCompany.id,
             workspace_id: currentContext !== 'personal' ? currentContext : null
           };
       

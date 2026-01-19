@@ -369,56 +369,13 @@ const FinanzasModule = ({ token, projects = [] }) => {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">Finanzas</h1>
-                <p className="text-sm text-gray-500">Control financiero para tu negocio</p>
+                <p className="text-sm text-gray-500">
+                  {selectedCompany?.name || 'Selecciona una empresa'}
+                </p>
               </div>
             </div>
             
             <div className="flex items-center gap-3 flex-wrap">
-              {/* Selector de empresa */}
-              <div className="relative">
-                <select
-                  value={selectedCompany?.id || ''}
-                  onChange={(e) => {
-                    const company = companies.find(c => c.id === e.target.value);
-                    selectCompany(company);
-                  }}
-                  className="appearance-none pl-10 pr-8 py-2 border border-gray-300 rounded-lg text-sm font-medium bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 cursor-pointer min-w-[180px]"
-                >
-                  {companies.map((company) => (
-                    <option key={company.id} value={company.id}>
-                      {company.name}
-                    </option>
-                  ))}
-                </select>
-                <Building2 size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <ChevronDown size={16} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-              </div>
-              
-              <button
-                onClick={() => setEditingCompany(selectedCompany)}
-                className="p-2 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                title="Editar empresa"
-              >
-                <Pencil size={18} />
-              </button>
-              
-              {/* Botón colaboradores */}
-              <button
-                onClick={() => setShowCollaborators(true)}
-                className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-                title="Colaboradores y configuración"
-              >
-                <Users size={18} />
-              </button>
-              
-              <button
-                onClick={() => setShowCompanyModal(true)}
-                className="p-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
-                title="Nueva empresa"
-              >
-                <Plus size={20} />
-              </button>
-              
               {/* Selector de periodo */}
               <input
                 type="month"
@@ -434,6 +391,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
               <button
                 onClick={loadData}
                 className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Recargar datos"
               >
                 <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
               </button>

@@ -378,6 +378,13 @@
 
 ## Upcoming Tasks
 
+### P1 - Finanzas Module (Phase 3 & 4)
+- Implementar secciones "Por Cobrar" y "Por Pagar" con flujos mejorados
+- Implementar roles "Empresario" y "Administrativo" con permisos diferenciados
+
+### P1 - Verificar feature "Proyecto Vinculado"
+- Usar testing agent para verificar el flujo end-to-end de nodos tipo "Proyecto"
+
 ### P1 - Account Blocking after 7 Days
 - Backend logic para bloquear cuentas no verificadas
 
@@ -385,6 +392,9 @@
 - Añadir exportación PDF/CSV para contactos
 
 ## Future/Backlog Tasks
+
+### P2 - Finanzas Module (IA)
+- Análisis financiero con IA para proyecciones y recomendaciones
 
 ### P2 - Admin Audit Log UI
 - Interfaz dedicada para ver historial de cambios de plan

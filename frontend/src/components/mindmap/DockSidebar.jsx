@@ -135,6 +135,26 @@ const DockSidebar = ({
           ${isExpanded ? 'w-52' : 'w-16'}
         `}
       >
+        {/* Company Selector - Global */}
+        <div className={`
+          px-2 py-3 border-b border-slate-700/50
+          transition-all duration-300
+          ${isExpanded ? 'opacity-100' : 'opacity-0 h-0 py-0 overflow-hidden'}
+        `}>
+          {isExpanded && token && (
+            <GlobalCompanySelector token={token} />
+          )}
+        </div>
+
+        {/* Collapsed company icon */}
+        {!isExpanded && (
+          <div className="px-3 py-3 border-b border-slate-700/50">
+            <div className="w-10 h-10 bg-slate-700/50 rounded-lg flex items-center justify-center">
+              <Building2 size={20} className="text-emerald-400" />
+            </div>
+          </div>
+        )}
+
         {/* Menu Items */}
         <nav className="flex-1 py-4 px-2 space-y-1">
           {menuItems.map((item) => {

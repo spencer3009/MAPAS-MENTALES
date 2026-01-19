@@ -2,6 +2,27 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-19: ARQUITECTURA — "Empresa como Contexto Operativo" ✅ COMPLETADO
+- **Estado**: Arquitectura dual implementada (Empresa para operaciones, Usuario para mente)
+- **Concepto implementado**:
+  - **Empresa = Contexto Operativo**: Finanzas, Contactos, Tableros requieren empresa activa
+  - **Usuario = Contexto Mental**: Mapas Mentales, Recordatorios siguen siendo personales
+- **Componentes creados**:
+  - `CompanyContext.jsx`: Context global para gestión de empresas
+  - `CompanySelector.jsx`: Selector reutilizable con create/edit
+  - `CompanyRequiredWrapper.jsx`: Wrapper para estado vacío
+  - `CompanyModal.jsx`: Modal crear/editar empresa
+- **Módulos actualizados**:
+  - **Finanzas**: Ya tenía company_id, se integró con CompanyContext
+  - **Contactos**: Agregado company_id obligatorio, selector de empresa en header
+  - **Tableros**: Agregado company_id obligatorio, selector de empresa en header
+- **Backend actualizado**:
+  - Endpoints de contactos ahora filtran por `company_id`
+  - Endpoints de tableros ahora filtran por `company_id`
+  - Endpoint de búsqueda de contactos (`/contacts/search`) filtra por empresa
+  - Endpoint de migración (`/migration/create-default-company`)
+- **Regla base**: Los datos NO se mezclan entre empresas
+
 ### 2026-01-19: FEATURE — Módulo de Finanzas con Soporte Multi-Empresa ✅ COMPLETADO
 - **Estado**: Módulo de Finanzas ahora requiere y soporta múltiples empresas
 - **Funcionalidades de Empresas implementadas**:

@@ -415,15 +415,21 @@
 ```
 /app/
 ├── backend/
-│   └── server.py        # Main backend with all endpoints
+│   ├── server.py           # Main backend with all endpoints
+│   └── finanzas_service.py # Finanzas module service (models, helpers)
 ├── frontend/
 │   └── src/
 │       ├── components/
 │       │   ├── admin/
 │       │   │   ├── AdminPanel.jsx      # Main admin container
 │       │   │   └── UsersManagement.jsx # Advanced user management
+│       │   ├── finanzas/
+│       │   │   └── FinanzasModule.jsx  # Financial management module
 │       │   ├── mindmap/
 │       │   │   ├── Canvas.jsx
+│       │   │   ├── DockSidebar.jsx     # Desktop navigation (includes Finanzas)
+│       │   │   ├── MobileNavigation.jsx # Mobile navigation (includes Finanzas)
+│       │   │   ├── MindMapApp.jsx      # Main app (handles Finanzas view)
 │       │   │   ├── NodeItem.jsx
 │       │   │   └── NavigationModeButton.jsx
 │       │   └── whatsapp/

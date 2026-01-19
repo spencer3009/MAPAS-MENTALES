@@ -148,7 +148,11 @@ const FinanzasModule = ({ token, projects = [] }) => {
     companies, 
     activeCompany: selectedCompany, 
     loading: loadingCompanies,
-    refreshCompanies
+    refreshCompanies,
+    selectCompany,
+    createCompany,
+    updateCompany,
+    deleteCompany
   } = useCompany();
   
   const [activeTab, setActiveTab] = useState('summary');

@@ -2,32 +2,33 @@
 The user's initial goal was to fix UI bugs and implement WhatsApp reminders. The scope expanded significantly to include several major features and architectural changes:
 1.  **WhatsApp Reminders & UI Fixes:** The initial tasks which led to deeper debugging and new feature requests.
 2.  **Linked Project Nodes:** A feature to link a mind map node to another entire mind map.
-3.  **Finance Module:** A comprehensive module for financial tracking (income, expenses, etc.).
-4.  **Contact Autocomplete:** An intelligent search field within the Finance module to link transactions to contacts.
-5.  **Empresa como Contexto Operativo (Company as Operative Context):** A major architectural refactor to make a Company entity the mandatory container for all operational data, including Finances, Contacts, and Boards (projects).
-6.  **Safe Company Deletion:** A feature to allow admins to safely delete a company and all its associated data, including a confirmation modal with a risk zone.
+3.  **Finance Module:** A comprehensive module for financial tracking.
+4.  **Empresa como Contexto Operativo (Company as Operative Context):** A major architectural refactor to make a Company entity the mandatory container for all operational data.
+5.  **Safe Company Deletion:** A feature to allow admins to safely delete a company and all its associated data.
+6.  **Collaborator Management:** A system to invite users to a company with specific roles and permissions.
+7.  **Global Company Management UI:** A refactor to move company management out of individual modules and into a centralized, global UI component.
+8.  **Recent Activity Log:** A timeline of actions performed by users within a company context.
 
 **User's preferred language**: Spanish
 
 **what currently exists?**
-The application is a full-stack mind mapping tool with a newly integrated operational layer centered around a Company concept.
-- **Company Context:** The modules for Finances, Contacts, and Boards are now fully dependent on a selected Company. The UI enforces company selection and presents an empty state if no company is created. A global  and a reusable  component manage this across the app.
-- **Finance Module:** A feature-rich module to manage incomes, expenses, investments, etc., on a per-company basis. It includes CRUD operations for companies, transactions, and a contact autocomplete for linking clients/providers.
-- **Backend:** All relevant models (contacts, boards, finance items) and API endpoints have been updated to include and filter by . A backend endpoint for securely deleting a company and all its cascaded data has been created.
-- **Frontend:** The UI for the Delete Company flow has been implemented. This includes a Zona de Riesgo (Risk Zone) in the edit company modal and a confirmation modal that requires the user to type the company's name before deletion.
-- **Blockers:** The WhatsApp feature remains non-functional due to a user-side Twilio template approval issue, and the production frontend deployment pipeline is broken (platform issue).
+The application is a full-stack mind mapping tool with a robust, company-centric operational layer.
+- **Global Company Management:** All company-related actions (selection, creation, editing, deletion, collaborator management, and activity viewing) are now centralized in a  component located in the main sidebar. This component uses a global  to manage state across the entire application.
+- **Refactored Modules:** The  has been significantly simplified, removing all local company management UI and logic. It now relies entirely on the global context and selector for company data.
+- **Collaborator System:** A full-featured collaborator system has been implemented. Owners/Admins can invite users via email, assign roles (Administrador, Colaborador Operativo), and manage members from a dedicated Colaboradores tab within the global Configuración de Empresa modal.
+- **Activity Log:** A Actividad reciente (Recent Activity) section has been added to the Colaboradores tab, providing a timeline of key actions (e.g., creating income/expenses) performed by company members.
+- **Backend:** The backend has been expanded with new services (, ) and corresponding API endpoints. Access control logic () has been updated to correctly handle collaborator permissions.
 
 **Last working item**:
--   **Last item agent was working:** Implementing the Delete Company feature. The agent added the backend logic to cascade-delete all data associated with a company and implemented the frontend Risk Zone and a confirmation modal () to ensure safe deletion.
--   **Status:** IN PROGRESS
--   **Agent Testing Done:** N
--   **Which testing method agent to use?** Frontend testing agent. The test requires a multi-step UI interaction: navigating to the edit modal, clicking the delete button in the risk zone, typing the company name in the confirmation modal, and verifying the deletion and UI update.
+-   **Last item agent was working:** Implementing the Actividad reciente (Recent Activity) feature. The agent added the backend services to log key actions and integrated a new UI section within the Configuración de Empresa modal to display a timeline of these activities.
+-   **Status:** USER VERIFICATION PENDING
+-   **Agent Testing Done:** Y
+-   **Which testing method agent to use?** NA
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
 -   **Issue 1: WhatsApp Message Template Not Approved (P0 - BLOCKER)**
 -   **Issue 2: Production Frontend Deployment Pipeline is Broken (P0 - BLOCKER)**
--   **Issue 3: Incorrect Financial Health Indicator (P2 - Minor Bug)**
 
 **Issues Detail:**
 -   **Issue 1: WhatsApp Message Template Not Approved**
@@ -48,28 +49,8 @@ The application is a full-stack mind mapping tool with a newly integrated operat
     -   **Should Test frontend/backend/both after fix?** N/A
     -   **Blocked on other issue:** None.
 
--   **Issue 3: Incorrect Financial Health Indicator**
-    -   **Attempted fixes:** None.
-    -   **Next debug checklist:** In , review the logic that calculates . It currently returns Crítico for a new company with S/ 0 income and S/ 0 expenses. Adjust the logic to return Saludable or a neutral status in this case.
-    -   **Why fix this issue and what will be achieved with the fix?** Provides a more accurate and less alarming financial summary for new or inactive companies.
-    -   **Status:** NOT STARTED
-    -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** Frontend.
-    -   **Blocked on other issue:** None.
-
 **In progress Task List**:
--   **Task 1: Test and Finalize Delete Company Feature (P0)**
-    -   **Where to resume:** The implementation is complete. The next step is to perform an end-to-end test using the  or screenshot tool.
-        1.  Log in and navigate to the Finanzas module.
-        2.  Click the pencil icon (✏️) next to the company selector to open the Editar Empresa modal.
-        3.  Scroll to the Zona de Riesgo and click the Eliminar Empresa button.
-        4.  In the confirmation modal, type the exact company name into the input field.
-        5.  Click the Eliminar permanentemente button.
-        6.  Verify that the company is removed and the UI updates correctly (e.g., switches to another company or shows the create company screen).
-    -   **What will be achieved with this?** This will complete a critical data management feature and ensure its safety and reliability.
-    -   **Status:** IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?** Both.
-    -   **Blocked on something:** None.
+(None)
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks:**
@@ -79,26 +60,21 @@ The application is a full-stack mind mapping tool with a newly integrated operat
     *   **P1 - Finance Module (Phase 4):** Implement the Inversiones section UI and logic.
     *   **P1 - Optional Company Link for Mind Maps:** Add an optional Empresa relacionada field to mind map nodes.
 *   **Future Tasks:**
-    *   **P2 - Finance Module Roles:** Implement Empresario and Administrativo roles.
-    *   **P2 - Finance Module IA:** Implement AI-driven financial analysis.
     *   **P2 - Account blocking after 7 days.**
     *   **P2 - Export Reports:** Add PDF/CSV export for contacts.
     *   **P2 - Add more Map Editor Settings.**
-    *   **P2 - Admin Audit Log UI.**
+    *   **P2 - Finance Module IA:** Implement AI-driven financial analysis.
 
 **Completed work in this session**
-- **Feature:** Implemented the full architectural refactor for **Empresa como Contexto Operativo**. This included creating a global , a reusable , and modifying the Finanzas, Contactos, and Tableros modules to be company-dependent with appropriate empty states. (DONE)
-- **Feature:** Implemented full CRUD functionality for **Companies**, including create and edit modals. (DONE)
-- **Feature:** Built and integrated the frontend for the **Finance Module**, connecting it to the backend and adding navigation links. (DONE)
-- **Feature:** Created and integrated a reusable **Contact Autocomplete** component into the Finance modals for linking clients and providers. (DONE)
-- **Bug Fix:** Resolved an issue where the Crear Empresa button was unresponsive, adding improved error handling and loading states. (DONE)
+- **Refactor (Major):** Centralized all company management into a global selector in the main sidebar (), based on user feedback. This includes UI for creation, selection, editing, configuration, and deletion.
+- **Refactor (Major):** Simplified the  by removing all local company management logic and making it fully reliant on the new global .
+- **Feature:** Completed and tested the **Collaborator System**, integrated as a tab within the new global Configuración de Empresa modal.
+- **Feature:** Implemented and tested the **Recent Activity log**, integrated within the Collaborators tab, to show a timeline of user actions.
+- **Feature:** Completed and tested the **Delete Company** flow, ensuring the Zona de Riesgo and confirmation modal are functional within the new global management UI.
+- **Bug Fix:** Corrected the logic for the **financial health indicator**, ensuring new companies correctly display a Saludable (good) status instead of Crítico.
 
 **Earlier issues found/mentioned but not fixed**
--   **Issue 1: Incorrect Financial Health Indicator**
-    -   **Debug checklist:** Check the  calculation logic in .
-    -   **Why to solve this issue and what will be achieved with this?** To provide a more accurate financial summary for new companies.
-    -   **Should Test frontend/backend/both after fix:** Frontend.
-    -   **Is recurring issue?** N
+(None)
 
 **Known issue recurrence from previous fork**
 -   **Issue recurrence in previous fork:** WhatsApp reminder approval and production frontend deployment pipeline.
@@ -109,38 +85,34 @@ The application is a full-stack mind mapping tool with a newly integrated operat
 
 
 **Key Technical Concepts**
-- **Global State Management (React Context):** Using  to provide company data across different modules.
-- **Component Reusability:** Building  and  for use across multiple pages.
-- **Conditional Rendering & Empty States:** Showing purpose-built UI to guide users when no company is created or selected.
-- **Backend Data Scoping:** Modifying all operational API endpoints to require and filter by .
-- **Cascading Deletes:** Implementing a backend endpoint that safely deletes a parent entity (Company) and all its child data across multiple database collections.
-- **Safe Deletion UI/UX:** Using a risk zone and a confirmation modal requiring user input (typing the entity name) to prevent accidental data loss.
+- **Architectural Refactoring:** Centralizing a core feature (Company Management) from a module-specific implementation into a global, context-driven component based on user feedback.
+- **Global State Management (React Context):** Using  to provide company data and management functions (create, update, delete, select) across the entire application.
+- **Backend Activity Logging:** Creating a dedicated service () to asynchronously record user actions for auditing purposes.
+- **Role-Based Access Control (RBAC):** Implementing different user roles (Propietario, Administrador, Colaborador Operativo) with distinct permissions handled in the backend ().
+- **Component Composition & Refactoring:** Replacing module-specific UI with a single, reusable global component to enforce a single source of truth for UI and logic.
+- **Tabbed Modals:** Using tabs within the  to organize complex settings (General, Colaboradores, Actividad) into a clean, user-friendly interface.
 
 **key DB schema**
 -   **finanzas_companies**: 
--   **incomes**: 
--   **expenses**: 
--   **investments**: 
--   **contacts**: 
--   **boards**: 
+-   **company_collaborators**: 
+-   **company_activities**: 
+-   **incomes, expenses, investments, contacts, boards**: All contain a  field.
 
 **All files of reference**
--    (Main server with all API logic)
+-    (New source of truth for all company UI)
 -    (Global state for companies)
--    (UI for managing companies)
--    (Finance module UI)
--    (Contacts module UI)
--    (Boards module UI)
--    (Product Requirements Document)
+-    (Main server with all API logic)
+-    (Collaborator logic)
+-    (Activity logging logic)
+-    (Example of a refactored module)
+-   
 
 **Areas that need refactoring**:
-- The  file has grown large as it now contains the logic and JSX for , , and . Consider splitting these into separate, more focused component files.
-- The  is also very large. The modals (, ) could be extracted into their own files within .
+-   **Backend Routes:** The  file has grown to over 9800 lines and contains logic for many different features. It should be broken down into smaller, domain-specific router files (e.g., , , ) and included in the main  file to improve maintainability.
 
 **key api endpoints**
--    (Create Company)
--    (Update Company)
--    (Delete Company and all associated data)
+-    (Returns companies user owns or is a collaborator in, with role info)
+-    (Deletes a company, requires confirmation in the request body)
 -   
 -   
 -   
@@ -148,42 +120,43 @@ The application is a full-stack mind mapping tool with a newly integrated operat
 
 **Critical Info for New Agent**
 -   **You MUST communicate with the user in Spanish.**
--   The application's architecture is now centered around the **Company** entity. All operational modules (Finanzas, Contactos, Tableros) require a company to be selected. Your primary task is to **test the Delete Company feature.**
--   Remind the user about the two major blockers (**unapproved Twilio template** and **broken production frontend deployment**) if they bring them up, but do not attempt to fix them as they are external issues.
--   After verifying the delete feature, prioritize testing the **Linked Project node feature**, which is a long-pending task.
+-   The user drove a major architectural refactor. All company management is now handled globally via the  component in the main sidebar. Do not add or modify company management features within individual modules like .
+-   The last features implemented were the **Collaborator Management System** and the **Recent Activity Log**. Both are integrated into the global Configuración de Empresa modal. Your first action should be to present these completed features to the user for verification.
+-   Do not attempt to fix the two long-standing blockers (WhatsApp and Production Deployment) as they depend on external actions from the user or the platform support team.
 
 **documents and test reports created in this job**
+-   
 -   
 -    (Continuously updated)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **Request (New Feature):** User requested the ability to delete a company, with safety measures like a confirmation modal and a risk zone.
-2.  **Request (Major Refactor):** User provided a detailed document outlining a new architecture where Company is the central context for operational modules (Finances, Contacts, Boards).
-3.  **Approval:** User approved the proposed plan to implement the major architectural refactor.
-4.  **Request (New Feature):** User asked how to edit a company's details after creation.
-5.  **Bug Report:** User reported that the Create Company button was not working.
-6.  **Request (New Feature):** User initiated the architectural shift by requesting that the Finance module be associated with a Company entity.
-7.  **Request (New Feature):** User provided detailed requirements for a smart autocomplete field to search and select contacts.
-8.  **Clarification:** User asked about a warning message regarding the preview environment being deleted and how to save their project.
-9.  **Clarification:** User followed up, asking for confirmation if their preview project will be deleted.
-10. **Feedback:** User provided a screenshot of the preview environment deletion warning message.
+1.  **Request:** Add a Collaborators feature with roles for company management.
+2.  **Approval:** Confirmed the implementation plan for the Collaborators feature.
+3.  **Question:** Asked where the Delete Company button was located.
+4.  **Feedback:** Reported not being able to see the Zona de Riesgo for deletion.
+5.  **Request (Major Refactor):** Stated that company management logic should be global and not isolated within the Finance module.
+6.  **Approval:** Approved the plan to refactor company management into a global component.
+7.  **Request:** Asked to place the Collaborators management UI inside the (now global) Company Configuration modal.
+8.  **Approval:** Confirmed the new tabbed UI for collaborator management.
+9.  **Request:** Asked for a Recent Activity log to be added within the company configuration UI.
+10. **Approval:** Confirmed the implementation plan for the Recent Activity feature.
 
 **Project Health Check:**
 -   **Blocked:**
     -   WhatsApp Reminder Feature (awaiting user action in Twilio).
     -   Production Frontend Deployments (platform issue).
--   **In Progress:**
-    -   Delete Company feature (implementation done, testing pending).
--   **Needs Verification:**
-    -   Linked Project Node Feature.
+-   **User Verification Pending:**
+    -   Collaborator Management System.
+    -   Recent Activity Log.
+    -   Global Company Selector refactor.
 
 **3rd Party Integrations**
 -   **Twilio:** For WhatsApp messages. The integration code is complete but is **blocked** pending user approval of a Message Template in the Twilio console.
 
 **Testing status**
--   **Testing agent used after significant changes:** YES (for the initial Finance Module implementation).
+-   **Testing agent used after significant changes:** YES
 -   **Troubleshoot agent used after agent stuck in loop:** NO
--   **Test files created:** []
+-   **Test files created:** [, ]
 -   **Known regressions:** None
 
 **Credentials to test flow:**
@@ -191,5 +164,4 @@ The application is a full-stack mind mapping tool with a newly integrated operat
 -   **Password:** 
 
 **What agent forgot to execute**
-- The agent implemented the Delete Company feature but did not perform any testing (curl or screenshot) to verify its functionality.
-- The agent identified a minor UI bug with the financial health indicator showing Crítico for new companies but did not log it as a formal issue or attempt a fix.</analysis>
+- The agent successfully completed all user requests, including a significant, user-driven architectural refactor mid-session. However, it did not create a follow-up task to address the growing complexity of , which is a technical debt that should be addressed.</analysis>

@@ -8116,6 +8116,692 @@ async def whatsapp_get_conversations(current_user: dict = Depends(get_current_us
     return {"conversations": conversations}
 
 
+# ==========================================
+# MÓDULO FINANZAS - APIs
+# ==========================================
+
+# Helper para obtener o crear workspace del usuario
+async def get_user_workspace_id(username: str) -> str:
+    """Obtiene el workspace_id del usuario, creándolo si no existe"""
+    workspace = await db.workspaces.find_one({"owner_username": username}, {"_id": 0})
+    if workspace:
+        return workspace.get("id")
+    
+    # Crear workspace personal si no existe
+    workspace_id = str(uuid.uuid4())
+    new_workspace = {
+        "id": workspace_id,
+        "name": f"Empresa de {username}",
+        "owner_username": username,
+        "created_at": get_current_timestamp(),
+        "type": "personal"
+    }
+    await db.workspaces.insert_one(new_workspace)
+    return workspace_id
+
+# ==========================================
+# INGRESOS (Incomes)
+# ==========================================
+
+@api_router.get("/finanzas/incomes", response_model=List[IncomeResponse])
+async def get_incomes(
+    status: Optional[str] = None,
+    project_id: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener lista de ingresos con filtros opcionales"""
+    workspace_id = await get_user_workspace_id(current_user["username"])
+    
+    query = {"workspace_id": workspace_id}
+    
+    if status:
+        query["status"] = status
+    if project_id:
+        query["project_id"] = project_id
+    if start_date:
+        query["date"] = {"$gte": start_date}
+    if end_date:
+        if "date" in query:
+            query["date"]["$lte"] = end_date
+        else:
+            query["date"] = {"$lte": end_date}
+    
+    incomes = await db.finanzas_incomes.find(query, {"_id": 0}).sort("date", -1).to_list(500)
+    return incomes
+
+@api_router.post("/finanzas/incomes", response_model=IncomeResponse)
+async def create_income(
+    income_data: IncomeCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Crear un nuevo ingreso"""
+    workspace_id = await get_user_workspace_id(current_user["username"])
+    now = get_current_timestamp()
+    
+    income = {
+        "id": generate_id(),
+        "workspace_id": workspace_id,
+        "username": current_user["username"],
+        **income_data.model_dump(),
+        "created_at": now,
+        "updated_at": now
+    }
+    
+    await db.finanzas_incomes.insert_one(income)
+    del income["_id"] if "_id" in income else None
+    return income
+
+@api_router.get("/finanzas/incomes/{income_id}", response_model=IncomeResponse)
+async def get_income(
+    income_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener un ingreso específico"""
+    workspace_id = await get_user_workspace_id(current_user["username"])
+    
+    income = await db.finanzas_incomes.find_one(
+        {"id": income_id, "workspace_id": workspace_id},
+        {"_id": 0}
+    )
+    
+    if not income:
+        raise HTTPException(status_code=404, detail="Ingreso no encontrado")
+    
+    return income
+
+@api_router.put("/finanzas/incomes/{income_id}", response_model=IncomeResponse)
+async def update_income(
+    income_id: str,
+    income_data: IncomeUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Actualizar un ingreso"""
+    workspace_id = await get_user_workspace_id(current_user["username"])
+    
+    update_dict = {k: v for k, v in income_data.model_dump().items() if v is not None}
+    update_dict["updated_at"] = get_current_timestamp()
+    
+    result = await db.finanzas_incomes.find_one_and_update(
+        {"id": income_id, "workspace_id": workspace_id},
+        {"$set": update_dict},
+        return_document=True
+    )
+    
+    if not result:
+        raise HTTPException(status_code=404, detail="Ingreso no encontrado")
+    
+    del result["_id"] if "_id" in result else None
+    return result
+
+@api_router.delete("/finanzas/incomes/{income_id}")
+async def delete_income(
+    income_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Eliminar un ingreso"""
+    workspace_id = await get_user_workspace_id(current_user["username"])
+    
+    result = await db.finanzas_incomes.delete_one(
+        {"id": income_id, "workspace_id": workspace_id}
+    )
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Ingreso no encontrado")
+    
+    return {"message": "Ingreso eliminado correctamente"}
+
+# ==========================================
+# GASTOS (Expenses)
+# ==========================================
+
+@api_router.get("/finanzas/expenses", response_model=List[ExpenseResponse])
+async def get_expenses(
+    status: Optional[str] = None,
+    category: Optional[str] = None,
+    project_id: Optional[str] = None,
+    priority: Optional[str] = None,
+    is_recurring: Optional[bool] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener lista de gastos con filtros opcionales"""
+    workspace_id = await get_user_workspace_id(current_user["username"])
+    
+    query = {"workspace_id": workspace_id}
+    
+    if status:
+        query["status"] = status
+    if category:
+        query["category"] = category
+    if project_id:
+        query["project_id"] = project_id
+    if priority:
+        query["priority"] = priority
+    if is_recurring is not None:
+        query["is_recurring"] = is_recurring
+    if start_date:
+        query["date"] = {"$gte": start_date}
+    if end_date:
+        if "date" in query:
+            query["date"]["$lte"] = end_date
+        else:
+            query["date"] = {"$lte": end_date}
+    
+    expenses = await db.finanzas_expenses.find(query, {"_id": 0}).sort("date", -1).to_list(500)
+    return expenses
+
+@api_router.post("/finanzas/expenses", response_model=ExpenseResponse)
+async def create_expense(
+    expense_data: ExpenseCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Crear un nuevo gasto"""
+    workspace_id = await get_user_workspace_id(current_user["username"])
+    now = get_current_timestamp()
+    
+    expense = {
+        "id": generate_id(),
+        "workspace_id": workspace_id,
+        "username": current_user["username"],
+        **expense_data.model_dump(),
+        "created_at": now,
+        "updated_at": now
+    }
+    
+    await db.finanzas_expenses.insert_one(expense)
+    del expense["_id"] if "_id" in expense else None
+    return expense
+
+@api_router.get("/finanzas/expenses/{expense_id}", response_model=ExpenseResponse)
+async def get_expense(
+    expense_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener un gasto específico"""
+    workspace_id = await get_user_workspace_id(current_user["username"])
+    
+    expense = await db.finanzas_expenses.find_one(
+        {"id": expense_id, "workspace_id": workspace_id},
+        {"_id": 0}
+    )
+    
+    if not expense:
+        raise HTTPException(status_code=404, detail="Gasto no encontrado")
+    
+    return expense
+
+@api_router.put("/finanzas/expenses/{expense_id}", response_model=ExpenseResponse)
+async def update_expense(
+    expense_id: str,
+    expense_data: ExpenseUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Actualizar un gasto"""
+    workspace_id = await get_user_workspace_id(current_user["username"])
+    
+    update_dict = {k: v for k, v in expense_data.model_dump().items() if v is not None}
+    update_dict["updated_at"] = get_current_timestamp()
+    
+    result = await db.finanzas_expenses.find_one_and_update(
+        {"id": expense_id, "workspace_id": workspace_id},
+        {"$set": update_dict},
+        return_document=True
+    )
+    
+    if not result:
+        raise HTTPException(status_code=404, detail="Gasto no encontrado")
+    
+    del result["_id"] if "_id" in result else None
+    return result
+
+@api_router.delete("/finanzas/expenses/{expense_id}")
+async def delete_expense(
+    expense_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Eliminar un gasto"""
+    workspace_id = await get_user_workspace_id(current_user["username"])
+    
+    result = await db.finanzas_expenses.delete_one(
+        {"id": expense_id, "workspace_id": workspace_id}
+    )
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Gasto no encontrado")
+    
+    return {"message": "Gasto eliminado correctamente"}
+
+@api_router.post("/finanzas/expenses/{expense_id}/duplicate", response_model=ExpenseResponse)
+async def duplicate_expense(
+    expense_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Duplicar un gasto (útil para gastos recurrentes)"""
+    workspace_id = await get_user_workspace_id(current_user["username"])
+    
+    original = await db.finanzas_expenses.find_one(
+        {"id": expense_id, "workspace_id": workspace_id},
+        {"_id": 0}
+    )
+    
+    if not original:
+        raise HTTPException(status_code=404, detail="Gasto no encontrado")
+    
+    now = get_current_timestamp()
+    new_expense = {
+        **original,
+        "id": generate_id(),
+        "date": now[:10],  # Fecha de hoy
+        "status": "pending",  # Reset a pendiente
+        "created_at": now,
+        "updated_at": now
+    }
+    
+    await db.finanzas_expenses.insert_one(new_expense)
+    del new_expense["_id"] if "_id" in new_expense else None
+    return new_expense
+
+# ==========================================
+# INVERSIONES (Investments)
+# ==========================================
+
+@api_router.get("/finanzas/investments", response_model=List[InvestmentResponse])
+async def get_investments(
+    status: Optional[str] = None,
+    project_id: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener lista de inversiones con filtros opcionales"""
+    workspace_id = await get_user_workspace_id(current_user["username"])
+    
+    query = {"workspace_id": workspace_id}
+    
+    if status:
+        query["status"] = status
+    if project_id:
+        query["project_id"] = project_id
+    if start_date:
+        query["date"] = {"$gte": start_date}
+    if end_date:
+        if "date" in query:
+            query["date"]["$lte"] = end_date
+        else:
+            query["date"] = {"$lte": end_date}
+    
+    investments = await db.finanzas_investments.find(query, {"_id": 0}).sort("date", -1).to_list(500)
+    return investments
+
+@api_router.post("/finanzas/investments", response_model=InvestmentResponse)
+async def create_investment(
+    investment_data: InvestmentCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Crear una nueva inversión"""
+    workspace_id = await get_user_workspace_id(current_user["username"])
+    now = get_current_timestamp()
+    
+    investment = {
+        "id": generate_id(),
+        "workspace_id": workspace_id,
+        "username": current_user["username"],
+        **investment_data.model_dump(),
+        "created_at": now,
+        "updated_at": now
+    }
+    
+    await db.finanzas_investments.insert_one(investment)
+    del investment["_id"] if "_id" in investment else None
+    return investment
+
+@api_router.get("/finanzas/investments/{investment_id}", response_model=InvestmentResponse)
+async def get_investment(
+    investment_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener una inversión específica"""
+    workspace_id = await get_user_workspace_id(current_user["username"])
+    
+    investment = await db.finanzas_investments.find_one(
+        {"id": investment_id, "workspace_id": workspace_id},
+        {"_id": 0}
+    )
+    
+    if not investment:
+        raise HTTPException(status_code=404, detail="Inversión no encontrada")
+    
+    return investment
+
+@api_router.put("/finanzas/investments/{investment_id}", response_model=InvestmentResponse)
+async def update_investment(
+    investment_id: str,
+    investment_data: InvestmentUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Actualizar una inversión"""
+    workspace_id = await get_user_workspace_id(current_user["username"])
+    
+    update_dict = {k: v for k, v in investment_data.model_dump().items() if v is not None}
+    update_dict["updated_at"] = get_current_timestamp()
+    
+    result = await db.finanzas_investments.find_one_and_update(
+        {"id": investment_id, "workspace_id": workspace_id},
+        {"$set": update_dict},
+        return_document=True
+    )
+    
+    if not result:
+        raise HTTPException(status_code=404, detail="Inversión no encontrada")
+    
+    del result["_id"] if "_id" in result else None
+    return result
+
+@api_router.delete("/finanzas/investments/{investment_id}")
+async def delete_investment(
+    investment_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Eliminar una inversión"""
+    workspace_id = await get_user_workspace_id(current_user["username"])
+    
+    result = await db.finanzas_investments.delete_one(
+        {"id": investment_id, "workspace_id": workspace_id}
+    )
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Inversión no encontrada")
+    
+    return {"message": "Inversión eliminada correctamente"}
+
+# ==========================================
+# CATEGORÍAS
+# ==========================================
+
+@api_router.get("/finanzas/categories")
+async def get_expense_categories(
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener categorías de gastos (predefinidas + personalizadas)"""
+    workspace_id = await get_user_workspace_id(current_user["username"])
+    
+    # Buscar categorías personalizadas del usuario
+    custom_categories = await db.finanzas_categories.find(
+        {"workspace_id": workspace_id, "type": "expense"},
+        {"_id": 0}
+    ).to_list(100)
+    
+    # Combinar con categorías predefinidas
+    default_cats = [
+        {**cat, "is_default": True, "type": "expense"} 
+        for cat in DEFAULT_EXPENSE_CATEGORIES
+    ]
+    custom_cats = [
+        {**cat, "is_default": False} 
+        for cat in custom_categories
+    ]
+    
+    return {"categories": default_cats + custom_cats}
+
+@api_router.post("/finanzas/categories")
+async def create_category(
+    category_data: CategoryCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Crear una categoría personalizada"""
+    workspace_id = await get_user_workspace_id(current_user["username"])
+    
+    category = {
+        "id": generate_id(),
+        "workspace_id": workspace_id,
+        "type": "expense",
+        **category_data.model_dump(),
+        "is_default": False,
+        "created_at": get_current_timestamp()
+    }
+    
+    await db.finanzas_categories.insert_one(category)
+    del category["_id"] if "_id" in category else None
+    return category
+
+@api_router.get("/finanzas/income-sources")
+async def get_income_sources(
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener fuentes de ingreso"""
+    workspace_id = await get_user_workspace_id(current_user["username"])
+    
+    # Buscar fuentes personalizadas
+    custom_sources = await db.finanzas_categories.find(
+        {"workspace_id": workspace_id, "type": "income"},
+        {"_id": 0}
+    ).to_list(100)
+    
+    default_sources = [
+        {**src, "is_default": True, "type": "income"} 
+        for src in DEFAULT_INCOME_SOURCES
+    ]
+    custom_src = [
+        {**src, "is_default": False} 
+        for src in custom_sources
+    ]
+    
+    return {"sources": default_sources + custom_src}
+
+# ==========================================
+# RESUMEN FINANCIERO
+# ==========================================
+
+@api_router.get("/finanzas/summary")
+async def get_financial_summary(
+    period: Optional[str] = None,  # "2026-01" formato año-mes
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Obtener resumen financiero del mes.
+    Si no se especifica periodo, usa el mes actual.
+    """
+    workspace_id = await get_user_workspace_id(current_user["username"])
+    
+    # Determinar periodo
+    if not period:
+        now = datetime.now(timezone.utc)
+        period = now.strftime("%Y-%m")
+    
+    # Construir rango de fechas
+    start_date = f"{period}-01"
+    year, month = int(period[:4]), int(period[5:])
+    if month == 12:
+        end_date = f"{year + 1}-01-01"
+    else:
+        end_date = f"{year}-{month + 1:02d}-01"
+    
+    date_filter = {"$gte": start_date, "$lt": end_date}
+    
+    # Obtener ingresos del periodo
+    incomes = await db.finanzas_incomes.find(
+        {"workspace_id": workspace_id, "date": date_filter},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    total_income = sum(i["amount"] for i in incomes)
+    income_collected = sum(i["amount"] for i in incomes if i.get("status") == "collected")
+    income_pending = sum(i["amount"] for i in incomes if i.get("status") == "pending")
+    
+    # Obtener gastos del periodo
+    expenses = await db.finanzas_expenses.find(
+        {"workspace_id": workspace_id, "date": date_filter},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    total_expenses = sum(e["amount"] for e in expenses)
+    expenses_paid = sum(e["amount"] for e in expenses if e.get("status") == "paid")
+    expenses_pending = sum(e["amount"] for e in expenses if e.get("status") == "pending")
+    
+    # Obtener inversiones del periodo
+    investments = await db.finanzas_investments.find(
+        {"workspace_id": workspace_id, "date": date_filter},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    total_investments = sum(inv["amount"] for inv in investments)
+    
+    # Calcular resultado neto y caja estimada
+    net_result = income_collected - expenses_paid
+    estimated_cash = income_collected - expenses_paid - total_investments
+    
+    # Determinar estado de salud financiera
+    health_status = calculate_health_status(income_collected, expenses_paid, expenses_pending)
+    
+    return {
+        "period": period,
+        "total_income": total_income,
+        "total_income_collected": income_collected,
+        "total_income_pending": income_pending,
+        "total_expenses": total_expenses,
+        "total_expenses_paid": expenses_paid,
+        "total_expenses_pending": expenses_pending,
+        "total_investments": total_investments,
+        "net_result": net_result,
+        "estimated_cash": estimated_cash,
+        "health_status": health_status,
+        "income_count": len(incomes),
+        "expense_count": len(expenses),
+        "investment_count": len(investments)
+    }
+
+@api_router.get("/finanzas/summary/by-project")
+async def get_project_financial_summaries(
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener resumen financiero agrupado por proyecto"""
+    workspace_id = await get_user_workspace_id(current_user["username"])
+    
+    # Agregación de ingresos por proyecto
+    income_pipeline = [
+        {"$match": {"workspace_id": workspace_id, "project_id": {"$ne": None}}},
+        {"$group": {
+            "_id": "$project_id",
+            "project_name": {"$first": "$project_name"},
+            "total_income": {"$sum": "$amount"}
+        }}
+    ]
+    income_by_project = {
+        doc["_id"]: {"project_name": doc["project_name"], "total_income": doc["total_income"]}
+        for doc in await db.finanzas_incomes.aggregate(income_pipeline).to_list(100)
+    }
+    
+    # Agregación de gastos por proyecto
+    expense_pipeline = [
+        {"$match": {"workspace_id": workspace_id, "project_id": {"$ne": None}}},
+        {"$group": {
+            "_id": "$project_id",
+            "project_name": {"$first": "$project_name"},
+            "total_expenses": {"$sum": "$amount"}
+        }}
+    ]
+    expense_by_project = {
+        doc["_id"]: {"project_name": doc["project_name"], "total_expenses": doc["total_expenses"]}
+        for doc in await db.finanzas_expenses.aggregate(expense_pipeline).to_list(100)
+    }
+    
+    # Agregación de inversiones por proyecto
+    investment_pipeline = [
+        {"$match": {"workspace_id": workspace_id, "project_id": {"$ne": None}}},
+        {"$group": {
+            "_id": "$project_id",
+            "project_name": {"$first": "$project_name"},
+            "total_investments": {"$sum": "$amount"}
+        }}
+    ]
+    investment_by_project = {
+        doc["_id"]: {"project_name": doc["project_name"], "total_investments": doc["total_investments"]}
+        for doc in await db.finanzas_investments.aggregate(investment_pipeline).to_list(100)
+    }
+    
+    # Combinar resultados
+    all_project_ids = set(income_by_project.keys()) | set(expense_by_project.keys()) | set(investment_by_project.keys())
+    
+    summaries = []
+    for project_id in all_project_ids:
+        income_data = income_by_project.get(project_id, {"project_name": "Desconocido", "total_income": 0})
+        expense_data = expense_by_project.get(project_id, {"total_expenses": 0})
+        investment_data = investment_by_project.get(project_id, {"total_investments": 0})
+        
+        total_income = income_data["total_income"]
+        total_expenses = expense_data["total_expenses"]
+        total_investments = investment_data["total_investments"]
+        net_result = total_income - total_expenses
+        
+        # Calcular ROI si hay inversión
+        roi = None
+        if total_investments > 0:
+            roi = ((net_result) / total_investments) * 100
+        
+        summaries.append({
+            "project_id": project_id,
+            "project_name": income_data["project_name"],
+            "total_income": total_income,
+            "total_expenses": total_expenses,
+            "total_investments": total_investments,
+            "net_result": net_result,
+            "roi": round(roi, 2) if roi is not None else None
+        })
+    
+    # Ordenar por resultado neto descendente
+    summaries.sort(key=lambda x: x["net_result"], reverse=True)
+    
+    return {"projects": summaries}
+
+@api_router.get("/finanzas/receivables")
+async def get_receivables(
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener ingresos por cobrar ordenados por fecha de vencimiento"""
+    workspace_id = await get_user_workspace_id(current_user["username"])
+    
+    receivables = await db.finanzas_incomes.find(
+        {"workspace_id": workspace_id, "status": "pending"},
+        {"_id": 0}
+    ).sort("due_date", 1).to_list(500)
+    
+    total = sum(r["amount"] for r in receivables)
+    
+    return {
+        "receivables": receivables,
+        "total": total,
+        "count": len(receivables)
+    }
+
+@api_router.get("/finanzas/payables")
+async def get_payables(
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener gastos por pagar ordenados por prioridad y fecha"""
+    workspace_id = await get_user_workspace_id(current_user["username"])
+    
+    # Ordenar por prioridad (high > medium > low) y luego por fecha
+    payables = await db.finanzas_expenses.find(
+        {"workspace_id": workspace_id, "status": "pending"},
+        {"_id": 0}
+    ).to_list(500)
+    
+    # Ordenar: prioridad alta primero, luego por fecha de vencimiento
+    priority_order = {"high": 0, "medium": 1, "low": 2}
+    payables.sort(key=lambda x: (priority_order.get(x.get("priority", "medium"), 1), x.get("due_date", "9999")))
+    
+    total = sum(p["amount"] for p in payables)
+    
+    return {
+        "payables": payables,
+        "total": total,
+        "count": len(payables)
+    }
+
+
 # Include the router in the main app
 app.include_router(api_router)
 

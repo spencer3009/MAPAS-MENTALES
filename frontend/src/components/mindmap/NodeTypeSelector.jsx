@@ -134,13 +134,13 @@ const NodeTypeSelector = ({
         </button>
       </div>
 
-      {/* Opciones */}
-      <div className="p-3 flex gap-3">
+      {/* Opciones - Grid responsive: 3 columnas en desktop, 2+1 en móvil */}
+      <div className="p-3 grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
         {/* Opción 1: Nodo rectangular con fondo */}
         <button
           onClick={() => handleSelect(NODE_TYPES.DEFAULT)}
           className={`
-            relative flex flex-col items-center gap-2 p-3
+            relative flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3
             rounded-xl border-2 transition-all duration-200
             hover:scale-105
             ${lastUsedType === NODE_TYPES.DEFAULT 
@@ -151,13 +151,13 @@ const NodeTypeSelector = ({
         >
           {/* Preview del nodo */}
           <div className="
-            w-20 h-12 rounded-lg
+            w-14 sm:w-20 h-10 sm:h-12 rounded-lg
             bg-gradient-to-br from-blue-100 to-blue-200
             border-2 border-blue-300
             shadow-sm
             flex items-center justify-center
           ">
-            <span className="text-[10px] text-blue-700 font-medium">Texto</span>
+            <span className="text-[9px] sm:text-[10px] text-blue-700 font-medium">Texto</span>
           </div>
           
           <span className="text-xs font-medium text-gray-700">

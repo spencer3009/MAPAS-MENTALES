@@ -1232,6 +1232,7 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
           setActiveView('contacts');
           setIsProjectsSidebarOpen(false);
         }}
+        onOpenFinanzas={handleOpenFinanzas}
         onOpenWhatsApp={() => {
           setActiveView('whatsapp');
           setIsProjectsSidebarOpen(false);

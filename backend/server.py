@@ -8606,6 +8606,7 @@ async def duplicate_expense(
 
 @api_router.get("/finanzas/investments", response_model=List[InvestmentResponse])
 async def get_investments(
+    company_id: str,
     status: Optional[str] = None,
     project_id: Optional[str] = None,
     start_date: Optional[str] = None,
@@ -8613,9 +8614,11 @@ async def get_investments(
     current_user: dict = Depends(get_current_user)
 ):
     """Obtener lista de inversiones con filtros opcionales"""
-    workspace_id = await get_user_workspace_id(current_user["username"])
+    username = current_user["username"]
+    await verify_company_access(company_id, username)
+    workspace_id = await get_user_workspace_id(username)
     
-    query = {"workspace_id": workspace_id}
+    query = {"company_id": company_id, "workspace_id": workspace_id}
     
     if status:
         query["status"] = status
@@ -8638,13 +8641,15 @@ async def create_investment(
     current_user: dict = Depends(get_current_user)
 ):
     """Crear una nueva inversión"""
-    workspace_id = await get_user_workspace_id(current_user["username"])
+    username = current_user["username"]
+    await verify_company_access(investment_data.company_id, username)
+    workspace_id = await get_user_workspace_id(username)
     now = get_current_timestamp()
     
     investment = {
         "id": generate_id(),
         "workspace_id": workspace_id,
-        "username": current_user["username"],
+        "username": username,
         **investment_data.model_dump(),
         "created_at": now,
         "updated_at": now

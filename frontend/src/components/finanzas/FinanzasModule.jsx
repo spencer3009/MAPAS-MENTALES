@@ -842,35 +842,6 @@ const FinanzasModule = ({ token, projects = [] }) => {
           projects={projects}
         />
       )}
-
-      {/* Modal Nueva Empresa */}
-      {showCompanyModal && (
-        <CompanyModal
-          onClose={() => setShowCompanyModal(false)}
-          onSave={handleCreateCompany}
-        />
-      )}
-
-      {/* Modal Editar Empresa */}
-      {editingCompany && (
-        <CompanyModal
-          key={editingCompany.id}
-          onClose={() => setEditingCompany(null)}
-          onSave={handleUpdateCompany}
-          onDelete={handleDeleteCompany}
-          company={editingCompany}
-        />
-      )}
-
-      {/* Modal de Colaboradores */}
-      {showCollaborators && selectedCompany && (
-        <CollaboratorsManager
-          company={selectedCompany}
-          token={token}
-          onClose={() => setShowCollaborators(false)}
-          userRole={selectedCompany?.user_role || 'owner'}
-        />
-      )}
     </div>
   );
 };

@@ -25,6 +25,7 @@ const DockSidebar = ({
   onOpenBoards,
   onOpenContacts,
   onOpenWhatsApp,
+  onOpenFinanzas,
   onLogout,
   isProjectsSidebarOpen = true,
   activeView = 'projects',

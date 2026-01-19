@@ -8538,6 +8538,17 @@ async def create_income(
     
     await db.finanzas_incomes.insert_one(income)
     income.pop("_id", None)
+    
+    # Registrar actividad
+    await log_company_activity(
+        company_id=income_data.company_id,
+        activity_type="income_created",
+        actor_username=username,
+        target_name=income_data.source or "Ingreso",
+        target_id=income["id"],
+        amount=income_data.amount
+    )
+    
     return income
 
 @api_router.get("/finanzas/incomes/{income_id}", response_model=IncomeResponse)

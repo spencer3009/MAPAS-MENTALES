@@ -768,6 +768,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
           onSave={handleCreateIncome}
           sources={incomeSources}
           projects={projects}
+          token={token}
         />
       )}
 
@@ -778,6 +779,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
           onSave={handleCreateExpense}
           categories={categories}
           projects={projects}
+          token={token}
         />
       )}
 

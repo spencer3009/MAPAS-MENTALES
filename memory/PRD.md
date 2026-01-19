@@ -2,6 +2,28 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-19: REFACTOR — Selector de Empresa Global en Header ✅ COMPLETADO
+- **Estado**: Refactorización completada - Gestión de empresas movida a nivel global
+- **Problema solucionado**: La gestión de empresas estaba dentro del módulo Finanzas, pero la empresa es un contexto que afecta a todos los módulos operativos (Finanzas, Contactos, Tableros, Colaboradores, Recordatorios)
+- **Solución implementada**:
+  - Nuevo componente: `/app/frontend/src/components/common/GlobalCompanySelector.jsx`
+  - Selector de empresa global ubicado en el **sidebar izquierdo** (DockSidebar)
+  - Dropdown con lista de empresas y acciones globales
+- **Funcionalidades del selector global**:
+  - Ver y cambiar empresa activa (con check visual)
+  - Crear nueva empresa
+  - Configuración de empresa (edición completa)
+  - Zona de riesgo para eliminar empresa
+  - Acceso a gestión de colaboradores
+- **Impacto en la arquitectura**:
+  - `FinanzasModule.jsx` simplificado - ya no maneja empresas, usa `useCompany()` context
+  - `DockSidebar.jsx` ahora recibe `token` y muestra el `GlobalCompanySelector`
+  - `CompanyContext.jsx` actualizado con `deleteCompany(id, confirmation)`
+- **UI**:
+  - Header gris oscuro "Configuración de Empresa" para modo edición
+  - Zona de riesgo roja expandible con confirmación de nombre
+  - Modal scrolleable para ver todo el contenido
+
 ### 2026-01-19: FEATURE — Sistema de Colaboradores por Empresa ✅ COMPLETADO
 - **Estado**: Sistema completo de colaboradores implementado y testeado
 - **Concepto implementado**:

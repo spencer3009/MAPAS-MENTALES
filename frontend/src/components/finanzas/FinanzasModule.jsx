@@ -962,7 +962,7 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
 };
 
 // Modal de Gasto
-const ExpenseModal = ({ onClose, onSave, categories, projects }) => {
+const ExpenseModal = ({ onClose, onSave, categories, projects, token }) => {
   const [form, setForm] = useState({
     amount: '',
     category: 'otros',
@@ -970,12 +970,25 @@ const ExpenseModal = ({ onClose, onSave, categories, projects }) => {
     date: new Date().toISOString().split('T')[0],
     status: 'pending',
     vendor_name: '',
+    vendor_id: null,
     is_recurring: false,
     recurrence_period: '',
     priority: 'medium',
     due_date: '',
     project_id: '',
   });
+
+  // Estado para el contacto/proveedor seleccionado
+  const [selectedVendor, setSelectedVendor] = useState(null);
+
+  const handleVendorChange = (contact) => {
+    setSelectedVendor(contact);
+    setForm(prev => ({
+      ...prev,
+      vendor_id: contact?.id || null,
+      vendor_name: contact?.name || '',
+    }));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();

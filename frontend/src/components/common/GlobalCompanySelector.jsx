@@ -200,7 +200,7 @@ const GlobalCompanySelector = ({ token }) => {
                   <button
                     onClick={() => {
                       setShowDropdown(false);
-                      setShowConfigModal(true);
+                      openConfigModal('general');
                     }}
                     className="w-full px-3 py-2 flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                   >

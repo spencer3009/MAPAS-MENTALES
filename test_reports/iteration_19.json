@@ -39,14 +39,14 @@
   "pwa_verification": {
     "manifest_json": {
       "status": "PASS",
-      "url": "https://admin-impersonate.preview.emergentagent.com/manifest.json",
+      "url": "https://nodes-connect.preview.emergentagent.com/manifest.json",
       "http_status": 200
     },
     "service_worker": {
       "status": "PASS",
-      "url": "https://admin-impersonate.preview.emergentagent.com/service-worker.js",
+      "url": "https://nodes-connect.preview.emergentagent.com/service-worker.js",
       "http_status": 200,
-      "registration_log": "[PWA] Service Worker registrado: https://admin-impersonate.preview.emergentagent.com/"
+      "registration_log": "[PWA] Service Worker registrado: https://nodes-connect.preview.emergentagent.com/"
     },
     "manifest_link_in_html": {
       "status": "PASS",

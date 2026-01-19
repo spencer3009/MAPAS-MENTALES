@@ -28,6 +28,7 @@ import { FullscreenControls } from './FullscreenMode';
 import { NotificationProvider, useNotifications } from './ToastProvider';
 import { BoardsPage, BoardView } from '../boards';
 import ContactsPage from '../contacts/ContactsPage';
+import CollaboratorsPage from '../collaborators/CollaboratorsPage';
 import { WhatsAppSettings, WhatsAppInbox } from '../whatsapp';
 import FinanzasModule from '../finanzas/FinanzasModule';
 import { PendingInvitationsBanner } from '../company/CollaboratorsManager';

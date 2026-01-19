@@ -141,6 +141,7 @@ class IncomeResponse(BaseModel):
 # ==========================================
 
 class ExpenseCreate(BaseModel):
+    company_id: str = Field(..., description="ID de la empresa")
     amount: float = Field(..., gt=0, description="Monto del gasto")
     category: str = Field(..., description="Categoría del gasto")
     description: Optional[str] = Field(None, description="Descripción del gasto")
@@ -149,6 +150,7 @@ class ExpenseCreate(BaseModel):
     project_id: Optional[str] = Field(None, description="Proyecto asociado")
     project_name: Optional[str] = Field(None, description="Nombre del proyecto")
     vendor_name: Optional[str] = Field(None, description="Proveedor")
+    vendor_id: Optional[str] = Field(None, description="ID del contacto proveedor")
     is_recurring: bool = Field(default=False, description="¿Es gasto recurrente?")
     recurrence_period: Optional[str] = Field(None, description="Periodo de recurrencia: monthly, weekly, yearly")
     priority: ExpensePriority = Field(default=ExpensePriority.MEDIUM)
@@ -164,6 +166,7 @@ class ExpenseUpdate(BaseModel):
     project_id: Optional[str] = None
     project_name: Optional[str] = None
     vendor_name: Optional[str] = None
+    vendor_id: Optional[str] = None
     is_recurring: Optional[bool] = None
     recurrence_period: Optional[str] = None
     priority: Optional[ExpensePriority] = None
@@ -172,6 +175,7 @@ class ExpenseUpdate(BaseModel):
 
 class ExpenseResponse(BaseModel):
     id: str
+    company_id: str
     workspace_id: str
     username: str
     amount: float
@@ -182,6 +186,7 @@ class ExpenseResponse(BaseModel):
     project_id: Optional[str]
     project_name: Optional[str]
     vendor_name: Optional[str]
+    vendor_id: Optional[str]
     is_recurring: bool
     recurrence_period: Optional[str]
     priority: ExpensePriority

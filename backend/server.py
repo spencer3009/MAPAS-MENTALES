@@ -76,6 +76,15 @@ from finanzas_service import (
     DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_SOURCES,
     generate_id, get_current_timestamp, calculate_health_status
 )
+import collaborator_service
+from collaborator_service import (
+    CompanyRole, InvitationStatus, ROLE_PERMISSIONS,
+    CollaboratorInvite, CollaboratorRoleUpdate, CollaboratorResponse, InvitationResponse,
+    generate_invitation_id, generate_collaborator_id, get_invitation_expiry, is_invitation_expired,
+    get_role_permissions, has_permission,
+    get_invitation_email_html, get_invitation_accepted_email_html, get_invitation_rejected_email_html,
+    get_role_changed_email_html, get_access_revoked_email_html
+)
 
 
 # JWT Configuration

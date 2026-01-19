@@ -2888,8 +2888,8 @@ export const useNodes = () => {
     ));
   }, [nodes, activeProjectId, pushToHistory]);
 
-  // Cambiar tipo de nodo (default <-> dashed_text)
-  const updateNodeType = useCallback((id, newNodeType) => {
+  // Cambiar tipo de nodo (default <-> dashed_text <-> project)
+  const updateNodeType = useCallback((id, newNodeType, options = {}) => {
     const newNodes = nodes.map(n => {
       if (n.id === id) {
         if (newNodeType === 'default') {
@@ -2900,7 +2900,19 @@ export const useNodes = () => {
             width: 160,
             height: 64,
             // Mantener el texto pero asegurarse de que tenga texto
-            text: n.text || 'Nuevo Nodo'
+            text: n.text || 'Nuevo Nodo',
+            // Limpiar linkedProjectId si se desvíncula
+            linkedProjectId: options.linkedProjectId !== undefined ? options.linkedProjectId : n.linkedProjectId
+          };
+        } else if (newNodeType === 'project') {
+          // Convertir a nodo tipo proyecto
+          return { 
+            ...n, 
+            nodeType: 'project',
+            width: 160,
+            height: 64,
+            linkedProjectId: options.linkedProjectId || n.linkedProjectId,
+            text: options.text || n.text || 'Proyecto'
           };
         } else {
           // Convertir a nodo dashed_text

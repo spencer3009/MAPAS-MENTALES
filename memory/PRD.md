@@ -28,9 +28,11 @@
 - **Testing**: 100% backend (22/22 tests), 100% frontend verificado
 - **Archivos modificados**:
   - `/app/frontend/src/components/finanzas/FinanzasModule.jsx` - Componente principal
+  - `/app/frontend/src/components/finanzas/ContactAutocomplete.jsx` - Componente de búsqueda de contactos (NUEVO)
   - `/app/frontend/src/components/mindmap/DockSidebar.jsx` - Agregado item Finanzas
   - `/app/frontend/src/components/mindmap/MobileNavigation.jsx` - Agregado item Finanzas
   - `/app/frontend/src/components/mindmap/MindMapApp.jsx` - Integración del módulo
+  - `/app/backend/server.py` - Endpoint `/api/contacts/search` para autocomplete
 - **Test files**: `/app/tests/test_finanzas_module.py` (22 tests)
 
 ### 2026-01-17: VERIFICACIÓN E2E — Scheduler de Recordatorios WhatsApp con Twilio ✅ FUNCIONANDO

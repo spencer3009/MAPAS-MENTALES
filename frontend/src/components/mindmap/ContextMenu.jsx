@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Plus, Copy, Trash2, Square, Minus, ChevronRight } from 'lucide-react';
+import { Plus, Copy, Trash2, Square, Minus, ChevronRight, FolderOpen, Unlink } from 'lucide-react';
 
 const LINE_WIDTH_OPTIONS = [
   { value: 1, label: 'Normal (1px)' },

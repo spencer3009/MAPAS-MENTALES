@@ -2,6 +2,30 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-19: FEATURE — Actividad Reciente por Empresa ✅ COMPLETADO
+- **Estado**: Sistema de actividad implementado y funcionando
+- **Ubicación**: Configuración de Empresa → Colaboradores → Actividad reciente (expandible)
+- **Backend implementado**:
+  - Nuevo servicio: `/app/backend/activity_company_service.py`
+  - Endpoint: `GET /api/finanzas/companies/{id}/activity` con filtros por módulo
+  - Logging automático en endpoints de: ingresos, gastos, colaboradores
+  - Función helper `log_company_activity()` para registrar actividad
+- **Tipos de actividad registrados**:
+  - **Finanzas**: ingresos, gastos, inversiones (crear/editar/eliminar/cobrar/pagar)
+  - **Contactos**: crear/editar/eliminar
+  - **Tableros**: tableros y tarjetas (crear/editar/mover/eliminar)
+  - **Equipo**: invitaciones, unirse, cambio de rol, eliminación
+- **UI implementada**:
+  - Sección "Actividad reciente" expandible con icono verde
+  - Timeline con iconos de colores según tipo de actividad
+  - Muestra: Usuario, Acción, Nombre del elemento, Monto (si aplica)
+  - Tiempo relativo en español (hace 1 min, hace 2h, hace 1d)
+  - Etiqueta del módulo (Finanzas, Contactos, etc.)
+- **Restricciones**:
+  - Solo visible para Propietario/Administrador
+  - Solo muestra actividad de la empresa activa
+  - Excluye mapas mentales y eventos pasivos
+
 ### 2026-01-19: FEATURE — Colaboradores dentro de Configuración de Empresa ✅ COMPLETADO
 - **Estado**: Sistema de colaboradores integrado dentro del modal de configuración
 - **Cambio de UX**: Los colaboradores ya no están en un modal separado - ahora son una **pestaña** dentro de "Configuración de Empresa"

@@ -234,7 +234,8 @@ const GlobalCompanySelector = ({ token }) => {
         <CompanyConfigModal
           company={activeCompany}
           token={token}
-          onClose={() => setShowConfigModal(false)}
+          initialTab={configModalTab}
+          onClose={closeConfigModal}
           onSave={async (data) => {
             const result = await updateCompany(activeCompany.id, data);
             if (result.success) {
@@ -246,7 +247,7 @@ const GlobalCompanySelector = ({ token }) => {
           onDelete={async (companyId, confirmation) => {
             const result = await deleteCompany(companyId, confirmation);
             if (result.success) {
-              setShowConfigModal(false);
+              closeConfigModal();
             }
             return result;
           }}

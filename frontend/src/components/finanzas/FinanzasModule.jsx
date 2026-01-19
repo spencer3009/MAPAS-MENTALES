@@ -259,9 +259,14 @@ const FinanzasModule = ({ token, projects = [] }) => {
         setCompanies(prev => [newCompany, ...prev]);
         setSelectedCompany(newCompany);
         setShowCompanyModal(false);
+      } else {
+        const error = await response.json();
+        console.error('Error creating company:', error);
+        alert(`Error al crear empresa: ${error.detail || 'Error desconocido'}`);
       }
     } catch (err) {
       console.error('Error creating company:', err);
+      alert(`Error de conexión: ${err.message}`);
     }
   };
 

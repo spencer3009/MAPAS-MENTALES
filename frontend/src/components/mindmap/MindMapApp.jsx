@@ -41,6 +41,7 @@ import { useContextMenu } from '../../hooks/useContextMenu';
 import { useVerificationCheck } from '../../hooks/useVerificationCheck';
 import { useAuth } from '../../contexts/AuthContext';
 import { TimeTrackingProvider } from '../../contexts/TimeTrackingContext';
+import { CompanyProvider } from '../../contexts/CompanyContext';
 
 // Use relative URLs for production compatibility
 const API_URL = '';

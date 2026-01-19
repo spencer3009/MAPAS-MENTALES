@@ -60,11 +60,14 @@ const ContextMenu = ({
   nodeId,
   currentNodeType,
   currentLineWidth,
+  linkedProjectId,
   onAddChild,
   onDuplicate,
   onDelete,
   onChangeNodeType,
   onChangeLineWidth,
+  onLinkToProject,
+  onUnlinkProject,
   onClose
 }) => {
   const [showLineWidthMenu, setShowLineWidthMenu] = useState(false);
@@ -73,6 +76,7 @@ const ContextMenu = ({
   if (!position) return null;
 
   const isDashedNode = currentNodeType === 'dashed' || currentNodeType === 'dashed_text';
+  const isProjectNode = currentNodeType === 'project';
   const estimatedMenuHeight = isDashedNode ? 280 : 200;
   const menuWidth = 224;
 

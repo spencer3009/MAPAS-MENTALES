@@ -2,6 +2,29 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-19: FEATURE — Colaboradores dentro de Configuración de Empresa ✅ COMPLETADO
+- **Estado**: Sistema de colaboradores integrado dentro del modal de configuración
+- **Cambio de UX**: Los colaboradores ya no están en un modal separado - ahora son una **pestaña** dentro de "Configuración de Empresa"
+- **UI implementada**:
+  - Modal con 2 pestañas: "General" y "Colaboradores"
+  - Sección "Roles disponibles" con badges de colores y descripciones
+  - Nota destacada: "Los colaboradores NO tienen acceso a mapas mentales ni recordatorios personales"
+  - Lista de miembros con foto, nombre, email y rol
+  - Selector de rol inline para cambiar roles (solo admins)
+  - Botón eliminar colaborador (solo admins)
+  - Lista de invitaciones pendientes con estado visual
+  - Formulario inline de invitación con: email, rol, mensaje opcional
+- **Roles implementados**:
+  - **Propietario** (amarillo): Acceso total. Puede eliminar empresa y gestionar colaboradores.
+  - **Administrador** (púrpura): Acceso total excepto eliminar empresa.
+  - **Colaborador Operativo** (azul): Acceso a Finanzas, Contactos y Tableros. Sin configuraciones.
+- **Reglas de acceso**:
+  - Colaboradores solo ven la empresa a la que pertenecen
+  - NO tienen acceso a mapas mentales personales
+  - NO tienen acceso a recordatorios personales
+  - Solo ven recordatorios operativos de la empresa
+- **Archivo modificado**: `/app/frontend/src/components/common/GlobalCompanySelector.jsx`
+
 ### 2026-01-19: REFACTOR — Selector de Empresa Global en Header ✅ COMPLETADO
 - **Estado**: Refactorización completada - Gestión de empresas movida a nivel global
 - **Problema solucionado**: La gestión de empresas estaba dentro del módulo Finanzas, pero la empresa es un contexto que afecta a todos los módulos operativos (Finanzas, Contactos, Tableros, Colaboradores, Recordatorios)

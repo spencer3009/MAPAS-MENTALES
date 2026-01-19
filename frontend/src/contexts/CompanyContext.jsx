@@ -9,6 +9,31 @@ export const CompanyProvider = ({ children, token }) => {
   const [activeCompany, setActiveCompany] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Estado global para abrir el modal de configuración con pestaña específica
+  const [showConfigModal, setShowConfigModal] = useState(false);
+  const [configModalTab, setConfigModalTab] = useState('general');
+  
+  // Función para abrir el modal de colaboradores directamente
+  const openCollaboratorsModal = useCallback(() => {
+    if (activeCompany) {
+      setConfigModalTab('collaborators');
+      setShowConfigModal(true);
+    }
+  }, [activeCompany]);
+  
+  // Función para abrir el modal de configuración general
+  const openConfigModal = useCallback((tab = 'general') => {
+    if (activeCompany) {
+      setConfigModalTab(tab);
+      setShowConfigModal(true);
+    }
+  }, [activeCompany]);
+  
+  // Función para cerrar el modal
+  const closeConfigModal = useCallback(() => {
+    setShowConfigModal(false);
+  }, []);
 
   // Cargar empresas del usuario
   const loadCompanies = useCallback(async () => {

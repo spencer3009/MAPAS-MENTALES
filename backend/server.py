@@ -6130,16 +6130,28 @@ async def delete_time_entry(entry_id: str, current_user: dict = Depends(get_curr
 async def get_contacts(
     contact_type: Optional[str] = None, 
     workspace_id: Optional[str] = None,
+    company_id: Optional[str] = None,
     current_user: dict = Depends(get_current_user)
 ):
     """
     Obtener contactos según el contexto:
-    - Sin workspace_id: Retorna contactos personales (owner_username = current_user)
-    - Con workspace_id: Retorna contactos del workspace (si el usuario tiene acceso)
+    - Con company_id: Retorna contactos de esa empresa
+    - Sin company_id + workspace_id: Retorna contactos del workspace
+    - Sin company_id ni workspace_id: Retorna contactos personales
     """
     username = current_user["username"]
     
-    if workspace_id:
+    if company_id:
+        # Verificar acceso a la empresa
+        company = await db.finanzas_companies.find_one({
+            "id": company_id,
+            "owner_username": username
+        })
+        if not company:
+            raise HTTPException(status_code=403, detail="No tienes acceso a esta empresa")
+        
+        query = {"company_id": company_id}
+    elif workspace_id:
         # Verificar que el usuario tiene acceso al workspace
         membership = await db.workspace_members.find_one({
             "workspace_id": workspace_id,
@@ -6151,12 +6163,18 @@ async def get_contacts(
         # Obtener contactos del workspace
         query = {"workspace_id": workspace_id}
     else:
-        # Obtener contactos personales (sin workspace_id asignado)
+        # Obtener contactos personales (sin workspace_id ni company_id asignado)
         query = {
             "owner_username": username,
             "$or": [
                 {"workspace_id": {"$exists": False}},
                 {"workspace_id": None}
+            ],
+            "$and": [
+                {"$or": [
+                    {"company_id": {"$exists": False}},
+                    {"company_id": None}
+                ]}
             ]
         }
     

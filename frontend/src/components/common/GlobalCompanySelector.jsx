@@ -1039,6 +1039,62 @@ const CollaboratorsTab = ({ company, token, canManage }) => {
           Solo los administradores pueden gestionar colaboradores.
         </div>
       )}
+
+      {/* Actividad reciente - Solo visible para admin/owner */}
+      {canManage && activities.length > 0 && (
+        <div className="border-t border-gray-200 pt-6">
+          <button
+            onClick={() => setShowActivity(!showActivity)}
+            className="w-full flex items-center justify-between mb-4"
+          >
+            <h4 className="font-medium text-gray-800 flex items-center gap-2">
+              <Activity size={18} className="text-emerald-600" />
+              Actividad reciente
+            </h4>
+            <ChevronDown 
+              size={18} 
+              className={`text-gray-400 transition-transform ${showActivity ? 'rotate-180' : ''}`} 
+            />
+          </button>
+          
+          {showActivity && (
+            <div className="space-y-3 max-h-80 overflow-y-auto">
+              {activities.map((activity) => {
+                const IconComponent = ACTIVITY_ICONS[activity.icon] || Activity;
+                const colorClass = ACTIVITY_COLORS[activity.color] || ACTIVITY_COLORS.gray;
+                
+                return (
+                  <div
+                    key={activity.id}
+                    className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <div className={`p-2 rounded-lg flex-shrink-0 ${colorClass}`}>
+                      <IconComponent size={14} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-gray-800">
+                        <span className="font-medium">{activity.actor_name}</span>
+                        {' '}{activity.action}
+                        {activity.target_name && (
+                          <span className="font-medium"> {activity.target_name}</span>
+                        )}
+                        {activity.amount && (
+                          <span className="text-emerald-600 font-medium"> (S/ {activity.amount.toLocaleString()})</span>
+                        )}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-gray-500">{activity.time_ago}</span>
+                        <span className="text-xs text-gray-400">•</span>
+                        <span className="text-xs text-gray-500">{activity.module_label}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

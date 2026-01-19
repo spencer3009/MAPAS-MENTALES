@@ -197,6 +197,12 @@ export const CompanyProvider = ({ children, token }) => {
     deleteCompany,
     refreshCompanies: loadCompanies,
     hasCompanies: companies.length > 0,
+    // Funciones para modal de configuración
+    showConfigModal,
+    configModalTab,
+    openConfigModal,
+    openCollaboratorsModal,
+    closeConfigModal,
   };
 
   return (

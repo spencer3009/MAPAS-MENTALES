@@ -278,8 +278,6 @@ const ContactsPage = () => {
   const [editingField, setEditingField] = useState(null); // Campo en edición
   const [newOption, setNewOption] = useState('');
   const [showTypeChangeWarning, setShowTypeChangeWarning] = useState(false);
-  
-  const token = localStorage.getItem('mm_auth_token');
 
   // Cargar el país del usuario desde su perfil (solo una vez)
   useEffect(() => {

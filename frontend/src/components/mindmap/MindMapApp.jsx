@@ -30,6 +30,7 @@ import { BoardsPage, BoardView } from '../boards';
 import ContactsPage from '../contacts/ContactsPage';
 import { WhatsAppSettings, WhatsAppInbox } from '../whatsapp';
 import FinanzasModule from '../finanzas/FinanzasModule';
+import { PendingInvitationsBanner } from '../company/CollaboratorsManager';
 import GlobalTimeIndicator from '../boards/GlobalTimeIndicator';
 import VerificationRequiredModal from '../auth/VerificationRequiredModal';
 import MobileNavigation from './MobileNavigation';

@@ -55,6 +55,9 @@ class Contact(BaseModel):
     # Campo opcional
     email: Optional[str] = ""
     
+    # Empresa asociada (obligatorio para módulos operativos)
+    company_id: Optional[str] = None
+    
     # Campos personalizados (diccionario dinámico)
     custom_fields: dict = {}
     

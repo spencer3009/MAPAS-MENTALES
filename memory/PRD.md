@@ -2,25 +2,36 @@
 
 ## Changelog (Latest First)
 
-### 2026-01-19: FEATURE — Módulo de Finanzas (Fase 1-2) ✅ COMPLETADO
-- **Estado**: Módulo de Finanzas integrado y 100% funcional
-- **Funcionalidades implementadas**:
+### 2026-01-19: FEATURE — Módulo de Finanzas con Soporte Multi-Empresa ✅ COMPLETADO
+- **Estado**: Módulo de Finanzas ahora requiere y soporta múltiples empresas
+- **Funcionalidades de Empresas implementadas**:
+  - CRUD completo de empresas (crear, listar, actualizar, eliminar)
+  - Cada empresa tiene datos financieros 100% independientes
+  - Selector de empresa visible en el header del módulo
+  - Estado vacío cuando no hay empresas con CTA para crear primera empresa
+  - Modal de creación de empresa con campos: nombre, RUC/NIF, moneda, dirección, teléfono, email
+  - Soporte multi-moneda (PEN, USD, EUR, MXN, COP)
+  - Al eliminar empresa se eliminan todos sus datos financieros
+- **Funcionalidades financieras existentes**:
   - Dashboard financiero con cards de resumen (Ingresos, Gastos, Inversiones, Resultado neto)
   - Cards secundarias: Por Cobrar, Por Pagar, Caja Estimada
   - Indicador de salud financiera (Saludable/Atención/Crítico)
   - Selector de período (mes/año)
   - Pestañas: Resumen, Ingresos, Gastos, Inversiones, Por Cobrar, Por Pagar
   - Tablas CRUD para ingresos, gastos e inversiones
-  - Modales de creación: Nuevo Ingreso, Nuevo Gasto, Nueva Inversión
-  - Estados con badges de color (Cobrado, Por cobrar, Pagado, Por pagar)
-  - Acciones rápidas: Marcar como cobrado/pagado, Eliminar, Duplicar gastos recurrentes
-  - **Campo Cliente/Proveedor con Autocomplete Inteligente**:
-    - Búsqueda dinámica integrada con módulo de Contactos
-    - Sugerencias en tiempo real filtradas por nombre, email, teléfono, empresa
-    - Selección única con chip visual (nombre + botón X para desvincular)
-    - Navegación por teclado (flechas + Enter + Escape)
-    - Badge de tipo de contacto (Cliente/Proveedor/Contacto)
-- **Navegación**:
+  - **Campo Cliente/Proveedor con Autocomplete Inteligente** integrado con Contactos
+- **Backend modificado**:
+  - Nuevo endpoint: `GET/POST/PUT/DELETE /api/finanzas/companies`
+  - Todos los endpoints de finanzas ahora requieren `company_id`
+  - Helper `verify_company_access` para validar permisos
+  - Nuevos modelos Pydantic: `CompanyCreate`, `CompanyUpdate`, `CompanyResponse`
+- **Frontend modificado**:
+  - Estado para empresas y empresa seleccionada
+  - UI de estado vacío cuando no hay empresas
+  - Selector dropdown de empresa en el header
+  - Botón "+" para agregar más empresas
+  - Modal `CompanyModal` para crear empresas
+- **Testing**: Backend y frontend verificado manualmente
   - Botón "Finanzas" agregado al DockSidebar (desktop) con ícono DollarSign
   - Botón "Finanzas" agregado al MobileNavigation (mobile) con ícono DollarSign
   - Handler `handleOpenFinanzas` en MindMapApp.jsx

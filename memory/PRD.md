@@ -2,6 +2,42 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-19: FEATURE — Sistema de Colaboradores por Empresa ✅ COMPLETADO
+- **Estado**: Sistema completo de colaboradores implementado y testeado
+- **Concepto implementado**:
+  - Colaboradores pertenecen a una Empresa específica, no a la cuenta global
+  - Roles: Propietario (acceso total), Administrador (casi todo), Colaborador Operativo (limitado)
+  - Límite de colaboradores según plan del propietario (free=0, personal=3, team=10, business=ilimitado)
+- **Backend implementado**:
+  - Nuevo servicio: `/app/backend/collaborator_service.py` con modelos, permisos y email templates
+  - `GET /api/finanzas/companies` - Ahora retorna `user_role` e `is_owner` para cada empresa
+  - `GET /api/finanzas/companies/{id}/collaborators` - Lista colaboradores (incluye propietario)
+  - `POST /api/finanzas/companies/{id}/collaborators/invite` - Invitar colaborador con validación de límite
+  - `GET /api/invitations/pending` - Obtener invitaciones pendientes del usuario
+  - `POST /api/invitations/{id}/accept` - Aceptar invitación
+  - `POST /api/invitations/{id}/reject` - Rechazar invitación
+  - `PUT /api/finanzas/companies/{id}/collaborators/{username}/role` - Cambiar rol
+  - `DELETE /api/finanzas/companies/{id}/collaborators/{username}` - Revocar acceso
+  - `verify_company_access()` actualizada para permitir acceso a colaboradores
+- **Frontend implementado**:
+  - Nuevo componente: `/app/frontend/src/components/company/CollaboratorsManager.jsx`
+  - Modal "Configuración de Empresa" con pestañas Colaboradores/Invitaciones
+  - Modal "Invitar Colaborador" con campos email, rol, mensaje
+  - Banner de invitaciones pendientes (PendingInvitationsBanner) al login
+  - Botón de colaboradores (Users icon) en header del módulo Finanzas
+- **Permisos por rol**:
+  - **Propietario**: Todo acceso, puede eliminar empresa
+  - **Administrador**: Todo excepto eliminar empresa
+  - **Colaborador Operativo**: Finanzas, Contactos, Tableros. Sin gestión de colaboradores
+- **Notificaciones**:
+  - Email de invitación enviado al colaborador
+  - Email de aceptación/rechazo al que invitó
+  - Email de cambio de rol
+  - Email de acceso revocado
+  - Notificaciones in-app para todos los eventos
+- **Testing**: 100% backend (15/15 tests), 100% frontend UI verificado
+- **Test file**: `/app/tests/test_collaborators.py`
+
 ### 2026-01-19: FEATURE — Eliminación Segura de Empresas + Bug Fix Indicador Salud ✅ COMPLETADO
 - **Estado**: Feature de eliminación de empresas implementado y testeado
 - **Bug Fix - Indicador de Salud Financiera**:

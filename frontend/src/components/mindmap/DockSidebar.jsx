@@ -17,7 +17,6 @@ import {
   UserCog
 } from 'lucide-react';
 import GlobalCompanySelector from '../common/GlobalCompanySelector';
-import { useCompany } from '../../contexts/CompanyContext';
 
 const DockSidebar = ({ 
   onToggleProjectsSidebar,
@@ -40,9 +39,6 @@ const DockSidebar = ({
   token
 }) => {
   const [isHovered, setIsHovered] = useState(false);
-  
-  // Obtener empresa activa del contexto
-  const { activeCompany } = useCompany();
   
   // Determinar si estamos en la vista de proyectos
   const isInProjectsView = activeView === 'projects';

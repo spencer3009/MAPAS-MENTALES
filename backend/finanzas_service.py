@@ -307,10 +307,15 @@ def get_current_timestamp() -> str:
 def calculate_health_status(income: float, expenses: float, pending_expenses: float) -> str:
     """
     Calcula el estado de salud financiera
-    - Verde (good): Ingresos > Gastos * 1.2
+    - Verde (good): Ingresos > Gastos * 1.2, o empresa nueva sin actividad
     - Amarillo (warning): Ingresos > Gastos pero < Gastos * 1.2
     - Rojo (critical): Ingresos <= Gastos o muchos pendientes
     """
+    # Empresa nueva o sin actividad: estado neutral (saludable)
+    if income == 0 and expenses == 0 and pending_expenses == 0:
+        return "good"
+    
+    # Sin ingresos pero con gastos: crítico
     if income <= 0:
         return "critical"
     

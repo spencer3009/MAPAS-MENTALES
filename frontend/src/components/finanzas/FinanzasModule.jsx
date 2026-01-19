@@ -4,11 +4,9 @@ import {
   ArrowUpCircle, ArrowDownCircle, Wallet, 
   Plus, Search, Filter, Calendar,
   CheckCircle2, Clock, AlertTriangle,
-  BarChart3, RefreshCw, Building2, ChevronDown, X, Pencil, Users
+  BarChart3, RefreshCw, Building2, ChevronDown, X
 } from 'lucide-react';
 import ContactAutocomplete from './ContactAutocomplete';
-import CompanyModal from './CompanyModal';
-import CollaboratorsManager from '../company/CollaboratorsManager';
 import { useCompany } from '../../contexts/CompanyContext';
 
 const API_URL = '';

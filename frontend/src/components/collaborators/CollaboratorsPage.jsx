@@ -647,7 +647,11 @@ const CollaboratorsPage = () => {
                     </td>
                     {canManage && (
                       <td className="px-6 py-4 text-right">
-                        {collaborator.role !== 'owner' && (
+                        {collaborator.role === 'owner' ? (
+                          <span className="text-xs text-gray-400 italic">
+                            — Propietario
+                          </span>
+                        ) : (
                           <div className="relative inline-block">
                             <button
                               onClick={() => setOpenDropdown(openDropdown === collaborator.id ? null : collaborator.id)}

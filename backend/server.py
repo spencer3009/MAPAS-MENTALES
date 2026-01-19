@@ -9053,6 +9053,124 @@ async def get_payables(
     }
 
 
+# ==========================================
+# MIGRACIÓN DE DATOS A EMPRESA
+# ==========================================
+
+@api_router.post("/migration/create-default-company")
+async def create_default_company_and_migrate(
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Crear empresa por defecto y migrar contactos/tableros existentes.
+    Solo se ejecuta si el usuario no tiene empresas.
+    """
+    username = current_user["username"]
+    now = get_current_timestamp()
+    
+    # Verificar si ya tiene empresas
+    existing_companies = await db.finanzas_companies.find(
+        {"owner_username": username}
+    ).to_list(1)
+    
+    if existing_companies:
+        return {
+            "migrated": False,
+            "message": "Ya tienes empresas creadas",
+            "company_id": existing_companies[0]["id"]
+        }
+    
+    # Crear empresa por defecto
+    default_company = {
+        "id": generate_id(),
+        "name": "Mi empresa – migración inicial",
+        "ruc": None,
+        "address": None,
+        "phone": None,
+        "email": None,
+        "currency": "PEN",
+        "logo_url": None,
+        "owner_username": username,
+        "created_at": now,
+        "updated_at": now
+    }
+    
+    await db.finanzas_companies.insert_one(default_company)
+    company_id = default_company["id"]
+    
+    # Migrar contactos sin company_id
+    contacts_result = await db.contacts.update_many(
+        {
+            "owner_username": username,
+            "$or": [
+                {"company_id": {"$exists": False}},
+                {"company_id": None}
+            ]
+        },
+        {"$set": {"company_id": company_id}}
+    )
+    
+    # Migrar tableros sin company_id
+    boards_result = await db.boards.update_many(
+        {
+            "owner_username": username,
+            "$or": [
+                {"company_id": {"$exists": False}},
+                {"company_id": None}
+            ]
+        },
+        {"$set": {"company_id": company_id}}
+    )
+    
+    # Migrar ingresos/gastos/inversiones sin company_id
+    incomes_result = await db.finanzas_incomes.update_many(
+        {
+            "username": username,
+            "$or": [
+                {"company_id": {"$exists": False}},
+                {"company_id": None}
+            ]
+        },
+        {"$set": {"company_id": company_id}}
+    )
+    
+    expenses_result = await db.finanzas_expenses.update_many(
+        {
+            "username": username,
+            "$or": [
+                {"company_id": {"$exists": False}},
+                {"company_id": None}
+            ]
+        },
+        {"$set": {"company_id": company_id}}
+    )
+    
+    investments_result = await db.finanzas_investments.update_many(
+        {
+            "username": username,
+            "$or": [
+                {"company_id": {"$exists": False}},
+                {"company_id": None}
+            ]
+        },
+        {"$set": {"company_id": company_id}}
+    )
+    
+    default_company.pop("_id", None)
+    
+    return {
+        "migrated": True,
+        "company": default_company,
+        "stats": {
+            "contacts_migrated": contacts_result.modified_count,
+            "boards_migrated": boards_result.modified_count,
+            "incomes_migrated": incomes_result.modified_count,
+            "expenses_migrated": expenses_result.modified_count,
+            "investments_migrated": investments_result.modified_count
+        }
+    }
+
+
 # Include the router in the main app
 app.include_router(api_router)
 

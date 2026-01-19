@@ -282,10 +282,11 @@ const FinanzasModule = ({ token, projects = [] }) => {
 
   // Crear gasto
   const handleCreateExpense = async (data) => {
+    if (!selectedCompany) return;
     try {
       await fetchWithAuth('/expenses', {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, company_id: selectedCompany.id }),
       });
       loadData();
       setShowExpenseModal(false);
@@ -296,10 +297,11 @@ const FinanzasModule = ({ token, projects = [] }) => {
 
   // Crear inversión
   const handleCreateInvestment = async (data) => {
+    if (!selectedCompany) return;
     try {
       await fetchWithAuth('/investments', {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, company_id: selectedCompany.id }),
       });
       loadData();
       setShowInvestmentModal(false);

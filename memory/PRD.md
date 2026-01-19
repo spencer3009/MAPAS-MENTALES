@@ -2,6 +2,31 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-19: FEATURE — Módulo de Finanzas (Fase 1-2) ✅ COMPLETADO
+- **Estado**: Módulo de Finanzas integrado y 100% funcional
+- **Funcionalidades implementadas**:
+  - Dashboard financiero con cards de resumen (Ingresos, Gastos, Inversiones, Resultado neto)
+  - Cards secundarias: Por Cobrar, Por Pagar, Caja Estimada
+  - Indicador de salud financiera (Saludable/Atención/Crítico)
+  - Selector de período (mes/año)
+  - Pestañas: Resumen, Ingresos, Gastos, Inversiones, Por Cobrar, Por Pagar
+  - Tablas CRUD para ingresos, gastos e inversiones
+  - Modales de creación: Nuevo Ingreso, Nuevo Gasto, Nueva Inversión
+  - Estados con badges de color (Cobrado, Por cobrar, Pagado, Por pagar)
+  - Acciones rápidas: Marcar como cobrado/pagado, Eliminar, Duplicar gastos recurrentes
+- **Navegación**:
+  - Botón "Finanzas" agregado al DockSidebar (desktop) con ícono DollarSign
+  - Botón "Finanzas" agregado al MobileNavigation (mobile) con ícono DollarSign
+  - Handler `handleOpenFinanzas` en MindMapApp.jsx
+  - Case 'finanzas' en renderMainContent
+- **Testing**: 100% backend (22/22 tests), 100% frontend verificado
+- **Archivos modificados**:
+  - `/app/frontend/src/components/finanzas/FinanzasModule.jsx` - Componente principal
+  - `/app/frontend/src/components/mindmap/DockSidebar.jsx` - Agregado item Finanzas
+  - `/app/frontend/src/components/mindmap/MobileNavigation.jsx` - Agregado item Finanzas
+  - `/app/frontend/src/components/mindmap/MindMapApp.jsx` - Integración del módulo
+- **Test files**: `/app/tests/test_finanzas_module.py` (22 tests)
+
 ### 2026-01-17: VERIFICACIÓN E2E — Scheduler de Recordatorios WhatsApp con Twilio ✅ FUNCIONANDO
 - **Estado**: El sistema de recordatorios de WhatsApp está **100% funcional**
 - **Verificación realizada**:

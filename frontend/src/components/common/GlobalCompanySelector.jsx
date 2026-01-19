@@ -2,11 +2,32 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Building2, ChevronDown, Plus, Settings, Users, Trash2, 
   X, AlertTriangle, Loader2, Check, Mail, Shield, Crown,
-  User, Clock, UserPlus, XCircle
+  User, Clock, UserPlus, XCircle, Activity, TrendingUp, TrendingDown,
+  LayoutGrid, UserCog, PiggyBank, CheckCircle
 } from 'lucide-react';
 import { useCompany } from '../../contexts/CompanyContext';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+
+// Iconos de actividad
+const ACTIVITY_ICONS = {
+  UserPlus, UserCog, TrendingUp, TrendingDown, LayoutGrid, 
+  Plus, Shield, XCircle, Settings, CheckCircle, PiggyBank,
+  Activity, User, Trash2, Clock
+};
+
+// Colores de actividad
+const ACTIVITY_COLORS = {
+  emerald: 'bg-emerald-100 text-emerald-600',
+  blue: 'bg-blue-100 text-blue-600',
+  red: 'bg-red-100 text-red-600',
+  orange: 'bg-orange-100 text-orange-600',
+  purple: 'bg-purple-100 text-purple-600',
+  indigo: 'bg-indigo-100 text-indigo-600',
+  amber: 'bg-amber-100 text-amber-600',
+  slate: 'bg-slate-100 text-slate-600',
+  gray: 'bg-gray-100 text-gray-600'
+};
 
 // Constantes de roles
 const ROLE_LABELS = {

@@ -982,6 +982,15 @@ const FinanzasModule = ({ token, projects = [] }) => {
           onSave={handleCreateCompany}
         />
       )}
+
+      {/* Modal Editar Empresa */}
+      {editingCompany && (
+        <CompanyModal
+          onClose={() => setEditingCompany(null)}
+          onSave={handleUpdateCompany}
+          company={editingCompany}
+        />
+      )}
     </div>
   );
 };

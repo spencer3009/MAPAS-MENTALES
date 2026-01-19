@@ -27,8 +27,8 @@ class TestFinanzasAuth:
         })
         assert response.status_code == 200, f"Login failed: {response.text}"
         data = response.json()
-        assert "token" in data, "No token in response"
-        return data["token"]
+        assert "access_token" in data, "No access_token in response"
+        return data["access_token"]
     
     @pytest.fixture(scope="class")
     def auth_headers(self, auth_token):
@@ -46,8 +46,8 @@ class TestFinanzasAuth:
         })
         assert response.status_code == 200
         data = response.json()
-        assert "token" in data
-        print(f"✅ Login successful, token received")
+        assert "access_token" in data
+        print(f"✅ Login successful, access_token received")
 
 
 class TestFinanzasSummary:
@@ -60,7 +60,7 @@ class TestFinanzasSummary:
             "username": TEST_USERNAME,
             "password": TEST_PASSWORD
         })
-        token = response.json()["token"]
+        token = response.json()["access_token"]
         return {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     
     def test_get_summary_current_month(self, auth_headers):
@@ -105,7 +105,7 @@ class TestFinanzasCategories:
             "username": TEST_USERNAME,
             "password": TEST_PASSWORD
         })
-        token = response.json()["token"]
+        token = response.json()["access_token"]
         return {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     
     def test_get_expense_categories(self, auth_headers):
@@ -154,7 +154,7 @@ class TestFinanzasIncomes:
             "username": TEST_USERNAME,
             "password": TEST_PASSWORD
         })
-        token = response.json()["token"]
+        token = response.json()["access_token"]
         return {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     
     def test_get_incomes_list(self, auth_headers):
@@ -239,7 +239,7 @@ class TestFinanzasExpenses:
             "username": TEST_USERNAME,
             "password": TEST_PASSWORD
         })
-        token = response.json()["token"]
+        token = response.json()["access_token"]
         return {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     
     def test_get_expenses_list(self, auth_headers):
@@ -331,7 +331,7 @@ class TestFinanzasInvestments:
             "username": TEST_USERNAME,
             "password": TEST_PASSWORD
         })
-        token = response.json()["token"]
+        token = response.json()["access_token"]
         return {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     
     def test_get_investments_list(self, auth_headers):
@@ -403,7 +403,7 @@ class TestFinanzasReceivablesPayables:
             "username": TEST_USERNAME,
             "password": TEST_PASSWORD
         })
-        token = response.json()["token"]
+        token = response.json()["access_token"]
         return {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     
     def test_get_receivables(self, auth_headers):
@@ -443,7 +443,7 @@ class TestFinanzasProjectSummary:
             "username": TEST_USERNAME,
             "password": TEST_PASSWORD
         })
-        token = response.json()["token"]
+        token = response.json()["access_token"]
         return {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     
     def test_get_summary_by_project(self, auth_headers):

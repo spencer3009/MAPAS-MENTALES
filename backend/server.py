@@ -9354,6 +9354,96 @@ async def get_companies_for_user(username: str, user_email: str = None) -> List[
     return companies
 
 
+# ==========================================
+# SISTEMA DE ACTIVIDAD POR EMPRESA
+# ==========================================
+
+async def log_company_activity(
+    company_id: str,
+    activity_type: str,
+    actor_username: str,
+    target_name: str = None,
+    target_id: str = None,
+    details: dict = None,
+    amount: float = None
+):
+    """Registra una actividad en la empresa (helper interno)"""
+    try:
+        activity = {
+            "id": generate_activity_id(),
+            "company_id": company_id,
+            "activity_type": activity_type,
+            "actor_username": actor_username,
+            "target_name": target_name,
+            "target_id": target_id,
+            "details": details,
+            "amount": amount,
+            "created_at": get_current_timestamp()
+        }
+        await db.company_activities.insert_one(activity)
+    except Exception as e:
+        # Log silencioso - no queremos que falle la operación principal
+        print(f"Error logging activity: {e}")
+
+
+@api_router.get("/finanzas/companies/{company_id}/activity")
+async def get_company_activity(
+    company_id: str,
+    limit: int = Query(default=50, le=100),
+    offset: int = Query(default=0, ge=0),
+    module: Optional[str] = Query(default=None, description="Filtrar por módulo: contacts, finances, boards, team"),
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener actividad reciente de una empresa (solo admin/owner)"""
+    username = current_user["username"]
+    
+    # Verificar permiso (solo admin/owner pueden ver actividad)
+    role = await get_user_company_role(username, company_id)
+    if role not in ["owner", "admin"]:
+        raise HTTPException(status_code=403, detail="Solo administradores pueden ver la actividad")
+    
+    # Construir query
+    query = {"company_id": company_id}
+    
+    # Filtrar por módulo si se especifica
+    if module:
+        activity_types = [k for k, v in ACTIVITY_TYPES.items() if v.get("module") == module]
+        if activity_types:
+            query["activity_type"] = {"$in": activity_types}
+    
+    # Obtener actividades
+    activities = await db.company_activities.find(
+        query,
+        {"_id": 0}
+    ).sort("created_at", -1).skip(offset).limit(limit).to_list(limit)
+    
+    # Obtener nombres de usuarios
+    usernames = list(set(a.get("actor_username") for a in activities if a.get("actor_username")))
+    user_names = {}
+    for uname in usernames:
+        profile = await db.user_profiles.find_one({"username": uname})
+        if profile:
+            user_names[uname] = profile.get("full_name", uname)
+        else:
+            user_names[uname] = uname
+    
+    # Formatear actividades
+    formatted = []
+    for activity in activities:
+        actor_name = user_names.get(activity.get("actor_username"), activity.get("actor_username"))
+        formatted.append(format_activity(activity, actor_name))
+    
+    # Contar total
+    total = await db.company_activities.count_documents(query)
+    
+    return {
+        "activities": formatted,
+        "total": total,
+        "limit": limit,
+        "offset": offset
+    }
+
+
 @api_router.get("/finanzas/companies/{company_id}/collaborators")
 async def get_company_collaborators(
     company_id: str,

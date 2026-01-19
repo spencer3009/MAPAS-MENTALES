@@ -4,7 +4,7 @@ import {
   ArrowUpCircle, ArrowDownCircle, Wallet, 
   Plus, Search, Filter, Calendar,
   CheckCircle2, Clock, AlertTriangle,
-  BarChart3, RefreshCw, Building2, ChevronDown, X
+  BarChart3, RefreshCw, Building2, ChevronDown, X, Pencil
 } from 'lucide-react';
 import ContactAutocomplete from './ContactAutocomplete';
 

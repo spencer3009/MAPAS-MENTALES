@@ -31,6 +31,41 @@ class ExpensePriority(str, Enum):
     MEDIUM = "medium"
     LOW = "low"
 
+# ==========================================
+# PYDANTIC MODELS - EMPRESAS
+# ==========================================
+
+class CompanyCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100, description="Nombre de la empresa")
+    ruc: Optional[str] = Field(None, description="RUC o identificador fiscal")
+    address: Optional[str] = Field(None, description="Dirección")
+    phone: Optional[str] = Field(None, description="Teléfono")
+    email: Optional[str] = Field(None, description="Email de contacto")
+    currency: str = Field(default="PEN", description="Moneda principal")
+    logo_url: Optional[str] = Field(None, description="URL del logo")
+
+class CompanyUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
+    ruc: Optional[str] = None
+    address: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    currency: Optional[str] = None
+    logo_url: Optional[str] = None
+
+class CompanyResponse(BaseModel):
+    id: str
+    name: str
+    ruc: Optional[str]
+    address: Optional[str]
+    phone: Optional[str]
+    email: Optional[str]
+    currency: str
+    logo_url: Optional[str]
+    owner_username: str
+    created_at: str
+    updated_at: str
+
 # Categorías de gastos predefinidas (editables por usuario)
 DEFAULT_EXPENSE_CATEGORIES = [
     {"id": "nomina", "name": "Nómina", "color": "#3B82F6", "icon": "Users"},

@@ -7,7 +7,7 @@ const CompanyModal = ({
   onDelete, 
   company = null 
 }) => {
-  const [form, setForm] = useState(() => ({
+  const [form, setForm] = useState({
     name: company?.name || '',
     description: company?.description || '',
     industry: company?.industry || '',
@@ -15,34 +15,9 @@ const CompanyModal = ({
     address: company?.address || '',
     phone: company?.phone || '',
     email: company?.email || '',
-  }));
+  });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
-
-  // Reset form when company changes
-  useEffect(() => {
-    if (company) {
-      setForm({
-        name: company.name || '',
-        description: company.description || '',
-        industry: company.industry || '',
-        tax_id: company.tax_id || '',
-        address: company.address || '',
-        phone: company.phone || '',
-        email: company.email || '',
-      });
-    } else {
-      setForm({
-        name: '',
-        description: '',
-        industry: '',
-        tax_id: '',
-        address: '',
-        phone: '',
-        email: '',
-      });
-    }
-  }, [company?.id]); // Only depend on company ID to avoid unnecessary re-renders
 
   const handleSubmit = (e) => {
     e.preventDefault();

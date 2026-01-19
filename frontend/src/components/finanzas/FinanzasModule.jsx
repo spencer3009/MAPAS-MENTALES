@@ -902,13 +902,13 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Cliente</label>
-            <input
-              type="text"
-              value={form.client_name}
-              onChange={(e) => setForm({ ...form, client_name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-              placeholder="Nombre del cliente"
+            <ContactAutocomplete
+              token={token}
+              value={selectedContact}
+              onChange={handleContactChange}
+              label="Cliente"
+              placeholder="Buscar cliente..."
+              focusColor="emerald"
             />
           </div>
 

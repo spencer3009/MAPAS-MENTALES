@@ -81,6 +81,17 @@ const CompanySelector = ({
         </button>
       )}
 
+      {/* Botón configuración/colaboradores */}
+      {showSettingsButton && activeCompany && (
+        <button
+          onClick={() => onSettingsClick && onSettingsClick(activeCompany)}
+          className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+          title="Configuración y colaboradores"
+        >
+          <Users size={18} />
+        </button>
+      )}
+
       {/* Botón crear */}
       {showCreateButton && (
         <button

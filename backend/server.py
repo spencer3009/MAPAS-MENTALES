@@ -8219,11 +8219,119 @@ async def get_user_workspace_id(username: str) -> str:
     return workspace_id
 
 # ==========================================
+# EMPRESAS (Companies)
+# ==========================================
+
+@api_router.get("/finanzas/companies", response_model=List[CompanyResponse])
+async def get_companies(current_user: dict = Depends(get_current_user)):
+    """Obtener lista de empresas del usuario"""
+    username = current_user["username"]
+    companies = await db.finanzas_companies.find(
+        {"owner_username": username},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    return companies
+
+@api_router.post("/finanzas/companies", response_model=CompanyResponse)
+async def create_company(
+    company_data: CompanyCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Crear una nueva empresa"""
+    username = current_user["username"]
+    now = get_current_timestamp()
+    
+    company = {
+        "id": generate_id(),
+        "owner_username": username,
+        **company_data.model_dump(),
+        "created_at": now,
+        "updated_at": now
+    }
+    
+    await db.finanzas_companies.insert_one(company)
+    company.pop("_id", None)
+    return company
+
+@api_router.get("/finanzas/companies/{company_id}", response_model=CompanyResponse)
+async def get_company(
+    company_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener una empresa específica"""
+    username = current_user["username"]
+    company = await db.finanzas_companies.find_one(
+        {"id": company_id, "owner_username": username},
+        {"_id": 0}
+    )
+    if not company:
+        raise HTTPException(status_code=404, detail="Empresa no encontrada")
+    return company
+
+@api_router.put("/finanzas/companies/{company_id}", response_model=CompanyResponse)
+async def update_company(
+    company_id: str,
+    company_data: CompanyUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Actualizar una empresa"""
+    username = current_user["username"]
+    company = await db.finanzas_companies.find_one(
+        {"id": company_id, "owner_username": username}
+    )
+    if not company:
+        raise HTTPException(status_code=404, detail="Empresa no encontrada")
+    
+    update_data = {k: v for k, v in company_data.model_dump().items() if v is not None}
+    update_data["updated_at"] = get_current_timestamp()
+    
+    await db.finanzas_companies.update_one(
+        {"id": company_id},
+        {"$set": update_data}
+    )
+    
+    updated = await db.finanzas_companies.find_one({"id": company_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/finanzas/companies/{company_id}")
+async def delete_company(
+    company_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Eliminar una empresa y todos sus datos financieros"""
+    username = current_user["username"]
+    company = await db.finanzas_companies.find_one(
+        {"id": company_id, "owner_username": username}
+    )
+    if not company:
+        raise HTTPException(status_code=404, detail="Empresa no encontrada")
+    
+    # Eliminar todos los datos financieros de la empresa
+    await db.finanzas_incomes.delete_many({"company_id": company_id})
+    await db.finanzas_expenses.delete_many({"company_id": company_id})
+    await db.finanzas_investments.delete_many({"company_id": company_id})
+    await db.finanzas_companies.delete_one({"id": company_id})
+    
+    return {"message": "Empresa eliminada exitosamente"}
+
+# Helper para verificar acceso a empresa
+async def verify_company_access(company_id: str, username: str) -> dict:
+    """Verifica que el usuario tenga acceso a la empresa"""
+    company = await db.finanzas_companies.find_one(
+        {"id": company_id, "owner_username": username},
+        {"_id": 0}
+    )
+    if not company:
+        raise HTTPException(status_code=404, detail="Empresa no encontrada o sin acceso")
+    return company
+
+# ==========================================
 # INGRESOS (Incomes)
 # ==========================================
 
 @api_router.get("/finanzas/incomes", response_model=List[IncomeResponse])
 async def get_incomes(
+    company_id: str,
     status: Optional[str] = None,
     project_id: Optional[str] = None,
     start_date: Optional[str] = None,
@@ -8231,9 +8339,11 @@ async def get_incomes(
     current_user: dict = Depends(get_current_user)
 ):
     """Obtener lista de ingresos con filtros opcionales"""
-    workspace_id = await get_user_workspace_id(current_user["username"])
+    username = current_user["username"]
+    await verify_company_access(company_id, username)
+    workspace_id = await get_user_workspace_id(username)
     
-    query = {"workspace_id": workspace_id}
+    query = {"company_id": company_id, "workspace_id": workspace_id}
     
     if status:
         query["status"] = status
@@ -8256,13 +8366,15 @@ async def create_income(
     current_user: dict = Depends(get_current_user)
 ):
     """Crear un nuevo ingreso"""
-    workspace_id = await get_user_workspace_id(current_user["username"])
+    username = current_user["username"]
+    await verify_company_access(income_data.company_id, username)
+    workspace_id = await get_user_workspace_id(username)
     now = get_current_timestamp()
     
     income = {
         "id": generate_id(),
         "workspace_id": workspace_id,
-        "username": current_user["username"],
+        "username": username,
         **income_data.model_dump(),
         "created_at": now,
         "updated_at": now

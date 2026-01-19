@@ -410,6 +410,11 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
     setActiveView('integrations');
   }, []);
 
+  const handleOpenFinanzas = useCallback(() => {
+    setActiveView('finanzas');
+    setIsProjectsSidebarOpen(false);
+  }, []);
+
   const handleOpenSettings = useCallback(() => {
     setShowProfileModal(true);
   }, []);

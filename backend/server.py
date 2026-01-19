@@ -9789,6 +9789,15 @@ async def accept_invitation(
             html_content=email_html
         )
     
+    # Registrar actividad
+    await log_company_activity(
+        company_id=invitation["company_id"],
+        activity_type="collaborator_joined",
+        actor_username=username,
+        target_name=collaborator_name,
+        details={"role": invitation.get("role", "collaborator")}
+    )
+    
     collaborator.pop("_id", None)
     
     return {

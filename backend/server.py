@@ -8798,14 +8798,17 @@ async def get_income_sources(
 
 @api_router.get("/finanzas/summary")
 async def get_financial_summary(
+    company_id: str,
     period: Optional[str] = None,  # "2026-01" formato año-mes
     current_user: dict = Depends(get_current_user)
 ):
     """
-    Obtener resumen financiero del mes.
+    Obtener resumen financiero del mes para una empresa.
     Si no se especifica periodo, usa el mes actual.
     """
-    workspace_id = await get_user_workspace_id(current_user["username"])
+    username = current_user["username"]
+    await verify_company_access(company_id, username)
+    workspace_id = await get_user_workspace_id(username)
     
     # Determinar periodo
     if not period:
@@ -8824,7 +8827,7 @@ async def get_financial_summary(
     
     # Obtener ingresos del periodo
     incomes = await db.finanzas_incomes.find(
-        {"workspace_id": workspace_id, "date": date_filter},
+        {"company_id": company_id, "workspace_id": workspace_id, "date": date_filter},
         {"_id": 0}
     ).to_list(1000)
     
@@ -8834,7 +8837,7 @@ async def get_financial_summary(
     
     # Obtener gastos del periodo
     expenses = await db.finanzas_expenses.find(
-        {"workspace_id": workspace_id, "date": date_filter},
+        {"company_id": company_id, "workspace_id": workspace_id, "date": date_filter},
         {"_id": 0}
     ).to_list(1000)
     
@@ -8844,7 +8847,7 @@ async def get_financial_summary(
     
     # Obtener inversiones del periodo
     investments = await db.finanzas_investments.find(
-        {"workspace_id": workspace_id, "date": date_filter},
+        {"company_id": company_id, "workspace_id": workspace_id, "date": date_filter},
         {"_id": 0}
     ).to_list(1000)
     
@@ -8859,6 +8862,7 @@ async def get_financial_summary(
     
     return {
         "period": period,
+        "company_id": company_id,
         "total_income": total_income,
         "total_income_collected": income_collected,
         "total_income_pending": income_pending,

@@ -8307,14 +8307,16 @@ async def get_user_workspace_id(username: str) -> str:
 # EMPRESAS (Companies)
 # ==========================================
 
-@api_router.get("/finanzas/companies", response_model=List[CompanyResponse])
+@api_router.get("/finanzas/companies")
 async def get_companies(current_user: dict = Depends(get_current_user)):
-    """Obtener lista de empresas del usuario"""
+    """Obtener lista de empresas del usuario (propias + donde es colaborador)"""
     username = current_user["username"]
-    companies = await db.finanzas_companies.find(
-        {"owner_username": username},
-        {"_id": 0}
-    ).sort("created_at", -1).to_list(100)
+    user = await db.users.find_one({"username": username})
+    user_email = user.get("email", "").lower() if user else None
+    
+    # Usar la función helper que incluye empresas propias y colaboraciones
+    companies = await get_companies_for_user(username, user_email)
+    
     return companies
 
 @api_router.post("/finanzas/companies", response_model=CompanyResponse)

@@ -6166,6 +6166,65 @@ async def get_contacts(
     return {"contacts": contacts}
 
 
+@api_router.get("/contacts/search")
+async def search_contacts(
+    q: str = "",
+    limit: int = 10,
+    workspace_id: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Búsqueda de contactos para autocomplete.
+    Busca por nombre, email o teléfono.
+    """
+    username = current_user["username"]
+    
+    # Construir query base según workspace
+    if workspace_id:
+        membership = await db.workspace_members.find_one({
+            "workspace_id": workspace_id,
+            "username": username
+        })
+        if not membership:
+            raise HTTPException(status_code=403, detail="No tienes acceso a este workspace")
+        base_query = {"workspace_id": workspace_id}
+    else:
+        base_query = {
+            "owner_username": username,
+            "$or": [
+                {"workspace_id": {"$exists": False}},
+                {"workspace_id": None}
+            ]
+        }
+    
+    # Si hay texto de búsqueda, agregar filtro
+    if q and q.strip():
+        search_regex = {"$regex": q.strip(), "$options": "i"}
+        search_conditions = [
+            {"name": search_regex},
+            {"email": search_regex},
+            {"phone": search_regex},
+            {"company": search_regex}
+        ]
+        # Combinar con la query base
+        final_query = {
+            "$and": [
+                base_query,
+                {"$or": search_conditions}
+            ]
+        }
+    else:
+        final_query = base_query
+    
+    contacts = await db.contacts.find(
+        final_query, 
+        {"_id": 0, "id": 1, "name": 1, "email": 1, "phone": 1, "company": 1, "contact_type": 1}
+    ).sort("name", 1).limit(limit).to_list(limit)
+    
+    return {"contacts": contacts}
+
+
+
 @api_router.post("/contacts")
 async def create_contact(request: CreateContactRequest, current_user: dict = Depends(get_current_user)):
     """

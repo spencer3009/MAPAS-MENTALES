@@ -816,6 +816,14 @@ const BoardsPage = ({ onBack, onSelectBoard, onTrashUpdate }) => {
         resourceName={shareBoard?.title}
         onCollaboratorsChange={fetchBoards}
       />
+
+      {/* Modal crear empresa */}
+      {showCompanyModal && (
+        <CompanyModal
+          onClose={() => setShowCompanyModal(false)}
+          onSave={handleCreateCompanyFromBoards}
+        />
+      )}
     </div>
   );
 };

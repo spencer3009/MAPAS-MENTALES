@@ -112,6 +112,12 @@ const MobileNavigation = ({
       onClick: onOpenContacts,
     },
     {
+      id: 'finanzas',
+      icon: DollarSign,
+      label: 'Finanzas',
+      onClick: onOpenFinanzas,
+    },
+    {
       id: 'favorites',
       icon: Star,
       label: 'Favoritos',

@@ -144,9 +144,9 @@ export const CompanyRequiredWrapper = ({
 };
 
 /**
- * CompanyModal - Modal para crear/editar empresa
+ * CompanyModal - Modal para crear/editar empresa con zona de riesgo
  */
-export const CompanyModal = ({ onClose, onSave, company = null }) => {
+export const CompanyModal = ({ onClose, onSave, onDelete, company = null }) => {
   const isEditing = !!company;
   const [form, setForm] = useState({
     name: company?.name || '',
@@ -157,6 +157,9 @@ export const CompanyModal = ({ onClose, onSave, company = null }) => {
     currency: company?.currency || 'PEN',
   });
   const [saving, setSaving] = useState(false);
+  const [showDangerZone, setShowDangerZone] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -170,10 +173,28 @@ export const CompanyModal = ({ onClose, onSave, company = null }) => {
     }
   };
 
+  const handleDelete = async () => {
+    if (!onDelete || deleting) return;
+    
+    // Verificar confirmación
+    const companyName = company?.name || '';
+    if (deleteConfirmation !== companyName && deleteConfirmation !== 'ELIMINAR') {
+      alert(`Debes escribir "${companyName}" o "ELIMINAR" para confirmar`);
+      return;
+    }
+    
+    setDeleting(true);
+    try {
+      await onDelete(company.id, deleteConfirmation);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
-        <div className={`px-6 py-4 flex items-center justify-between ${isEditing ? 'bg-gradient-to-r from-blue-500 to-indigo-600' : 'bg-gradient-to-r from-emerald-500 to-teal-600'} text-white`}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden max-h-[90vh] overflow-y-auto">
+        <div className={`px-6 py-4 flex items-center justify-between ${isEditing ? 'bg-gradient-to-r from-blue-500 to-indigo-600' : 'bg-gradient-to-r from-emerald-500 to-teal-600'} text-white sticky top-0`}>
           <div>
             <h2 className="text-lg font-semibold">{isEditing ? 'Editar Empresa' : 'Nueva Empresa'}</h2>
             <p className="text-sm opacity-90">{isEditing ? 'Modifica los datos de tu empresa' : 'Crea una empresa para gestionar tus datos'}</p>
@@ -276,6 +297,82 @@ export const CompanyModal = ({ onClose, onSave, company = null }) => {
             </button>
           </div>
         </form>
+
+        {/* Zona de Riesgo - Solo visible en modo edición */}
+        {isEditing && onDelete && (
+          <div className="border-t border-gray-200">
+            <button
+              type="button"
+              onClick={() => setShowDangerZone(!showDangerZone)}
+              className="w-full px-6 py-3 flex items-center justify-between text-left hover:bg-red-50 transition-colors"
+            >
+              <div className="flex items-center gap-2 text-red-600">
+                <AlertTriangle size={18} />
+                <span className="font-medium">Zona de riesgo</span>
+              </div>
+              <ChevronDown size={18} className={`text-red-400 transition-transform ${showDangerZone ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {showDangerZone && (
+              <div className="px-6 pb-6 space-y-4">
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-red-100 rounded-lg">
+                      <Trash2 size={20} className="text-red-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-red-800">Eliminar empresa permanentemente</h4>
+                      <p className="text-sm text-red-600 mt-1">
+                        Esta acción es <strong>IRREVERSIBLE</strong>. Se eliminarán permanentemente:
+                      </p>
+                      <ul className="text-sm text-red-600 mt-2 space-y-1 list-disc list-inside">
+                        <li>Todos los datos financieros (ingresos, gastos, inversiones)</li>
+                        <li>Todos los contactos de la empresa</li>
+                        <li>Todos los tableros y sus tarjetas</li>
+                        <li>Todos los recordatorios operativos</li>
+                      </ul>
+                      <p className="text-sm text-red-700 mt-3 font-medium">
+                        Los mapas mentales y recordatorios personales NO serán afectados.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-red-700 mb-2">
+                    Para confirmar, escribe <strong>"{company?.name}"</strong> o <strong>"ELIMINAR"</strong>
+                  </label>
+                  <input
+                    type="text"
+                    value={deleteConfirmation}
+                    onChange={(e) => setDeleteConfirmation(e.target.value)}
+                    className="w-full px-3 py-2 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-red-50"
+                    placeholder="Escribe aquí para confirmar"
+                  />
+                </div>
+                
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={deleting || (deleteConfirmation !== company?.name && deleteConfirmation !== 'ELIMINAR')}
+                  className="w-full px-4 py-3 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {deleting ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      Eliminando...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 size={18} />
+                      Eliminar empresa permanentemente
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

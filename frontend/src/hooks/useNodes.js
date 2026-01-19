@@ -1980,9 +1980,18 @@ export const useNodes = () => {
 
       const nodeDefaults = getNodeDefaults();
 
+      // Determinar el texto inicial del nodo
+      let initialText = 'Nuevo Nodo';
+      if (options?.nodeType === 'dashed' || options?.nodeType === 'dashed_text') {
+        initialText = ''; // Texto vacío para dashed
+      } else if (options?.nodeType === 'project' && position) {
+        // Para nodos tipo proyecto, usar el nombre del proyecto como texto inicial
+        initialText = position; // position contiene el nombre del proyecto
+      }
+
       const newNode = {
         id: newId,
-        text: (options?.nodeType === 'dashed' || options?.nodeType === 'dashed_text') ? '' : 'Nuevo Nodo', // Texto vacío para dashed (mostrará placeholder)
+        text: initialText,
         x: newX,
         y: newY,
         color: 'blue',
@@ -1990,7 +1999,9 @@ export const useNodes = () => {
         width: (options?.nodeType === 'dashed' || options?.nodeType === 'dashed_text') ? 260 : 160,
         height: (options?.nodeType === 'dashed' || options?.nodeType === 'dashed_text') ? 40 : 64,
         // Normalizar 'dashed' a 'dashed_text' para nuevos nodos
-        nodeType: options?.nodeType === 'dashed' ? 'dashed_text' : (options?.nodeType || 'default'), // 'default' | 'dashed_text'
+        nodeType: options?.nodeType === 'dashed' ? 'dashed_text' : (options?.nodeType || 'default'), // 'default' | 'dashed_text' | 'project'
+        // Para nodos tipo proyecto: guardar el ID del proyecto vinculado
+        ...(options?.linkedProjectId && { linkedProjectId: options.linkedProjectId }),
         // MindAxis: guardar el lado del eje
         ...(axisSide && { axisSide }),
         // Aplicar valores por defecto (ícono y alineación)

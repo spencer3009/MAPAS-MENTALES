@@ -948,6 +948,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
       {/* Modal Editar Empresa */}
       {editingCompany && (
         <CompanyModal
+          key={editingCompany.id}
           onClose={() => setEditingCompany(null)}
           onSave={handleUpdateCompany}
           onDelete={handleDeleteCompany}

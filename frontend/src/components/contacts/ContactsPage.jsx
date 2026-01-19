@@ -1517,6 +1517,51 @@ const ContactsPage = () => {
     }
   };
 
+  // Handler para crear empresa desde el componente
+  const handleCreateCompanyFromContacts = async (companyData) => {
+    const result = await createCompany(companyData);
+    if (result.success) {
+      setShowCompanyModal(false);
+    } else {
+      alert(result.error);
+    }
+  };
+
+  // Si no hay empresa activa, mostrar estado vacío
+  if (!hasCompanies || !activeCompany) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <Building2 size={32} className="text-amber-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Empresa requerida
+          </h2>
+          <p className="text-gray-500 mb-6">
+            Para gestionar <strong>Contactos</strong>, primero debes crear o seleccionar una empresa. 
+            Los contactos pertenecen a cada empresa de forma independiente.
+          </p>
+          <button
+            onClick={() => setShowCompanyModal(true)}
+            className="w-full px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl font-medium hover:from-cyan-600 hover:to-blue-700 transition-all flex items-center justify-center gap-2"
+          >
+            <Plus size={20} />
+            Crear mi primera empresa
+          </button>
+        </div>
+        
+        {/* Modal crear empresa */}
+        {showCompanyModal && (
+          <CompanyModal
+            onClose={() => setShowCompanyModal(false)}
+            onSave={handleCreateCompanyFromContacts}
+          />
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Verification Alert */}
@@ -1548,7 +1593,7 @@ const ContactsPage = () => {
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
                   <Users className="w-5 h-5 text-white" />
@@ -1559,7 +1604,15 @@ const ContactsPage = () => {
                 </div>
               </div>
               
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
+                {/* Selector de Empresa */}
+                <CompanySelector 
+                  showCreateButton={true}
+                  showEditButton={false}
+                  onCreateClick={() => setShowCompanyModal(true)}
+                  compact={true}
+                />
+                
                 {/* Selector de Contexto (Mis Contactos / Workspaces) */}
                 <div className="relative" ref={contextSelectorRef}>
                   <button

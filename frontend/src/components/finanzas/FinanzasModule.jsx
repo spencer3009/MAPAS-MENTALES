@@ -233,30 +233,11 @@ const FinanzasModule = ({ token, projects = [] }) => {
   // Actualizar empresa
   const handleUpdateCompany = async (companyData) => {
     if (!editingCompany) return;
-    try {
-      const response = await fetch(`${API_URL}/api/finanzas/companies/${editingCompany.id}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(companyData),
-      });
-      
-      if (response.ok) {
-        const updatedCompany = await response.json();
-        setCompanies(prev => prev.map(c => c.id === updatedCompany.id ? updatedCompany : c));
-        if (selectedCompany?.id === updatedCompany.id) {
-          setSelectedCompany(updatedCompany);
-        }
-        setEditingCompany(null);
-      } else {
-        const error = await response.json();
-        alert(`Error al actualizar empresa: ${error.detail || 'Error desconocido'}`);
-      }
-    } catch (err) {
-      console.error('Error updating company:', err);
-      alert(`Error de conexión: ${err.message}`);
+    const result = await updateCompany(editingCompany.id, companyData);
+    if (result.success) {
+      setEditingCompany(null);
+    } else {
+      alert(`Error al actualizar empresa: ${result.error}`);
     }
   };
 

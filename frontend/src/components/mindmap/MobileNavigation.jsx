@@ -37,6 +37,7 @@ const MobileNavigation = ({
   onOpenBoards,
   onOpenContacts,
   onOpenWhatsApp,
+  onOpenFinanzas,
   onLogout,
   activeView = 'projects',
   trashCount = 0,

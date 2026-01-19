@@ -2,6 +2,30 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-19: FEATURE — Eliminación Segura de Empresas + Bug Fix Indicador Salud ✅ COMPLETADO
+- **Estado**: Feature de eliminación de empresas implementado y testeado
+- **Bug Fix - Indicador de Salud Financiera**:
+  - Problema: Empresas nuevas con S/ 0 ingresos y gastos mostraban "Crítico"
+  - Solución: Función `calculate_health_status()` ahora retorna "good" cuando income=0, expenses=0, pending_expenses=0
+  - Archivo modificado: `/app/backend/finanzas_service.py` línea 307
+- **Feature - Eliminación de Empresas**:
+  - "Zona de riesgo" en modal de edición de empresa
+  - Sección expandible con advertencia IRREVERSIBLE
+  - Lista de datos que serán eliminados (finanzas, contactos, tableros, recordatorios)
+  - Campo de confirmación requiere nombre exacto de empresa o "ELIMINAR"
+  - Botón de eliminación deshabilitado hasta confirmación válida
+  - Eliminación en cascada de todos los datos asociados
+- **Backend**:
+  - Endpoint `DELETE /api/finanzas/companies/{company_id}` con validación de confirmación
+  - Retorna estadísticas de datos eliminados (incomes, expenses, investments, contacts, boards, reminders)
+  - Retorna 400 si confirmación es incorrecta, 404 si empresa no existe
+- **Frontend**:
+  - `CompanyModal` en `/app/frontend/src/components/common/CompanySelector.jsx` con zona de riesgo
+  - `FinanzasModule.jsx` importa `CompanyModal` y pasa `onDelete` handler
+  - Handler `handleDeleteCompany` elimina empresa y actualiza UI
+- **Testing**: 100% backend (7/7 tests), 100% frontend UI verificado
+- **Test file**: `/app/tests/test_company_delete_and_health.py`
+
 ### 2026-01-19: ARQUITECTURA — "Empresa como Contexto Operativo" ✅ COMPLETADO
 - **Estado**: Arquitectura dual implementada (Empresa para operaciones, Usuario para mente)
 - **Concepto implementado**:

@@ -357,8 +357,8 @@ const CompanyCreateModal = ({ onClose, onSave }) => {
 /**
  * CompanyConfigModal - Modal de configuración de empresa CON colaboradores
  */
-const CompanyConfigModal = ({ company, token, onClose, onSave, onDelete }) => {
-  const [activeTab, setActiveTab] = useState('general');
+const CompanyConfigModal = ({ company, token, initialTab = 'general', onClose, onSave, onDelete }) => {
+  const [activeTab, setActiveTab] = useState(initialTab);
   const userRole = company?.user_role || 'owner';
   const canManageCollaborators = userRole === 'owner' || userRole === 'admin';
   const canDeleteCompany = userRole === 'owner';

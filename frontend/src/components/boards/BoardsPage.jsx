@@ -211,6 +211,10 @@ const BoardsPage = ({ onBack, onSelectBoard, onTrashUpdate }) => {
 
   const createBoard = async () => {
     if (!newBoardTitle.trim()) return;
+    if (!activeCompany) {
+      alert('Debes seleccionar una empresa primero');
+      return;
+    }
     
     setCreating(true);
     try {
@@ -223,7 +227,8 @@ const BoardsPage = ({ onBack, onSelectBoard, onTrashUpdate }) => {
         },
         body: JSON.stringify({
           title: newBoardTitle,
-          background_color: newBoardColor
+          background_color: newBoardColor,
+          company_id: activeCompany.id
         })
       });
       

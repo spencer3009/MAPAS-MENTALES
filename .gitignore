@@ -80,8 +80,7 @@ agenthub/agents/youtube/db
 android-sdk/
 
 # Cache files
-frontend/node_modules/.cache/
-frontend/node_modules/.cache/default-development/12.pack
+frontend/node_modules/.cache/frontend/node_modules/.cache/default-development/12.pack
 frontend/node_modules/.cache/default-development/13.pack
 frontend/node_modules/.cache/default-development/5.pack
 frontend/node_modules/.cache/default-development/14.pack

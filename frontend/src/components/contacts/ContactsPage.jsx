@@ -26,6 +26,8 @@ import {
   PieChart as RechartsPieChart, Pie, Cell, LineChart, Line, Area, AreaChart
 } from 'recharts';
 import { useAuth } from '../../contexts/AuthContext';
+import { useCompany } from '../../contexts/CompanyContext';
+import CompanySelector, { CompanyRequiredWrapper, CompanyModal } from '../common/CompanySelector';
 import { ShareModal } from '../sharing/ShareModal';
 
 // Use relative URLs for production compatibility

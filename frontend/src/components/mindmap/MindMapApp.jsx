@@ -1371,7 +1371,7 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
             // Props para nodos tipo proyecto
             projects={projects}
             currentProjectId={activeProjectId}
-            onNavigateToProject={setActiveProjectId}
+            onNavigateToProject={switchProject}
             onCreateProject={createBlankMap}
             />
 

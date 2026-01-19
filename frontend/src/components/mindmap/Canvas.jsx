@@ -494,6 +494,28 @@ const Canvas = ({
     setShowControls(true);
   }, []);
 
+  // Handler para abrir modal de vinculación desde el menú contextual
+  const handleLinkToProjectFromContext = useCallback((nodeId) => {
+    setLinkedProjectModal({ isOpen: true, parentId: null, nodeIdToLink: nodeId });
+  }, []);
+
+  // Handler para vincular un nodo existente a un proyecto
+  const handleLinkExistingNodeToProject = useCallback((project) => {
+    const nodeId = linkedProjectModal.nodeIdToLink;
+    if (nodeId && project && onChangeNodeType) {
+      // Cambiar el tipo del nodo a 'project' y agregar linkedProjectId
+      onChangeNodeType(nodeId, 'project', { linkedProjectId: project.id, text: project.name });
+    }
+    setLinkedProjectModal({ isOpen: false, parentId: null, nodeIdToLink: null });
+  }, [linkedProjectModal.nodeIdToLink, onChangeNodeType]);
+
+  // Handler para desvincular un nodo de un proyecto
+  const handleUnlinkProject = useCallback((nodeId) => {
+    if (nodeId && onChangeNodeType) {
+      onChangeNodeType(nodeId, 'default', { linkedProjectId: null });
+    }
+  }, [onChangeNodeType]);
+
   // Handler para cerrar el selector de tipo de nodo
   const handleCloseNodeTypeSelector = useCallback(() => {
     setNodeTypeSelector({ isOpen: false, position: null, parentId: null });

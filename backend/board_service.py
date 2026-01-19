@@ -68,6 +68,7 @@ class CreateBoardRequest(BaseModel):
     title: str
     description: Optional[str] = ""
     background_color: Optional[str] = "#3B82F6"
+    company_id: Optional[str] = None  # ID de la empresa (obligatorio para operaciones)
 
 
 class UpdateBoardRequest(BaseModel):
@@ -76,6 +77,7 @@ class UpdateBoardRequest(BaseModel):
     background_color: Optional[str] = None
     background_image: Optional[str] = None
     board_labels: Optional[List[dict]] = None  # Etiquetas reutilizables
+    company_id: Optional[str] = None  # Para migrar tableros existentes
 
 
 class CreateListRequest(BaseModel):

@@ -229,9 +229,10 @@ const NodeTypeSelector = ({
         <button
           onClick={() => handleSelect(NODE_TYPES.PROJECT)}
           className={`
-            relative flex flex-col items-center gap-2 p-3
+            relative flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3
             rounded-xl border-2 transition-all duration-200
             hover:scale-105
+            col-span-2 sm:col-span-1
             ${lastUsedType === NODE_TYPES.PROJECT
               ? 'border-emerald-500 bg-emerald-50' 
               : 'border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/50'
@@ -240,7 +241,7 @@ const NodeTypeSelector = ({
         >
           {/* Preview del nodo proyecto */}
           <div className="
-            w-20 h-12 rounded-lg
+            w-14 sm:w-20 h-10 sm:h-12 rounded-lg
             bg-gradient-to-br from-emerald-100 to-emerald-200
             border-2 border-emerald-300
             border-dashed
@@ -252,7 +253,7 @@ const NodeTypeSelector = ({
             <span className="text-[9px] text-emerald-700 font-medium">Mapa</span>
           </div>
           
-          <span className="text-xs font-medium text-gray-700">
+          <span className="text-[10px] sm:text-xs font-medium text-gray-700">
             Proyecto
           </span>
 
@@ -272,11 +273,11 @@ const NodeTypeSelector = ({
 
       {/* Footer con tip */}
       <div className="
-        px-3 py-2
+        px-3 py-1.5 sm:py-2
         bg-gray-50
         border-t border-gray-100
       ">
-        <p className="text-[10px] text-gray-400 text-center">
+        <p className="text-[9px] sm:text-[10px] text-gray-400 text-center">
           💡 Se recuerda tu última selección
         </p>
       </div>

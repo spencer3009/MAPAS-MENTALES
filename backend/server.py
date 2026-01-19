@@ -8364,23 +8364,69 @@ async def update_company(
 @api_router.delete("/finanzas/companies/{company_id}")
 async def delete_company(
     company_id: str,
+    confirmation: str = "",  # Debe ser el nombre de la empresa o "ELIMINAR"
     current_user: dict = Depends(get_current_user)
 ):
-    """Eliminar una empresa y todos sus datos financieros"""
+    """
+    Eliminar una empresa y TODOS sus datos operativos asociados.
+    
+    Esta acción es IRREVERSIBLE y eliminará:
+    - Todos los datos financieros (ingresos, gastos, inversiones)
+    - Todos los contactos de la empresa
+    - Todos los tableros de la empresa
+    - Todos los recordatorios operativos de la empresa
+    
+    Requiere confirmación: escribir el nombre exacto de la empresa o "ELIMINAR"
+    """
     username = current_user["username"]
+    
+    # Verificar que la empresa existe y el usuario es propietario
     company = await db.finanzas_companies.find_one(
         {"id": company_id, "owner_username": username}
     )
     if not company:
-        raise HTTPException(status_code=404, detail="Empresa no encontrada")
+        raise HTTPException(status_code=404, detail="Empresa no encontrada o no tienes permisos para eliminarla")
     
-    # Eliminar todos los datos financieros de la empresa
+    # Verificar confirmación
+    company_name = company.get("name", "")
+    if confirmation != company_name and confirmation != "ELIMINAR":
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Confirmación incorrecta. Debes escribir el nombre exacto de la empresa ('{company_name}') o 'ELIMINAR'"
+        )
+    
+    # Contar datos que serán eliminados (para el resumen)
+    stats = {
+        "incomes": await db.finanzas_incomes.count_documents({"company_id": company_id}),
+        "expenses": await db.finanzas_expenses.count_documents({"company_id": company_id}),
+        "investments": await db.finanzas_investments.count_documents({"company_id": company_id}),
+        "contacts": await db.contacts.count_documents({"company_id": company_id}),
+        "boards": await db.boards.count_documents({"company_id": company_id}),
+        "reminders": await db.reminders.count_documents({"company_id": company_id}) if await db.list_collection_names() else 0
+    }
+    
+    # Eliminar TODOS los datos operativos de la empresa
+    # 1. Finanzas
     await db.finanzas_incomes.delete_many({"company_id": company_id})
     await db.finanzas_expenses.delete_many({"company_id": company_id})
     await db.finanzas_investments.delete_many({"company_id": company_id})
+    
+    # 2. Contactos
+    await db.contacts.delete_many({"company_id": company_id})
+    
+    # 3. Tableros (y sus tarjetas están dentro del documento)
+    await db.boards.delete_many({"company_id": company_id})
+    
+    # 4. Recordatorios operativos (solo los que tienen company_id)
+    await db.reminders.delete_many({"company_id": company_id})
+    
+    # 5. Finalmente, eliminar la empresa
     await db.finanzas_companies.delete_one({"id": company_id})
     
-    return {"message": "Empresa eliminada exitosamente"}
+    return {
+        "message": f"Empresa '{company_name}' eliminada permanentemente",
+        "deleted_data": stats
+    }
 
 # Helper para verificar acceso a empresa
 async def verify_company_access(company_id: str, username: str) -> dict:

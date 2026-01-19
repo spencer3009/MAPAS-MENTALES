@@ -368,10 +368,54 @@ const FinanzasModule = ({ token, projects = [] }) => {
     }
   };
 
+  // Loading inicial de empresas
+  if (loadingCompanies) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+      </div>
+    );
+  }
+
+  // Estado vacío: No hay empresas
+  if (companies.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <Building2 size={32} className="text-emerald-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Crea tu primera empresa
+          </h2>
+          <p className="text-gray-500 mb-6">
+            Para comenzar a usar el módulo de Finanzas, necesitas crear al menos una empresa. 
+            Cada empresa tendrá sus propios datos financieros independientes.
+          </p>
+          <button
+            onClick={() => setShowCompanyModal(true)}
+            className="w-full px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-medium hover:from-emerald-600 hover:to-teal-700 transition-all flex items-center justify-center gap-2"
+          >
+            <Plus size={20} />
+            Crear Empresa
+          </button>
+        </div>
+        
+        {/* Modal crear empresa */}
+        {showCompanyModal && (
+          <CompanyModal
+            onClose={() => setShowCompanyModal(false)}
+            onSave={handleCreateCompany}
+          />
+        )}
+      </div>
+    );
+  }
+
   if (loading && !summary) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
       </div>
     );
   }
@@ -381,7 +425,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl text-white">
                 <DollarSign size={24} />
@@ -392,7 +436,35 @@ const FinanzasModule = ({ token, projects = [] }) => {
               </div>
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
+              {/* Selector de empresa */}
+              <div className="relative">
+                <select
+                  value={selectedCompany?.id || ''}
+                  onChange={(e) => {
+                    const company = companies.find(c => c.id === e.target.value);
+                    setSelectedCompany(company);
+                  }}
+                  className="appearance-none pl-10 pr-8 py-2 border border-gray-300 rounded-lg text-sm font-medium bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 cursor-pointer min-w-[180px]"
+                >
+                  {companies.map((company) => (
+                    <option key={company.id} value={company.id}>
+                      {company.name}
+                    </option>
+                  ))}
+                </select>
+                <Building2 size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <ChevronDown size={16} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              </div>
+              
+              <button
+                onClick={() => setShowCompanyModal(true)}
+                className="p-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
+                title="Nueva empresa"
+              >
+                <Plus size={20} />
+              </button>
+              
               {/* Selector de periodo */}
               <input
                 type="month"

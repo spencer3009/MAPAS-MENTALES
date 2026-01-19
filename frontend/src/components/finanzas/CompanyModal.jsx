@@ -21,7 +21,8 @@ const CompanyModal = ({
 
   useEffect(() => {
     if (company) {
-      setForm({
+      // Initialize form with company data when component mounts or company changes
+      const initialForm = {
         name: company.name || '',
         description: company.description || '',
         industry: company.industry || '',
@@ -29,7 +30,8 @@ const CompanyModal = ({
         address: company.address || '',
         phone: company.phone || '',
         email: company.email || '',
-      });
+      };
+      setForm(initialForm);
     }
   }, [company]);
 

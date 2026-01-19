@@ -430,7 +430,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
                   value={selectedCompany?.id || ''}
                   onChange={(e) => {
                     const company = companies.find(c => c.id === e.target.value);
-                    setSelectedCompany(company);
+                    selectCompany(company);
                   }}
                   className="appearance-none pl-10 pr-8 py-2 border border-gray-300 rounded-lg text-sm font-medium bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 cursor-pointer min-w-[180px]"
                 >

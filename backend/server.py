@@ -67,6 +67,7 @@ from activity_service import (
 )
 import finanzas_service
 from finanzas_service import (
+    CompanyCreate, CompanyUpdate, CompanyResponse,
     IncomeCreate, IncomeUpdate, IncomeResponse, IncomeStatus,
     ExpenseCreate, ExpenseUpdate, ExpenseResponse, ExpenseStatus, ExpensePriority,
     InvestmentCreate, InvestmentUpdate, InvestmentResponse, InvestmentStatus,

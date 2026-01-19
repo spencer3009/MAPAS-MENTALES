@@ -4606,8 +4606,18 @@ async def get_boards(
 @api_router.post("/boards")
 async def create_board(request: CreateBoardRequest, current_user: dict = Depends(get_current_user)):
     """Crear un nuevo tablero con 3 columnas por defecto"""
+    username = current_user["username"]
     now = datetime.now(timezone.utc).isoformat()
     board_id = f"board_{uuid.uuid4().hex[:12]}"
+    
+    # Verificar acceso a empresa si se especifica
+    if request.company_id:
+        company = await db.finanzas_companies.find_one({
+            "id": request.company_id,
+            "owner_username": username
+        })
+        if not company:
+            raise HTTPException(status_code=403, detail="No tienes acceso a esta empresa")
     
     # Crear las 3 listas por defecto con colores distintivos
     default_lists = [
@@ -4643,7 +4653,8 @@ async def create_board(request: CreateBoardRequest, current_user: dict = Depends
         "description": request.description or "",
         "background_color": request.background_color or "#3B82F6",
         "background_image": None,
-        "owner_username": current_user["username"],
+        "owner_username": username,
+        "company_id": request.company_id,  # Empresa asociada
         "lists": default_lists,
         "collaborators": [],
         "is_archived": False,

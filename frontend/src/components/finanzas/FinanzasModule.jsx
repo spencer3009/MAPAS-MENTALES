@@ -7,8 +7,7 @@ import {
   BarChart3, RefreshCw, Building2, ChevronDown, X, Pencil, Users
 } from 'lucide-react';
 import ContactAutocomplete from './ContactAutocomplete';
-import { CompanyModal } from '../common/CompanySelector';
-import { CollaboratorsManager } from '../company/CollaboratorsManager';
+import { useCompany } from '../../contexts/CompanyContext';
 
 const API_URL = '';
 

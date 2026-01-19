@@ -794,7 +794,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
 };
 
 // Modal de Ingreso
-const IncomeModal = ({ onClose, onSave, sources, projects }) => {
+const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
   const [form, setForm] = useState({
     amount: '',
     source: 'ventas',
@@ -802,9 +802,22 @@ const IncomeModal = ({ onClose, onSave, sources, projects }) => {
     date: new Date().toISOString().split('T')[0],
     status: 'pending',
     client_name: '',
+    client_id: null,
     due_date: '',
     project_id: '',
   });
+  
+  // Estado para el contacto seleccionado
+  const [selectedContact, setSelectedContact] = useState(null);
+
+  const handleContactChange = (contact) => {
+    setSelectedContact(contact);
+    setForm(prev => ({
+      ...prev,
+      client_id: contact?.id || null,
+      client_name: contact?.name || '',
+    }));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();

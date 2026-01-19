@@ -129,20 +129,22 @@ export const CompanyProvider = ({ children, token }) => {
     }
   }, [token, activeCompany]);
 
-  // Eliminar empresa
-  const deleteCompany = useCallback(async (companyId) => {
+  // Eliminar empresa (con confirmación)
+  const deleteCompany = useCallback(async (companyId, confirmation) => {
     try {
-      const response = await fetch(`${API_URL}/api/finanzas/companies/${companyId}`, {
+      const response = await fetch(`${API_URL}/api/finanzas/companies/${companyId}?confirmation=${encodeURIComponent(confirmation)}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
       });
 
       if (response.ok) {
-        setCompanies(prev => prev.filter(c => c.id !== companyId));
+        const remaining = companies.filter(c => c.id !== companyId);
+        setCompanies(remaining);
+        
         if (activeCompany?.id === companyId) {
-          const remaining = companies.filter(c => c.id !== companyId);
           if (remaining.length > 0) {
             selectCompany(remaining[0]);
           } else {

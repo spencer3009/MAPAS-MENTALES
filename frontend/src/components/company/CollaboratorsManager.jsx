@@ -279,10 +279,10 @@ export const CollaboratorsManager = ({ company, token, onClose, userRole }) => {
     
     try {
       const [collabRes, invitationsRes] = await Promise.all([
-        fetch(`${API_URL}/api/companies/${company.id}/collaborators`, {
+        fetch(`${API_URL}/api/finanzas/companies/${company.id}/collaborators`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }),
-        fetch(`${API_URL}/api/companies/${company.id}/invitations?status=pending`, {
+        fetch(`${API_URL}/api/finanzas/companies/${company.id}/invitations?status=pending`, {
           headers: { 'Authorization': `Bearer ${token}` }
         })
       ]);
@@ -308,7 +308,7 @@ export const CollaboratorsManager = ({ company, token, onClose, userRole }) => {
   const handleInvite = async (form) => {
     setActionLoading(true);
     try {
-      const response = await fetch(`${API_URL}/api/companies/${company.id}/collaborators/invite`, {
+      const response = await fetch(`${API_URL}/api/finanzas/companies/${company.id}/collaborators/invite`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -339,7 +339,7 @@ export const CollaboratorsManager = ({ company, token, onClose, userRole }) => {
     setActionLoading(true);
     try {
       const response = await fetch(
-        `${API_URL}/api/companies/${company.id}/collaborators/${showChangeRoleModal.username}/role`,
+        `${API_URL}/api/finanzas/companies/${company.id}/collaborators/${showChangeRoleModal.username}/role`,
         {
           method: 'PUT',
           headers: {
@@ -372,7 +372,7 @@ export const CollaboratorsManager = ({ company, token, onClose, userRole }) => {
     setActionLoading(true);
     try {
       const response = await fetch(
-        `${API_URL}/api/companies/${company.id}/collaborators/${showRemoveModal.username}`,
+        `${API_URL}/api/finanzas/companies/${company.id}/collaborators/${showRemoveModal.username}`,
         {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}` }
@@ -398,7 +398,7 @@ export const CollaboratorsManager = ({ company, token, onClose, userRole }) => {
   const handleRevokeInvitation = async (invitationId) => {
     try {
       const response = await fetch(
-        `${API_URL}/api/companies/${company.id}/invitations/${invitationId}`,
+        `${API_URL}/api/finanzas/companies/${company.id}/invitations/${invitationId}`,
         {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}` }

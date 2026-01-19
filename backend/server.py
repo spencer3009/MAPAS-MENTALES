@@ -8449,14 +8449,32 @@ async def delete_company(
 
 # Helper para verificar acceso a empresa
 async def verify_company_access(company_id: str, username: str) -> dict:
-    """Verifica que el usuario tenga acceso a la empresa"""
+    """Verifica que el usuario tenga acceso a la empresa (como propietario o colaborador)"""
+    # Primero buscar como propietario
     company = await db.finanzas_companies.find_one(
-        {"id": company_id, "owner_username": username},
+        {"id": company_id},
         {"_id": 0}
     )
+    
     if not company:
-        raise HTTPException(status_code=404, detail="Empresa no encontrada o sin acceso")
-    return company
+        raise HTTPException(status_code=404, detail="Empresa no encontrada")
+    
+    # Verificar si es propietario
+    if company.get("owner_username") == username:
+        company["user_role"] = "owner"
+        return company
+    
+    # Verificar si es colaborador
+    collaborator = await db.company_collaborators.find_one({
+        "company_id": company_id,
+        "username": username
+    })
+    
+    if collaborator:
+        company["user_role"] = collaborator.get("role", "collaborator")
+        return company
+    
+    raise HTTPException(status_code=403, detail="No tienes acceso a esta empresa")
 
 # ==========================================
 # INGRESOS (Incomes)

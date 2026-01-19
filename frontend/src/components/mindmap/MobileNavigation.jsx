@@ -18,7 +18,8 @@ import {
   Share2,
   CheckCircle2,
   MessageSquare,
-  Shield
+  Shield,
+  DollarSign
 } from 'lucide-react';
 import { usePWAInstall } from '../../hooks/usePWAInstall';
 

@@ -11,7 +11,8 @@ import {
   LayoutGrid,
   Users,
   MessageSquare,
-  Shield
+  Shield,
+  DollarSign
 } from 'lucide-react';
 
 const DockSidebar = ({ 

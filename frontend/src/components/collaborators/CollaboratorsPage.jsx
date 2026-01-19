@@ -343,7 +343,8 @@ const CollaboratorsPage = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setCollaborators(data);
+        // La API retorna { collaborators: [...], total: N }
+        setCollaborators(data.collaborators || []);
       } else {
         const err = await response.json();
         setError(err.detail || 'Error al cargar colaboradores');

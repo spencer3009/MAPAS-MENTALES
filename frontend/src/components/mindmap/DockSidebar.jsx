@@ -12,8 +12,10 @@ import {
   Users,
   MessageSquare,
   Shield,
-  DollarSign
+  DollarSign,
+  Building2
 } from 'lucide-react';
+import GlobalCompanySelector from '../common/GlobalCompanySelector';
 
 const DockSidebar = ({ 
   onToggleProjectsSidebar,
@@ -31,7 +33,8 @@ const DockSidebar = ({
   activeView = 'projects',
   trashCount = 0,
   isAdmin = false,
-  onAdminClick
+  onAdminClick,
+  token
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   

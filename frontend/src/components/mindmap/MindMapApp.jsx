@@ -1113,6 +1113,8 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
         return <IntegrationsView />;
       case 'contacts':
         return <ContactsPage />;
+      case 'collaborators':
+        return <CollaboratorsPage />;
       case 'finanzas':
         return <FinanzasModule token={token} projects={projects} />;
       case 'whatsapp':

@@ -9262,6 +9262,722 @@ async def create_default_company_and_migrate(
     }
 
 
+# ==========================================
+# SISTEMA DE COLABORADORES DE EMPRESA
+# ==========================================
+
+async def get_user_company_role(username: str, company_id: str) -> Optional[str]:
+    """Obtener el rol del usuario en una empresa (owner, admin, collaborator o None)"""
+    # Verificar si es propietario
+    company = await db.finanzas_companies.find_one({"id": company_id})
+    if not company:
+        return None
+    if company.get("owner_username") == username:
+        return "owner"
+    
+    # Verificar si es colaborador
+    collaborator = await db.company_collaborators.find_one({
+        "company_id": company_id,
+        "username": username
+    })
+    if collaborator:
+        return collaborator.get("role", "collaborator")
+    
+    return None
+
+async def verify_company_permission(username: str, company_id: str, permission: str):
+    """Verificar que el usuario tenga un permiso específico en la empresa"""
+    role = await get_user_company_role(username, company_id)
+    if not role:
+        raise HTTPException(status_code=403, detail="No tienes acceso a esta empresa")
+    
+    if not has_permission(role, permission):
+        raise HTTPException(status_code=403, detail=f"No tienes permiso para: {permission}")
+    
+    return role
+
+async def get_companies_for_user(username: str, user_email: str = None) -> List[dict]:
+    """Obtener todas las empresas a las que un usuario tiene acceso (como dueño o colaborador)"""
+    companies = []
+    
+    # Empresas propias
+    owned = await db.finanzas_companies.find(
+        {"owner_username": username},
+        {"_id": 0}
+    ).to_list(100)
+    
+    for company in owned:
+        company["user_role"] = "owner"
+        company["is_owner"] = True
+        companies.append(company)
+    
+    # Empresas donde es colaborador
+    collaborations = await db.company_collaborators.find(
+        {"username": username}
+    ).to_list(100)
+    
+    for collab in collaborations:
+        company = await db.finanzas_companies.find_one(
+            {"id": collab["company_id"]},
+            {"_id": 0}
+        )
+        if company:
+            company["user_role"] = collab.get("role", "collaborator")
+            company["is_owner"] = False
+            companies.append(company)
+    
+    return companies
+
+
+@api_router.get("/companies/{company_id}/collaborators")
+async def get_company_collaborators(
+    company_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Listar todos los colaboradores de una empresa"""
+    username = current_user["username"]
+    
+    # Verificar acceso y permiso
+    await verify_company_permission(username, company_id, "view_collaborators")
+    
+    # Obtener empresa
+    company = await db.finanzas_companies.find_one({"id": company_id})
+    if not company:
+        raise HTTPException(status_code=404, detail="Empresa no encontrada")
+    
+    # Agregar propietario a la lista
+    owner = await db.users.find_one({"username": company["owner_username"]})
+    collaborators = []
+    
+    if owner:
+        profile = await db.user_profiles.find_one({"username": company["owner_username"]})
+        collaborators.append({
+            "id": f"owner_{company['owner_username']}",
+            "user_id": str(owner.get("_id", "")),
+            "username": company["owner_username"],
+            "email": owner.get("email", ""),
+            "full_name": profile.get("full_name", owner.get("username", "")) if profile else owner.get("username", ""),
+            "role": "owner",
+            "is_owner": True,
+            "joined_at": company.get("created_at", ""),
+            "invited_by": None
+        })
+    
+    # Obtener colaboradores
+    collabs = await db.company_collaborators.find(
+        {"company_id": company_id},
+        {"_id": 0}
+    ).to_list(100)
+    
+    for collab in collabs:
+        user = await db.users.find_one({"username": collab["username"]})
+        profile = await db.user_profiles.find_one({"username": collab["username"]})
+        
+        if user:
+            collaborators.append({
+                "id": collab.get("id", ""),
+                "user_id": str(user.get("_id", "")),
+                "username": collab["username"],
+                "email": user.get("email", ""),
+                "full_name": profile.get("full_name", collab["username"]) if profile else collab["username"],
+                "role": collab.get("role", "collaborator"),
+                "is_owner": False,
+                "joined_at": collab.get("joined_at", ""),
+                "invited_by": collab.get("invited_by", "")
+            })
+    
+    return {
+        "company_id": company_id,
+        "company_name": company.get("name", ""),
+        "collaborators": collaborators,
+        "total": len(collaborators)
+    }
+
+
+@api_router.post("/companies/{company_id}/collaborators/invite")
+async def invite_collaborator(
+    company_id: str,
+    invitation: CollaboratorInvite,
+    background_tasks: BackgroundTasks,
+    current_user: dict = Depends(get_current_user)
+):
+    """Invitar a un colaborador a la empresa"""
+    username = current_user["username"]
+    
+    # Verificar permiso de gestionar colaboradores
+    await verify_company_permission(username, company_id, "manage_collaborators")
+    
+    # Obtener empresa
+    company = await db.finanzas_companies.find_one({"id": company_id})
+    if not company:
+        raise HTTPException(status_code=404, detail="Empresa no encontrada")
+    
+    # Verificar límite de colaboradores según plan del propietario
+    owner_profile = await db.user_profiles.find_one({"username": company["owner_username"]})
+    owner_plan = owner_profile.get("plan", "free") if owner_profile else "free"
+    
+    plan_config = PLANS_CONFIG.get(owner_plan, PLANS_CONFIG["free"])
+    max_collaborators = plan_config.get("limits", {}).get("max_collaborators", 0)
+    
+    current_collab_count = await db.company_collaborators.count_documents({"company_id": company_id})
+    
+    if max_collaborators != -1 and current_collab_count >= max_collaborators:
+        raise HTTPException(
+            status_code=403, 
+            detail=f"Has alcanzado el límite de {max_collaborators} colaboradores para tu plan {plan_config.get('display_name', owner_plan)}. Actualiza tu plan para agregar más."
+        )
+    
+    # Verificar si el email es del propietario
+    owner = await db.users.find_one({"username": company["owner_username"]})
+    if owner and owner.get("email", "").lower() == invitation.email.lower():
+        raise HTTPException(status_code=400, detail="No puedes invitarte a ti mismo")
+    
+    # Verificar si ya existe invitación pendiente
+    existing_invitation = await db.company_invitations.find_one({
+        "company_id": company_id,
+        "email": invitation.email.lower(),
+        "status": "pending"
+    })
+    if existing_invitation:
+        raise HTTPException(status_code=400, detail="Ya existe una invitación pendiente para este email")
+    
+    # Verificar si ya es colaborador
+    invited_user = await db.users.find_one({"email": invitation.email.lower()})
+    if invited_user:
+        existing_collab = await db.company_collaborators.find_one({
+            "company_id": company_id,
+            "username": invited_user["username"]
+        })
+        if existing_collab:
+            raise HTTPException(status_code=400, detail="Este usuario ya es colaborador de la empresa")
+    
+    # Crear invitación
+    now = get_current_timestamp()
+    inviter_profile = await db.user_profiles.find_one({"username": username})
+    inviter_name = inviter_profile.get("full_name", username) if inviter_profile else username
+    
+    new_invitation = {
+        "id": generate_invitation_id(),
+        "company_id": company_id,
+        "company_name": company.get("name", ""),
+        "email": invitation.email.lower(),
+        "role": invitation.role,
+        "message": invitation.message,
+        "status": "pending",
+        "invited_by_username": username,
+        "invited_by_name": inviter_name,
+        "created_at": now,
+        "expires_at": get_invitation_expiry(7)  # 7 días
+    }
+    
+    await db.company_invitations.insert_one(new_invitation)
+    
+    # Crear notificación in-app si el usuario existe
+    if invited_user:
+        notification = {
+            "id": generate_id(),
+            "username": invited_user["username"],
+            "type": "company_invitation",
+            "title": "Nueva invitación de colaboración",
+            "message": f"{inviter_name} te ha invitado a colaborar en {company.get('name', '')}",
+            "data": {
+                "invitation_id": new_invitation["id"],
+                "company_id": company_id,
+                "company_name": company.get("name", ""),
+                "role": invitation.role
+            },
+            "read": False,
+            "created_at": now
+        }
+        await db.notifications.insert_one(notification)
+    
+    # Enviar email de invitación
+    app_url = os.environ.get("FRONTEND_URL", "https://mindoramap.com")
+    email_html = get_invitation_email_html(
+        inviter_name=inviter_name,
+        company_name=company.get("name", ""),
+        role=invitation.role,
+        message=invitation.message,
+        app_url=app_url
+    )
+    
+    background_tasks.add_task(
+        email_service.send_email,
+        to_email=invitation.email,
+        subject=f"🤝 {inviter_name} te invita a colaborar en {company.get('name', '')}",
+        html_content=email_html
+    )
+    
+    new_invitation.pop("_id", None)
+    
+    return {
+        "message": "Invitación enviada exitosamente",
+        "invitation": new_invitation
+    }
+
+
+@api_router.get("/invitations/pending")
+async def get_pending_invitations(
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener invitaciones pendientes del usuario actual"""
+    user = await db.users.find_one({"username": current_user["username"]})
+    if not user or not user.get("email"):
+        return {"invitations": []}
+    
+    user_email = user["email"].lower()
+    now = datetime.now(timezone.utc).isoformat()
+    
+    # Obtener invitaciones pendientes no expiradas
+    invitations = await db.company_invitations.find({
+        "email": user_email,
+        "status": "pending",
+        "expires_at": {"$gt": now}
+    }, {"_id": 0}).to_list(50)
+    
+    # Marcar como expiradas las que ya pasaron
+    await db.company_invitations.update_many(
+        {
+            "email": user_email,
+            "status": "pending",
+            "expires_at": {"$lte": now}
+        },
+        {"$set": {"status": "expired"}}
+    )
+    
+    return {"invitations": invitations}
+
+
+@api_router.post("/invitations/{invitation_id}/accept")
+async def accept_invitation(
+    invitation_id: str,
+    background_tasks: BackgroundTasks,
+    current_user: dict = Depends(get_current_user)
+):
+    """Aceptar una invitación de colaboración"""
+    username = current_user["username"]
+    user = await db.users.find_one({"username": username})
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    user_email = user.get("email", "").lower()
+    
+    # Buscar invitación
+    invitation = await db.company_invitations.find_one({
+        "id": invitation_id,
+        "email": user_email,
+        "status": "pending"
+    })
+    
+    if not invitation:
+        raise HTTPException(status_code=404, detail="Invitación no encontrada o ya procesada")
+    
+    # Verificar expiración
+    if is_invitation_expired(invitation.get("expires_at", "")):
+        await db.company_invitations.update_one(
+            {"id": invitation_id},
+            {"$set": {"status": "expired"}}
+        )
+        raise HTTPException(status_code=400, detail="La invitación ha expirado")
+    
+    # Verificar que la empresa existe
+    company = await db.finanzas_companies.find_one({"id": invitation["company_id"]})
+    if not company:
+        raise HTTPException(status_code=404, detail="La empresa ya no existe")
+    
+    now = get_current_timestamp()
+    
+    # Crear registro de colaborador
+    collaborator = {
+        "id": generate_collaborator_id(),
+        "company_id": invitation["company_id"],
+        "username": username,
+        "user_email": user_email,
+        "role": invitation.get("role", "collaborator"),
+        "invited_by": invitation.get("invited_by_username", ""),
+        "joined_at": now
+    }
+    
+    await db.company_collaborators.insert_one(collaborator)
+    
+    # Actualizar estado de invitación
+    await db.company_invitations.update_one(
+        {"id": invitation_id},
+        {"$set": {"status": "accepted", "accepted_at": now}}
+    )
+    
+    # Crear notificación para el que invitó
+    profile = await db.user_profiles.find_one({"username": username})
+    collaborator_name = profile.get("full_name", username) if profile else username
+    
+    notification = {
+        "id": generate_id(),
+        "username": invitation.get("invited_by_username", ""),
+        "type": "invitation_accepted",
+        "title": "Invitación aceptada",
+        "message": f"{collaborator_name} ha aceptado tu invitación para {company.get('name', '')}",
+        "data": {
+            "company_id": invitation["company_id"],
+            "company_name": company.get("name", ""),
+            "collaborator_username": username
+        },
+        "read": False,
+        "created_at": now
+    }
+    await db.notifications.insert_one(notification)
+    
+    # Enviar email al que invitó
+    inviter = await db.users.find_one({"username": invitation.get("invited_by_username", "")})
+    if inviter and inviter.get("email"):
+        app_url = os.environ.get("FRONTEND_URL", "https://mindoramap.com")
+        email_html = get_invitation_accepted_email_html(
+            collaborator_name=collaborator_name,
+            company_name=company.get("name", ""),
+            role=invitation.get("role", "collaborator"),
+            app_url=app_url
+        )
+        background_tasks.add_task(
+            email_service.send_email,
+            to_email=inviter["email"],
+            subject=f"✅ {collaborator_name} aceptó tu invitación",
+            html_content=email_html
+        )
+    
+    collaborator.pop("_id", None)
+    
+    return {
+        "message": "Invitación aceptada",
+        "company_id": invitation["company_id"],
+        "company_name": company.get("name", ""),
+        "role": invitation.get("role", "collaborator")
+    }
+
+
+@api_router.post("/invitations/{invitation_id}/reject")
+async def reject_invitation(
+    invitation_id: str,
+    background_tasks: BackgroundTasks,
+    current_user: dict = Depends(get_current_user)
+):
+    """Rechazar una invitación de colaboración"""
+    username = current_user["username"]
+    user = await db.users.find_one({"username": username})
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    user_email = user.get("email", "").lower()
+    
+    # Buscar invitación
+    invitation = await db.company_invitations.find_one({
+        "id": invitation_id,
+        "email": user_email,
+        "status": "pending"
+    })
+    
+    if not invitation:
+        raise HTTPException(status_code=404, detail="Invitación no encontrada o ya procesada")
+    
+    now = get_current_timestamp()
+    
+    # Actualizar estado
+    await db.company_invitations.update_one(
+        {"id": invitation_id},
+        {"$set": {"status": "rejected", "rejected_at": now}}
+    )
+    
+    # Notificar al que invitó
+    profile = await db.user_profiles.find_one({"username": username})
+    collaborator_name = profile.get("full_name", username) if profile else username
+    
+    company = await db.finanzas_companies.find_one({"id": invitation["company_id"]})
+    company_name = company.get("name", "") if company else ""
+    
+    notification = {
+        "id": generate_id(),
+        "username": invitation.get("invited_by_username", ""),
+        "type": "invitation_rejected",
+        "title": "Invitación rechazada",
+        "message": f"{collaborator_name} ha rechazado la invitación para {company_name}",
+        "data": {
+            "company_id": invitation["company_id"],
+            "company_name": company_name
+        },
+        "read": False,
+        "created_at": now
+    }
+    await db.notifications.insert_one(notification)
+    
+    # Enviar email
+    inviter = await db.users.find_one({"username": invitation.get("invited_by_username", "")})
+    if inviter and inviter.get("email"):
+        email_html = get_invitation_rejected_email_html(
+            collaborator_name=collaborator_name,
+            company_name=company_name
+        )
+        background_tasks.add_task(
+            email_service.send_email,
+            to_email=inviter["email"],
+            subject=f"❌ {collaborator_name} rechazó la invitación",
+            html_content=email_html
+        )
+    
+    return {"message": "Invitación rechazada"}
+
+
+@api_router.put("/companies/{company_id}/collaborators/{collaborator_username}/role")
+async def update_collaborator_role_endpoint(
+    company_id: str,
+    collaborator_username: str,
+    role_update: CollaboratorRoleUpdate,
+    background_tasks: BackgroundTasks,
+    current_user: dict = Depends(get_current_user)
+):
+    """Cambiar el rol de un colaborador"""
+    username = current_user["username"]
+    
+    # Verificar permiso
+    await verify_company_permission(username, company_id, "manage_collaborators")
+    
+    # No se puede cambiar el rol del propietario
+    company = await db.finanzas_companies.find_one({"id": company_id})
+    if not company:
+        raise HTTPException(status_code=404, detail="Empresa no encontrada")
+    
+    if company.get("owner_username") == collaborator_username:
+        raise HTTPException(status_code=400, detail="No se puede cambiar el rol del propietario")
+    
+    # Buscar colaborador
+    collaborator = await db.company_collaborators.find_one({
+        "company_id": company_id,
+        "username": collaborator_username
+    })
+    
+    if not collaborator:
+        raise HTTPException(status_code=404, detail="Colaborador no encontrado")
+    
+    old_role = collaborator.get("role", "collaborator")
+    new_role = role_update.role
+    
+    if old_role == new_role:
+        return {"message": "El rol no ha cambiado", "role": new_role}
+    
+    # Actualizar rol
+    await db.company_collaborators.update_one(
+        {"company_id": company_id, "username": collaborator_username},
+        {"$set": {"role": new_role, "updated_at": get_current_timestamp()}}
+    )
+    
+    # Notificar al colaborador
+    changer_profile = await db.user_profiles.find_one({"username": username})
+    changer_name = changer_profile.get("full_name", username) if changer_profile else username
+    
+    notification = {
+        "id": generate_id(),
+        "username": collaborator_username,
+        "type": "role_changed",
+        "title": "Tu rol ha cambiado",
+        "message": f"{changer_name} cambió tu rol en {company.get('name', '')} de {old_role} a {new_role}",
+        "data": {
+            "company_id": company_id,
+            "company_name": company.get("name", ""),
+            "old_role": old_role,
+            "new_role": new_role
+        },
+        "read": False,
+        "created_at": get_current_timestamp()
+    }
+    await db.notifications.insert_one(notification)
+    
+    # Enviar email
+    collab_user = await db.users.find_one({"username": collaborator_username})
+    if collab_user and collab_user.get("email"):
+        app_url = os.environ.get("FRONTEND_URL", "https://mindoramap.com")
+        email_html = get_role_changed_email_html(
+            company_name=company.get("name", ""),
+            old_role=old_role,
+            new_role=new_role,
+            changed_by=changer_name,
+            app_url=app_url
+        )
+        background_tasks.add_task(
+            email_service.send_email,
+            to_email=collab_user["email"],
+            subject=f"🔄 Tu rol en {company.get('name', '')} ha cambiado",
+            html_content=email_html
+        )
+    
+    return {
+        "message": f"Rol actualizado de {old_role} a {new_role}",
+        "collaborator_username": collaborator_username,
+        "old_role": old_role,
+        "new_role": new_role
+    }
+
+
+@api_router.delete("/companies/{company_id}/collaborators/{collaborator_username}")
+async def remove_company_collaborator(
+    company_id: str,
+    collaborator_username: str,
+    background_tasks: BackgroundTasks,
+    current_user: dict = Depends(get_current_user)
+):
+    """Revocar acceso de un colaborador"""
+    username = current_user["username"]
+    
+    # Verificar permiso (o que sea el mismo colaborador saliendo)
+    user_role = await get_user_company_role(username, company_id)
+    is_self_removal = username == collaborator_username
+    
+    if not is_self_removal and not has_permission(user_role or "", "manage_collaborators"):
+        raise HTTPException(status_code=403, detail="No tienes permiso para eliminar colaboradores")
+    
+    # No se puede eliminar al propietario
+    company = await db.finanzas_companies.find_one({"id": company_id})
+    if not company:
+        raise HTTPException(status_code=404, detail="Empresa no encontrada")
+    
+    if company.get("owner_username") == collaborator_username:
+        raise HTTPException(status_code=400, detail="No se puede eliminar al propietario de la empresa")
+    
+    # Eliminar colaborador
+    result = await db.company_collaborators.delete_one({
+        "company_id": company_id,
+        "username": collaborator_username
+    })
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Colaborador no encontrado")
+    
+    # Notificar al colaborador (si no es auto-eliminación)
+    if not is_self_removal:
+        remover_profile = await db.user_profiles.find_one({"username": username})
+        remover_name = remover_profile.get("full_name", username) if remover_profile else username
+        
+        notification = {
+            "id": generate_id(),
+            "username": collaborator_username,
+            "type": "access_revoked",
+            "title": "Acceso revocado",
+            "message": f"{remover_name} ha revocado tu acceso a {company.get('name', '')}",
+            "data": {
+                "company_id": company_id,
+                "company_name": company.get("name", "")
+            },
+            "read": False,
+            "created_at": get_current_timestamp()
+        }
+        await db.notifications.insert_one(notification)
+        
+        # Enviar email
+        collab_user = await db.users.find_one({"username": collaborator_username})
+        if collab_user and collab_user.get("email"):
+            email_html = get_access_revoked_email_html(
+                company_name=company.get("name", ""),
+                revoked_by=remover_name
+            )
+            background_tasks.add_task(
+                email_service.send_email,
+                to_email=collab_user["email"],
+                subject=f"🚫 Tu acceso a {company.get('name', '')} ha sido revocado",
+                html_content=email_html
+            )
+    
+    return {"message": "Colaborador eliminado exitosamente"}
+
+
+@api_router.get("/companies/{company_id}/invitations")
+async def get_company_invitations(
+    company_id: str,
+    status: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Listar invitaciones de una empresa"""
+    username = current_user["username"]
+    
+    # Verificar permiso
+    await verify_company_permission(username, company_id, "view_collaborators")
+    
+    # Construir query
+    query = {"company_id": company_id}
+    if status:
+        query["status"] = status
+    
+    invitations = await db.company_invitations.find(
+        query,
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    return {"invitations": invitations}
+
+
+@api_router.delete("/companies/{company_id}/invitations/{invitation_id}")
+async def revoke_invitation(
+    company_id: str,
+    invitation_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Revocar una invitación pendiente"""
+    username = current_user["username"]
+    
+    # Verificar permiso
+    await verify_company_permission(username, company_id, "manage_collaborators")
+    
+    # Buscar invitación pendiente
+    invitation = await db.company_invitations.find_one({
+        "id": invitation_id,
+        "company_id": company_id,
+        "status": "pending"
+    })
+    
+    if not invitation:
+        raise HTTPException(status_code=404, detail="Invitación no encontrada o ya procesada")
+    
+    # Actualizar estado
+    await db.company_invitations.update_one(
+        {"id": invitation_id},
+        {"$set": {"status": "revoked", "revoked_at": get_current_timestamp()}}
+    )
+    
+    return {"message": "Invitación revocada"}
+
+
+@api_router.get("/companies/{company_id}/my-role")
+async def get_my_company_role(
+    company_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener mi rol y permisos en una empresa"""
+    username = current_user["username"]
+    
+    role = await get_user_company_role(username, company_id)
+    if not role:
+        raise HTTPException(status_code=403, detail="No tienes acceso a esta empresa")
+    
+    company = await db.finanzas_companies.find_one({"id": company_id}, {"_id": 0})
+    
+    return {
+        "company_id": company_id,
+        "company_name": company.get("name", "") if company else "",
+        "role": role,
+        "is_owner": role == "owner",
+        "permissions": get_role_permissions(role)
+    }
+
+
+@api_router.get("/my-companies")
+async def get_my_companies(
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener todas las empresas a las que tengo acceso"""
+    username = current_user["username"]
+    user = await db.users.find_one({"username": username})
+    user_email = user.get("email", "").lower() if user else None
+    
+    companies = await get_companies_for_user(username, user_email)
+    
+    return {"companies": companies}
+
+
 # Include the router in the main app
 app.include_router(api_router)
 

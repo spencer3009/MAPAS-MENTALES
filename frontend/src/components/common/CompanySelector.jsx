@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Building2, ChevronDown, Plus, Pencil, X } from 'lucide-react';
+import { Building2, ChevronDown, Plus, Pencil, X, AlertTriangle, Trash2, Loader2 } from 'lucide-react';
 import { useCompany } from '../../contexts/CompanyContext';
 
 /**

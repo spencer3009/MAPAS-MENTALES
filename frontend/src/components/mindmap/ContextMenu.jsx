@@ -207,6 +207,21 @@ const ContextMenu = ({
         )}
 
         <div className="border-t border-gray-100 my-1" />
+
+        {/* Opciones de vinculación de proyecto */}
+        {isProjectNode && linkedProjectId ? (
+          <MenuButton onClick={() => handleAction(() => onUnlinkProject && onUnlinkProject(nodeId))}>
+            <Unlink size={16} className="text-orange-500" />
+            <span>Desvincular proyecto</span>
+          </MenuButton>
+        ) : !isProjectNode && (
+          <MenuButton onClick={() => handleAction(() => onLinkToProject && onLinkToProject(nodeId))}>
+            <FolderOpen size={16} className="text-emerald-500" />
+            <span>Vincular a proyecto</span>
+          </MenuButton>
+        )}
+
+        <div className="border-t border-gray-100 my-1" />
         
         <MenuButton onClick={() => handleAction(() => onDelete(nodeId))} danger>
           <Trash2 size={16} />

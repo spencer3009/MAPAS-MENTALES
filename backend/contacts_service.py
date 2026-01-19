@@ -80,6 +80,7 @@ class CreateContactRequest(BaseModel):
     custom_fields: Optional[dict] = {}
     labels: Optional[List[str]] = []  # Lista de IDs de etiquetas
     workspace_id: Optional[str] = None  # ID del workspace (si es compartido)
+    company_id: Optional[str] = None  # ID de la empresa (obligatorio para operaciones)
 
 
 class UpdateContactRequest(BaseModel):

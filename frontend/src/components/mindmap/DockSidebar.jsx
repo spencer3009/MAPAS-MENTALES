@@ -28,6 +28,7 @@ const DockSidebar = ({
   onOpenSettings,
   onOpenBoards,
   onOpenContacts,
+  onOpenCollaborators,
   onOpenWhatsApp,
   onOpenFinanzas,
   onLogout,
@@ -40,8 +41,8 @@ const DockSidebar = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   
-  // Obtener la función para abrir colaboradores del contexto
-  const { openCollaboratorsModal, activeCompany } = useCompany();
+  // Obtener empresa activa del contexto
+  const { activeCompany } = useCompany();
   
   // Determinar si estamos en la vista de proyectos
   const isInProjectsView = activeView === 'projects';

@@ -8449,6 +8449,7 @@ async def delete_income(
 
 @api_router.get("/finanzas/expenses", response_model=List[ExpenseResponse])
 async def get_expenses(
+    company_id: str,
     status: Optional[str] = None,
     category: Optional[str] = None,
     project_id: Optional[str] = None,
@@ -8459,9 +8460,11 @@ async def get_expenses(
     current_user: dict = Depends(get_current_user)
 ):
     """Obtener lista de gastos con filtros opcionales"""
-    workspace_id = await get_user_workspace_id(current_user["username"])
+    username = current_user["username"]
+    await verify_company_access(company_id, username)
+    workspace_id = await get_user_workspace_id(username)
     
-    query = {"workspace_id": workspace_id}
+    query = {"company_id": company_id, "workspace_id": workspace_id}
     
     if status:
         query["status"] = status
@@ -8490,13 +8493,15 @@ async def create_expense(
     current_user: dict = Depends(get_current_user)
 ):
     """Crear un nuevo gasto"""
-    workspace_id = await get_user_workspace_id(current_user["username"])
+    username = current_user["username"]
+    await verify_company_access(expense_data.company_id, username)
+    workspace_id = await get_user_workspace_id(username)
     now = get_current_timestamp()
     
     expense = {
         "id": generate_id(),
         "workspace_id": workspace_id,
-        "username": current_user["username"],
+        "username": username,
         **expense_data.model_dump(),
         "created_at": now,
         "updated_at": now

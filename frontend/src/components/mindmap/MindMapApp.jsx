@@ -1368,6 +1368,11 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
             onToggleRulers={() => setShowRulers(prev => !prev)}
             minZoom={minZoom}
             maxZoom={maxZoom}
+            // Props para nodos tipo proyecto
+            projects={projects}
+            currentProjectId={activeProjectId}
+            onNavigateToProject={setActiveProjectId}
+            onCreateProject={createBlankMap}
             />
 
           {/* Toolbar de selección múltiple */}

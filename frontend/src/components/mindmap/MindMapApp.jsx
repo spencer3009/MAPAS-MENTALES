@@ -1272,6 +1272,15 @@ const MindMapAppInner = ({ onAdminClick, onNavigateToReminders, forceView, clear
         </div>
       )}
 
+      {/* Banner de invitaciones pendientes */}
+      <PendingInvitationsBanner 
+        token={token}
+        onAccept={(data) => {
+          // Recargar empresas cuando se acepta una invitación
+          console.log('Invitación aceptada:', data);
+        }}
+      />
+
       {/* Área principal - Cambia según la vista activa */}
       {activeView !== 'projects' ? (
         <div className="flex-1 w-full h-full overflow-auto">

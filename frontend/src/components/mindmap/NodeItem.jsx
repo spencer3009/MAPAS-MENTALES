@@ -714,8 +714,22 @@ const NodeItem = memo(({
 
           {/* Contenido del nodo normal */}
           <div className={`flex items-center gap-2 w-full relative z-10 ${isCloudShape ? 'px-2' : ''}`}>
-            {/* Icono del nodo */}
-            {node.icon && !isEditing && (() => {
+            {/* Icono de proyecto (si es nodo tipo proyecto) */}
+            {isProjectNode && !isEditing && (
+              <div 
+                className="shrink-0 flex items-center justify-center"
+                title="Doble clic para abrir el mapa vinculado"
+              >
+                <FolderOpen 
+                  size={Math.min(Math.max(Math.floor(nodeHeight * 0.35), 16), 28)} 
+                  className="text-emerald-600"
+                  strokeWidth={2}
+                />
+              </div>
+            )}
+            
+            {/* Icono del nodo (si tiene uno personalizado y no es proyecto) */}
+            {node.icon && !isEditing && !isProjectNode && (() => {
               // Calcular tamaño del icono basado en la altura del nodo
               const iconSize = Math.min(Math.max(Math.floor(nodeHeight * 0.35), 16), 28);
               const iconColor = node.icon.color || textColor;

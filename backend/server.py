@@ -6249,11 +6249,20 @@ async def search_contacts(
 async def create_contact(request: CreateContactRequest, current_user: dict = Depends(get_current_user)):
     """
     Crear un nuevo contacto.
+    - Si company_id está presente, el contacto pertenece a esa empresa
     - Si workspace_id está presente, el contacto pertenece al workspace (compartido)
-    - Si workspace_id es None, el contacto es personal del usuario
     """
     username = current_user["username"]
     now = datetime.now(timezone.utc).isoformat()
+    
+    # Verificar acceso a empresa si se especifica
+    if request.company_id:
+        company = await db.finanzas_companies.find_one({
+            "id": request.company_id,
+            "owner_username": username
+        })
+        if not company:
+            raise HTTPException(status_code=403, detail="No tienes acceso a esta empresa")
     
     # Si se especifica workspace_id, verificar acceso y permisos
     if request.workspace_id:
@@ -6279,6 +6288,7 @@ async def create_contact(request: CreateContactRequest, current_user: dict = Dep
         "labels": request.labels or [],
         "owner_username": username,
         "workspace_id": request.workspace_id,  # None para contactos personales
+        "company_id": request.company_id,  # ID de la empresa
         "created_at": now,
         "updated_at": now
     }

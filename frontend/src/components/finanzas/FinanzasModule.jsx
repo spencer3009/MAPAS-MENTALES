@@ -143,6 +143,14 @@ const SummaryCard = ({ title, amount, icon: Icon, trend, trendLabel, color = 'bl
 
 // Componente principal
 const FinanzasModule = ({ token, projects = [] }) => {
+  // Usar el contexto global de empresa
+  const { 
+    companies, 
+    activeCompany: selectedCompany, 
+    loading: loadingCompanies,
+    refreshCompanies
+  } = useCompany();
+  
   const [activeTab, setActiveTab] = useState('summary');
   const [summary, setSummary] = useState(null);
   const [incomes, setIncomes] = useState([]);
@@ -158,20 +166,11 @@ const FinanzasModule = ({ token, projects = [] }) => {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
   
-  // Estado para empresas
-  const [companies, setCompanies] = useState([]);
-  const [selectedCompany, setSelectedCompany] = useState(null);
-  const [showCompanyModal, setShowCompanyModal] = useState(false);
-  const [loadingCompanies, setLoadingCompanies] = useState(true);
-  
   // Modales
   const [showIncomeModal, setShowIncomeModal] = useState(false);
   const [showExpenseModal, setShowExpenseModal] = useState(false);
   const [showInvestmentModal, setShowInvestmentModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  const [editingCompany, setEditingCompany] = useState(null); // Para editar empresa
-  const [showCollaborators, setShowCollaborators] = useState(false); // Para gestionar colaboradores
-  const [userCompanyRole, setUserCompanyRole] = useState(null); // Rol del usuario en la empresa
   
   const { fetchWithAuth } = useFinanzas(token);
 

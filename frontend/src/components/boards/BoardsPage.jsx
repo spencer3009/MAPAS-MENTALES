@@ -58,14 +58,26 @@ const BoardsPage = ({ onBack, onSelectBoard, onTrashUpdate }) => {
   const [toast, setToast] = useState(null);
 
   // Cargar tableros
+  // Cargar tableros cuando cambie la empresa activa
   useEffect(() => {
-    fetchBoards();
-  }, []);
+    if (activeCompany) {
+      fetchBoards();
+    } else {
+      setBoards([]);
+      setLoading(false);
+    }
+  }, [activeCompany]);
 
   const fetchBoards = async () => {
+    if (!activeCompany) {
+      setLoading(false);
+      return;
+    }
+    
+    setLoading(true);
     try {
       const token = localStorage.getItem('mm_auth_token');
-      const response = await fetch(`${API_URL}/api/boards`, {
+      const response = await fetch(`${API_URL}/api/boards?company_id=${activeCompany.id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -77,6 +89,16 @@ const BoardsPage = ({ onBack, onSelectBoard, onTrashUpdate }) => {
       console.error('Error fetching boards:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Handler para crear empresa
+  const handleCreateCompanyFromBoards = async (companyData) => {
+    const result = await createCompany(companyData);
+    if (result.success) {
+      setShowCompanyModal(false);
+    } else {
+      alert(result.error);
     }
   };
 

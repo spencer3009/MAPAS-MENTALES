@@ -181,38 +181,6 @@ const FinanzasModule = ({ token, projects = [] }) => {
   
   const { fetchWithAuth } = useFinanzas(token);
 
-  // Cargar empresas
-  const loadCompanies = useCallback(async () => {
-    setLoadingCompanies(true);
-    try {
-      const response = await fetch(`${API_URL}/api/finanzas/companies`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setCompanies(data);
-        // Seleccionar la primera empresa por defecto si existe
-        if (data.length > 0 && !selectedCompany) {
-          setSelectedCompany(data[0]);
-        }
-      }
-    } catch (err) {
-      console.error('Error loading companies:', err);
-    } finally {
-      setLoadingCompanies(false);
-    }
-  }, [token, selectedCompany]);
-
-  // Cargar empresas al inicio
-  useEffect(() => {
-    if (token) {
-      loadCompanies();
-    }
-  }, [token, loadCompanies]);
-
   // Cargar datos financieros (solo si hay empresa seleccionada)
   const loadData = useCallback(async () => {
     if (!selectedCompany) return;

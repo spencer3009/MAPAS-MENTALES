@@ -2,6 +2,32 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-19: FEATURE — Vista de Colaboradores en Sidebar ✅ COMPLETADO
+- **Estado**: Nueva vista completa de Colaboradores similar a Contactos
+- **Ubicación**: Menú lateral → "Colaboradores" (nuevo ítem del sidebar)
+- **Componente creado**: `/app/frontend/src/components/collaborators/CollaboratorsPage.jsx`
+- **Funcionalidades implementadas**:
+  - Lista de colaboradores de la empresa activa en formato tabla
+  - Columnas: Usuario, Email, Rol, Estado, Acciones
+  - Actualización automática al cambiar de empresa
+  - Buscador por nombre o email
+  - Contador de colaboradores
+  - Botón "Invitar colaborador" con modal
+  - Modal de edición de rol
+  - Modal de confirmación para quitar acceso
+  - Panel informativo de roles en el footer
+- **Roles con badges de colores**:
+  - Propietario (amber/dorado) - No editable/eliminable
+  - Administrador (púrpura)
+  - Colaborador Operativo (azul)
+- **Estados**:
+  - Activo (verde)
+  - Invitación pendiente (naranja)
+- **Restricciones**:
+  - El propietario no puede ser editado ni eliminado
+  - Solo Propietario/Admin pueden gestionar colaboradores
+  - Sin empresa seleccionada muestra mensaje guía
+
 ### 2026-01-19: FEATURE — Actividad Reciente por Empresa ✅ COMPLETADO
 - **Estado**: Sistema de actividad implementado y funcionando
 - **Ubicación**: Configuración de Empresa → Colaboradores → Actividad reciente (expandible)

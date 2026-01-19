@@ -200,6 +200,7 @@ class ExpenseResponse(BaseModel):
 # ==========================================
 
 class InvestmentCreate(BaseModel):
+    company_id: str = Field(..., description="ID de la empresa")
     amount: float = Field(..., gt=0, description="Monto de la inversión")
     description: str = Field(..., description="Descripción de la inversión")
     date: str = Field(..., description="Fecha de la inversión (ISO format)")
@@ -225,6 +226,7 @@ class InvestmentUpdate(BaseModel):
 
 class InvestmentResponse(BaseModel):
     id: str
+    company_id: str
     workspace_id: str
     username: str
     amount: float

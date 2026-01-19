@@ -215,38 +215,6 @@ const FinanzasModule = ({ token, projects = [] }) => {
     }
   }, [token, selectedCompany, loadData]);
 
-  // Crear empresa
-  const handleCreateCompany = async (companyData) => {
-    const result = await createCompany(companyData);
-    if (result.success) {
-      setShowCompanyModal(false);
-    } else {
-      alert(`Error al crear empresa: ${result.error}`);
-    }
-  };
-
-  // Actualizar empresa
-  const handleUpdateCompany = async (companyData) => {
-    if (!editingCompany) return;
-    const result = await updateCompany(editingCompany.id, companyData);
-    if (result.success) {
-      setEditingCompany(null);
-    } else {
-      alert(`Error al actualizar empresa: ${result.error}`);
-    }
-  };
-
-  // Eliminar empresa (con cascada de datos)
-  const handleDeleteCompany = async (companyId, confirmation) => {
-    const result = await deleteCompany(companyId, confirmation);
-    if (result.success) {
-      setEditingCompany(null);
-      alert('Empresa eliminada exitosamente');
-    } else {
-      alert(`Error al eliminar empresa: ${result.error}`);
-    }
-  };
-
   // Crear ingreso
   const handleCreateIncome = async (data) => {
     if (!selectedCompany) return;

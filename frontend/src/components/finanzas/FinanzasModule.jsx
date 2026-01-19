@@ -222,29 +222,11 @@ const FinanzasModule = ({ token, projects = [] }) => {
 
   // Crear empresa
   const handleCreateCompany = async (companyData) => {
-    try {
-      const response = await fetch(`${API_URL}/api/finanzas/companies`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(companyData),
-      });
-      
-      if (response.ok) {
-        const newCompany = await response.json();
-        setCompanies(prev => [newCompany, ...prev]);
-        setSelectedCompany(newCompany);
-        setShowCompanyModal(false);
-      } else {
-        const error = await response.json();
-        console.error('Error creating company:', error);
-        alert(`Error al crear empresa: ${error.detail || 'Error desconocido'}`);
-      }
-    } catch (err) {
-      console.error('Error creating company:', err);
-      alert(`Error de conexión: ${err.message}`);
+    const result = await createCompany(companyData);
+    if (result.success) {
+      setShowCompanyModal(false);
+    } else {
+      alert(`Error al crear empresa: ${result.error}`);
     }
   };
 

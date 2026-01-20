@@ -694,7 +694,7 @@ const NodeItem = memo(({
         style={{
           left: node.x,
           top: node.y,
-          width: Math.max(dimensions.width, 200), // Mínimo 200px para task cards
+          width: Math.max(dimensions.width, 220), // Ancho consistente con Project Cards
           minHeight: 80,
           backgroundColor: '#FFFFFF',
           borderRadius: '12px',

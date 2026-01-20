@@ -3,7 +3,7 @@ import {
   X, Calendar, CheckSquare, Clock, Flag, 
   Plus, Trash2, Check, Paperclip, Image,
   Play, Pause, ChevronDown, ChevronUp,
-  Pin, Tag, Users, MessageSquare, ChevronRight
+  Tag, Users, MessageSquare, ChevronRight
 } from 'lucide-react';
 
 // Prioridades con colores distintivos

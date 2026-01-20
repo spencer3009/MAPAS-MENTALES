@@ -127,6 +127,16 @@ const NodeItem = memo(({
   // Determinar si el nodo está en cualquier tipo de selección
   const isInSelection = isSelected || isMultiSelected;
 
+  // Tipo de nodo: 'default' | 'dashed_text' | 'project' | 'task'
+  // Compatibilidad: 'dashed' se trata igual que 'dashed_text'
+  const nodeType = node.nodeType || 'default';
+  const isDashedNode = nodeType === 'dashed' || nodeType === 'dashed_text';
+  const isProjectNode = nodeType === 'project';
+  const isTaskNode = nodeType === 'task';
+  const taskStatus = node.taskStatus || 'pending'; // 'pending' | 'in_progress' | 'completed'
+  const taskData = node.taskData || {}; // { checklist: [], dueDate, priority, etc. }
+  const linkedProjectId = node.linkedProjectId;
+
   // Obtener estilos del nodo (con fallback a colores legacy)
   // Nodos tarea tienen colores especiales basados en su estado
   const getNodeColors = () => {
@@ -152,16 +162,6 @@ const NodeItem = memo(({
   // Tamaño del nodo (con valores por defecto)
   const nodeWidth = node.width || NODE_WIDTH;
   const nodeHeight = node.height || NODE_HEIGHT;
-
-  // Tipo de nodo: 'default' | 'dashed_text' | 'project' | 'task'
-  // Compatibilidad: 'dashed' se trata igual que 'dashed_text'
-  const nodeType = node.nodeType || 'default';
-  const isDashedNode = nodeType === 'dashed' || nodeType === 'dashed_text';
-  const isProjectNode = nodeType === 'project';
-  const isTaskNode = nodeType === 'task';
-  const taskStatus = node.taskStatus || 'pending'; // 'pending' | 'in_progress' | 'completed'
-  const taskData = node.taskData || {}; // { checklist: [], dueDate, priority, etc. }
-  const linkedProjectId = node.linkedProjectId;
   
   // Alineación de texto (left, center, right) - por defecto center
   const textAlign = node.textAlign || 'center';

@@ -2,6 +2,26 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-20: FEATURE — Nodo Tarea Edición Avanzada y Sincronización Visual ✅ COMPLETADO
+- **Estado**: Implementación completada y verificada mediante screenshots
+- **Cambios realizados**:
+  - `NodeTaskModal.jsx` - Reordenado secciones, título editable, timer persistente
+  - `NodeItem.jsx` - Indicadores visuales (timer, fecha, prioridad, progreso)
+  - `Canvas.jsx` - Timer global persistente, handler para actualizar título
+- **Panel lateral - Orden correcto (OBLIGATORIO)**:
+  1. Título de la tarea (editable)
+  2. Descripción (textarea)
+  3. Progreso (barra automática)
+  4. Sub-tareas (checklist)
+  5. Temporizador (persistente)
+  6. Fecha límite
+  7. Prioridad
+- **Funcionalidades implementadas**:
+  - ✅ Timer PERSISTENTE: continúa corriendo aunque se cierre el panel
+  - ✅ Edición bidireccional: cambios en panel se reflejan en nodo
+  - ✅ Indicadores visuales en el nodo: timer, fecha, prioridad, progreso
+  - ✅ Mensaje informativo: "El temporizador continuará aunque cierres este panel"
+
 ### 2026-01-20: FEATURE — Modal "Tipo de nodo" con opción Tarea ✅ COMPLETADO
 - **Estado**: Implementación completada y verificada
 - **Cambios realizados**:

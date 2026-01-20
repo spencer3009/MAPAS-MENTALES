@@ -1412,6 +1412,7 @@ const Canvas = ({
             onNavigateToProject={onNavigateToProject}
             onOpenTaskModal={handleOpenTaskModal}
             onReminderClick={handleNodeReminderClick}
+            projects={projects}
             forceEdit={newNodeId === node.id}
             onEditComplete={handleEditComplete}
             isNavigationMode={isNavigationMode}

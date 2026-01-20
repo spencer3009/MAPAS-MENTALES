@@ -675,8 +675,8 @@ const Canvas = ({
 
   // Handler para actualizar el título del nodo desde el panel de tarea
   const handleUpdateNodeTitle = useCallback((nodeId, newTitle) => {
-    if (nodeId && onUpdateText) {
-      onUpdateText(nodeId, newTitle);
+    if (nodeId && onUpdateNodeText) {
+      onUpdateNodeText(nodeId, newTitle);
       // Actualizar también el nodo en el modal para sincronizar la UI
       setTaskNodeModal(prev => {
         if (prev.node && prev.node.id === nodeId) {
@@ -685,7 +685,7 @@ const Canvas = ({
         return prev;
       });
     }
-  }, [onUpdateText]);
+  }, [onUpdateNodeText]);
 
   // Handler para actualizar la tarea del nodo
   const handleUpdateNodeTask = useCallback((nodeId, taskUpdates) => {

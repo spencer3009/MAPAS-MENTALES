@@ -613,7 +613,7 @@ const DashboardView = ({ projects = [], onOpenProject, token, user, onNewProject
           <img 
             src={LOGO_URL} 
             alt="MindoraMap" 
-            style={{ width: '160px', height: 'auto' }}
+            style={{ width: '170px', height: 'auto' }}
             className="object-contain"
           />
         </div>

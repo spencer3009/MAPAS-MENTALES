@@ -2,6 +2,35 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-20: FEATURE — Nodo Convertible en Tarea ✅ IMPLEMENTADO (Pendiente Testing Usuario)
+- **Estado**: Implementación completada, pendiente verificación por usuario
+- **Archivos creados/modificados**:
+  - `/app/frontend/src/components/mindmap/NodeTaskModal.jsx` (NUEVO)
+  - `/app/frontend/src/components/mindmap/NodeItem.jsx` (MODIFICADO)
+  - `/app/frontend/src/components/mindmap/ContextMenu.jsx` (MODIFICADO)
+  - `/app/frontend/src/components/mindmap/Canvas.jsx` (MODIFICADO)
+- **Funcionalidades implementadas**:
+  - **Modelo de datos**: `nodeType: 'task'`, `taskStatus`, `taskData`
+  - **Sistema de colores**:
+    - Tarea pendiente/en progreso: Amarillo (#FACC15)
+    - Tarea completada: Naranja (#FB923C)
+  - **Menú contextual**:
+    - "Convertir en tarea" (para nodos normales)
+    - "Quitar estado de tarea" (para nodos tarea)
+    - "Reabrir tarea" (para tareas completadas)
+  - **Modal de Tarea** (NodeTaskModal):
+    - Sub-tareas (checklist) con progreso automático
+    - Temporizador (start/pause/reset)
+    - Fecha límite
+    - Prioridad (Baja, Media, Alta, Urgente)
+    - Notas
+    - Barra de progreso
+  - **Comportamiento**:
+    - Doble clic en nodo tarea abre el modal
+    - Progreso se calcula automáticamente basado en subtareas
+    - Estado cambia automáticamente cuando todas las subtareas están completas
+    - Nodo proyecto (verde) NO puede convertirse en tarea
+
 ### 2026-01-19: FEATURE — Vista de Colaboradores en Sidebar ✅ COMPLETADO
 - **Estado**: Nueva vista completa de Colaboradores similar a Contactos
 - **Ubicación**: Menú lateral → "Colaboradores" (nuevo ítem del sidebar)

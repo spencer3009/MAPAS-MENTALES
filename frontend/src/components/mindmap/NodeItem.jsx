@@ -535,8 +535,25 @@ const NodeItem = memo(({
       e.stopPropagation();
       // Solo navegar si hay proyecto vinculado
       if (linkedProjectId && onNavigateToProject) {
+        console.log('[NodeItem] Navegando a proyecto vinculado:', linkedProjectId);
         onNavigateToProject(linkedProjectId);
       }
+    };
+    
+    // Handler de mouseDown para proyecto: selecciona pero también permite arrastrar
+    // NO inicia navegación aquí - se hace en onClick del badge o doble clic
+    const handleProjectMouseDown = (e) => {
+      if (e.button === 2) {
+        e.preventDefault();
+        onSelect(node.id, e);
+        onContextMenu(e, node.id);
+        return;
+      }
+      
+      // Solo seleccionar y permitir arrastre
+      e.stopPropagation();
+      onSelect(node.id, e);
+      onDragStart(e, node);
     };
     
     return (
@@ -564,7 +581,7 @@ const NodeItem = memo(({
           pointerEvents: isNavigationMode ? 'none' : 'auto',
           touchAction: isNavigationMode ? 'none' : 'auto',
         }}
-        onMouseDown={handleMouseDown}
+        onMouseDown={handleProjectMouseDown}
         onTouchStart={handleTouchStart}
         onClick={handleNodeClick}
         onDoubleClick={handleProjectClick}

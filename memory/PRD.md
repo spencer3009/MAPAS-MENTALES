@@ -2,8 +2,15 @@
 
 ## Changelog (Latest First)
 
-### 2026-01-20: FEATURE — Nodo Convertible en Tarea ✅ IMPLEMENTADO (Pendiente Testing Usuario)
-- **Estado**: Implementación completada, pendiente verificación por usuario
+### 2026-01-20: FEATURE — Nodo Convertible en Tarea ✅ COMPLETADO Y VERIFICADO
+- **Estado**: Implementación completada y verificada mediante screenshot testing
+- **Verificación realizada**:
+  - ✅ Opción "Convertir en tarea" visible en menú contextual
+  - ✅ Nodos normales Y dashed pueden convertirse en tareas
+  - ✅ Color cambia a amarillo al convertir
+  - ✅ Icono de tarea (📋) aparece en el nodo
+  - ✅ Panel lateral derecho se abre automáticamente
+  - ✅ Panel muestra: título, estado, timer, sub-tareas, fecha, prioridad, descripción
 - **Archivos creados/modificados**:
   - `/app/frontend/src/components/mindmap/NodeTaskModal.jsx` (NUEVO)
   - `/app/frontend/src/components/mindmap/NodeItem.jsx` (MODIFICADO)

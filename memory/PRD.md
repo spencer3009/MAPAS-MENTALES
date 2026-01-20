@@ -2,6 +2,16 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-20: FEATURE — Badge "Ver tarea →" en Task Cards ✅ COMPLETADO Y PROBADO
+- **Estado**: Implementación completada y verificada
+- **Funcionalidad**: Agregado badge amarillo "Ver tarea →" en todos los nodos de tipo Tarea
+- **Comportamiento**: 
+  - ✅ Clic en badge abre el panel lateral de tareas
+  - ✅ Badge siempre visible (no depende de otros metadatos)
+  - ✅ Estilo consistente con el badge "Abrir mapa →" de proyectos
+- **Archivos modificados**:
+  - `/app/frontend/src/components/mindmap/NodeItem.jsx` - Agregado badge y import de icono Pencil
+
 ### 2026-01-20: BUGFIX — Recordatorios y Proyecto Vinculado UX ✅ COMPLETADO Y PROBADO
 - **Estado**: Implementación completada y verificada mediante testing automático
 - **Problema 1 - Recordatorios**: El ícono de recordatorio seguía visible después de enviado

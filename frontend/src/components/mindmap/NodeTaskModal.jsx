@@ -348,7 +348,17 @@ const NodeTaskModal = ({ node, onClose, onUpdate, onUpdateTitle, onDelete }) => 
         {/* Contenido scrolleable */}
         <div 
           className="flex-1 overflow-y-auto overscroll-contain"
-          onWheel={(e) => e.stopPropagation()}
+          style={{ 
+            // Forzar que el scroll sea solo dentro de este contenedor
+            overscrollBehavior: 'contain',
+            WebkitOverflowScrolling: 'touch'
+          }}
+          onWheelCapture={(e) => {
+            e.stopPropagation();
+          }}
+          onWheel={(e) => {
+            e.stopPropagation();
+          }}
         >
           <div className="p-5 space-y-6">
             

@@ -1,75 +1,80 @@
 <analysis>**original_problem_statement:**
-The user's initial project was to create a mind mapping tool. The scope has evolved significantly to include a company-centric architecture, collaborator management, a finance module, and robust task management features integrated directly into the mind map nodes.
+The user's goal is to enhance their full-stack mind mapping application, MindoraMap, with significant functional and UX improvements.
 
-In this session, the user's focus was exclusively on building out the Task Node and Project Node features with a high degree of UI/UX polish. The requests included:
-1.  Fixing the initial bug where converting a node to a task did nothing.
-2.  Adding a Task option to the Node Type selection modal.
-3.  Completely overhauling the Task Node's appearance to be a status card with a dynamic header, timer, and badges for metadata, based on a user-provided image.
-4.  Applying the same status card design to Project Nodes for visual consistency.
-5.  Standardizing the width of both card types.
-6.  Adding a clickable reminder icon to both card types.
-7.  Redesigning the task management panel into a two-column layout, and then converting it into a right-side sliding panel with independent scrolling.
-8.  Fixing multiple bugs, including a critical scroll-propagation issue, and a bug where pausing the timer would incorrectly reset its value.
-9.  Refining the task panel by removing a Pin button and laying the groundwork for an Attachments feature.
-10. The final request was to hide the reminder icon on a card after the reminder has been sent.
+The specific requests addressed in this session were:
+1.  **Reminders & Linked Projects:**
+    *   Hide the reminder icon on a node after the reminder has been sent. The agent discovered this was already working as intended.
+    *   Fix the click behavior on Linked Project nodes. A simple click was incorrectly allowing text editing instead of navigating to the linked project.
+2.  **Task Node Button:** Add a Ver tarea → (View task) button to task node cards, which opens the task details side panel.
+3.  **Dynamic Toolbar:** The floating node action toolbar needed to be context-aware. For Task and Project nodes, it should only display three actions: Delete, Duplicate, and Reminder, hiding all text and style editing options.
+4.  **Finance Module - IGV Dashboard:** Add a new summary dashboard at the top of the Ingresos (Income) tab, displaying three cards: Total earnings for the period, Subtotal (pre-tax), and IGV (18% tax).
+5.  **Finance Module - Filters & Health Status:**
+    *   Overhaul the date filter to support three modes: Day (default, set to today), Month, and Year.
+    *   Fix the non-functional Saludable / Atención (Healthy / Attention) financial status indicator, making it dynamically react to the financial data of the selected period.
+6.  **Timezone Bug:** Fix a critical bug where dates entered in the finance module were being displayed as the previous day due to incorrect timezone handling.
+7.  **Partial Payments:** The final and current task is to implement a partial payment system. When creating an income record with the status Por cobrar (Accounts Receivable), the form must dynamically show fields for Monto total (Total Amount) and Pago recibido (Payment Received), automatically calculating and displaying the Saldo pendiente (Pending Balance).
 
 **User's preferred language**: Spanish
 
 **what currently exists?**
-The application is a full-stack mind mapping tool with a React frontend and a FastAPI backend. The key work in this session has been the implementation and refinement of Task Nodes and Project Nodes as visual status cards directly on the canvas.
+The application is a full-stack mind mapping tool with a React frontend and FastAPI backend.
 
--   **Task & Project Cards:** Nodes can be converted into Tasks or linked Projects, which are displayed as information-rich cards with dynamic, color-coded headers reflecting their status (e.g., Red for an active timer, Yellow for pending, Green for a project).
--   **Task Side Panel:** A comprehensive, two-column side panel slides out from the right to manage tasks. It features an editable title, description, checklist, persistent timer, date selector, priority levels, and sections for attachments and comments.
--   **Independent Scrolling:** A critical UX bug has been fixed; scrolling within the open side panel no longer accidentally zooms or moves the main canvas.
--   **Persistent Timer:** The task timer correctly persists its accumulated time when paused and continues running in the background even if the side panel is closed, with the live time reflected on the node card itself.
+-   **Dynamic Node Cards:** Task and Project nodes are visually distinct cards. A critical bug was fixed where clicking a Project node now correctly navigates to the linked map, even recovering from missing data by matching the project name.
+-   **Contextual Actions:** Task nodes now feature a Ver tarea → button to open the details panel. The floating toolbar is now dynamic, showing a simplified set of actions for Task and Project nodes.
+-   **Advanced Finance Module:** The finance module features a sophisticated filtering system (Day/Month/Year), a functional financial health indicator, and a new dashboard on the income tab that automatically calculates Total, Subtotal, and IGV for the selected period.
+-   **Timezone Fix:** A critical timezone bug has been resolved, ensuring all dates entered and displayed in the finance module are consistent with the user's local timezone.
+-   **Partial Payments UI:** The UI for the New Income modal has been updated to support partial payments, dynamically showing fields for total amount, payment received, and pending balance. The backend models and API endpoint have also been modified to support this.
 
 **Last working item**:
--   **Last item agent was working:** Implementing the user's request to make the reminder badge on Task/Project cards disappear after the reminder has been sent to free up space on the card.
--   **Status:** NOT STARTED
+-   **Last item agent was working:** Implementing the logic for partial payments in the finance module. The agent updated the frontend  to include new fields, updated the backend Pydantic models in  to add  and , and modified the  endpoint in  to handle the new logic.
+-   **Status:** IN PROGRESS
 -   **Agent Testing Done:** N
--   **Which testing method agent to use?** both
+-   **Which testing method agent to use?** Frontend testing agent
 -   **User Testing Done:** N
 
-**All Pending/In progress Issue list**:
--   **Issue 1: Hide reminder badge after the reminder has been sent (P0 - HIGHEST)**
+**All Pending/Inprogress Issue list**:
+-   **Issue 1: Complete and Test Partial Payments Feature (P0 - HIGHEST)**
 -   **Issue 2: Production Deployment Stabilization (P0 - BLOCKER)**
 -   **Issue 3: Implement Attachment Upload Functionality (P1)**
 -   **Issue 4: WhatsApp Message Template Not Approved (P2 - BLOCKED)**
 
 **Issues Detail:**
--   **Issue 1: Hide reminder badge after the reminder has been sent**
-    -   **Attempted fixes:** None.
+-   **Issue 1: Complete and Test Partial Payments Feature**
+    -   **Attempted fixes:** Frontend () was updated with a new modal structure. Backend (, ) was updated to include new fields (, ) and logic.
     -   **Next debug checklist:**
-        1.  Examine the backend () to determine how reminder status is stored. If a  flag doesn't exist, add it to the data model.
-        2.  Update the relevant API endpoint that provides node data to include this new  status for reminders.
-        3.  In , modify the conditional rendering for the reminder badge.
-        4.  The badge should only be displayed if .
-    -   **Why fix this issue and what will be achieved with the fix?** This will free up UI space on the compact node cards and provide users with clear visual feedback that a reminder has been processed.
-    -   **Status:** NOT STARTED
+        1.  Launch the app and navigate to Finanzas → Ingresos.
+        2.  Click to add a new income.
+        3.  Set the status to Por cobrar.
+        4.  Enter a Monto total (e.g., 1000) and a Pago recibido (e.g., 300).
+        5.  Verify the Saldo pendiente automatically calculates to 700.
+        6.  Save the record and confirm it's stored correctly.
+        7.  Test the edge case where Pago recibido equals Monto total and verify the status automatically changes to Cobrado.
+        8.  Ensure the main Por Cobrar summary card reflects the new pending balance.
+    -   **Why fix this issue and what will be achieved with the fix?** This is a critical accounting feature that allows the user to manage invoices with fractional payments, making the finance module suitable for real-world business scenarios.
+    -   **Status:** IN PROGRESS
     -   **Is recurring issue?** N
     -   **Should Test frontend/backend/both after fix?** Both.
     -   **Blocked on other issue:** None.
 
 -   **Issue 2: Production Deployment Stabilization**
-    -   **Attempted fixes:** (From previous session) The  package was downgraded,  was cleaned, and the user was guided on how to re-link their custom domain and force-push the updated code to GitHub.
+    -   **Attempted fixes:** (From previous sessions) The user has been guided on how to push code to GitHub.
     -   **Next debug checklist:**
-        1.  Verbally confirm with the user that they have successfully used Save to GitHub to push all the latest changes to the  branch.
-        2.  Instruct the user to trigger a Re-Deploy from the Emergent platform UI.
-        3.  Ask the user to verify that all the new Task/Project card features are working correctly on their production URL after clearing their browser cache.
-    -   **Why fix this issue and what will be achieved with the fix?** This is a critical blocker preventing the user from seeing or using any of the recently developed features in their live application.
+        1.  Once the current feature is stable, proactively remind the user that new features are not live.
+        2.  Instruct the user to use Save to GitHub to push all changes.
+        3.  Guide them to trigger a Re-Deploy from the Emergent platform UI.
+    -   **Why fix this issue and what will be achieved with the fix?** This is a critical blocker preventing the user from using any recently developed features in their live application.
     -   **Status:** IN PROGRESS
     -   **Is recurring issue?** Y
     -   **Should Test frontend/backend/both after fix?** Both.
     -   **Blocked on other issue:** None.
 
 -   **Issue 3: Implement Attachment Upload Functionality**
-    -   **Attempted fixes:** The UI is fully implemented in , including the drag-and-drop zone, state, and placeholder functions. The logic for actually uploading the file is missing.
+    -   **Attempted fixes:** The UI is implemented in .
     -   **Next debug checklist:**
-        1.  Create a new backend endpoint (e.g., ) to handle file uploads, storing them in a persistent location.
-        2.  Implement the file upload logic in the  and  functions in  to send the file to the new endpoint.
-        3.  Update the  logic to persist the list of attachment URLs or IDs in the node's .
-        4.  Implement UI to display, link to, and delete existing attachments.
-    -   **Why fix this issue and what will be achieved with the fix?** To complete the Adjuntos (Attachments) feature in the task panel.
+        1.  Create a new backend endpoint (e.g., ).
+        2.  Implement file upload logic in  in .
+        3.  Implement UI to display and manage existing attachments.
+    -   **Why fix this issue and what will be achieved with the fix?** Completes the Adjuntos (Attachments) feature in the task panel.
     -   **Status:** IN PROGRESS
     -   **Is recurring issue?** N
     -   **Should Test frontend/backend/both after fix?** Both.
@@ -77,7 +82,7 @@ The application is a full-stack mind mapping tool with a React frontend and a Fa
 
 -   **Issue 4: WhatsApp Message Template Not Approved**
     -   **Attempted fixes:** Backend code is complete.
-    -   **Next debug checklist:** Blocked on user action. The user must get their message template approved in their Twilio Console.
+    -   **Next debug checklist:** Blocked on the user, who must get their message template approved in their Twilio Console.
     -   **Why fix this issue and what will be achieved with the fix?** Enables the WhatsApp reminder feature.
     -   **Status:** BLOCKED
     -   **Is recurring issue?** Y
@@ -85,14 +90,18 @@ The application is a full-stack mind mapping tool with a React frontend and a Fa
     -   **Blocked on other issue:** None.
 
 **In progress Task List**:
-(None)
+-   **Task 1: Finalize Partial Payments Feature**
+    -   **Where to resume:** The frontend and backend code has been modified. The next step is to perform end-to-end testing as outlined in the Next debug checklist for Issue #1.
+    -   **What will be achieved with this?** A fully functional and tested partial payment system for invoices.
+    -   **Status:** IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?** Both.
+    -   **Blocked on something:** None.
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks:**
-    *   **P1 - Task Node Logic (Phase 2):** Implement sub-task logic and automatic task completion (e.g., when all sub-tasks are done).
-    *   **P1 - Verify Linked Project Node Feature:** The UI card is complete, but the core functionality of linking and navigating between projects needs full verification.
+    *   **P1 - Task Node Logic (Phase 2):** Implement sub-task logic and automatic task completion.
     *   **P1 - Hybrid Reminders:** Add support for both personal and company-wide reminders.
-    *   **P1 - Finance Module (Phase 3):** Implement Por Cobrar (Accounts Receivable) and Por Pagar (Accounts Payable).
+    *   **P1 - Finance Module (Phase 3):** Enhance Por Pagar (Accounts Payable) functionality.
 *   **Future Tasks:**
     *   **P1 - Finance Module (Phase 4):** Implement the Inversiones (Investments) section.
     *   **P2 - Account blocking after 7 days.**
@@ -101,14 +110,12 @@ The application is a full-stack mind mapping tool with a React frontend and a Fa
     *   **P2 - Finance Module IA:** Implement AI-driven financial analysis.
 
 **Completed work in this session**
--   **Feature:** Implemented a Task option in the Node Type modal, using a 2x2 grid layout.
--   **Feature:** Implemented a persistent task timer that continues running when the panel is closed and correctly displays accumulated time when paused.
--   **Feature (UI):** Completely redesigned Task and Project nodes into dynamic status cards with color-coded headers, timers, and metadata badges, based on user-provided specs.
--   **Feature (UI):** Redesigned the task management view into a two-column, right-side sliding panel.
--   **Feature:** Added a clickable reminder icon/badge to both Task and Project cards.
--   **Bug Fix (UX):** Resolved a critical issue where scrolling inside the side panel would incorrectly affect the main canvas.
--   **Bug Fix:** Fixed the task timer to correctly maintain its value when paused.
--   **UI Refinement:** Removed the Pin button from the task panel and scaffolded the UI for the Attachments feature.
+-   **Bug Fix:** Fixed navigation for Linked Project nodes by implementing a data-fallback mechanism to find projects by name ().
+-   **Feature:** Added a Ver tarea → (View Task) button to Task Node cards to open the details panel ().
+-   **Feature:** Implemented a dynamic floating toolbar that adapts its options based on the selected node type ().
+-   **Feature:** Created a financial summary dashboard (Total, Subtotal, IGV) in the Finance module ().
+-   **Feature:** Implemented a robust Day/Month/Year date filter and a functional financial health status indicator ().
+-   **Bug Fix:** Resolved a critical timezone bug, ensuring date consistency across the finance module by standardizing on  string formats ().
 
 **Earlier issues found/mentioned but not fixed**
 (None)
@@ -117,55 +124,57 @@ The application is a full-stack mind mapping tool with a React frontend and a Fa
 -   **Issue recurrence in previous fork:**
     1.  Production deployment pipeline issues.
     2.  WhatsApp reminder approval.
--   **Recurrence count:** 3+
+-   **Recurrence count:** 4+
 -   **Status:** Issue 1 is IN PROGRESS. Issue 2 is BLOCKED.
 
 **Code Architecture**
-
+paid_amount/finanzas/incomesprojects
 
 **Key Technical Concepts**
--   **Event Propagation Control:** Using  in the main canvas's  handler to effectively ignore scroll events originating from the task panel, preventing unwanted canvas zooming.
--   **Component-Based Rendering:** Refactoring  to conditionally render entirely different component structures (, , or a default node) based on the  property.
--   **Persistent Background Timers:** Using a global  in the parent  component to continuously update the state of all active task timers, ensuring they run even when their respective editing panels are closed.
--   **Iterative UI/UX Development:** Progressively building a complex feature based on continuous user feedback, moving from a simple modal to a polished, information-dense side panel and status card UI.
+-   **Data Integrity Fallback:** The fix for project node navigation in  is a key concept, where the UI can recover from incomplete data ( missing) by using other available data () to find the correct link.
+-   **Timezone-Safe Date Handling:** The fix in  to use  date strings for all calculations and displays is a critical pattern for avoiding common timezone bugs in financial applications.
+-   **Dynamic UI Based on State:** The New Income modal dynamically adds/removes fields based on the status dropdown selection, providing a clean and intuitive user experience.
+-   **Component-Scoped Calculations:** The finance dashboard performs all its calculations (totals, taxes, health status) based on a  state that is re-computed whenever the master data or date filters change, ensuring the UI is always in sync.
 
 **key DB schema**
--   **nodes** (within the  collection): The frontend object structure for a node now supports . The  object within a task node has been significantly enriched to store state for the new panel: .
+-   **finanzas_incomes** (MongoDB collection):
+    -   The  field now represents the **total amount** of the invoice.
+    -   New field  stores the amount paid so far.
+    -   New field  stores the calculated remaining balance.
 
 **All files of reference**
--    (The new task management side panel)
--    (The visual component for all nodes, including the new card designs)
--    (The main mind map canvas component)
--    (Updated with progress on task features)
+-   
+-   
+-   
+-   
+-   
+-   
 
 **Areas that need refactoring**:
--   **:** Remains a large monolithic file (>9800 lines) and is a major source of technical debt. It should be broken down into smaller, domain-specific router files.
--   **:** This component has grown very large and complex due to handling the rendering logic for default nodes, dashed nodes, Task Cards, and Project Cards. The card logic could be extracted into separate  and  components for better maintainability.
+-   **:** This file has exceeded 1500 lines and is becoming a monolith. The , , summary cards, and various tables should be extracted into their own components.
+-   **:** Remains a very large file that should be broken down into smaller, domain-specific routers (e.g., , ).
 
 **key api endpoints**
--   No new endpoints were created.
--   An endpoint for file uploads (e.g., ) is now required to complete the attachments feature.
+-   : The backend logic for this endpoint was modified to handle  and calculate  upon creation.
 
 **Critical Info for New Agent**
 -   **You MUST communicate with the user in Spanish.**
--   The user provides very specific UI/UX requirements, often with images. Follow them precisely.
--   The immediate next task is small: hide the reminder badge on a node after the reminder has been sent. This will require a small backend change (to track sent status) and a frontend change (to conditionally render the badge).
--   After the current task, the **Production Deployment issue is the highest priority.** The user has not been able to see any of this session's work on their live site. You should proactively bring this up and guide them through re-deploying.
+-   Your immediate priority is to complete and test the **Partial Payments** feature. The UI and backend have been modified, but require thorough end-to-end testing to ensure correctness.
+-   Once the current task is complete, the **Production Deployment issue is the highest priority.** The user has not been able to see any of the work from this session on their live site. You must proactively guide them to Save to GitHub and Re-Deploy.
 
 **documents and test reports created in this job**
-(None)
+-    (updated multiple times)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **Request:** Hide the reminder icon after the reminder has been sent. (PENDING)
-2.  **Bug Report:** Pausing the task timer resets it to zero. (RESOLVED)
-3.  **Request:** Make task title editable, remove the Pin button, and implement the Attachments functionality. (RESOLVED - except for attachment upload logic)
-4.  **Bug Report:** Scrolling in the side panel affects the canvas. (RESOLVED)
-5.  **Request:** The task editing view should be a side panel, not a modal. (RESOLVED)
-6.  **Request:** Redesign the task panel to match a new two-column layout from an image. (RESOLVED)
-7.  **Request:** Add a clickable reminder icon to Task and Project cards. (RESOLVED)
-8.  **Request:** Make Project cards the same width as Task cards. (RESOLVED)
-9.  **Request:** Apply the status card design to Project nodes, but with a green header. (RESOLVED)
-10. **Request:** Redesign the Task node to be a status card based on an image spec. (RESOLVED)
+1.  **Request:** Implement partial payments in the New Income form. (IN PROGRESS)
+2.  **Bug Report/Request:** Fix the timezone bug causing dates to display as the previous day. (RESOLVED)
+3.  **Request:** Add improved date filters (Day/Month/Year) and a functional health status indicator to the Finance module. (RESOLVED)
+4.  **Request:** Add a financial summary dashboard (Total, Subtotal, IGV) to the Income tab. (RESOLVED)
+5.  **Request:** Modify the floating toolbar to be dynamic based on the selected node type. (RESOLVED)
+6.  **Confirmation/Request:** Liked the project link fix and requested a similar View Task button for task nodes. (RESOLVED)
+7.  **Bug Report:** Clicking a linked project node doesn't navigate. (RESOLVED)
+8.  **Request:** Improve reminder icon visibility and fix linked project navigation. (RESOLVED)
+9.  **User is waiting for the agent to finish implementing the partial payment feature.**
 
 **Project Health Check:**
 -   **Blocked:**
@@ -173,7 +182,8 @@ The application is a full-stack mind mapping tool with a React frontend and a Fa
 -   **In Progress / Blocked:**
     -   Production Deployment (agent has provided fixes, but user must push to GitHub and re-deploy).
 -   **In Progress:**
-    -   Task Attachments (UI is done, backend upload logic is missing).
+    -   Partial Payments Feature (coding done, testing pending).
+    -   Task Attachments (UI done, backend upload logic missing).
 
 **3rd Party Integrations**
 -   **Twilio:** For WhatsApp messages. The integration is code-complete but **blocked** by the user's need to get their message template approved in the Twilio console.
@@ -189,4 +199,4 @@ The application is a full-stack mind mapping tool with a React frontend and a Fa
 -   **Password:** 
 
 **What agent forgot to execute**
--   The agent did not follow up on the critical Production Deployment Stabilization issue from the previous handoff. While the user directed focus elsewhere, this remains a major blocker preventing them from using any of the new features. This should be addressed with high priority.</analysis>
+-   The agent successfully implemented all user requests from this session but has not yet addressed the long-standing, critical Production Deployment Stabilization issue. This remains a major blocker and must be prioritized after the current task is finished.</analysis>

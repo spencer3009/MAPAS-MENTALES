@@ -18,7 +18,7 @@ import requests
 import os
 import time
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://projectflow-111.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://mindmap-finance-1.preview.emergentagent.com').rstrip('/')
 
 # Test board and list IDs
 TEST_BOARD_ID = "board_37fa1864a7a4"

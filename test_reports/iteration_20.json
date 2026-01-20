@@ -54,7 +54,7 @@
   "pwa_verification": {
     "manifest_json": {
       "status": "PASS",
-      "url": "https://projectflow-111.preview.emergentagent.com/manifest.json",
+      "url": "https://mindmap-finance-1.preview.emergentagent.com/manifest.json",
       "http_status": 200,
       "content": {
         "name": "Mindora - Mapas Mentales",
@@ -66,9 +66,9 @@
     },
     "service_worker": {
       "status": "PASS",
-      "url": "https://projectflow-111.preview.emergentagent.com/service-worker.js",
+      "url": "https://mindmap-finance-1.preview.emergentagent.com/service-worker.js",
       "http_status": 200,
-      "registration_log": "[PWA] Service Worker registrado: https://projectflow-111.preview.emergentagent.com/"
+      "registration_log": "[PWA] Service Worker registrado: https://mindmap-finance-1.preview.emergentagent.com/"
     },
     "icons": {
       "favicon_16": "PASS (200)",

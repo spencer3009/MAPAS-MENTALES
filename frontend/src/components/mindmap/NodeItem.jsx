@@ -891,6 +891,91 @@ const NodeItem = memo(({
             )}
           </div>
 
+          {/* ========== INDICADORES VISUALES DE TAREA ========== */}
+          {isTaskNode && !isEditing && (
+            <div className="w-full mt-1 space-y-1">
+              {/* Barra de progreso mini */}
+              {taskData.checklist && taskData.checklist.length > 0 && (
+                <div className="flex items-center gap-1.5 px-1">
+                  <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full transition-all duration-300 ${
+                        taskData.progress === 100 ? 'bg-orange-500' : 'bg-yellow-500'
+                      }`}
+                      style={{ width: `${taskData.progress || 0}%` }}
+                    />
+                  </div>
+                  <span className="text-[9px] font-mono font-medium text-gray-500">
+                    {taskData.progress || 0}%
+                  </span>
+                </div>
+              )}
+              
+              {/* Fila de indicadores: Timer | Fecha | Prioridad */}
+              <div className="flex items-center justify-center gap-1.5 flex-wrap px-1">
+                {/* Timer activo */}
+                {taskData.timerRunning && (
+                  <div 
+                    className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-100 rounded text-green-700 animate-pulse"
+                    title="Temporizador activo"
+                  >
+                    <Clock size={10} />
+                    <span className="text-[9px] font-mono font-bold">
+                      {formatTime(taskData.timerSeconds || 0)}
+                    </span>
+                  </div>
+                )}
+                
+                {/* Timer pausado (mostrar tiempo acumulado si > 0) */}
+                {!taskData.timerRunning && taskData.timerSeconds > 0 && (
+                  <div 
+                    className="flex items-center gap-0.5 px-1.5 py-0.5 bg-gray-100 rounded text-gray-600"
+                    title="Tiempo acumulado"
+                  >
+                    <Clock size={10} />
+                    <span className="text-[9px] font-mono">
+                      {formatTime(taskData.timerSeconds)}
+                    </span>
+                  </div>
+                )}
+                
+                {/* Fecha límite */}
+                {taskData.dueDate && (
+                  <div 
+                    className="flex items-center gap-0.5 px-1.5 py-0.5 bg-blue-100 rounded text-blue-700"
+                    title={`Fecha límite: ${formatDateShort(taskData.dueDate)}`}
+                  >
+                    <Calendar size={10} />
+                    <span className="text-[9px] font-medium">
+                      {formatDateShort(taskData.dueDate)}
+                    </span>
+                  </div>
+                )}
+                
+                {/* Prioridad */}
+                {taskData.priority && (() => {
+                  const priorityData = PRIORITIES?.find(p => p.id === taskData.priority);
+                  if (!priorityData) return null;
+                  return (
+                    <div 
+                      className="flex items-center gap-0.5 px-1.5 py-0.5 rounded"
+                      style={{ 
+                        backgroundColor: priorityData.bgColor,
+                        color: priorityData.color 
+                      }}
+                      title={`Prioridad: ${priorityData.label}`}
+                    >
+                      <Flag size={10} />
+                      <span className="text-[9px] font-medium">
+                        {priorityData.label}
+                      </span>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+          )}
+
           {/* Subrayado para forma de línea */}
           {isLineShape && (
             <div 

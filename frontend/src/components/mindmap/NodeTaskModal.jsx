@@ -639,16 +639,103 @@ const NodeTaskModal = ({ node, onClose, onUpdate, onUpdateTitle, onDelete }) => 
             </div>
             
             {/* ========== ADJUNTOS ========== */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-gray-600">
-                <Image size={16} />
-                <span className="font-semibold text-sm">Adjuntos</span>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-gray-600">
+                  <Image size={16} />
+                  <span className="font-semibold text-sm">Adjuntos</span>
+                  {attachments.length > 0 && (
+                    <span className="text-xs text-gray-400">({attachments.length})</span>
+                  )}
+                </div>
               </div>
-              <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-gray-400 transition-colors cursor-pointer">
-                <Image size={28} className="mx-auto text-gray-300 mb-2" />
-                <p className="text-gray-500 text-sm">Haz clic para adjuntar</p>
-                <p className="text-gray-400 text-xs mt-1">JPG, PNG, GIF (máx. 10MB)</p>
-              </div>
+              
+              {/* Lista de adjuntos existentes */}
+              {attachments.length > 0 && (
+                <div className="space-y-2">
+                  {attachments.map((attachment) => (
+                    <div 
+                      key={attachment.id}
+                      className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 group"
+                    >
+                      {/* Preview/Icon */}
+                      {attachment.type.startsWith('image/') ? (
+                        <img 
+                          src={attachment.dataUrl} 
+                          alt={attachment.name}
+                          className="w-12 h-12 object-cover rounded-lg"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <Paperclip size={20} className="text-blue-500" />
+                        </div>
+                      )}
+                      
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-700 truncate">
+                          {attachment.name}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {formatFileSize(attachment.size)}
+                        </p>
+                      </div>
+                      
+                      {/* Actions */}
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {attachment.type.startsWith('image/') && (
+                          <a
+                            href={attachment.dataUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1.5 hover:bg-gray-200 rounded-lg transition-colors"
+                            title="Ver imagen"
+                          >
+                            <Image size={14} className="text-gray-500" />
+                          </a>
+                        )}
+                        <button
+                          onClick={() => removeAttachment(attachment.id)}
+                          className="p-1.5 hover:bg-red-100 rounded-lg transition-colors"
+                          title="Eliminar"
+                        >
+                          <Trash2 size={14} className="text-red-500" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {/* Zona de subida */}
+              <label 
+                className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors cursor-pointer block ${
+                  uploadingFile 
+                    ? 'border-blue-400 bg-blue-50' 
+                    : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                }`}
+              >
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  disabled={uploadingFile}
+                />
+                {uploadingFile ? (
+                  <>
+                    <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                    <p className="text-blue-500 text-sm">Subiendo...</p>
+                  </>
+                ) : (
+                  <>
+                    <Paperclip size={28} className="mx-auto text-gray-300 mb-2" />
+                    <p className="text-gray-500 text-sm">Haz clic para adjuntar archivos</p>
+                    <p className="text-gray-400 text-xs mt-1">Imágenes, PDF, documentos (máx. 10MB)</p>
+                  </>
+                )}
+              </label>
             </div>
             
             {/* ========== ACTIVIDAD ========== */}

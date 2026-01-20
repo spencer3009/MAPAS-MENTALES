@@ -174,7 +174,7 @@ const NodeTaskModal = ({ node, onClose, onUpdate, onUpdateTitle, onDelete }) => 
   useEffect(() => {
     const timeout = setTimeout(() => saveChanges(), 300);
     return () => clearTimeout(timeout);
-  }, [checklist, dueDate, priority, description, timerSeconds, timerRunning, isPinned]);
+  }, [checklist, dueDate, priority, description, timerSeconds, timerRunning, attachments]);
   
   useEffect(() => {
     const timeout = setTimeout(() => saveTitle(), 500);

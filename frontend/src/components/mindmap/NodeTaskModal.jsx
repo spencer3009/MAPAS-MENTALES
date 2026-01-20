@@ -49,8 +49,9 @@ const NodeTaskModal = ({ node, onClose, onUpdate, onUpdateTitle, onDelete }) => 
   const [newChecklistItem, setNewChecklistItem] = useState('');
   const [dueDate, setDueDate] = useState(taskData.dueDate || '');
   const [priority, setPriority] = useState(taskData.priority || '');
-  const [isPinned, setIsPinned] = useState(taskData.isPinned || false);
-  const [showPriorityPicker, setShowPriorityPicker] = useState(false);
+  const [attachments, setAttachments] = useState(taskData.attachments || []);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const fileInputRef = useRef(null);
   
   // Temporizador
   const [timerRunning, setTimerRunning] = useState(taskData.timerRunning || false);

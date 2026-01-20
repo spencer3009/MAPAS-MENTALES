@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   X, Calendar, CheckSquare, Clock, Flag, 
-  Plus, Trash2, Check, Edit2, AlertCircle,
-  Play, Pause, RotateCcw, ListTodo, ChevronRight,
-  Save
+  Plus, Trash2, Check, Paperclip, Image,
+  Play, Pause, ChevronDown, ChevronUp,
+  Pin, Tag, Users, MessageSquare, BarChart3
 } from 'lucide-react';
 
 // Prioridades con colores distintivos
@@ -37,7 +37,7 @@ export const formatDateShort = (dateString) => {
 // Exportar prioridades para uso en NodeItem
 export { PRIORITIES };
 
-const NodeTaskModal = ({ node, onClose, onUpdate, onUpdateTitle }) => {
+const NodeTaskModal = ({ node, onClose, onUpdate, onUpdateTitle, onDelete }) => {
   const taskData = node?.taskData || {};
   const taskStatus = node?.taskStatus || 'pending';
   
@@ -48,32 +48,29 @@ const NodeTaskModal = ({ node, onClose, onUpdate, onUpdateTitle }) => {
   const [newChecklistItem, setNewChecklistItem] = useState('');
   const [dueDate, setDueDate] = useState(taskData.dueDate || '');
   const [priority, setPriority] = useState(taskData.priority || '');
-  const [showPriorityPicker, setShowPriorityPicker] = useState(false);
+  const [isPinned, setIsPinned] = useState(taskData.isPinned || false);
+  const [showStats, setShowStats] = useState(false);
   
-  // Temporizador - estado sincronizado con taskData
+  // Temporizador
   const [timerRunning, setTimerRunning] = useState(taskData.timerRunning || false);
   const [timerSeconds, setTimerSeconds] = useState(taskData.timerSeconds || 0);
+  const [totalTime, setTotalTime] = useState(taskData.totalTime || 0);
   const timerRef = useRef(null);
-  const lastSaveRef = useRef(Date.now());
+  
+  // Activity log
+  const [activities, setActivities] = useState(taskData.activities || []);
+  const [newComment, setNewComment] = useState('');
   
   // Calcular progreso
   const completedItems = checklist.filter(item => item.completed).length;
   const totalItems = checklist.length;
   const progress = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
   
-  // Efecto para el temporizador - PERSISTENTE
+  // Efecto para el temporizador
   useEffect(() => {
     if (timerRunning) {
       timerRef.current = setInterval(() => {
-        setTimerSeconds(prev => {
-          const newValue = prev + 1;
-          // Guardar cada 5 segundos para persistencia
-          if (Date.now() - lastSaveRef.current > 5000) {
-            lastSaveRef.current = Date.now();
-            // Trigger auto-save
-          }
-          return newValue;
-        });
+        setTimerSeconds(prev => prev + 1);
       }, 1000);
     } else {
       clearInterval(timerRef.current);
@@ -86,7 +83,7 @@ const NodeTaskModal = ({ node, onClose, onUpdate, onUpdateTitle }) => {
     setTitle(node?.text || 'Nueva tarea');
   }, [node?.text]);
   
-  // Guardar cambios completos
+  // Guardar cambios
   const saveChanges = useCallback(() => {
     if (!node || !onUpdate) return;
     
@@ -97,9 +94,12 @@ const NodeTaskModal = ({ node, onClose, onUpdate, onUpdateTitle }) => {
       notes: description,
       timerRunning,
       timerSeconds,
-      progress
+      totalTime: timerRunning ? totalTime : totalTime + timerSeconds,
+      progress,
+      isPinned,
+      activities
     });
-  }, [node, onUpdate, checklist, dueDate, priority, description, timerRunning, timerSeconds, progress]);
+  }, [node, onUpdate, checklist, dueDate, priority, description, timerRunning, timerSeconds, totalTime, progress, isPinned, activities]);
   
   // Guardar título
   const saveTitle = useCallback(() => {
@@ -109,19 +109,14 @@ const NodeTaskModal = ({ node, onClose, onUpdate, onUpdateTitle }) => {
     }
   }, [node, onUpdateTitle, title]);
   
-  // Auto-guardar cuando cambian los datos (debounced)
+  // Auto-guardar
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      saveChanges();
-    }, 300);
+    const timeout = setTimeout(() => saveChanges(), 300);
     return () => clearTimeout(timeout);
-  }, [checklist, dueDate, priority, description, timerSeconds, timerRunning]);
+  }, [checklist, dueDate, priority, description, timerSeconds, timerRunning, isPinned]);
   
-  // Guardar título al cambiar
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      saveTitle();
-    }, 500);
+    const timeout = setTimeout(() => saveTitle(), 500);
     return () => clearTimeout(timeout);
   }, [title]);
   
@@ -152,363 +147,421 @@ const NodeTaskModal = ({ node, onClose, onUpdate, onUpdateTitle }) => {
   // Control del temporizador
   const toggleTimer = () => {
     const newRunning = !timerRunning;
+    
+    // Agregar actividad
+    const newActivity = {
+      id: Date.now().toString(),
+      type: newRunning ? 'timer_start' : 'timer_stop',
+      user: 'Usuario',
+      timestamp: new Date().toISOString(),
+      duration: newRunning ? null : timerSeconds
+    };
+    setActivities([newActivity, ...activities]);
+    
+    if (!newRunning) {
+      // Al pausar, acumular el tiempo
+      setTotalTime(prev => prev + timerSeconds);
+      setTimerSeconds(0);
+    }
+    
     setTimerRunning(newRunning);
-    // Guardar inmediatamente el estado del timer
-    if (onUpdate && node) {
-      setTimeout(() => {
-        onUpdate(node.id, {
-          checklist,
-          dueDate,
-          priority,
-          notes: description,
-          timerRunning: newRunning,
-          timerSeconds,
-          progress
-        });
-      }, 50);
+  };
+  
+  // Agregar comentario
+  const addComment = () => {
+    if (!newComment.trim()) return;
+    const activity = {
+      id: Date.now().toString(),
+      type: 'comment',
+      user: 'Usuario',
+      timestamp: new Date().toISOString(),
+      text: newComment.trim()
+    };
+    setActivities([activity, ...activities]);
+    setNewComment('');
+  };
+  
+  // Eliminar tarea
+  const handleDelete = () => {
+    if (window.confirm('¿Estás seguro de que deseas eliminar esta tarea?')) {
+      if (onDelete) {
+        onDelete(node.id);
+      }
+      onClose();
     }
   };
   
-  const resetTimer = () => {
-    setTimerRunning(false);
-    setTimerSeconds(0);
-  };
-  
-  // Cerrar panel pero mantener timer activo
+  // Cerrar panel
   const handleClose = () => {
-    // Guardar estado actual antes de cerrar
     saveChanges();
     onClose();
   };
   
-  // Obtener estado visual
-  const getStatusBadge = () => {
-    switch(taskStatus) {
-      case 'completed':
-        return <span className="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-700 rounded-full">✅ Completada</span>;
-      case 'in_progress':
-        return <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-700 rounded-full">⏳ En progreso</span>;
-      default:
-        return <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-full">📋 Pendiente</span>;
-    }
+  // Formatear fecha relativa
+  const formatRelativeTime = (timestamp) => {
+    const now = new Date();
+    const date = new Date(timestamp);
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    
+    if (diffMins < 1) return 'Ahora mismo';
+    if (diffMins < 60) return `Hace ${diffMins} min`;
+    if (diffHours < 24) return `Hace ${diffHours} hora${diffHours > 1 ? 's' : ''}`;
+    return date.toLocaleDateString('es-ES');
   };
 
   if (!node) return null;
 
   return (
     <>
-      {/* Overlay oscuro - click para cerrar (pero mantiene timer) */}
+      {/* Overlay */}
       <div 
-        className="fixed inset-0 bg-black/30 z-[9998]"
+        className="fixed inset-0 bg-black/40 z-[9998]"
         onClick={handleClose}
       />
       
-      {/* Panel lateral derecho */}
+      {/* Modal centrado */}
       <div 
-        className="fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl z-[9999] flex flex-col transform transition-transform duration-300 ease-out"
+        className="fixed inset-4 md:inset-10 lg:inset-16 bg-gray-50 rounded-2xl shadow-2xl z-[9999] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header con indicador de timer activo */}
-        <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-yellow-50 to-orange-50 flex-shrink-0">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-              timerRunning ? 'bg-green-100 animate-pulse' : 'bg-yellow-100'
-            }`}>
-              {timerRunning ? (
-                <Clock className="w-5 h-5 text-green-600" />
-              ) : (
-                <ListTodo className="w-5 h-5 text-yellow-600" />
-              )}
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                {getStatusBadge()}
-                {timerRunning && (
-                  <span className="px-2 py-0.5 text-[10px] font-medium bg-green-100 text-green-700 rounded-full animate-pulse">
-                    ⏱️ Timer activo
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 bg-white border-b">
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="text-xl font-bold text-gray-800 bg-transparent outline-none flex-1 mr-4"
+            placeholder="Nombre de la tarea..."
+          />
           <button
             onClick={handleClose}
-            className="p-2 hover:bg-white/50 rounded-lg transition-colors flex-shrink-0 ml-2"
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <ChevronRight size={20} className="text-gray-500" />
+            <X size={20} className="text-gray-500" />
           </button>
         </div>
         
-        {/* Content - scrollable */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-5">
-          
-          {/* 1️⃣ TÍTULO EDITABLE */}
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-1.5">
-              <Edit2 className="w-4 h-4 text-gray-500" />
-              <span className="text-xs font-medium text-gray-700">Título de la tarea</span>
-            </div>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Nombre de la tarea..."
-              className="w-full px-3 py-2.5 text-base font-semibold border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
-            />
-          </div>
-          
-          {/* 2️⃣ DESCRIPCIÓN */}
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-1.5">
-              <AlertCircle className="w-4 h-4 text-gray-500" />
-              <span className="text-xs font-medium text-gray-700">Descripción</span>
-            </div>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe la tarea en detalle..."
-              rows={3}
-              className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors resize-none"
-            />
-          </div>
-          
-          {/* 3️⃣ PROGRESO */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-medium text-gray-700">📊 Progreso</span>
-              <span className="text-gray-500 font-mono">{progress}%</span>
-            </div>
-            <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
-              <div 
-                className={`h-full transition-all duration-300 ${
-                  progress === 100 ? 'bg-orange-500' : 'bg-yellow-500'
-                }`}
-                style={{ width: `${progress}%` }}
+        {/* Content - Two columns */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* ========== COLUMNA IZQUIERDA ========== */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            
+            {/* Descripción */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-gray-600">
+                <MessageSquare size={18} />
+                <span className="font-medium">Descripción</span>
+              </div>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Añade una descripción más detallada..."
+                rows={3}
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none text-gray-700"
               />
             </div>
-            <p className="text-xs text-gray-500">
-              {completedItems} de {totalItems} sub-tareas completadas
-              {progress === 100 && <span className="ml-2 text-orange-600 font-medium">🎉 ¡Completado!</span>}
-            </p>
-          </div>
-          
-          {/* 4️⃣ SUB-TAREAS (Checklist) */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <CheckSquare className="w-4 h-4 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700">Sub-tareas</span>
-            </div>
             
-            {/* Lista de items */}
-            <div className="space-y-2 max-h-48 overflow-y-auto">
-              {checklist.length === 0 && (
-                <p className="text-sm text-gray-400 text-center py-3 bg-gray-50 rounded-lg">
-                  No hay sub-tareas aún
-                </p>
+            {/* Checklist */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-gray-600">
+                <CheckSquare size={18} />
+                <span className="font-medium">Checklist</span>
+                {totalItems > 0 && (
+                  <span className="text-sm text-gray-400">({completedItems}/{totalItems})</span>
+                )}
+              </div>
+              
+              {/* Progress bar */}
+              {totalItems > 0 && (
+                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-green-500 transition-all duration-300"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
               )}
-              {checklist.map((item) => (
-                <div 
-                  key={item.id}
-                  className={`flex items-center gap-2 p-2.5 rounded-lg border transition-all ${
-                    item.completed 
-                      ? 'bg-green-50 border-green-200' 
-                      : 'bg-white border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <button
-                    onClick={() => toggleChecklistItem(item.id)}
-                    className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors flex-shrink-0 ${
-                      item.completed 
-                        ? 'bg-green-500 border-green-500 text-white' 
-                        : 'border-gray-300 hover:border-green-500'
+              
+              {/* Items */}
+              <div className="space-y-2">
+                {checklist.map((item) => (
+                  <div 
+                    key={item.id}
+                    className={`flex items-center gap-3 p-3 bg-white rounded-lg border ${
+                      item.completed ? 'border-green-200 bg-green-50' : 'border-gray-200'
                     }`}
                   >
-                    {item.completed && <Check size={12} />}
-                  </button>
-                  <span className={`flex-1 text-sm ${item.completed ? 'line-through text-gray-400' : 'text-gray-700'}`}>
-                    {item.text}
-                  </span>
-                  <button
-                    onClick={() => deleteChecklistItem(item.id)}
-                    className="p-1 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              ))}
+                    <button
+                      onClick={() => toggleChecklistItem(item.id)}
+                      className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors flex-shrink-0 ${
+                        item.completed 
+                          ? 'bg-green-500 border-green-500 text-white' 
+                          : 'border-gray-300 hover:border-green-500'
+                      }`}
+                    >
+                      {item.completed && <Check size={12} />}
+                    </button>
+                    <span className={`flex-1 text-sm ${item.completed ? 'line-through text-gray-400' : 'text-gray-700'}`}>
+                      {item.text}
+                    </span>
+                    <button
+                      onClick={() => deleteChecklistItem(item.id)}
+                      className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Add item input */}
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newChecklistItem}
+                  onChange={(e) => setNewChecklistItem(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && addChecklistItem()}
+                  placeholder="Añadir elemento..."
+                  className="flex-1 px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                />
+                <button
+                  onClick={addChecklistItem}
+                  disabled={!newChecklistItem.trim()}
+                  className="px-4 py-2 bg-rose-400 text-white rounded-lg hover:bg-rose-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm"
+                >
+                  Añadir
+                </button>
+              </div>
             </div>
             
-            {/* Agregar nuevo item */}
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newChecklistItem}
-                onChange={(e) => setNewChecklistItem(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && addChecklistItem()}
-                placeholder="Nueva sub-tarea..."
-                className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
-              />
-              <button
-                onClick={addChecklistItem}
-                disabled={!newChecklistItem.trim()}
-                className="px-3 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <Plus size={18} />
-              </button>
+            {/* Adjuntos */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-gray-600">
+                  <Paperclip size={18} />
+                  <span className="font-medium">Adjuntos</span>
+                </div>
+                <button className="text-blue-500 hover:text-blue-600 text-sm font-medium flex items-center gap-1">
+                  <Plus size={14} />
+                  Añadir
+                </button>
+              </div>
+              
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer">
+                <Image size={32} className="mx-auto text-gray-300 mb-2" />
+                <p className="text-gray-500 text-sm">Haz clic para adjuntar una imagen</p>
+                <p className="text-gray-400 text-xs mt-1">JPG, PNG, GIF o WebP (máx. 10MB)</p>
+              </div>
+            </div>
+            
+            {/* Actividad */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-gray-600">
+                <MessageSquare size={18} />
+                <span className="font-medium">Actividad</span>
+              </div>
+              
+              {/* Add comment */}
+              <div className="flex gap-3 items-start">
+                <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                  U
+                </div>
+                <input
+                  type="text"
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && addComment()}
+                  placeholder="Escribe un comentario..."
+                  className="flex-1 px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                />
+              </div>
+              
+              {/* Activity list */}
+              <div className="space-y-3 mt-4">
+                {activities.map((activity) => (
+                  <div key={activity.id} className="flex gap-3 items-start">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      activity.type === 'timer_start' ? 'bg-green-500' :
+                      activity.type === 'timer_stop' ? 'bg-red-500' :
+                      'bg-blue-500'
+                    }`}>
+                      {activity.type === 'timer_start' ? <Play size={14} className="text-white" /> :
+                       activity.type === 'timer_stop' ? <Pause size={14} className="text-white" /> :
+                       <MessageSquare size={14} className="text-white" />}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-400 uppercase font-medium">
+                        {formatRelativeTime(activity.timestamp)}
+                      </p>
+                      <p className="text-sm text-gray-700">
+                        <span className="font-semibold">{activity.user}</span>
+                        {activity.type === 'timer_start' && ' comenzó a hacer un registro del tiempo.'}
+                        {activity.type === 'timer_stop' && ` dejó de hacer un registro del tiempo.`}
+                        {activity.type === 'comment' && `: ${activity.text}`}
+                      </p>
+                      {activity.type === 'timer_stop' && activity.duration && (
+                        <p className="text-xs text-gray-500">Duración: {formatTime(activity.duration)}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
           
-          {/* 5️⃣ TEMPORIZADOR */}
-          <div className={`rounded-xl p-4 ${timerRunning ? 'bg-green-50 border-2 border-green-200' : 'bg-gray-50'}`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Clock className={`w-4 h-4 ${timerRunning ? 'text-green-600' : 'text-gray-500'}`} />
-                <span className={`text-sm font-medium ${timerRunning ? 'text-green-700' : 'text-gray-700'}`}>
-                  Temporizador
-                </span>
-                {timerRunning && (
-                  <span className="text-[10px] px-1.5 py-0.5 bg-green-200 text-green-800 rounded-full">
-                    Activo
-                  </span>
-                )}
+          {/* ========== COLUMNA DERECHA (SIDEBAR) ========== */}
+          <div className="w-72 bg-white border-l overflow-y-auto p-4 space-y-4">
+            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              Añadir a la tarjeta
+            </h3>
+            
+            {/* Registro de Tiempo */}
+            <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+              <div className="flex items-center gap-2 text-gray-600">
+                <Clock size={16} />
+                <span className="font-medium text-sm">Registro de Tiempo</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className={`text-xl font-mono font-bold ${timerRunning ? 'text-green-700' : 'text-gray-800'}`}>
-                  {formatTime(timerSeconds)}
-                </span>
+              
+              <div className="flex items-center gap-4">
                 <button
                   onClick={toggleTimer}
-                  className={`p-2 rounded-lg transition-colors ${
+                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors ${
                     timerRunning 
-                      ? 'bg-red-100 text-red-600 hover:bg-red-200' 
-                      : 'bg-green-100 text-green-600 hover:bg-green-200'
+                      ? 'bg-red-500 hover:bg-red-600' 
+                      : 'bg-blue-500 hover:bg-blue-600'
                   }`}
-                  title={timerRunning ? 'Pausar' : 'Iniciar'}
                 >
-                  {timerRunning ? <Pause size={18} /> : <Play size={18} />}
+                  {timerRunning 
+                    ? <Pause size={24} className="text-white" />
+                    : <Play size={24} className="text-white ml-1" />
+                  }
                 </button>
-                <button
-                  onClick={resetTimer}
-                  className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
-                  title="Reiniciar"
-                >
-                  <RotateCcw size={18} />
-                </button>
+                <div>
+                  <p className="text-2xl font-mono font-bold text-gray-800">
+                    {formatTime(timerSeconds)}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {timerRunning ? '⏱️ Registrando...' : '▶️ Presiona play para iniciar'}
+                  </p>
+                </div>
               </div>
+              
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-500">Tiempo total:</span>
+                <span className="font-mono font-bold text-rose-500">
+                  {formatTime(totalTime + (timerRunning ? timerSeconds : 0))}
+                </span>
+              </div>
+              
+              <button 
+                onClick={() => setShowStats(!showStats)}
+                className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1 w-full justify-center"
+              >
+                {showStats ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                Ver estadísticas
+              </button>
             </div>
-            {timerRunning && (
-              <p className="text-xs text-green-600 mt-2">
-                ⚡ El temporizador continuará aunque cierres este panel
-              </p>
-            )}
-          </div>
-          
-          {/* 6️⃣ FECHA LÍMITE y 7️⃣ PRIORIDAD */}
-          <div className="grid grid-cols-2 gap-3">
+            
+            {/* Anclar */}
+            <button 
+              onClick={() => setIsPinned(!isPinned)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border transition-colors ${
+                isPinned 
+                  ? 'bg-amber-50 border-amber-200 text-amber-700' 
+                  : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <Pin size={18} className={isPinned ? 'fill-current' : ''} />
+              <span className="font-medium">Anclar</span>
+            </button>
+            
             {/* Fecha límite */}
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-1.5">
-                <Calendar className="w-4 h-4 text-gray-500" />
-                <span className="text-xs font-medium text-gray-700">Fecha límite</span>
-              </div>
-              <input
-                type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-                className="w-full px-2.5 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
-              />
-              {dueDate && (
-                <button
-                  onClick={() => setDueDate('')}
-                  className="text-xs text-red-500 hover:text-red-700"
-                >
-                  Quitar fecha
-                </button>
+            <div className="space-y-2">
+              <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors">
+                <Calendar size={18} />
+                <span className="font-medium">Fecha límite</span>
+              </button>
+              {dueDate ? (
+                <div className="flex items-center justify-between px-4 py-2 bg-blue-50 rounded-lg">
+                  <span className="text-sm text-blue-700">{formatDateShort(dueDate)}</span>
+                  <button 
+                    onClick={() => setDueDate('')}
+                    className="text-blue-500 hover:text-blue-700"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ) : (
+                <input
+                  type="date"
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)}
+                  className="w-full px-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
               )}
             </div>
             
+            {/* Etiquetas */}
+            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors">
+              <Tag size={18} />
+              <span className="font-medium">Etiquetas</span>
+            </button>
+            
             {/* Prioridad */}
-            <div className="space-y-1.5 relative">
-              <div className="flex items-center gap-1.5">
-                <Flag className="w-4 h-4 text-gray-500" />
-                <span className="text-xs font-medium text-gray-700">Prioridad</span>
-              </div>
-              <button
-                onClick={() => setShowPriorityPicker(!showPriorityPicker)}
-                className={`w-full px-2.5 py-2 text-sm border rounded-lg text-left flex items-center justify-between transition-colors ${
-                  priority 
-                    ? `border-2`
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-                style={priority ? { 
-                  borderColor: PRIORITIES.find(p => p.id === priority)?.color,
-                  backgroundColor: PRIORITIES.find(p => p.id === priority)?.bgColor
-                } : {}}
-              >
-                {priority ? (
-                  <span className="flex items-center gap-1.5">
-                    <span>{PRIORITIES.find(p => p.id === priority)?.icon}</span>
-                    <span className="font-medium">{PRIORITIES.find(p => p.id === priority)?.label}</span>
-                  </span>
-                ) : (
-                  <span className="text-gray-400">Sin prioridad</span>
-                )}
+            <div className="space-y-2">
+              <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors">
+                <Flag size={18} />
+                <span className="font-medium">Prioridad</span>
               </button>
-              
-              {showPriorityPicker && (
-                <div className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                  {PRIORITIES.map((p) => (
-                    <button
-                      key={p.id}
-                      onClick={() => {
-                        setPriority(p.id);
-                        setShowPriorityPicker(false);
-                      }}
-                      className="w-full px-3 py-2 text-left text-sm flex items-center gap-2 hover:bg-gray-50 transition-colors"
-                      style={{ borderLeft: `4px solid ${p.color}` }}
-                    >
-                      <span>{p.icon}</span>
-                      <span className="font-medium">{p.label}</span>
-                    </button>
-                  ))}
+              <div className="grid grid-cols-2 gap-2">
+                {PRIORITIES.map((p) => (
                   <button
-                    onClick={() => {
-                      setPriority('');
-                      setShowPriorityPicker(false);
+                    key={p.id}
+                    onClick={() => setPriority(priority === p.id ? '' : p.id)}
+                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                      priority === p.id 
+                        ? 'ring-2 ring-offset-1' 
+                        : 'hover:opacity-80'
+                    }`}
+                    style={{ 
+                      backgroundColor: p.bgColor, 
+                      color: p.color,
+                      ringColor: p.color 
                     }}
-                    className="w-full px-3 py-2 text-left text-sm text-gray-400 hover:bg-gray-50 transition-colors border-t"
                   >
-                    Sin prioridad
+                    {p.icon} {p.label}
                   </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-        
-        {/* Footer */}
-        <div className="px-5 py-3 border-t border-gray-200 bg-gray-50 flex items-center justify-between flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="text-xs text-gray-500">
-              {progress === 100 
-                ? '✅ Tarea completada' 
-                : progress > 0 
-                  ? `⏳ ${progress}% completado` 
-                  : '📋 Sin progreso'
-              }
-            </div>
-            {timerRunning && (
-              <div className="text-xs text-green-600 font-medium">
-                ⏱️ {formatTime(timerSeconds)}
+                ))}
               </div>
-            )}
+            </div>
+            
+            {/* Miembros */}
+            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors">
+              <Users size={18} />
+              <span className="font-medium">Miembros</span>
+            </button>
+            
+            {/* Adjuntos */}
+            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors">
+              <Paperclip size={18} />
+              <span className="font-medium">Adjuntos</span>
+            </button>
+            
+            {/* Acciones */}
+            <div className="pt-4 border-t">
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                Acciones
+              </h3>
+              <button 
+                onClick={handleDelete}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+              >
+                <Trash2 size={18} />
+                <span className="font-medium">Eliminar tarea</span>
+              </button>
+            </div>
           </div>
-          <button
-            onClick={handleClose}
-            className="px-4 py-2 text-sm bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors"
-          >
-            Cerrar
-          </button>
         </div>
       </div>
     </>

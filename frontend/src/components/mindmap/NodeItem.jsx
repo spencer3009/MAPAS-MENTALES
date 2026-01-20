@@ -138,7 +138,24 @@ const NodeItem = memo(({
   const isTaskNode = nodeType === 'task';
   const taskStatus = node.taskStatus || 'pending'; // 'pending' | 'in_progress' | 'completed'
   const taskData = node.taskData || {}; // { checklist: [], dueDate, priority, etc. }
-  const linkedProjectId = node.linkedProjectId;
+  
+  // Para nodos de proyecto: usar linkedProjectId si existe, o buscar por nombre
+  const directLinkedProjectId = node.linkedProjectId;
+  const linkedProjectId = useMemo(() => {
+    if (directLinkedProjectId) return directLinkedProjectId;
+    
+    // Si no tiene linkedProjectId pero es un nodo de proyecto, buscar por nombre
+    if (isProjectNode && node.text && projects.length > 0) {
+      const matchingProject = projects.find(p => 
+        p.name?.toLowerCase().trim() === node.text?.toLowerCase().trim()
+      );
+      if (matchingProject) {
+        console.log('[NodeItem] Proyecto encontrado por nombre:', matchingProject.name, matchingProject.id);
+        return matchingProject.id;
+      }
+    }
+    return null;
+  }, [directLinkedProjectId, isProjectNode, node.text, projects]);
   
   // Debug log para nodos de proyecto
   if (isProjectNode) {
@@ -146,8 +163,9 @@ const NodeItem = memo(({
       nodeId: node.id,
       text: node.text,
       nodeType,
-      linkedProjectId,
-      hasLinkedProjectId: !!linkedProjectId,
+      directLinkedProjectId,
+      resolvedLinkedProjectId: linkedProjectId,
+      projectsCount: projects.length,
       hasOnNavigateToProject: !!onNavigateToProject
     });
   }

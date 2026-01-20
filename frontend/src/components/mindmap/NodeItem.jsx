@@ -838,6 +838,7 @@ const NodeItem = memo(({
             <button
               onClick={(e) => {
                 e.stopPropagation();
+                console.log('[NodeItem] Click en Ver tarea, onOpenTaskModal:', !!onOpenTaskModal, 'node:', node?.id);
                 if (onOpenTaskModal) {
                   onOpenTaskModal(node);
                 }

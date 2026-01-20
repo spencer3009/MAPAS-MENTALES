@@ -157,10 +157,10 @@ const NodeTaskModal = ({ node, onClose, onUpdate, onUpdateTitle, onDelete }) => 
       timerSeconds,
       totalTime: timerRunning ? totalTime : totalTime + timerSeconds,
       progress,
-      isPinned,
+      attachments,
       activities
     });
-  }, [node, onUpdate, checklist, dueDate, priority, description, timerRunning, timerSeconds, totalTime, progress, isPinned, activities]);
+  }, [node, onUpdate, checklist, dueDate, priority, description, timerRunning, timerSeconds, totalTime, progress, attachments, activities]);
   
   // Guardar título
   const saveTitle = useCallback(() => {

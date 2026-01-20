@@ -631,8 +631,24 @@ const Canvas = ({
 
   // Handler para cerrar el modal de tarea
   const handleCloseTaskModal = useCallback(() => {
+    // Sincronizar el estado actual del nodo antes de cerrar
+    // El timer continúa corriendo en el estado del nodo
     setTaskNodeModal({ isOpen: false, node: null });
   }, []);
+
+  // Handler para actualizar el título del nodo desde el panel de tarea
+  const handleUpdateNodeTitle = useCallback((nodeId, newTitle) => {
+    if (nodeId && onUpdateText) {
+      onUpdateText(nodeId, newTitle);
+      // Actualizar también el nodo en el modal para sincronizar la UI
+      setTaskNodeModal(prev => {
+        if (prev.node && prev.node.id === nodeId) {
+          return { ...prev, node: { ...prev.node, text: newTitle } };
+        }
+        return prev;
+      });
+    }
+  }, [onUpdateText]);
 
   // Handler para actualizar la tarea del nodo
   const handleUpdateNodeTask = useCallback((nodeId, taskUpdates) => {

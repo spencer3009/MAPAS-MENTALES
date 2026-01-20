@@ -60,6 +60,7 @@ const ContextMenu = ({
   nodeId,
   currentNodeType,
   currentLineWidth,
+  currentTaskStatus,
   linkedProjectId,
   onAddChild,
   onDuplicate,
@@ -68,6 +69,9 @@ const ContextMenu = ({
   onChangeLineWidth,
   onLinkToProject,
   onUnlinkProject,
+  onConvertToTask,
+  onRemoveTaskStatus,
+  onReopenTask,
   onClose
 }) => {
   const [showLineWidthMenu, setShowLineWidthMenu] = useState(false);

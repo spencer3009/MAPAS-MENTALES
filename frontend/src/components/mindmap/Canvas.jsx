@@ -179,6 +179,20 @@ const Canvas = ({
           const newTimerSeconds = (node.taskData.timerSeconds || 0) + 1;
           const newTaskData = { ...node.taskData, timerSeconds: newTimerSeconds };
           onChangeNodeType(node.id, 'task', { taskData: newTaskData });
+          
+          // Si el modal está abierto para este nodo, actualizar también el modal
+          setTaskNodeModal(prev => {
+            if (prev.isOpen && prev.node && prev.node.id === node.id) {
+              return {
+                ...prev,
+                node: {
+                  ...prev.node,
+                  taskData: newTaskData
+                }
+              };
+            }
+            return prev;
+          });
         });
       }
     }, 1000);

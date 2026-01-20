@@ -13,6 +13,7 @@ import CanvasModePanel from './CanvasModePanel';
 import CanvasGrid from './CanvasGrid';
 import CanvasRulers, { RULER_SIZE } from './CanvasRulers';
 import NavigationModeButton from './NavigationModeButton';
+import NodeTaskModal from './NodeTaskModal';
 import { useTouchGestures } from '../../hooks/useTouchGestures';
 import { getSmartAnchorToPosition, getSmartAnchorPoints, generatePreviewPath, generateSmartPath } from '../../utils/curve';
 

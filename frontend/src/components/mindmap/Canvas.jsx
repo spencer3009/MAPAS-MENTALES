@@ -520,17 +520,42 @@ const Canvas = ({
   // Handler para convertir un nodo en tarea
   const handleConvertToTask = useCallback((nodeId) => {
     if (nodeId && onChangeNodeType) {
+      // Convertir el nodo a tipo tarea
       onChangeNodeType(nodeId, 'task', { 
         taskStatus: 'pending',
         taskData: { 
           checklist: [], 
           dueDate: null, 
           priority: null,
-          progress: 0 
+          progress: 0,
+          notes: '',
+          timerSeconds: 0,
+          timerRunning: false
         }
       });
+      
+      // Abrir automáticamente el panel de tarea
+      const node = nodes.find(n => n.id === nodeId);
+      if (node) {
+        // Crear un nodo actualizado con los nuevos valores para el modal
+        const updatedNode = {
+          ...node,
+          nodeType: 'task',
+          taskStatus: 'pending',
+          taskData: { 
+            checklist: [], 
+            dueDate: null, 
+            priority: null,
+            progress: 0,
+            notes: '',
+            timerSeconds: 0,
+            timerRunning: false
+          }
+        };
+        setTaskNodeModal({ isOpen: true, node: updatedNode });
+      }
     }
-  }, [onChangeNodeType]);
+  }, [onChangeNodeType, nodes]);
 
   // Handler para quitar el estado de tarea
   const handleRemoveTaskStatus = useCallback((nodeId) => {

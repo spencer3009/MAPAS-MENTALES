@@ -1987,6 +1987,11 @@ export const useNodes = () => {
       } else if (options?.nodeType === 'project' && position) {
         // Para nodos tipo proyecto, usar el nombre del proyecto como texto inicial
         initialText = position; // position contiene el nombre del proyecto
+      } else if (options?.nodeType === 'task' && position) {
+        // Para nodos tipo tarea, usar el texto proporcionado o 'Nueva tarea'
+        initialText = position;
+      } else if (options?.nodeType === 'task') {
+        initialText = 'Nueva tarea';
       }
 
       const newNode = {
@@ -1999,9 +2004,22 @@ export const useNodes = () => {
         width: (options?.nodeType === 'dashed' || options?.nodeType === 'dashed_text') ? 260 : 160,
         height: (options?.nodeType === 'dashed' || options?.nodeType === 'dashed_text') ? 40 : 64,
         // Normalizar 'dashed' a 'dashed_text' para nuevos nodos
-        nodeType: options?.nodeType === 'dashed' ? 'dashed_text' : (options?.nodeType || 'default'), // 'default' | 'dashed_text' | 'project'
+        nodeType: options?.nodeType === 'dashed' ? 'dashed_text' : (options?.nodeType || 'default'), // 'default' | 'dashed_text' | 'project' | 'task'
         // Para nodos tipo proyecto: guardar el ID del proyecto vinculado
         ...(options?.linkedProjectId && { linkedProjectId: options.linkedProjectId }),
+        // Para nodos tipo tarea: guardar el estado y datos de la tarea
+        ...(options?.nodeType === 'task' && { 
+          taskStatus: options?.taskStatus || 'pending',
+          taskData: options?.taskData || {
+            checklist: [],
+            dueDate: null,
+            priority: null,
+            progress: 0,
+            notes: '',
+            timerSeconds: 0,
+            timerRunning: false
+          }
+        }),
         // MindAxis: guardar el lado del eje
         ...(axisSide && { axisSide }),
         // Aplicar valores por defecto (ícono y alineación)

@@ -1653,6 +1653,15 @@ const Canvas = ({
         isNavigationMode={isNavigationMode}
         onToggle={setIsNavigationMode}
       />
+
+      {/* Modal de tarea para nodos */}
+      {taskNodeModal.isOpen && taskNodeModal.node && (
+        <NodeTaskModal
+          node={taskNodeModal.node}
+          onClose={handleCloseTaskModal}
+          onUpdate={handleUpdateNodeTask}
+        />
+      )}
     </div>
   );
 };

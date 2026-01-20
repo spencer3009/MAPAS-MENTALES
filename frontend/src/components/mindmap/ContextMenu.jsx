@@ -81,7 +81,9 @@ const ContextMenu = ({
 
   const isDashedNode = currentNodeType === 'dashed' || currentNodeType === 'dashed_text';
   const isProjectNode = currentNodeType === 'project';
-  const estimatedMenuHeight = isDashedNode ? 280 : 200;
+  const isTaskNode = currentNodeType === 'task';
+  const isNormalNode = !isDashedNode && !isProjectNode && !isTaskNode;
+  const estimatedMenuHeight = isDashedNode ? 280 : (isTaskNode ? 320 : 200);
   const menuWidth = 224;
 
   const getAdjustedPosition = () => {

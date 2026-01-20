@@ -2,6 +2,22 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-20: FEATURE — Dashboard de IGV en Finanzas/Ingresos ✅ COMPLETADO Y PROBADO
+- **Estado**: Implementación completada y verificada
+- **Funcionalidad**: Dashboard superior con 3 tarjetas de resumen financiero
+- **Tarjetas implementadas**:
+  1. **Total del día** (Verde) - Suma de ingresos cobrados con contador
+  2. **Subtotal** (Azul) - Monto base sin IGV (total / 1.18)
+  3. **IGV 18%** (Naranja) - Impuesto a pagar (total - subtotal)
+- **Cálculos**:
+  - Solo considera ingresos con `status === 'collected'`
+  - `subtotal = total / 1.18`
+  - `igv = total - subtotal`
+- **Ubicación**: Encima de la tabla de ingresos, debajo del título "Ingresos"
+- **Archivos modificados**:
+  - `/app/frontend/src/components/finanzas/FinanzasModule.jsx` - Agregadas tarjetas en tab Ingresos
+- **Testing**: Verificado con datos reales (S/ 4,000 → Subtotal: S/ 3,389.83, IGV: S/ 610.17)
+
 ### 2026-01-20: FEATURE — Toolbar Dinámico por Tipo de Nodo ✅ COMPLETADO Y PROBADO
 - **Estado**: Implementación completada y verificada
 - **Funcionalidad**: El toolbar flotante ahora muestra opciones diferentes según el tipo de nodo seleccionado

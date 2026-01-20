@@ -516,6 +516,84 @@ const Canvas = ({
     }
   }, [onChangeNodeType]);
 
+  // Handler para convertir un nodo en tarea
+  const handleConvertToTask = useCallback((nodeId) => {
+    if (nodeId && onChangeNodeType) {
+      onChangeNodeType(nodeId, 'task', { 
+        taskStatus: 'pending',
+        taskData: { 
+          checklist: [], 
+          dueDate: null, 
+          priority: null,
+          progress: 0 
+        }
+      });
+    }
+  }, [onChangeNodeType]);
+
+  // Handler para quitar el estado de tarea
+  const handleRemoveTaskStatus = useCallback((nodeId) => {
+    if (nodeId && onChangeNodeType) {
+      onChangeNodeType(nodeId, 'default', { 
+        taskStatus: null,
+        taskData: null
+      });
+    }
+  }, [onChangeNodeType]);
+
+  // Handler para reabrir una tarea completada
+  const handleReopenTask = useCallback((nodeId) => {
+    if (nodeId && onChangeNodeType) {
+      const node = nodes.find(n => n.id === nodeId);
+      if (node) {
+        onChangeNodeType(nodeId, 'task', { 
+          taskStatus: 'pending',
+          taskData: { ...node.taskData, progress: 0 }
+        });
+      }
+    }
+  }, [onChangeNodeType, nodes]);
+
+  // Estado para el modal de tarea del nodo
+  const [taskNodeModal, setTaskNodeModal] = useState({ isOpen: false, node: null });
+
+  // Handler para abrir el modal de tarea
+  const handleOpenTaskModal = useCallback((node) => {
+    setTaskNodeModal({ isOpen: true, node });
+  }, []);
+
+  // Handler para cerrar el modal de tarea
+  const handleCloseTaskModal = useCallback(() => {
+    setTaskNodeModal({ isOpen: false, node: null });
+  }, []);
+
+  // Handler para actualizar la tarea del nodo
+  const handleUpdateNodeTask = useCallback((nodeId, taskUpdates) => {
+    if (nodeId && onChangeNodeType) {
+      const node = nodes.find(n => n.id === nodeId);
+      if (node) {
+        const newTaskData = { ...node.taskData, ...taskUpdates };
+        
+        // Calcular progreso basado en checklist
+        if (newTaskData.checklist && newTaskData.checklist.length > 0) {
+          const completed = newTaskData.checklist.filter(item => item.completed).length;
+          newTaskData.progress = Math.round((completed / newTaskData.checklist.length) * 100);
+          
+          // Cambiar estado automáticamente
+          if (completed === newTaskData.checklist.length) {
+            onChangeNodeType(nodeId, 'task', { taskStatus: 'completed', taskData: newTaskData });
+          } else if (completed > 0) {
+            onChangeNodeType(nodeId, 'task', { taskStatus: 'in_progress', taskData: newTaskData });
+          } else {
+            onChangeNodeType(nodeId, 'task', { taskStatus: 'pending', taskData: newTaskData });
+          }
+        } else {
+          onChangeNodeType(nodeId, 'task', { taskData: newTaskData });
+        }
+      }
+    }
+  }, [onChangeNodeType, nodes]);
+
   // Handler para cerrar el selector de tipo de nodo
   const handleCloseNodeTypeSelector = useCallback(() => {
     setNodeTypeSelector({ isOpen: false, position: null, parentId: null });

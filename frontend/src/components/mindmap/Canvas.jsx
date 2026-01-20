@@ -961,6 +961,13 @@ const Canvas = ({
     }
   }, [onOpenReminderPanel]);
 
+  // Handler para abrir el panel de recordatorios desde un nodo específico
+  const handleNodeReminderClick = useCallback((nodeId) => {
+    if (onOpenReminderPanel) {
+      onOpenReminderPanel();
+    }
+  }, [onOpenReminderPanel]);
+
   // Handlers de alineación de texto del nodo seleccionado
   const handleToolbarAlignTextLeft = useCallback(() => {
     if (selectedNodeId && onAlignTextLeft) {

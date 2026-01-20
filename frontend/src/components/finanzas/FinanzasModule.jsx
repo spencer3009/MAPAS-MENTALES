@@ -1119,7 +1119,7 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
     amount: '',
     source: 'ventas',
     description: '',
-    date: new Date().toISOString().split('T')[0],
+    date: getLocalDateString(), // Fecha local sin UTC
     status: 'pending',
     client_name: '',
     client_id: null,

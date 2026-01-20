@@ -1501,7 +1501,7 @@ const InvestmentModal = ({ onClose, onSave, projects }) => {
   const [form, setForm] = useState({
     amount: '',
     description: '',
-    date: new Date().toISOString().split('T')[0],
+    date: getLocalDateString(), // Fecha local sin UTC
     status: 'active',
     objective: '',
     expected_return: '',

@@ -1287,7 +1287,7 @@ const ExpenseModal = ({ onClose, onSave, categories, projects, token }) => {
     amount: '',
     category: 'otros',
     description: '',
-    date: new Date().toISOString().split('T')[0],
+    date: getLocalDateString(), // Fecha local sin UTC
     status: 'pending',
     vendor_name: '',
     vendor_id: null,

@@ -833,55 +833,70 @@ const NodeItem = memo(({
           )}
           
           {/* ========== METADATA INFERIOR (Badges) ========== */}
-          {(dueDate || priorityInfo || hasReminder) && (
-            <div className="flex items-center gap-2 mt-2 flex-wrap">
-              {/* Badge de fecha límite */}
-              {dueDate && (
-                <div 
-                  className="flex items-center gap-1 px-2 py-1 rounded-md text-xs"
-                  style={{ backgroundColor: '#EFF6FF', color: '#1E40AF' }}
-                  title={`Fecha límite: ${dueDate}`}
-                >
-                  <Calendar size={12} />
-                  <span className="font-medium">{formatDueDateShort(dueDate)}</span>
-                </div>
-              )}
-              
-              {/* Badge de prioridad */}
-              {priorityInfo && (
-                <div 
-                  className="flex items-center gap-1 px-2 py-1 rounded-md text-xs"
-                  style={{ 
-                    backgroundColor: priorityInfo.bgColor || '#FEE2E2', 
-                    color: priorityInfo.color || '#991B1B' 
-                  }}
-                  title={`Prioridad: ${priorityInfo.label}`}
-                >
-                  <Flag size={12} />
-                  <span className="font-medium">{priorityInfo.label}</span>
-                </div>
-              )}
-              
-              {/* Badge de recordatorio */}
-              {hasReminder && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (onReminderClick) {
-                      onSelect(node.id, e);
-                      onReminderClick(node.id);
-                    }
-                  }}
-                  onMouseDown={(e) => e.stopPropagation()}
-                  className="flex items-center gap-1 px-2 py-1 rounded-md text-xs bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors cursor-pointer"
-                  title="Ver recordatorio programado"
-                >
-                  <Bell size={12} />
-                  <span className="font-medium">Recordatorio</span>
-                </button>
-              )}
-            </div>
-          )}
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
+            {/* Badge para abrir panel de tarea - siempre visible */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onOpenTaskModal) {
+                  onOpenTaskModal(node);
+                }
+              }}
+              onMouseDown={(e) => e.stopPropagation()}
+              className="flex items-center gap-1 px-2 py-1 rounded-md text-xs hover:opacity-80 transition-opacity cursor-pointer"
+              style={{ backgroundColor: '#FEF3C7', color: '#92400E' }}
+              title="Clic para ver detalles de la tarea"
+            >
+              <Pencil size={12} />
+              <span className="font-medium">Ver tarea →</span>
+            </button>
+            
+            {/* Badge de fecha límite */}
+            {dueDate && (
+              <div 
+                className="flex items-center gap-1 px-2 py-1 rounded-md text-xs"
+                style={{ backgroundColor: '#EFF6FF', color: '#1E40AF' }}
+                title={`Fecha límite: ${dueDate}`}
+              >
+                <Calendar size={12} />
+                <span className="font-medium">{formatDueDateShort(dueDate)}</span>
+              </div>
+            )}
+            
+            {/* Badge de prioridad */}
+            {priorityInfo && (
+              <div 
+                className="flex items-center gap-1 px-2 py-1 rounded-md text-xs"
+                style={{ 
+                  backgroundColor: priorityInfo.bgColor || '#FEE2E2', 
+                  color: priorityInfo.color || '#991B1B' 
+                }}
+                title={`Prioridad: ${priorityInfo.label}`}
+              >
+                <Flag size={12} />
+                <span className="font-medium">{priorityInfo.label}</span>
+              </div>
+            )}
+            
+            {/* Badge de recordatorio */}
+            {hasReminder && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onReminderClick) {
+                    onSelect(node.id, e);
+                    onReminderClick(node.id);
+                  }
+                }}
+                onMouseDown={(e) => e.stopPropagation()}
+                className="flex items-center gap-1 px-2 py-1 rounded-md text-xs bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors cursor-pointer"
+                title="Ver recordatorio programado"
+              >
+                <Bell size={12} />
+                <span className="font-medium">Recordatorio</span>
+              </button>
+            )}
+          </div>
           
           {/* Barra de progreso (si hay subtareas) */}
           {taskData.checklist && taskData.checklist.length > 0 && (

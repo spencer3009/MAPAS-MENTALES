@@ -163,6 +163,29 @@ const Canvas = ({
     };
   }, [showRulers]);
 
+  // ========== TIMER PERSISTENTE PARA NODOS DE TAREA ==========
+  // Este efecto se ejecuta cada segundo y actualiza los timers de todos los nodos
+  // que tengan timerRunning: true, incluso cuando el panel de tarea está cerrado
+  useEffect(() => {
+    const timerInterval = setInterval(() => {
+      // Buscar nodos con timer activo
+      const nodesWithActiveTimer = nodes.filter(
+        node => node.nodeType === 'task' && node.taskData?.timerRunning
+      );
+      
+      // Si hay nodos con timer activo, actualizar sus timerSeconds
+      if (nodesWithActiveTimer.length > 0 && onChangeNodeType) {
+        nodesWithActiveTimer.forEach(node => {
+          const newTimerSeconds = (node.taskData.timerSeconds || 0) + 1;
+          const newTaskData = { ...node.taskData, timerSeconds: newTimerSeconds };
+          onChangeNodeType(node.id, 'task', { taskData: newTaskData });
+        });
+      }
+    }, 1000);
+    
+    return () => clearInterval(timerInterval);
+  }, [nodes, onChangeNodeType]);
+
   // Handler para tap en el canvas (touch)
   const handleTouchTap = useCallback((e) => {
     if (!containerRef.current) return;

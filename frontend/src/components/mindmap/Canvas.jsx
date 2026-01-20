@@ -458,6 +458,47 @@ const Canvas = ({
     setLinkedProjectModal({ isOpen: true, parentId });
   }, [nodeTypeSelector.parentId]);
 
+  // Handler para cuando se selecciona tipo "Tarea" - crea nodo y abre panel
+  const handleSelectTaskType = useCallback(() => {
+    const parentId = nodeTypeSelector.parentId;
+    if (parentId) {
+      // Crear nodo hijo de tipo tarea
+      const taskData = { 
+        checklist: [], 
+        dueDate: null, 
+        priority: null,
+        progress: 0,
+        notes: '',
+        timerSeconds: 0,
+        timerRunning: false
+      };
+      
+      const newId = onAddChildNode(parentId, 'Nueva tarea', { 
+        nodeType: 'task',
+        taskStatus: 'pending',
+        taskData,
+        autoAlign: autoAlignEnabled 
+      });
+      
+      setNewNodeId(newId);
+      setNodeTypeSelector({ isOpen: false, position: null, parentId: null });
+      
+      // Abrir automáticamente el panel de tarea después de un pequeño delay
+      // para dar tiempo a que el nodo se cree
+      setTimeout(() => {
+        const createdNode = {
+          id: newId,
+          text: 'Nueva tarea',
+          nodeType: 'task',
+          taskStatus: 'pending',
+          taskData
+        };
+        setTaskNodeModal({ isOpen: true, node: createdNode });
+        setShowControls(true);
+      }, 100);
+    }
+  }, [nodeTypeSelector.parentId, onAddChildNode, autoAlignEnabled]);
+
   // Handler para seleccionar un proyecto existente para vincular
   const handleSelectLinkedProject = useCallback((project) => {
     if (linkedProjectModal.parentId && project) {

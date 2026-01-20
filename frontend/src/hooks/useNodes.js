@@ -2902,7 +2902,10 @@ export const useNodes = () => {
             // Mantener el texto pero asegurarse de que tenga texto
             text: n.text || 'Nuevo Nodo',
             // Limpiar linkedProjectId si se desvíncula
-            linkedProjectId: options.linkedProjectId !== undefined ? options.linkedProjectId : n.linkedProjectId
+            linkedProjectId: options.linkedProjectId !== undefined ? options.linkedProjectId : n.linkedProjectId,
+            // Limpiar datos de tarea si se quita el estado
+            taskStatus: options.taskStatus !== undefined ? options.taskStatus : n.taskStatus,
+            taskData: options.taskData !== undefined ? options.taskData : n.taskData
           };
         } else if (newNodeType === 'project') {
           // Convertir a nodo tipo proyecto
@@ -2913,6 +2916,22 @@ export const useNodes = () => {
             height: 64,
             linkedProjectId: options.linkedProjectId || n.linkedProjectId,
             text: options.text || n.text || 'Proyecto'
+          };
+        } else if (newNodeType === 'task') {
+          // Convertir a nodo tipo tarea
+          return { 
+            ...n, 
+            nodeType: 'task',
+            taskStatus: options.taskStatus || 'pending',
+            taskData: options.taskData || n.taskData || {
+              checklist: [],
+              dueDate: null,
+              priority: null,
+              progress: 0,
+              notes: '',
+              timerSeconds: 0,
+              timerRunning: false
+            }
           };
         } else {
           // Convertir a nodo dashed_text

@@ -256,6 +256,12 @@ const NodeItem = memo(({
       return;
     }
     
+    // Si es un nodo tipo tarea, abrir el modal de tarea
+    if (isTaskNode && onOpenTaskModal) {
+      onOpenTaskModal(node);
+      return;
+    }
+    
     handleStartEdit();
   };
 

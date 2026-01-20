@@ -267,15 +267,6 @@ const NodeItem = memo(({
     
     handleStartEdit();
   };
-  
-  // Handler para clic simple en nodos de proyecto vinculado
-  // El clic simple también navega al proyecto (UX más intuitiva)
-  const handleProjectNodeClick = (e) => {
-    e.stopPropagation();
-    if (isProjectNode && linkedProjectId && onNavigateToProject) {
-      onNavigateToProject(linkedProjectId);
-    }
-  };
 
   const handleBlur = () => {
     setIsEditing(false);

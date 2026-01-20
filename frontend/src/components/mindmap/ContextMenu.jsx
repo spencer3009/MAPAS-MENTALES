@@ -228,7 +228,7 @@ const ContextMenu = ({
         )}
 
         {/* Opciones de tarea */}
-        {!isProjectNode && !isTaskNode && !isDashedNode && (
+        {!isProjectNode && !isTaskNode && (
           <>
             <div className="border-t border-gray-100 my-1" />
             <MenuButton onClick={() => handleAction(() => onConvertToTask && onConvertToTask(nodeId))}>

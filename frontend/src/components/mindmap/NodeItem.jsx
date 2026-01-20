@@ -539,6 +539,15 @@ const NodeItem = memo(({
   // El nombre solo se puede cambiar desde la vista del proyecto original
   // El clic en el nodo navega al proyecto vinculado
   if (isProjectNode) {
+    // Handler especial para proyecto: navega al hacer clic (no edita)
+    const handleProjectClick = (e) => {
+      e.stopPropagation();
+      // Solo navegar si hay proyecto vinculado
+      if (linkedProjectId && onNavigateToProject) {
+        onNavigateToProject(linkedProjectId);
+      }
+    };
+    
     return (
       <div
         ref={nodeRef}
@@ -566,14 +575,8 @@ const NodeItem = memo(({
         }}
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
-        onClick={(e) => {
-          e.stopPropagation();
-          // Clic simple navega al proyecto vinculado
-          if (linkedProjectId && onNavigateToProject) {
-            onNavigateToProject(linkedProjectId);
-          }
-        }}
-        onDoubleClick={handleDoubleClick}
+        onClick={handleNodeClick}
+        onDoubleClick={handleProjectClick}
         onContextMenu={handleRightClick}
       >
         {/* ========== HEADER SUPERIOR VERDE (Proyecto vinculado) ========== */}
@@ -611,15 +614,10 @@ const NodeItem = memo(({
           
           {/* Badges inferiores: Proyecto vinculado + Recordatorio */}
           <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-            {/* Badge de proyecto vinculado - clickeable */}
+            {/* Badge de proyecto vinculado - clickeable para navegar */}
             {linkedProjectId && (
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (onNavigateToProject) {
-                    onNavigateToProject(linkedProjectId);
-                  }
-                }}
+                onClick={handleProjectClick}
                 onMouseDown={(e) => e.stopPropagation()}
                 className="flex items-center gap-1 px-2 py-1 rounded-md text-xs hover:opacity-80 transition-opacity cursor-pointer"
                 style={{ backgroundColor: '#D1FAE5', color: '#065F46' }}

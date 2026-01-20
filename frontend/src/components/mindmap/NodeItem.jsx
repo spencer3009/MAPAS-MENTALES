@@ -758,8 +758,30 @@ const NodeItem = memo(({
               </div>
             )}
             
-            {/* Icono del nodo (si tiene uno personalizado y no es proyecto) */}
-            {node.icon && !isEditing && !isProjectNode && (() => {
+            {/* Icono de tarea (si es nodo tipo tarea) */}
+            {isTaskNode && !isEditing && (
+              <div 
+                className="shrink-0 flex items-center justify-center"
+                title={`Tarea: ${taskStatus === 'completed' ? 'Completada' : taskStatus === 'in_progress' ? 'En progreso' : 'Pendiente'} - Doble clic para editar`}
+              >
+                {taskStatus === 'completed' ? (
+                  <CheckCircle2 
+                    size={Math.min(Math.max(Math.floor(nodeHeight * 0.35), 16), 28)} 
+                    className="text-orange-600"
+                    strokeWidth={2}
+                  />
+                ) : (
+                  <ListTodo 
+                    size={Math.min(Math.max(Math.floor(nodeHeight * 0.35), 16), 28)} 
+                    className="text-yellow-600"
+                    strokeWidth={2}
+                  />
+                )}
+              </div>
+            )}
+            
+            {/* Icono del nodo (si tiene uno personalizado y no es proyecto ni tarea) */}
+            {node.icon && !isEditing && !isProjectNode && !isTaskNode && (() => {
               // Calcular tamaño del icono basado en la altura del nodo
               const iconSize = Math.min(Math.max(Math.floor(nodeHeight * 0.35), 16), 28);
               const iconColor = node.icon.color || textColor;

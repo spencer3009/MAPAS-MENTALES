@@ -604,9 +604,10 @@ const NodeItem = memo(({
             </p>
           )}
           
-          {/* Indicador de proyecto vinculado */}
-          {linkedProjectId && (
-            <div className="flex items-center gap-1.5 mt-2">
+          {/* Badges inferiores: Proyecto vinculado + Recordatorio */}
+          <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+            {/* Badge de proyecto vinculado */}
+            {linkedProjectId && (
               <div 
                 className="flex items-center gap-1 px-2 py-1 rounded-md text-xs"
                 style={{ backgroundColor: '#D1FAE5', color: '#065F46' }}
@@ -615,8 +616,27 @@ const NodeItem = memo(({
                 <FolderOpen size={12} />
                 <span className="font-medium">Abrir mapa →</span>
               </div>
-            </div>
-          )}
+            )}
+            
+            {/* Badge de recordatorio */}
+            {hasReminder && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onReminderClick) {
+                    onSelect(node.id, e);
+                    onReminderClick(node.id);
+                  }
+                }}
+                onMouseDown={(e) => e.stopPropagation()}
+                className="flex items-center gap-1 px-2 py-1 rounded-md text-xs bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors cursor-pointer"
+                title="Ver recordatorio programado"
+              >
+                <Bell size={12} />
+                <span className="font-medium">Recordatorio</span>
+              </button>
+            )}
+          </div>
         </div>
         
         {/* Resize Handles (solo cuando está seleccionado) */}

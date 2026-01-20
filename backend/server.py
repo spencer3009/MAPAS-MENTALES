@@ -8521,17 +8521,36 @@ async def create_income(
     income_data: IncomeCreate,
     current_user: dict = Depends(get_current_user)
 ):
-    """Crear un nuevo ingreso"""
+    """Crear un nuevo ingreso con soporte para pagos parciales"""
     username = current_user["username"]
     await verify_company_access(income_data.company_id, username)
     workspace_id = await get_user_workspace_id(username)
     now = get_current_timestamp()
+    
+    # Calcular paid_amount y pending_balance
+    amount = income_data.amount
+    paid_amount = income_data.paid_amount or 0
+    
+    # Si el estado es "collected", el pago es completo
+    if income_data.status == IncomeStatus.COLLECTED:
+        paid_amount = amount
+    
+    # Calcular saldo pendiente
+    pending_balance = max(0, amount - paid_amount)
+    
+    # Si el saldo es 0 y hay monto, marcar como cobrado
+    final_status = income_data.status
+    if pending_balance == 0 and amount > 0 and income_data.status == IncomeStatus.PENDING:
+        final_status = IncomeStatus.COLLECTED
     
     income = {
         "id": generate_id(),
         "workspace_id": workspace_id,
         "username": username,
         **income_data.model_dump(),
+        "paid_amount": paid_amount,
+        "pending_balance": pending_balance,
+        "status": final_status,
         "created_at": now,
         "updated_at": now
     }

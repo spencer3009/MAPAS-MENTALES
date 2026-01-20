@@ -219,11 +219,8 @@ const NodeTaskModal = ({ node, onClose, onUpdate, onUpdateTitle, onDelete }) => 
     };
     setActivities([newActivity, ...activities]);
     
-    if (!newRunning) {
-      setTotalTime(prev => prev + timerSeconds);
-      setTimerSeconds(0);
-    }
-    
+    // NO reiniciar timerSeconds al pausar
+    // El contador mantiene el tiempo acumulado
     setTimerRunning(newRunning);
   };
   

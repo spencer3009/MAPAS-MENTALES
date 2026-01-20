@@ -110,6 +110,7 @@ const NodeItem = memo(({
   onCommentClick,
   onNavigateToProject,  // Callback para navegar a un proyecto vinculado
   onOpenTaskModal,      // Callback para abrir el modal de tarea
+  onReminderClick,      // Callback para abrir el panel de recordatorios
   forceEdit = false,
   onEditComplete,
   isNavigationMode = false  // Modo navegación: deshabilita interacción táctil

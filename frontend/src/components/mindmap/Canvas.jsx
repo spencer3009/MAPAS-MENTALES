@@ -1403,6 +1403,7 @@ const Canvas = ({
             onCommentClick={handleNodeCommentClick}
             onNavigateToProject={onNavigateToProject}
             onOpenTaskModal={handleOpenTaskModal}
+            onReminderClick={handleNodeReminderClick}
             forceEdit={newNodeId === node.id}
             onEditComplete={handleEditComplete}
             isNavigationMode={isNavigationMode}

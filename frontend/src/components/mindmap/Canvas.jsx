@@ -1743,6 +1743,7 @@ const Canvas = ({
           node={taskNodeModal.node}
           onClose={handleCloseTaskModal}
           onUpdate={handleUpdateNodeTask}
+          onUpdateTitle={handleUpdateNodeTitle}
         />
       )}
     </div>

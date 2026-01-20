@@ -288,7 +288,15 @@ const NodeTaskModal = ({ node, onClose, onUpdate, onUpdateTitle, onDelete }) => 
           boxShadow: '-4px 0 25px rgba(0,0,0,0.15)',
         }}
         onClick={(e) => e.stopPropagation()}
-        onWheel={(e) => e.stopPropagation()}
+        onWheelCapture={(e) => {
+          // Capturar el evento de wheel en fase de captura
+          // para prevenir que llegue al canvas
+          e.stopPropagation();
+        }}
+        onWheel={(e) => {
+          // También detener en fase de burbujeo
+          e.stopPropagation();
+        }}
       >
         {/* Header fijo */}
         <div className="flex-shrink-0 border-b bg-white">

@@ -502,6 +502,79 @@ const FinanzasModule = ({ token, projects = [] }) => {
               </button>
             </div>
             
+            {/* ========== DASHBOARD DE RESUMEN FINANCIERO ========== */}
+            {(() => {
+              // Calcular totales solo de ingresos COBRADOS del período
+              const collectedIncomes = incomes.filter(inc => inc.status === 'collected');
+              const totalCollected = collectedIncomes.reduce((sum, inc) => sum + (inc.amount || 0), 0);
+              
+              // Cálculos de IGV (18%)
+              // El total incluye IGV, entonces: total = subtotal * 1.18
+              // subtotal = total / 1.18
+              // igv = total - subtotal
+              const IGV_RATE = 0.18;
+              const subtotal = totalCollected / (1 + IGV_RATE);
+              const igv = totalCollected - subtotal;
+              
+              return (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                  {/* Card 1: Total del día (Verde) */}
+                  <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-sm text-gray-500 font-medium">Total del día</p>
+                        <p className="text-3xl font-bold text-gray-900 mt-2">
+                          S/ {totalCollected.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {collectedIncomes.length} ingreso(s) cobrado(s)
+                        </p>
+                      </div>
+                      <div className="p-3 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 text-white">
+                        <DollarSign size={24} />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Card 2: Subtotal sin IGV (Azul) */}
+                  <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-sm text-gray-500 font-medium">Subtotal</p>
+                        <p className="text-3xl font-bold text-gray-900 mt-2">
+                          S/ {subtotal.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          Monto base sin impuesto
+                        </p>
+                      </div>
+                      <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
+                        <TrendingUp size={24} />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Card 3: IGV (Naranja) */}
+                  <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-sm text-gray-500 font-medium">IGV (18%)</p>
+                        <p className="text-3xl font-bold text-gray-900 mt-2">
+                          S/ {igv.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          Impuesto a pagar
+                        </p>
+                      </div>
+                      <div className="p-3 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 text-white">
+                        <Wallet size={24} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+            
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">

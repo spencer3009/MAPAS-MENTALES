@@ -474,16 +474,73 @@ const FinanzasModule = ({ token, projects = [] }) => {
             </div>
             
             <div className="flex items-center gap-3 flex-wrap">
-              {/* Selector de periodo */}
-              <input
-                type="month"
-                value={selectedPeriod}
-                onChange={(e) => setSelectedPeriod(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-              />
+              {/* ========== SELECTOR DE PERÍODO CON 3 MODOS ========== */}
+              <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+                {/* Botones de modo */}
+                <button
+                  onClick={() => setFilterMode('day')}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                    filterMode === 'day' 
+                      ? 'bg-white text-emerald-700 shadow-sm' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Día
+                </button>
+                <button
+                  onClick={() => setFilterMode('month')}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                    filterMode === 'month' 
+                      ? 'bg-white text-emerald-700 shadow-sm' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Mes
+                </button>
+                <button
+                  onClick={() => setFilterMode('year')}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                    filterMode === 'year' 
+                      ? 'bg-white text-emerald-700 shadow-sm' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Año
+                </button>
+              </div>
               
-              {/* Health indicator */}
-              {summary && <HealthIndicator status={summary.health_status} />}
+              {/* Input según el modo */}
+              {filterMode === 'day' && (
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                />
+              )}
+              {filterMode === 'month' && (
+                <input
+                  type="month"
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                />
+              )}
+              {filterMode === 'year' && (
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                >
+                  {Array.from({ length: 10 }, (_, i) => {
+                    const year = new Date().getFullYear() - i;
+                    return <option key={year} value={year}>{year}</option>;
+                  })}
+                </select>
+              )}
+              
+              {/* Health indicator - AHORA FUNCIONAL */}
+              <HealthIndicator status={healthStatus} />
               
               {/* Refresh */}
               <button

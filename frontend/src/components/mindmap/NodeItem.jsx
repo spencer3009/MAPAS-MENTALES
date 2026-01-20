@@ -127,10 +127,23 @@ const NodeItem = memo(({
   const isInSelection = isSelected || isMultiSelected;
 
   // Obtener estilos del nodo (con fallback a colores legacy)
-  const legacyColors = LEGACY_COLORS[node.color] || LEGACY_COLORS.blue;
-  const bgColor = node.bgColor || legacyColors.bg;
-  const borderColor = node.borderColor || legacyColors.border;
-  const textColor = node.textColor || legacyColors.text;
+  // Nodos tarea tienen colores especiales basados en su estado
+  const getNodeColors = () => {
+    if (isTaskNode) {
+      return TASK_COLORS[taskStatus] || TASK_COLORS.pending;
+    }
+    const legacyColors = LEGACY_COLORS[node.color] || LEGACY_COLORS.blue;
+    return {
+      bg: node.bgColor || legacyColors.bg,
+      border: node.borderColor || legacyColors.border,
+      text: node.textColor || legacyColors.text
+    };
+  };
+  
+  const nodeColors = getNodeColors();
+  const bgColor = nodeColors.bg;
+  const borderColor = nodeColors.border;
+  const textColor = nodeColors.text;
   const borderWidth = node.borderWidth || 2;
   const borderStyle = node.borderStyle || 'solid';
   const shape = node.shape || 'rounded';

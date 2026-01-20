@@ -257,23 +257,44 @@ const FinanzasModule = ({ token, projects = [] }) => {
 
   // ========== FUNCIONES DE FILTRADO POR PERÍODO ==========
   
+  // Función para extraer fecha en formato YYYY-MM-DD de cualquier formato
+  const extractDateString = (dateStr) => {
+    if (!dateStr) return null;
+    
+    // Si ya está en formato YYYY-MM-DD, usarlo directamente
+    if (typeof dateStr === 'string' && dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      return dateStr;
+    }
+    
+    // Si tiene formato ISO con hora (2026-01-20T00:00:00.000Z), extraer solo la fecha
+    if (typeof dateStr === 'string' && dateStr.includes('T')) {
+      return dateStr.split('T')[0];
+    }
+    
+    // Para otros formatos, parsear y extraer fecha local
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return null;
+    
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  
   // Función para verificar si una fecha está dentro del período seleccionado
   const isDateInPeriod = useCallback((dateStr) => {
-    if (!dateStr) return false;
-    const date = new Date(dateStr);
+    const dateYMD = extractDateString(dateStr);
+    if (!dateYMD) return false;
     
     if (filterMode === 'day') {
-      // Comparar día específico
-      const targetDate = new Date(selectedDate);
-      return date.toISOString().split('T')[0] === targetDate.toISOString().split('T')[0];
+      // Comparar día específico (string vs string, sin timezone)
+      return dateYMD === selectedDate;
     } else if (filterMode === 'month') {
-      // Comparar mes y año
-      const [targetYear, targetMonth] = selectedMonth.split('-');
-      return date.getFullYear() === parseInt(targetYear) && 
-             (date.getMonth() + 1) === parseInt(targetMonth);
+      // Comparar mes y año (primeros 7 caracteres: YYYY-MM)
+      return dateYMD.substring(0, 7) === selectedMonth;
     } else if (filterMode === 'year') {
-      // Comparar solo año
-      return date.getFullYear() === parseInt(selectedYear);
+      // Comparar solo año (primeros 4 caracteres)
+      return dateYMD.substring(0, 4) === selectedYear;
     }
     return true;
   }, [filterMode, selectedDate, selectedMonth, selectedYear]);

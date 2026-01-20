@@ -1614,6 +1614,7 @@ const Canvas = ({
         currentColor={selectedNodeForMenu?.color}
         currentNodeType={selectedNodeForMenu?.nodeType}
         currentLineWidth={selectedNodeForMenu?.dashedLineWidth}
+        currentTaskStatus={selectedNodeForMenu?.taskStatus}
         linkedProjectId={selectedNodeForMenu?.linkedProjectId}
         onAddChild={handleAddChildWithAutoAlign}
         onDuplicate={handleDuplicateWithAutoAlign}
@@ -1623,6 +1624,9 @@ const Canvas = ({
         onChangeLineWidth={onChangeLineWidth}
         onLinkToProject={handleLinkToProjectFromContext}
         onUnlinkProject={handleUnlinkProject}
+        onConvertToTask={handleConvertToTask}
+        onRemoveTaskStatus={handleRemoveTaskStatus}
+        onReopenTask={handleReopenTask}
         onClose={onCloseContextMenu}
       />
 

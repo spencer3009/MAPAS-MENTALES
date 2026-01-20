@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, memo, useCallback } from 'react';
-import { MessageSquare, Link2, Clock, FileText, Bell, FolderOpen, CheckSquare, ListTodo, CheckCircle2 } from 'lucide-react';
+import { MessageSquare, Link2, Clock, FileText, Bell, FolderOpen, CheckSquare, ListTodo, CheckCircle2, Flag, Calendar } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
+import { formatTime, formatDateShort, PRIORITIES } from './NodeTaskModal';
 
 // Icono personalizado de WhatsApp
 const WhatsAppIcon = ({ size = 20, color = 'currentColor' }) => (

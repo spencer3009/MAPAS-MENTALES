@@ -1,11 +1,12 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Square, MinusSquare, X, FolderOpen } from 'lucide-react';
+import { Square, MinusSquare, X, FolderOpen, ListTodo } from 'lucide-react';
 
 // Tipos de nodo disponibles
 export const NODE_TYPES = {
   DEFAULT: 'default',      // Nodo rectangular con fondo
   DASHED_TEXT: 'dashed_text',  // Nodo con línea punteada celeste sin fondo
-  PROJECT: 'project'       // Nodo vinculado a otro proyecto/mapa
+  PROJECT: 'project',      // Nodo vinculado a otro proyecto/mapa
+  TASK: 'task'             // Nodo tipo tarea
 };
 
 // Alias para compatibilidad con código existente
@@ -39,6 +40,7 @@ const NodeTypeSelector = ({
   onSelect, 
   onClose,
   onSelectProjectType,
+  onSelectTaskType,
   parentNode 
 }) => {
   const selectorRef = useRef(null);
@@ -83,6 +85,16 @@ const NodeTypeSelector = ({
       onClose();
       return;
     }
+    
+    if (type === NODE_TYPES.TASK) {
+      // Para tipo tarea, llamar handler específico que crea el nodo y abre el panel
+      if (onSelectTaskType) {
+        onSelectTaskType();
+      }
+      onClose();
+      return;
+    }
+    
     saveLastNodeType(type);
     setLastUsedType(type);
     onSelect(type);
@@ -134,9 +146,9 @@ const NodeTypeSelector = ({
         </button>
       </div>
 
-      {/* Opciones - Grid responsive: 3 columnas en desktop, 2+1 en móvil */}
-      <div className="p-3 grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-        {/* Opción 1: Nodo rectangular con fondo */}
+      {/* Opciones - Grid 2x2 */}
+      <div className="p-3 grid grid-cols-2 gap-2 sm:gap-3">
+        {/* Fila 1, Columna 1: Texto (con fondo) */}
         <button
           onClick={() => handleSelect(NODE_TYPES.DEFAULT)}
           className={`
@@ -160,8 +172,8 @@ const NodeTypeSelector = ({
             <span className="text-[9px] sm:text-[10px] text-blue-700 font-medium">Texto</span>
           </div>
           
-          <span className="text-xs font-medium text-gray-700">
-            Con fondo
+          <span className="text-[10px] sm:text-xs font-medium text-gray-700">
+            Texto (con fondo)
           </span>
 
           {/* Indicador de último usado */}
@@ -177,7 +189,7 @@ const NodeTypeSelector = ({
           )}
         </button>
 
-        {/* Opción 2: Nodo con línea punteada celeste (solo texto) */}
+        {/* Fila 1, Columna 2: Texto (solo línea) */}
         <button
           onClick={() => handleSelect(NODE_TYPES.DASHED_TEXT)}
           className={`
@@ -196,7 +208,7 @@ const NodeTypeSelector = ({
             flex flex-col items-center justify-center
           ">
             <span className="text-[9px] sm:text-[10px] text-gray-600 font-medium mb-1">Texto</span>
-            {/* Línea celeste punteada - 1px de grosor (muy delgada) */}
+            {/* Línea celeste punteada */}
             <div 
               className="w-12 sm:w-16"
               style={{
@@ -209,7 +221,7 @@ const NodeTypeSelector = ({
           </div>
           
           <span className="text-[10px] sm:text-xs font-medium text-gray-700">
-            Solo línea
+            Texto (solo línea)
           </span>
 
           {/* Indicador de último usado */}
@@ -225,14 +237,13 @@ const NodeTypeSelector = ({
           )}
         </button>
 
-        {/* Opción 3: Nodo tipo Proyecto (vinculado a otro mapa) */}
+        {/* Fila 2, Columna 1: Proyecto (verde) */}
         <button
           onClick={() => handleSelect(NODE_TYPES.PROJECT)}
           className={`
             relative flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3
             rounded-xl border-2 transition-all duration-200
             hover:scale-105
-            col-span-2 sm:col-span-1
             ${lastUsedType === NODE_TYPES.PROJECT
               ? 'border-emerald-500 bg-emerald-50' 
               : 'border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/50'
@@ -263,6 +274,49 @@ const NodeTypeSelector = ({
               absolute -top-1 -right-1
               w-4 h-4 rounded-full
               bg-emerald-500
+              flex items-center justify-center
+            ">
+              <span className="text-white text-[8px]">✓</span>
+            </span>
+          )}
+        </button>
+
+        {/* Fila 2, Columna 2: Tarea (amarillo) - NUEVO */}
+        <button
+          onClick={() => handleSelect(NODE_TYPES.TASK)}
+          className={`
+            relative flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3
+            rounded-xl border-2 transition-all duration-200
+            hover:scale-105
+            ${lastUsedType === NODE_TYPES.TASK
+              ? 'border-yellow-500 bg-yellow-50' 
+              : 'border-gray-200 hover:border-yellow-400 hover:bg-yellow-50/50'
+            }
+          `}
+        >
+          {/* Preview del nodo tarea */}
+          <div className="
+            w-14 sm:w-20 h-10 sm:h-12 rounded-lg
+            bg-gradient-to-br from-yellow-100 to-yellow-200
+            border-2 border-yellow-400
+            shadow-sm
+            flex items-center justify-center
+            gap-1
+          ">
+            <ListTodo size={12} className="text-yellow-600" />
+            <span className="text-[9px] text-yellow-700 font-medium">Tarea</span>
+          </div>
+          
+          <span className="text-[10px] sm:text-xs font-medium text-gray-700">
+            Tarea
+          </span>
+
+          {/* Indicador de último usado */}
+          {lastUsedType === NODE_TYPES.TASK && (
+            <span className="
+              absolute -top-1 -right-1
+              w-4 h-4 rounded-full
+              bg-yellow-500
               flex items-center justify-center
             ">
               <span className="text-white text-[8px]">✓</span>

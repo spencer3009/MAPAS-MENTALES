@@ -523,6 +523,217 @@ const NodeItem = memo(({
     );
   };
 
+  // ========== RENDERIZADO ESPECIAL PARA NODO TIPO TAREA (TASK CARD) ==========
+  if (isTaskNode) {
+    const isTimerRunning = taskData.timerRunning;
+    const timerSeconds = taskData.timerSeconds || 0;
+    const progress = taskData.progress || 0;
+    const dueDate = taskData.dueDate;
+    const priority = taskData.priority;
+    const priorityInfo = priority ? PRIORITIES?.find(p => p.id === priority) : null;
+    
+    // Determinar color del header según estado
+    const getHeaderColor = () => {
+      if (isTimerRunning) return '#EF4444'; // Rojo - Timer activo
+      if (taskStatus === 'completed') return '#FB923C'; // Naranja - Completada
+      return '#FACC15'; // Amarillo - Pendiente
+    };
+    
+    const getHeaderTextColor = () => {
+      if (isTimerRunning) return '#FFFFFF'; // Blanco para rojo
+      if (taskStatus === 'completed') return '#FFFFFF'; // Blanco para naranja
+      return '#1f2937'; // Gris oscuro para amarillo
+    };
+
+    // Formatear fecha corta para mostrar en el nodo
+    const formatDueDateShort = (dateStr) => {
+      if (!dateStr) return '';
+      try {
+        const date = new Date(dateStr);
+        const day = date.getDate();
+        const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+        const month = months[date.getMonth()];
+        const hours = date.getHours();
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const hour12 = hours % 12 || 12;
+        return `${day} ${month} ${hour12}:${minutes} ${ampm}`;
+      } catch {
+        return dateStr;
+      }
+    };
+    
+    return (
+      <div
+        ref={nodeRef}
+        data-node-id={node.id}
+        className={`
+          absolute select-none overflow-hidden
+          ${isEditing ? 'cursor-text' : 'cursor-grab active:cursor-grabbing'}
+          ${isMultiSelected ? 'ring-[3px] ring-offset-2 ring-blue-600' : ''}
+          ${isSelected && !isMultiSelected ? 'ring-2 ring-offset-2 ring-blue-500' : ''}
+        `}
+        style={{
+          left: node.x,
+          top: node.y,
+          width: Math.max(dimensions.width, 200), // Mínimo 200px para task cards
+          minHeight: 80,
+          backgroundColor: '#FFFFFF',
+          borderRadius: '12px',
+          boxShadow: isInSelection 
+            ? '0 8px 25px -5px rgba(0, 0, 0, 0.2), 0 0 0 2px rgba(59, 130, 246, 0.3)' 
+            : '0 4px 12px -2px rgba(0, 0, 0, 0.15)',
+          zIndex: isInSelection || isSnapTarget ? 20 : 10,
+          opacity: node.isCompleted ? 0.6 : 1,
+          pointerEvents: isNavigationMode ? 'none' : 'auto',
+          touchAction: isNavigationMode ? 'none' : 'auto',
+        }}
+        onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
+        onClick={handleNodeClick}
+        onDoubleClick={handleDoubleClick}
+        onContextMenu={handleRightClick}
+      >
+        {/* ========== HEADER SUPERIOR (Estado de ejecución) ========== */}
+        <div 
+          className="w-full px-3 py-2 flex items-center justify-between"
+          style={{ 
+            backgroundColor: getHeaderColor(),
+            borderRadius: '12px 12px 0 0'
+          }}
+        >
+          {/* Lado izquierdo: Indicador + Icono + Texto */}
+          <div className="flex items-center gap-2">
+            {/* Punto indicador */}
+            <div 
+              className={`w-2 h-2 rounded-full ${isTimerRunning ? 'animate-pulse' : ''}`}
+              style={{ backgroundColor: getHeaderTextColor() }}
+            />
+            {/* Icono de reloj */}
+            <Clock size={14} style={{ color: getHeaderTextColor() }} />
+            {/* Texto de estado */}
+            <span 
+              className="text-xs font-medium"
+              style={{ color: getHeaderTextColor() }}
+            >
+              {isTimerRunning 
+                ? 'Registrando tiempo' 
+                : taskStatus === 'completed' 
+                  ? 'Completada' 
+                  : timerSeconds > 0 
+                    ? 'Tiempo registrado'
+                    : 'Pendiente'
+              }
+            </span>
+          </div>
+          
+          {/* Lado derecho: Timer */}
+          {(isTimerRunning || timerSeconds > 0) && (
+            <span 
+              className="text-sm font-mono font-bold"
+              style={{ color: getHeaderTextColor() }}
+            >
+              {formatTime(timerSeconds)}
+            </span>
+          )}
+        </div>
+        
+        {/* ========== CUERPO DE LA TARJETA ========== */}
+        <div className="px-3 py-2.5">
+          {/* Título de la tarea */}
+          {isEditing ? (
+            <input
+              ref={inputRef}
+              type="text"
+              value={localText}
+              onChange={(e) => setLocalText(e.target.value)}
+              onBlur={handleBlur}
+              onKeyDown={handleKeyDown}
+              onMouseDown={(e) => e.stopPropagation()}
+              className="w-full bg-transparent outline-none font-semibold text-sm text-gray-800 border-b-2 border-gray-300"
+              placeholder="Nombre de la tarea"
+            />
+          ) : (
+            <p className="font-semibold text-sm text-gray-800 leading-tight">
+              {displayText || 'Nueva tarea'}
+            </p>
+          )}
+          
+          {/* ========== METADATA INFERIOR (Badges) ========== */}
+          {(dueDate || priorityInfo) && (
+            <div className="flex items-center gap-2 mt-2 flex-wrap">
+              {/* Badge de fecha límite */}
+              {dueDate && (
+                <div 
+                  className="flex items-center gap-1 px-2 py-1 rounded-md text-xs"
+                  style={{ backgroundColor: '#EFF6FF', color: '#1E40AF' }}
+                  title={`Fecha límite: ${dueDate}`}
+                >
+                  <Calendar size={12} />
+                  <span className="font-medium">{formatDueDateShort(dueDate)}</span>
+                </div>
+              )}
+              
+              {/* Badge de prioridad */}
+              {priorityInfo && (
+                <div 
+                  className="flex items-center gap-1 px-2 py-1 rounded-md text-xs"
+                  style={{ 
+                    backgroundColor: priorityInfo.bgColor || '#FEE2E2', 
+                    color: priorityInfo.color || '#991B1B' 
+                  }}
+                  title={`Prioridad: ${priorityInfo.label}`}
+                >
+                  <Flag size={12} />
+                  <span className="font-medium">{priorityInfo.label}</span>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Barra de progreso (si hay subtareas) */}
+          {taskData.checklist && taskData.checklist.length > 0 && (
+            <div className="mt-2">
+              <div className="flex items-center justify-between text-[10px] text-gray-500 mb-1">
+                <span>Progreso</span>
+                <span className="font-mono">{progress}%</span>
+              </div>
+              <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className={`h-full transition-all duration-300 ${
+                    progress === 100 ? 'bg-orange-500' : 'bg-yellow-500'
+                  }`}
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {/* Resize Handles (solo cuando está seleccionado) */}
+        {isSelected && !isMultiSelected && !isEditing && (
+          <>
+            {/* Handler Derecho */}
+            <div
+              onMouseDown={handleResizeRight}
+              className="absolute top-1/2 -translate-y-1/2 -right-2 w-4 h-4 cursor-ew-resize bg-white border-2 border-blue-500 rounded-full opacity-90 hover:opacity-100 hover:scale-110 transition-all shadow-md"
+              style={{ zIndex: 30 }}
+              title="Arrastrar para ajustar ancho"
+            />
+            {/* Handler Inferior */}
+            <div
+              onMouseDown={handleResizeBottom}
+              className="absolute left-1/2 -translate-x-1/2 -bottom-2 w-4 h-4 cursor-ns-resize bg-white border-2 border-blue-500 rounded-full opacity-90 hover:opacity-100 hover:scale-110 transition-all shadow-md"
+              style={{ zIndex: 30 }}
+              title="Arrastrar para ajustar altura"
+            />
+          </>
+        )}
+      </div>
+    );
+  }
+
+  // ========== RENDERIZADO NORMAL PARA OTROS TIPOS DE NODO ==========
   return (
     <>
       {/* Ícono de check verde cuando está completado */}

@@ -2,6 +2,29 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-20: FEATURE — UI SPEC Task Node Card ✅ COMPLETADO
+- **Estado**: Implementación completada y verificada mediante screenshots
+- **Estructura visual exacta del Nodo Tarea:**
+  - **Header superior** (franja horizontal):
+    - Color: Rojo (timer activo) / Amarillo (pendiente) / Naranja (completada)
+    - Izquierda: ● punto sólido + ⏱️ icono reloj + texto estado
+    - Derecha: Timer en formato HH:MM:SS
+  - **Cuerpo** (fondo blanco):
+    - Título de la tarea (editable desde panel)
+  - **Metadata inferior** (badges):
+    - 📅 Fecha límite (formato: "24 ene 12:00 PM")
+    - 🚩 Prioridad (Alta/Media/Baja con color)
+    - 📊 Barra de progreso (si hay subtareas)
+- **Comportamiento dinámico:**
+  - ✅ Timer continúa aunque se cierre el panel
+  - ✅ Timer se actualiza en tiempo real en el header del nodo
+  - ✅ Fecha solo visible si existe
+  - ✅ Prioridad solo visible si está definida
+- **Estilo:**
+  - Bordes redondeados (12px)
+  - Sombra suave (elevación)
+  - Header con color según estado, cuerpo siempre blanco
+
 ### 2026-01-20: FEATURE — Nodo Tarea Edición Avanzada y Sincronización Visual ✅ COMPLETADO
 - **Estado**: Implementación completada y verificada mediante screenshots
 - **Cambios realizados**:

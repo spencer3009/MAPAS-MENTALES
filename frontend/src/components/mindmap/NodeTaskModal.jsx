@@ -548,18 +548,7 @@ const NodeTaskModal = ({ node, onClose, onUpdate, onUpdateTitle, onDelete }) => 
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
                 Opciones
               </p>
-              <div className="grid grid-cols-2 gap-2">
-                <button 
-                  onClick={() => setIsPinned(!isPinned)}
-                  className={`flex items-center gap-2 px-4 py-3 rounded-lg border text-sm font-medium transition-colors ${
-                    isPinned 
-                      ? 'bg-amber-50 border-amber-200 text-amber-700' 
-                      : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  <Pin size={16} className={isPinned ? 'fill-current' : ''} />
-                  Anclar
-                </button>
+              <div className="grid grid-cols-3 gap-2">
                 <button className="flex items-center gap-2 px-4 py-3 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 text-sm font-medium transition-colors">
                   <Tag size={16} />
                   Etiquetas
@@ -568,10 +557,17 @@ const NodeTaskModal = ({ node, onClose, onUpdate, onUpdateTitle, onDelete }) => 
                   <Users size={16} />
                   Miembros
                 </button>
-                <button className="flex items-center gap-2 px-4 py-3 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 text-sm font-medium transition-colors">
+                <label className="flex items-center gap-2 px-4 py-3 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 text-sm font-medium transition-colors cursor-pointer">
                   <Paperclip size={16} />
                   Adjuntos
-                </button>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                </label>
               </div>
             </div>
             

@@ -2,6 +2,18 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-20: FEATURE — Project Card Design (Nodo Proyecto Vinculado) ✅ COMPLETADO
+- **Estado**: Implementación completada y verificada
+- **Diseño tipo "status card"** consistente con Task Cards:
+  - **Header VERDE** (#10B981 esmeralda):
+    - ● Punto indicador blanco
+    - 📁 Icono de carpeta
+    - Texto "Proyecto vinculado"
+    - 🔗 Icono de enlace
+  - **Cuerpo blanco** con título del proyecto
+  - **Badge** "Abrir mapa →" para indicar la acción de doble clic
+- **Estilo**: Bordes redondeados (12px), sombra suave, resize handles verdes
+
 ### 2026-01-20: FEATURE — UI SPEC Task Node Card ✅ COMPLETADO
 - **Estado**: Implementación completada y verificada mediante screenshots
 - **Estructura visual exacta del Nodo Tarea:**

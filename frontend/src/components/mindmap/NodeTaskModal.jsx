@@ -445,17 +445,22 @@ const NodeTaskModal = ({ node, onClose, onUpdate, onUpdateTitle, onDelete }) => 
                     <p className="text-2xl font-mono font-bold text-gray-800">
                       {formatTime(timerSeconds)}
                     </p>
-                    <p className="text-xs text-gray-500">▶️ Presiona play para iniciar</p>
+                    <p className="text-xs text-gray-500">
+                      {timerSeconds > 0 ? '⏸️ Pausado - presiona play para continuar' : '▶️ Presiona play para iniciar'}
+                    </p>
                   </div>
                 </div>
               )}
               
-              <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-200">
-                <span className="text-gray-500">Tiempo total:</span>
-                <span className="font-mono font-bold text-rose-500">
-                  {formatTime(totalTime + (timerRunning ? timerSeconds : 0))}
-                </span>
-              </div>
+              {/* Mostrar tiempo total solo si hay tiempo registrado */}
+              {timerSeconds > 0 && !timerRunning && (
+                <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-200">
+                  <span className="text-gray-500">Tiempo acumulado:</span>
+                  <span className="font-mono font-bold text-rose-500">
+                    {formatTime(timerSeconds)}
+                  </span>
+                </div>
+              )}
             </div>
             
             {/* ========== DESCRIPCIÓN ========== */}

@@ -1257,6 +1257,23 @@ const Canvas = ({
   const selectedNodeForMenu = nodes.find(n => n.id === contextMenu?.nodeId);
   // El toolbar debe mostrarse solo cuando hay UN nodo seleccionado (no múltiples)
   const shouldShowToolbar = selectedNodeId && selectedNodeIds.size === 0 && showControls && !contextMenu && !dragging && !newNodeId && !commentPopover.isOpen && !linkPopover.isOpen;
+  
+  // Debug log para toolbar
+  if (selectedNodeId) {
+    console.log('[Canvas] Toolbar debug:', {
+      selectedNodeId,
+      selectedNodeIdsSize: selectedNodeIds.size,
+      showControls,
+      contextMenu: !!contextMenu,
+      dragging: !!dragging,
+      newNodeId,
+      commentPopoverOpen: commentPopover.isOpen,
+      linkPopoverOpen: linkPopover.isOpen,
+      shouldShowToolbar,
+      selectedNodeType: selectedNode?.nodeType
+    });
+  }
+  
   const shouldShowAddButton = shouldShowToolbar;
   const commentNode = nodes.find(n => n.id === commentPopover.nodeId);
   const linkNode = nodes.find(n => n.id === linkPopover.nodeId);

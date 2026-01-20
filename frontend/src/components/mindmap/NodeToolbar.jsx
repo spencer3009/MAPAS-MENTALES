@@ -338,85 +338,93 @@ const NodeToolbar = ({
 
       {/* Contenedor de botones - scrollable en móvil */}
       <div className="flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-2 overflow-x-auto max-w-[80vw] sm:max-w-none">
-        {/* Marcar como completado */}
-        <ToolbarButton 
-          icon={CheckCircle2} 
-          label={isCompleted ? "Desmarcar tarea" : "Marcar como completada"}
-          onClick={wrapHandler(onToggleCompleted, 'ToggleCompleted')}
-          active={isCompleted}
-        />
         
-        <Divider />
+        {/* ========== OPCIONES SOLO PARA NODOS NORMALES (NO task/project) ========== */}
+        {!isSpecialNode && (
+          <>
+            {/* Marcar como completado */}
+            <ToolbarButton 
+              icon={CheckCircle2} 
+              label={isCompleted ? "Desmarcar tarea" : "Marcar como completada"}
+              onClick={wrapHandler(onToggleCompleted, 'ToggleCompleted')}
+              active={isCompleted}
+            />
+            
+            <Divider />
 
-        {/* Editar texto */}
-        <ToolbarButton 
-          icon={Type} 
-          label="Editar texto" 
-          onClick={wrapHandler(onEdit, 'Edit')}
-        />
-        
-        {/* Panel de estilos */}
-        {!isDashedNode && (
-          <ToolbarButton 
-            icon={Palette} 
-            label="Personalizar estilo" 
-            onClick={wrapHandler(onStyle, 'Style')}
-            active={stylePanelOpen}
-          />
+            {/* Editar texto */}
+            <ToolbarButton 
+              icon={Type} 
+              label="Editar texto" 
+              onClick={wrapHandler(onEdit, 'Edit')}
+            />
+            
+            {/* Panel de estilos */}
+            {!isDashedNode && (
+              <ToolbarButton 
+                icon={Palette} 
+                label="Personalizar estilo" 
+                onClick={wrapHandler(onStyle, 'Style')}
+                active={stylePanelOpen}
+              />
+            )}
+
+            {/* Comentario */}
+            <ToolbarButton 
+              icon={MessageSquare} 
+              label={hasComment ? "Ver comentario" : "Agregar comentario"}
+              onClick={wrapHandler(onComment, 'Comment')}
+              hasIndicator={hasComment}
+            />
+
+            <Divider />
+
+            {/* Icono */}
+            <ToolbarButton 
+              icon={Laugh} 
+              label="Agregar icono" 
+              onClick={wrapHandler(onAddIcon, 'AddIcon')}
+              active={iconPanelOpen}
+              hasIndicator={hasIcon}
+            />
+            
+            <Divider />
+
+            {/* Alineación de texto */}
+            <ToolbarButton 
+              icon={AlignLeft} 
+              label="Alinear texto a la izquierda" 
+              onClick={wrapHandler(onAlignTextLeft, 'AlignLeft')}
+              active={currentTextAlign === 'left'}
+            />
+            <ToolbarButton 
+              icon={AlignCenter} 
+              label="Alinear texto al centro" 
+              onClick={wrapHandler(onAlignTextCenter, 'AlignCenter')}
+              active={currentTextAlign === 'center'}
+            />
+            <ToolbarButton 
+              icon={AlignRight} 
+              label="Alinear texto a la derecha" 
+              onClick={wrapHandler(onAlignTextRight, 'AlignRight')}
+              active={currentTextAlign === 'right'}
+            />
+            
+            <Divider />
+            
+            {/* Enlace */}
+            <ToolbarButton 
+              icon={Link2} 
+              label={hasLinks ? `Ver enlaces (${linksCount})` : "Agregar enlace"}
+              onClick={wrapHandler(onAddLink, 'AddLink')}
+              badge={linksCount > 0 ? linksCount : null}
+            />
+          </>
         )}
 
-        {/* Comentario */}
-        <ToolbarButton 
-          icon={MessageSquare} 
-          label={hasComment ? "Ver comentario" : "Agregar comentario"}
-          onClick={wrapHandler(onComment, 'Comment')}
-          hasIndicator={hasComment}
-        />
-
-        <Divider />
-
-        {/* Icono */}
-        <ToolbarButton 
-          icon={Laugh} 
-          label="Agregar icono" 
-          onClick={wrapHandler(onAddIcon, 'AddIcon')}
-          active={iconPanelOpen}
-          hasIndicator={hasIcon}
-        />
+        {/* ========== OPCIONES COMUNES PARA TODOS LOS NODOS ========== */}
         
-        <Divider />
-
-        {/* Alineación de texto */}
-        <ToolbarButton 
-          icon={AlignLeft} 
-          label="Alinear texto a la izquierda" 
-          onClick={wrapHandler(onAlignTextLeft, 'AlignLeft')}
-          active={currentTextAlign === 'left'}
-        />
-        <ToolbarButton 
-          icon={AlignCenter} 
-          label="Alinear texto al centro" 
-          onClick={wrapHandler(onAlignTextCenter, 'AlignCenter')}
-          active={currentTextAlign === 'center'}
-        />
-        <ToolbarButton 
-          icon={AlignRight} 
-          label="Alinear texto a la derecha" 
-          onClick={wrapHandler(onAlignTextRight, 'AlignRight')}
-          active={currentTextAlign === 'right'}
-        />
-        
-        <Divider />
-        
-        {/* Enlace */}
-        <ToolbarButton 
-          icon={Link2} 
-          label={hasLinks ? `Ver enlaces (${linksCount})` : "Agregar enlace"}
-          onClick={wrapHandler(onAddLink, 'AddLink')}
-          badge={linksCount > 0 ? linksCount : null}
-        />
-
-        {/* Recordatorio */}
+        {/* Recordatorio - disponible para todos */}
         <ToolbarButton 
           icon={Bell} 
           label={hasReminder ? "Ver recordatorio" : "Agregar recordatorio"}
@@ -427,14 +435,14 @@ const NodeToolbar = ({
         
         <Divider />
         
-        {/* Duplicar */}
+        {/* Duplicar - disponible para todos */}
         <ToolbarButton 
           icon={Copy} 
           label="Duplicar nodo" 
           onClick={wrapHandler(onDuplicate, 'Duplicate')}
         />
         
-        {/* Eliminar */}
+        {/* Eliminar - disponible para todos */}
         <ToolbarButton 
           icon={Trash2} 
           label="Eliminar nodo" 

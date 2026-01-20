@@ -241,6 +241,72 @@ const NodeTaskModal = ({ node, onClose, onUpdate, onUpdateTitle, onDelete }) => 
     setNewComment('');
   };
   
+  // Manejar subida de archivos
+  const handleFileUpload = async (e) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    setUploadingFile(true);
+    
+    const newAttachments = [];
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      
+      // Validar tamaño (máx 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        alert(`El archivo ${file.name} excede el límite de 10MB`);
+        continue;
+      }
+      
+      // Crear URL local para preview (en producción se subiría a un servidor)
+      const reader = new FileReader();
+      const fileData = await new Promise((resolve) => {
+        reader.onload = (event) => {
+          resolve({
+            id: Date.now().toString() + '_' + i,
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            dataUrl: event.target.result,
+            uploadedAt: new Date().toISOString()
+          });
+        };
+        reader.readAsDataURL(file);
+      });
+      
+      newAttachments.push(fileData);
+    }
+    
+    setAttachments([...attachments, ...newAttachments]);
+    setUploadingFile(false);
+    
+    // Agregar actividad
+    const activity = {
+      id: Date.now().toString(),
+      type: 'attachment',
+      user: 'Usuario',
+      timestamp: new Date().toISOString(),
+      text: `adjuntó ${newAttachments.length} archivo(s)`
+    };
+    setActivities([activity, ...activities]);
+    
+    // Reset input
+    e.target.value = '';
+  };
+  
+  // Eliminar adjunto
+  const removeAttachment = (attachmentId) => {
+    setAttachments(attachments.filter(a => a.id !== attachmentId));
+  };
+  
+  // Formatear tamaño de archivo
+  const formatFileSize = (bytes) => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  };
+  
   // Eliminar tarea
   const handleDelete = () => {
     if (window.confirm('¿Estás seguro de que deseas eliminar esta tarea?')) {

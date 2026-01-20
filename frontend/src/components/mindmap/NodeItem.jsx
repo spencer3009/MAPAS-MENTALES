@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, memo, useCallback } from 'react';
+import React, { useState, useRef, useEffect, memo, useCallback, useMemo } from 'react';
 import { MessageSquare, Link2, Clock, FileText, Bell, FolderOpen, CheckSquare, ListTodo, CheckCircle2, Flag, Calendar } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { formatTime, formatDateShort, PRIORITIES } from './NodeTaskModal';

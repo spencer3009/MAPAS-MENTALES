@@ -647,7 +647,10 @@ const FinanzasModule = ({ token, projects = [] }) => {
         {activeTab === 'incomes' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900">Ingresos</h2>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Ingresos</h2>
+                <p className="text-sm text-gray-500 capitalize">{getPeriodLabel()}</p>
+              </div>
               <button
                 onClick={() => setShowIncomeModal(true)}
                 className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
@@ -657,78 +660,64 @@ const FinanzasModule = ({ token, projects = [] }) => {
               </button>
             </div>
             
-            {/* ========== DASHBOARD DE RESUMEN FINANCIERO ========== */}
-            {(() => {
-              // Calcular totales solo de ingresos COBRADOS del período
-              const collectedIncomes = incomes.filter(inc => inc.status === 'collected');
-              const totalCollected = collectedIncomes.reduce((sum, inc) => sum + (inc.amount || 0), 0);
-              
-              // Cálculos de IGV (18%)
-              // El total incluye IGV, entonces: total = subtotal * 1.18
-              // subtotal = total / 1.18
-              // igv = total - subtotal
-              const IGV_RATE = 0.18;
-              const subtotal = totalCollected / (1 + IGV_RATE);
-              const igv = totalCollected - subtotal;
-              
-              return (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                  {/* Card 1: Total del día (Verde) */}
-                  <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-sm text-gray-500 font-medium">Total del día</p>
-                        <p className="text-3xl font-bold text-gray-900 mt-2">
-                          S/ {totalCollected.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-1">
-                          {collectedIncomes.length} ingreso(s) cobrado(s)
-                        </p>
-                      </div>
-                      <div className="p-3 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 text-white">
-                        <DollarSign size={24} />
-                      </div>
-                    </div>
+            {/* ========== DASHBOARD DE RESUMEN FINANCIERO (FILTRADO POR PERÍODO) ========== */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+              {/* Card 1: Total del período (Verde) */}
+              <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium">
+                      {filterMode === 'day' ? 'Total del día' : filterMode === 'month' ? 'Total del mes' : 'Total del año'}
+                    </p>
+                    <p className="text-3xl font-bold text-gray-900 mt-2">
+                      S/ {totalFilteredCollected.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {filteredCollectedIncomes.length} ingreso(s) cobrado(s)
+                    </p>
                   </div>
-                  
-                  {/* Card 2: Subtotal sin IGV (Azul) */}
-                  <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-sm text-gray-500 font-medium">Subtotal</p>
-                        <p className="text-3xl font-bold text-gray-900 mt-2">
-                          S/ {subtotal.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-1">
-                          Monto base sin impuesto
-                        </p>
-                      </div>
-                      <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
-                        <TrendingUp size={24} />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Card 3: IGV (Naranja) */}
-                  <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-sm text-gray-500 font-medium">IGV (18%)</p>
-                        <p className="text-3xl font-bold text-gray-900 mt-2">
-                          S/ {igv.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-1">
-                          Impuesto a pagar
-                        </p>
-                      </div>
-                      <div className="p-3 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 text-white">
-                        <Wallet size={24} />
-                      </div>
-                    </div>
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 text-white">
+                    <DollarSign size={24} />
                   </div>
                 </div>
-              );
-            })()}
+              </div>
+              
+              {/* Card 2: Subtotal sin IGV (Azul) */}
+              <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium">Subtotal</p>
+                    <p className="text-3xl font-bold text-gray-900 mt-2">
+                      S/ {filteredSubtotal.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Monto base sin impuesto
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
+                    <TrendingUp size={24} />
+                  </div>
+                </div>
+              </div>
+              
+              {/* Card 3: IGV (Naranja) */}
+              <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium">IGV (18%)</p>
+                    <p className="text-3xl font-bold text-gray-900 mt-2">
+                      S/ {filteredIgv.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Impuesto a pagar
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 text-white">
+                    <Wallet size={24} />
+                  </div>
+                </div>
+              </div>
+            </div>
             
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
               <table className="w-full">
@@ -743,7 +732,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {incomes.map((income) => (
+                  {filteredIncomes.map((income) => (
                     <tr key={income.id} className="hover:bg-gray-50">
                       <td className="px-4 py-3 text-sm text-gray-600">{formatDate(income.date)}</td>
                       <td className="px-4 py-3 text-sm text-gray-900">{income.description || '-'}</td>
@@ -772,10 +761,10 @@ const FinanzasModule = ({ token, projects = [] }) => {
                       </td>
                     </tr>
                   ))}
-                  {incomes.length === 0 && (
+                  {filteredIncomes.length === 0 && (
                     <tr>
                       <td colSpan="6" className="px-4 py-8 text-center text-gray-500">
-                        No hay ingresos registrados
+                        No hay ingresos registrados en este período
                       </td>
                     </tr>
                   )}

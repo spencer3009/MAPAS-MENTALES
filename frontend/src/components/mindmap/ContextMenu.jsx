@@ -220,11 +220,38 @@ const ContextMenu = ({
             <Unlink size={16} className="text-orange-500" />
             <span>Desvincular proyecto</span>
           </MenuButton>
-        ) : !isProjectNode && (
+        ) : !isProjectNode && !isTaskNode && (
           <MenuButton onClick={() => handleAction(() => onLinkToProject && onLinkToProject(nodeId))}>
             <FolderOpen size={16} className="text-emerald-500" />
             <span>Vincular a proyecto</span>
           </MenuButton>
+        )}
+
+        {/* Opciones de tarea */}
+        {!isProjectNode && !isTaskNode && !isDashedNode && (
+          <>
+            <div className="border-t border-gray-100 my-1" />
+            <MenuButton onClick={() => handleAction(() => onConvertToTask && onConvertToTask(nodeId))}>
+              <ListTodo size={16} className="text-yellow-600" />
+              <span>Convertir en tarea</span>
+            </MenuButton>
+          </>
+        )}
+
+        {isTaskNode && (
+          <>
+            <div className="border-t border-gray-100 my-1" />
+            {currentTaskStatus === 'completed' ? (
+              <MenuButton onClick={() => handleAction(() => onReopenTask && onReopenTask(nodeId))}>
+                <RotateCcw size={16} className="text-blue-500" />
+                <span>Reabrir tarea</span>
+              </MenuButton>
+            ) : null}
+            <MenuButton onClick={() => handleAction(() => onRemoveTaskStatus && onRemoveTaskStatus(nodeId))}>
+              <XCircle size={16} className="text-gray-500" />
+              <span>Quitar estado de tarea</span>
+            </MenuButton>
+          </>
         )}
 
         <div className="border-t border-gray-100 my-1" />

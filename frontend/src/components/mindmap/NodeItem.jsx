@@ -87,6 +87,13 @@ const LEGACY_COLORS = {
   yellow: { bg: '#fef3c7', border: '#fcd34d', text: '#1f2937' },
 };
 
+// Colores para nodos tipo tarea
+const TASK_COLORS = {
+  pending: { bg: '#FEF9C3', border: '#FACC15', text: '#1f2937' },      // Amarillo
+  in_progress: { bg: '#FEF9C3', border: '#FACC15', text: '#1f2937' }, // Amarillo
+  completed: { bg: '#FFEDD5', border: '#FB923C', text: '#1f2937' },   // Naranja
+};
+
 const NodeItem = memo(({
   node,
   isSelected,

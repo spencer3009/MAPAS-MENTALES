@@ -150,25 +150,11 @@ const NodeItem = memo(({
         p.name?.toLowerCase().trim() === node.text?.toLowerCase().trim()
       );
       if (matchingProject) {
-        console.log('[NodeItem] Proyecto encontrado por nombre:', matchingProject.name, matchingProject.id);
         return matchingProject.id;
       }
     }
     return null;
   }, [directLinkedProjectId, isProjectNode, node.text, projects]);
-  
-  // Debug log para nodos de proyecto
-  if (isProjectNode) {
-    console.log('[NodeItem] Nodo de proyecto:', {
-      nodeId: node.id,
-      text: node.text,
-      nodeType,
-      directLinkedProjectId,
-      resolvedLinkedProjectId: linkedProjectId,
-      projectsCount: projects.length,
-      hasOnNavigateToProject: !!onNavigateToProject
-    });
-  }
 
   // Obtener estilos del nodo (con fallback a colores legacy)
   // Nodos tarea tienen colores especiales basados en su estado

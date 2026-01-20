@@ -2,6 +2,22 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-20: FEATURE — Toolbar Dinámico por Tipo de Nodo ✅ COMPLETADO Y PROBADO
+- **Estado**: Implementación completada y verificada
+- **Funcionalidad**: El toolbar flotante ahora muestra opciones diferentes según el tipo de nodo seleccionado
+- **Comportamiento**:
+  - ✅ **Nodo Normal** (`default`, `dashed_text`): Toolbar COMPLETO con todas las opciones
+    - Marcar completado, Editar texto, Estilo, Comentario, Icono, Alineación (3), Enlace, Recordatorio, Duplicar, Eliminar
+  - ✅ **Nodo Tarea** (`task`): Toolbar REDUCIDO con solo 3 opciones
+    - Recordatorio, Duplicar, Eliminar
+  - ✅ **Nodo Proyecto** (`project`): Toolbar REDUCIDO con solo 3 opciones
+    - Recordatorio, Duplicar, Eliminar
+- **Opciones OCULTAS para Task/Project** (eliminadas del DOM, no solo deshabilitadas):
+  - Marcar completado, Editar texto, Estilo, Comentario, Icono, Alineación, Enlace
+- **Archivos modificados**:
+  - `/app/frontend/src/components/mindmap/NodeToolbar.jsx` - Lógica condicional de renderizado
+- **Testing**: Verificado con screenshots - 3 casos de prueba exitosos
+
 ### 2026-01-20: FEATURE — Badge "Ver tarea →" en Task Cards ✅ COMPLETADO Y PROBADO
 - **Estado**: Implementación completada y verificada
 - **Funcionalidad**: Agregado badge amarillo "Ver tarea →" en todos los nodos de tipo Tarea

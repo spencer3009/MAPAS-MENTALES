@@ -195,8 +195,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
   // ========== NUEVO: Sistema de filtro por período (Día/Mes/Año) ==========
   const [filterMode, setFilterMode] = useState('day'); // 'day' | 'month' | 'year'
   const [selectedDate, setSelectedDate] = useState(() => {
-    const now = new Date();
-    return now.toISOString().split('T')[0]; // YYYY-MM-DD (hoy por defecto)
+    return getLocalDateString(); // YYYY-MM-DD (hoy por defecto, sin UTC)
   });
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date();

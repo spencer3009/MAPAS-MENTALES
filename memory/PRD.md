@@ -2,6 +2,21 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-20: FEATURE — Modal "Tipo de nodo" con opción Tarea ✅ COMPLETADO
+- **Estado**: Implementación completada y verificada
+- **Cambios realizados**:
+  - `/app/frontend/src/components/mindmap/NodeTypeSelector.jsx` - Rediseño a grilla 2x2
+  - `/app/frontend/src/components/mindmap/Canvas.jsx` - Nuevo handler `handleSelectTaskType`
+  - `/app/frontend/src/hooks/useNodes.js` - Soporte para crear nodos tipo tarea directamente
+- **Layout del modal (2x2)**:
+  - Fila 1: "Texto (con fondo)" azul | "Texto (solo línea)" celeste
+  - Fila 2: "Proyecto" verde | "Tarea" amarillo (NUEVO)
+- **Comportamiento al seleccionar "Tarea"**:
+  - ✅ Crea nodo con `nodeType: 'task'`, `taskStatus: 'pending'`
+  - ✅ Nodo se muestra en color amarillo con icono de tarea
+  - ✅ Panel lateral derecho se abre automáticamente (sin doble clic)
+  - ✅ Panel muestra: timer, sub-tareas, fecha, prioridad, descripción
+
 ### 2026-01-20: FEATURE — Nodo Convertible en Tarea ✅ COMPLETADO Y VERIFICADO
 - **Estado**: Implementación completada y verificada mediante screenshot testing
 - **Verificación realizada**:

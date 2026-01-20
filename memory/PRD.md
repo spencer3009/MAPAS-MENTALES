@@ -2,6 +2,28 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-20: FEATURE — Calendario con 3 Modos + Estado Financiero Funcional ✅ COMPLETADO
+- **Estado**: Implementación completada y verificada
+- **Funcionalidad 1 - Selector de período con 3 modos**:
+  - ✅ **Día** (default): Filtra por día específico, HOY seleccionado por defecto
+  - ✅ **Mes**: Filtra por mes completo
+  - ✅ **Año**: Filtra por año completo
+  - ✅ El dashboard (Total/Subtotal/IGV) se actualiza según el filtro
+  - ✅ La tabla de ingresos muestra solo registros del período
+  - ✅ Subtítulo muestra el período seleccionado en formato legible
+- **Funcionalidad 2 - Indicador de Estado FUNCIONAL**:
+  - Antes: Solo decorativo, no respondía a datos
+  - Ahora: Se recalcula automáticamente según:
+    - 🟢 **Saludable**: Ingresos cobrados > IGV + Por pagar
+    - 🟡 **Atención**: IGV > 0 o hay montos por pagar
+    - 🔴 **Crítico**: Por pagar > Ingresos cobrados
+  - ✅ Se recalcula al agregar/eliminar ingresos o cambiar filtro
+- **Testing verificado**:
+  - Modo Día (hoy sin ingresos): Total S/ 0.00, Estado "Crítico"
+  - Modo Mes (enero con ingresos): Total S/ 4,000.00, Estado "Saludable"
+- **Archivos modificados**:
+  - `/app/frontend/src/components/finanzas/FinanzasModule.jsx`
+
 ### 2026-01-20: FEATURE — Dashboard de IGV en Finanzas/Ingresos ✅ COMPLETADO Y PROBADO
 - **Estado**: Implementación completada y verificada
 - **Funcionalidad**: Dashboard superior con 3 tarjetas de resumen financiero

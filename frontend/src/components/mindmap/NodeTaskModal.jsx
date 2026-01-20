@@ -283,6 +283,7 @@ const NodeTaskModal = ({ node, onClose, onUpdate, onUpdateTitle, onDelete }) => 
       {/* Side Panel desde la derecha */}
       <div 
         ref={panelRef}
+        data-task-panel="true"
         className="fixed top-0 right-0 h-full w-full max-w-lg bg-white shadow-2xl z-[9999] flex flex-col transform transition-transform duration-300 ease-out animate-slide-in-right"
         style={{ 
           boxShadow: '-4px 0 25px rgba(0,0,0,0.15)',

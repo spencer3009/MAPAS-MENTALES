@@ -108,6 +108,7 @@ const NodeItem = memo(({
   onContextMenu,
   onCommentClick,
   onNavigateToProject,  // Callback para navegar a un proyecto vinculado
+  onOpenTaskModal,      // Callback para abrir el modal de tarea
   forceEdit = false,
   onEditComplete,
   isNavigationMode = false  // Modo navegación: deshabilita interacción táctil

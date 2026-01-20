@@ -523,6 +523,124 @@ const NodeItem = memo(({
     );
   };
 
+  // ========== RENDERIZADO ESPECIAL PARA NODO TIPO PROYECTO VINCULADO (PROJECT CARD) ==========
+  if (isProjectNode) {
+    return (
+      <div
+        ref={nodeRef}
+        data-node-id={node.id}
+        className={`
+          absolute select-none overflow-hidden
+          ${isEditing ? 'cursor-text' : 'cursor-grab active:cursor-grabbing'}
+          ${isMultiSelected ? 'ring-[3px] ring-offset-2 ring-blue-600' : ''}
+          ${isSelected && !isMultiSelected ? 'ring-2 ring-offset-2 ring-blue-500' : ''}
+        `}
+        style={{
+          left: node.x,
+          top: node.y,
+          width: Math.max(dimensions.width, 180), // Mínimo 180px para project cards
+          minHeight: 70,
+          backgroundColor: '#FFFFFF',
+          borderRadius: '12px',
+          boxShadow: isInSelection 
+            ? '0 8px 25px -5px rgba(0, 0, 0, 0.2), 0 0 0 2px rgba(16, 185, 129, 0.3)' 
+            : '0 4px 12px -2px rgba(0, 0, 0, 0.15)',
+          zIndex: isInSelection || isSnapTarget ? 20 : 10,
+          opacity: node.isCompleted ? 0.6 : 1,
+          pointerEvents: isNavigationMode ? 'none' : 'auto',
+          touchAction: isNavigationMode ? 'none' : 'auto',
+        }}
+        onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
+        onClick={handleNodeClick}
+        onDoubleClick={handleDoubleClick}
+        onContextMenu={handleRightClick}
+      >
+        {/* ========== HEADER SUPERIOR VERDE (Proyecto vinculado) ========== */}
+        <div 
+          className="w-full px-3 py-2 flex items-center justify-between"
+          style={{ 
+            backgroundColor: '#10B981', // Verde esmeralda
+            borderRadius: '12px 12px 0 0'
+          }}
+        >
+          {/* Lado izquierdo: Indicador + Icono + Texto */}
+          <div className="flex items-center gap-2">
+            {/* Punto indicador */}
+            <div className="w-2 h-2 rounded-full bg-white" />
+            {/* Icono de carpeta */}
+            <FolderOpen size={14} className="text-white" />
+            {/* Texto de estado */}
+            <span className="text-xs font-medium text-white">
+              Proyecto vinculado
+            </span>
+          </div>
+          
+          {/* Lado derecho: Indicador de enlace */}
+          <div className="flex items-center gap-1">
+            <Link2 size={12} className="text-white/80" />
+          </div>
+        </div>
+        
+        {/* ========== CUERPO DE LA TARJETA ========== */}
+        <div className="px-3 py-2.5">
+          {/* Título del proyecto */}
+          {isEditing ? (
+            <input
+              ref={inputRef}
+              type="text"
+              value={localText}
+              onChange={(e) => setLocalText(e.target.value)}
+              onBlur={handleBlur}
+              onKeyDown={handleKeyDown}
+              onMouseDown={(e) => e.stopPropagation()}
+              className="w-full bg-transparent outline-none font-semibold text-sm text-gray-800 border-b-2 border-emerald-300"
+              placeholder="Nombre del proyecto"
+            />
+          ) : (
+            <p className="font-semibold text-sm text-gray-800 leading-tight">
+              {displayText || 'Proyecto vinculado'}
+            </p>
+          )}
+          
+          {/* Indicador de proyecto vinculado */}
+          {linkedProjectId && (
+            <div className="flex items-center gap-1.5 mt-2">
+              <div 
+                className="flex items-center gap-1 px-2 py-1 rounded-md text-xs"
+                style={{ backgroundColor: '#D1FAE5', color: '#065F46' }}
+                title="Doble clic para abrir el mapa vinculado"
+              >
+                <FolderOpen size={12} />
+                <span className="font-medium">Abrir mapa →</span>
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {/* Resize Handles (solo cuando está seleccionado) */}
+        {isSelected && !isMultiSelected && !isEditing && (
+          <>
+            {/* Handler Derecho */}
+            <div
+              onMouseDown={handleResizeRight}
+              className="absolute top-1/2 -translate-y-1/2 -right-2 w-4 h-4 cursor-ew-resize bg-white border-2 border-emerald-500 rounded-full opacity-90 hover:opacity-100 hover:scale-110 transition-all shadow-md"
+              style={{ zIndex: 30 }}
+              title="Arrastrar para ajustar ancho"
+            />
+            {/* Handler Inferior */}
+            <div
+              onMouseDown={handleResizeBottom}
+              className="absolute left-1/2 -translate-x-1/2 -bottom-2 w-4 h-4 cursor-ns-resize bg-white border-2 border-emerald-500 rounded-full opacity-90 hover:opacity-100 hover:scale-110 transition-all shadow-md"
+              style={{ zIndex: 30 }}
+              title="Arrastrar para ajustar altura"
+            />
+          </>
+        )}
+      </div>
+    );
+  }
+
   // ========== RENDERIZADO ESPECIAL PARA NODO TIPO TAREA (TASK CARD) ==========
   if (isTaskNode) {
     const isTimerRunning = taskData.timerRunning;

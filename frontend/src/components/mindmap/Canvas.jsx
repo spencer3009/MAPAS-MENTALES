@@ -1602,6 +1602,7 @@ const Canvas = ({
         position={nodeTypeSelector.position}
         onSelect={handleNodeTypeSelect}
         onSelectProjectType={handleSelectProjectType}
+        onSelectTaskType={handleSelectTaskType}
         onClose={handleCloseNodeTypeSelector}
         parentNode={selectedNode}
       />

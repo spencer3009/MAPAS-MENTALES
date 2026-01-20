@@ -161,10 +161,23 @@ const FinanzasModule = ({ token, projects = [] }) => {
   const [receivables, setReceivables] = useState({ receivables: [], total: 0, count: 0 });
   const [payables, setPayables] = useState({ payables: [], total: 0, count: 0 });
   const [loading, setLoading] = useState(true);
-  const [selectedPeriod, setSelectedPeriod] = useState(() => {
+  
+  // ========== NUEVO: Sistema de filtro por período (Día/Mes/Año) ==========
+  const [filterMode, setFilterMode] = useState('day'); // 'day' | 'month' | 'year'
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const now = new Date();
+    return now.toISOString().split('T')[0]; // YYYY-MM-DD (hoy por defecto)
+  });
+  const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
+  const [selectedYear, setSelectedYear] = useState(() => {
+    return new Date().getFullYear().toString();
+  });
+  
+  // Período para la API (compatibilidad con el backend)
+  const selectedPeriod = selectedMonth;
   
   // Modales de finanzas (no de empresa - eso está en GlobalCompanySelector)
   const [showIncomeModal, setShowIncomeModal] = useState(false);

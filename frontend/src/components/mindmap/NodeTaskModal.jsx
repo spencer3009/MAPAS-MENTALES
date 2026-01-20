@@ -53,10 +53,9 @@ const NodeTaskModal = ({ node, onClose, onUpdate, onUpdateTitle, onDelete }) => 
   const [uploadingFile, setUploadingFile] = useState(false);
   const fileInputRef = useRef(null);
   
-  // Temporizador
+  // Temporizador - timerSeconds contiene el tiempo TOTAL acumulado
   const [timerRunning, setTimerRunning] = useState(taskData.timerRunning || false);
   const [timerSeconds, setTimerSeconds] = useState(taskData.timerSeconds || 0);
-  const [totalTime, setTotalTime] = useState(taskData.totalTime || 0);
   const timerRef = useRef(null);
   
   // Activity log

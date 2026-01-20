@@ -138,6 +138,18 @@ const NodeItem = memo(({
   const taskStatus = node.taskStatus || 'pending'; // 'pending' | 'in_progress' | 'completed'
   const taskData = node.taskData || {}; // { checklist: [], dueDate, priority, etc. }
   const linkedProjectId = node.linkedProjectId;
+  
+  // Debug log para nodos de proyecto
+  if (isProjectNode) {
+    console.log('[NodeItem] Nodo de proyecto:', {
+      nodeId: node.id,
+      text: node.text,
+      nodeType,
+      linkedProjectId,
+      hasLinkedProjectId: !!linkedProjectId,
+      hasOnNavigateToProject: !!onNavigateToProject
+    });
+  }
 
   // Obtener estilos del nodo (con fallback a colores legacy)
   // Nodos tarea tienen colores especiales basados en su estado

@@ -227,9 +227,6 @@ const NodeToolbar = ({
   // Determinar si es un nodo especial (Task o Project)
   // Estos nodos solo muestran: Eliminar, Duplicar, Recordatorio
   const isSpecialNode = nodeType === 'task' || nodeType === 'project';
-  
-  // Debug log para verificar nodeType
-  console.log('[NodeToolbar] nodeType:', nodeType, 'isSpecialNode:', isSpecialNode);
 
   // Calcular posición restringida a los límites del canvas
   const getConstrainedPosition = () => {

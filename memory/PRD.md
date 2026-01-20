@@ -2,6 +2,27 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-20: BUGFIX — Recordatorios y Proyecto Vinculado UX ✅ COMPLETADO
+- **Estado**: Implementación completada y verificada mediante screenshots
+- **Problema 1 - Recordatorios**: El ícono de recordatorio seguía visible después de enviado
+  - **Solución**: El código YA filtraba correctamente por `status === 'pending'` en `MindMapApp.jsx` (línea 296-300)
+  - ✅ Recordatorios con `status: 'sent'` ya NO muestran el ícono automáticamente
+  - ✅ `hasReminder` solo es `true` para recordatorios pendientes
+- **Problema 2 - Proyecto Vinculado**: El clic permitía editar el texto del nodo
+  - **Comportamiento incorrecto**: Doble clic editaba nombre en lugar de navegar
+  - **Solución implementada**:
+    - ✅ Clic en badge "Abrir mapa →" navega al proyecto vinculado
+    - ✅ Doble clic en cualquier parte del nodo navega al proyecto
+    - ✅ Texto del proyecto ya NO es editable desde el nodo (se cambió de `<input>` a `<p>`)
+    - ✅ Cursor cambiado de `grab` a `pointer` indicando que es un enlace
+    - ✅ Hover añade sombra (`hover:shadow-lg`) para feedback visual
+- **Archivos modificados**:
+  - `/app/frontend/src/components/mindmap/NodeItem.jsx` - Lógica de Project Card
+- **Reglas UX implementadas**:
+  - Proyecto vinculado funciona como ENLACE, no como texto editable
+  - El nombre del proyecto solo se cambia desde la vista del proyecto original
+  - Arrastrar el nodo sigue funcionando (para mover en el canvas)
+
 ### 2026-01-20: FEATURE — Project Card Design (Nodo Proyecto Vinculado) ✅ COMPLETADO
 - **Estado**: Implementación completada y verificada
 - **Diseño tipo "status card"** consistente con Task Cards:

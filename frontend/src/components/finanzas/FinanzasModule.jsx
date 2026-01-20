@@ -1113,13 +1113,14 @@ const FinanzasModule = ({ token, projects = [] }) => {
   );
 };
 
-// Modal de Ingreso
+// Modal de Ingreso con soporte para pagos parciales
 const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
   const [form, setForm] = useState({
-    amount: '',
+    amount: '',          // Monto total del servicio/venta
+    paid_amount: '',     // Pago recibido (a cuenta)
     source: 'ventas',
     description: '',
-    date: getLocalDateString(), // Fecha local sin UTC
+    date: getLocalDateString(),
     status: 'pending',
     client_name: '',
     client_id: null,
@@ -1127,8 +1128,17 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
     project_id: '',
   });
   
-  // Estado para el contacto seleccionado
   const [selectedContact, setSelectedContact] = useState(null);
+
+  // Calcular saldo pendiente en tiempo real
+  const totalAmount = parseFloat(form.amount) || 0;
+  const paidAmount = parseFloat(form.paid_amount) || 0;
+  const pendingBalance = Math.max(0, totalAmount - paidAmount);
+  
+  // Determinar el estado efectivo basado en el saldo
+  const effectiveStatus = form.status === 'pending' 
+    ? (pendingBalance === 0 && totalAmount > 0 ? 'collected' : 'pending')
+    : form.status;
 
   const handleContactChange = (contact) => {
     setSelectedContact(contact);
@@ -1139,11 +1149,50 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
     }));
   };
 
+  // Manejar cambio de estado
+  const handleStatusChange = (newStatus) => {
+    setForm(prev => ({
+      ...prev,
+      status: newStatus,
+      // Si cambia a "Cobrado", el pago recibido = monto total
+      paid_amount: newStatus === 'collected' ? prev.amount : prev.paid_amount,
+    }));
+  };
+
+  // Validar que el pago no exceda el monto total
+  const handlePaidAmountChange = (value) => {
+    const paid = parseFloat(value) || 0;
+    const total = parseFloat(form.amount) || 0;
+    
+    // No permitir pago mayor al monto total
+    if (paid > total && total > 0) {
+      setForm(prev => ({ ...prev, paid_amount: form.amount }));
+    } else {
+      setForm(prev => ({ ...prev, paid_amount: value }));
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    const finalAmount = parseFloat(form.amount);
+    const finalPaidAmount = form.status === 'collected' 
+      ? finalAmount 
+      : (parseFloat(form.paid_amount) || 0);
+    const finalPendingBalance = Math.max(0, finalAmount - finalPaidAmount);
+    
+    // Determinar estado final
+    let finalStatus = form.status;
+    if (form.status === 'pending' && finalPendingBalance === 0) {
+      finalStatus = 'collected';
+    }
+    
     onSave({
       ...form,
-      amount: parseFloat(form.amount),
+      amount: finalAmount,
+      paid_amount: finalPaidAmount,
+      pending_balance: finalPendingBalance,
+      status: finalStatus,
       project_id: form.project_id || null,
       project_name: projects.find(p => p.id === form.project_id)?.name || null,
       due_date: form.due_date || null,
@@ -1152,15 +1201,18 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
-        <div className="px-6 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden max-h-[90vh] overflow-y-auto">
+        <div className="px-6 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white sticky top-0">
           <h2 className="text-lg font-semibold">Nuevo Ingreso</h2>
           <p className="text-sm text-emerald-100">Registra un nuevo ingreso</p>
         </div>
         
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Monto Total */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Monto *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {form.status === 'pending' ? 'Monto Total *' : 'Monto *'}
+            </label>
             <input
               type="number"
               value={form.amount}
@@ -1171,7 +1223,57 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
               min="0.01"
               step="0.01"
             />
+            {form.status === 'pending' && (
+              <p className="text-xs text-gray-500 mt-1">Valor total del servicio o venta</p>
+            )}
           </div>
+
+          {/* Campos adicionales para "Por cobrar" */}
+          {form.status === 'pending' && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-4">
+              <div className="flex items-center gap-2 text-amber-700">
+                <Wallet size={18} />
+                <span className="text-sm font-medium">Detalle de pago</span>
+              </div>
+              
+              {/* Pago recibido (a cuenta) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Pago recibido (a cuenta)
+                </label>
+                <input
+                  type="number"
+                  value={form.paid_amount}
+                  onChange={(e) => handlePaidAmountChange(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                  placeholder="0.00"
+                  min="0"
+                  step="0.01"
+                  max={form.amount || undefined}
+                />
+                <p className="text-xs text-gray-500 mt-1">Monto que el cliente paga ahora (puede ser 0)</p>
+              </div>
+              
+              {/* Saldo pendiente (calculado automáticamente) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Saldo pendiente
+                </label>
+                <div className={`w-full px-3 py-2 rounded-lg font-semibold ${
+                  pendingBalance > 0 
+                    ? 'bg-red-100 text-red-700 border border-red-200' 
+                    : 'bg-green-100 text-green-700 border border-green-200'
+                }`}>
+                  S/ {pendingBalance.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  {pendingBalance === 0 && totalAmount > 0 
+                    ? '✓ Pago completo - Se marcará como "Cobrado"' 
+                    : 'Monto que queda por cobrar'}
+                </p>
+              </div>
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Fuente *</label>
@@ -1212,7 +1314,7 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
               <select
                 value={form.status}
-                onChange={(e) => setForm({ ...form, status: e.target.value })}
+                onChange={(e) => handleStatusChange(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               >
                 <option value="pending">Por cobrar</option>
@@ -1257,6 +1359,22 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
                   <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
               </select>
+            </div>
+          )}
+
+          {/* Resumen antes de guardar */}
+          {form.status === 'pending' && totalAmount > 0 && (
+            <div className="bg-gray-50 rounded-lg p-3 text-sm">
+              <p className="text-gray-600">
+                <span className="font-medium">Resumen:</span> Registrando venta por{' '}
+                <span className="font-semibold text-gray-900">S/ {totalAmount.toFixed(2)}</span>
+                {paidAmount > 0 && (
+                  <>, con pago a cuenta de <span className="font-semibold text-emerald-600">S/ {paidAmount.toFixed(2)}</span></>
+                )}
+                {pendingBalance > 0 && (
+                  <>. Saldo pendiente: <span className="font-semibold text-red-600">S/ {pendingBalance.toFixed(2)}</span></>
+                )}
+              </p>
             </div>
           )}
 

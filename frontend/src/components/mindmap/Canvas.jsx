@@ -1229,6 +1229,14 @@ const Canvas = ({
   }, []);
 
   const handleWheel = useCallback((e) => {
+    // Ignorar eventos de wheel si el cursor está sobre el Side Panel de tareas
+    // (el panel tiene z-index 9999 y está fuera del canvas)
+    const targetElement = e.target;
+    const isInsideTaskPanel = targetElement.closest('[data-task-panel]');
+    if (isInsideTaskPanel) {
+      return; // No procesar el evento, dejar que el panel lo maneje
+    }
+    
     e.preventDefault();
     onWheel(e);
   }, [onWheel]);

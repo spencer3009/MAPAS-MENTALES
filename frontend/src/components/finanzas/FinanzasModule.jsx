@@ -226,6 +226,91 @@ const FinanzasModule = ({ token, projects = [] }) => {
     }
   }, [token, selectedCompany, loadData]);
 
+  // ========== FUNCIONES DE FILTRADO POR PERÍODO ==========
+  
+  // Función para verificar si una fecha está dentro del período seleccionado
+  const isDateInPeriod = useCallback((dateStr) => {
+    if (!dateStr) return false;
+    const date = new Date(dateStr);
+    
+    if (filterMode === 'day') {
+      // Comparar día específico
+      const targetDate = new Date(selectedDate);
+      return date.toISOString().split('T')[0] === targetDate.toISOString().split('T')[0];
+    } else if (filterMode === 'month') {
+      // Comparar mes y año
+      const [targetYear, targetMonth] = selectedMonth.split('-');
+      return date.getFullYear() === parseInt(targetYear) && 
+             (date.getMonth() + 1) === parseInt(targetMonth);
+    } else if (filterMode === 'year') {
+      // Comparar solo año
+      return date.getFullYear() === parseInt(selectedYear);
+    }
+    return true;
+  }, [filterMode, selectedDate, selectedMonth, selectedYear]);
+
+  // Filtrar ingresos por período
+  const filteredIncomes = incomes.filter(inc => isDateInPeriod(inc.date));
+  
+  // Calcular totales filtrados
+  const filteredCollectedIncomes = filteredIncomes.filter(inc => inc.status === 'collected');
+  const totalFilteredCollected = filteredCollectedIncomes.reduce((sum, inc) => sum + (inc.amount || 0), 0);
+  
+  // Cálculos de IGV (18%)
+  const IGV_RATE = 0.18;
+  const filteredSubtotal = totalFilteredCollected / (1 + IGV_RATE);
+  const filteredIgv = totalFilteredCollected - filteredSubtotal;
+  
+  // ========== CÁLCULO DE ESTADO FINANCIERO (FUNCIONAL) ==========
+  // Lógica: 
+  // 🟢 Saludable: Ingresos cobrados > IGV + Por pagar
+  // 🟡 Atención: IGV > 0 O hay montos por pagar
+  // 🔴 Crítico: Gastos pendientes > Ingresos cobrados
+  
+  const calculateHealthStatus = useCallback(() => {
+    const totalPayables = payables?.total || 0;
+    const ingresosCobrados = totalFilteredCollected;
+    const igvAPagar = filteredIgv;
+    
+    // Si no hay ingresos ni gastos, estado neutral (saludable)
+    if (ingresosCobrados === 0 && totalPayables === 0) {
+      return 'good';
+    }
+    
+    // Crítico: Por pagar > Ingresos cobrados
+    if (totalPayables > ingresosCobrados) {
+      return 'critical';
+    }
+    
+    // Saludable: Ingresos cobrados > IGV + Por pagar
+    if (ingresosCobrados > (igvAPagar + totalPayables)) {
+      return 'good';
+    }
+    
+    // Atención: IGV > 0 o hay montos por pagar
+    if (igvAPagar > 0 || totalPayables > 0) {
+      return 'warning';
+    }
+    
+    return 'good';
+  }, [totalFilteredCollected, filteredIgv, payables]);
+  
+  const healthStatus = calculateHealthStatus();
+  
+  // Obtener etiqueta del período actual
+  const getPeriodLabel = () => {
+    if (filterMode === 'day') {
+      const date = new Date(selectedDate);
+      return date.toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    } else if (filterMode === 'month') {
+      const [year, month] = selectedMonth.split('-');
+      const date = new Date(year, month - 1);
+      return date.toLocaleDateString('es-PE', { month: 'long', year: 'numeric' });
+    } else {
+      return `Año ${selectedYear}`;
+    }
+  };
+
   // Crear ingreso
   const handleCreateIncome = async (data) => {
     if (!selectedCompany) return;

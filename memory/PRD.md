@@ -2,6 +2,23 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-20: BUGFIX — Corrección de Timezone en Fechas de Finanzas ✅ CORREGIDO
+- **Estado**: Bug corregido y verificado
+- **Problema**: Las fechas se mostraban con un día de diferencia debido a conversión UTC/local
+- **Causa raíz**: `new Date(dateStr)` con formato YYYY-MM-DD interpreta como UTC medianoche, restando 5h en Perú (GMT-5)
+- **Solución implementada**:
+  - ✅ Nueva función `getLocalDateString()` que genera YYYY-MM-DD sin usar `toISOString()`
+  - ✅ Función `formatDate()` corregida para parsear YYYY-MM-DD como fecha local
+  - ✅ Función `extractDateString()` para extraer fecha de cualquier formato
+  - ✅ Función `isDateInPeriod()` compara strings directamente sin parsear a Date
+  - ✅ Formularios usan `getLocalDateString()` como valor por defecto
+- **Archivos modificados**:
+  - `/app/frontend/src/components/finanzas/FinanzasModule.jsx`
+- **Testing verificado**:
+  - Crear ingreso el 20/01/2026 → Tabla muestra "20 ene. 2026" ✅
+  - Filtro por día 20 incluye el registro ✅
+  - Cero desfase de timezone ✅
+
 ### 2026-01-20: FEATURE — Calendario con 3 Modos + Estado Financiero Funcional ✅ COMPLETADO
 - **Estado**: Implementación completada y verificada
 - **Funcionalidad 1 - Selector de período con 3 modos**:

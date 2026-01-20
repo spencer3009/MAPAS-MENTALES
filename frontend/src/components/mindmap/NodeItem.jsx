@@ -552,7 +552,6 @@ const NodeItem = memo(({
       e.stopPropagation();
       // Solo navegar si hay proyecto vinculado
       if (linkedProjectId && onNavigateToProject) {
-        console.log('[NodeItem] Navegando a proyecto vinculado:', linkedProjectId);
         onNavigateToProject(linkedProjectId);
       }
     };

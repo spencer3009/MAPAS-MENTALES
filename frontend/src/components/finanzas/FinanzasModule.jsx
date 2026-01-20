@@ -58,9 +58,39 @@ const formatCurrency = (amount) => {
 };
 
 // Formatear fecha
+// ========== FUNCIONES DE UTILIDAD PARA FECHAS (SIN PROBLEMAS DE TIMEZONE) ==========
+
+// Obtener fecha local en formato YYYY-MM-DD (sin usar toISOString que convierte a UTC)
+const getLocalDateString = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+// Formatear fecha para mostrar (parsea YYYY-MM-DD como fecha local, no UTC)
 const formatDate = (dateStr) => {
   if (!dateStr) return '-';
+  
+  // Si la fecha viene en formato YYYY-MM-DD, parsearla manualmente para evitar UTC
+  if (typeof dateStr === 'string' && dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day); // Mes es 0-indexed
+    return date.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+  
+  // Para otros formatos, usar el parser normal pero ajustar timezone
   const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return '-';
+  
+  // Si tiene hora UTC (contiene T o Z), es posible que necesite ajuste
+  if (typeof dateStr === 'string' && (dateStr.includes('T') || dateStr.includes('Z'))) {
+    // Extraer solo la parte de fecha
+    const localDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+    return localDate.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+  
   return date.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 

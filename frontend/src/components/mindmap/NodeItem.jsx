@@ -111,6 +111,7 @@ const NodeItem = memo(({
   onNavigateToProject,  // Callback para navegar a un proyecto vinculado
   onOpenTaskModal,      // Callback para abrir el modal de tarea
   onReminderClick,      // Callback para abrir el panel de recordatorios
+  projects = [],        // Lista de proyectos disponibles para buscar por nombre
   forceEdit = false,
   onEditComplete,
   isNavigationMode = false  // Modo navegación: deshabilita interacción táctil

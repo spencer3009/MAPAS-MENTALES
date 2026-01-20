@@ -535,6 +535,9 @@ const NodeItem = memo(({
   };
 
   // ========== RENDERIZADO ESPECIAL PARA NODO TIPO PROYECTO VINCULADO (PROJECT CARD) ==========
+  // IMPORTANTE: El nodo de proyecto vinculado NO permite editar el nombre
+  // El nombre solo se puede cambiar desde la vista del proyecto original
+  // El clic en el nodo navega al proyecto vinculado
   if (isProjectNode) {
     return (
       <div
@@ -542,7 +545,7 @@ const NodeItem = memo(({
         data-node-id={node.id}
         className={`
           absolute select-none overflow-hidden
-          ${isEditing ? 'cursor-text' : 'cursor-grab active:cursor-grabbing'}
+          cursor-pointer hover:shadow-lg transition-shadow
           ${isMultiSelected ? 'ring-[3px] ring-offset-2 ring-blue-600' : ''}
           ${isSelected && !isMultiSelected ? 'ring-2 ring-offset-2 ring-blue-500' : ''}
         `}
@@ -563,7 +566,13 @@ const NodeItem = memo(({
         }}
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
-        onClick={handleNodeClick}
+        onClick={(e) => {
+          e.stopPropagation();
+          // Clic simple navega al proyecto vinculado
+          if (linkedProjectId && onNavigateToProject) {
+            onNavigateToProject(linkedProjectId);
+          }
+        }}
         onDoubleClick={handleDoubleClick}
         onContextMenu={handleRightClick}
       >
@@ -595,40 +604,33 @@ const NodeItem = memo(({
         
         {/* ========== CUERPO DE LA TARJETA ========== */}
         <div className="px-3 py-2.5">
-          {/* Título del proyecto */}
-          {isEditing ? (
-            <input
-              ref={inputRef}
-              type="text"
-              value={localText}
-              onChange={(e) => setLocalText(e.target.value)}
-              onBlur={handleBlur}
-              onKeyDown={handleKeyDown}
-              onMouseDown={(e) => e.stopPropagation()}
-              className="w-full bg-transparent outline-none font-semibold text-sm text-gray-800 border-b-2 border-emerald-300"
-              placeholder="Nombre del proyecto"
-            />
-          ) : (
-            <p className="font-semibold text-sm text-gray-800 leading-tight">
-              {displayText || 'Proyecto vinculado'}
-            </p>
-          )}
+          {/* Título del proyecto - NO EDITABLE (el nombre viene del proyecto vinculado) */}
+          <p className="font-semibold text-sm text-gray-800 leading-tight">
+            {displayText || 'Proyecto vinculado'}
+          </p>
           
           {/* Badges inferiores: Proyecto vinculado + Recordatorio */}
           <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-            {/* Badge de proyecto vinculado */}
+            {/* Badge de proyecto vinculado - clickeable */}
             {linkedProjectId && (
-              <div 
-                className="flex items-center gap-1 px-2 py-1 rounded-md text-xs"
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onNavigateToProject) {
+                    onNavigateToProject(linkedProjectId);
+                  }
+                }}
+                onMouseDown={(e) => e.stopPropagation()}
+                className="flex items-center gap-1 px-2 py-1 rounded-md text-xs hover:opacity-80 transition-opacity cursor-pointer"
                 style={{ backgroundColor: '#D1FAE5', color: '#065F46' }}
-                title="Doble clic para abrir el mapa vinculado"
+                title="Clic para abrir el mapa vinculado"
               >
                 <FolderOpen size={12} />
                 <span className="font-medium">Abrir mapa →</span>
-              </div>
+              </button>
             )}
             
-            {/* Badge de recordatorio */}
+            {/* Badge de recordatorio - solo si está pendiente (hasReminder ya filtra por status=pending) */}
             {hasReminder && (
               <button
                 onClick={(e) => {

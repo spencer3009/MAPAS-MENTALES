@@ -92,7 +92,9 @@ DEFAULT_INCOME_SOURCES = [
 
 class IncomeCreate(BaseModel):
     company_id: str = Field(..., description="ID de la empresa")
-    amount: float = Field(..., gt=0, description="Monto del ingreso")
+    amount: float = Field(..., gt=0, description="Monto total del ingreso")
+    paid_amount: Optional[float] = Field(0, ge=0, description="Monto pagado (a cuenta)")
+    pending_balance: Optional[float] = Field(None, ge=0, description="Saldo pendiente (calculado)")
     source: str = Field(..., description="Fuente del ingreso")
     description: Optional[str] = Field(None, description="Descripción opcional")
     date: str = Field(..., description="Fecha del ingreso (ISO format)")
@@ -106,6 +108,8 @@ class IncomeCreate(BaseModel):
 
 class IncomeUpdate(BaseModel):
     amount: Optional[float] = Field(None, gt=0)
+    paid_amount: Optional[float] = Field(None, ge=0)
+    pending_balance: Optional[float] = Field(None, ge=0)
     source: Optional[str] = None
     description: Optional[str] = None
     date: Optional[str] = None
@@ -123,6 +127,8 @@ class IncomeResponse(BaseModel):
     workspace_id: str
     username: str
     amount: float
+    paid_amount: Optional[float] = 0
+    pending_balance: Optional[float] = 0
     source: str
     description: Optional[str]
     date: str

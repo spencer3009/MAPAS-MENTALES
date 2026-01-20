@@ -67,16 +67,63 @@ const NodeTaskModal = ({ node, onClose, onUpdate, onUpdateTitle, onDelete }) => 
   const totalItems = checklist.length;
   const progress = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
   
-  // Prevenir scroll del canvas cuando el panel está abierto
+  // ========== PREVENIR SCROLL DEL CANVAS ==========
+  // Captura robusta de eventos de scroll para aislar el Side Panel
   useEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) return;
+    
+    // Handler principal para wheel events
     const handleWheel = (e) => {
-      if (panelRef.current && panelRef.current.contains(e.target)) {
-        e.stopPropagation();
+      // Siempre detener la propagación cuando estamos en el panel
+      e.stopPropagation();
+      
+      // Encontrar el elemento scrolleable más cercano
+      const scrollableContent = panel.querySelector('.overflow-y-auto');
+      if (!scrollableContent) return;
+      
+      const { scrollTop, scrollHeight, clientHeight } = scrollableContent;
+      const isScrollingDown = e.deltaY > 0;
+      const isScrollingUp = e.deltaY < 0;
+      
+      // Verificar si podemos hacer scroll en la dirección deseada
+      const canScrollDown = scrollTop + clientHeight < scrollHeight;
+      const canScrollUp = scrollTop > 0;
+      
+      // Si intentamos hacer scroll más allá de los límites, prevenir el default
+      // para evitar que el evento se propague al canvas
+      if ((isScrollingDown && !canScrollDown) || (isScrollingUp && !canScrollUp)) {
+        e.preventDefault();
       }
     };
     
-    document.addEventListener('wheel', handleWheel, { passive: false });
-    return () => document.removeEventListener('wheel', handleWheel);
+    // Handler para touchmove (móviles y touchpad)
+    const handleTouchMove = (e) => {
+      e.stopPropagation();
+    };
+    
+    // Agregar listeners con capture para interceptar antes del canvas
+    panel.addEventListener('wheel', handleWheel, { passive: false, capture: true });
+    panel.addEventListener('touchmove', handleTouchMove, { passive: false });
+    
+    return () => {
+      panel.removeEventListener('wheel', handleWheel, { capture: true });
+      panel.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, []);
+  
+  // Bloquear eventos de wheel a nivel del documento cuando el panel está abierto
+  useEffect(() => {
+    const handleDocumentWheel = (e) => {
+      // Si el evento se originó dentro del panel, no hacer nada extra
+      // (ya lo manejamos arriba)
+      if (panelRef.current && panelRef.current.contains(e.target)) {
+        return;
+      }
+    };
+    
+    document.addEventListener('wheel', handleDocumentWheel, { passive: true });
+    return () => document.removeEventListener('wheel', handleDocumentWheel);
   }, []);
   
   // Efecto para el temporizador

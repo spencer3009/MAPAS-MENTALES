@@ -554,11 +554,11 @@ const FinanzasModule = ({ token, projects = [] }) => {
   // ========== CÁLCULO DE INGRESOS REALES (CAJA REAL) ==========
   // Regla contable: Solo cuenta el dinero efectivamente recibido
   // - Cobrado: suma el monto total (amount)
-  // - Por cobrar: suma solo el pago recibido (paid_amount)
+  // - Por cobrar/Parcial: suma solo el pago recibido (paid_amount)
   const calculateRealIncome = (income) => {
     if (income.status === 'collected') {
       return income.amount || 0;
-    } else if (income.status === 'pending') {
+    } else if (income.status === 'pending' || income.status === 'partial') {
       return income.paid_amount || 0;
     }
     return 0;

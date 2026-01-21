@@ -570,25 +570,46 @@ const FinanzasModule = ({ token, projects = [] }) => {
   // Contador de ingresos con dinero recibido
   const incomesWithPayment = filteredIncomes.filter(inc => calculateRealIncome(inc) > 0).length;
   
-  // Cálculos de IGV (18%) - basados en dinero real
+  // ========== CÁLCULO DE IGV - DETERMINACIÓN FISCAL ==========
+  // IGV a pagar = IGV de Ventas - IGV de Gastos (crédito fiscal)
   const IGV_RATE = 0.18;
+  
+  // IGV de Ventas (débito fiscal) - basado en ingresos reales
   const filteredSubtotal = totalRealIncome / (1 + IGV_RATE);
-  const filteredIgv = totalRealIncome - filteredSubtotal;
+  const igvVentas = totalRealIncome - filteredSubtotal;
+  
+  // IGV de Gastos (crédito fiscal) - solo gastos con IGV del período
+  const filteredExpenses = expenses.filter(exp => isDateInPeriod(exp.date));
+  const igvGastos = filteredExpenses.reduce((sum, exp) => {
+    // Solo contar IGV de gastos que tienen includes_igv = true
+    if (exp.includes_igv) {
+      return sum + (exp.igv_gasto || (exp.amount - (exp.amount / (1 + IGV_RATE))));
+    }
+    return sum;
+  }, 0);
+  
+  // Determinación del IGV
+  const igvDeterminado = igvVentas - igvGastos;
+  const igvAPagar = igvDeterminado > 0;
+  const igvAFavor = igvDeterminado < 0;
+  const igvAbsoluto = Math.abs(igvDeterminado);
+  
+  // Para compatibilidad con código existente
+  const filteredIgv = igvDeterminado;
   
   // Legacy: mantener para compatibilidad con otros cálculos
   const filteredCollectedIncomes = filteredIncomes.filter(inc => inc.status === 'collected');
   const totalFilteredCollected = totalRealIncome; // Usar el nuevo cálculo
   
   // ========== CÁLCULO DE ESTADO FINANCIERO (FUNCIONAL) ==========
-  // Lógica: 
-  // 🟢 Saludable: Ingresos cobrados > IGV + Por pagar
-  // 🟡 Atención: IGV > 0 O hay montos por pagar
+  // Lógica mejorada con determinación de IGV:
+  // 🟢 Saludable: IGV a favor O (Ingresos cobrados > IGV a pagar + Por pagar)
+  // 🟡 Atención: IGV a pagar > 0 O hay montos por pagar
   // 🔴 Crítico: Gastos pendientes > Ingresos cobrados
   
   const calculateHealthStatus = useCallback(() => {
     const totalPayables = payables?.total || 0;
     const ingresosCobrados = totalFilteredCollected;
-    const igvAPagar = filteredIgv;
     
     // Si no hay ingresos ni gastos, estado neutral (saludable)
     if (ingresosCobrados === 0 && totalPayables === 0) {
@@ -600,18 +621,23 @@ const FinanzasModule = ({ token, projects = [] }) => {
       return 'critical';
     }
     
-    // Saludable: Ingresos cobrados > IGV + Por pagar
-    if (ingresosCobrados > (igvAPagar + totalPayables)) {
+    // Si hay IGV a favor, es saludable
+    if (igvAFavor) {
       return 'good';
     }
     
-    // Atención: IGV > 0 o hay montos por pagar
-    if (igvAPagar > 0 || totalPayables > 0) {
+    // Saludable: Ingresos cobrados > IGV a pagar + Por pagar
+    if (ingresosCobrados > (igvAbsoluto + totalPayables)) {
+      return 'good';
+    }
+    
+    // Atención: IGV a pagar > 0 o hay montos por pagar
+    if (igvAPagar || totalPayables > 0) {
       return 'warning';
     }
     
     return 'good';
-  }, [totalFilteredCollected, filteredIgv, payables]);
+  }, [totalFilteredCollected, igvAPagar, igvAFavor, igvAbsoluto, payables]);
   
   const healthStatus = calculateHealthStatus();
   

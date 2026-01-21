@@ -1381,6 +1381,24 @@ const FinanzasModule = ({ token, projects = [] }) => {
             </div>
           </div>
         )}
+
+        {/* ========== PRODUCTOS / SERVICIOS TAB ========== */}
+        {activeTab === 'products' && (
+          <ProductsTab
+            products={products}
+            onAdd={() => {
+              setEditingProduct(null);
+              setShowProductModal(true);
+            }}
+            onEdit={handleEditProduct}
+            onDelete={handleDeleteProduct}
+            onToggleStatus={handleToggleProductStatus}
+            formatCurrency={formatCurrency}
+            loadData={loadData}
+            token={token}
+            companyId={selectedCompany?.id}
+          />
+        )}
       </div>
 
       {/* Modal Nuevo Ingreso */}
@@ -1390,6 +1408,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
           onSave={handleCreateIncome}
           sources={incomeSources}
           projects={projects}
+          products={products}
           token={token}
         />
       )}
@@ -1411,6 +1430,18 @@ const FinanzasModule = ({ token, projects = [] }) => {
           onClose={() => setShowInvestmentModal(false)}
           onSave={handleCreateInvestment}
           projects={projects}
+        />
+      )}
+
+      {/* Modal Nuevo/Editar Producto */}
+      {showProductModal && (
+        <ProductModal
+          onClose={() => {
+            setShowProductModal(false);
+            setEditingProduct(null);
+          }}
+          onSave={handleSaveProduct}
+          product={editingProduct}
         />
       )}
     </div>

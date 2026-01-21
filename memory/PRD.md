@@ -2,6 +2,30 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-21: FEATURE — Entrada por Voz (Speech-to-Text) en Nuevo Gasto ✅ COMPLETADO Y PROBADO
+- **Estado**: Implementación completada y verificada con testing agent (6/6 tests passed)
+- **Funcionalidad**: Dictar por voz el monto y descripción de gastos
+- **Ubicación**: Modal "Nuevo Gasto" - campos Monto y Descripción
+- **Tecnología**: Web Speech API nativa del navegador (SpeechRecognition)
+- **Componentes implementados**:
+  - `VoiceMicButton` - Botón de micrófono reutilizable
+  - `useSpeechRecognition` - Hook personalizado para reconocimiento de voz
+  - `spanishTextToNumber` - Conversor de números hablados a valores numéricos
+- **Características**:
+  - ✅ Ícono de micrófono dentro del input, alineado a la derecha
+  - ✅ Estado visual "escuchando" (rojo con animación pulse)
+  - ✅ Campo Monto: convierte números hablados en español ("ciento veinte" → 120)
+  - ✅ Campo Descripción: transcripción de texto libre
+  - ✅ Idioma: Español (es-PE)
+  - ✅ Si navegador no soporta, íconos no se muestran
+  - ✅ No graba ni envía audio a servidores (transcripción local)
+- **Estilo visual**:
+  - Default: `bg-gray-100 text-gray-500` (discreto)
+  - Escuchando: `bg-red-100 text-red-600 animate-pulse`
+  - Hover: `hover:bg-gray-200 hover:text-gray-700`
+- **Archivos modificados**:
+  - `/app/frontend/src/components/finanzas/FinanzasModule.jsx`
+
 ### 2026-01-21: FEATURE — Ajuste Contable: Visualización correcta de Ingresos "Por cobrar" ✅ COMPLETADO Y PROBADO
 - **Estado**: Implementación completada y verificada con testing agent (8/8 tests passed)
 - **Problema resuelto**: Se mostraba el monto total de venta como ingreso, cuando solo el dinero recibido es ingreso real

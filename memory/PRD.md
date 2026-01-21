@@ -50,6 +50,16 @@ Transformar MindoraMap en una herramienta profesional de gestión financiera con
 - Columnas Subtotal e IGV en tablas de Ingresos y Gastos
 - Sección de Determinación del IGV en Dashboard
 
+### Session: January 21, 2026 (Current)
+
+#### Cambio de Terminología Completado
+- ✅ **"Categoría" → "Concepto del gasto"** en toda la UI de finanzas
+- ✅ Tabla de Gastos: columna "CONCEPTO"
+- ✅ Tabla de Gastos Fijos: columna "CONCEPTO"
+- ✅ Botón y modal "Conceptos de Gasto"
+- ✅ Formularios de creación/edición actualizados
+- ✅ Comentarios del código actualizados
+
 ## Prioritized Backlog
 
 ### P0 - Critical (Immediate)

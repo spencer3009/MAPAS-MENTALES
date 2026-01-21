@@ -47,6 +47,7 @@ const TABS = [
   { id: 'receivables', label: 'Por Cobrar', icon: Clock },
   { id: 'payables', label: 'Por Pagar', icon: AlertTriangle },
   { id: 'products', label: 'Productos', icon: Package },
+  { id: 'fixed-expenses', label: 'Gastos Fijos', icon: Repeat },
 ];
 
 // Formatear moneda

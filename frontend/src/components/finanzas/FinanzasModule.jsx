@@ -3232,6 +3232,406 @@ const PaymentHistoryModal = ({ income, payments, loading, onClose, onDelete, for
 };
 
 // ==========================================
+// BALANCE GENERAL - COMPONENTE
+// ==========================================
+
+const BalanceGeneralTab = ({ 
+  balance, 
+  filterType, 
+  dateRange, 
+  projectFilter,
+  projects = [],
+  onFilterChange, 
+  onDateRangeChange,
+  onProjectFilterChange,
+  onLoad,
+  formatCurrency,
+  companyId
+}) => {
+  const [showIncomeDetails, setShowIncomeDetails] = useState(false);
+  const [showExpenseDetails, setShowExpenseDetails] = useState(false);
+
+  // Cargar datos al montar el componente
+  useEffect(() => {
+    if (companyId && !balance) {
+      onLoad();
+    }
+  }, [companyId]);
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '-';
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const getPeriodLabel = () => {
+    if (!balance?.period) return '';
+    const { filter_type, start_date, end_date } = balance.period;
+    
+    if (filter_type === 'today') return 'Hoy';
+    if (filter_type === 'month') return 'Mes actual';
+    if (filter_type === 'last30days') return 'Últimos 30 días';
+    if (filter_type === 'custom') {
+      return `${formatDate(start_date)} - ${formatDate(end_date)}`;
+    }
+    return 'Mes actual';
+  };
+
+  if (!balance) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+          <p className="text-gray-500">Cargando Balance General...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const { 
+    total_income_real, 
+    total_expense_real, 
+    resultado_neto, 
+    is_profit,
+    incomes,
+    expenses,
+    income_count,
+    expense_count,
+    context,
+    projects_balance
+  } = balance;
+
+  return (
+    <div className="space-y-6">
+      {/* Header con título y filtros */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <TrendingUp size={24} className={is_profit ? 'text-green-500' : 'text-red-500'} />
+            Balance General
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Basado en <strong>Caja Real</strong> • {getPeriodLabel()}
+          </p>
+        </div>
+
+        {/* Filtros */}
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Filtro rápido */}
+          <select
+            value={filterType}
+            onChange={(e) => onFilterChange(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
+          >
+            <option value="today">Hoy</option>
+            <option value="month">Mes actual</option>
+            <option value="last30days">Últimos 30 días</option>
+            <option value="custom">Personalizado</option>
+          </select>
+
+          {/* Rango de fechas personalizado */}
+          {filterType === 'custom' && (
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={dateRange.start}
+                onChange={(e) => onDateRangeChange({ ...dateRange, start: e.target.value })}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              />
+              <span className="text-gray-500">a</span>
+              <input
+                type="date"
+                value={dateRange.end}
+                onChange={(e) => onDateRangeChange({ ...dateRange, end: e.target.value })}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              />
+            </div>
+          )}
+
+          {/* Filtro por proyecto */}
+          {projects.length > 0 && (
+            <select
+              value={projectFilter}
+              onChange={(e) => onProjectFilterChange(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
+            >
+              <option value="">Todos los proyectos</option>
+              {projects.map(p => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          )}
+        </div>
+      </div>
+
+      {/* ========== RESULTADO PRINCIPAL ========== */}
+      <div className={`rounded-2xl p-8 text-center ${
+        is_profit 
+          ? 'bg-gradient-to-br from-green-500 to-emerald-600' 
+          : 'bg-gradient-to-br from-red-500 to-rose-600'
+      }`}>
+        <p className="text-white/80 text-lg mb-2">
+          {is_profit ? '¡Felicidades! En este período...' : 'En este período...'}
+        </p>
+        <h3 className="text-4xl md:text-5xl font-bold text-white mb-2">
+          {is_profit ? 'Has ganado' : 'Has perdido'}
+        </h3>
+        <p className="text-5xl md:text-6xl font-bold text-white">
+          S/ {Math.abs(resultado_neto).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </p>
+        <p className="text-white/70 text-sm mt-4">
+          "Mindora no muestra números, muestra decisiones."
+        </p>
+      </div>
+
+      {/* ========== KPIs SECUNDARIOS ========== */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Total Ingresos Reales */}
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-gray-500">Ingresos Reales</span>
+            <ArrowUpCircle size={20} className="text-green-500" />
+          </div>
+          <p className="text-2xl font-bold text-green-600">
+            {formatCurrency(total_income_real)}
+          </p>
+          <p className="text-xs text-gray-400 mt-1">{income_count} movimiento(s)</p>
+        </div>
+
+        {/* Total Gastos Reales */}
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-gray-500">Gastos Reales</span>
+            <ArrowDownCircle size={20} className="text-red-500" />
+          </div>
+          <p className="text-2xl font-bold text-red-600">
+            {formatCurrency(total_expense_real)}
+          </p>
+          <p className="text-xs text-gray-400 mt-1">{expense_count} movimiento(s)</p>
+        </div>
+
+        {/* Resultado Neto */}
+        <div className={`rounded-xl border p-5 ${
+          is_profit ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+        }`}>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-gray-500">Resultado Neto</span>
+            <Wallet size={20} className={is_profit ? 'text-green-500' : 'text-red-500'} />
+          </div>
+          <p className={`text-2xl font-bold ${is_profit ? 'text-green-700' : 'text-red-700'}`}>
+            {is_profit ? '+' : ''}{formatCurrency(resultado_neto)}
+          </p>
+          <p className={`text-xs mt-1 ${is_profit ? 'text-green-600' : 'text-red-600'}`}>
+            {is_profit ? 'Ganancia del período' : 'Pérdida del período'}
+          </p>
+        </div>
+      </div>
+
+      {/* ========== CONTEXTO FINANCIERO (INFORMATIVO) ========== */}
+      <div className="bg-gray-50 rounded-xl border border-gray-200 p-5">
+        <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+          <AlertTriangle size={16} className="text-amber-500" />
+          Contexto Financiero (No afecta el resultado)
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="text-center p-3 bg-white rounded-lg border border-gray-100">
+            <p className="text-xs text-gray-500 uppercase mb-1">Por Cobrar</p>
+            <p className="text-lg font-bold text-amber-600">
+              {formatCurrency(context?.total_por_cobrar || 0)}
+            </p>
+            <p className="text-xs text-gray-400">{context?.receivables_count || 0} pendiente(s)</p>
+          </div>
+          <div className="text-center p-3 bg-white rounded-lg border border-gray-100">
+            <p className="text-xs text-gray-500 uppercase mb-1">Por Pagar</p>
+            <p className="text-lg font-bold text-red-600">
+              {formatCurrency(context?.total_por_pagar || 0)}
+            </p>
+            <p className="text-xs text-gray-400">{context?.payables_count || 0} pendiente(s)</p>
+          </div>
+          <div className="text-center p-3 bg-white rounded-lg border border-gray-100">
+            <p className="text-xs text-gray-500 uppercase mb-1">Gastos Fijos Comprometidos</p>
+            <p className="text-lg font-bold text-purple-600">
+              {formatCurrency(context?.total_gastos_fijos_comprometidos || 0)}
+            </p>
+            <p className="text-xs text-gray-400">{context?.fixed_expenses_count || 0} activo(s)</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ========== BALANCE POR PROYECTO ========== */}
+      {projects_balance && projects_balance.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+            <BarChart3 size={16} className="text-blue-500" />
+            Balance por Proyecto/Nodo
+          </h3>
+          <div className="space-y-3">
+            {projects_balance.map((project) => (
+              <div 
+                key={project.project_id}
+                className={`flex items-center justify-between p-3 rounded-lg border ${
+                  project.result >= 0 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                }`}
+              >
+                <div>
+                  <p className="font-medium text-gray-900">{project.project_name}</p>
+                  <p className="text-xs text-gray-500">
+                    Ingresos: {formatCurrency(project.total_income)} | Gastos: {formatCurrency(project.total_expense)}
+                  </p>
+                </div>
+                <p className={`text-lg font-bold ${project.result >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {project.result >= 0 ? '+' : ''}{formatCurrency(project.result)}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ========== DETALLE DE MOVIMIENTOS ========== */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Tabla de Ingresos */}
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <button
+            onClick={() => setShowIncomeDetails(!showIncomeDetails)}
+            className="w-full px-5 py-4 flex items-center justify-between bg-green-50 hover:bg-green-100 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <ArrowUpCircle size={18} className="text-green-500" />
+              <span className="font-semibold text-green-700">Ingresos ({income_count})</span>
+            </div>
+            <ChevronDown size={18} className={`text-green-500 transition-transform ${showIncomeDetails ? 'rotate-180' : ''}`} />
+          </button>
+          
+          {showIncomeDetails && (
+            <div className="max-h-80 overflow-y-auto">
+              {incomes && incomes.length > 0 ? (
+                <table className="w-full">
+                  <thead className="bg-gray-50 sticky top-0">
+                    <tr>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Fecha</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Concepto</th>
+                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">Monto</th>
+                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500">Tipo</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {incomes.map((income) => (
+                      <tr key={income.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-2 text-sm text-gray-600">{formatDate(income.date)}</td>
+                        <td className="px-4 py-2 text-sm text-gray-900">
+                          {income.description}
+                          {income.project_name && (
+                            <span className="text-xs text-blue-600 ml-2">({income.project_name})</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-green-600 font-medium text-right">
+                          {formatCurrency(income.amount_paid)}
+                        </td>
+                        <td className="px-4 py-2 text-center">
+                          <span className={`text-xs px-2 py-0.5 rounded-full ${
+                            income.payment_type === 'total' 
+                              ? 'bg-green-100 text-green-700' 
+                              : 'bg-amber-100 text-amber-700'
+                          }`}>
+                            {income.payment_type}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot className="bg-green-50">
+                    <tr>
+                      <td colSpan="2" className="px-4 py-3 text-sm font-semibold text-green-700">Total</td>
+                      <td className="px-4 py-3 text-sm font-bold text-green-700 text-right">
+                        {formatCurrency(total_income_real)}
+                      </td>
+                      <td></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              ) : (
+                <p className="text-center py-8 text-gray-500">No hay ingresos en este período</p>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Tabla de Gastos */}
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <button
+            onClick={() => setShowExpenseDetails(!showExpenseDetails)}
+            className="w-full px-5 py-4 flex items-center justify-between bg-red-50 hover:bg-red-100 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <ArrowDownCircle size={18} className="text-red-500" />
+              <span className="font-semibold text-red-700">Gastos ({expense_count})</span>
+            </div>
+            <ChevronDown size={18} className={`text-red-500 transition-transform ${showExpenseDetails ? 'rotate-180' : ''}`} />
+          </button>
+          
+          {showExpenseDetails && (
+            <div className="max-h-80 overflow-y-auto">
+              {expenses && expenses.length > 0 ? (
+                <table className="w-full">
+                  <thead className="bg-gray-50 sticky top-0">
+                    <tr>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Fecha</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Concepto</th>
+                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">Monto</th>
+                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500">Categoría</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {expenses.map((expense) => (
+                      <tr key={expense.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-2 text-sm text-gray-600">{formatDate(expense.date)}</td>
+                        <td className="px-4 py-2 text-sm text-gray-900">
+                          {expense.description}
+                          {expense.is_fixed_expense && (
+                            <span className="text-xs text-orange-600 ml-2">(Gasto Fijo)</span>
+                          )}
+                          {expense.project_name && (
+                            <span className="text-xs text-blue-600 ml-2">({expense.project_name})</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-red-600 font-medium text-right">
+                          {formatCurrency(expense.amount_paid)}
+                        </td>
+                        <td className="px-4 py-2 text-center">
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
+                            {expense.category}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot className="bg-red-50">
+                    <tr>
+                      <td colSpan="2" className="px-4 py-3 text-sm font-semibold text-red-700">Total</td>
+                      <td className="px-4 py-3 text-sm font-bold text-red-700 text-right">
+                        {formatCurrency(total_expense_real)}
+                      </td>
+                      <td></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              ) : (
+                <p className="text-center py-8 text-gray-500">No hay gastos en este período</p>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
 // PRODUCTOS / SERVICIOS - COMPONENTES
 // ==========================================
 

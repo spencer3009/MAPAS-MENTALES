@@ -1098,20 +1098,49 @@ const FinanzasModule = ({ token, projects = [] }) => {
                 </div>
               </div>
               
-              {/* Card 3: IGV (Naranja) */}
-              <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+              {/* Card 3: Determinación IGV (Dinámico según resultado) */}
+              <div className={`bg-white rounded-xl border p-5 shadow-sm hover:shadow-md transition-shadow ${
+                igvAFavor ? 'border-green-200' : igvAPagar ? 'border-amber-200' : 'border-gray-200'
+              }`}>
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm text-gray-500 font-medium">IGV (18%)</p>
-                    <p className="text-3xl font-bold text-gray-900 mt-2">
-                      S/ {filteredIgv.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    <p className={`text-sm font-medium ${
+                      igvAFavor ? 'text-green-600' : igvAPagar ? 'text-amber-600' : 'text-gray-500'
+                    }`}>
+                      {igvAFavor ? 'IGV a favor ✓' : igvAPagar ? 'IGV a pagar' : 'IGV (18%)'}
+                    </p>
+                    <p className={`text-3xl font-bold mt-2 ${
+                      igvAFavor ? 'text-green-600' : igvAPagar ? 'text-amber-600' : 'text-gray-900'
+                    }`}>
+                      S/ {igvAbsoluto.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
                     <p className="text-xs text-gray-400 mt-1">
-                      Impuesto a pagar
+                      {igvAFavor 
+                        ? 'Crédito fiscal disponible' 
+                        : igvAPagar 
+                          ? 'Ventas - Compras con IGV' 
+                          : 'Sin movimientos'}
                     </p>
+                    {/* Desglose del cálculo */}
+                    {(igvVentas > 0 || igvGastos > 0) && (
+                      <div className="mt-2 pt-2 border-t border-gray-100 text-xs space-y-0.5">
+                        <div className="flex justify-between text-gray-500">
+                          <span>IGV Ventas:</span>
+                          <span className="text-gray-700">S/ {igvVentas.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-gray-500">
+                          <span>IGV Gastos (−):</span>
+                          <span className="text-green-600">S/ {igvGastos.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 text-white">
-                    <Wallet size={24} />
+                  <div className={`p-3 rounded-xl text-white ${
+                    igvAFavor 
+                      ? 'bg-gradient-to-br from-green-500 to-emerald-600' 
+                      : 'bg-gradient-to-br from-orange-500 to-amber-600'
+                  }`}>
+                    {igvAFavor ? <CheckCircle2 size={24} /> : <Wallet size={24} />}
                   </div>
                 </div>
               </div>

@@ -14,8 +14,9 @@ import uuid
 # ==========================================
 
 class IncomeStatus(str, Enum):
-    COLLECTED = "collected"  # Cobrado
-    PENDING = "pending"      # Por cobrar
+    COLLECTED = "collected"  # Cobrado (100% pagado)
+    PENDING = "pending"      # Por cobrar (0% pagado)
+    PARTIAL = "partial"      # Parcial (tiene abonos pero no está completo)
 
 class ExpenseStatus(str, Enum):
     PAID = "paid"           # Pagado

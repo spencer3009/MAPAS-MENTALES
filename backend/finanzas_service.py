@@ -32,6 +32,51 @@ class ExpensePriority(str, Enum):
     MEDIUM = "medium"
     LOW = "low"
 
+class ProductType(str, Enum):
+    PRODUCT = "producto"
+    SERVICE = "servicio"
+
+class ProductStatus(str, Enum):
+    ACTIVE = "activo"
+    INACTIVE = "inactivo"
+
+# ==========================================
+# PYDANTIC MODELS - PRODUCTOS / SERVICIOS
+# ==========================================
+
+class ProductCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=200, description="Nombre del producto/servicio")
+    type: ProductType = Field(..., description="Tipo: producto o servicio")
+    base_price: float = Field(..., gt=0, description="Precio base sin formato")
+    includes_igv: bool = Field(default=True, description="¿El precio incluye IGV?")
+    description: Optional[str] = Field(None, description="Descripción del producto/servicio")
+    category: Optional[str] = Field(None, description="Categoría")
+    status: ProductStatus = Field(default=ProductStatus.ACTIVE, description="Estado: activo o inactivo")
+
+class ProductUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=1, max_length=200)
+    type: Optional[ProductType] = None
+    base_price: Optional[float] = Field(None, gt=0)
+    includes_igv: Optional[bool] = None
+    description: Optional[str] = None
+    category: Optional[str] = None
+    status: Optional[ProductStatus] = None
+
+class ProductResponse(BaseModel):
+    id: str
+    company_id: str
+    workspace_id: str
+    username: str
+    name: str
+    type: str
+    base_price: float
+    includes_igv: bool
+    description: Optional[str]
+    category: Optional[str]
+    status: str
+    created_at: str
+    updated_at: str
+
 # ==========================================
 # PYDANTIC MODELS - EMPRESAS
 # ==========================================

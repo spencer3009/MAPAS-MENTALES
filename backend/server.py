@@ -2027,6 +2027,271 @@ async def start_scheduler():
     # Scheduler de expiración de planes
     asyncio.create_task(check_plan_expirations())
     logger.info("✅ Scheduler de expiración de planes iniciado")
+    
+    # Scheduler de recordatorios de gastos fijos (Email + WhatsApp)
+    asyncio.create_task(check_and_send_fixed_expense_reminders())
+    logger.info("✅ Scheduler de recordatorios de gastos fijos iniciado")
+
+
+# ==========================================
+# SCHEDULER DE GASTOS FIJOS
+# ==========================================
+
+fixed_expense_reminder_scheduler_running = False
+
+async def check_and_send_fixed_expense_reminders():
+    """Verificar y enviar recordatorios de gastos fijos (OBLIGATORIO: Email + WhatsApp)"""
+    global fixed_expense_reminder_scheduler_running
+    fixed_expense_reminder_scheduler_running = True
+    
+    logger.info("🚀 [Fixed Expense Scheduler] Iniciando scheduler de recordatorios de gastos fijos...")
+    
+    while fixed_expense_reminder_scheduler_running:
+        try:
+            now = datetime.now(timezone.utc)
+            
+            # Buscar recordatorios de gastos fijos pendientes
+            pending_reminders = await db.finanzas_fixed_expense_reminders.find({
+                "status": "pending",
+                "reminder_date": {"$lte": now.isoformat()}
+            }, {"_id": 0}).to_list(100)
+            
+            if pending_reminders:
+                logger.info(f"📬 [Fixed Expense Scheduler] Encontrados {len(pending_reminders)} recordatorios de gastos fijos pendientes")
+            
+            for reminder in pending_reminders:
+                try:
+                    reminder_id = reminder.get("id", "unknown")
+                    fixed_expense_name = reminder.get("fixed_expense_name", "Gasto fijo")
+                    username = reminder.get("username")
+                    amount = reminder.get("amount", 0)
+                    due_date = reminder.get("due_date", "")
+                    category = reminder.get("category", "otros")
+                    
+                    logger.info(f"⏳ [Fixed Expense Scheduler] Procesando recordatorio para '{fixed_expense_name}'...")
+                    
+                    # Obtener información del usuario
+                    user = await db.users.find_one({"username": username}, {"_id": 0})
+                    profile = await db.user_profiles.find_one({"username": username}, {"_id": 0})
+                    
+                    email_sent = False
+                    whatsapp_sent = False
+                    
+                    # ========== ENVÍO POR EMAIL (OBLIGATORIO) ==========
+                    if user and user.get("email"):
+                        recipient_email = user["email"]
+                        recipient_name = user.get("full_name", username)
+                        
+                        logger.info(f"📧 [Fixed Expense Scheduler] Enviando email a {recipient_email}...")
+                        
+                        # Formatear fecha para mostrar
+                        try:
+                            due_dt = datetime.fromisoformat(due_date.replace('Z', '+00:00'))
+                            due_date_formatted = due_dt.strftime("%d/%m/%Y")
+                        except:
+                            due_date_formatted = due_date
+                        
+                        email_result = await send_fixed_expense_reminder_email(
+                            recipient_email=recipient_email,
+                            recipient_name=recipient_name,
+                            expense_name=fixed_expense_name,
+                            amount=amount,
+                            due_date=due_date_formatted,
+                            category=category
+                        )
+                        
+                        email_sent = email_result.get("success", False)
+                        if email_sent:
+                            logger.info(f"✅ [Fixed Expense Scheduler] Email enviado para '{fixed_expense_name}'")
+                        else:
+                            logger.error(f"❌ [Fixed Expense Scheduler] Error enviando email: {email_result.get('error')}")
+                    else:
+                        logger.warning(f"⚠️ [Fixed Expense Scheduler] Usuario {username} no tiene email configurado")
+                    
+                    # ========== ENVÍO POR WHATSAPP (OBLIGATORIO) ==========
+                    phone_number = profile.get("whatsapp") if profile else None
+                    if not phone_number and user:
+                        phone_number = user.get("whatsapp", "")
+                    
+                    if phone_number:
+                        logger.info(f"📱 [Fixed Expense Scheduler] Enviando WhatsApp a {phone_number}...")
+                        
+                        # Variables para la plantilla de Twilio
+                        content_variables = {
+                            "1": fixed_expense_name[:100],
+                            "2": f"S/ {amount:.2f}",
+                            "3": due_date_formatted if 'due_date_formatted' in dir() else due_date
+                        }
+                        
+                        # Mensaje de fallback
+                        message = f"🔔 Recordatorio de Gasto Fijo\n\n📋 {fixed_expense_name}\n💰 Monto: S/ {amount:.2f}\n📅 Vence: {due_date_formatted if 'due_date_formatted' in dir() else due_date}\n\nNo olvides registrar este pago en Mindora."
+                        
+                        whatsapp_result = await send_whatsapp_message(
+                            phone_number,
+                            message,
+                            content_variables=content_variables
+                        )
+                        
+                        whatsapp_sent = whatsapp_result.get("success", False)
+                        if whatsapp_sent:
+                            logger.info(f"✅ [Fixed Expense Scheduler] WhatsApp enviado para '{fixed_expense_name}'")
+                        else:
+                            logger.error(f"❌ [Fixed Expense Scheduler] Error enviando WhatsApp: {whatsapp_result.get('error')}")
+                    else:
+                        logger.warning(f"⚠️ [Fixed Expense Scheduler] Usuario {username} no tiene WhatsApp configurado")
+                    
+                    # Actualizar estado del recordatorio
+                    new_status = "sent" if (email_sent or whatsapp_sent) else "failed"
+                    await db.finanzas_fixed_expense_reminders.update_one(
+                        {"id": reminder_id},
+                        {
+                            "$set": {
+                                "status": new_status,
+                                "email_sent": email_sent,
+                                "whatsapp_sent": whatsapp_sent,
+                                "processed_at": now.isoformat()
+                            }
+                        }
+                    )
+                    
+                    logger.info(f"📊 [Fixed Expense Scheduler] Recordatorio '{fixed_expense_name}' → {new_status} (Email: {email_sent}, WhatsApp: {whatsapp_sent})")
+                    
+                except Exception as e:
+                    logger.error(f"❌ [Fixed Expense Scheduler] Error procesando recordatorio {reminder.get('id')}: {str(e)}")
+            
+        except Exception as e:
+            logger.error(f"❌ [Fixed Expense Scheduler] Error general: {str(e)}")
+        
+        # Verificar cada 60 segundos
+        await asyncio.sleep(60)
+
+
+async def send_fixed_expense_reminder_email(
+    recipient_email: str,
+    recipient_name: str,
+    expense_name: str,
+    amount: float,
+    due_date: str,
+    category: str
+) -> dict:
+    """Enviar email de recordatorio de gasto fijo usando Resend"""
+    try:
+        import resend
+        
+        resend.api_key = os.environ.get("RESEND_API_KEY", "")
+        sender_email = os.environ.get("SENDER_EMAIL", "noreply@mindora.pe")
+        
+        if not resend.api_key:
+            logger.warning("⚠️ RESEND_API_KEY no configurada")
+            return {"success": False, "error": "RESEND_API_KEY not configured"}
+        
+        # Template HTML para el email
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7fa;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f7fa; padding: 40px 20px;">
+                <tr>
+                    <td align="center">
+                        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                            <!-- Header -->
+                            <tr>
+                                <td style="background: linear-gradient(135deg, #EF4444 0%, #F97316 100%); padding: 30px; text-align: center;">
+                                    <h1 style="color: #ffffff; margin: 0; font-size: 24px;">🔔 Recordatorio de Gasto Fijo</h1>
+                                </td>
+                            </tr>
+                            
+                            <!-- Content -->
+                            <tr>
+                                <td style="padding: 40px;">
+                                    <p style="color: #374151; font-size: 16px; margin: 0 0 20px;">
+                                        Hola <strong>{recipient_name}</strong>,
+                                    </p>
+                                    <p style="color: #6B7280; font-size: 14px; margin: 0 0 30px;">
+                                        Te recordamos que tienes un gasto fijo próximo a vencer:
+                                    </p>
+                                    
+                                    <!-- Expense Card -->
+                                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #FEF2F2; border-radius: 12px; padding: 20px; margin-bottom: 30px;">
+                                        <tr>
+                                            <td>
+                                                <h2 style="color: #991B1B; margin: 0 0 15px; font-size: 20px;">📋 {expense_name}</h2>
+                                                <table width="100%" cellpadding="0" cellspacing="0">
+                                                    <tr>
+                                                        <td style="padding: 8px 0; color: #6B7280; font-size: 14px;">💰 Monto estimado:</td>
+                                                        <td style="padding: 8px 0; color: #111827; font-size: 16px; font-weight: bold; text-align: right;">S/ {amount:,.2f}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="padding: 8px 0; color: #6B7280; font-size: 14px;">📅 Fecha de vencimiento:</td>
+                                                        <td style="padding: 8px 0; color: #DC2626; font-size: 16px; font-weight: bold; text-align: right;">{due_date}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="padding: 8px 0; color: #6B7280; font-size: 14px;">🏷️ Categoría:</td>
+                                                        <td style="padding: 8px 0; color: #111827; font-size: 14px; text-align: right;">{category.capitalize()}</td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    
+                                    <p style="color: #6B7280; font-size: 14px; margin: 0 0 20px; text-align: center;">
+                                        Recuerda registrar este pago en Mindora para mantener tu caja actualizada.
+                                    </p>
+                                    
+                                    <!-- CTA Button -->
+                                    <table width="100%" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td align="center">
+                                                <a href="{os.environ.get('APP_URL', 'https://mindora.pe')}" 
+                                                   style="display: inline-block; padding: 14px 40px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">
+                                                    Ir a Mindora
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            
+                            <!-- Footer -->
+                            <tr>
+                                <td style="background-color: #F9FAFB; padding: 20px; text-align: center; border-top: 1px solid #E5E7EB;">
+                                    <p style="color: #9CA3AF; font-size: 12px; margin: 0;">
+                                        Este es un recordatorio automático de Mindora.<br>
+                                        © {datetime.now().year} Mindora - Gestión Financiera Inteligente
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>
+        """
+        
+        params = {
+            "from": f"Mindora <{sender_email}>",
+            "to": [recipient_email],
+            "subject": f"🔔 Recordatorio: {expense_name} - Vence {due_date}",
+            "html": html_content
+        }
+        
+        # Ejecutar en thread para no bloquear
+        email = await asyncio.to_thread(resend.Emails.send, params)
+        
+        return {
+            "success": True,
+            "message": f"Email enviado a {recipient_email}",
+            "email_id": email.get("id")
+        }
+        
+    except Exception as e:
+        logger.error(f"Error enviando email de gasto fijo: {str(e)}")
+        return {"success": False, "error": str(e)}
 
 
 # Flag para scheduler de expiración de planes

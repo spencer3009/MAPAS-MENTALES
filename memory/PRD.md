@@ -52,6 +52,11 @@ Transformar MindoraMap en una herramienta profesional de gestión financiera con
 
 ### Session: January 21, 2026 (Current)
 
+#### Bug Fix - Filtro de Fechas en Gastos
+- ✅ **Corregido:** La tabla de gastos ahora respeta el filtro de mes/fecha seleccionado
+- Antes: Mostraba todos los gastos sin importar el período seleccionado
+- Después: Solo muestra los gastos del período seleccionado
+
 #### Cambio de Terminología Completado
 - ✅ **"Categoría" → "Concepto del gasto"** en toda la UI de finanzas
 - ✅ Tabla de Gastos: columna "CONCEPTO"

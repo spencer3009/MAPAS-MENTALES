@@ -8754,8 +8754,32 @@ async def update_expense(
     """Actualizar un gasto"""
     workspace_id = await get_user_workspace_id(current_user["username"])
     
+    # Obtener el gasto actual
+    existing = await db.finanzas_expenses.find_one(
+        {"id": expense_id, "workspace_id": workspace_id}
+    )
+    
+    if not existing:
+        raise HTTPException(status_code=404, detail="Gasto no encontrado")
+    
     update_dict = {k: v for k, v in expense_data.model_dump().items() if v is not None}
     update_dict["updated_at"] = get_current_timestamp()
+    
+    # Recalcular IGV si cambia el monto o el flag includes_igv
+    IGV_RATE = 0.18
+    amount = update_dict.get("amount", existing.get("amount", 0))
+    includes_igv = update_dict.get("includes_igv", existing.get("includes_igv", False))
+    
+    if "amount" in update_dict or "includes_igv" in update_dict:
+        if includes_igv:
+            base_imponible = amount / (1 + IGV_RATE)
+            igv_gasto = amount - base_imponible
+        else:
+            base_imponible = amount
+            igv_gasto = 0.0
+        
+        update_dict["base_imponible"] = round(base_imponible, 2)
+        update_dict["igv_gasto"] = round(igv_gasto, 2)
     
     result = await db.finanzas_expenses.find_one_and_update(
         {"id": expense_id, "workspace_id": workspace_id},

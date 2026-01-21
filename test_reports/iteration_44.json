@@ -1,0 +1,133 @@
+{
+  "summary": "IGV Determination Feature - ALL 8 FEATURES VERIFIED AND WORKING. Fixed critical backend bug where GET /api/finanzas/expenses was failing due to missing IGV fields in legacy data.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [],
+    "fixed": [
+      {
+        "endpoint": "GET /api/finanzas/expenses",
+        "issue": "ResponseValidationError - legacy expenses missing includes_igv, base_imponible, igv_gasto fields",
+        "fix": "Added default values for IGV fields in GET endpoints (includes_igv=false, base_imponible=amount, igv_gasto=0)",
+        "files_modified": ["/app/backend/server.py lines 8675-8685, 8748-8764"]
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/tests/test_igv_determination.py",
+    "/app/test_reports/pytest/pytest_igv_determination.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "✅ ExpenseCreate model in finanzas_service.py (line 212) has includes_igv field with default=False",
+    "✅ ExpenseResponse model (lines 231-255) has Optional fields for includes_igv, base_imponible, igv_gasto",
+    "✅ POST /api/finanzas/expenses (server.py lines 8691-8710) correctly calculates IGV: base_imponible = amount/(1+0.18), igv_gasto = amount - base_imponible",
+    "✅ PUT /api/finanzas/expenses (lines 8768-8782) recalculates IGV when amount or includes_igv changes",
+    "✅ ExpenseModal component (FinanzasModule.jsx lines 1937-2055) has IGV toggle with data-testid='expense-includes-igv-toggle'",
+    "✅ IGV breakdown shows Base imponible and IGV (18%) when toggle is enabled",
+    "✅ Educational message '💡 Este IGV será tu crédito fiscal (reduce tu IGV a pagar)' displayed",
+    "✅ Dashboard (lines 1102-1146) shows IGV determination: 'IGV a pagar' or 'IGV a favor' based on calculation",
+    "✅ IGV Ventas and IGV Gastos (−) breakdown shown in dashboard card",
+    "✅ Filter modes (Día/Mes/Año) work correctly for IGV calculation"
+  ],
+  "updated_files": [
+    "/app/backend/server.py",
+    "/app/tests/test_igv_determination.py"
+  ],
+  "success_rate": {
+    "backend": "100% (12/12 tests passed)",
+    "frontend": "100% (all UI features working)"
+  },
+  "test_credentials": {
+    "username": "spencer3009",
+    "password": "Socios3009"
+  },
+  "seed_data_creation": "Existing expense with IGV: amount=590, base_imponible=500, igv_gasto=90 (Pago de internet - Movistar). Multiple incomes for IGV Ventas calculation.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "IGV determination feature is fully functional. Backend fix applied for legacy data compatibility. All CRUD operations for expenses with IGV toggle working correctly.",
+  "features_tested": {
+    "test_1_expense_modal_igv_toggle": {
+      "status": "PASSED",
+      "description": "Modal 'Nuevo Gasto' has toggle '¿Este gasto incluye IGV?' with data-testid='expense-includes-igv-toggle'"
+    },
+    "test_2_automatic_igv_breakdown": {
+      "status": "PASSED",
+      "description": "When toggle enabled and amount entered, shows Base imponible (S/ 500.00) and IGV 18% (S/ 90.00) for amount 590"
+    },
+    "test_3_create_expense_with_igv": {
+      "status": "PASSED",
+      "description": "Expense created with includes_igv=true saves base_imponible and igv_gasto correctly"
+    },
+    "test_4_create_expense_without_igv": {
+      "status": "PASSED",
+      "description": "Expense created with includes_igv=false has igv_gasto=0 and base_imponible=amount"
+    },
+    "test_5_dashboard_igv_determination": {
+      "status": "PASSED",
+      "description": "Dashboard shows 'IGV a pagar' (S/ 1,726.78) or 'IGV a favor' based on IGV Ventas - IGV Gastos"
+    },
+    "test_6_igv_breakdown_in_dashboard": {
+      "status": "PASSED",
+      "description": "Dashboard card shows 'IGV Ventas: S/ 1754.24' and 'IGV Gastos (−): S/ 27.46'"
+    },
+    "test_7_only_igv_expenses_count": {
+      "status": "PASSED",
+      "description": "Only expenses with includes_igv=true are counted for crédito fiscal (IGV Gastos)"
+    },
+    "test_8_filter_modes_work": {
+      "status": "PASSED",
+      "description": "Día/Mes/Año filter buttons work correctly, updating IGV determination for selected period"
+    }
+  },
+  "api_endpoints_tested": {
+    "POST /api/finanzas/expenses": {
+      "status": "WORKING",
+      "params": "ExpenseCreate with includes_igv field",
+      "response": "ExpenseResponse with calculated base_imponible and igv_gasto"
+    },
+    "GET /api/finanzas/expenses": {
+      "status": "WORKING (FIXED)",
+      "issue_fixed": "Added default values for legacy data missing IGV fields",
+      "response": "Array of ExpenseResponse with IGV fields"
+    },
+    "GET /api/finanzas/expenses/{id}": {
+      "status": "WORKING (FIXED)",
+      "response": "Single ExpenseResponse with IGV fields"
+    },
+    "PUT /api/finanzas/expenses/{id}": {
+      "status": "WORKING",
+      "response": "Updated ExpenseResponse with recalculated IGV if amount/includes_igv changed"
+    },
+    "GET /api/finanzas/summary": {
+      "status": "WORKING",
+      "response": "Financial summary for period"
+    },
+    "GET /api/finanzas/incomes": {
+      "status": "WORKING",
+      "response": "Array of incomes for IGV Ventas calculation"
+    }
+  },
+  "ui_components_verified": {
+    "ExpenseModal": "IGV toggle, amount input, automatic breakdown display, educational message",
+    "Dashboard IGV Card": "IGV a pagar/favor label, IGV Ventas, IGV Gastos breakdown, dynamic color (amber for pagar, green for favor)",
+    "Filter Buttons": "Día/Mes/Año buttons with corresponding date/month/year pickers"
+  },
+  "data_testid_attributes": {
+    "expense-includes-igv-toggle": "IGV toggle checkbox in Expense modal",
+    "expense-amount-input": "Amount input in Expense modal",
+    "expense-description-input": "Description input in Expense modal"
+  },
+  "igv_calculation_formula": {
+    "IGV_RATE": 0.18,
+    "base_imponible": "amount / (1 + IGV_RATE)",
+    "igv_gasto": "amount - base_imponible",
+    "igv_ventas": "sum of (income.amount / (1 + IGV_RATE) * IGV_RATE) for collected incomes",
+    "igv_determinado": "igv_ventas - igv_gastos",
+    "result": "If igv_determinado > 0: 'IGV a pagar', else: 'IGV a favor'"
+  }
+}

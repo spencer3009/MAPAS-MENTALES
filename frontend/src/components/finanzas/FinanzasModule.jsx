@@ -1458,10 +1458,10 @@ const FinanzasModule = ({ token, projects = [] }) => {
                 <button
                   onClick={() => setShowCategoryModal(true)}
                   className="flex items-center gap-2 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                  title="Gestionar categorías"
+                  title="Gestionar conceptos de gasto"
                 >
                   <Settings size={18} />
-                  Categorías
+                  Conceptos
                 </button>
                 <button
                   onClick={() => setShowExpenseModal(true)}

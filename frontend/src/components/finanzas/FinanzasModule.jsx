@@ -2753,7 +2753,7 @@ const ExpenseModal = ({ onClose, onSave, categories, projects, fixedExpenses = [
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Categoría *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Concepto del gasto *</label>
             <select
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
@@ -4893,7 +4893,7 @@ const FixedExpenseModal = ({ onClose, onSave, fixedExpense, categories, projects
 
           {/* Categoría */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Categoría *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Concepto del gasto *</label>
             <select
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}

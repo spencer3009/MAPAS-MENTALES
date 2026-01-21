@@ -46,6 +46,7 @@ const TABS = [
   { id: 'investments', label: 'Inversiones', icon: PiggyBank },
   { id: 'receivables', label: 'Por Cobrar', icon: Clock },
   { id: 'payables', label: 'Por Pagar', icon: AlertTriangle },
+  { id: 'products', label: 'Productos', icon: Wallet },
 ];
 
 // Formatear moneda

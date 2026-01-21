@@ -78,6 +78,109 @@ class ProductResponse(BaseModel):
     updated_at: str
 
 # ==========================================
+# PYDANTIC MODELS - GASTOS FIJOS (CATÁLOGO)
+# ==========================================
+
+class FixedExpensePeriodicity(str, Enum):
+    WEEKLY = "semanal"
+    BIWEEKLY = "quincenal"
+    MONTHLY = "mensual"
+    QUARTERLY = "trimestral"
+    ANNUAL = "anual"
+    CUSTOM = "personalizada"
+
+class FixedExpenseStatus(str, Enum):
+    ACTIVE = "activo"
+    INACTIVE = "inactivo"
+
+class FixedExpenseCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=200, description="Nombre del gasto fijo")
+    category: str = Field(default="otros", description="Categoría del gasto")
+    estimated_amount: float = Field(..., gt=0, description="Monto estimado del gasto")
+    periodicity: FixedExpensePeriodicity = Field(default=FixedExpensePeriodicity.MONTHLY, description="Periodicidad del gasto")
+    custom_days: Optional[int] = Field(None, description="Días personalizados (si periodicidad es personalizada)")
+    includes_igv: bool = Field(default=False, description="¿El monto incluye IGV?")
+    project_id: Optional[str] = Field(None, description="Proyecto asociado")
+    project_name: Optional[str] = Field(None, description="Nombre del proyecto")
+    vendor_id: Optional[str] = Field(None, description="Proveedor asociado")
+    vendor_name: Optional[str] = Field(None, description="Nombre del proveedor")
+    notes: Optional[str] = Field(None, description="Notas adicionales")
+    status: FixedExpenseStatus = Field(default=FixedExpenseStatus.ACTIVE, description="Estado")
+    # Configuración de recordatorios (OBLIGATORIOS: Email + WhatsApp)
+    reminder_enabled: bool = Field(default=True, description="Recordatorios habilitados")
+    reminder_days_before: int = Field(default=3, ge=1, le=30, description="Días antes para recordatorio")
+    next_due_date: Optional[str] = Field(None, description="Próxima fecha de vencimiento")
+    day_of_month: Optional[int] = Field(None, ge=1, le=31, description="Día del mes para vencimiento")
+
+class FixedExpenseUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=1, max_length=200)
+    category: Optional[str] = None
+    estimated_amount: Optional[float] = Field(None, gt=0)
+    periodicity: Optional[FixedExpensePeriodicity] = None
+    custom_days: Optional[int] = None
+    includes_igv: Optional[bool] = None
+    project_id: Optional[str] = None
+    project_name: Optional[str] = None
+    vendor_id: Optional[str] = None
+    vendor_name: Optional[str] = None
+    notes: Optional[str] = None
+    status: Optional[FixedExpenseStatus] = None
+    reminder_enabled: Optional[bool] = None
+    reminder_days_before: Optional[int] = Field(None, ge=1, le=30)
+    next_due_date: Optional[str] = None
+    day_of_month: Optional[int] = Field(None, ge=1, le=31)
+
+class FixedExpenseResponse(BaseModel):
+    id: str
+    company_id: str
+    workspace_id: str
+    username: str
+    name: str
+    category: str
+    estimated_amount: float
+    periodicity: str
+    custom_days: Optional[int]
+    includes_igv: bool
+    project_id: Optional[str]
+    project_name: Optional[str]
+    vendor_id: Optional[str]
+    vendor_name: Optional[str]
+    notes: Optional[str]
+    status: str
+    reminder_enabled: bool
+    reminder_days_before: int
+    next_due_date: Optional[str]
+    day_of_month: Optional[int]
+    created_at: str
+    updated_at: str
+
+# ==========================================
+# PYDANTIC MODELS - PAGOS DE GASTOS FIJOS
+# ==========================================
+
+class FixedExpensePaymentCreate(BaseModel):
+    fixed_expense_id: str = Field(..., description="ID del gasto fijo")
+    amount: float = Field(..., gt=0, description="Monto del pago")
+    date: str = Field(..., description="Fecha del pago")
+    payment_method: Optional[str] = Field(None, description="Método de pago")
+    notes: Optional[str] = Field(None, description="Notas del pago")
+    reference: Optional[str] = Field(None, description="Número de referencia/comprobante")
+
+class FixedExpensePaymentResponse(BaseModel):
+    id: str
+    fixed_expense_id: str
+    fixed_expense_name: str
+    company_id: str
+    workspace_id: str
+    username: str
+    amount: float
+    date: str
+    payment_method: Optional[str]
+    notes: Optional[str]
+    reference: Optional[str]
+    created_at: str
+
+# ==========================================
 # PYDANTIC MODELS - EMPRESAS
 # ==========================================
 

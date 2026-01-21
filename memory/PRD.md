@@ -2,6 +2,33 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-21: FEATURE — Determinación del IGV (Ventas - Compras con IGV) ✅ COMPLETADO Y PROBADO
+- **Estado**: Implementación completada y verificada con testing agent (12/12 backend + 8/8 frontend features passed)
+- **Funcionalidad**: Cálculo correcto del IGV a pagar/favor considerando crédito fiscal de gastos
+- **Fórmula contable**:
+  ```
+  IGV a pagar = IGV de Ventas - IGV de Gastos (crédito fiscal)
+  ```
+- **Backend (Cambios)**:
+  - `ExpenseCreate`: Nuevo campo `includes_igv` (boolean, default=false)
+  - `ExpenseResponse`: Nuevos campos `base_imponible`, `igv_gasto`
+  - Cálculo automático: `base_imponible = amount / (1 + 0.18)`, `igv_gasto = amount - base_imponible`
+  - Fix para datos legacy: valores por defecto en GET endpoints
+- **Modal "Nuevo Gasto"**:
+  - Toggle "¿Este gasto incluye IGV?" con data-testid
+  - Desglose automático: Base imponible e IGV (18%)
+  - Mensaje educativo: "💡 Este IGV será tu crédito fiscal (reduce tu IGV a pagar)"
+- **Dashboard de IGV (Card dinámica)**:
+  - **IGV a pagar** (ámbar): cuando IGV Ventas > IGV Gastos
+  - **IGV a favor ✓** (verde): cuando IGV Gastos > IGV Ventas
+  - Desglose: "IGV Ventas: S/ X" / "IGV Gastos (−): S/ Y"
+- **Filtros de tiempo**: Día/Mes/Año respetados para determinación
+- **Testing verificado** (iteration_44.json): 12/12 backend + 8/8 frontend
+- **Archivos modificados**:
+  - `/app/backend/finanzas_service.py` - ExpenseCreate, ExpenseResponse con campos IGV
+  - `/app/backend/server.py` - POST/PUT expenses con cálculo IGV, fix legacy data
+  - `/app/frontend/src/components/finanzas/FinanzasModule.jsx` - ExpenseModal toggle, Dashboard IGV card
+
 ### 2026-01-21: FEATURE — Módulo Productos/Servicios Integrado con Finanzas ✅ COMPLETADO Y PROBADO
 - **Estado**: Implementación completada y verificada con testing agent (14/14 backend + 13/13 frontend features passed)
 - **Funcionalidad**: Sistema de productos/servicios con integración al formulario de Nuevo Ingreso

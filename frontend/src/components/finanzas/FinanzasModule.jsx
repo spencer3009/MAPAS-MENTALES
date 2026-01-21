@@ -1248,55 +1248,13 @@ const FinanzasModule = ({ token, projects = [] }) => {
 
         {/* Por Cobrar Tab */}
         {activeTab === 'receivables' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Por Cobrar</h2>
-                <p className="text-sm text-gray-500">Total: {formatCurrency(receivables.total)}</p>
-              </div>
-            </div>
-            
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descripción</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cliente</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vencimiento</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Monto</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acción</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {receivables.receivables.map((item) => (
-                    <tr key={item.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-600">{formatDate(item.date)}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{item.description || '-'}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{item.client_name || '-'}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{formatDate(item.due_date)}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900 text-right font-medium">{formatCurrency(item.amount)}</td>
-                      <td className="px-4 py-3 text-right">
-                        <button
-                          onClick={() => handleUpdateIncomeStatus(item.id, 'collected')}
-                          className="text-xs text-green-600 hover:text-green-700 font-medium"
-                        >
-                          Marcar cobrado
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                  {receivables.receivables.length === 0 && (
-                    <tr>
-                      <td colSpan="6" className="px-4 py-8 text-center text-gray-500">
-                        No hay ingresos pendientes de cobro
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <ReceivablesTab
+            receivables={receivables}
+            loadData={loadData}
+            token={token}
+            formatCurrency={formatCurrency}
+            formatDate={formatDate}
+          />
         )}
 
         {/* Por Pagar Tab */}

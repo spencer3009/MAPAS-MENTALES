@@ -9382,6 +9382,161 @@ async def delete_partial_payment(
         }
     }
 
+# ==========================================
+# PRODUCTOS / SERVICIOS - CRUD
+# ==========================================
+
+@api_router.get("/finanzas/products")
+async def get_products(
+    company_id: str,
+    status: Optional[str] = None,
+    type: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener lista de productos/servicios de una empresa"""
+    username = current_user["username"]
+    await verify_company_access(company_id, username)
+    workspace_id = await get_user_workspace_id(username)
+    
+    # Construir filtro
+    filter_query = {"company_id": company_id, "workspace_id": workspace_id}
+    if status:
+        filter_query["status"] = status
+    if type:
+        filter_query["type"] = type
+    
+    products = await db.finanzas_products.find(
+        filter_query,
+        {"_id": 0}
+    ).sort("name", 1).to_list(500)
+    
+    return products
+
+@api_router.post("/finanzas/products")
+async def create_product(
+    product: ProductCreate,
+    company_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Crear un nuevo producto/servicio"""
+    username = current_user["username"]
+    await verify_company_access(company_id, username)
+    workspace_id = await get_user_workspace_id(username)
+    
+    now = datetime.now(timezone.utc).isoformat()
+    product_id = str(uuid.uuid4())
+    
+    product_doc = {
+        "id": product_id,
+        "company_id": company_id,
+        "workspace_id": workspace_id,
+        "username": username,
+        "name": product.name,
+        "type": product.type.value,
+        "base_price": product.base_price,
+        "includes_igv": product.includes_igv,
+        "description": product.description,
+        "category": product.category,
+        "status": product.status.value,
+        "created_at": now,
+        "updated_at": now
+    }
+    
+    await db.finanzas_products.insert_one(product_doc)
+    
+    return {**product_doc, "_id": None}
+
+@api_router.get("/finanzas/products/{product_id}")
+async def get_product(
+    product_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener un producto/servicio por ID"""
+    username = current_user["username"]
+    workspace_id = await get_user_workspace_id(username)
+    
+    product = await db.finanzas_products.find_one(
+        {"id": product_id, "workspace_id": workspace_id},
+        {"_id": 0}
+    )
+    
+    if not product:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+    
+    return product
+
+@api_router.put("/finanzas/products/{product_id}")
+async def update_product(
+    product_id: str,
+    product: ProductUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Actualizar un producto/servicio"""
+    username = current_user["username"]
+    workspace_id = await get_user_workspace_id(username)
+    
+    existing = await db.finanzas_products.find_one(
+        {"id": product_id, "workspace_id": workspace_id}
+    )
+    
+    if not existing:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+    
+    # Verificar acceso a la empresa
+    await verify_company_access(existing["company_id"], username)
+    
+    # Construir actualización
+    update_data = {"updated_at": datetime.now(timezone.utc).isoformat()}
+    
+    if product.name is not None:
+        update_data["name"] = product.name
+    if product.type is not None:
+        update_data["type"] = product.type.value
+    if product.base_price is not None:
+        update_data["base_price"] = product.base_price
+    if product.includes_igv is not None:
+        update_data["includes_igv"] = product.includes_igv
+    if product.description is not None:
+        update_data["description"] = product.description
+    if product.category is not None:
+        update_data["category"] = product.category
+    if product.status is not None:
+        update_data["status"] = product.status.value
+    
+    await db.finanzas_products.update_one(
+        {"id": product_id},
+        {"$set": update_data}
+    )
+    
+    updated = await db.finanzas_products.find_one(
+        {"id": product_id},
+        {"_id": 0}
+    )
+    
+    return updated
+
+@api_router.delete("/finanzas/products/{product_id}")
+async def delete_product(
+    product_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Eliminar un producto/servicio"""
+    username = current_user["username"]
+    workspace_id = await get_user_workspace_id(username)
+    
+    existing = await db.finanzas_products.find_one(
+        {"id": product_id, "workspace_id": workspace_id}
+    )
+    
+    if not existing:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+    
+    await verify_company_access(existing["company_id"], username)
+    
+    await db.finanzas_products.delete_one({"id": product_id})
+    
+    return {"message": "Producto eliminado correctamente"}
+
 @api_router.get("/finanzas/payables")
 async def get_payables(
     company_id: str,

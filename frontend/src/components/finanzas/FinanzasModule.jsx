@@ -2049,7 +2049,7 @@ const ExpenseModal = ({ onClose, onSave, categories, projects, token }) => {
     category: 'otros',
     description: '',
     date: getLocalDateString(), // Fecha local sin UTC
-    status: 'pending',
+    status: 'paid', // Por defecto "Pagado" - cambio solicitado por usuario
     vendor_name: '',
     vendor_id: null,
     is_recurring: false,

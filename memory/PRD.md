@@ -2,6 +2,33 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-21: FEATURE — Reordenamiento UX del Modal "Nuevo Ingreso" ✅ COMPLETADO Y PROBADO
+- **Estado**: Implementación completada y verificada con testing agent (7/7 tests passed)
+- **Problema resuelto**: El campo Estado aparecía al final del formulario y el default era incorrecto
+- **Cambios implementados**:
+  1. **Campo "Tipo de ingreso" al INICIO** del formulario (justo después del título)
+  2. **Default = "Cobrado"** (el caso más común para ingresos diarios)
+  3. **UI con botones visuales** en lugar de dropdown para el estado
+  4. **Lógica condicional**:
+     - 🟢 Si Cobrado: Formulario simple (Monto, Fuente, Descripción, Fecha, Cliente, Proyecto)
+     - 🟡 Si Por cobrar: + Monto Total, Detalle de pago parcial, Saldo pendiente (auto), Fecha de vencimiento
+- **Comportamiento dinámico**:
+  - ✅ Saldo pendiente se calcula en tiempo real (Monto Total - Pago recibido)
+  - ✅ Saldo pendiente muestra fondo rojo si > 0, verde si = 0
+  - ✅ Si saldo pendiente = 0, se marca automáticamente como "Cobrado"
+  - ✅ Cambio de estado oculta/muestra campos correctamente
+- **Testing verificado** (iteration_39.json):
+  - Test 1: Default Cobrado ✅
+  - Test 2: Cobrado sin campos parciales ✅
+  - Test 3: Por cobrar muestra todos los campos ✅
+  - Test 4: Cálculo 1000-300=700 ✅
+  - Test 5: Switch back a Cobrado ✅
+  - Test 6: Guardar Cobrado ✅
+  - Test 7: Guardar Por cobrar con pago parcial ✅
+- **Archivos modificados**:
+  - `/app/frontend/src/components/finanzas/FinanzasModule.jsx` - IncomeModal component refactorizado
+- **data-testid agregados**: income-amount-input, income-paid-amount-input, income-pending-balance, income-source-select, income-description-input, income-date-input, income-due-date-input, income-save-btn, income-cancel-btn
+
 ### 2026-01-20: BUGFIX — Corrección de Timezone en Fechas de Finanzas ✅ CORREGIDO
 - **Estado**: Bug corregido y verificado
 - **Problema**: Las fechas se mostraban con un día de diferencia debido a conversión UTC/local

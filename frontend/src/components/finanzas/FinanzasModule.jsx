@@ -2745,4 +2745,401 @@ const PaymentHistoryModal = ({ income, payments, loading, onClose, onDelete, for
   );
 };
 
+// ==========================================
+// PRODUCTOS / SERVICIOS - COMPONENTES
+// ==========================================
+
+// Tab de Productos
+const ProductsTab = ({ products, onAdd, onEdit, onDelete, onToggleStatus, formatCurrency, loadData, token, companyId }) => {
+  const [filter, setFilter] = useState('all'); // 'all' | 'producto' | 'servicio'
+  const [statusFilter, setStatusFilter] = useState('activo'); // 'activo' | 'inactivo' | 'all'
+  const [searchTerm, setSearchTerm] = useState('');
+  const [allProducts, setAllProducts] = useState([]);
+  
+  // Cargar todos los productos (activos e inactivos)
+  useEffect(() => {
+    const fetchAllProducts = async () => {
+      try {
+        const response = await fetch(`/api/finanzas/products?company_id=${companyId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setAllProducts(data);
+        }
+      } catch (err) {
+        console.error('Error loading all products:', err);
+      }
+    };
+    
+    if (companyId) {
+      fetchAllProducts();
+    }
+  }, [companyId, token, products]);
+
+  // Filtrar productos
+  const filteredProducts = allProducts.filter(p => {
+    const matchesType = filter === 'all' || p.type === filter;
+    const matchesStatus = statusFilter === 'all' || p.status === statusFilter;
+    const matchesSearch = !searchTerm || 
+      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (p.description && p.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    return matchesType && matchesStatus && matchesSearch;
+  });
+
+  // Estadísticas
+  const totalProducts = allProducts.filter(p => p.type === 'producto').length;
+  const totalServices = allProducts.filter(p => p.type === 'servicio').length;
+  const activeCount = allProducts.filter(p => p.status === 'activo').length;
+
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">Productos y Servicios</h2>
+          <p className="text-sm text-gray-500">
+            {totalProducts} producto(s) • {totalServices} servicio(s) • {activeCount} activo(s)
+          </p>
+        </div>
+        <button
+          onClick={onAdd}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+        >
+          <Plus size={18} />
+          Nuevo Producto
+        </button>
+      </div>
+
+      {/* Filtros */}
+      <div className="flex flex-wrap items-center gap-3">
+        {/* Búsqueda */}
+        <div className="relative flex-1 min-w-[200px]">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            placeholder="Buscar por nombre o descripción..."
+          />
+        </div>
+        
+        {/* Filtro por tipo */}
+        <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+          <button
+            onClick={() => setFilter('all')}
+            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+              filter === 'all' ? 'bg-white shadow text-gray-900' : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Todos
+          </button>
+          <button
+            onClick={() => setFilter('producto')}
+            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+              filter === 'producto' ? 'bg-white shadow text-gray-900' : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            📦 Productos
+          </button>
+          <button
+            onClick={() => setFilter('servicio')}
+            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+              filter === 'servicio' ? 'bg-white shadow text-gray-900' : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            🔧 Servicios
+          </button>
+        </div>
+        
+        {/* Filtro por estado */}
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+        >
+          <option value="activo">Activos</option>
+          <option value="inactivo">Inactivos</option>
+          <option value="all">Todos</option>
+        </select>
+      </div>
+
+      {/* Tabla de productos */}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoría</th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Precio Base</th>
+              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">IGV</th>
+              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Estado</th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {filteredProducts.map((product) => (
+              <tr key={product.id} className={`hover:bg-gray-50 ${product.status === 'inactivo' ? 'opacity-60' : ''}`}>
+                <td className="px-4 py-3">
+                  <div>
+                    <p className="font-medium text-gray-900">{product.name}</p>
+                    {product.description && (
+                      <p className="text-xs text-gray-500 truncate max-w-xs">{product.description}</p>
+                    )}
+                  </div>
+                </td>
+                <td className="px-4 py-3 text-sm">
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                    product.type === 'servicio' 
+                      ? 'bg-blue-100 text-blue-700' 
+                      : 'bg-purple-100 text-purple-700'
+                  }`}>
+                    {product.type === 'servicio' ? '🔧 Servicio' : '📦 Producto'}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-sm text-gray-600">{product.category || '-'}</td>
+                <td className="px-4 py-3 text-right font-semibold text-gray-900">
+                  {formatCurrency(product.base_price)}
+                </td>
+                <td className="px-4 py-3 text-center">
+                  {product.includes_igv ? (
+                    <span className="text-xs text-green-600">✓ Incluye</span>
+                  ) : (
+                    <span className="text-xs text-gray-400">No incluye</span>
+                  )}
+                </td>
+                <td className="px-4 py-3 text-center">
+                  <button
+                    onClick={() => onToggleStatus(product)}
+                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium cursor-pointer transition-colors ${
+                      product.status === 'activo'
+                        ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {product.status === 'activo' ? '● Activo' : '○ Inactivo'}
+                  </button>
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    <button
+                      onClick={() => onEdit(product)}
+                      className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      title="Editar"
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                    <button
+                      onClick={() => onDelete(product.id)}
+                      className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Eliminar"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+            {filteredProducts.length === 0 && (
+              <tr>
+                <td colSpan="7" className="px-4 py-8 text-center text-gray-500">
+                  {searchTerm ? 'No se encontraron productos con ese término' : 'No hay productos registrados'}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Tip */}
+      <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+        <p className="text-sm text-emerald-700">
+          <strong>💡 Tip:</strong> Los productos y servicios activos aparecerán automáticamente en el formulario de "Nuevo Ingreso" para autocompletar precio y descripción.
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// Modal de Producto
+const ProductModal = ({ onClose, onSave, product }) => {
+  const [form, setForm] = useState({
+    name: product?.name || '',
+    type: product?.type || 'servicio',
+    base_price: product?.base_price?.toString() || '',
+    includes_igv: product?.includes_igv ?? true,
+    description: product?.description || '',
+    category: product?.category || '',
+    status: product?.status || 'activo',
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave({
+      ...form,
+      base_price: parseFloat(form.base_price),
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+        <div className="px-6 py-4 bg-gradient-to-r from-purple-500 to-indigo-600 text-white">
+          <h2 className="text-lg font-semibold">{product ? 'Editar' : 'Nuevo'} Producto / Servicio</h2>
+          <p className="text-sm text-purple-100">
+            {product ? 'Actualiza la información' : 'Registra un nuevo producto o servicio'}
+          </p>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Nombre */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+            <div className="relative">
+              <input
+                type="text"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="Ej: Clases de piano, Diseño de logo..."
+                required
+                data-testid="product-name-input"
+              />
+              <VoiceMicButton 
+                isNumeric={false}
+                onResult={(value) => setForm(prev => ({ ...prev, name: value }))}
+              />
+            </div>
+          </div>
+
+          {/* Tipo */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tipo *</label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, type: 'servicio' })}
+                className={`px-4 py-2.5 rounded-lg border-2 transition-all flex items-center justify-center gap-2 ${
+                  form.type === 'servicio'
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                    : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                }`}
+              >
+                🔧 Servicio
+              </button>
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, type: 'producto' })}
+                className={`px-4 py-2.5 rounded-lg border-2 transition-all flex items-center justify-center gap-2 ${
+                  form.type === 'producto'
+                    ? 'border-purple-500 bg-purple-50 text-purple-700'
+                    : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                }`}
+              >
+                📦 Producto
+              </button>
+            </div>
+          </div>
+
+          {/* Precio base */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Precio Base *</label>
+            <div className="relative">
+              <input
+                type="number"
+                value={form.base_price}
+                onChange={(e) => setForm({ ...form, base_price: e.target.value })}
+                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="0.00"
+                required
+                min="0.01"
+                step="0.01"
+                data-testid="product-price-input"
+              />
+              <VoiceMicButton 
+                isNumeric={true}
+                onResult={(value) => setForm(prev => ({ ...prev, base_price: value }))}
+              />
+            </div>
+          </div>
+
+          {/* IGV */}
+          <div className="flex items-center gap-3">
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.includes_igv}
+                onChange={(e) => setForm({ ...form, includes_igv: e.target.checked })}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+              <span className="ml-3 text-sm font-medium text-gray-700">El precio incluye IGV (18%)</span>
+            </label>
+          </div>
+
+          {/* Descripción */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+            <div className="relative">
+              <textarea
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
+                placeholder="Descripción detallada del producto o servicio..."
+                rows={2}
+              />
+            </div>
+          </div>
+
+          {/* Categoría */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+            <input
+              type="text"
+              value={form.category}
+              onChange={(e) => setForm({ ...form, category: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              placeholder="Ej: Educación, Diseño, Consultoría..."
+            />
+          </div>
+
+          {/* Estado (solo en edición) */}
+          {product && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+              <select
+                value={form.status}
+                onChange={(e) => setForm({ ...form, status: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              >
+                <option value="activo">Activo</option>
+                <option value="inactivo">Inactivo</option>
+              </select>
+            </div>
+          )}
+
+          {/* Botones */}
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              {product ? 'Guardar cambios' : 'Crear producto'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 export default FinanzasModule;

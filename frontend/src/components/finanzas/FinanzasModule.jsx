@@ -731,7 +731,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
             
             {/* ========== DASHBOARD DE RESUMEN FINANCIERO (FILTRADO POR PERÍODO) ========== */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-              {/* Card 1: Total del período (Verde) */}
+              {/* Card 1: Total del período (Verde) - DINERO REAL EN CAJA */}
               <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex items-start justify-between">
                   <div>
@@ -739,10 +739,10 @@ const FinanzasModule = ({ token, projects = [] }) => {
                       {filterMode === 'day' ? 'Total del día' : filterMode === 'month' ? 'Total del mes' : 'Total del año'}
                     </p>
                     <p className="text-3xl font-bold text-gray-900 mt-2">
-                      S/ {totalFilteredCollected.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      S/ {totalRealIncome.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
                     <p className="text-xs text-gray-400 mt-1">
-                      {filteredCollectedIncomes.length} ingreso(s) cobrado(s)
+                      {incomesWithPayment} ingreso(s) con pago recibido
                     </p>
                   </div>
                   <div className="p-3 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 text-white">

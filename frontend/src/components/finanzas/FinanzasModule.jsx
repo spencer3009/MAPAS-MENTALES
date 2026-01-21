@@ -41,6 +41,7 @@ const useFinanzas = (token) => {
 // Tabs del módulo
 const TABS = [
   { id: 'summary', label: 'Resumen', icon: BarChart3 },
+  { id: 'balance', label: 'Balance General', icon: TrendingUp },
   { id: 'incomes', label: 'Ingresos', icon: ArrowUpCircle },
   { id: 'expenses', label: 'Gastos', icon: ArrowDownCircle },
   { id: 'investments', label: 'Inversiones', icon: PiggyBank },

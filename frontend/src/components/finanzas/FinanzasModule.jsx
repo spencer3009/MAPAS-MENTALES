@@ -2158,7 +2158,7 @@ const IncomeModal = ({ onClose, onSave, sources, projects, products = [], token 
 };
 
 // Modal de Gasto
-const ExpenseModal = ({ onClose, onSave, categories, projects, token }) => {
+const ExpenseModal = ({ onClose, onSave, categories, projects, fixedExpenses = [], token }) => {
   const [form, setForm] = useState({
     amount: '',
     category: 'otros',
@@ -2173,16 +2173,52 @@ const ExpenseModal = ({ onClose, onSave, categories, projects, token }) => {
     due_date: '',
     project_id: '',
     includes_igv: false, // Por defecto no incluye IGV
+    is_fixed_expense: false, // Si viene de un gasto fijo
+    fixed_expense_id: null, // ID del gasto fijo asociado
   });
 
   // Estado para el contacto/proveedor seleccionado
   const [selectedVendor, setSelectedVendor] = useState(null);
+  
+  // Estado para el autocompletado de gastos fijos
+  const [fixedExpenseSearch, setFixedExpenseSearch] = useState('');
+  const [showFixedExpenseDropdown, setShowFixedExpenseDropdown] = useState(false);
 
   // Calcular IGV en tiempo real para mostrar al usuario
   const IGV_RATE = 0.18;
   const totalAmount = parseFloat(form.amount) || 0;
   const baseImponible = form.includes_igv ? totalAmount / (1 + IGV_RATE) : totalAmount;
   const igvGasto = form.includes_igv ? totalAmount - baseImponible : 0;
+
+  // Filtrar gastos fijos activos que coincidan con la búsqueda
+  const filteredFixedExpenses = fixedExpenses.filter(fe => 
+    fe.status === 'activo' && 
+    (fe.name.toLowerCase().includes(fixedExpenseSearch.toLowerCase()) ||
+     (fe.category && fe.category.toLowerCase().includes(fixedExpenseSearch.toLowerCase())))
+  );
+
+  // Seleccionar un gasto fijo del autocompletado
+  const handleSelectFixedExpense = (fixedExpense) => {
+    setForm(prev => ({
+      ...prev,
+      amount: fixedExpense.estimated_amount.toString(),
+      category: fixedExpense.category || 'otros',
+      description: fixedExpense.name,
+      includes_igv: fixedExpense.includes_igv || false,
+      vendor_name: fixedExpense.vendor_name || '',
+      vendor_id: fixedExpense.vendor_id || null,
+      project_id: fixedExpense.project_id || '',
+      is_fixed_expense: true,
+      fixed_expense_id: fixedExpense.id,
+    }));
+    setFixedExpenseSearch(fixedExpense.name);
+    setShowFixedExpenseDropdown(false);
+    
+    // Si tiene proveedor, actualizar también
+    if (fixedExpense.vendor_name) {
+      setSelectedVendor({ id: fixedExpense.vendor_id, name: fixedExpense.vendor_name });
+    }
+  };
 
   const handleVendorChange = (contact) => {
     setSelectedVendor(contact);
@@ -2227,6 +2263,63 @@ const ExpenseModal = ({ onClose, onSave, categories, projects, token }) => {
               <option value="pending">Por pagar</option>
             </select>
           </div>
+
+          {/* ========== AUTOCOMPLETADO DE GASTOS FIJOS ========== */}
+          {fixedExpenses.length > 0 && (
+            <div className="relative">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                <span className="flex items-center gap-2">
+                  <Repeat size={14} className="text-orange-500" />
+                  Buscar gasto fijo (opcional)
+                </span>
+              </label>
+              <div className="relative">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  value={fixedExpenseSearch}
+                  onChange={(e) => {
+                    setFixedExpenseSearch(e.target.value);
+                    setShowFixedExpenseDropdown(true);
+                    // Limpiar el gasto fijo seleccionado si se edita manualmente
+                    if (form.is_fixed_expense) {
+                      setForm(prev => ({ ...prev, is_fixed_expense: false, fixed_expense_id: null }));
+                    }
+                  }}
+                  onFocus={() => setShowFixedExpenseDropdown(true)}
+                  className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  placeholder="Buscar gasto fijo para autocompletar..."
+                  data-testid="fixed-expense-search"
+                />
+                {form.is_fixed_expense && (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">
+                    Gasto fijo
+                  </span>
+                )}
+              </div>
+              
+              {/* Dropdown de gastos fijos */}
+              {showFixedExpenseDropdown && fixedExpenseSearch && filteredFixedExpenses.length > 0 && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                  {filteredFixedExpenses.map(fe => (
+                    <button
+                      key={fe.id}
+                      type="button"
+                      onClick={() => handleSelectFixedExpense(fe)}
+                      className="w-full px-4 py-3 text-left hover:bg-orange-50 border-b border-gray-100 last:border-0"
+                    >
+                      <div className="font-medium text-gray-900">{fe.name}</div>
+                      <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
+                        <span>S/ {fe.estimated_amount.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
+                        <span className="text-orange-600">{fe.category}</span>
+                        {fe.includes_igv && <span className="text-green-600">(inc. IGV)</span>}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* ========== MONTO CON VOZ ========== */}
           <div>

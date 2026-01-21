@@ -1,68 +1,58 @@
 <analysis>**original_problem_statement:**
-The user's primary goal is to transform their MindoraMap application into a professional-grade financial management tool. This session focused on a series of significant enhancements to the Finance module.
+The user's primary goal is to transform their MindoraMap application into a professional-grade financial management tool. This session continued the enhancement of the Finance module with several key features.
 
-The user's explicit requests, which were implemented in this session, were:
-1.  **UX/Logic Redesign for New Income Modal:** The user requested to reorder the New Income form to prioritize the  (Status) field, setting its default to Cobrado (Collected). The more complex partial payment fields should only appear conditionally when the status is set to Por cobrar (Accounts Receivable).
-2.  **Correct Accounting for Partial Payments:** The user mandated a critical accounting logic change: in the income list and all financial dashboards, only the  (amount paid) for Por cobrar items should be counted as real income, with the  (total amount) serving only as a reference.
-3.  **Speech-to-Text in New Expense Form:** Add a microphone icon to the Monto (Amount) and Descripción (Description) fields to allow voice input using the browser's native Web Speech API. The amount field must correctly parse numbers from spoken words.
-4.  **Professional Accounts Receivable System:** Implement a comprehensive system for managing partial payments. This includes a new backend model (), a dedicated Por Cobrar tab with a summary dashboard (Total Billed, Total Paid, Pending Balance), and a modal to add and track multiple partial payments for each invoice.
-5.  **Products/Services Module:** Create a new module to manage a catalog of products and services. This module must integrate with the New Income form, allowing a user to select a product/service to auto-fill the description and price, speeding up data entry.
-6.  **Full IGV (VAT) Determination:** Implement a proper IGV (VAT) calculation system. This required adding a toggle to the New Expense form to specify if an expense includes IGV. The main finance dashboard must then display the net IGV to pay or in favor, calculated as .
+The user's explicit requests for this session were:
+1.  **IGV (VAT) Display Enhancement:** Show Subtotal and IGV columns in the main Income and Expense tables, and improve the IGV summary section on the main finance dashboard.
+2.  **Expense Form UX Improvement:** Move the Estado (Status) field to the top of the New Expense form and set its default value to Pagado (Paid).
+3.  **Fixed Expenses Module (Major Feature):** Implement a comprehensive system for managing recurring Fixed Expenses. This includes creating a catalog of fixed expenses, an autocomplete search field in the New Expense form to auto-fill data, and mandatory, automated reminders via both Email (using Resend) and WhatsApp.
+4.  **General Balance Module (Major Feature):** Create a new Balance General view based on Real Cash flow. This view must clearly show whether the user has earned or lost money over a selected period by calculating . It should also provide non-calculatory context for accounts receivable/payable.
+5.  **Customizable Expense Categories:** Allow users to create, edit, and delete their own custom expense categories, which are then available in the New Expense form dropdown.
+6.  **Terminology Change:** Rename Categoría (Category) to Concepto del gasto (Expense Concept) throughout the expense-related UI.
+7.  **Bug/Clarification:** The user reported that the product/service autocomplete was missing from the New Income form. The agent investigated and confirmed the feature was already implemented and working correctly.
 
 **User's preferred language**: Spanish
 
 **what currently exists?**
-The application is a full-stack mind mapping tool with a highly advanced finance module.
--   **Finance Module UI/UX:** The New Income modal is optimized for common use cases, defaulting to Cobrado and conditionally showing complexity. The New Expense modal supports speech-to-text for faster data entry.
--   **Accounts Receivable:** A complete, professional-grade Por Cobrar system is in place. It features a dedicated tab with a summary dashboard, a detailed table tracking invoices, and functionality to add multiple partial payments to any invoice, with automatic status updates (e.g.,  ->  -> ).
--   **Product Catalog:** A new Productos / Servicios module allows the user to create and manage a catalog of items with predefined prices and descriptions. This catalog is integrated into the New Income form to enable quick, consistent data entry.
--   **Accurate Accounting Logic:** The application's financial calculations are now robust. Dashboards and income lists correctly distinguish between real income (money received) and accounts receivable (money promised), providing an accurate cash flow picture.
--   **IGV Determination:** The finance dashboard correctly calculates and displays the net IGV (VAT) to be paid or held as a credit, taking into account both sales and IGV-bearing expenses.
+The application is a full-stack mind mapping tool with a highly advanced and feature-rich finance module. The key additions from this session are:
+-   **Fixed Expenses System:** A complete module for creating, managing, and tracking recurring expenses. It integrates with the main expense form via an autocomplete field and has a backend scheduler for sending mandatory email (Resend) and WhatsApp reminders.
+-   **General Balance View:** A dedicated Balance General tab that provides a clear, real-time Real Cash profit/loss statement for any given period. It visually indicates profit (green) or loss (red) and includes context for pending payables/receivables.
+-   **Customizable Expense Concepts:** The application now has a UI for users to manage their own list of expense concepts (formerly categories), which are dynamically loaded into the expense creation form.
+-   **Enhanced UI/UX:** The Income and Expense tables now provide a full breakdown of Subtotal and IGV. The New Expense form has been reordered for better workflow.
 
 **Last working item**:
--   **Last item agent was working:** Implementing the full IGV (VAT) Determination logic. This involved updating the backend  model, modifying the API to calculate tax from expenses, adding a toggle switch to the frontend , and updating the main dashboard's calculation and display logic to show the net IGV ().
+-   **Last item agent was working:** The agent finished implementing the user's request to rename all instances of Categoría to Concepto del gasto in the frontend. This involved changing labels, button text, and modal titles in .
 -   **Status:** USER VERIFICATION PENDING
 -   **Agent Testing Done:** Y
--   **Which testing method agent to use?** NA
+-   **Which testing method agent to use?** screenshot tool
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
 -   **Issue 1: Production Deployment Stabilization (P0 - BLOCKER)**
 -   **Issue 2: Implement Attachment Upload Functionality (P1)**
--   **Issue 3: WhatsApp Message Template Not Approved (P2 - BLOCKED)**
 
 **Issues Detail:**
 -   **Issue 1: Production Deployment Stabilization**
-    -   **Attempted fixes:** This is a recurring issue from previous forks. The user needs guidance to push the latest code to their live environment.
+    -   **Attempted fixes:** This recurring issue was not addressed in this session. The user has many new features in the preview environment that are not live.
     -   **Next debug checklist:**
-        1.  Proactively remind the user that the newly completed features are only in the preview environment.
-        2.  Instruct the user to use the Save to GitHub feature to push all recent changes.
-        3.  Guide them to trigger a Re-Deploy from their Emergent platform dashboard to make the features live.
-    -   **Why fix this issue and what will be achieved with the fix?** This is a critical blocker preventing the user from benefiting from any of the recently developed features in their production application.
-    -   **Status:** IN PROGRESS
+        1.  Proactively inform the user that all the newly completed features (Fixed Expenses, General Balance, etc.) are only in the preview environment.
+        2.  Instruct the user to use the Save to GitHub feature to push all recent changes to their repository.
+        3.  Guide them on how to trigger a Re-Deploy from their Emergent platform dashboard to make the features live.
+    -   **Why fix this issue and what will be achieved with the fix?** This is a critical blocker preventing the user from using any of the valuable features developed in the last several sessions in their production application.
+    -   **Status:** NOT STARTED
     -   **Is recurring issue?** Y
     -   **Should Test frontend/backend/both after fix?** Both.
     -   **Blocked on other issue:** None.
 
 -   **Issue 2: Implement Attachment Upload Functionality**
-    -   **Attempted fixes:** The UI for attachments is partially implemented in .
+    -   **Attempted fixes:** No new work was done on this. The UI for attachments is partially implemented in .
     -   **Next debug checklist:**
-        1.  Create a new backend endpoint (e.g., ) to handle file uploads.
-        2.  Implement the file upload logic in the  function in .
+        1.  Create a new backend endpoint (e.g., ) to handle file uploads, storing files in a persistent location.
+        2.  Implement the file upload logic in the  function in , possibly using chunked uploads.
         3.  Implement UI to display, download, and delete existing attachments for a task.
-    -   **Why fix this issue and what will be achieved with the fix?** This will complete the Adjuntos (Attachments) feature in the task details panel.
+    -   **Why fix this issue and what will be achieved with the fix?** This will complete the Adjuntos (Attachments) feature in the task details panel, which has been pending.
     -   **Status:** NOT STARTED
     -   **Is recurring issue?** N
     -   **Should Test frontend/backend/both after fix?** Both.
-    -   **Blocked on other issue:** None.
-
--   **Issue 3: WhatsApp Message Template Not Approved**
-    -   **Attempted fixes:** Backend integration with Twilio is complete.
-    -   **Next debug checklist:** The agent cannot proceed. The issue is blocked pending user action to get their message template approved in their Twilio Console.
-    -   **Why fix this issue and what will be achieved with the fix?** Enables the WhatsApp reminder feature for tasks and events.
-    -   **Status:** BLOCKED
-    -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Backend.
     -   **Blocked on other issue:** None.
 
 **In progress Task List**:
@@ -70,8 +60,8 @@ The application is a full-stack mind mapping tool with a highly advanced finance
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks:**
-    *   **P0 - Refactor :** This monolithic file must be broken down into smaller, manageable components. This is a top-priority technical debt task.
-    *   **P1 - Finance Module (Phase 3 - Por Pagar):** Enhance the Por Pagar (Accounts Payable) functionality, likely mirroring the professional system just built for Por Cobrar. The user hinted at this in a recent message.
+    *   **P0 - Refactor  (CRITICAL):** This monolithic file is now over 6000 lines and is a severe technical debt. It must be broken down into smaller, manageable components before any new features are added. This is the highest priority task.
+    *   **P1 - Finance Module (Phase 3 - Por Pagar):** Enhance the Por Pagar (Accounts Payable) functionality, likely mirroring the professional system built for Por Cobrar.
     *   **P1 - Task Node Logic (Phase 2):** Implement sub-task logic and automatic task completion within the mind map.
     *   **P1 - Hybrid Reminders:** Add support for both personal and company-wide reminders.
 *   **Future Tasks:**
@@ -82,36 +72,35 @@ The application is a full-stack mind mapping tool with a highly advanced finance
     *   **P2 - Finance Module IA:** Implement AI-driven financial analysis.
 
 **Completed work in this session**
--   **UX/Logic Redesign of New Income Modal:** Reordered fields, set Cobrado as default, and implemented conditional logic for partial payments ().
--   **Correct Accounting for Partial Payments:** Updated the income list and dashboards to calculate totals based on  (real cash received) instead of  ().
--   **Speech-to-Text for New Expense Form:** Implemented voice input for the Amount and Description fields using the native Web Speech API ().
--   **Professional Accounts Receivable (Por Cobrar) System:** Built a full-featured system with a dedicated dashboard, partial payment tracking, and a new backend model/API (, , ).
--   **Products/Services Module:** Created a new module to manage a product/service catalog and integrated it with the New Income form for auto-completion (, , ).
--   **IGV (VAT) Determination System:** Implemented a correct net IGV calculation (Sales - Expenses) and updated the dashboard and backend models accordingly (, , ).
--   **Bug Fix:** Resolved an issue where the finance module's date filter was not correctly displaying data for the selected period ().
+-   **Fixed Expenses System:** Implemented a full-featured module with a dedicated UI tab, creation/edit modals, and backend logic for a catalog of recurring expenses. This includes an autocomplete feature in the New Expense form and a backend scheduler for mandatory Email (Resend) and WhatsApp reminders.
+-   **General Balance Module:** Created a new Balance General tab in the finance module that provides a real-cash P&L statement, visually showing profit or loss for a selected period.
+-   **Customizable Expense Concepts:** Implemented CRUD functionality for expense categories (now concepts), allowing users to create, edit, and delete their own via a new management modal.
+-   **IGV Display Enhancements:** Added Subtotal and IGV columns to the Income and Expense tables and improved the IGV summary dashboard.
+-   **UX Improvement for Expense Form:** Reordered the New Expense form to place the Status field at the top with Paid as the default.
+-   **Terminology Update:** Renamed Categoría to Concepto del gasto across the frontend.
+-   **Issue Investigation:** Confirmed that the Product/Service Autocomplete in the New Income form was already implemented and fully functional, clarifying the user's concern.
+-   **Resolved Blocker:** The user confirmed that the WhatsApp message templates have been approved, unblocking the Twilio integration.
 
 **Earlier issues found/mentioned but not fixed**
 (None)
 
 **Known issue recurrence from previous fork**
--   **Issue recurrence in previous fork:** Production deployment pipeline issues and WhatsApp reminder approval.
--   **Recurrence count:** 5+
--   **Status:** Production issue is IN PROGRESS (P0 Blocker). WhatsApp issue is BLOCKED.
+-   **Issue recurrence in previous fork:** Production deployment pipeline issues.
+-   **Recurrence count:** 6+
+-   **Status:** NOT STARTED
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Monolithic Frontend Component:**  has grown excessively large, encapsulating several distinct business domains (Incomes, Expenses, Receivables, Products). While functional, it poses a significant maintenance and scalability risk.
--   **Native Browser API Integration:** The use of the Web Speech API for voice input demonstrates how to add modern features without relying on external libraries.
--   **Client-Side Financial Calculations:** The main dashboard performs complex, real-time calculations (Net IGV, subtotals, totals) based on filtered data, providing an interactive user experience.
--   **Backend Data Integrity:** Critical accounting logic, such as calculating  and  upon expense creation, is handled on the backend to ensure data consistency and accuracy.
+-   **Monolithic Frontend Component:**  has become critically oversized. It is a major liability for maintainability and future development. The agent continued adding new, distinct components (, , , ) directly into this file.
+-   **Real-Cash Accounting:** The new Balance General module is built on the principle of caja real (real cash), correctly fetching and calculating totals based only on paid transactions, providing an accurate P&L.
+-   **Background Task Scheduling:** A new scheduler job was added to the existing APScheduler implementation in  to handle sending reminders for fixed expenses.
+-   **Dynamic Data Management:** The custom expense concepts feature demonstrates a full CRUD cycle for user-defined data, from backend API to a frontend management modal and dynamic population of form dropdowns.
 
 **key DB schema**
--   **finanzas_incomes:**  field is now an enum: , , .
--   **finanzas_expenses:** New fields added: , , .
--   **finanzas_partial_payments (New Collection):** 
--   **finanzas_products_services (New Collection):** 
+-   **finanzas_fixed_expenses (New Collection):** 
+-   **finanzas_categories (Updated):** This collection is no longer just for pre-defined values. It now stores user-created custom categories with fields like .
 
 **All files of reference**
 -   
@@ -120,58 +109,47 @@ The application is a full-stack mind mapping tool with a highly advanced finance
 -   
 
 **Areas that need refactoring**:
--   ** (CRITICAL):** This file is now over 4000 lines and must be broken down. The next agent should prioritize extracting the following into their own component files:
-    -    & 
-    -    & 
-    -   
-    -   
-    -   
-    -   Dashboard summary cards
--   **:** Still a large, single file. All finance-related routes should be moved into a dedicated router file (e.g., ).
+-   ** (CRITICAL - P0):** This file must be the first priority. It has grown to an unmanageable size. The next agent must propose and execute a plan to extract its main sections into separate component files.
+    -   **To Extract:** , , , , , , , , , , and dashboard summary cards.
+-   **:** Continues to grow. All finance-related routes should be moved into a dedicated FastAPI router (e.g., ) to improve organization.
 
 **key api endpoints**
 -   
 -   
 -   
--    (Updated to calculate IGV)
--    (Updated to recalculate IGV)
+-   
 
 **Critical Info for New Agent**
 -   **You MUST communicate with the user in Spanish.**
--   **CRITICAL REFACTORING NEEDED:** Your first major task should be to address the technical debt in . Propose a plan to the user to break this monolithic component into smaller, more manageable pieces before adding new features. This will improve maintainability and prevent future development from slowing down.
--   **Next Feature:** The user has strongly hinted that enhancing the Por Pagar (Accounts Payable) module is the next desired feature. Plan to build a system similar to the one just created for Por Cobrar.
--   **Deployment Blocker:** The Production Deployment issue is a recurring, high-priority blocker that you must help the user resolve.
+-   **CRITICAL REFACTORING NEEDED:** Your first and most important task is to address the severe technical debt in . Do not add any new features until you have proposed and executed a plan to break this monolith into smaller components. The application's health depends on it.
+-   **Address P0 Blocker:** The second priority is to guide the user through deploying their application to production. They have many features they cannot use.
+-   **WhatsApp is Active:** The user has confirmed the Twilio integration is unblocked and ready for use. Reminders for fixed expenses should be sent via both Resend (email) and Twilio (WhatsApp) as implemented.
 
 **documents and test reports created in this job**
--   
--   
--   
--   
--   
--   
--   
+-    (overwritten with latest summary)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **Request:** Implement a full IGV (VAT) determination system (Sales - Expenses). (Completed)
-2.  **Request:** Implement a Products/Services module and integrate it with the New Income form. (Completed)
-3.  **Request:** Implement a professional Accounts Receivable system with partial payments. (Completed)
-4.  **Request:** Implement speech-to-text (voice input) for the New Expense form. (Completed)
-5.  **Request:** Correct the accounting logic in the income list to show  as the primary figure for partially paid items. (Completed)
-6.  **Request:** Redesign the UX of the New Income modal to be simpler and more logical. (Completed)
-7.  (Previous Handoff) Request: Implement partial payments in the New Income form. (Completed)
-8.  (Previous Handoff) Bug Report: Fix the timezone bug. (Completed)
-9.  (Previous Handoff) Request: Add improved date filters and health status. (Completed)
-10. (Previous Handoff) Request: Add a financial summary dashboard. (Completed)
+1.  **Request:** Rename Categoría to Concepto del gasto. (Completed)
+2.  **Request:** Allow creating and editing expense categories. (Completed)
+3.  **Confirmation:** Clarified that the product autocomplete in the income form was the feature they were asking for, which was already present. (Completed)
+4.  **Request:** Add product autocomplete to the new income form. (Investigated and confirmed it was already implemented).
+5.  **Request:** Implement the Balance General module. (Completed)
+6.  **Request:** Implement the Fixed Expenses module. (Completed)
+7.  **Clarification:** Provided all necessary details for the Fixed Expenses feature (use Resend, new UI tab, configurable reminder days). (Completed)
+8.  **Confirmation:** Confirmed the WhatsApp channel is approved and ready for use, unblocking the Twilio integration. (Completed)
+9.  **Request:** For the New Expense form, move Estado to the top and default it to Pagado. (Completed)
+10. **Request:** Improve IGV visualization in tables and the dashboard. (Completed)
 
 **Project Health Check:**
 -   **Broken:** None
 -   **Mocked:** None
 
 **3rd Party Integrations**
--   **Twilio:** For WhatsApp messages. The integration is code-complete but **blocked** by the user's need to get their message template approved in the Twilio console.
+-   **Twilio:** For WhatsApp messages. **Status: ACTIVE**. The user has confirmed their templates are approved.
+-   **Resend:** For email reminders. **Status: ACTIVE**. Integrated for the new Fixed Expenses feature.
 
 **Testing status**
--   **Testing agent used after significant changes:** YES (used after every major feature implementation)
+-   **Testing agent used after significant changes:** NO
 -   **Troubleshoot agent used after agent stuck in loop:** NO
 -   **Test files created:** []
 -   **Known regressions:** None.
@@ -181,5 +159,5 @@ The application is a full-stack mind mapping tool with a highly advanced finance
 -   **Password:** 
 
 **What agent forgot to execute**
--   The agent did not address the critical technical debt in . Despite adding thousands of lines of code to the file, no refactoring was performed, making future work significantly harder.
--   The agent did not address the long-standing, P0 Production Deployment Stabilization issue. The user is still unable to use any of the new features in their live environment.</analysis>
+-   **Refactoring :** The agent completely ignored the critical technical debt from the previous handoff. Instead of refactoring, they added over 2000 more lines of code (including multiple new components) into this single file, making the problem significantly worse.
+-   **Production Deployment Guidance:** The agent did not address the P0 blocker of guiding the user to deploy the application. The user still cannot access any of the new features in their live environment.</analysis>

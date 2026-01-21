@@ -1121,7 +1121,7 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
     source: 'ventas',
     description: '',
     date: getLocalDateString(),
-    status: 'pending',
+    status: 'collected', // DEFAULT: Cobrado (caso más común)
     client_name: '',
     client_id: null,
     due_date: '',
@@ -1130,15 +1130,10 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
   
   const [selectedContact, setSelectedContact] = useState(null);
 
-  // Calcular saldo pendiente en tiempo real
+  // Calcular saldo pendiente en tiempo real (solo aplica cuando status es 'pending')
   const totalAmount = parseFloat(form.amount) || 0;
   const paidAmount = parseFloat(form.paid_amount) || 0;
   const pendingBalance = Math.max(0, totalAmount - paidAmount);
-  
-  // Determinar el estado efectivo basado en el saldo
-  const effectiveStatus = form.status === 'pending' 
-    ? (pendingBalance === 0 && totalAmount > 0 ? 'collected' : 'pending')
-    : form.status;
 
   const handleContactChange = (contact) => {
     setSelectedContact(contact);
@@ -1154,8 +1149,9 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
     setForm(prev => ({
       ...prev,
       status: newStatus,
-      // Si cambia a "Cobrado", el pago recibido = monto total
-      paid_amount: newStatus === 'collected' ? prev.amount : prev.paid_amount,
+      // Si cambia a "Cobrado", limpiar campos de pago parcial
+      paid_amount: newStatus === 'collected' ? '' : prev.paid_amount,
+      due_date: newStatus === 'collected' ? '' : prev.due_date,
     }));
   };
 
@@ -1176,14 +1172,19 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
     e.preventDefault();
     
     const finalAmount = parseFloat(form.amount);
+    
+    // Si es "Cobrado", el pago = monto total, saldo = 0
+    // Si es "Por cobrar", calcular según lo ingresado
     const finalPaidAmount = form.status === 'collected' 
       ? finalAmount 
       : (parseFloat(form.paid_amount) || 0);
-    const finalPendingBalance = Math.max(0, finalAmount - finalPaidAmount);
+    const finalPendingBalance = form.status === 'collected'
+      ? 0
+      : Math.max(0, finalAmount - finalPaidAmount);
     
-    // Determinar estado final
+    // Determinar estado final (si el pago completa el saldo, marcar como cobrado)
     let finalStatus = form.status;
-    if (form.status === 'pending' && finalPendingBalance === 0) {
+    if (form.status === 'pending' && finalPendingBalance === 0 && finalAmount > 0) {
       finalStatus = 'collected';
     }
     
@@ -1195,7 +1196,7 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
       status: finalStatus,
       project_id: form.project_id || null,
       project_name: projects.find(p => p.id === form.project_id)?.name || null,
-      due_date: form.due_date || null,
+      due_date: form.status === 'pending' ? (form.due_date || null) : null,
     });
   };
 
@@ -1208,7 +1209,45 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
         </div>
         
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {/* Monto Total */}
+          {/* ========== ESTADO AL INICIO (CAMPO PRINCIPAL) ========== */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Tipo de ingreso *
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => handleStatusChange('collected')}
+                className={`px-4 py-3 rounded-xl border-2 transition-all flex items-center justify-center gap-2 font-medium ${
+                  form.status === 'collected'
+                    ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                    : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                }`}
+              >
+                <CheckCircle2 size={18} />
+                Cobrado
+              </button>
+              <button
+                type="button"
+                onClick={() => handleStatusChange('pending')}
+                className={`px-4 py-3 rounded-xl border-2 transition-all flex items-center justify-center gap-2 font-medium ${
+                  form.status === 'pending'
+                    ? 'border-amber-500 bg-amber-50 text-amber-700'
+                    : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                }`}
+              >
+                <Clock size={18} />
+                Por cobrar
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mt-1.5">
+              {form.status === 'collected' 
+                ? 'Dinero ya recibido - Ingreso efectivo' 
+                : 'Venta a crédito o pago pendiente'}
+            </p>
+          </div>
+
+          {/* ========== MONTO ========== */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {form.status === 'pending' ? 'Monto Total *' : 'Monto *'}
@@ -1222,18 +1261,19 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
               required
               min="0.01"
               step="0.01"
+              data-testid="income-amount-input"
             />
             {form.status === 'pending' && (
               <p className="text-xs text-gray-500 mt-1">Valor total del servicio o venta</p>
             )}
           </div>
 
-          {/* Campos adicionales para "Por cobrar" */}
+          {/* ========== CAMPOS DE PAGO PARCIAL (SOLO SI "POR COBRAR") ========== */}
           {form.status === 'pending' && (
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-4">
               <div className="flex items-center gap-2 text-amber-700">
                 <Wallet size={18} />
-                <span className="text-sm font-medium">Detalle de pago</span>
+                <span className="text-sm font-medium">Detalle de pago parcial</span>
               </div>
               
               {/* Pago recibido (a cuenta) */}
@@ -1250,6 +1290,7 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
                   min="0"
                   step="0.01"
                   max={form.amount || undefined}
+                  data-testid="income-paid-amount-input"
                 />
                 <p className="text-xs text-gray-500 mt-1">Monto que el cliente paga ahora (puede ser 0)</p>
               </div>
@@ -1259,11 +1300,14 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Saldo pendiente
                 </label>
-                <div className={`w-full px-3 py-2 rounded-lg font-semibold ${
-                  pendingBalance > 0 
-                    ? 'bg-red-100 text-red-700 border border-red-200' 
-                    : 'bg-green-100 text-green-700 border border-green-200'
-                }`}>
+                <div 
+                  className={`w-full px-3 py-2 rounded-lg font-semibold ${
+                    pendingBalance > 0 
+                      ? 'bg-red-100 text-red-700 border border-red-200' 
+                      : 'bg-green-100 text-green-700 border border-green-200'
+                  }`}
+                  data-testid="income-pending-balance"
+                >
                   S/ {pendingBalance.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
@@ -1275,12 +1319,14 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
             </div>
           )}
 
+          {/* ========== FUENTE ========== */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Fuente *</label>
             <select
               value={form.source}
               onChange={(e) => setForm({ ...form, source: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              data-testid="income-source-select"
             >
               {sources.map((s) => (
                 <option key={s.id} value={s.id}>{s.name}</option>
@@ -1288,6 +1334,7 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
             </select>
           </div>
 
+          {/* ========== DESCRIPCIÓN ========== */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
             <input
@@ -1296,33 +1343,24 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               placeholder="Ej: Pago de cliente ABC"
+              data-testid="income-description-input"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha *</label>
-              <input
-                type="date"
-                value={form.date}
-                onChange={(e) => setForm({ ...form, date: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-              <select
-                value={form.status}
-                onChange={(e) => handleStatusChange(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-              >
-                <option value="pending">Por cobrar</option>
-                <option value="collected">Cobrado</option>
-              </select>
-            </div>
+          {/* ========== FECHA ========== */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Fecha *</label>
+            <input
+              type="date"
+              value={form.date}
+              onChange={(e) => setForm({ ...form, date: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              required
+              data-testid="income-date-input"
+            />
           </div>
 
+          {/* ========== CLIENTE ========== */}
           <div>
             <ContactAutocomplete
               token={token}
@@ -1334,6 +1372,7 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
             />
           </div>
 
+          {/* ========== FECHA DE VENCIMIENTO (SOLO SI "POR COBRAR") ========== */}
           {form.status === 'pending' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de vencimiento</label>
@@ -1341,11 +1380,13 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
                 type="date"
                 value={form.due_date}
                 onChange={(e) => setForm({ ...form, due_date: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                data-testid="income-due-date-input"
               />
             </div>
           )}
 
+          {/* ========== PROYECTO ASOCIADO ========== */}
           {projects.length > 0 && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Proyecto asociado</label>
@@ -1353,6 +1394,7 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
                 value={form.project_id}
                 onChange={(e) => setForm({ ...form, project_id: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                data-testid="income-project-select"
               >
                 <option value="">Sin proyecto</option>
                 {projects.map((p) => (
@@ -1362,7 +1404,7 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
             </div>
           )}
 
-          {/* Resumen antes de guardar */}
+          {/* ========== RESUMEN (SOLO SI "POR COBRAR") ========== */}
           {form.status === 'pending' && totalAmount > 0 && (
             <div className="bg-gray-50 rounded-lg p-3 text-sm">
               <p className="text-gray-600">
@@ -1378,17 +1420,20 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
             </div>
           )}
 
+          {/* ========== BOTONES ========== */}
           <div className="flex gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
               className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              data-testid="income-cancel-btn"
             >
               Cancelar
             </button>
             <button
               type="submit"
               className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+              data-testid="income-save-btn"
             >
               Guardar
             </button>

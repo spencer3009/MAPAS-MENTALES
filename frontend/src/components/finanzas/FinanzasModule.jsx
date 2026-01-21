@@ -2526,6 +2526,9 @@ const IncomeModal = ({ onClose, onSave, sources, projects, products = [], token 
 
 // Modal de Gasto
 const ExpenseModal = ({ onClose, onSave, categories, projects, fixedExpenses = [], token }) => {
+  // NUEVO: Tipo de gasto (fijo o puntual) - default: puntual
+  const [expenseType, setExpenseType] = useState('puntual'); // 'fijo' | 'puntual'
+  
   const [form, setForm] = useState({
     amount: '',
     category: 'otros',
@@ -2550,6 +2553,7 @@ const ExpenseModal = ({ onClose, onSave, categories, projects, fixedExpenses = [
   // Estado para el autocompletado de gastos fijos
   const [fixedExpenseSearch, setFixedExpenseSearch] = useState('');
   const [showFixedExpenseDropdown, setShowFixedExpenseDropdown] = useState(false);
+  const [selectedFixedExpense, setSelectedFixedExpense] = useState(null);
 
   // Calcular IGV en tiempo real para mostrar al usuario
   const IGV_RATE = 0.18;
@@ -2564,8 +2568,35 @@ const ExpenseModal = ({ onClose, onSave, categories, projects, fixedExpenses = [
      (fe.category && fe.category.toLowerCase().includes(fixedExpenseSearch.toLowerCase())))
   );
 
+  // Resetear formulario al cambiar tipo de gasto
+  const handleExpenseTypeChange = (type) => {
+    setExpenseType(type);
+    setFixedExpenseSearch('');
+    setSelectedFixedExpense(null);
+    setShowFixedExpenseDropdown(false);
+    setSelectedVendor(null);
+    setForm({
+      amount: '',
+      category: 'otros',
+      description: '',
+      date: getLocalDateString(),
+      status: 'paid',
+      vendor_name: '',
+      vendor_id: null,
+      is_recurring: false,
+      recurrence_period: '',
+      priority: 'medium',
+      due_date: '',
+      project_id: '',
+      includes_igv: false,
+      is_fixed_expense: type === 'fijo',
+      fixed_expense_id: null,
+    });
+  };
+
   // Seleccionar un gasto fijo del autocompletado
   const handleSelectFixedExpense = (fixedExpense) => {
+    setSelectedFixedExpense(fixedExpense);
     setForm(prev => ({
       ...prev,
       amount: fixedExpense.estimated_amount.toString(),
@@ -2598,6 +2629,13 @@ const ExpenseModal = ({ onClose, onSave, categories, projects, fixedExpenses = [
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Validación: si es gasto fijo, debe tener uno seleccionado
+    if (expenseType === 'fijo' && !selectedFixedExpense) {
+      alert('Por favor selecciona un gasto fijo del catálogo');
+      return;
+    }
+    
     onSave({
       ...form,
       amount: parseFloat(form.amount),
@@ -2617,7 +2655,44 @@ const ExpenseModal = ({ onClose, onSave, categories, projects, fixedExpenses = [
         </div>
         
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {/* ========== ESTADO (AL INICIO, POR DEFECTO "PAGADO") ========== */}
+          {/* ========== SELECTOR DE TIPO DE GASTO (NUEVO) ========== */}
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+            <label className="block text-sm font-semibold text-gray-800 mb-3">
+              ¿Este gasto es recurrente?
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => handleExpenseTypeChange('fijo')}
+                className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                  expenseType === 'fijo'
+                    ? 'border-orange-500 bg-orange-50 text-orange-700'
+                    : 'border-gray-200 bg-white text-gray-600 hover:border-orange-300 hover:bg-orange-50/50'
+                }`}
+                data-testid="expense-type-fijo"
+              >
+                <Repeat size={24} className={expenseType === 'fijo' ? 'text-orange-500' : 'text-gray-400'} />
+                <span className="text-sm font-medium">Sí, es gasto fijo</span>
+                <span className="text-xs text-center opacity-75">Del catálogo</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleExpenseTypeChange('puntual')}
+                className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                  expenseType === 'puntual'
+                    ? 'border-red-500 bg-red-50 text-red-700'
+                    : 'border-gray-200 bg-white text-gray-600 hover:border-red-300 hover:bg-red-50/50'
+                }`}
+                data-testid="expense-type-puntual"
+              >
+                <ArrowDownCircle size={24} className={expenseType === 'puntual' ? 'text-red-500' : 'text-gray-400'} />
+                <span className="text-sm font-medium">No, es puntual</span>
+                <span className="text-xs text-center opacity-75">Gasto único</span>
+              </button>
+            </div>
+          </div>
+
+          {/* ========== ESTADO ========== */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Estado *</label>
             <select
@@ -2631,13 +2706,13 @@ const ExpenseModal = ({ onClose, onSave, categories, projects, fixedExpenses = [
             </select>
           </div>
 
-          {/* ========== AUTOCOMPLETADO DE GASTOS FIJOS ========== */}
-          {fixedExpenses.length > 0 && (
+          {/* ========== SI ES GASTO FIJO: Mostrar buscador de gastos fijos ========== */}
+          {expenseType === 'fijo' && (
             <div className="relative">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 <span className="flex items-center gap-2">
                   <Repeat size={14} className="text-orange-500" />
-                  Buscar gasto fijo (opcional)
+                  Seleccionar gasto fijo *
                 </span>
               </label>
               <div className="relative">
@@ -2648,32 +2723,34 @@ const ExpenseModal = ({ onClose, onSave, categories, projects, fixedExpenses = [
                   onChange={(e) => {
                     setFixedExpenseSearch(e.target.value);
                     setShowFixedExpenseDropdown(true);
-                    // Limpiar el gasto fijo seleccionado si se edita manualmente
-                    if (form.is_fixed_expense) {
-                      setForm(prev => ({ ...prev, is_fixed_expense: false, fixed_expense_id: null }));
+                    if (selectedFixedExpense) {
+                      setSelectedFixedExpense(null);
+                      setForm(prev => ({ ...prev, is_fixed_expense: true, fixed_expense_id: null }));
                     }
                   }}
                   onFocus={() => setShowFixedExpenseDropdown(true)}
                   className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                  placeholder="Buscar gasto fijo para autocompletar..."
+                  placeholder="Buscar en catálogo de gastos fijos..."
                   data-testid="fixed-expense-search"
                 />
-                {form.is_fixed_expense && (
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">
-                    Gasto fijo
+                {selectedFixedExpense && (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <Check size={12} /> Seleccionado
                   </span>
                 )}
               </div>
               
               {/* Dropdown de gastos fijos */}
-              {showFixedExpenseDropdown && fixedExpenseSearch && filteredFixedExpenses.length > 0 && (
+              {showFixedExpenseDropdown && filteredFixedExpenses.length > 0 && (
                 <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
                   {filteredFixedExpenses.map(fe => (
                     <button
                       key={fe.id}
                       type="button"
                       onClick={() => handleSelectFixedExpense(fe)}
-                      className="w-full px-4 py-3 text-left hover:bg-orange-50 border-b border-gray-100 last:border-0"
+                      className={`w-full px-4 py-3 text-left hover:bg-orange-50 border-b border-gray-100 last:border-0 ${
+                        selectedFixedExpense?.id === fe.id ? 'bg-orange-50' : ''
+                      }`}
                     >
                       <div className="font-medium text-gray-900">{fe.name}</div>
                       <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
@@ -2685,12 +2762,76 @@ const ExpenseModal = ({ onClose, onSave, categories, projects, fixedExpenses = [
                   ))}
                 </div>
               )}
+              
+              {/* Mensaje si no hay gastos fijos */}
+              {showFixedExpenseDropdown && fixedExpenseSearch && filteredFixedExpenses.length === 0 && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-4 text-center text-gray-500 text-sm">
+                  No se encontraron gastos fijos con ese nombre
+                </div>
+              )}
+              
+              {/* Info del gasto fijo seleccionado */}
+              {selectedFixedExpense && (
+                <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-orange-800">{selectedFixedExpense.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedFixedExpense(null);
+                        setFixedExpenseSearch('');
+                        setForm(prev => ({
+                          ...prev,
+                          amount: '',
+                          category: 'otros',
+                          description: '',
+                          includes_igv: false,
+                          vendor_name: '',
+                          vendor_id: null,
+                          project_id: '',
+                          fixed_expense_id: null,
+                        }));
+                        setSelectedVendor(null);
+                      }}
+                      className="text-xs text-orange-600 hover:text-orange-800"
+                    >
+                      Cambiar
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs text-orange-700">
+                    <div>Monto sugerido: <span className="font-medium">S/ {selectedFixedExpense.estimated_amount}</span></div>
+                    <div>Concepto: <span className="font-medium">{selectedFixedExpense.category}</span></div>
+                    {selectedFixedExpense.vendor_name && (
+                      <div className="col-span-2">Proveedor: <span className="font-medium">{selectedFixedExpense.vendor_name}</span></div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ========== SI ES GASTO PUNTUAL: Mostrar concepto del gasto ========== */}
+          {expenseType === 'puntual' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Concepto del gasto *</label>
+              <select
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                data-testid="expense-category-select"
+              >
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
             </div>
           )}
 
           {/* ========== MONTO CON VOZ ========== */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Monto Total *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Monto Total * {expenseType === 'fijo' && selectedFixedExpense && <span className="text-xs text-gray-400">(puedes modificarlo)</span>}
+            </label>
             <div className="relative">
               <input
                 type="number"
@@ -2752,18 +2893,23 @@ const ExpenseModal = ({ onClose, onSave, categories, projects, fixedExpenses = [
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Concepto del gasto *</label>
-            <select
-              value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-            >
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-          </div>
+          {/* ========== CONCEPTO (solo visible si es gasto fijo, para mostrar el autocompletado) ========== */}
+          {expenseType === 'fijo' && selectedFixedExpense && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Concepto del gasto</label>
+              <select
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-gray-50"
+                data-testid="expense-category-select-fixed"
+              >
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-400 mt-1">Pre-llenado desde el gasto fijo, puedes modificarlo</p>
+            </div>
+          )}
 
           {/* ========== DESCRIPCIÓN CON VOZ ========== */}
           <div>
@@ -2774,7 +2920,7 @@ const ExpenseModal = ({ onClose, onSave, categories, projects, fixedExpenses = [
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                placeholder="Ej: Pago de servicios"
+                placeholder={expenseType === 'fijo' ? 'Descripción adicional (opcional)' : 'Ej: Pago de servicios'}
                 data-testid="expense-description-input"
               />
               <VoiceMicButton 
@@ -2834,33 +2980,38 @@ const ExpenseModal = ({ onClose, onSave, categories, projects, fixedExpenses = [
             </>
           )}
 
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="is_recurring"
-              checked={form.is_recurring}
-              onChange={(e) => setForm({ ...form, is_recurring: e.target.checked })}
-              className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
-            />
-            <label htmlFor="is_recurring" className="text-sm text-gray-700">
-              Gasto recurrente
-            </label>
-          </div>
+          {/* Solo mostrar recurrencia para gastos puntuales */}
+          {expenseType === 'puntual' && (
+            <>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="is_recurring"
+                  checked={form.is_recurring}
+                  onChange={(e) => setForm({ ...form, is_recurring: e.target.checked })}
+                  className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+                />
+                <label htmlFor="is_recurring" className="text-sm text-gray-700">
+                  Gasto recurrente
+                </label>
+              </div>
 
-          {form.is_recurring && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Periodo</label>
-              <select
-                value={form.recurrence_period}
-                onChange={(e) => setForm({ ...form, recurrence_period: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-              >
-                <option value="">Seleccionar...</option>
-                <option value="weekly">Semanal</option>
-                <option value="monthly">Mensual</option>
-                <option value="yearly">Anual</option>
-              </select>
-            </div>
+              {form.is_recurring && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Periodo</label>
+                  <select
+                    value={form.recurrence_period}
+                    onChange={(e) => setForm({ ...form, recurrence_period: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  >
+                    <option value="">Seleccionar...</option>
+                    <option value="weekly">Semanal</option>
+                    <option value="monthly">Mensual</option>
+                    <option value="yearly">Anual</option>
+                  </select>
+                </div>
+              )}
+            </>
           )}
 
           {projects.length > 0 && (
@@ -2889,7 +3040,12 @@ const ExpenseModal = ({ onClose, onSave, categories, projects, fixedExpenses = [
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              disabled={expenseType === 'fijo' && !selectedFixedExpense}
+              className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
+                expenseType === 'fijo' && !selectedFixedExpense
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-red-600 text-white hover:bg-red-700'
+              }`}
             >
               Guardar
             </button>

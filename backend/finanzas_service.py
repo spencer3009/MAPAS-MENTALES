@@ -216,14 +216,9 @@ class CompanyResponse(BaseModel):
     created_at: str
     updated_at: str
 
-# Categorías de gastos predefinidas (editables por usuario)
+# Categorías de gastos predefinidas (solo Otros y Servicios externos - no editables)
 DEFAULT_EXPENSE_CATEGORIES = [
-    {"id": "nomina", "name": "Nómina", "color": "#3B82F6", "icon": "Users"},
-    {"id": "marketing", "name": "Marketing", "color": "#8B5CF6", "icon": "Megaphone"},
-    {"id": "herramientas", "name": "Herramientas", "color": "#F59E0B", "icon": "Wrench"},
-    {"id": "infraestructura", "name": "Infraestructura", "color": "#10B981", "icon": "Building"},
     {"id": "servicios_externos", "name": "Servicios externos", "color": "#EC4899", "icon": "Briefcase"},
-    {"id": "impuestos", "name": "Impuestos", "color": "#EF4444", "icon": "Receipt"},
     {"id": "otros", "name": "Otros", "color": "#6B7280", "icon": "MoreHorizontal"},
 ]
 

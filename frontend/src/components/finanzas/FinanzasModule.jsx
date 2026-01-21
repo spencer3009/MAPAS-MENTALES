@@ -302,14 +302,33 @@ const FinanzasModule = ({ token, projects = [] }) => {
   // Filtrar ingresos por período
   const filteredIncomes = incomes.filter(inc => isDateInPeriod(inc.date));
   
-  // Calcular totales filtrados
-  const filteredCollectedIncomes = filteredIncomes.filter(inc => inc.status === 'collected');
-  const totalFilteredCollected = filteredCollectedIncomes.reduce((sum, inc) => sum + (inc.amount || 0), 0);
+  // ========== CÁLCULO DE INGRESOS REALES (CAJA REAL) ==========
+  // Regla contable: Solo cuenta el dinero efectivamente recibido
+  // - Cobrado: suma el monto total (amount)
+  // - Por cobrar: suma solo el pago recibido (paid_amount)
+  const calculateRealIncome = (income) => {
+    if (income.status === 'collected') {
+      return income.amount || 0;
+    } else if (income.status === 'pending') {
+      return income.paid_amount || 0;
+    }
+    return 0;
+  };
   
-  // Cálculos de IGV (18%)
+  // Total de dinero REAL en caja (suma de pagos recibidos)
+  const totalRealIncome = filteredIncomes.reduce((sum, inc) => sum + calculateRealIncome(inc), 0);
+  
+  // Contador de ingresos con dinero recibido
+  const incomesWithPayment = filteredIncomes.filter(inc => calculateRealIncome(inc) > 0).length;
+  
+  // Cálculos de IGV (18%) - basados en dinero real
   const IGV_RATE = 0.18;
-  const filteredSubtotal = totalFilteredCollected / (1 + IGV_RATE);
-  const filteredIgv = totalFilteredCollected - filteredSubtotal;
+  const filteredSubtotal = totalRealIncome / (1 + IGV_RATE);
+  const filteredIgv = totalRealIncome - filteredSubtotal;
+  
+  // Legacy: mantener para compatibilidad con otros cálculos
+  const filteredCollectedIncomes = filteredIncomes.filter(inc => inc.status === 'collected');
+  const totalFilteredCollected = totalRealIncome; // Usar el nuevo cálculo
   
   // ========== CÁLCULO DE ESTADO FINANCIERO (FUNCIONAL) ==========
   // Lógica: 

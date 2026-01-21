@@ -72,6 +72,7 @@ from finanzas_service import (
     ExpenseCreate, ExpenseUpdate, ExpenseResponse, ExpenseStatus, ExpensePriority,
     InvestmentCreate, InvestmentUpdate, InvestmentResponse, InvestmentStatus,
     CategoryCreate, CategoryUpdate, CategoryResponse,
+    PartialPaymentCreate, PartialPaymentResponse,
     FinancialSummary, ProjectFinancialSummary,
     DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_SOURCES,
     generate_id, get_current_timestamp, calculate_health_status

@@ -2063,4 +2063,496 @@ const InvestmentModal = ({ onClose, onSave, projects }) => {
   );
 };
 
+// ==========================================
+// SECCIÓN POR COBRAR CON PAGOS PARCIALES
+// ==========================================
+
+const ReceivablesTab = ({ receivables, loadData, token, formatCurrency, formatDate }) => {
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedIncome, setSelectedIncome] = useState(null);
+  const [showPaymentHistory, setShowPaymentHistory] = useState(false);
+  const [paymentHistory, setPaymentHistory] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+
+  // Abrir modal de pago
+  const handleAddPayment = (income) => {
+    setSelectedIncome(income);
+    setShowPaymentModal(true);
+  };
+
+  // Ver historial de pagos
+  const handleViewHistory = async (income) => {
+    setSelectedIncome(income);
+    setLoadingHistory(true);
+    setShowPaymentHistory(true);
+    
+    try {
+      const response = await fetch(`/api/finanzas/partial-payments/${income.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setPaymentHistory(data.payments || []);
+      }
+    } catch (err) {
+      console.error('Error loading payment history:', err);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
+  // Guardar pago parcial
+  const handleSavePayment = async (paymentData) => {
+    try {
+      const response = await fetch('/api/finanzas/partial-payments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(paymentData)
+      });
+      
+      if (response.ok) {
+        setShowPaymentModal(false);
+        setSelectedIncome(null);
+        loadData(); // Recargar datos
+      } else {
+        const error = await response.json();
+        alert(error.detail || 'Error al registrar el pago');
+      }
+    } catch (err) {
+      console.error('Error saving payment:', err);
+      alert('Error al registrar el pago');
+    }
+  };
+
+  // Eliminar pago parcial
+  const handleDeletePayment = async (paymentId) => {
+    if (!confirm('¿Estás seguro de eliminar este pago? Esta acción no se puede deshacer.')) return;
+    
+    try {
+      const response = await fetch(`/api/finanzas/partial-payments/${paymentId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        loadData();
+        // Recargar historial
+        if (selectedIncome) {
+          handleViewHistory(selectedIncome);
+        }
+      }
+    } catch (err) {
+      console.error('Error deleting payment:', err);
+    }
+  };
+
+  // Obtener estado visual
+  const getStatusBadge = (item) => {
+    const paidAmount = item.paid_amount || 0;
+    const totalAmount = item.amount || 0;
+    const pending = totalAmount - paidAmount;
+    
+    if (pending <= 0 || item.status === 'collected') {
+      return { bg: 'bg-green-100', text: 'text-green-700', label: 'Cobrado' };
+    } else if (paidAmount > 0 || item.status === 'partial') {
+      return { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Parcial' };
+    } else {
+      return { bg: 'bg-red-100', text: 'text-red-700', label: 'Por cobrar' };
+    }
+  };
+
+  // Calcular totales
+  const totalFacturado = receivables.total_facturado || receivables.receivables.reduce((sum, r) => sum + (r.amount || 0), 0);
+  const totalAbonado = receivables.total_abonado || receivables.receivables.reduce((sum, r) => sum + (r.paid_amount || 0), 0);
+  const totalPendiente = receivables.total || (totalFacturado - totalAbonado);
+
+  return (
+    <div className="space-y-4">
+      {/* Header con totales */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">Por Cobrar</h2>
+          <p className="text-sm text-gray-500">{receivables.count} cuenta(s) pendiente(s)</p>
+        </div>
+      </div>
+
+      {/* Dashboard de resumen */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Total Facturado */}
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm text-gray-500">Total Facturado</span>
+            <DollarSign size={18} className="text-blue-500" />
+          </div>
+          <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalFacturado)}</p>
+          <p className="text-xs text-gray-400">Valor total de ventas/servicios</p>
+        </div>
+
+        {/* Total Abonado */}
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm text-gray-500">Total Abonado</span>
+            <CheckCircle2 size={18} className="text-green-500" />
+          </div>
+          <p className="text-2xl font-bold text-green-600">{formatCurrency(totalAbonado)}</p>
+          <p className="text-xs text-gray-400">Dinero recibido en caja</p>
+        </div>
+
+        {/* Saldo Pendiente */}
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm text-gray-500">Saldo Pendiente</span>
+            <Clock size={18} className="text-amber-500" />
+          </div>
+          <p className="text-2xl font-bold text-amber-600">{formatCurrency(totalPendiente)}</p>
+          <p className="text-xs text-gray-400">Por cobrar a clientes</p>
+        </div>
+      </div>
+
+      {/* Tabla de cuentas por cobrar */}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descripción</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cliente</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vencimiento</th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Monto Total</th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Pagado</th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Saldo</th>
+              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Estado</th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acción</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {receivables.receivables.map((item) => {
+              const paidAmount = item.paid_amount || 0;
+              const totalAmount = item.amount || 0;
+              const pendingAmount = totalAmount - paidAmount;
+              const statusBadge = getStatusBadge(item);
+              
+              return (
+                <tr key={item.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3 text-sm text-gray-600">{formatDate(item.date)}</td>
+                  <td className="px-4 py-3 text-sm text-gray-900">
+                    <div>
+                      {item.description || '-'}
+                      {paidAmount > 0 && (
+                        <button
+                          onClick={() => handleViewHistory(item)}
+                          className="ml-2 text-xs text-blue-600 hover:text-blue-700 underline"
+                        >
+                          Ver pagos
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-600">{item.client_name || '-'}</td>
+                  <td className="px-4 py-3 text-sm text-gray-600">{formatDate(item.due_date)}</td>
+                  <td className="px-4 py-3 text-sm text-gray-900 text-right font-medium">
+                    {formatCurrency(totalAmount)}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-right">
+                    <span className="font-medium text-green-600">{formatCurrency(paidAmount)}</span>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-right">
+                    <span className={`font-semibold ${pendingAmount > 0 ? 'text-amber-600' : 'text-green-600'}`}>
+                      {formatCurrency(pendingAmount)}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${statusBadge.bg} ${statusBadge.text}`}>
+                      {statusBadge.label}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    {pendingAmount > 0 ? (
+                      <button
+                        onClick={() => handleAddPayment(item)}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 transition-colors text-xs font-medium"
+                      >
+                        <Plus size={14} />
+                        Agregar pago
+                      </button>
+                    ) : (
+                      <span className="text-xs text-green-600 font-medium">✓ Cobrado</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+            {receivables.receivables.length === 0 && (
+              <tr>
+                <td colSpan="9" className="px-4 py-8 text-center text-gray-500">
+                  No hay ingresos pendientes de cobro
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Modal de agregar pago */}
+      {showPaymentModal && selectedIncome && (
+        <AddPaymentModal
+          income={selectedIncome}
+          onClose={() => {
+            setShowPaymentModal(false);
+            setSelectedIncome(null);
+          }}
+          onSave={handleSavePayment}
+          formatCurrency={formatCurrency}
+        />
+      )}
+
+      {/* Modal de historial de pagos */}
+      {showPaymentHistory && selectedIncome && (
+        <PaymentHistoryModal
+          income={selectedIncome}
+          payments={paymentHistory}
+          loading={loadingHistory}
+          onClose={() => {
+            setShowPaymentHistory(false);
+            setSelectedIncome(null);
+            setPaymentHistory([]);
+          }}
+          onDelete={handleDeletePayment}
+          formatCurrency={formatCurrency}
+          formatDate={formatDate}
+        />
+      )}
+    </div>
+  );
+};
+
+// Modal para agregar pago parcial
+const AddPaymentModal = ({ income, onClose, onSave, formatCurrency }) => {
+  const pendingAmount = (income.amount || 0) - (income.paid_amount || 0);
+  
+  const [form, setForm] = useState({
+    income_id: income.id,
+    amount: '',
+    date: getLocalDateString(),
+    payment_method: 'efectivo',
+    note: ''
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    const paymentAmount = parseFloat(form.amount);
+    if (paymentAmount > pendingAmount) {
+      alert(`El monto del pago no puede exceder el saldo pendiente (${formatCurrency(pendingAmount)})`);
+      return;
+    }
+    
+    onSave({
+      ...form,
+      amount: paymentAmount
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+        <div className="px-6 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white">
+          <h2 className="text-lg font-semibold">Agregar Pago</h2>
+          <p className="text-sm text-emerald-100">{income.description || 'Sin descripción'}</p>
+        </div>
+        
+        {/* Resumen del ingreso */}
+        <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <p className="text-xs text-gray-500">Monto Total</p>
+              <p className="font-semibold text-gray-900">{formatCurrency(income.amount)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500">Pagado</p>
+              <p className="font-semibold text-green-600">{formatCurrency(income.paid_amount || 0)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500">Pendiente</p>
+              <p className="font-semibold text-amber-600">{formatCurrency(pendingAmount)}</p>
+            </div>
+          </div>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Monto del pago *
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                value={form.amount}
+                onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                placeholder="0.00"
+                required
+                min="0.01"
+                max={pendingAmount}
+                step="0.01"
+                data-testid="payment-amount-input"
+              />
+              <VoiceMicButton 
+                isNumeric={true}
+                onResult={(value) => setForm(prev => ({ ...prev, amount: value }))}
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-1">Máximo: {formatCurrency(pendingAmount)}</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Fecha del pago *</label>
+            <input
+              type="date"
+              value={form.date}
+              onChange={(e) => setForm({ ...form, date: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Método de pago</label>
+            <select
+              value={form.payment_method}
+              onChange={(e) => setForm({ ...form, payment_method: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            >
+              <option value="efectivo">Efectivo</option>
+              <option value="transferencia">Transferencia</option>
+              <option value="tarjeta">Tarjeta</option>
+              <option value="yape">Yape</option>
+              <option value="plin">Plin</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nota (opcional)</label>
+            <div className="relative">
+              <input
+                type="text"
+                value={form.note}
+                onChange={(e) => setForm({ ...form, note: e.target.value })}
+                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                placeholder="Ej: Pago en efectivo, referencia bancaria..."
+              />
+              <VoiceMicButton 
+                isNumeric={false}
+                onResult={(value) => setForm(prev => ({ ...prev, note: value }))}
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+            >
+              Registrar Pago
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// Modal para ver historial de pagos
+const PaymentHistoryModal = ({ income, payments, loading, onClose, onDelete, formatCurrency, formatDate }) => {
+  const totalPaid = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
+  
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 overflow-hidden max-h-[80vh] flex flex-col">
+        <div className="px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold">Historial de Pagos</h2>
+            <p className="text-sm text-blue-100">{income.description || 'Sin descripción'}</p>
+          </div>
+          <button onClick={onClose} className="p-1 hover:bg-white/20 rounded-full">
+            <X size={20} />
+          </button>
+        </div>
+        
+        {/* Resumen */}
+        <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-500">Total facturado:</span>
+            <span className="font-medium">{formatCurrency(income.amount)}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-500">Total abonado ({payments.length} pagos):</span>
+            <span className="font-medium text-green-600">{formatCurrency(totalPaid)}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-500">Saldo pendiente:</span>
+            <span className="font-medium text-amber-600">{formatCurrency((income.amount || 0) - totalPaid)}</span>
+          </div>
+        </div>
+        
+        {/* Lista de pagos */}
+        <div className="flex-1 overflow-y-auto p-4">
+          {loading ? (
+            <div className="text-center py-8 text-gray-500">Cargando...</div>
+          ) : payments.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">No hay pagos registrados</div>
+          ) : (
+            <div className="space-y-3">
+              {payments.map((payment, index) => (
+                <div key={payment.id} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-semibold text-gray-900">{formatCurrency(payment.amount)}</p>
+                      <p className="text-xs text-gray-500">{formatDate(payment.date)}</p>
+                      {payment.payment_method && (
+                        <span className="inline-block mt-1 px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">
+                          {payment.payment_method}
+                        </span>
+                      )}
+                      {payment.note && (
+                        <p className="text-xs text-gray-600 mt-1">{payment.note}</p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => onDelete(payment.id)}
+                      className="text-xs text-red-600 hover:text-red-700"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        
+        <div className="px-6 py-4 border-t border-gray-200">
+          <button
+            onClick={onClose}
+            className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default FinanzasModule;

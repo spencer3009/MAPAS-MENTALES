@@ -95,6 +95,248 @@ const formatDate = (dateStr) => {
   return date.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 
+// ========== SPEECH-TO-TEXT: RECONOCIMIENTO DE VOZ ==========
+
+// Verificar soporte del navegador para Web Speech API
+const isSpeechRecognitionSupported = () => {
+  return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+};
+
+// Convertir números hablados en español a valor numérico
+const spanishTextToNumber = (text) => {
+  if (!text) return null;
+  
+  // Limpiar el texto
+  let cleanText = text.toLowerCase().trim();
+  
+  // Eliminar palabras comunes que no son números
+  cleanText = cleanText
+    .replace(/\bsoles?\b/gi, '')
+    .replace(/\bdólares?\b/gi, '')
+    .replace(/\bpesos?\b/gi, '')
+    .replace(/\bcon\b/gi, 'punto')
+    .replace(/\by\b/gi, '')
+    .trim();
+  
+  // Si ya es un número, devolverlo directamente
+  const directNumber = parseFloat(cleanText.replace(',', '.'));
+  if (!isNaN(directNumber)) {
+    return directNumber;
+  }
+  
+  // Diccionario de números en español
+  const units = {
+    'cero': 0, 'uno': 1, 'una': 1, 'un': 1, 'dos': 2, 'tres': 3, 'cuatro': 4,
+    'cinco': 5, 'seis': 6, 'siete': 7, 'ocho': 8, 'nueve': 9, 'diez': 10,
+    'once': 11, 'doce': 12, 'trece': 13, 'catorce': 14, 'quince': 15,
+    'dieciséis': 16, 'dieciseis': 16, 'diecisiete': 17, 'dieciocho': 18, 'diecinueve': 19,
+    'veinte': 20, 'veintiuno': 21, 'veintiuna': 21, 'veintidós': 22, 'veintidos': 22,
+    'veintitrés': 23, 'veintitres': 23, 'veinticuatro': 24, 'veinticinco': 25,
+    'veintiséis': 26, 'veintiseis': 26, 'veintisiete': 27, 'veintiocho': 28, 'veintinueve': 29,
+    'treinta': 30, 'cuarenta': 40, 'cincuenta': 50, 'sesenta': 60,
+    'setenta': 70, 'ochenta': 80, 'noventa': 90
+  };
+  
+  const hundreds = {
+    'cien': 100, 'ciento': 100, 'doscientos': 200, 'doscientas': 200,
+    'trescientos': 300, 'trescientas': 300, 'cuatrocientos': 400, 'cuatrocientas': 400,
+    'quinientos': 500, 'quinientas': 500, 'seiscientos': 600, 'seiscientas': 600,
+    'setecientos': 700, 'setecientas': 700, 'ochocientos': 800, 'ochocientas': 800,
+    'novecientos': 900, 'novecientas': 900
+  };
+  
+  const multipliers = {
+    'mil': 1000, 'millón': 1000000, 'millon': 1000000, 'millones': 1000000
+  };
+  
+  // Procesar "punto" para decimales
+  let integerPart = cleanText;
+  let decimalPart = '';
+  
+  if (cleanText.includes('punto')) {
+    const parts = cleanText.split('punto');
+    integerPart = parts[0].trim();
+    decimalPart = parts[1]?.trim() || '';
+  }
+  
+  // Función para convertir una parte a número
+  const parseSpanishNumber = (str) => {
+    if (!str) return 0;
+    
+    const words = str.split(/\s+/);
+    let result = 0;
+    let current = 0;
+    
+    for (const word of words) {
+      if (units[word] !== undefined) {
+        current += units[word];
+      } else if (hundreds[word] !== undefined) {
+        if (current === 0) current = 1;
+        current *= hundreds[word] / 100;
+        current = current * 100 + (hundreds[word] % 100 === 0 ? 0 : hundreds[word]);
+        if (word === 'cien' || word === 'ciento') {
+          current = hundreds[word];
+        } else {
+          current = hundreds[word];
+        }
+      } else if (multipliers[word] !== undefined) {
+        if (current === 0) current = 1;
+        current *= multipliers[word];
+        result += current;
+        current = 0;
+      }
+    }
+    
+    return result + current;
+  };
+  
+  // Intentar parsear de forma más simple
+  let total = 0;
+  const words = integerPart.split(/\s+/);
+  
+  for (const word of words) {
+    if (units[word] !== undefined) {
+      total += units[word];
+    } else if (hundreds[word] !== undefined) {
+      total += hundreds[word];
+    } else if (multipliers[word] !== undefined) {
+      total = (total || 1) * multipliers[word];
+    }
+  }
+  
+  // Procesar decimales
+  if (decimalPart) {
+    let decimal = 0;
+    const decWords = decimalPart.split(/\s+/);
+    for (const word of decWords) {
+      if (units[word] !== undefined) {
+        decimal = decimal * 10 + units[word];
+      } else {
+        const num = parseInt(word);
+        if (!isNaN(num)) {
+          decimal = decimal * 10 + num;
+        }
+      }
+    }
+    if (decimal > 0) {
+      const decimalPlaces = Math.pow(10, decimalPart.replace(/\s+/g, '').length);
+      total += decimal / (decimal < 10 ? 10 : decimal < 100 ? 100 : 1000);
+    }
+  }
+  
+  return total > 0 ? total : null;
+};
+
+// Hook personalizado para reconocimiento de voz
+const useSpeechRecognition = () => {
+  const [isListening, setIsListening] = useState(false);
+  const [transcript, setTranscript] = useState('');
+  const recognitionRef = useRef(null);
+  
+  useEffect(() => {
+    if (!isSpeechRecognitionSupported()) return;
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognitionRef.current = new SpeechRecognition();
+    recognitionRef.current.continuous = false;
+    recognitionRef.current.interimResults = false;
+    recognitionRef.current.lang = 'es-PE'; // Español de Perú
+    
+    recognitionRef.current.onresult = (event) => {
+      const result = event.results[0][0].transcript;
+      setTranscript(result);
+    };
+    
+    recognitionRef.current.onend = () => {
+      setIsListening(false);
+    };
+    
+    recognitionRef.current.onerror = () => {
+      setIsListening(false);
+    };
+    
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+    };
+  }, []);
+  
+  const startListening = useCallback(() => {
+    if (!recognitionRef.current || isListening) return;
+    setTranscript('');
+    setIsListening(true);
+    try {
+      recognitionRef.current.start();
+    } catch (e) {
+      setIsListening(false);
+    }
+  }, [isListening]);
+  
+  const stopListening = useCallback(() => {
+    if (!recognitionRef.current) return;
+    recognitionRef.current.stop();
+    setIsListening(false);
+  }, []);
+  
+  return {
+    isListening,
+    transcript,
+    startListening,
+    stopListening,
+    isSupported: isSpeechRecognitionSupported()
+  };
+};
+
+// Componente de botón de micrófono
+const VoiceMicButton = ({ onResult, isNumeric = false, className = '' }) => {
+  const { isListening, transcript, startListening, stopListening, isSupported } = useSpeechRecognition();
+  
+  useEffect(() => {
+    if (transcript) {
+      if (isNumeric) {
+        // Convertir texto hablado a número
+        const number = spanishTextToNumber(transcript);
+        if (number !== null && number > 0) {
+          onResult(number.toString());
+        }
+      } else {
+        // Texto libre - capitalizar primera letra
+        const cleanText = transcript.charAt(0).toUpperCase() + transcript.slice(1);
+        onResult(cleanText);
+      }
+    }
+  }, [transcript, onResult, isNumeric]);
+  
+  // No mostrar si el navegador no soporta reconocimiento de voz
+  if (!isSupported) return null;
+  
+  const handleClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  };
+  
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      className={`absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full transition-all ${
+        isListening 
+          ? 'bg-red-100 text-red-600 animate-pulse' 
+          : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700'
+      } ${className}`}
+      title={isListening ? 'Escuchando... (clic para detener)' : 'Dictar por voz'}
+    >
+      {isListening ? <MicOff size={16} /> : <Mic size={16} />}
+    </button>
+  );
+};
+
 // Badge de estado
 const StatusBadge = ({ status, type }) => {
   const configs = {

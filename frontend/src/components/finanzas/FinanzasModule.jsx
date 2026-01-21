@@ -3473,4 +3473,749 @@ const ProductModal = ({ onClose, onSave, product }) => {
   );
 };
 
+// ==========================================
+// GASTOS FIJOS - COMPONENTES
+// ==========================================
+
+const PERIODICITIES = [
+  { value: 'semanal', label: 'Semanal', days: 7 },
+  { value: 'quincenal', label: 'Quincenal', days: 15 },
+  { value: 'mensual', label: 'Mensual', days: 30 },
+  { value: 'trimestral', label: 'Trimestral', days: 90 },
+  { value: 'anual', label: 'Anual', days: 365 },
+  { value: 'personalizada', label: 'Personalizada', days: null },
+];
+
+// Tab de Gastos Fijos
+const FixedExpensesTab = ({ 
+  fixedExpenses, 
+  categories,
+  onAdd, 
+  onEdit, 
+  onDelete, 
+  onToggleStatus, 
+  onRegisterPayment,
+  formatCurrency, 
+  loadData, 
+  token, 
+  companyId 
+}) => {
+  const [statusFilter, setStatusFilter] = useState('activo');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState(null);
+  const [paymentHistory, setPaymentHistory] = useState([]);
+
+  // Filtrar gastos fijos
+  const filteredExpenses = fixedExpenses.filter(fe => {
+    const matchesStatus = statusFilter === 'all' || fe.status === statusFilter;
+    const matchesSearch = !searchTerm || 
+      fe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (fe.notes && fe.notes.toLowerCase().includes(searchTerm.toLowerCase()));
+    return matchesStatus && matchesSearch;
+  });
+
+  // Estadísticas
+  const activeCount = fixedExpenses.filter(fe => fe.status === 'activo').length;
+  const totalEstimated = fixedExpenses
+    .filter(fe => fe.status === 'activo')
+    .reduce((sum, fe) => sum + fe.estimated_amount, 0);
+
+  // Cargar historial de pagos para un gasto fijo
+  const loadPaymentHistory = async (fixedExpenseId) => {
+    try {
+      const response = await fetch(`/api/finanzas/fixed-expenses/${fixedExpenseId}/payments`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setPaymentHistory(data.payments || []);
+      }
+    } catch (err) {
+      console.error('Error loading payment history:', err);
+    }
+  };
+
+  const handleOpenPaymentModal = async (expense) => {
+    setSelectedExpense(expense);
+    await loadPaymentHistory(expense.id);
+    setShowPaymentModal(true);
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '-';
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const getPeriodicityLabel = (periodicity) => {
+    const found = PERIODICITIES.find(p => p.value === periodicity);
+    return found ? found.label : periodicity;
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <Repeat size={22} className="text-orange-500" />
+            Gastos Fijos
+          </h2>
+          <p className="text-sm text-gray-500">
+            {activeCount} activo(s) • Estimado mensual: {formatCurrency(totalEstimated)}
+          </p>
+        </div>
+        <button
+          onClick={onAdd}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+          data-testid="add-fixed-expense-btn"
+        >
+          <Plus size={18} />
+          Nuevo Gasto Fijo
+        </button>
+      </div>
+
+      {/* Filtros */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Buscar gasto fijo..."
+            className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+          />
+        </div>
+        
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+        >
+          <option value="all">Todos</option>
+          <option value="activo">Activos</option>
+          <option value="inactivo">Inactivos</option>
+        </select>
+      </div>
+
+      {/* Información sobre recordatorios */}
+      <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+        <div className="flex items-start gap-3">
+          <Bell size={20} className="text-orange-500 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-orange-800">Recordatorios automáticos</p>
+            <p className="text-xs text-orange-600 mt-1">
+              Los gastos fijos activos enviarán recordatorios por <strong>Email y WhatsApp</strong> según la configuración de días antes del vencimiento.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Lista de Gastos Fijos */}
+      {filteredExpenses.length === 0 ? (
+        <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+          <Repeat size={40} className="mx-auto text-gray-300 mb-3" />
+          <p className="text-gray-500">No hay gastos fijos registrados</p>
+          <p className="text-sm text-gray-400 mt-1">Los gastos fijos te ayudan a gestionar pagos recurrentes</p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoría</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Monto Est.</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Periodicidad</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Próx. Vencimiento</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Recordatorio</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Estado</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {filteredExpenses.map((expense) => (
+                <tr key={expense.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3">
+                    <div className="font-medium text-gray-900">{expense.name}</div>
+                    {expense.vendor_name && (
+                      <div className="text-xs text-gray-500">{expense.vendor_name}</div>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-600">{expense.category}</td>
+                  <td className="px-4 py-3 text-right font-medium text-gray-900">
+                    {formatCurrency(expense.estimated_amount)}
+                    {expense.includes_igv && (
+                      <span className="text-xs text-green-600 ml-1">(inc. IGV)</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700">
+                      {getPeriodicityLabel(expense.periodicity)}
+                      {expense.periodicity === 'personalizada' && expense.custom_days && (
+                        <span className="ml-1">({expense.custom_days}d)</span>
+                      )}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-center text-sm">
+                    {expense.next_due_date ? (
+                      <span className="text-gray-900">{formatDate(expense.next_due_date)}</span>
+                    ) : (
+                      <span className="text-gray-400">Sin fecha</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    {expense.reminder_enabled ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-green-100 text-green-700">
+                        <Bell size={12} />
+                        {expense.reminder_days_before}d antes
+                      </span>
+                    ) : (
+                      <span className="text-gray-400 text-xs">Deshabilitado</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <button
+                      onClick={() => onToggleStatus(expense)}
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
+                        expense.status === 'activo' 
+                          ? 'bg-green-100 text-green-700' 
+                          : 'bg-gray-100 text-gray-500'
+                      }`}
+                    >
+                      {expense.status === 'activo' ? 'Activo' : 'Inactivo'}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => handleOpenPaymentModal(expense)}
+                        className="text-xs text-green-600 hover:text-green-700 font-medium"
+                        title="Registrar pago"
+                      >
+                        Pagar
+                      </button>
+                      <button
+                        onClick={() => onEdit(expense)}
+                        className="text-xs text-blue-600 hover:text-blue-700"
+                        title="Editar"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => onDelete(expense.id)}
+                        className="text-xs text-red-600 hover:text-red-700"
+                        title="Eliminar"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Modal de Pago de Gasto Fijo */}
+      {showPaymentModal && selectedExpense && (
+        <FixedExpensePaymentModal
+          expense={selectedExpense}
+          paymentHistory={paymentHistory}
+          onClose={() => {
+            setShowPaymentModal(false);
+            setSelectedExpense(null);
+            setPaymentHistory([]);
+          }}
+          onSavePayment={async (paymentData) => {
+            await onRegisterPayment(selectedExpense.id, paymentData);
+            setShowPaymentModal(false);
+            setSelectedExpense(null);
+            setPaymentHistory([]);
+          }}
+          formatCurrency={formatCurrency}
+        />
+      )}
+    </div>
+  );
+};
+
+// Modal de Pago de Gasto Fijo
+const FixedExpensePaymentModal = ({ expense, paymentHistory, onClose, onSavePayment, formatCurrency }) => {
+  const [form, setForm] = useState({
+    amount: expense.estimated_amount || '',
+    date: getLocalDateString(),
+    payment_method: 'transferencia',
+    notes: '',
+    reference: ''
+  });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.amount || parseFloat(form.amount) <= 0) {
+      alert('Ingresa un monto válido');
+      return;
+    }
+    await onSavePayment({
+      amount: parseFloat(form.amount),
+      date: form.date,
+      payment_method: form.payment_method,
+      notes: form.notes,
+      reference: form.reference
+    });
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '-';
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const totalPaid = paymentHistory.reduce((sum, p) => sum + p.amount, 0);
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Registrar Pago</h2>
+            <p className="text-sm text-gray-500">{expense.name}</p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full">
+            <X size={20} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Info del gasto fijo */}
+          <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="text-gray-500">Monto estimado:</span>
+                <span className="ml-2 font-medium">{formatCurrency(expense.estimated_amount)}</span>
+              </div>
+              <div>
+                <span className="text-gray-500">Categoría:</span>
+                <span className="ml-2 font-medium">{expense.category}</span>
+              </div>
+              {paymentHistory.length > 0 && (
+                <div className="col-span-2">
+                  <span className="text-gray-500">Total pagado:</span>
+                  <span className="ml-2 font-medium text-green-600">{formatCurrency(totalPaid)}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Monto */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Monto del pago *</label>
+            <input
+              type="number"
+              step="0.01"
+              value={form.amount}
+              onChange={(e) => setForm({ ...form, amount: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              required
+            />
+          </div>
+
+          {/* Fecha */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Fecha del pago *</label>
+            <input
+              type="date"
+              value={form.date}
+              onChange={(e) => setForm({ ...form, date: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              required
+            />
+          </div>
+
+          {/* Método de pago */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Método de pago</label>
+            <select
+              value={form.payment_method}
+              onChange={(e) => setForm({ ...form, payment_method: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+            >
+              <option value="efectivo">Efectivo</option>
+              <option value="transferencia">Transferencia</option>
+              <option value="tarjeta">Tarjeta</option>
+              <option value="yape">Yape</option>
+              <option value="plin">Plin</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+
+          {/* Referencia */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nº de referencia/comprobante</label>
+            <input
+              type="text"
+              value={form.reference}
+              onChange={(e) => setForm({ ...form, reference: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              placeholder="Opcional"
+            />
+          </div>
+
+          {/* Notas */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Notas</label>
+            <textarea
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none"
+              rows={2}
+              placeholder="Opcional"
+            />
+          </div>
+
+          {/* Historial de pagos */}
+          {paymentHistory.length > 0 && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Historial de pagos</h3>
+              <div className="bg-gray-50 rounded-lg p-3 max-h-40 overflow-y-auto">
+                {paymentHistory.map((payment) => (
+                  <div key={payment.id} className="flex justify-between items-center py-2 border-b border-gray-200 last:border-0">
+                    <div>
+                      <span className="text-sm text-gray-900">{formatCurrency(payment.amount)}</span>
+                      <span className="text-xs text-gray-500 ml-2">{formatDate(payment.date)}</span>
+                    </div>
+                    <span className="text-xs text-gray-500">{payment.payment_method}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Botones */}
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              Registrar Pago
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// Modal de Gasto Fijo
+const FixedExpenseModal = ({ onClose, onSave, fixedExpense, categories, projects = [], token }) => {
+  const [form, setForm] = useState({
+    name: fixedExpense?.name || '',
+    category: fixedExpense?.category || 'otros',
+    estimated_amount: fixedExpense?.estimated_amount || '',
+    periodicity: fixedExpense?.periodicity || 'mensual',
+    custom_days: fixedExpense?.custom_days || '',
+    includes_igv: fixedExpense?.includes_igv || false,
+    project_id: fixedExpense?.project_id || '',
+    project_name: fixedExpense?.project_name || '',
+    vendor_name: fixedExpense?.vendor_name || '',
+    notes: fixedExpense?.notes || '',
+    status: fixedExpense?.status || 'activo',
+    reminder_enabled: fixedExpense?.reminder_enabled !== false, // true por defecto
+    reminder_days_before: fixedExpense?.reminder_days_before || 3,
+    next_due_date: fixedExpense?.next_due_date?.split('T')[0] || '',
+    day_of_month: fixedExpense?.day_of_month || '',
+  });
+
+  const [selectedContact, setSelectedContact] = useState(null);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!form.name || !form.estimated_amount) {
+      alert('Por favor completa los campos obligatorios');
+      return;
+    }
+
+    await onSave({
+      name: form.name,
+      category: form.category,
+      estimated_amount: parseFloat(form.estimated_amount),
+      periodicity: form.periodicity,
+      custom_days: form.periodicity === 'personalizada' ? parseInt(form.custom_days) : null,
+      includes_igv: form.includes_igv,
+      project_id: form.project_id || null,
+      project_name: form.project_name || null,
+      vendor_id: selectedContact?.id || null,
+      vendor_name: form.vendor_name || null,
+      notes: form.notes || null,
+      status: form.status,
+      reminder_enabled: form.reminder_enabled,
+      reminder_days_before: parseInt(form.reminder_days_before) || 3,
+      next_due_date: form.next_due_date || null,
+      day_of_month: form.day_of_month ? parseInt(form.day_of_month) : null,
+    });
+  };
+
+  const handleContactSelect = (contact) => {
+    setSelectedContact(contact);
+    setForm({ ...form, vendor_name: contact?.name || '' });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold">
+            {fixedExpense ? 'Editar Gasto Fijo' : 'Nuevo Gasto Fijo'}
+          </h2>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full">
+            <X size={20} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Nombre */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del gasto fijo *</label>
+            <input
+              type="text"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              placeholder="Ej: Alquiler oficina, Internet, Luz..."
+              required
+            />
+          </div>
+
+          {/* Monto estimado e IGV */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Monto estimado (S/) *</label>
+              <input
+                type="number"
+                step="0.01"
+                value={form.estimated_amount}
+                onChange={(e) => setForm({ ...form, estimated_amount: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                required
+              />
+            </div>
+            <div className="flex items-center">
+              <label className="flex items-center gap-2 cursor-pointer mt-6">
+                <input
+                  type="checkbox"
+                  checked={form.includes_igv}
+                  onChange={(e) => setForm({ ...form, includes_igv: e.target.checked })}
+                  className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                />
+                <span className="text-sm text-gray-700">Incluye IGV</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Categoría */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Categoría *</label>
+            <select
+              value={form.category}
+              onChange={(e) => setForm({ ...form, category: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+            >
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Periodicidad */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Periodicidad</label>
+              <select
+                value={form.periodicity}
+                onChange={(e) => setForm({ ...form, periodicity: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              >
+                {PERIODICITIES.map(p => (
+                  <option key={p.value} value={p.value}>{p.label}</option>
+                ))}
+              </select>
+            </div>
+            {form.periodicity === 'personalizada' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Días</label>
+                <input
+                  type="number"
+                  value={form.custom_days}
+                  onChange={(e) => setForm({ ...form, custom_days: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  placeholder="Cada cuántos días"
+                />
+              </div>
+            )}
+            {form.periodicity === 'mensual' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Día del mes</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="31"
+                  value={form.day_of_month}
+                  onChange={(e) => setForm({ ...form, day_of_month: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  placeholder="Ej: 15"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Próximo vencimiento */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Próximo vencimiento</label>
+            <input
+              type="date"
+              value={form.next_due_date}
+              onChange={(e) => setForm({ ...form, next_due_date: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+            />
+          </div>
+
+          {/* Recordatorios */}
+          <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Bell size={18} className="text-orange-500" />
+                <span className="text-sm font-medium text-gray-700">Recordatorios (Email + WhatsApp)</span>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.reminder_enabled}
+                  onChange={(e) => setForm({ ...form, reminder_enabled: e.target.checked })}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
+              </label>
+            </div>
+            {form.reminder_enabled && (
+              <div className="flex items-center gap-3">
+                <label className="text-sm text-gray-600">Notificar</label>
+                <select
+                  value={form.reminder_days_before}
+                  onChange={(e) => setForm({ ...form, reminder_days_before: e.target.value })}
+                  className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                >
+                  <option value="1">1 día</option>
+                  <option value="2">2 días</option>
+                  <option value="3">3 días</option>
+                  <option value="5">5 días</option>
+                  <option value="7">7 días</option>
+                  <option value="10">10 días</option>
+                  <option value="15">15 días</option>
+                </select>
+                <label className="text-sm text-gray-600">antes del vencimiento</label>
+              </div>
+            )}
+          </div>
+
+          {/* Proveedor */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Proveedor (opcional)</label>
+            <ContactAutocomplete
+              token={token}
+              onSelect={handleContactSelect}
+              placeholder="Buscar proveedor..."
+              initialValue={form.vendor_name}
+            />
+          </div>
+
+          {/* Proyecto asociado */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Proyecto asociado (opcional)</label>
+            <select
+              value={form.project_id}
+              onChange={(e) => {
+                const proj = projects.find(p => p.id === e.target.value);
+                setForm({ 
+                  ...form, 
+                  project_id: e.target.value,
+                  project_name: proj?.name || ''
+                });
+              }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+            >
+              <option value="">Sin proyecto</option>
+              {projects.map(proj => (
+                <option key={proj.id} value={proj.id}>{proj.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Notas */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Notas</label>
+            <textarea
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none"
+              rows={2}
+              placeholder="Notas adicionales..."
+            />
+          </div>
+
+          {/* Estado (solo en edición) */}
+          {fixedExpense && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+              <select
+                value={form.status}
+                onChange={(e) => setForm({ ...form, status: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              >
+                <option value="activo">Activo</option>
+                <option value="inactivo">Inactivo</option>
+              </select>
+            </div>
+          )}
+
+          {/* Botones */}
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+            >
+              {fixedExpense ? 'Guardar cambios' : 'Crear gasto fijo'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 export default FinanzasModule;

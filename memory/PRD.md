@@ -52,6 +52,14 @@ Transformar MindoraMap en una herramienta profesional de gestión financiera con
 
 ### Session: January 21, 2026 (Current)
 
+#### Mejora UX - Formulario "Nuevo Gasto" (COMPLETADO)
+- ✅ **Selector inicial "¿Este gasto es recurrente?"** con dos opciones claras
+- ✅ **Render condicional**: Gasto Fijo muestra buscador de catálogo, Gasto Puntual muestra concepto manual
+- ✅ **Autocompletado inteligente**: Al seleccionar gasto fijo, autocompleta monto, concepto, IGV, proveedor y proyecto
+- ✅ **Validación**: No permite guardar sin seleccionar gasto fijo (si ese tipo está seleccionado)
+- ✅ **UX profesional**: Campos editables después de autocompletar, mensajes informativos claros
+- **Regla de oro implementada**: Un gasto tiene un solo origen: fijo o puntual, nunca ambos
+
 #### Bug Fix - Filtro de Fechas en Gastos
 - ✅ **Corregido:** La tabla de gastos ahora respeta el filtro de mes/fecha seleccionado
 - Antes: Mostraba todos los gastos sin importar el período seleccionado

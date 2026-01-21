@@ -1824,7 +1824,7 @@ const CategoryManagerModal = ({ onClose, categories, onUpdate, token }) => {
 
   const handleCreateCategory = async () => {
     if (!newCategory.name.trim()) {
-      alert('Ingresa un nombre para la categoría');
+      alert('Ingresa un nombre para el concepto');
       return;
     }
 
@@ -1849,11 +1849,11 @@ const CategoryManagerModal = ({ onClose, categories, onUpdate, token }) => {
         onUpdate();
       } else {
         const error = await response.json();
-        alert(error.detail || 'Error al crear categoría');
+        alert(error.detail || 'Error al crear concepto');
       }
     } catch (err) {
       console.error('Error creating category:', err);
-      alert('Error al crear categoría');
+      alert('Error al crear concepto');
     } finally {
       setLoading(false);
     }
@@ -1886,11 +1886,11 @@ const CategoryManagerModal = ({ onClose, categories, onUpdate, token }) => {
         onUpdate();
       } else {
         const error = await response.json();
-        alert(error.detail || 'Error al actualizar categoría');
+        alert(error.detail || 'Error al actualizar concepto');
       }
     } catch (err) {
       console.error('Error updating category:', err);
-      alert('Error al actualizar categoría');
+      alert('Error al actualizar concepto');
     } finally {
       setLoading(false);
     }
@@ -1898,11 +1898,11 @@ const CategoryManagerModal = ({ onClose, categories, onUpdate, token }) => {
 
   const handleDeleteCategory = async (category) => {
     if (category.is_default) {
-      alert('No se pueden eliminar categorías predefinidas');
+      alert('No se pueden eliminar conceptos predefinidos');
       return;
     }
 
-    if (!window.confirm(`¿Estás seguro de eliminar la categoría "${category.name}"?`)) {
+    if (!window.confirm(`¿Estás seguro de eliminar el concepto "${category.name}"?`)) {
       return;
     }
 
@@ -1920,11 +1920,11 @@ const CategoryManagerModal = ({ onClose, categories, onUpdate, token }) => {
         onUpdate();
       } else {
         const error = await response.json();
-        alert(error.detail || 'Error al eliminar categoría');
+        alert(error.detail || 'Error al eliminar concepto');
       }
     } catch (err) {
       console.error('Error deleting category:', err);
-      alert('Error al eliminar categoría');
+      alert('Error al eliminar concepto');
     } finally {
       setLoading(false);
     }

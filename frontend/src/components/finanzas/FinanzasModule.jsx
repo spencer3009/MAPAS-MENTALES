@@ -470,7 +470,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
     setLoading(true);
     try {
       const companyId = selectedCompany.id;
-      const [summaryData, incomesData, expensesData, investmentsData, categoriesData, sourcesData, receivablesData, payablesData] = await Promise.all([
+      const [summaryData, incomesData, expensesData, investmentsData, categoriesData, sourcesData, receivablesData, payablesData, productsData] = await Promise.all([
         fetchWithAuth(`/summary?company_id=${companyId}&period=${selectedPeriod}`),
         fetchWithAuth(`/incomes?company_id=${companyId}`),
         fetchWithAuth(`/expenses?company_id=${companyId}`),
@@ -479,6 +479,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
         fetchWithAuth('/income-sources'),
         fetchWithAuth(`/receivables?company_id=${companyId}`),
         fetchWithAuth(`/payables?company_id=${companyId}`),
+        fetchWithAuth(`/products?company_id=${companyId}&status=activo`),
       ]);
       
       setSummary(summaryData);
@@ -489,6 +490,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
       setIncomeSources(sourcesData.sources || []);
       setReceivables(receivablesData);
       setPayables(payablesData);
+      setProducts(productsData || []);
     } catch (err) {
       console.error('Error loading finanzas data:', err);
     } finally {

@@ -436,6 +436,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
   const [receivables, setReceivables] = useState({ receivables: [], total: 0, total_facturado: 0, total_abonado: 0, count: 0 });
   const [payables, setPayables] = useState({ payables: [], total: 0, count: 0 });
   const [products, setProducts] = useState([]);
+  const [fixedExpenses, setFixedExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   
   // ========== NUEVO: Sistema de filtro por período (Día/Mes/Año) ==========
@@ -459,8 +460,10 @@ const FinanzasModule = ({ token, projects = [] }) => {
   const [showExpenseModal, setShowExpenseModal] = useState(false);
   const [showInvestmentModal, setShowInvestmentModal] = useState(false);
   const [showProductModal, setShowProductModal] = useState(false);
+  const [showFixedExpenseModal, setShowFixedExpenseModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [editingFixedExpense, setEditingFixedExpense] = useState(null);
   
   const { fetchWithAuth } = useFinanzas(token);
 
@@ -471,7 +474,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
     setLoading(true);
     try {
       const companyId = selectedCompany.id;
-      const [summaryData, incomesData, expensesData, investmentsData, categoriesData, sourcesData, receivablesData, payablesData, productsData] = await Promise.all([
+      const [summaryData, incomesData, expensesData, investmentsData, categoriesData, sourcesData, receivablesData, payablesData, productsData, fixedExpensesData] = await Promise.all([
         fetchWithAuth(`/summary?company_id=${companyId}&period=${selectedPeriod}`),
         fetchWithAuth(`/incomes?company_id=${companyId}`),
         fetchWithAuth(`/expenses?company_id=${companyId}`),
@@ -481,6 +484,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
         fetchWithAuth(`/receivables?company_id=${companyId}`),
         fetchWithAuth(`/payables?company_id=${companyId}`),
         fetchWithAuth(`/products?company_id=${companyId}&status=activo`),
+        fetchWithAuth(`/fixed-expenses?company_id=${companyId}`),
       ]);
       
       setSummary(summaryData);
@@ -492,6 +496,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
       setReceivables(receivablesData);
       setPayables(payablesData);
       setProducts(productsData || []);
+      setFixedExpenses(fixedExpensesData || []);
     } catch (err) {
       console.error('Error loading finanzas data:', err);
     } finally {

@@ -1448,8 +1448,8 @@ const FinanzasModule = ({ token, projects = [] }) => {
   );
 };
 
-// Modal de Ingreso con soporte para pagos parciales
-const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
+// Modal de Ingreso con soporte para pagos parciales y productos
+const IncomeModal = ({ onClose, onSave, sources, projects, products = [], token }) => {
   const [form, setForm] = useState({
     amount: '',          // Monto total del servicio/venta
     paid_amount: '',     // Pago recibido (a cuenta)
@@ -1461,9 +1461,43 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
     client_id: null,
     due_date: '',
     project_id: '',
+    product_id: '',      // ID del producto seleccionado
   });
   
   const [selectedContact, setSelectedContact] = useState(null);
+  const [productSearch, setProductSearch] = useState('');
+  const [showProductDropdown, setShowProductDropdown] = useState(false);
+
+  // Filtrar productos activos que coincidan con la búsqueda
+  const filteredProducts = products.filter(p => 
+    p.status === 'activo' && 
+    (p.name.toLowerCase().includes(productSearch.toLowerCase()) ||
+     (p.description && p.description.toLowerCase().includes(productSearch.toLowerCase())))
+  );
+
+  // Manejar selección de producto
+  const handleProductSelect = (product) => {
+    setForm(prev => ({
+      ...prev,
+      product_id: product.id,
+      description: product.name + (product.description ? ` - ${product.description}` : ''),
+      amount: product.base_price.toString(),
+      source: product.type === 'servicio' ? 'servicios' : 'ventas',
+    }));
+    setProductSearch(product.name);
+    setShowProductDropdown(false);
+  };
+
+  // Limpiar selección de producto
+  const handleClearProduct = () => {
+    setForm(prev => ({
+      ...prev,
+      product_id: '',
+      description: '',
+      amount: '',
+    }));
+    setProductSearch('');
+  };
 
   // Calcular saldo pendiente en tiempo real (solo aplica cuando status es 'pending')
   const totalAmount = parseFloat(form.amount) || 0;
@@ -1544,6 +1578,71 @@ const IncomeModal = ({ onClose, onSave, sources, projects, token }) => {
         </div>
         
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* ========== SELECTOR DE PRODUCTO/SERVICIO ========== */}
+          {products.length > 0 && (
+            <div className="relative">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                <Package size={14} className="inline mr-1" />
+                Producto / Servicio
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={productSearch}
+                  onChange={(e) => {
+                    setProductSearch(e.target.value);
+                    setShowProductDropdown(true);
+                    if (!e.target.value) handleClearProduct();
+                  }}
+                  onFocus={() => setShowProductDropdown(true)}
+                  className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  placeholder="Buscar producto o servicio..."
+                  data-testid="income-product-search"
+                />
+                {form.product_id && (
+                  <button
+                    type="button"
+                    onClick={handleClearProduct}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+              
+              {/* Dropdown de productos */}
+              {showProductDropdown && productSearch && filteredProducts.length > 0 && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                  {filteredProducts.map(product => (
+                    <button
+                      key={product.id}
+                      type="button"
+                      onClick={() => handleProductSelect(product)}
+                      className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center justify-between"
+                    >
+                      <div>
+                        <p className="font-medium text-gray-900">{product.name}</p>
+                        <p className="text-xs text-gray-500">
+                          {product.type === 'servicio' ? '🔧 Servicio' : '📦 Producto'}
+                          {product.description && ` • ${product.description}`}
+                        </p>
+                      </div>
+                      <span className="font-semibold text-emerald-600">
+                        S/ {product.base_price.toFixed(2)}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              
+              {form.product_id && (
+                <p className="text-xs text-emerald-600 mt-1">
+                  ✓ Precio y descripción completados automáticamente
+                </p>
+              )}
+            </div>
+          )}
+
           {/* ========== ESTADO AL INICIO (CAMPO PRINCIPAL) ========== */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

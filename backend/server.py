@@ -9168,17 +9168,216 @@ async def get_receivables(
     await verify_company_access(company_id, username)
     workspace_id = await get_user_workspace_id(username)
     
+    # Obtener ingresos con estado pending o partial
     receivables = await db.finanzas_incomes.find(
-        {"company_id": company_id, "workspace_id": workspace_id, "status": "pending"},
+        {
+            "company_id": company_id, 
+            "workspace_id": workspace_id, 
+            "status": {"$in": ["pending", "partial"]}
+        },
         {"_id": 0}
     ).sort("due_date", 1).to_list(500)
     
-    total = sum(r["amount"] for r in receivables)
+    # Calcular totales correctamente basado en saldo pendiente
+    total_facturado = sum(r.get("amount", 0) for r in receivables)
+    total_abonado = sum(r.get("paid_amount", 0) for r in receivables)
+    total_pendiente = sum(r.get("amount", 0) - r.get("paid_amount", 0) for r in receivables)
     
     return {
         "receivables": receivables,
-        "total": total,
+        "total": total_pendiente,  # Solo saldo pendiente
+        "total_facturado": total_facturado,
+        "total_abonado": total_abonado,
         "count": len(receivables)
+    }
+
+# ==========================================
+# PAGOS PARCIALES - CUENTAS POR COBRAR
+# ==========================================
+
+@api_router.post("/finanzas/partial-payments")
+async def create_partial_payment(
+    payment: PartialPaymentCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Registrar un pago parcial para un ingreso pendiente"""
+    username = current_user["username"]
+    workspace_id = await get_user_workspace_id(username)
+    
+    # Obtener el ingreso
+    income = await db.finanzas_incomes.find_one(
+        {"id": payment.income_id, "workspace_id": workspace_id}
+    )
+    
+    if not income:
+        raise HTTPException(status_code=404, detail="Ingreso no encontrado")
+    
+    # Verificar acceso a la empresa
+    await verify_company_access(income["company_id"], username)
+    
+    # Verificar que el ingreso no está completamente cobrado
+    if income.get("status") == "collected":
+        raise HTTPException(status_code=400, detail="Este ingreso ya está completamente cobrado")
+    
+    # Calcular saldo pendiente actual
+    current_paid = income.get("paid_amount", 0) or 0
+    total_amount = income.get("amount", 0)
+    current_pending = total_amount - current_paid
+    
+    # Verificar que el pago no exceda el saldo pendiente
+    if payment.amount > current_pending:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"El monto del pago (S/ {payment.amount:.2f}) excede el saldo pendiente (S/ {current_pending:.2f})"
+        )
+    
+    # Crear el registro del pago parcial
+    payment_id = str(uuid.uuid4())
+    now = datetime.now(timezone.utc).isoformat()
+    
+    payment_record = {
+        "id": payment_id,
+        "income_id": payment.income_id,
+        "company_id": income["company_id"],
+        "workspace_id": workspace_id,
+        "username": username,
+        "amount": payment.amount,
+        "date": payment.date,
+        "payment_method": payment.payment_method,
+        "note": payment.note,
+        "created_at": now
+    }
+    
+    await db.finanzas_partial_payments.insert_one(payment_record)
+    
+    # Actualizar el ingreso
+    new_paid_amount = current_paid + payment.amount
+    new_pending_balance = total_amount - new_paid_amount
+    
+    # Determinar nuevo estado
+    if new_pending_balance <= 0:
+        new_status = "collected"
+    elif new_paid_amount > 0:
+        new_status = "partial"
+    else:
+        new_status = "pending"
+    
+    await db.finanzas_incomes.update_one(
+        {"id": payment.income_id},
+        {
+            "$set": {
+                "paid_amount": new_paid_amount,
+                "pending_balance": new_pending_balance,
+                "status": new_status,
+                "updated_at": now
+            }
+        }
+    )
+    
+    # Devolver el pago creado junto con el estado actualizado del ingreso
+    return {
+        "payment": {**payment_record, "_id": None},
+        "income_updated": {
+            "id": payment.income_id,
+            "paid_amount": new_paid_amount,
+            "pending_balance": new_pending_balance,
+            "status": new_status
+        }
+    }
+
+@api_router.get("/finanzas/partial-payments/{income_id}")
+async def get_partial_payments(
+    income_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener historial de pagos parciales de un ingreso"""
+    username = current_user["username"]
+    workspace_id = await get_user_workspace_id(username)
+    
+    # Verificar que el ingreso existe y pertenece al usuario
+    income = await db.finanzas_incomes.find_one(
+        {"id": income_id, "workspace_id": workspace_id}
+    )
+    
+    if not income:
+        raise HTTPException(status_code=404, detail="Ingreso no encontrado")
+    
+    # Obtener pagos parciales ordenados por fecha
+    payments = await db.finanzas_partial_payments.find(
+        {"income_id": income_id, "workspace_id": workspace_id},
+        {"_id": 0}
+    ).sort("date", -1).to_list(100)
+    
+    return {
+        "payments": payments,
+        "total_paid": sum(p.get("amount", 0) for p in payments),
+        "count": len(payments)
+    }
+
+@api_router.delete("/finanzas/partial-payments/{payment_id}")
+async def delete_partial_payment(
+    payment_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Eliminar un pago parcial (requiere confirmación del frontend)"""
+    username = current_user["username"]
+    workspace_id = await get_user_workspace_id(username)
+    
+    # Obtener el pago
+    payment = await db.finanzas_partial_payments.find_one(
+        {"id": payment_id, "workspace_id": workspace_id}
+    )
+    
+    if not payment:
+        raise HTTPException(status_code=404, detail="Pago no encontrado")
+    
+    # Obtener el ingreso asociado
+    income = await db.finanzas_incomes.find_one({"id": payment["income_id"]})
+    
+    if not income:
+        raise HTTPException(status_code=404, detail="Ingreso asociado no encontrado")
+    
+    # Eliminar el pago
+    await db.finanzas_partial_payments.delete_one({"id": payment_id})
+    
+    # Recalcular el monto pagado del ingreso
+    remaining_payments = await db.finanzas_partial_payments.find(
+        {"income_id": payment["income_id"]}
+    ).to_list(100)
+    
+    new_paid_amount = sum(p.get("amount", 0) for p in remaining_payments)
+    new_pending_balance = income.get("amount", 0) - new_paid_amount
+    
+    # Determinar nuevo estado
+    if new_pending_balance <= 0:
+        new_status = "collected"
+    elif new_paid_amount > 0:
+        new_status = "partial"
+    else:
+        new_status = "pending"
+    
+    now = datetime.now(timezone.utc).isoformat()
+    
+    await db.finanzas_incomes.update_one(
+        {"id": payment["income_id"]},
+        {
+            "$set": {
+                "paid_amount": new_paid_amount,
+                "pending_balance": new_pending_balance,
+                "status": new_status,
+                "updated_at": now
+            }
+        }
+    )
+    
+    return {
+        "message": "Pago eliminado correctamente",
+        "income_updated": {
+            "id": payment["income_id"],
+            "paid_amount": new_paid_amount,
+            "pending_balance": new_pending_balance,
+            "status": new_status
+        }
     }
 
 @api_router.get("/finanzas/payables")

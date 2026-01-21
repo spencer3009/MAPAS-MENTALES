@@ -1454,13 +1454,23 @@ const FinanzasModule = ({ token, projects = [] }) => {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-900">Gastos</h2>
-              <button
-                onClick={() => setShowExpenseModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
-              >
-                <Plus size={18} />
-                Nuevo Gasto
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowCategoryModal(true)}
+                  className="flex items-center gap-2 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  title="Gestionar categorías"
+                >
+                  <Settings size={18} />
+                  Categorías
+                </button>
+                <button
+                  onClick={() => setShowExpenseModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                >
+                  <Plus size={18} />
+                  Nuevo Gasto
+                </button>
+              </div>
             </div>
             
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">

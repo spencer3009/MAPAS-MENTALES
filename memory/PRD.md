@@ -2,6 +2,31 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-21: FEATURE — Ajuste Contable: Visualización correcta de Ingresos "Por cobrar" ✅ COMPLETADO Y PROBADO
+- **Estado**: Implementación completada y verificada con testing agent (8/8 tests passed)
+- **Problema resuelto**: Se mostraba el monto total de venta como ingreso, cuando solo el dinero recibido es ingreso real
+- **Regla contable implementada**:
+  - `paid_amount` → Ingreso real (se suma a totales)
+  - `amount` → Referencia informativa (monto total de la venta)
+  - `pending_balance` → Cuenta por cobrar (no suma)
+- **Cambios en Dashboard**:
+  - ✅ "Total del día/mes/año" ahora muestra solo dinero recibido
+  - ✅ Subtotal e IGV calculados sobre el ingreso real
+  - ✅ Contador: "X ingreso(s) con pago recibido"
+- **Cambios en Tabla de Ingresos**:
+  - ✅ Columna renombrada a "INGRESO REAL"
+  - ✅ Para "Por cobrar": monto principal = paid_amount (negrita)
+  - ✅ Referencia secundaria: "de S/X total" (gris, menor jerarquía)
+  - ✅ Debajo del badge: "Pendiente: S/X" (ámbar)
+  - ✅ Para "Cobrado": solo el monto total sin referencias
+- **Función clave**: `calculateRealIncome(income)` - calcula ingreso real según estado
+- **Testing verificado** (iteration_40.json):
+  - Income amount=3000, paid_amount=800 → Dashboard muestra S/800 ✅
+  - "Marcar cobrado" → Dashboard cambia a S/3,000 ✅
+  - Subtotal/IGV basados en ingreso real ✅
+- **Archivos modificados**:
+  - `/app/frontend/src/components/finanzas/FinanzasModule.jsx`
+
 ### 2026-01-21: FEATURE — Reordenamiento UX del Modal "Nuevo Ingreso" ✅ COMPLETADO Y PROBADO
 - **Estado**: Implementación completada y verificada con testing agent (7/7 tests passed)
 - **Problema resuelto**: El campo Estado aparecía al final del formulario y el default era incorrecto

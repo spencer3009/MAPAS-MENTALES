@@ -1930,7 +1930,7 @@ const CategoryManagerModal = ({ onClose, categories, onUpdate, token }) => {
     }
   };
 
-  // Separar categorías predefinidas y personalizadas
+  // Separar conceptos predefinidos y personalizados
   const defaultCategories = localCategories.filter(c => c.is_default);
   const customCategories = localCategories.filter(c => !c.is_default);
 
@@ -1941,9 +1941,9 @@ const CategoryManagerModal = ({ onClose, categories, onUpdate, token }) => {
           <div>
             <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <Settings size={20} className="text-gray-500" />
-              Gestionar Categorías de Gastos
+              Gestionar Conceptos de Gasto
             </h2>
-            <p className="text-sm text-gray-500">Crea y edita categorías personalizadas</p>
+            <p className="text-sm text-gray-500">Crea y edita conceptos personalizados</p>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full">
             <X size={20} />
@@ -1951,11 +1951,11 @@ const CategoryManagerModal = ({ onClose, categories, onUpdate, token }) => {
         </div>
 
         <div className="p-6 space-y-6">
-          {/* Crear nueva categoría */}
+          {/* Crear nuevo concepto */}
           <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-200">
             <h3 className="text-sm font-semibold text-emerald-800 mb-3 flex items-center gap-2">
               <Plus size={16} />
-              Nueva Categoría
+              Nuevo Concepto
             </h3>
             <div className="space-y-3">
               <input
@@ -1963,7 +1963,7 @@ const CategoryManagerModal = ({ onClose, categories, onUpdate, token }) => {
                 value={newCategory.name}
                 onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                placeholder="Nombre de la categoría"
+                placeholder="Nombre del concepto"
               />
               <input
                 type="text"
@@ -1977,17 +1977,17 @@ const CategoryManagerModal = ({ onClose, categories, onUpdate, token }) => {
                 disabled={loading || !newCategory.name.trim()}
                 className="w-full px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Creando...' : 'Crear Categoría'}
+                {loading ? 'Creando...' : 'Crear Concepto'}
               </button>
             </div>
           </div>
 
-          {/* Categorías personalizadas */}
+          {/* Conceptos personalizados */}
           {customCategories.length > 0 && (
             <div>
               <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                 <Edit2 size={16} className="text-blue-500" />
-                Mis Categorías ({customCategories.length})
+                Mis Conceptos ({customCategories.length})
               </h3>
               <div className="space-y-2">
                 {customCategories.map((category) => (

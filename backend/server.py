@@ -9486,6 +9486,234 @@ async def get_project_financial_summaries(
     
     return {"projects": summaries}
 
+# ==========================================
+# BALANCE GENERAL (CAJA REAL)
+# ==========================================
+
+@api_router.get("/finanzas/balance-general")
+async def get_balance_general(
+    company_id: str,
+    start_date: Optional[str] = None,  # YYYY-MM-DD
+    end_date: Optional[str] = None,    # YYYY-MM-DD
+    project_id: Optional[str] = None,
+    filter_type: Optional[str] = None,  # 'today' | 'month' | 'last30days'
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Obtener Balance General basado en Caja Real.
+    Solo considera ingresos y gastos efectivamente PAGADOS.
+    """
+    username = current_user["username"]
+    await verify_company_access(company_id, username)
+    workspace_id = await get_user_workspace_id(username)
+    
+    now = datetime.now(timezone.utc)
+    
+    # Determinar rango de fechas según filter_type
+    if filter_type == 'today':
+        start_date = now.strftime("%Y-%m-%d")
+        end_date = (now + timedelta(days=1)).strftime("%Y-%m-%d")
+    elif filter_type == 'month' or (not start_date and not end_date):
+        # Mes actual por defecto
+        start_date = now.strftime("%Y-%m-01")
+        if now.month == 12:
+            end_date = f"{now.year + 1}-01-01"
+        else:
+            end_date = f"{now.year}-{now.month + 1:02d}-01"
+    elif filter_type == 'last30days':
+        start_date = (now - timedelta(days=30)).strftime("%Y-%m-%d")
+        end_date = (now + timedelta(days=1)).strftime("%Y-%m-%d")
+    
+    # Construir filtro base
+    base_filter = {
+        "company_id": company_id,
+        "workspace_id": workspace_id,
+        "date": {"$gte": start_date, "$lt": end_date}
+    }
+    
+    if project_id:
+        base_filter["project_id"] = project_id
+    
+    # ==========================================
+    # INGRESOS REALES (solo cobrados/pagados)
+    # ==========================================
+    income_filter = {**base_filter, "status": {"$in": ["collected", "partial"]}}
+    incomes = await db.finanzas_incomes.find(
+        income_filter, {"_id": 0}
+    ).sort("date", -1).to_list(1000)
+    
+    # Calcular ingresos reales considerando pagos parciales
+    income_details = []
+    total_income_real = 0
+    
+    for income in incomes:
+        if income.get("status") == "collected":
+            amount_paid = income.get("amount", 0)
+            payment_type = "total"
+        else:  # partial
+            amount_paid = income.get("paid_amount", 0) or 0
+            payment_type = "parcial"
+        
+        total_income_real += amount_paid
+        
+        income_details.append({
+            "id": income.get("id"),
+            "date": income.get("date"),
+            "description": income.get("description") or income.get("source", "Ingreso"),
+            "project_id": income.get("project_id"),
+            "project_name": income.get("project_name"),
+            "client_name": income.get("client_name"),
+            "amount_paid": amount_paid,
+            "total_amount": income.get("amount", 0),
+            "payment_type": payment_type,
+            "source": income.get("source")
+        })
+    
+    # ==========================================
+    # GASTOS REALES (solo pagados)
+    # ==========================================
+    expense_filter = {**base_filter, "status": "paid"}
+    expenses = await db.finanzas_expenses.find(
+        expense_filter, {"_id": 0}
+    ).sort("date", -1).to_list(1000)
+    
+    expense_details = []
+    total_expense_real = 0
+    
+    for expense in expenses:
+        amount_paid = expense.get("amount", 0)
+        total_expense_real += amount_paid
+        
+        expense_details.append({
+            "id": expense.get("id"),
+            "date": expense.get("date"),
+            "description": expense.get("description") or "Gasto",
+            "category": expense.get("category"),
+            "project_id": expense.get("project_id"),
+            "project_name": expense.get("project_name"),
+            "vendor_name": expense.get("vendor_name"),
+            "amount_paid": amount_paid,
+            "payment_type": "total",
+            "is_fixed_expense": expense.get("fixed_expense_id") is not None
+        })
+    
+    # ==========================================
+    # RESULTADO OPERATIVO
+    # ==========================================
+    resultado_neto = total_income_real - total_expense_real
+    
+    # ==========================================
+    # CONTEXTO FINANCIERO (informativo, NO afecta resultado)
+    # ==========================================
+    
+    # Cuentas por cobrar (pendientes)
+    receivables_filter = {
+        "company_id": company_id,
+        "workspace_id": workspace_id,
+        "status": {"$in": ["pending", "partial"]}
+    }
+    receivables = await db.finanzas_incomes.find(
+        receivables_filter, {"_id": 0}
+    ).to_list(500)
+    
+    total_por_cobrar = sum(
+        (inc.get("amount", 0) - (inc.get("paid_amount", 0) or 0)) 
+        for inc in receivables
+    )
+    
+    # Cuentas por pagar (pendientes)
+    payables_filter = {
+        "company_id": company_id,
+        "workspace_id": workspace_id,
+        "status": "pending"
+    }
+    payables = await db.finanzas_expenses.find(
+        payables_filter, {"_id": 0}
+    ).to_list(500)
+    
+    total_por_pagar = sum(exp.get("amount", 0) for exp in payables)
+    
+    # Gastos fijos comprometidos (no pagados aún)
+    fixed_expenses = await db.finanzas_fixed_expenses.find(
+        {"company_id": company_id, "workspace_id": workspace_id, "status": "activo"},
+        {"_id": 0}
+    ).to_list(100)
+    
+    total_gastos_fijos_comprometidos = sum(fe.get("estimated_amount", 0) for fe in fixed_expenses)
+    
+    # ==========================================
+    # BALANCE POR PROYECTO
+    # ==========================================
+    projects_balance = {}
+    
+    for income in income_details:
+        proj_id = income.get("project_id")
+        if proj_id:
+            if proj_id not in projects_balance:
+                projects_balance[proj_id] = {
+                    "project_id": proj_id,
+                    "project_name": income.get("project_name") or "Sin nombre",
+                    "total_income": 0,
+                    "total_expense": 0,
+                    "result": 0
+                }
+            projects_balance[proj_id]["total_income"] += income.get("amount_paid", 0)
+    
+    for expense in expense_details:
+        proj_id = expense.get("project_id")
+        if proj_id:
+            if proj_id not in projects_balance:
+                projects_balance[proj_id] = {
+                    "project_id": proj_id,
+                    "project_name": expense.get("project_name") or "Sin nombre",
+                    "total_income": 0,
+                    "total_expense": 0,
+                    "result": 0
+                }
+            projects_balance[proj_id]["total_expense"] += expense.get("amount_paid", 0)
+    
+    # Calcular resultado por proyecto
+    for proj_id in projects_balance:
+        proj = projects_balance[proj_id]
+        proj["result"] = proj["total_income"] - proj["total_expense"]
+    
+    # Ordenar por resultado descendente
+    projects_list = sorted(projects_balance.values(), key=lambda x: x["result"], reverse=True)
+    
+    return {
+        "period": {
+            "start_date": start_date,
+            "end_date": end_date,
+            "filter_type": filter_type or "month"
+        },
+        "company_id": company_id,
+        
+        # KPIs principales (CAJA REAL)
+        "total_income_real": total_income_real,
+        "total_expense_real": total_expense_real,
+        "resultado_neto": resultado_neto,
+        "is_profit": resultado_neto >= 0,
+        
+        # Detalles de movimientos
+        "incomes": income_details,
+        "expenses": expense_details,
+        "income_count": len(income_details),
+        "expense_count": len(expense_details),
+        
+        # Contexto financiero (informativo)
+        "context": {
+            "total_por_cobrar": total_por_cobrar,
+            "total_por_pagar": total_por_pagar,
+            "total_gastos_fijos_comprometidos": total_gastos_fijos_comprometidos,
+            "receivables_count": len(receivables),
+            "payables_count": len(payables),
+            "fixed_expenses_count": len(fixed_expenses)
+        },
+        
+        # Balance por proyecto
+        "projects_balance": projects_list
+    }
+
 @api_router.get("/finanzas/receivables")
 async def get_receivables(
     company_id: str,

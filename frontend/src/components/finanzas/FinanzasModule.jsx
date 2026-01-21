@@ -1810,6 +1810,290 @@ const FinanzasModule = ({ token, projects = [] }) => {
   );
 };
 
+// ==========================================
+// MODAL DE GESTIÓN DE CATEGORÍAS
+// ==========================================
+
+const CategoryManagerModal = ({ onClose, categories, onUpdate, token }) => {
+  const [localCategories, setLocalCategories] = useState(categories);
+  const [newCategory, setNewCategory] = useState({ name: '', description: '' });
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+
+  const handleCreateCategory = async () => {
+    if (!newCategory.name.trim()) {
+      alert('Ingresa un nombre para la categoría');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/api/finanzas/categories`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: newCategory.name.trim(),
+          description: newCategory.description.trim() || null
+        })
+      });
+
+      if (response.ok) {
+        const created = await response.json();
+        setLocalCategories([...localCategories, created]);
+        setNewCategory({ name: '', description: '' });
+        onUpdate();
+      } else {
+        const error = await response.json();
+        alert(error.detail || 'Error al crear categoría');
+      }
+    } catch (err) {
+      console.error('Error creating category:', err);
+      alert('Error al crear categoría');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateCategory = async (category) => {
+    if (!editingCategory.name.trim()) {
+      alert('El nombre no puede estar vacío');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/api/finanzas/categories/${category.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: editingCategory.name.trim(),
+          description: editingCategory.description?.trim() || null
+        })
+      });
+
+      if (response.ok) {
+        const updated = await response.json();
+        setLocalCategories(localCategories.map(c => c.id === category.id ? updated : c));
+        setEditingCategory(null);
+        onUpdate();
+      } else {
+        const error = await response.json();
+        alert(error.detail || 'Error al actualizar categoría');
+      }
+    } catch (err) {
+      console.error('Error updating category:', err);
+      alert('Error al actualizar categoría');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteCategory = async (category) => {
+    if (category.is_default) {
+      alert('No se pueden eliminar categorías predefinidas');
+      return;
+    }
+
+    if (!window.confirm(`¿Estás seguro de eliminar la categoría "${category.name}"?`)) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/api/finanzas/categories/${category.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        setLocalCategories(localCategories.filter(c => c.id !== category.id));
+        onUpdate();
+      } else {
+        const error = await response.json();
+        alert(error.detail || 'Error al eliminar categoría');
+      }
+    } catch (err) {
+      console.error('Error deleting category:', err);
+      alert('Error al eliminar categoría');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Separar categorías predefinidas y personalizadas
+  const defaultCategories = localCategories.filter(c => c.is_default);
+  const customCategories = localCategories.filter(c => !c.is_default);
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <Settings size={20} className="text-gray-500" />
+              Gestionar Categorías de Gastos
+            </h2>
+            <p className="text-sm text-gray-500">Crea y edita categorías personalizadas</p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full">
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-6">
+          {/* Crear nueva categoría */}
+          <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-200">
+            <h3 className="text-sm font-semibold text-emerald-800 mb-3 flex items-center gap-2">
+              <Plus size={16} />
+              Nueva Categoría
+            </h3>
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={newCategory.name}
+                onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                placeholder="Nombre de la categoría"
+              />
+              <input
+                type="text"
+                value={newCategory.description}
+                onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                placeholder="Descripción (opcional)"
+              />
+              <button
+                onClick={handleCreateCategory}
+                disabled={loading || !newCategory.name.trim()}
+                className="w-full px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Creando...' : 'Crear Categoría'}
+              </button>
+            </div>
+          </div>
+
+          {/* Categorías personalizadas */}
+          {customCategories.length > 0 && (
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                <Edit2 size={16} className="text-blue-500" />
+                Mis Categorías ({customCategories.length})
+              </h3>
+              <div className="space-y-2">
+                {customCategories.map((category) => (
+                  <div key={category.id} className="bg-white border border-gray-200 rounded-lg p-3">
+                    {editingCategory?.id === category.id ? (
+                      <div className="space-y-2">
+                        <input
+                          type="text"
+                          value={editingCategory.name}
+                          onChange={(e) => setEditingCategory({ ...editingCategory, name: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                          placeholder="Nombre"
+                        />
+                        <input
+                          type="text"
+                          value={editingCategory.description || ''}
+                          onChange={(e) => setEditingCategory({ ...editingCategory, description: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                          placeholder="Descripción"
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleUpdateCategory(category)}
+                            disabled={loading}
+                            className="flex-1 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                          >
+                            Guardar
+                          </button>
+                          <button
+                            onClick={() => setEditingCategory(null)}
+                            className="flex-1 px-3 py-1.5 border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900">{category.name}</p>
+                          {category.description && (
+                            <p className="text-xs text-gray-500">{category.description}</p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setEditingCategory({ ...category })}
+                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
+                            title="Editar"
+                          >
+                            <Edit2 size={16} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteCategory(category)}
+                            className="p-1.5 text-red-600 hover:bg-red-50 rounded"
+                            title="Eliminar"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Categorías predefinidas */}
+          <div>
+            <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+              <Package size={16} className="text-gray-400" />
+              Categorías Predefinidas ({defaultCategories.length})
+            </h3>
+            <div className="bg-gray-50 rounded-lg p-3">
+              <div className="flex flex-wrap gap-2">
+                {defaultCategories.map((category) => (
+                  <span
+                    key={category.id}
+                    className="inline-flex items-center px-3 py-1.5 bg-white border border-gray-200 rounded-full text-sm text-gray-700"
+                  >
+                    {category.name}
+                  </span>
+                ))}
+              </div>
+              <p className="text-xs text-gray-400 mt-3">
+                Las categorías predefinidas no se pueden editar ni eliminar
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4">
+          <button
+            onClick={onClose}
+            className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Modal de Ingreso con soporte para pagos parciales y productos
 const IncomeModal = ({ onClose, onSave, sources, projects, products = [], token }) => {
   const [form, setForm] = useState({

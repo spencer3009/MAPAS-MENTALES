@@ -1038,6 +1038,75 @@ const FinanzasModule = ({ token, projects = [] }) => {
                 <p className="text-xs text-gray-400">Después de pagos</p>
               </div>
             </div>
+
+            {/* ========== SECCIÓN DE DETERMINACIÓN DE IGV ========== */}
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <Wallet size={20} className="text-blue-500" />
+                Determinación del IGV
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {/* IGV Ventas (Débito Fiscal) */}
+                <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
+                  <p className="text-xs text-amber-700 font-medium uppercase mb-1">IGV Ventas</p>
+                  <p className="text-2xl font-bold text-amber-700">
+                    S/ {igvVentas.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
+                  <p className="text-xs text-amber-600 mt-1">Débito fiscal</p>
+                </div>
+
+                {/* IGV Gastos (Crédito Fiscal) */}
+                <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                  <p className="text-xs text-green-700 font-medium uppercase mb-1">IGV Gastos</p>
+                  <p className="text-2xl font-bold text-green-700">
+                    S/ {igvGastos.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
+                  <p className="text-xs text-green-600 mt-1">Crédito fiscal</p>
+                </div>
+
+                {/* Subtotal de Gastos con IGV */}
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <p className="text-xs text-gray-500 font-medium uppercase mb-1">Base Gastos c/IGV</p>
+                  <p className="text-2xl font-bold text-gray-700">
+                    S/ {filteredExpenses.reduce((sum, exp) => sum + (exp.includes_igv ? (exp.base_imponible || exp.amount / 1.18) : 0), 0).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">Subtotal sin impuesto</p>
+                </div>
+
+                {/* Resultado: IGV a Pagar o a Favor */}
+                <div className={`rounded-lg p-4 border ${
+                  igvAFavor 
+                    ? 'bg-green-50 border-green-300' 
+                    : igvAPagar 
+                      ? 'bg-red-50 border-red-200' 
+                      : 'bg-gray-50 border-gray-200'
+                }`}>
+                  <p className={`text-xs font-medium uppercase mb-1 ${
+                    igvAFavor ? 'text-green-700' : igvAPagar ? 'text-red-700' : 'text-gray-500'
+                  }`}>
+                    {igvAFavor ? 'IGV a Favor' : igvAPagar ? 'IGV a Pagar' : 'IGV Neto'}
+                  </p>
+                  <p className={`text-2xl font-bold ${
+                    igvAFavor ? 'text-green-700' : igvAPagar ? 'text-red-700' : 'text-gray-700'
+                  }`}>
+                    S/ {igvAbsoluto.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
+                  <p className={`text-xs mt-1 ${
+                    igvAFavor ? 'text-green-600' : igvAPagar ? 'text-red-600' : 'text-gray-500'
+                  }`}>
+                    {igvAFavor ? 'Crédito disponible' : igvAPagar ? 'Por pagar a SUNAT' : 'Sin movimientos'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Fórmula explicativa */}
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <p className="text-xs text-gray-500 text-center">
+                  <span className="font-medium">Fórmula:</span> IGV Ventas (S/ {igvVentas.toFixed(2)}) − IGV Gastos (S/ {igvGastos.toFixed(2)}) = {igvAFavor ? 'IGV a Favor' : 'IGV a Pagar'} (S/ {igvAbsoluto.toFixed(2)})
+                </p>
+              </div>
+            </div>
           </div>
         )}
 

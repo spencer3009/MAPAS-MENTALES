@@ -1893,10 +1893,17 @@ const ExpenseModal = ({ onClose, onSave, categories, projects, token }) => {
     priority: 'medium',
     due_date: '',
     project_id: '',
+    includes_igv: false, // Por defecto no incluye IGV
   });
 
   // Estado para el contacto/proveedor seleccionado
   const [selectedVendor, setSelectedVendor] = useState(null);
+
+  // Calcular IGV en tiempo real para mostrar al usuario
+  const IGV_RATE = 0.18;
+  const totalAmount = parseFloat(form.amount) || 0;
+  const baseImponible = form.includes_igv ? totalAmount / (1 + IGV_RATE) : totalAmount;
+  const igvGasto = form.includes_igv ? totalAmount - baseImponible : 0;
 
   const handleVendorChange = (contact) => {
     setSelectedVendor(contact);
@@ -1930,7 +1937,7 @@ const ExpenseModal = ({ onClose, onSave, categories, projects, token }) => {
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {/* ========== MONTO CON VOZ ========== */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Monto *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Monto Total *</label>
             <div className="relative">
               <input
                 type="number"
@@ -1948,6 +1955,48 @@ const ExpenseModal = ({ onClose, onSave, categories, projects, token }) => {
                 onResult={(value) => setForm(prev => ({ ...prev, amount: value }))}
               />
             </div>
+          </div>
+
+          {/* ========== TOGGLE IGV ========== */}
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-amber-700 font-medium text-sm">¿Este gasto incluye IGV?</span>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.includes_igv}
+                  onChange={(e) => setForm({ ...form, includes_igv: e.target.checked })}
+                  className="sr-only peer"
+                  data-testid="expense-includes-igv-toggle"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+              </label>
+            </div>
+            
+            {/* Desglose de IGV (solo si está activado y hay monto) */}
+            {form.includes_igv && totalAmount > 0 && (
+              <div className="mt-3 pt-3 border-t border-amber-200 space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Base imponible:</span>
+                  <span className="font-medium text-gray-900">S/ {baseImponible.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">IGV (18%):</span>
+                  <span className="font-medium text-amber-600">S/ {igvGasto.toFixed(2)}</span>
+                </div>
+                <p className="text-xs text-amber-600 mt-1">
+                  💡 Este IGV será tu crédito fiscal (reduce tu IGV a pagar)
+                </p>
+              </div>
+            )}
+            
+            {!form.includes_igv && (
+              <p className="text-xs text-gray-500 mt-2">
+                Actívalo si la factura o boleta incluye IGV desglosado
+              </p>
+            )}
           </div>
 
           <div>

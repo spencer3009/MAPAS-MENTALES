@@ -1,107 +1,79 @@
 <analysis>**original_problem_statement:**
-The user's goal is to enhance their full-stack mind mapping application, MindoraMap, with significant functional and UX improvements.
+The user's primary goal is to transform their MindoraMap application into a professional-grade financial management tool. This session focused on a series of significant enhancements to the Finance module.
 
-The specific requests addressed in this session were:
-1.  **Reminders & Linked Projects:**
-    *   Hide the reminder icon on a node after the reminder has been sent. The agent discovered this was already working as intended.
-    *   Fix the click behavior on Linked Project nodes. A simple click was incorrectly allowing text editing instead of navigating to the linked project.
-2.  **Task Node Button:** Add a Ver tarea → (View task) button to task node cards, which opens the task details side panel.
-3.  **Dynamic Toolbar:** The floating node action toolbar needed to be context-aware. For Task and Project nodes, it should only display three actions: Delete, Duplicate, and Reminder, hiding all text and style editing options.
-4.  **Finance Module - IGV Dashboard:** Add a new summary dashboard at the top of the Ingresos (Income) tab, displaying three cards: Total earnings for the period, Subtotal (pre-tax), and IGV (18% tax).
-5.  **Finance Module - Filters & Health Status:**
-    *   Overhaul the date filter to support three modes: Day (default, set to today), Month, and Year.
-    *   Fix the non-functional Saludable / Atención (Healthy / Attention) financial status indicator, making it dynamically react to the financial data of the selected period.
-6.  **Timezone Bug:** Fix a critical bug where dates entered in the finance module were being displayed as the previous day due to incorrect timezone handling.
-7.  **Partial Payments:** The final and current task is to implement a partial payment system. When creating an income record with the status Por cobrar (Accounts Receivable), the form must dynamically show fields for Monto total (Total Amount) and Pago recibido (Payment Received), automatically calculating and displaying the Saldo pendiente (Pending Balance).
+The user's explicit requests, which were implemented in this session, were:
+1.  **UX/Logic Redesign for New Income Modal:** The user requested to reorder the New Income form to prioritize the  (Status) field, setting its default to Cobrado (Collected). The more complex partial payment fields should only appear conditionally when the status is set to Por cobrar (Accounts Receivable).
+2.  **Correct Accounting for Partial Payments:** The user mandated a critical accounting logic change: in the income list and all financial dashboards, only the  (amount paid) for Por cobrar items should be counted as real income, with the  (total amount) serving only as a reference.
+3.  **Speech-to-Text in New Expense Form:** Add a microphone icon to the Monto (Amount) and Descripción (Description) fields to allow voice input using the browser's native Web Speech API. The amount field must correctly parse numbers from spoken words.
+4.  **Professional Accounts Receivable System:** Implement a comprehensive system for managing partial payments. This includes a new backend model (), a dedicated Por Cobrar tab with a summary dashboard (Total Billed, Total Paid, Pending Balance), and a modal to add and track multiple partial payments for each invoice.
+5.  **Products/Services Module:** Create a new module to manage a catalog of products and services. This module must integrate with the New Income form, allowing a user to select a product/service to auto-fill the description and price, speeding up data entry.
+6.  **Full IGV (VAT) Determination:** Implement a proper IGV (VAT) calculation system. This required adding a toggle to the New Expense form to specify if an expense includes IGV. The main finance dashboard must then display the net IGV to pay or in favor, calculated as .
 
 **User's preferred language**: Spanish
 
 **what currently exists?**
-The application is a full-stack mind mapping tool with a React frontend and FastAPI backend.
-
--   **Dynamic Node Cards:** Task and Project nodes are visually distinct cards. A critical bug was fixed where clicking a Project node now correctly navigates to the linked map, even recovering from missing data by matching the project name.
--   **Contextual Actions:** Task nodes now feature a Ver tarea → button to open the details panel. The floating toolbar is now dynamic, showing a simplified set of actions for Task and Project nodes.
--   **Advanced Finance Module:** The finance module features a sophisticated filtering system (Day/Month/Year), a functional financial health indicator, and a new dashboard on the income tab that automatically calculates Total, Subtotal, and IGV for the selected period.
--   **Timezone Fix:** A critical timezone bug has been resolved, ensuring all dates entered and displayed in the finance module are consistent with the user's local timezone.
--   **Partial Payments UI:** The UI for the New Income modal has been updated to support partial payments, dynamically showing fields for total amount, payment received, and pending balance. The backend models and API endpoint have also been modified to support this.
+The application is a full-stack mind mapping tool with a highly advanced finance module.
+-   **Finance Module UI/UX:** The New Income modal is optimized for common use cases, defaulting to Cobrado and conditionally showing complexity. The New Expense modal supports speech-to-text for faster data entry.
+-   **Accounts Receivable:** A complete, professional-grade Por Cobrar system is in place. It features a dedicated tab with a summary dashboard, a detailed table tracking invoices, and functionality to add multiple partial payments to any invoice, with automatic status updates (e.g.,  ->  -> ).
+-   **Product Catalog:** A new Productos / Servicios module allows the user to create and manage a catalog of items with predefined prices and descriptions. This catalog is integrated into the New Income form to enable quick, consistent data entry.
+-   **Accurate Accounting Logic:** The application's financial calculations are now robust. Dashboards and income lists correctly distinguish between real income (money received) and accounts receivable (money promised), providing an accurate cash flow picture.
+-   **IGV Determination:** The finance dashboard correctly calculates and displays the net IGV (VAT) to be paid or held as a credit, taking into account both sales and IGV-bearing expenses.
 
 **Last working item**:
--   **Last item agent was working:** Implementing the logic for partial payments in the finance module. The agent updated the frontend  to include new fields, updated the backend Pydantic models in  to add  and , and modified the  endpoint in  to handle the new logic.
--   **Status:** IN PROGRESS
--   **Agent Testing Done:** N
--   **Which testing method agent to use?** Frontend testing agent
+-   **Last item agent was working:** Implementing the full IGV (VAT) Determination logic. This involved updating the backend  model, modifying the API to calculate tax from expenses, adding a toggle switch to the frontend , and updating the main dashboard's calculation and display logic to show the net IGV ().
+-   **Status:** USER VERIFICATION PENDING
+-   **Agent Testing Done:** Y
+-   **Which testing method agent to use?** NA
 -   **User Testing Done:** N
 
-**All Pending/Inprogress Issue list**:
--   **Issue 1: Complete and Test Partial Payments Feature (P0 - HIGHEST)**
--   **Issue 2: Production Deployment Stabilization (P0 - BLOCKER)**
--   **Issue 3: Implement Attachment Upload Functionality (P1)**
--   **Issue 4: WhatsApp Message Template Not Approved (P2 - BLOCKED)**
+**All Pending/In progress Issue list**:
+-   **Issue 1: Production Deployment Stabilization (P0 - BLOCKER)**
+-   **Issue 2: Implement Attachment Upload Functionality (P1)**
+-   **Issue 3: WhatsApp Message Template Not Approved (P2 - BLOCKED)**
 
 **Issues Detail:**
--   **Issue 1: Complete and Test Partial Payments Feature**
-    -   **Attempted fixes:** Frontend () was updated with a new modal structure. Backend (, ) was updated to include new fields (, ) and logic.
+-   **Issue 1: Production Deployment Stabilization**
+    -   **Attempted fixes:** This is a recurring issue from previous forks. The user needs guidance to push the latest code to their live environment.
     -   **Next debug checklist:**
-        1.  Launch the app and navigate to Finanzas → Ingresos.
-        2.  Click to add a new income.
-        3.  Set the status to Por cobrar.
-        4.  Enter a Monto total (e.g., 1000) and a Pago recibido (e.g., 300).
-        5.  Verify the Saldo pendiente automatically calculates to 700.
-        6.  Save the record and confirm it's stored correctly.
-        7.  Test the edge case where Pago recibido equals Monto total and verify the status automatically changes to Cobrado.
-        8.  Ensure the main Por Cobrar summary card reflects the new pending balance.
-    -   **Why fix this issue and what will be achieved with the fix?** This is a critical accounting feature that allows the user to manage invoices with fractional payments, making the finance module suitable for real-world business scenarios.
-    -   **Status:** IN PROGRESS
-    -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** Both.
-    -   **Blocked on other issue:** None.
-
--   **Issue 2: Production Deployment Stabilization**
-    -   **Attempted fixes:** (From previous sessions) The user has been guided on how to push code to GitHub.
-    -   **Next debug checklist:**
-        1.  Once the current feature is stable, proactively remind the user that new features are not live.
-        2.  Instruct the user to use Save to GitHub to push all changes.
-        3.  Guide them to trigger a Re-Deploy from the Emergent platform UI.
-    -   **Why fix this issue and what will be achieved with the fix?** This is a critical blocker preventing the user from using any recently developed features in their live application.
+        1.  Proactively remind the user that the newly completed features are only in the preview environment.
+        2.  Instruct the user to use the Save to GitHub feature to push all recent changes.
+        3.  Guide them to trigger a Re-Deploy from their Emergent platform dashboard to make the features live.
+    -   **Why fix this issue and what will be achieved with the fix?** This is a critical blocker preventing the user from benefiting from any of the recently developed features in their production application.
     -   **Status:** IN PROGRESS
     -   **Is recurring issue?** Y
     -   **Should Test frontend/backend/both after fix?** Both.
     -   **Blocked on other issue:** None.
 
--   **Issue 3: Implement Attachment Upload Functionality**
-    -   **Attempted fixes:** The UI is implemented in .
+-   **Issue 2: Implement Attachment Upload Functionality**
+    -   **Attempted fixes:** The UI for attachments is partially implemented in .
     -   **Next debug checklist:**
-        1.  Create a new backend endpoint (e.g., ).
-        2.  Implement file upload logic in  in .
-        3.  Implement UI to display and manage existing attachments.
-    -   **Why fix this issue and what will be achieved with the fix?** Completes the Adjuntos (Attachments) feature in the task panel.
-    -   **Status:** IN PROGRESS
+        1.  Create a new backend endpoint (e.g., ) to handle file uploads.
+        2.  Implement the file upload logic in the  function in .
+        3.  Implement UI to display, download, and delete existing attachments for a task.
+    -   **Why fix this issue and what will be achieved with the fix?** This will complete the Adjuntos (Attachments) feature in the task details panel.
+    -   **Status:** NOT STARTED
     -   **Is recurring issue?** N
     -   **Should Test frontend/backend/both after fix?** Both.
     -   **Blocked on other issue:** None.
 
--   **Issue 4: WhatsApp Message Template Not Approved**
-    -   **Attempted fixes:** Backend code is complete.
-    -   **Next debug checklist:** Blocked on the user, who must get their message template approved in their Twilio Console.
-    -   **Why fix this issue and what will be achieved with the fix?** Enables the WhatsApp reminder feature.
+-   **Issue 3: WhatsApp Message Template Not Approved**
+    -   **Attempted fixes:** Backend integration with Twilio is complete.
+    -   **Next debug checklist:** The agent cannot proceed. The issue is blocked pending user action to get their message template approved in their Twilio Console.
+    -   **Why fix this issue and what will be achieved with the fix?** Enables the WhatsApp reminder feature for tasks and events.
     -   **Status:** BLOCKED
     -   **Is recurring issue?** Y
     -   **Should Test frontend/backend/both after fix?** Backend.
     -   **Blocked on other issue:** None.
 
 **In progress Task List**:
--   **Task 1: Finalize Partial Payments Feature**
-    -   **Where to resume:** The frontend and backend code has been modified. The next step is to perform end-to-end testing as outlined in the Next debug checklist for Issue #1.
-    -   **What will be achieved with this?** A fully functional and tested partial payment system for invoices.
-    -   **Status:** IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?** Both.
-    -   **Blocked on something:** None.
+(None)
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks:**
-    *   **P1 - Task Node Logic (Phase 2):** Implement sub-task logic and automatic task completion.
+    *   **P0 - Refactor :** This monolithic file must be broken down into smaller, manageable components. This is a top-priority technical debt task.
+    *   **P1 - Finance Module (Phase 3 - Por Pagar):** Enhance the Por Pagar (Accounts Payable) functionality, likely mirroring the professional system just built for Por Cobrar. The user hinted at this in a recent message.
+    *   **P1 - Task Node Logic (Phase 2):** Implement sub-task logic and automatic task completion within the mind map.
     *   **P1 - Hybrid Reminders:** Add support for both personal and company-wide reminders.
-    *   **P1 - Finance Module (Phase 3):** Enhance Por Pagar (Accounts Payable) functionality.
 *   **Future Tasks:**
     *   **P1 - Finance Module (Phase 4):** Implement the Inversiones (Investments) section.
     *   **P2 - Account blocking after 7 days.**
@@ -110,86 +82,96 @@ The application is a full-stack mind mapping tool with a React frontend and Fast
     *   **P2 - Finance Module IA:** Implement AI-driven financial analysis.
 
 **Completed work in this session**
--   **Bug Fix:** Fixed navigation for Linked Project nodes by implementing a data-fallback mechanism to find projects by name ().
--   **Feature:** Added a Ver tarea → (View Task) button to Task Node cards to open the details panel ().
--   **Feature:** Implemented a dynamic floating toolbar that adapts its options based on the selected node type ().
--   **Feature:** Created a financial summary dashboard (Total, Subtotal, IGV) in the Finance module ().
--   **Feature:** Implemented a robust Day/Month/Year date filter and a functional financial health status indicator ().
--   **Bug Fix:** Resolved a critical timezone bug, ensuring date consistency across the finance module by standardizing on  string formats ().
+-   **UX/Logic Redesign of New Income Modal:** Reordered fields, set Cobrado as default, and implemented conditional logic for partial payments ().
+-   **Correct Accounting for Partial Payments:** Updated the income list and dashboards to calculate totals based on  (real cash received) instead of  ().
+-   **Speech-to-Text for New Expense Form:** Implemented voice input for the Amount and Description fields using the native Web Speech API ().
+-   **Professional Accounts Receivable (Por Cobrar) System:** Built a full-featured system with a dedicated dashboard, partial payment tracking, and a new backend model/API (, , ).
+-   **Products/Services Module:** Created a new module to manage a product/service catalog and integrated it with the New Income form for auto-completion (, , ).
+-   **IGV (VAT) Determination System:** Implemented a correct net IGV calculation (Sales - Expenses) and updated the dashboard and backend models accordingly (, , ).
+-   **Bug Fix:** Resolved an issue where the finance module's date filter was not correctly displaying data for the selected period ().
 
 **Earlier issues found/mentioned but not fixed**
 (None)
 
 **Known issue recurrence from previous fork**
--   **Issue recurrence in previous fork:**
-    1.  Production deployment pipeline issues.
-    2.  WhatsApp reminder approval.
--   **Recurrence count:** 4+
--   **Status:** Issue 1 is IN PROGRESS. Issue 2 is BLOCKED.
+-   **Issue recurrence in previous fork:** Production deployment pipeline issues and WhatsApp reminder approval.
+-   **Recurrence count:** 5+
+-   **Status:** Production issue is IN PROGRESS (P0 Blocker). WhatsApp issue is BLOCKED.
 
 **Code Architecture**
-paid_amount/finanzas/incomesprojects
+
 
 **Key Technical Concepts**
--   **Data Integrity Fallback:** The fix for project node navigation in  is a key concept, where the UI can recover from incomplete data ( missing) by using other available data () to find the correct link.
--   **Timezone-Safe Date Handling:** The fix in  to use  date strings for all calculations and displays is a critical pattern for avoiding common timezone bugs in financial applications.
--   **Dynamic UI Based on State:** The New Income modal dynamically adds/removes fields based on the status dropdown selection, providing a clean and intuitive user experience.
--   **Component-Scoped Calculations:** The finance dashboard performs all its calculations (totals, taxes, health status) based on a  state that is re-computed whenever the master data or date filters change, ensuring the UI is always in sync.
+-   **Monolithic Frontend Component:**  has grown excessively large, encapsulating several distinct business domains (Incomes, Expenses, Receivables, Products). While functional, it poses a significant maintenance and scalability risk.
+-   **Native Browser API Integration:** The use of the Web Speech API for voice input demonstrates how to add modern features without relying on external libraries.
+-   **Client-Side Financial Calculations:** The main dashboard performs complex, real-time calculations (Net IGV, subtotals, totals) based on filtered data, providing an interactive user experience.
+-   **Backend Data Integrity:** Critical accounting logic, such as calculating  and  upon expense creation, is handled on the backend to ensure data consistency and accuracy.
 
 **key DB schema**
--   **finanzas_incomes** (MongoDB collection):
-    -   The  field now represents the **total amount** of the invoice.
-    -   New field  stores the amount paid so far.
-    -   New field  stores the calculated remaining balance.
+-   **finanzas_incomes:**  field is now an enum: , , .
+-   **finanzas_expenses:** New fields added: , , .
+-   **finanzas_partial_payments (New Collection):** 
+-   **finanzas_products_services (New Collection):** 
 
 **All files of reference**
 -   
 -   
 -   
 -   
--   
--   
 
 **Areas that need refactoring**:
--   **:** This file has exceeded 1500 lines and is becoming a monolith. The , , summary cards, and various tables should be extracted into their own components.
--   **:** Remains a very large file that should be broken down into smaller, domain-specific routers (e.g., , ).
+-   ** (CRITICAL):** This file is now over 4000 lines and must be broken down. The next agent should prioritize extracting the following into their own component files:
+    -    & 
+    -    & 
+    -   
+    -   
+    -   
+    -   Dashboard summary cards
+-   **:** Still a large, single file. All finance-related routes should be moved into a dedicated router file (e.g., ).
 
 **key api endpoints**
--   : The backend logic for this endpoint was modified to handle  and calculate  upon creation.
+-   
+-   
+-   
+-    (Updated to calculate IGV)
+-    (Updated to recalculate IGV)
 
 **Critical Info for New Agent**
 -   **You MUST communicate with the user in Spanish.**
--   Your immediate priority is to complete and test the **Partial Payments** feature. The UI and backend have been modified, but require thorough end-to-end testing to ensure correctness.
--   Once the current task is complete, the **Production Deployment issue is the highest priority.** The user has not been able to see any of the work from this session on their live site. You must proactively guide them to Save to GitHub and Re-Deploy.
+-   **CRITICAL REFACTORING NEEDED:** Your first major task should be to address the technical debt in . Propose a plan to the user to break this monolithic component into smaller, more manageable pieces before adding new features. This will improve maintainability and prevent future development from slowing down.
+-   **Next Feature:** The user has strongly hinted that enhancing the Por Pagar (Accounts Payable) module is the next desired feature. Plan to build a system similar to the one just created for Por Cobrar.
+-   **Deployment Blocker:** The Production Deployment issue is a recurring, high-priority blocker that you must help the user resolve.
 
 **documents and test reports created in this job**
--    (updated multiple times)
+-   
+-   
+-   
+-   
+-   
+-   
+-   
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **Request:** Implement partial payments in the New Income form. (IN PROGRESS)
-2.  **Bug Report/Request:** Fix the timezone bug causing dates to display as the previous day. (RESOLVED)
-3.  **Request:** Add improved date filters (Day/Month/Year) and a functional health status indicator to the Finance module. (RESOLVED)
-4.  **Request:** Add a financial summary dashboard (Total, Subtotal, IGV) to the Income tab. (RESOLVED)
-5.  **Request:** Modify the floating toolbar to be dynamic based on the selected node type. (RESOLVED)
-6.  **Confirmation/Request:** Liked the project link fix and requested a similar View Task button for task nodes. (RESOLVED)
-7.  **Bug Report:** Clicking a linked project node doesn't navigate. (RESOLVED)
-8.  **Request:** Improve reminder icon visibility and fix linked project navigation. (RESOLVED)
-9.  **User is waiting for the agent to finish implementing the partial payment feature.**
+1.  **Request:** Implement a full IGV (VAT) determination system (Sales - Expenses). (Completed)
+2.  **Request:** Implement a Products/Services module and integrate it with the New Income form. (Completed)
+3.  **Request:** Implement a professional Accounts Receivable system with partial payments. (Completed)
+4.  **Request:** Implement speech-to-text (voice input) for the New Expense form. (Completed)
+5.  **Request:** Correct the accounting logic in the income list to show  as the primary figure for partially paid items. (Completed)
+6.  **Request:** Redesign the UX of the New Income modal to be simpler and more logical. (Completed)
+7.  (Previous Handoff) Request: Implement partial payments in the New Income form. (Completed)
+8.  (Previous Handoff) Bug Report: Fix the timezone bug. (Completed)
+9.  (Previous Handoff) Request: Add improved date filters and health status. (Completed)
+10. (Previous Handoff) Request: Add a financial summary dashboard. (Completed)
 
 **Project Health Check:**
--   **Blocked:**
-    -   WhatsApp Reminder Feature (awaiting user action in Twilio).
--   **In Progress / Blocked:**
-    -   Production Deployment (agent has provided fixes, but user must push to GitHub and re-deploy).
--   **In Progress:**
-    -   Partial Payments Feature (coding done, testing pending).
-    -   Task Attachments (UI done, backend upload logic missing).
+-   **Broken:** None
+-   **Mocked:** None
 
 **3rd Party Integrations**
 -   **Twilio:** For WhatsApp messages. The integration is code-complete but **blocked** by the user's need to get their message template approved in the Twilio console.
 
 **Testing status**
--   **Testing agent used after significant changes:** NO
+-   **Testing agent used after significant changes:** YES (used after every major feature implementation)
 -   **Troubleshoot agent used after agent stuck in loop:** NO
 -   **Test files created:** []
 -   **Known regressions:** None.
@@ -199,4 +181,5 @@ paid_amount/finanzas/incomesprojects
 -   **Password:** 
 
 **What agent forgot to execute**
--   The agent successfully implemented all user requests from this session but has not yet addressed the long-standing, critical Production Deployment Stabilization issue. This remains a major blocker and must be prioritized after the current task is finished.</analysis>
+-   The agent did not address the critical technical debt in . Despite adding thousands of lines of code to the file, no refactoring was performed, making future work significantly harder.
+-   The agent did not address the long-standing, P0 Production Deployment Stabilization issue. The user is still unable to use any of the new features in their live environment.</analysis>

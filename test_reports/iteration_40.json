@@ -1,0 +1,87 @@
+{
+  "summary": "Frontend testing for accounting logic of 'Por cobrar' incomes - All 8 test cases PASSED. The implementation correctly shows paid_amount as real income in dashboard totals and table, with amount as secondary reference for pending incomes.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/frontend/src/components/finanzas/FinanzasModule.jsx"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "✅ calculateRealIncome function (lines 309-316) correctly returns paid_amount for 'pending' status and amount for 'collected' status",
+    "✅ totalRealIncome calculation (line 319) correctly sums only real income (paid_amount for pending, amount for collected)",
+    "✅ Dashboard cards (lines 733-788) show Total del día based on totalRealIncome, not total amount",
+    "✅ Subtotal and IGV are calculated from totalRealIncome (lines 325-327)",
+    "✅ Table column 'INGRESO REAL' (lines 815-825) shows paid_amount as main amount with 'de S/X total' as secondary reference",
+    "✅ 'Pendiente: S/X' shown below 'Por cobrar' status (lines 829-834)",
+    "✅ 'Cobrado' incomes show only total amount without secondary references",
+    "✅ 'Marcar cobrado' functionality works and updates the view correctly"
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "N/A (frontend only testing)",
+    "frontend": "100% (all 8 test cases passed)"
+  },
+  "test_credentials": {
+    "username": "spencer3009",
+    "password": "Socios3009"
+  },
+  "seed_data_creation": "Test income created: 'Test Cobrado Income' (S/2500, collected). Original test income 'Proyecto web - pago parcial' was marked as collected during testing.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Accounting logic for 'Por cobrar' incomes has been verified. Key rule: paid_amount = real income (SUMA), amount = reference, pending_balance = accounts receivable. The calculateRealIncome function in FinanzasModule.jsx handles this correctly.",
+  "features_tested": {
+    "test_1_dashboard_total_shows_paid_amount": {
+      "status": "PASSED",
+      "description": "Dashboard 'Total del día' shows S/ 800 (paid_amount) for 'Por cobrar' income, NOT S/ 3,000 (total amount)"
+    },
+    "test_2_subtotal_igv_based_on_real_income": {
+      "status": "PASSED",
+      "description": "Subtotal (S/ 677.97) and IGV (S/ 122.03) calculated from real income S/ 800, not total S/ 3,000"
+    },
+    "test_3_table_ingreso_real_column": {
+      "status": "PASSED",
+      "description": "Table column 'INGRESO REAL' shows S/ 800 as main amount for 'Por cobrar' income"
+    },
+    "test_4_secondary_reference_for_pending": {
+      "status": "PASSED",
+      "description": "For 'Por cobrar', shows 'de S/ 3,000 total' as secondary reference below main amount"
+    },
+    "test_5_pending_balance_display": {
+      "status": "PASSED",
+      "description": "Shows 'Pendiente: S/ 2,200' in amber color below 'Por cobrar' status badge"
+    },
+    "test_6_cobrado_no_secondary_reference": {
+      "status": "PASSED",
+      "description": "'Cobrado' incomes show only total amount (S/ 2,500) without secondary references"
+    },
+    "test_7_create_por_cobrar_with_partial_payment": {
+      "status": "PASSED",
+      "description": "Modal shows 'Detalle de pago parcial' section with correct calculation (5000 - 1500 = 3500 pending)"
+    },
+    "test_8_marcar_cobrado_functionality": {
+      "status": "PASSED",
+      "description": "'Marcar cobrado' changes status to 'Cobrado', updates total from S/ 800 to S/ 3,000, removes secondary references"
+    }
+  },
+  "accounting_logic_verification": {
+    "rule": "paid_amount = real income (SUMA), amount = reference, pending_balance = accounts receivable",
+    "implementation": {
+      "calculateRealIncome_function": "Returns paid_amount for 'pending' status, amount for 'collected' status",
+      "totalRealIncome": "Sum of calculateRealIncome for all filtered incomes",
+      "dashboard_cards": "Show totalRealIncome, not sum of amounts",
+      "table_display": "Shows real income as main, total as secondary reference for pending"
+    },
+    "verified_scenarios": [
+      "Income with amount=3000, paid_amount=800, status=pending → Dashboard shows S/ 800",
+      "After 'Marcar cobrado' → Dashboard shows S/ 3,000",
+      "New 'Cobrado' income with amount=2500 → Shows S/ 2,500 without secondary reference"
+    ]
+  }
+}

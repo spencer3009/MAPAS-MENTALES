@@ -1,0 +1,70 @@
+{
+  "summary": "Income Modal (Nuevo Ingreso) - All 7 test cases passed. The refactored modal correctly shows 'Tipo de ingreso' field at the top with 'Cobrado' as default. Conditional fields for partial payments work correctly.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/frontend/src/components/finanzas/FinanzasModule.jsx"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "✅ 'Tipo de ingreso' field appears at the top of the modal with visual buttons for 'Cobrado' and 'Por cobrar'",
+    "✅ Default state is 'Cobrado' (emerald/green styling) - most common use case",
+    "✅ In 'Cobrado' mode: Simple form with Monto, Fuente, Descripción, Fecha, Cliente, Proyecto",
+    "✅ In 'Por cobrar' mode: Additional fields appear - Monto Total, Detalle de pago parcial section, Saldo pendiente, Fecha de vencimiento",
+    "✅ Saldo pendiente calculates correctly in real-time (1000 - 300 = 700)",
+    "✅ Saldo pendiente shows red background when > 0, green when = 0",
+    "✅ Switching back to 'Cobrado' hides partial payment fields and clears values",
+    "✅ Backend correctly handles both 'collected' and 'pending' status with paid_amount and pending_balance",
+    "✅ data-testid attributes present: income-amount-input, income-paid-amount-input, income-pending-balance, income-source-select, income-description-input, income-date-input, income-due-date-input, income-save-btn, income-cancel-btn"
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "100% (income creation works for both statuses)",
+    "frontend": "100% (all 7 test cases passed)"
+  },
+  "test_credentials": {
+    "username": "spencer3009",
+    "password": "Socios3009"
+  },
+  "seed_data_creation": "Test incomes created and deleted during testing: 'Test Cobrado Income' (S/500, collected), 'Test Por Cobrar Income' (S/1000, pending with S/400 paid)",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Income Modal (IncomeModal component in FinanzasModule.jsx) was refactored. Key changes: 1) 'Tipo de ingreso' field at top with Cobrado/Por cobrar buttons, 2) Default is 'Cobrado', 3) 'Por cobrar' shows partial payment fields (Monto Total, Pago recibido, Saldo pendiente, Fecha de vencimiento), 4) Saldo pendiente auto-calculates. Backend POST /api/finanzas/incomes handles both statuses correctly.",
+  "features_tested": {
+    "test_1_default_cobrado": {
+      "status": "PASSED",
+      "description": "Opened 'Nuevo Ingreso' modal and verified 'Cobrado' is the default selected state (emerald/green styling)"
+    },
+    "test_2_cobrado_simple_form": {
+      "status": "PASSED",
+      "description": "In 'Cobrado' mode, partial payment fields (Pago recibido, Saldo pendiente, Fecha de vencimiento) are NOT visible"
+    },
+    "test_3_por_cobrar_fields": {
+      "status": "PASSED",
+      "description": "Switching to 'Por cobrar' shows: Monto Total, Detalle de pago parcial section, Pago recibido input, Saldo pendiente display, Fecha de vencimiento"
+    },
+    "test_4_saldo_calculation": {
+      "status": "PASSED",
+      "description": "Entered Monto Total=1000, Pago recibido=300, verified Saldo pendiente shows 'S/ 700.00'"
+    },
+    "test_5_switch_back_to_cobrado": {
+      "status": "PASSED",
+      "description": "Switching from 'Por cobrar' back to 'Cobrado' hides partial payment fields"
+    },
+    "test_6_save_cobrado_income": {
+      "status": "PASSED",
+      "description": "Saved income as 'Cobrado' (S/500, 'Test Cobrado Income') - appears in table with green 'Cobrado' badge"
+    },
+    "test_7_save_por_cobrar_income": {
+      "status": "PASSED",
+      "description": "Saved income as 'Por cobrar' (S/1000 total, S/400 paid, S/600 pending) - appears in table with yellow 'Por cobrar' badge and 'Marcar cobrado' action"
+    }
+  }
+}

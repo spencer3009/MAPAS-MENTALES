@@ -1260,60 +1260,87 @@ const FinanzasModule = ({ token, projects = [] }) => {
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descripción</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoría</th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Monto</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Subtotal</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">IGV</th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Estado</th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {expenses.map((expense) => (
-                    <tr key={expense.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-600">{formatDate(expense.date)}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        {expense.description || '-'}
-                        {expense.is_recurring && (
-                          <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-blue-100 text-blue-700">
-                            <RefreshCw size={10} className="mr-1" /> Recurrente
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
-                        {categories.find(c => c.id === expense.category)?.name || expense.category}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900 text-right font-medium">{formatCurrency(expense.amount)}</td>
-                      <td className="px-4 py-3 text-center">
-                        <StatusBadge status={expense.status} type="expense" />
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          {expense.status === 'pending' && (
-                            <button
-                              onClick={() => handleUpdateExpenseStatus(expense.id, 'paid')}
-                              className="text-xs text-green-600 hover:text-green-700 font-medium"
-                            >
-                              Marcar pagado
-                            </button>
-                          )}
+                  {expenses.map((expense) => {
+                    // Calcular Subtotal e IGV solo si includes_igv está activado
+                    const hasIgv = expense.includes_igv;
+                    const expenseSubtotal = hasIgv ? (expense.base_imponible || expense.amount / 1.18) : null;
+                    const expenseIgv = hasIgv ? (expense.igv_gasto || expense.amount - (expense.amount / 1.18)) : null;
+                    
+                    return (
+                      <tr key={expense.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 text-sm text-gray-600">{formatDate(expense.date)}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {expense.description || '-'}
                           {expense.is_recurring && (
-                            <button
-                              onClick={() => handleDuplicateExpense(expense.id)}
-                              className="text-xs text-blue-600 hover:text-blue-700"
-                            >
-                              Duplicar
-                            </button>
+                            <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-blue-100 text-blue-700">
+                              <RefreshCw size={10} className="mr-1" /> Recurrente
+                            </span>
                           )}
-                          <button
-                            onClick={() => handleDeleteExpense(expense.id)}
-                            className="text-xs text-red-600 hover:text-red-700"
-                          >
-                            Eliminar
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600">
+                          {categories.find(c => c.id === expense.category)?.name || expense.category}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900 text-right font-medium">{formatCurrency(expense.amount)}</td>
+                        {/* Subtotal (Base Imponible) - solo si tiene IGV */}
+                        <td className="px-4 py-3 text-right text-sm text-gray-600">
+                          {hasIgv ? (
+                            `S/ ${expenseSubtotal.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </td>
+                        {/* IGV (18%) - solo si tiene IGV */}
+                        <td className="px-4 py-3 text-right text-sm">
+                          {hasIgv ? (
+                            <span className="text-green-600 font-medium">
+                              S/ {expenseIgv.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <StatusBadge status={expense.status} type="expense" />
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {expense.status === 'pending' && (
+                              <button
+                                onClick={() => handleUpdateExpenseStatus(expense.id, 'paid')}
+                                className="text-xs text-green-600 hover:text-green-700 font-medium"
+                              >
+                                Marcar pagado
+                              </button>
+                            )}
+                            {expense.is_recurring && (
+                              <button
+                                onClick={() => handleDuplicateExpense(expense.id)}
+                                className="text-xs text-blue-600 hover:text-blue-700"
+                              >
+                                Duplicar
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleDeleteExpense(expense.id)}
+                              className="text-xs text-red-600 hover:text-red-700"
+                            >
+                              Eliminar
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                   {expenses.length === 0 && (
                     <tr>
-                      <td colSpan="6" className="px-4 py-8 text-center text-gray-500">
+                      <td colSpan="8" className="px-4 py-8 text-center text-gray-500">
                         No hay gastos registrados
                       </td>
                     </tr>

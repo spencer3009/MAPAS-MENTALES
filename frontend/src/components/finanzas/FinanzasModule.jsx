@@ -509,6 +509,30 @@ const FinanzasModule = ({ token, projects = [] }) => {
     }
   }, [fetchWithAuth, selectedPeriod, selectedCompany]);
 
+  // Función para cargar el Balance General
+  const loadBalanceGeneral = useCallback(async (filterType = 'month', startDate = '', endDate = '', projectId = '') => {
+    if (!selectedCompany) return;
+    
+    try {
+      let url = `/balance-general?company_id=${selectedCompany.id}`;
+      
+      if (filterType === 'custom' && startDate && endDate) {
+        url += `&start_date=${startDate}&end_date=${endDate}`;
+      } else {
+        url += `&filter_type=${filterType}`;
+      }
+      
+      if (projectId) {
+        url += `&project_id=${projectId}`;
+      }
+      
+      const data = await fetchWithAuth(url);
+      setBalanceGeneral(data);
+    } catch (err) {
+      console.error('Error loading balance general:', err);
+    }
+  }, [fetchWithAuth, selectedCompany]);
+
   useEffect(() => {
     if (token && selectedCompany) {
       loadData();

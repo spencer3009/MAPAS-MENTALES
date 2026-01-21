@@ -438,6 +438,10 @@ const FinanzasModule = ({ token, projects = [] }) => {
   const [payables, setPayables] = useState({ payables: [], total: 0, count: 0 });
   const [products, setProducts] = useState([]);
   const [fixedExpenses, setFixedExpenses] = useState([]);
+  const [balanceGeneral, setBalanceGeneral] = useState(null);
+  const [balanceFilter, setBalanceFilter] = useState('month'); // 'today' | 'month' | 'last30days' | 'custom'
+  const [balanceDateRange, setBalanceDateRange] = useState({ start: '', end: '' });
+  const [balanceProjectFilter, setBalanceProjectFilter] = useState('');
   const [loading, setLoading] = useState(true);
   
   // ========== NUEVO: Sistema de filtro por período (Día/Mes/Año) ==========

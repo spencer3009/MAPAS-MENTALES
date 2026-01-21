@@ -9293,6 +9293,67 @@ async def create_category(
     category.pop("_id", None)
     return category
 
+@api_router.put("/finanzas/categories/{category_id}")
+async def update_category(
+    category_id: str,
+    category_data: CategoryUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Actualizar una categoría personalizada"""
+    workspace_id = await get_user_workspace_id(current_user["username"])
+    
+    # Verificar que existe y pertenece al usuario
+    existing = await db.finanzas_categories.find_one(
+        {"id": category_id, "workspace_id": workspace_id},
+        {"_id": 0}
+    )
+    
+    if not existing:
+        raise HTTPException(status_code=404, detail="Categoría no encontrada")
+    
+    if existing.get("is_default"):
+        raise HTTPException(status_code=400, detail="No se pueden editar categorías predefinidas")
+    
+    update_dict = {k: v for k, v in category_data.model_dump().items() if v is not None}
+    
+    if update_dict:
+        update_dict["updated_at"] = get_current_timestamp()
+        await db.finanzas_categories.update_one(
+            {"id": category_id},
+            {"$set": update_dict}
+        )
+    
+    updated = await db.finanzas_categories.find_one(
+        {"id": category_id},
+        {"_id": 0}
+    )
+    
+    return updated
+
+@api_router.delete("/finanzas/categories/{category_id}")
+async def delete_category(
+    category_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Eliminar una categoría personalizada"""
+    workspace_id = await get_user_workspace_id(current_user["username"])
+    
+    # Verificar que existe y pertenece al usuario
+    existing = await db.finanzas_categories.find_one(
+        {"id": category_id, "workspace_id": workspace_id},
+        {"_id": 0}
+    )
+    
+    if not existing:
+        raise HTTPException(status_code=404, detail="Categoría no encontrada")
+    
+    if existing.get("is_default"):
+        raise HTTPException(status_code=400, detail="No se pueden eliminar categorías predefinidas")
+    
+    await db.finanzas_categories.delete_one({"id": category_id})
+    
+    return {"message": "Categoría eliminada correctamente"}
+
 @api_router.get("/finanzas/income-sources")
 async def get_income_sources(
     current_user: dict = Depends(get_current_user)

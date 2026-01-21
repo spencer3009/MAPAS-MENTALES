@@ -1488,7 +1488,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {expenses.map((expense) => {
+                  {filteredExpenses.map((expense) => {
                     // Calcular Subtotal e IGV solo si includes_igv está activado
                     const hasIgv = expense.includes_igv;
                     const expenseSubtotal = hasIgv ? (expense.base_imponible || expense.amount / 1.18) : null;
@@ -1559,10 +1559,10 @@ const FinanzasModule = ({ token, projects = [] }) => {
                       </tr>
                     );
                   })}
-                  {expenses.length === 0 && (
+                  {filteredExpenses.length === 0 && (
                     <tr>
                       <td colSpan="8" className="px-4 py-8 text-center text-gray-500">
-                        No hay gastos registrados
+                        No hay gastos registrados en este período
                       </td>
                     </tr>
                   )}

@@ -1780,18 +1780,26 @@ const ExpenseModal = ({ onClose, onSave, categories, projects, token }) => {
         </div>
         
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* ========== MONTO CON VOZ ========== */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Monto *</label>
-            <input
-              type="number"
-              value={form.amount}
-              onChange={(e) => setForm({ ...form, amount: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-              placeholder="0.00"
-              required
-              min="0.01"
-              step="0.01"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                value={form.amount}
+                onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                placeholder="0.00"
+                required
+                min="0.01"
+                step="0.01"
+                data-testid="expense-amount-input"
+              />
+              <VoiceMicButton 
+                isNumeric={true}
+                onResult={(value) => setForm(prev => ({ ...prev, amount: value }))}
+              />
+            </div>
           </div>
 
           <div>
@@ -1807,15 +1815,23 @@ const ExpenseModal = ({ onClose, onSave, categories, projects, token }) => {
             </select>
           </div>
 
+          {/* ========== DESCRIPCIÓN CON VOZ ========== */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-            <input
-              type="text"
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-              placeholder="Ej: Pago de servicios"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                placeholder="Ej: Pago de servicios"
+                data-testid="expense-description-input"
+              />
+              <VoiceMicButton 
+                isNumeric={false}
+                onResult={(value) => setForm(prev => ({ ...prev, description: value }))}
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

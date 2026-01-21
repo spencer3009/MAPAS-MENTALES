@@ -2056,11 +2056,11 @@ const CategoryManagerModal = ({ onClose, categories, onUpdate, token }) => {
             </div>
           )}
 
-          {/* Categorías predefinidas */}
+          {/* Conceptos predefinidos */}
           <div>
             <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
               <Package size={16} className="text-gray-400" />
-              Categorías Predefinidas ({defaultCategories.length})
+              Conceptos Predefinidos ({defaultCategories.length})
             </h3>
             <div className="bg-gray-50 rounded-lg p-3">
               <div className="flex flex-wrap gap-2">
@@ -2074,7 +2074,7 @@ const CategoryManagerModal = ({ onClose, categories, onUpdate, token }) => {
                 ))}
               </div>
               <p className="text-xs text-gray-400 mt-3">
-                Las categorías predefinidas no se pueden editar ni eliminar
+                Los conceptos predefinidos no se pueden editar ni eliminar
               </p>
             </div>
           </div>

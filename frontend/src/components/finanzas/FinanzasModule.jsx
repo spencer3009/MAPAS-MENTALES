@@ -5,7 +5,7 @@ import {
   Plus, Search, Filter, Calendar,
   CheckCircle2, Clock, AlertTriangle,
   BarChart3, RefreshCw, Building2, ChevronDown, X,
-  Mic, MicOff, Package, Edit2, Trash2
+  Mic, MicOff, Package, Edit2, Trash2, Repeat, Bell
 } from 'lucide-react';
 import ContactAutocomplete from './ContactAutocomplete';
 import { useCompany } from '../../contexts/CompanyContext';

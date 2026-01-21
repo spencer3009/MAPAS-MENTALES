@@ -194,7 +194,7 @@ class IncomeResponse(BaseModel):
 
 class ExpenseCreate(BaseModel):
     company_id: str = Field(..., description="ID de la empresa")
-    amount: float = Field(..., gt=0, description="Monto del gasto")
+    amount: float = Field(..., gt=0, description="Monto total del gasto (incluyendo IGV si aplica)")
     category: str = Field(..., description="Categoría del gasto")
     description: Optional[str] = Field(None, description="Descripción del gasto")
     date: str = Field(..., description="Fecha del gasto (ISO format)")
@@ -208,6 +208,8 @@ class ExpenseCreate(BaseModel):
     priority: ExpensePriority = Field(default=ExpensePriority.MEDIUM)
     due_date: Optional[str] = Field(None, description="Fecha de vencimiento para pagar")
     notes: Optional[str] = Field(None, description="Notas adicionales")
+    # Campos de IGV para gastos
+    includes_igv: bool = Field(default=False, description="¿El gasto incluye IGV?")
 
 class ExpenseUpdate(BaseModel):
     amount: Optional[float] = Field(None, gt=0)
@@ -224,6 +226,7 @@ class ExpenseUpdate(BaseModel):
     priority: Optional[ExpensePriority] = None
     due_date: Optional[str] = None
     notes: Optional[str] = None
+    includes_igv: Optional[bool] = None
 
 class ExpenseResponse(BaseModel):
     id: str
@@ -244,6 +247,10 @@ class ExpenseResponse(BaseModel):
     priority: ExpensePriority
     due_date: Optional[str]
     notes: Optional[str]
+    # Campos de IGV calculados
+    includes_igv: Optional[bool]
+    base_imponible: Optional[float]
+    igv_gasto: Optional[float]
     created_at: str
     updated_at: str
 

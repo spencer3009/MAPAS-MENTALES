@@ -1642,6 +1642,26 @@ const FinanzasModule = ({ token, projects = [] }) => {
             companyId={selectedCompany?.id}
           />
         )}
+
+        {/* ========== GASTOS FIJOS TAB ========== */}
+        {activeTab === 'fixed-expenses' && (
+          <FixedExpensesTab
+            fixedExpenses={fixedExpenses}
+            categories={categories}
+            onAdd={() => {
+              setEditingFixedExpense(null);
+              setShowFixedExpenseModal(true);
+            }}
+            onEdit={handleEditFixedExpense}
+            onDelete={handleDeleteFixedExpense}
+            onToggleStatus={handleToggleFixedExpenseStatus}
+            onRegisterPayment={handleRegisterFixedExpensePayment}
+            formatCurrency={formatCurrency}
+            loadData={loadData}
+            token={token}
+            companyId={selectedCompany?.id}
+          />
+        )}
       </div>
 
       {/* Modal Nuevo Ingreso */}
@@ -1663,6 +1683,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
           onSave={handleCreateExpense}
           categories={categories}
           projects={projects}
+          fixedExpenses={fixedExpenses}
           token={token}
         />
       )}
@@ -1685,6 +1706,21 @@ const FinanzasModule = ({ token, projects = [] }) => {
           }}
           onSave={handleSaveProduct}
           product={editingProduct}
+        />
+      )}
+
+      {/* Modal Nuevo/Editar Gasto Fijo */}
+      {showFixedExpenseModal && (
+        <FixedExpenseModal
+          onClose={() => {
+            setShowFixedExpenseModal(false);
+            setEditingFixedExpense(null);
+          }}
+          onSave={handleSaveFixedExpense}
+          fixedExpense={editingFixedExpense}
+          categories={categories}
+          projects={projects}
+          token={token}
         />
       )}
     </div>

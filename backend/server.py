@@ -8686,11 +8686,28 @@ async def create_expense(
     workspace_id = await get_user_workspace_id(username)
     now = get_current_timestamp()
     
+    # Calcular IGV si el gasto lo incluye
+    # El monto ingresado es el total (con IGV incluido)
+    IGV_RATE = 0.18
+    includes_igv = expense_data.includes_igv
+    amount = expense_data.amount
+    
+    if includes_igv:
+        # El monto incluye IGV, calcular base e IGV
+        base_imponible = amount / (1 + IGV_RATE)
+        igv_gasto = amount - base_imponible
+    else:
+        # El gasto no tiene IGV (ej: compras informales, servicios exentos)
+        base_imponible = amount
+        igv_gasto = 0.0
+    
     expense = {
         "id": generate_id(),
         "workspace_id": workspace_id,
         "username": username,
         **expense_data.model_dump(),
+        "base_imponible": round(base_imponible, 2),
+        "igv_gasto": round(igv_gasto, 2),
         "created_at": now,
         "updated_at": now
     }

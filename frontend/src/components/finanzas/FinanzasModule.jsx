@@ -795,41 +795,65 @@ const FinanzasModule = ({ token, projects = [] }) => {
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descripción</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fuente</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Monto</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ingreso Real</th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Estado</th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {filteredIncomes.map((income) => (
-                    <tr key={income.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-600">{formatDate(income.date)}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{income.description || '-'}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{income.source}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900 text-right font-medium">{formatCurrency(income.amount)}</td>
-                      <td className="px-4 py-3 text-center">
-                        <StatusBadge status={income.status} type="income" />
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          {income.status === 'pending' && (
-                            <button
-                              onClick={() => handleUpdateIncomeStatus(income.id, 'collected')}
-                              className="text-xs text-green-600 hover:text-green-700 font-medium"
-                            >
-                              Marcar cobrado
-                            </button>
+                  {filteredIncomes.map((income) => {
+                    // Calcular el ingreso real para esta fila
+                    const realIncome = calculateRealIncome(income);
+                    const isPending = income.status === 'pending';
+                    const hasPendingBalance = isPending && (income.pending_balance > 0 || (income.amount - (income.paid_amount || 0)) > 0);
+                    
+                    return (
+                      <tr key={income.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 text-sm text-gray-600">{formatDate(income.date)}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{income.description || '-'}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{income.source}</td>
+                        <td className="px-4 py-3 text-right">
+                          {/* Monto principal: dinero recibido */}
+                          <div className="font-semibold text-gray-900">
+                            {formatCurrency(realIncome)}
+                          </div>
+                          {/* Referencia: monto total de la venta (solo si está pendiente y hay diferencia) */}
+                          {hasPendingBalance && (
+                            <div className="text-xs text-gray-400 mt-0.5">
+                              de {formatCurrency(income.amount)} total
+                            </div>
                           )}
-                          <button
-                            onClick={() => handleDeleteIncome(income.id)}
-                            className="text-xs text-red-600 hover:text-red-700"
-                          >
-                            Eliminar
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <StatusBadge status={income.status} type="income" />
+                          {/* Mostrar saldo pendiente si aplica */}
+                          {hasPendingBalance && (
+                            <div className="text-xs text-amber-600 mt-1">
+                              Pendiente: {formatCurrency(income.amount - (income.paid_amount || 0))}
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {income.status === 'pending' && (
+                              <button
+                                onClick={() => handleUpdateIncomeStatus(income.id, 'collected')}
+                                className="text-xs text-green-600 hover:text-green-700 font-medium"
+                              >
+                                Marcar cobrado
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleDeleteIncome(income.id)}
+                              className="text-xs text-red-600 hover:text-red-700"
+                            >
+                              Eliminar
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                   {filteredIncomes.length === 0 && (
                     <tr>
                       <td colSpan="6" className="px-4 py-8 text-center text-gray-500">

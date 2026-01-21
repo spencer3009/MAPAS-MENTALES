@@ -431,7 +431,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
   const [investments, setInvestments] = useState([]);
   const [categories, setCategories] = useState([]);
   const [incomeSources, setIncomeSources] = useState([]);
-  const [receivables, setReceivables] = useState({ receivables: [], total: 0, count: 0 });
+  const [receivables, setReceivables] = useState({ receivables: [], total: 0, total_facturado: 0, total_abonado: 0, count: 0 });
   const [payables, setPayables] = useState({ payables: [], total: 0, count: 0 });
   const [loading, setLoading] = useState(true);
   

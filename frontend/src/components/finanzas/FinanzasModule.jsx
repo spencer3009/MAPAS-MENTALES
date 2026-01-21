@@ -732,6 +732,60 @@ const FinanzasModule = ({ token, projects = [] }) => {
     }
   };
 
+  // ========== HANDLERS PARA PRODUCTOS/SERVICIOS ==========
+  
+  const handleSaveProduct = async (productData) => {
+    try {
+      if (editingProduct) {
+        // Actualizar producto existente
+        await fetchWithAuth(`/products/${editingProduct.id}`, {
+          method: 'PUT',
+          body: JSON.stringify(productData)
+        });
+      } else {
+        // Crear nuevo producto
+        await fetchWithAuth(`/products?company_id=${selectedCompany.id}`, {
+          method: 'POST',
+          body: JSON.stringify(productData)
+        });
+      }
+      setShowProductModal(false);
+      setEditingProduct(null);
+      loadData();
+    } catch (err) {
+      console.error('Error saving product:', err);
+      alert('Error al guardar el producto');
+    }
+  };
+
+  const handleEditProduct = (product) => {
+    setEditingProduct(product);
+    setShowProductModal(true);
+  };
+
+  const handleDeleteProduct = async (id) => {
+    if (!window.confirm('¿Estás seguro de eliminar este producto/servicio?')) return;
+    try {
+      await fetchWithAuth(`/products/${id}`, { method: 'DELETE' });
+      loadData();
+    } catch (err) {
+      console.error('Error deleting product:', err);
+    }
+  };
+
+  const handleToggleProductStatus = async (product) => {
+    try {
+      const newStatus = product.status === 'activo' ? 'inactivo' : 'activo';
+      await fetchWithAuth(`/products/${product.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ status: newStatus })
+      });
+      loadData();
+    } catch (err) {
+      console.error('Error toggling product status:', err);
+    }
+  };
+
   // Loading inicial de empresas
   if (loadingCompanies) {
     return (

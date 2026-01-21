@@ -3,7 +3,7 @@ import {
   DollarSign, TrendingUp, TrendingDown, PiggyBank, 
   ArrowUpCircle, ArrowDownCircle, Wallet, 
   Plus, Search, Filter, Calendar,
-  CheckCircle2, Clock, AlertTriangle,
+  CheckCircle2, Clock, AlertTriangle, Check,
   BarChart3, RefreshCw, Building2, ChevronDown, X,
   Mic, MicOff, Package, Edit2, Trash2, Repeat, Bell, Settings
 } from 'lucide-react';

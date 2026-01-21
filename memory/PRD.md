@@ -2,6 +2,45 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-21: FEATURE — Módulo Productos/Servicios Integrado con Finanzas ✅ COMPLETADO Y PROBADO
+- **Estado**: Implementación completada y verificada con testing agent (14/14 backend + 13/13 frontend features passed)
+- **Funcionalidad**: Sistema de productos/servicios con integración al formulario de Nuevo Ingreso
+- **Backend (Nuevos endpoints CRUD)**:
+  - `GET /api/finanzas/products` - Listar productos (filtros: company_id, status, type)
+  - `POST /api/finanzas/products` - Crear producto
+  - `GET /api/finanzas/products/{id}` - Obtener producto
+  - `PUT /api/finanzas/products/{id}` - Actualizar producto
+  - `DELETE /api/finanzas/products/{id}` - Eliminar producto
+- **Modelo de datos (finanzas_products)**:
+  - id, company_id, workspace_id, username
+  - name, type (producto/servicio), base_price, includes_igv
+  - description, category, status (activo/inactivo)
+  - created_at, updated_at
+- **Nueva pestaña "Productos"**:
+  - Tabla con columnas: NOMBRE | TIPO | CATEGORÍA | PRECIO BASE | IGV | ESTADO | ACCIONES
+  - Filtros: búsqueda, tipo (Todos/Productos/Servicios), estado (Activos/Inactivos)
+  - Toggle de estado activo/inactivo
+  - Botones de editar y eliminar
+  - Tip informativo sobre integración con Nuevo Ingreso
+- **ProductModal** (crear/editar):
+  - Nombre con voz 🎤
+  - Tipo con botones visuales (🔧 Servicio / 📦 Producto)
+  - Precio base con voz 🎤
+  - Toggle IGV (18%)
+  - Descripción, Categoría, Estado
+- **Integración con Nuevo Ingreso**:
+  - Campo "Producto / Servicio" con búsqueda
+  - Dropdown muestra productos activos con precio
+  - **Autocompletado** al seleccionar: monto, descripción, fuente
+  - ✓ "Precio y descripción completados automáticamente"
+  - El usuario puede editar el monto (descuentos/promociones)
+  - Compatible con pagos parciales (Por cobrar)
+- **Testing verificado** (iteration_43.json): 14/14 backend + 13/13 frontend
+- **Archivos modificados**:
+  - `/app/backend/finanzas_service.py` - ProductCreate, ProductUpdate, ProductResponse, ProductType, ProductStatus
+  - `/app/backend/server.py` - Endpoints CRUD de productos
+  - `/app/frontend/src/components/finanzas/FinanzasModule.jsx` - ProductsTab, ProductModal, IncomeModal
+
 ### 2026-01-21: FEATURE — Sistema Profesional de Cuentas por Cobrar con Pagos Parciales ✅ COMPLETADO Y PROBADO
 - **Estado**: Implementación completada y verificada con testing agent (10/10 features passed)
 - **Funcionalidad**: Sistema contable completo para gestionar cuentas por cobrar con pagos fraccionados

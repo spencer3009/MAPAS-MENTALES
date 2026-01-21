@@ -457,7 +457,9 @@ const FinanzasModule = ({ token, projects = [] }) => {
   const [showIncomeModal, setShowIncomeModal] = useState(false);
   const [showExpenseModal, setShowExpenseModal] = useState(false);
   const [showInvestmentModal, setShowInvestmentModal] = useState(false);
+  const [showProductModal, setShowProductModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [editingProduct, setEditingProduct] = useState(null);
   
   const { fetchWithAuth } = useFinanzas(token);
 

@@ -1154,6 +1154,8 @@ const FinanzasModule = ({ token, projects = [] }) => {
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descripción</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fuente</th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ingreso Real</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Subtotal</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">IGV</th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Estado</th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
                   </tr>
@@ -1164,6 +1166,9 @@ const FinanzasModule = ({ token, projects = [] }) => {
                     const realIncome = calculateRealIncome(income);
                     const isPending = income.status === 'pending';
                     const hasPendingBalance = isPending && (income.pending_balance > 0 || (income.amount - (income.paid_amount || 0)) > 0);
+                    // Calcular Subtotal e IGV (18%) del ingreso real
+                    const incomeSubtotal = realIncome / 1.18;
+                    const incomeIgv = realIncome - incomeSubtotal;
                     
                     return (
                       <tr key={income.id} className="hover:bg-gray-50">
@@ -1181,6 +1186,14 @@ const FinanzasModule = ({ token, projects = [] }) => {
                               de {formatCurrency(income.amount)} total
                             </div>
                           )}
+                        </td>
+                        {/* Subtotal (Base Imponible) */}
+                        <td className="px-4 py-3 text-right text-sm text-gray-600">
+                          S/ {incomeSubtotal.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </td>
+                        {/* IGV (18%) */}
+                        <td className="px-4 py-3 text-right text-sm text-amber-600 font-medium">
+                          S/ {incomeIgv.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </td>
                         <td className="px-4 py-3 text-center">
                           <StatusBadge status={income.status} type="income" />
@@ -1214,7 +1227,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
                   })}
                   {filteredIncomes.length === 0 && (
                     <tr>
-                      <td colSpan="6" className="px-4 py-8 text-center text-gray-500">
+                      <td colSpan="8" className="px-4 py-8 text-center text-gray-500">
                         No hay ingresos registrados en este período
                       </td>
                     </tr>

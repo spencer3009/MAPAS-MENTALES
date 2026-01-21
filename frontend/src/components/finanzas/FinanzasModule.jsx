@@ -1796,6 +1796,16 @@ const FinanzasModule = ({ token, projects = [] }) => {
           token={token}
         />
       )}
+
+      {/* Modal Gestionar Categorías */}
+      {showCategoryModal && (
+        <CategoryManagerModal
+          onClose={() => setShowCategoryModal(false)}
+          categories={categories}
+          onUpdate={loadData}
+          token={token}
+        />
+      )}
     </div>
   );
 };

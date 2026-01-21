@@ -74,6 +74,8 @@ from finanzas_service import (
     CategoryCreate, CategoryUpdate, CategoryResponse,
     PartialPaymentCreate, PartialPaymentResponse,
     ProductCreate, ProductUpdate, ProductResponse, ProductType, ProductStatus,
+    FixedExpenseCreate, FixedExpenseUpdate, FixedExpenseResponse, FixedExpensePeriodicity, FixedExpenseStatus,
+    FixedExpensePaymentCreate, FixedExpensePaymentResponse,
     FinancialSummary, ProjectFinancialSummary,
     DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_SOURCES,
     generate_id, get_current_timestamp, calculate_health_status

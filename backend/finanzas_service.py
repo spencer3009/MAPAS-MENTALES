@@ -203,6 +203,28 @@ class ExpenseResponse(BaseModel):
     updated_at: str
 
 # ==========================================
+# PYDANTIC MODELS - PAGOS PARCIALES
+# ==========================================
+
+class PartialPaymentCreate(BaseModel):
+    income_id: str = Field(..., description="ID del ingreso asociado")
+    amount: float = Field(..., gt=0, description="Monto del pago")
+    date: str = Field(..., description="Fecha del pago (ISO format)")
+    payment_method: Optional[str] = Field(None, description="Método de pago: efectivo, transferencia, tarjeta, etc.")
+    note: Optional[str] = Field(None, description="Nota o referencia del pago")
+
+class PartialPaymentResponse(BaseModel):
+    id: str
+    income_id: str
+    company_id: str
+    username: str
+    amount: float
+    date: str
+    payment_method: Optional[str]
+    note: Optional[str]
+    created_at: str
+
+# ==========================================
 # PYDANTIC MODELS - INVERSIONES
 # ==========================================
 

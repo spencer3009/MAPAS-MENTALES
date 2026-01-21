@@ -818,6 +818,79 @@ const FinanzasModule = ({ token, projects = [] }) => {
     }
   };
 
+  // ========== FUNCIONES DE GASTOS FIJOS ==========
+  
+  const handleSaveFixedExpense = async (data) => {
+    try {
+      if (editingFixedExpense) {
+        // Actualizar gasto fijo existente
+        await fetchWithAuth(`/fixed-expenses/${editingFixedExpense.id}`, {
+          method: 'PUT',
+          body: JSON.stringify(data)
+        });
+      } else {
+        // Crear nuevo gasto fijo
+        await fetchWithAuth('/fixed-expenses', {
+          method: 'POST',
+          body: JSON.stringify({
+            ...data,
+            company_id: selectedCompany.id
+          })
+        });
+      }
+      setShowFixedExpenseModal(false);
+      setEditingFixedExpense(null);
+      loadData();
+    } catch (err) {
+      console.error('Error saving fixed expense:', err);
+      alert('Error al guardar el gasto fijo');
+    }
+  };
+
+  const handleEditFixedExpense = (fixedExpense) => {
+    setEditingFixedExpense(fixedExpense);
+    setShowFixedExpenseModal(true);
+  };
+
+  const handleDeleteFixedExpense = async (id) => {
+    if (!window.confirm('¿Estás seguro de eliminar este gasto fijo? Se eliminarán también los recordatorios asociados.')) return;
+    try {
+      await fetchWithAuth(`/fixed-expenses/${id}`, { method: 'DELETE' });
+      loadData();
+    } catch (err) {
+      console.error('Error deleting fixed expense:', err);
+    }
+  };
+
+  const handleToggleFixedExpenseStatus = async (fixedExpense) => {
+    try {
+      const newStatus = fixedExpense.status === 'activo' ? 'inactivo' : 'activo';
+      await fetchWithAuth(`/fixed-expenses/${fixedExpense.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ status: newStatus })
+      });
+      loadData();
+    } catch (err) {
+      console.error('Error toggling fixed expense status:', err);
+    }
+  };
+
+  const handleRegisterFixedExpensePayment = async (fixedExpenseId, paymentData) => {
+    try {
+      await fetchWithAuth('/fixed-expenses/payments', {
+        method: 'POST',
+        body: JSON.stringify({
+          fixed_expense_id: fixedExpenseId,
+          ...paymentData
+        })
+      });
+      loadData();
+    } catch (err) {
+      console.error('Error registering fixed expense payment:', err);
+      alert('Error al registrar el pago');
+    }
+  };
+
   // Loading inicial de empresas
   if (loadingCompanies) {
     return (

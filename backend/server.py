@@ -8753,6 +8753,14 @@ async def get_expense(
     if not expense:
         raise HTTPException(status_code=404, detail="Gasto no encontrado")
     
+    # Add default values for IGV fields for legacy data
+    if "includes_igv" not in expense:
+        expense["includes_igv"] = False
+    if "base_imponible" not in expense:
+        expense["base_imponible"] = expense.get("amount", 0)
+    if "igv_gasto" not in expense:
+        expense["igv_gasto"] = 0.0
+    
     return expense
 
 @api_router.put("/finanzas/expenses/{expense_id}", response_model=ExpenseResponse)

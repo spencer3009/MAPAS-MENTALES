@@ -9598,6 +9598,413 @@ async def delete_product(
     
     return {"message": "Producto eliminado correctamente"}
 
+# ==========================================
+# GASTOS FIJOS (CATÁLOGO) ENDPOINTS
+# ==========================================
+
+@api_router.get("/finanzas/fixed-expenses")
+async def get_fixed_expenses(
+    company_id: str,
+    status: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener lista de gastos fijos (catálogo)"""
+    username = current_user["username"]
+    await verify_company_access(company_id, username)
+    workspace_id = await get_user_workspace_id(username)
+    
+    query = {
+        "company_id": company_id,
+        "workspace_id": workspace_id
+    }
+    
+    if status:
+        query["status"] = status
+    
+    fixed_expenses = await db.finanzas_fixed_expenses.find(
+        query, {"_id": 0}
+    ).sort("name", 1).to_list(500)
+    
+    return fixed_expenses
+
+@api_router.post("/finanzas/fixed-expenses", response_model=FixedExpenseResponse)
+async def create_fixed_expense(
+    fixed_expense: FixedExpenseCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Crear nuevo gasto fijo en el catálogo"""
+    username = current_user["username"]
+    await verify_company_access(fixed_expense.company_id, username)
+    workspace_id = await get_user_workspace_id(username)
+    
+    now = get_current_timestamp()
+    
+    fixed_expense_data = {
+        "id": generate_id(),
+        "company_id": fixed_expense.company_id,
+        "workspace_id": workspace_id,
+        "username": username,
+        "name": fixed_expense.name,
+        "category": fixed_expense.category,
+        "estimated_amount": fixed_expense.estimated_amount,
+        "periodicity": fixed_expense.periodicity.value,
+        "custom_days": fixed_expense.custom_days,
+        "includes_igv": fixed_expense.includes_igv,
+        "project_id": fixed_expense.project_id,
+        "project_name": fixed_expense.project_name,
+        "vendor_id": fixed_expense.vendor_id,
+        "vendor_name": fixed_expense.vendor_name,
+        "notes": fixed_expense.notes,
+        "status": fixed_expense.status.value,
+        "reminder_enabled": fixed_expense.reminder_enabled,
+        "reminder_days_before": fixed_expense.reminder_days_before,
+        "next_due_date": fixed_expense.next_due_date,
+        "day_of_month": fixed_expense.day_of_month,
+        "created_at": now,
+        "updated_at": now,
+    }
+    
+    await db.finanzas_fixed_expenses.insert_one(fixed_expense_data)
+    
+    # Si tiene recordatorios habilitados y fecha de vencimiento, crear recordatorio inicial
+    if fixed_expense.reminder_enabled and fixed_expense.next_due_date:
+        await create_fixed_expense_reminder(fixed_expense_data, username)
+    
+    return FixedExpenseResponse(**fixed_expense_data)
+
+@api_router.get("/finanzas/fixed-expenses/{fixed_expense_id}", response_model=FixedExpenseResponse)
+async def get_fixed_expense(
+    fixed_expense_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener un gasto fijo específico"""
+    username = current_user["username"]
+    
+    fixed_expense = await db.finanzas_fixed_expenses.find_one(
+        {"id": fixed_expense_id}, {"_id": 0}
+    )
+    
+    if not fixed_expense:
+        raise HTTPException(status_code=404, detail="Gasto fijo no encontrado")
+    
+    await verify_company_access(fixed_expense["company_id"], username)
+    
+    return FixedExpenseResponse(**fixed_expense)
+
+@api_router.put("/finanzas/fixed-expenses/{fixed_expense_id}", response_model=FixedExpenseResponse)
+async def update_fixed_expense(
+    fixed_expense_id: str,
+    update_data: FixedExpenseUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Actualizar un gasto fijo"""
+    username = current_user["username"]
+    
+    existing = await db.finanzas_fixed_expenses.find_one(
+        {"id": fixed_expense_id}, {"_id": 0}
+    )
+    
+    if not existing:
+        raise HTTPException(status_code=404, detail="Gasto fijo no encontrado")
+    
+    await verify_company_access(existing["company_id"], username)
+    
+    update_dict = {k: v for k, v in update_data.dict().items() if v is not None}
+    
+    if update_dict:
+        # Convertir enums a valores string
+        if "periodicity" in update_dict:
+            update_dict["periodicity"] = update_dict["periodicity"].value
+        if "status" in update_dict:
+            update_dict["status"] = update_dict["status"].value
+        
+        update_dict["updated_at"] = get_current_timestamp()
+        
+        await db.finanzas_fixed_expenses.update_one(
+            {"id": fixed_expense_id},
+            {"$set": update_dict}
+        )
+    
+    updated = await db.finanzas_fixed_expenses.find_one(
+        {"id": fixed_expense_id}, {"_id": 0}
+    )
+    
+    # Si cambió la fecha o recordatorios, actualizar el recordatorio
+    if "next_due_date" in update_dict or "reminder_days_before" in update_dict or "reminder_enabled" in update_dict:
+        await update_fixed_expense_reminder(updated, username)
+    
+    return FixedExpenseResponse(**updated)
+
+@api_router.delete("/finanzas/fixed-expenses/{fixed_expense_id}")
+async def delete_fixed_expense(
+    fixed_expense_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Eliminar un gasto fijo"""
+    username = current_user["username"]
+    
+    existing = await db.finanzas_fixed_expenses.find_one(
+        {"id": fixed_expense_id}, {"_id": 0}
+    )
+    
+    if not existing:
+        raise HTTPException(status_code=404, detail="Gasto fijo no encontrado")
+    
+    await verify_company_access(existing["company_id"], username)
+    
+    # Eliminar el gasto fijo
+    await db.finanzas_fixed_expenses.delete_one({"id": fixed_expense_id})
+    
+    # Eliminar recordatorios asociados
+    await db.finanzas_fixed_expense_reminders.delete_many({"fixed_expense_id": fixed_expense_id})
+    
+    return {"message": "Gasto fijo eliminado correctamente"}
+
+# ==========================================
+# PAGOS DE GASTOS FIJOS ENDPOINTS
+# ==========================================
+
+@api_router.get("/finanzas/fixed-expenses/{fixed_expense_id}/payments")
+async def get_fixed_expense_payments(
+    fixed_expense_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener historial de pagos de un gasto fijo"""
+    username = current_user["username"]
+    
+    fixed_expense = await db.finanzas_fixed_expenses.find_one(
+        {"id": fixed_expense_id}, {"_id": 0}
+    )
+    
+    if not fixed_expense:
+        raise HTTPException(status_code=404, detail="Gasto fijo no encontrado")
+    
+    await verify_company_access(fixed_expense["company_id"], username)
+    
+    payments = await db.finanzas_fixed_expense_payments.find(
+        {"fixed_expense_id": fixed_expense_id}, {"_id": 0}
+    ).sort("date", -1).to_list(100)
+    
+    return {
+        "fixed_expense": fixed_expense,
+        "payments": payments,
+        "total_paid": sum(p["amount"] for p in payments)
+    }
+
+@api_router.post("/finanzas/fixed-expenses/payments", response_model=FixedExpensePaymentResponse)
+async def create_fixed_expense_payment(
+    payment: FixedExpensePaymentCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Registrar un pago de gasto fijo (AFECTA LA CAJA)"""
+    username = current_user["username"]
+    
+    # Verificar que existe el gasto fijo
+    fixed_expense = await db.finanzas_fixed_expenses.find_one(
+        {"id": payment.fixed_expense_id}, {"_id": 0}
+    )
+    
+    if not fixed_expense:
+        raise HTTPException(status_code=404, detail="Gasto fijo no encontrado")
+    
+    await verify_company_access(fixed_expense["company_id"], username)
+    workspace_id = await get_user_workspace_id(username)
+    
+    now = get_current_timestamp()
+    
+    payment_data = {
+        "id": generate_id(),
+        "fixed_expense_id": payment.fixed_expense_id,
+        "fixed_expense_name": fixed_expense["name"],
+        "company_id": fixed_expense["company_id"],
+        "workspace_id": workspace_id,
+        "username": username,
+        "amount": payment.amount,
+        "date": payment.date,
+        "payment_method": payment.payment_method,
+        "notes": payment.notes,
+        "reference": payment.reference,
+        "created_at": now,
+    }
+    
+    await db.finanzas_fixed_expense_payments.insert_one(payment_data)
+    
+    # IMPORTANTE: Crear también un gasto en la tabla principal para afectar la caja
+    # Esto mantiene la coherencia con el concepto de Caja Real
+    expense_data = {
+        "id": generate_id(),
+        "company_id": fixed_expense["company_id"],
+        "workspace_id": workspace_id,
+        "username": username,
+        "amount": payment.amount,
+        "category": fixed_expense["category"],
+        "description": f"[Gasto Fijo] {fixed_expense['name']}",
+        "date": payment.date,
+        "status": "paid",  # Ya está pagado
+        "vendor_name": fixed_expense.get("vendor_name"),
+        "vendor_id": fixed_expense.get("vendor_id"),
+        "is_recurring": False,  # El gasto individual no es recurrente
+        "priority": "medium",
+        "project_id": fixed_expense.get("project_id"),
+        "project_name": fixed_expense.get("project_name"),
+        "includes_igv": fixed_expense.get("includes_igv", False),
+        "base_imponible": payment.amount / 1.18 if fixed_expense.get("includes_igv") else payment.amount,
+        "igv_gasto": (payment.amount - payment.amount / 1.18) if fixed_expense.get("includes_igv") else 0,
+        "fixed_expense_id": payment.fixed_expense_id,  # Referencia al gasto fijo
+        "fixed_expense_payment_id": payment_data["id"],  # Referencia al pago
+        "created_at": now,
+        "updated_at": now,
+    }
+    
+    await db.finanzas_expenses.insert_one(expense_data)
+    
+    # Actualizar próxima fecha de vencimiento del gasto fijo
+    await update_next_due_date(fixed_expense)
+    
+    return FixedExpensePaymentResponse(**payment_data)
+
+@api_router.delete("/finanzas/fixed-expenses/payments/{payment_id}")
+async def delete_fixed_expense_payment(
+    payment_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Eliminar un pago de gasto fijo"""
+    username = current_user["username"]
+    
+    payment = await db.finanzas_fixed_expense_payments.find_one(
+        {"id": payment_id}, {"_id": 0}
+    )
+    
+    if not payment:
+        raise HTTPException(status_code=404, detail="Pago no encontrado")
+    
+    await verify_company_access(payment["company_id"], username)
+    
+    # Eliminar el pago
+    await db.finanzas_fixed_expense_payments.delete_one({"id": payment_id})
+    
+    # Eliminar el gasto asociado
+    await db.finanzas_expenses.delete_one({"fixed_expense_payment_id": payment_id})
+    
+    return {"message": "Pago eliminado correctamente"}
+
+# ==========================================
+# FUNCIONES AUXILIARES PARA GASTOS FIJOS
+# ==========================================
+
+async def update_next_due_date(fixed_expense: dict):
+    """Calcular y actualizar la próxima fecha de vencimiento"""
+    from datetime import datetime, timedelta
+    from dateutil.relativedelta import relativedelta
+    
+    periodicity = fixed_expense.get("periodicity", "mensual")
+    current_due = fixed_expense.get("next_due_date")
+    day_of_month = fixed_expense.get("day_of_month")
+    
+    if not current_due:
+        return
+    
+    try:
+        current_date = datetime.fromisoformat(current_due.replace('Z', '+00:00'))
+    except:
+        return
+    
+    # Calcular próxima fecha según periodicidad
+    if periodicity == "semanal":
+        next_date = current_date + timedelta(days=7)
+    elif periodicity == "quincenal":
+        next_date = current_date + timedelta(days=15)
+    elif periodicity == "mensual":
+        next_date = current_date + relativedelta(months=1)
+        if day_of_month:
+            try:
+                next_date = next_date.replace(day=min(day_of_month, 28))
+            except:
+                pass
+    elif periodicity == "trimestral":
+        next_date = current_date + relativedelta(months=3)
+    elif periodicity == "anual":
+        next_date = current_date + relativedelta(years=1)
+    elif periodicity == "personalizada":
+        custom_days = fixed_expense.get("custom_days", 30)
+        next_date = current_date + timedelta(days=custom_days)
+    else:
+        next_date = current_date + relativedelta(months=1)
+    
+    # Actualizar en la base de datos
+    await db.finanzas_fixed_expenses.update_one(
+        {"id": fixed_expense["id"]},
+        {"$set": {"next_due_date": next_date.isoformat(), "updated_at": get_current_timestamp()}}
+    )
+    
+    # Crear nuevo recordatorio
+    updated = await db.finanzas_fixed_expenses.find_one(
+        {"id": fixed_expense["id"]}, {"_id": 0}
+    )
+    if updated and updated.get("reminder_enabled"):
+        await create_fixed_expense_reminder(updated, updated["username"])
+
+async def create_fixed_expense_reminder(fixed_expense: dict, username: str):
+    """Crear recordatorio para un gasto fijo (Email + WhatsApp obligatorios)"""
+    from datetime import datetime, timedelta
+    
+    if not fixed_expense.get("reminder_enabled") or not fixed_expense.get("next_due_date"):
+        return
+    
+    try:
+        due_date = datetime.fromisoformat(fixed_expense["next_due_date"].replace('Z', '+00:00'))
+        days_before = fixed_expense.get("reminder_days_before", 3)
+        reminder_date = due_date - timedelta(days=days_before)
+        
+        # Si la fecha del recordatorio ya pasó, no crear
+        if reminder_date < datetime.now(timezone.utc):
+            return
+        
+        reminder_id = generate_id()
+        now = get_current_timestamp()
+        
+        reminder_data = {
+            "id": reminder_id,
+            "fixed_expense_id": fixed_expense["id"],
+            "fixed_expense_name": fixed_expense["name"],
+            "company_id": fixed_expense["company_id"],
+            "workspace_id": fixed_expense["workspace_id"],
+            "username": username,
+            "type": "fixed_expense",
+            "reminder_date": reminder_date.isoformat(),
+            "due_date": fixed_expense["next_due_date"],
+            "amount": fixed_expense["estimated_amount"],
+            "category": fixed_expense["category"],
+            "status": "pending",
+            "email_sent": False,
+            "whatsapp_sent": False,
+            "created_at": now,
+        }
+        
+        # Eliminar recordatorios anteriores pendientes para este gasto fijo
+        await db.finanzas_fixed_expense_reminders.delete_many({
+            "fixed_expense_id": fixed_expense["id"],
+            "status": "pending"
+        })
+        
+        await db.finanzas_fixed_expense_reminders.insert_one(reminder_data)
+        logger.info(f"📅 Recordatorio creado para gasto fijo '{fixed_expense['name']}' - Fecha: {reminder_date.isoformat()}")
+        
+    except Exception as e:
+        logger.error(f"Error creando recordatorio de gasto fijo: {e}")
+
+async def update_fixed_expense_reminder(fixed_expense: dict, username: str):
+    """Actualizar recordatorio de un gasto fijo"""
+    # Eliminar recordatorios pendientes anteriores
+    await db.finanzas_fixed_expense_reminders.delete_many({
+        "fixed_expense_id": fixed_expense["id"],
+        "status": "pending"
+    })
+    
+    # Crear nuevo si está habilitado
+    if fixed_expense.get("reminder_enabled") and fixed_expense.get("next_due_date"):
+        await create_fixed_expense_reminder(fixed_expense, username)
+
 @api_router.get("/finanzas/payables")
 async def get_payables(
     company_id: str,

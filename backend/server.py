@@ -8673,6 +8673,16 @@ async def get_expenses(
             query["date"] = {"$lte": end_date}
     
     expenses = await db.finanzas_expenses.find(query, {"_id": 0}).sort("date", -1).to_list(500)
+    
+    # Add default values for IGV fields for legacy data
+    for expense in expenses:
+        if "includes_igv" not in expense:
+            expense["includes_igv"] = False
+        if "base_imponible" not in expense:
+            expense["base_imponible"] = expense.get("amount", 0)
+        if "igv_gasto" not in expense:
+            expense["igv_gasto"] = 0.0
+    
     return expenses
 
 @api_router.post("/finanzas/expenses", response_model=ExpenseResponse)

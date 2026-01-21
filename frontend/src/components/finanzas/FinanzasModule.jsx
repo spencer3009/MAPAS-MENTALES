@@ -1218,6 +1218,39 @@ const FinanzasModule = ({ token, projects = [] }) => {
           </div>
         )}
 
+        {/* ========== BALANCE GENERAL TAB ========== */}
+        {activeTab === 'balance' && (
+          <BalanceGeneralTab
+            balance={balanceGeneral}
+            filterType={balanceFilter}
+            dateRange={balanceDateRange}
+            projectFilter={balanceProjectFilter}
+            projects={projects}
+            onFilterChange={(type) => {
+              setBalanceFilter(type);
+              loadBalanceGeneral(type, '', '', balanceProjectFilter);
+            }}
+            onDateRangeChange={(range) => {
+              setBalanceDateRange(range);
+              if (range.start && range.end) {
+                loadBalanceGeneral('custom', range.start, range.end, balanceProjectFilter);
+              }
+            }}
+            onProjectFilterChange={(projectId) => {
+              setBalanceProjectFilter(projectId);
+              loadBalanceGeneral(
+                balanceFilter === 'custom' ? 'custom' : balanceFilter,
+                balanceDateRange.start,
+                balanceDateRange.end,
+                projectId
+              );
+            }}
+            onLoad={() => loadBalanceGeneral(balanceFilter, balanceDateRange.start, balanceDateRange.end, balanceProjectFilter)}
+            formatCurrency={formatCurrency}
+            companyId={selectedCompany?.id}
+          />
+        )}
+
         {/* Ingresos Tab */}
         {activeTab === 'incomes' && (
           <div className="space-y-4">

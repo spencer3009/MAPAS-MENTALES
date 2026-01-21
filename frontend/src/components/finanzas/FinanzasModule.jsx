@@ -1797,7 +1797,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
         />
       )}
 
-      {/* Modal Gestionar Categorías */}
+      {/* Modal Gestionar Conceptos de Gasto */}
       {showCategoryModal && (
         <CategoryManagerModal
           onClose={() => setShowCategoryModal(false)}
@@ -4891,7 +4891,7 @@ const FixedExpenseModal = ({ onClose, onSave, fixedExpense, categories, projects
             </div>
           </div>
 
-          {/* Categoría */}
+          {/* Concepto del gasto */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Concepto del gasto *</label>
             <select

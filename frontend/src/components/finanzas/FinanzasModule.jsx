@@ -1479,7 +1479,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descripción</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoría</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Concepto</th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Monto</th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Subtotal</th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">IGV</th>
@@ -1650,7 +1650,7 @@ const FinanzasModule = ({ token, projects = [] }) => {
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prioridad</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descripción</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoría</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Concepto</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vencimiento</th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Monto</th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acción</th>
@@ -3886,9 +3886,9 @@ const BalanceGeneralTab = ({
                   <thead className="bg-gray-50 sticky top-0">
                     <tr>
                       <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Fecha</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Concepto</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Descripción</th>
                       <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">Monto</th>
-                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500">Categoría</th>
+                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500">Concepto</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -4063,7 +4063,7 @@ const ProductsTab = ({ products, onAdd, onEdit, onDelete, onToggleStatus, format
             <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoría</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Concepto</th>
               <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Precio Base</th>
               <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">IGV</th>
               <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Estado</th>
@@ -4284,9 +4284,9 @@ const ProductModal = ({ onClose, onSave, product }) => {
             </div>
           </div>
 
-          {/* Categoría */}
+          {/* Concepto del gasto */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Concepto</label>
             <input
               type="text"
               value={form.category}
@@ -4490,7 +4490,7 @@ const FixedExpensesTab = ({
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoría</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Concepto</th>
                 <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Monto Est.</th>
                 <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Periodicidad</th>
                 <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Próx. Vencimiento</th>
@@ -4666,7 +4666,7 @@ const FixedExpensePaymentModal = ({ expense, paymentHistory, onClose, onSavePaym
                 <span className="ml-2 font-medium">{formatCurrency(expense.estimated_amount)}</span>
               </div>
               <div>
-                <span className="text-gray-500">Categoría:</span>
+                <span className="text-gray-500">Concepto:</span>
                 <span className="ml-2 font-medium">{expense.category}</span>
               </div>
               {paymentHistory.length > 0 && (

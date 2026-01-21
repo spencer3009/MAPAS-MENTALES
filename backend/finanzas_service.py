@@ -94,6 +94,7 @@ class FixedExpenseStatus(str, Enum):
     INACTIVE = "inactivo"
 
 class FixedExpenseCreate(BaseModel):
+    company_id: str = Field(..., description="ID de la empresa")
     name: str = Field(..., min_length=1, max_length=200, description="Nombre del gasto fijo")
     category: str = Field(default="otros", description="Categoría del gasto")
     estimated_amount: float = Field(..., gt=0, description="Monto estimado del gasto")

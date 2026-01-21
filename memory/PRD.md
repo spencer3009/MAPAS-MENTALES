@@ -2,6 +2,45 @@
 
 ## Changelog (Latest First)
 
+### 2026-01-21: FEATURE — Sistema Profesional de Cuentas por Cobrar con Pagos Parciales ✅ COMPLETADO Y PROBADO
+- **Estado**: Implementación completada y verificada con testing agent (10/10 features passed)
+- **Funcionalidad**: Sistema contable completo para gestionar cuentas por cobrar con pagos fraccionados
+- **Backend (Nuevos endpoints)**:
+  - `POST /api/finanzas/partial-payments` - Registrar pago parcial
+  - `GET /api/finanzas/partial-payments/{income_id}` - Obtener historial de pagos
+  - `DELETE /api/finanzas/partial-payments/{payment_id}` - Eliminar pago con recálculo
+  - `GET /api/finanzas/receivables` - Mejorado con total_facturado, total_abonado, estados
+- **Nueva entidad PagoParcial**:
+  - id, income_id, company_id, amount, date, payment_method, note, created_at
+- **Estados de ingreso**:
+  - 🔴 `pending` (Por cobrar) - 0% pagado
+  - 🟡 `partial` (Parcial) - tiene abonos pero no está completo
+  - 🟢 `collected` (Cobrado) - 100% pagado
+- **Dashboard de Por Cobrar** (3 tarjetas):
+  - Total Facturado: valor total de ventas/servicios
+  - Total Abonado: dinero recibido en caja (verde)
+  - Saldo Pendiente: por cobrar a clientes (ámbar)
+- **Tabla mejorada** con columnas:
+  - FECHA | DESCRIPCIÓN | CLIENTE | VENCIMIENTO | MONTO TOTAL | PAGADO | SALDO | ESTADO | ACCIÓN
+- **Modal "Agregar Pago"**:
+  - Resumen del ingreso (Total/Pagado/Pendiente)
+  - Campos: Monto (con voz), Fecha, Método de pago (6 opciones), Nota (con voz)
+  - Validación: no permite pago mayor al saldo pendiente
+- **Modal "Historial de Pagos"**:
+  - Lista de pagos con monto, fecha, método, nota
+  - Opción de eliminar pago (con confirmación y recálculo)
+- **Reglas de negocio**:
+  - ✅ Múltiples pagos parciales sin límite
+  - ✅ Cambio automático de estado según saldo
+  - ✅ Solo paid_amount suma a caja/dashboards
+  - ❌ No permite editar monto_total una vez creado
+  - ❌ No permite pago mayor al saldo
+- **Testing verificado** (iteration_42.json): 10/10 features passed
+- **Archivos modificados**:
+  - `/app/backend/finanzas_service.py` - PartialPaymentCreate, IncomeStatus.PARTIAL
+  - `/app/backend/server.py` - Endpoints de pagos parciales
+  - `/app/frontend/src/components/finanzas/FinanzasModule.jsx` - ReceivablesTab, AddPaymentModal, PaymentHistoryModal
+
 ### 2026-01-21: FEATURE — Entrada por Voz (Speech-to-Text) en Nuevo Gasto ✅ COMPLETADO Y PROBADO
 - **Estado**: Implementación completada y verificada con testing agent (6/6 tests passed)
 - **Funcionalidad**: Dictar por voz el monto y descripción de gastos

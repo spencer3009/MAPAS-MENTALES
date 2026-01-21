@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   DollarSign, TrendingUp, TrendingDown, PiggyBank, 
   ArrowUpCircle, ArrowDownCircle, Wallet, 
   Plus, Search, Filter, Calendar,
   CheckCircle2, Clock, AlertTriangle,
-  BarChart3, RefreshCw, Building2, ChevronDown, X
+  BarChart3, RefreshCw, Building2, ChevronDown, X,
+  Mic, MicOff
 } from 'lucide-react';
 import ContactAutocomplete from './ContactAutocomplete';
 import { useCompany } from '../../contexts/CompanyContext';
